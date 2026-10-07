@@ -21,20 +21,19 @@ const ALIAS2_INDICES = [5, 6, 7, 8, 9];
 
 spaceTest.describe('Data views on index aliases', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
-    for (const n of ALIAS1_INDICES) {
-      await esClient.index({
-        index: sourceIndex(n, scoutSpace.id),
-        document: { message: 'woza' },
-        refresh: true,
-      });
-    }
-    for (const n of ALIAS2_INDICES) {
-      await esClient.index({
-        index: sourceIndex(n, scoutSpace.id),
-        document: { date: `2016-11-${String(9 + n)}` },
-        refresh: true,
-      });
-    }
+    await esClient.bulk({
+      refresh: 'wait_for',
+      operations: [
+        ...ALIAS1_INDICES.flatMap((n) => [
+          { index: { _index: sourceIndex(n, scoutSpace.id) } },
+          { message: 'woza' },
+        ]),
+        ...ALIAS2_INDICES.flatMap((n) => [
+          { index: { _index: sourceIndex(n, scoutSpace.id) } },
+          { date: `2016-11-${String(9 + n)}` },
+        ]),
+      ],
+    });
     await esClient.indices.updateAliases({
       actions: [
         ...ALIAS1_INDICES.map((n) => ({

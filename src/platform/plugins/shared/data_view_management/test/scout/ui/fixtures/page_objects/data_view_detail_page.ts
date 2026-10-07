@@ -9,6 +9,8 @@
 
 import { AppMenu, KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
 
+const TAB_COUNT_PATTERN = /(\d+)\)/;
+
 export class DataViewDetailPage {
   readonly container;
   readonly editButton;
@@ -82,17 +84,13 @@ export class DataViewDetailPage {
 
   /** Returns the number in the "Fields (N)" tab title; while filtering it reads "Fields (0 / N)". */
   async getFieldsTabCount(): Promise<number> {
-    const text = await this.fieldsTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.fieldsTab);
   }
 
   /** The scripted fields tab only renders once the data view has scripted fields. */
   async getScriptedFieldsTabCount(): Promise<number> {
     if ((await this.scriptedFieldsTab.count()) === 0) return 0;
-    const text = await this.scriptedFieldsTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.scriptedFieldsTab);
   }
 
   async openScriptedFieldsTab(): Promise<void> {
@@ -105,9 +103,7 @@ export class DataViewDetailPage {
 
   /** Returns the number in the "Field filters (N)" tab title. */
   async getSourceFiltersTabCount(): Promise<number> {
-    const text = await this.sourceFiltersTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.sourceFiltersTab);
   }
 
   async openSourceFiltersTab(): Promise<void> {
@@ -137,9 +133,7 @@ export class DataViewDetailPage {
 
   /** Returns the number in the "Relationships (N)" tab title. */
   async getRelationshipsTabCount(): Promise<number> {
-    const text = await this.relationshipsTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.relationshipsTab);
   }
 
   async openRelationshipsTab(): Promise<void> {
@@ -378,6 +372,17 @@ export class DataViewDetailPage {
     await deleteBtn.click();
     await this.page.testSubj.locator('deleteDataViewFlyoutHeader').waitFor({ state: 'visible' });
     await this.page.testSubj.click('confirmFlyoutConfirmButton');
+  }
+
+  /** Reads the last number in a tab title such as "Fields (12)" or "Fields (0 / 12)". */
+  private async readTabCount(tab: Locator): Promise<number> {
+    await tab.filter({ hasText: TAB_COUNT_PATTERN }).waitFor({ state: 'visible' });
+    const text = await tab.innerText();
+    const match = text.match(TAB_COUNT_PATTERN);
+    if (!match) {
+      throw new Error(`Could not read a count from tab title "${text}"`);
+    }
+    return parseInt(match[1], 10);
   }
 
   private async toggleFlyoutRow(rowTestSubj: string): Promise<void> {

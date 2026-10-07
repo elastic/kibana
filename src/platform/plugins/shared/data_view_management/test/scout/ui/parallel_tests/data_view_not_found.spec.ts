@@ -20,10 +20,12 @@ spaceTest.describe('Data view not found', { tag: tags.deploymentAgnostic }, () =
 
   spaceTest(
     'redirects to the main view and shows an error when the data view is missing',
-    async ({ page }) => {
+    async ({ page, pageObjects }) => {
       await page.gotoApp(`management/kibana/dataViews/patterns/${MISSING_DATA_VIEW_ID}`);
 
       await expect(page).toHaveURL(/\/app\/management\/kibana\/dataViews\/?(?:[?#].*)?$/);
+      // The listing region wraps both the table and the empty prompt, so it renders either way.
+      await expect(pageObjects.dataViewsManagement.table).toBeVisible();
       await expect(page.testSubj.locator('globalToastList')).toContainText(
         `The data view with id:${MISSING_DATA_VIEW_ID} could not be loaded. Try creating a new one.`
       );
