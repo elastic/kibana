@@ -38,6 +38,7 @@ import {
 } from '@kbn/mock-idp-utils';
 
 import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
+import { publishLoopbackPort } from './publish_loopback_port';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { readFileSecrets } from './read_file_secrets';
@@ -227,8 +228,7 @@ const DOCKER_BASE_CMD = [
   '--name',
   'es01',
 
-  '-p',
-  '127.0.0.1:9300:9300',
+  ...publishLoopbackPort(9300),
 ];
 
 const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
@@ -379,8 +379,7 @@ export function getServerlessNodes(
     {
       name: n1,
       params: [
-        '-p',
-        `127.0.0.1:${9300 + portOffset}:${9300 + portOffset}`,
+        ...publishLoopbackPort(9300 + portOffset),
 
         '--env',
         `discovery.seed_hosts=${n2}`,
@@ -397,11 +396,9 @@ export function getServerlessNodes(
     {
       name: n2,
       params: [
-        '-p',
-        `127.0.0.1:${9202 + portOffset}:${9202 + portOffset}`,
+        ...publishLoopbackPort(9202 + portOffset),
 
-        '-p',
-        `127.0.0.1:${9302 + portOffset}:${9302 + portOffset}`,
+        ...publishLoopbackPort(9302 + portOffset),
 
         '--env',
         `discovery.seed_hosts=${n1}`,
@@ -453,7 +450,7 @@ export function resolveDockerImage({
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
   const port = options.port || DEFAULT_PORT;
-  const value = ['-p', `127.0.0.1:${port}:${port}`];
+  const value = publishLoopbackPort(port);
 
   if ((options as ServerlessOptions).host) {
     value.push('-p', `${(options as ServerlessOptions).host}:${port}:${port}`);
@@ -1026,6 +1023,20 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker({ log, options });
   log.info(`[runServerlessCluster] Docker environment ready (${elapsed()})`);
 
+  try {
+    return await startServerlessContainers(log, options, elapsed);
+  } catch (error) {
+    // Without this, containers started before the failure keep holding their ports and volumes.
+    teardownServerlessClusterSync(log, options);
+    throw error;
+  }
+}
+
+async function startServerlessContainers(
+  log: ToolingLog,
+  options: ServerlessOptions,
+  elapsed: () => string
+) {
   const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
   log.info(`[runServerlessCluster] Pulling Docker image(s) for: ${esServerlessImage}...`);
   await Promise.all([
