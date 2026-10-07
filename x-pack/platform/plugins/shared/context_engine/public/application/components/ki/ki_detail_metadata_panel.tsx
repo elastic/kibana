@@ -5,38 +5,23 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
+import type { KiGovernanceWriter } from './ki_detail_helpers';
+import { getDocumentStringArray, readKiGovernance } from './ki_detail_helpers';
 import {
-  formatWriterMetadata,
-  getDocumentStringArray,
-  readKiGovernance,
-  type KiGovernanceWriter,
-} from './ki_detail_helpers';
-import { KiDetailSidebarBreakableText, KiDetailSidebarDescriptionList } from './ki_detail_sidebar';
+  KiDetailSidebarBreakableText,
+  KiDetailSidebarDescriptionList,
+  KiDetailSidebarWriterProvenance,
+} from './ki_detail_sidebar';
 
 interface KiDetailMetadataPanelProps {
   kiId: string;
   document: KiDocument;
 }
-
-const formatWriterDescription = (writer: KiGovernanceWriter): React.ReactElement => {
-  const metadataText = formatWriterMetadata(writer.metadata);
-  if (metadataText.length === 0) {
-    return <KiDetailSidebarBreakableText>{writer.uri}</KiDetailSidebarBreakableText>;
-  }
-  return (
-    <>
-      <KiDetailSidebarBreakableText>{writer.uri}</KiDetailSidebarBreakableText>
-      <EuiText size="xs" color="subdued">
-        <KiDetailSidebarBreakableText>{metadataText}</KiDetailSidebarBreakableText>
-      </EuiText>
-    </>
-  );
-};
 
 const getDocumentString = (document: KiDocument, key: string): string | undefined => {
   const value = document[key];
@@ -75,6 +60,48 @@ const KiMetadataFormattedDate = ({ value }: { value: string }) => {
   );
 };
 
+interface KiMetadataProvenanceRowProps {
+  at?: string;
+  writer?: KiGovernanceWriter;
+}
+
+const KiMetadataProvenanceRow = ({ at, writer }: KiMetadataProvenanceRowProps) => {
+  if (at && writer) {
+    return (
+      <span className="eui-textBreakWord">
+        <FormattedMessage
+          id="xpack.contextEngine.kiDetail.metadata.provenanceAtBy"
+          defaultMessage="{time} by {writer}"
+          values={{
+            time: <KiMetadataFormattedDate value={at} />,
+            writer: <KiDetailSidebarWriterProvenance writer={writer} />,
+          }}
+        />
+      </span>
+    );
+  }
+
+  if (at) {
+    return <KiMetadataFormattedDate value={at} />;
+  }
+
+  if (writer) {
+    return (
+      <span className="eui-textBreakWord">
+        <FormattedMessage
+          id="xpack.contextEngine.kiDetail.metadata.provenanceByOnly"
+          defaultMessage="by {writer}"
+          values={{
+            writer: <KiDetailSidebarWriterProvenance writer={writer} />,
+          }}
+        />
+      </span>
+    );
+  }
+
+  return null;
+};
+
 export const KiDetailMetadataSection = ({ kiId, document }: KiDetailMetadataPanelProps) => {
   const governance = readKiGovernance(document);
 
@@ -82,117 +109,83 @@ export const KiDetailMetadataSection = ({ kiId, document }: KiDetailMetadataPane
     const tags = getDocumentStringArray(document, 'tags');
     const items: Array<{ title: string; description: React.ReactElement | string }> = [];
 
-    items.push({
-      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.id', {
-        defaultMessage: 'ID',
-      }),
-      description: <KiDetailSidebarBreakableText>{kiId}</KiDetailSidebarBreakableText>,
-    });
+    if (kiId.trim().length > 0) {
+      items.push({
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.id', {
+          defaultMessage: 'ID',
+        }),
+        description: <KiDetailSidebarBreakableText>{kiId}</KiDetailSidebarBreakableText>,
+      });
+    }
 
     const description = getDocumentString(document, 'description');
-    items.push({
-      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.description', {
-        defaultMessage: 'Description',
-      }),
-      description: description ? (
-        <span data-test-subj="contextKiDetailDescription">
-          <KiDetailSidebarBreakableText title={description}>
-            {description}
-          </KiDetailSidebarBreakableText>
-        </span>
-      ) : (
-        <KiDetailSidebarBreakableText>
-          {i18n.translate('xpack.contextEngine.kiDetail.metadata.descriptionNone', {
-            defaultMessage: 'None',
-          })}
-        </KiDetailSidebarBreakableText>
-      ),
-    });
-
-    items.push({
-      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.tags', {
-        defaultMessage: 'Tags',
-      }),
-      description:
-        tags.length > 0 ? (
-          <EuiBadgeGroup data-test-subj="contextKiDetailTagsList">
-            {tags.map((tag) => (
-              <EuiBadge key={tag} color="hollow">
-                {tag}
-              </EuiBadge>
-            ))}
-          </EuiBadgeGroup>
-        ) : (
-          <KiDetailSidebarBreakableText>
-            {i18n.translate('xpack.contextEngine.kiDetail.metadata.tagsNone', {
-              defaultMessage: 'None',
-            })}
-          </KiDetailSidebarBreakableText>
-        ),
-    });
-
-    if (governance.lifecycleStatus) {
+    if (description) {
       items.push({
-        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.lifecycleStatus', {
-          defaultMessage: 'Lifecycle status',
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.description', {
+          defaultMessage: 'Description',
         }),
         description: (
-          <KiDetailSidebarBreakableText>{governance.lifecycleStatus}</KiDetailSidebarBreakableText>
+          <span data-test-subj="contextKiDetailDescription">
+            <KiDetailSidebarBreakableText title={description}>
+              {description}
+            </KiDetailSidebarBreakableText>
+          </span>
         ),
       });
     }
 
     const createdAt = getDocumentString(document, '@timestamp');
-    if (createdAt) {
+    if (createdAt || governance.createdBy) {
       items.push({
-        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.createdAt', {
-          defaultMessage: 'Created at',
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.created', {
+          defaultMessage: 'Created',
         }),
-        description: <KiMetadataFormattedDate value={createdAt} />,
+        description: <KiMetadataProvenanceRow at={createdAt} writer={governance.createdBy} />,
       });
     }
 
     const updatedAt = getDocumentString(document, 'updated_at');
-    if (updatedAt) {
+    if (updatedAt || governance.updatedBy) {
       items.push({
-        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.updatedAt', {
-          defaultMessage: 'Last updated at',
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.updated', {
+          defaultMessage: 'Updated',
         }),
-        description: <KiMetadataFormattedDate value={updatedAt} />,
+        description: <KiMetadataProvenanceRow at={updatedAt} writer={governance.updatedBy} />,
       });
     }
 
     const expiresAt = getDocumentString(document, 'expires_at');
-    items.push({
-      title: i18n.translate('xpack.contextEngine.kiDetail.metadata.expiresAt', {
-        defaultMessage: 'Expires at',
-      }),
-      description: expiresAt ? (
-        <KiMetadataFormattedDate value={expiresAt} />
-      ) : (
-        <KiDetailSidebarBreakableText>
-          {i18n.translate('xpack.contextEngine.kiDetail.metadata.expiresNever', {
-            defaultMessage: 'Never',
-          })}
-        </KiDetailSidebarBreakableText>
-      ),
-    });
-
-    if (governance.createdBy) {
+    if (expiresAt) {
       items.push({
-        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.createdBy', {
-          defaultMessage: 'Created by',
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.expiresAt', {
+          defaultMessage: 'Expires at',
         }),
-        description: formatWriterDescription(governance.createdBy),
+        description: <KiMetadataFormattedDate value={expiresAt} />,
       });
     }
 
-    if (governance.updatedBy) {
+    if (tags.length > 0) {
       items.push({
-        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.updatedBy', {
-          defaultMessage: 'Updated by',
+        title: i18n.translate('xpack.contextEngine.kiDetail.metadata.tags', {
+          defaultMessage: 'Tags',
         }),
-        description: formatWriterDescription(governance.updatedBy),
+
+        // default
+        // hollow
+        // primary
+        // success
+        // accent
+        // warning
+        // danger
+        description: (
+          <EuiBadgeGroup data-test-subj="contextKiDetailTagsList">
+            {tags.map((tag) => (
+              <EuiBadge key={tag} color="primary">
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        ),
       });
     }
 

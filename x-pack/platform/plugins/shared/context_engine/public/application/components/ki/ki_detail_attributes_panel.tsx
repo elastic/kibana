@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
@@ -24,13 +24,17 @@ export const KiDetailAttributesSection = ({ document }: KiDetailAttributesPanelP
   const viewItems = useMemo(
     () =>
       documentAttributesToRows(document)
-        .filter((row) => row.key.trim().length > 0)
+        .filter((row) => row.key.trim().length > 0 && row.value.trim().length > 0)
         .map((row) => ({
           title: row.key,
           description: <KiDetailSidebarBreakableText>{row.value}</KiDetailSidebarBreakableText>,
         })),
     [document]
   );
+
+  if (viewItems.length === 0) {
+    return null;
+  }
 
   return (
     <section data-test-subj="contextKiDetailAttributesPanel">
@@ -41,19 +45,10 @@ export const KiDetailAttributesSection = ({ document }: KiDetailAttributesPanelP
         />
       </KiDetailSidebarSectionTitle>
       <EuiSpacer size="s" />
-      {viewItems.length > 0 ? (
-        <KiDetailSidebarDescriptionList
-          listItems={viewItems}
-          data-test-subj="contextKiDetailAttributesList"
-        />
-      ) : (
-        <EuiText size="s" color="subdued" data-test-subj="contextKiDetailAttributesEmpty">
-          <FormattedMessage
-            id="xpack.contextEngine.kiDetail.attributes.empty"
-            defaultMessage="No attributes"
-          />
-        </EuiText>
-      )}
+      <KiDetailSidebarDescriptionList
+        listItems={viewItems}
+        data-test-subj="contextKiDetailAttributesList"
+      />
     </section>
   );
 };

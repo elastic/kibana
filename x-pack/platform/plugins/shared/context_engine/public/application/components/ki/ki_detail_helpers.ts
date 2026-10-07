@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { i18n } from '@kbn/i18n';
 import type { KiJsonValue, KiDocument } from '../../../../common/http_api/knowledge_indicators';
 import { KI_REFERENCE_RELATIONS, type KiReferenceRelation } from '../../../../common/step_types/ki';
 import { capitalizeLabel, getKiTypeLabel } from './helpers';
@@ -60,6 +63,10 @@ export const getDocumentStringArray = (document: KiDocument, key: string): strin
 };
 
 const parseWriter = (value: KiJsonValue | undefined): KiGovernanceWriter | undefined => {
+  if (typeof value === 'string') {
+    const uri = value.trim();
+    return uri.length > 0 ? { uri, metadata: {} } : undefined;
+  }
   if (!isKiJsonObject(value)) {
     return undefined;
   }
@@ -207,5 +214,116 @@ export const formatWriterMetadata = (metadata: Record<string, string | number>):
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ');
 
+export interface ParsedWriterUri {
+  scheme: string;
+  identifier: string;
+}
+
+const WRITER_URI_PATTERN = /^([^:]+):\/\/(.+)$/;
+
+/** Splits provenance URIs such as `workflow://id` or `tool://platform.foo.bar`. */
+export const parseWriterUri = (uri: string): ParsedWriterUri | undefined => {
+  const match = WRITER_URI_PATTERN.exec(uri);
+  if (!match) {
+    return undefined;
+  }
+  const scheme = match[1];
+  const identifier = match[2];
+  if (scheme.length === 0 || identifier.length === 0) {
+    return undefined;
+  }
+  return { scheme, identifier };
+};
+
+export const getWriterUriSchemeLabel = (scheme: string): string => {
+  switch (scheme.toLowerCase()) {
+    case 'workflow':
+      return i18n.translate('xpack.contextEngine.kiDetail.writerUri.scheme.workflow', {
+        defaultMessage: 'Workflow',
+      });
+    case 'tool':
+      return i18n.translate('xpack.contextEngine.kiDetail.writerUri.scheme.tool', {
+        defaultMessage: 'Tool',
+      });
+    default:
+      return capitalizeLabel(scheme);
+  }
+};
+
+export const getWriterAgentId = (metadata: Record<string, string | number>): string | undefined => {
+  const value = metadata.agent_id;
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  return undefined;
+};
+
 export const isHttpUri = (uri: string): boolean =>
   uri.startsWith('http://') || uri.startsWith('https://');
+
+export type KiGetUrlForApp = (appId: string, options?: { path?: string }) => string;
+
+const tryGetUrlForApp = (
+  getUrlForApp: KiGetUrlForApp,
+  appId: string,
+  path: string
+): string | undefined => {
+  try {
+    return getUrlForApp(appId, { path });
+  } catch {
+    return undefined;
+  }
+};
+
+/** Agent Builder manage URL for a provenance `agent_id` metadata value. */
+export const getKiWriterAgentManageHref = (
+  getUrlForApp: KiGetUrlForApp,
+  agentId: string
+): string | undefined => {
+  const trimmed = agentId.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+  return tryGetUrlForApp(
+    getUrlForApp,
+    AGENT_BUILDER_APP_ID,
+    `/manage/agents/${encodeURIComponent(trimmed)}`
+  );
+};
+
+/** In-app (or absolute http) href for a provenance writer URI. */
+export const getKiWriterUriHref = (
+  getUrlForApp: KiGetUrlForApp,
+  uri: string
+): string | undefined => {
+  const trimmed = uri.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+  if (isHttpUri(trimmed)) {
+    return trimmed;
+  }
+  const parsed = parseWriterUri(trimmed);
+  if (!parsed) {
+    return undefined;
+  }
+  const scheme = parsed.scheme.toLowerCase();
+  if (scheme === 'workflow') {
+    return tryGetUrlForApp(
+      getUrlForApp,
+      WORKFLOWS_APP_ID,
+      `/${encodeURIComponent(parsed.identifier)}`
+    );
+  }
+  if (scheme === 'tool') {
+    return tryGetUrlForApp(
+      getUrlForApp,
+      AGENT_BUILDER_APP_ID,
+      `/manage/tools/${encodeURIComponent(parsed.identifier)}`
+    );
+  }
+  return undefined;
+};

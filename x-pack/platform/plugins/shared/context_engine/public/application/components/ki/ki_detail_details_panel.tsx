@@ -9,8 +9,13 @@ import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { KiDocument } from '../../../../common/http_api/knowledge_indicators';
 import { KiDetailAttributesSection } from './ki_detail_attributes_panel';
+import { documentAttributesToRows } from './ki_detail_helpers';
 import { KiDetailMetadataSection } from './ki_detail_metadata_panel';
-import { KiDetailReferencesSection } from './ki_detail_references_panel';
+
+const hasKiDetailAttributes = (document: KiDocument): boolean =>
+  documentAttributesToRows(document).some(
+    (row) => row.key.trim().length > 0 && row.value.trim().length > 0
+  );
 
 interface KiDetailDetailsPanelProps {
   kiId: string;
@@ -18,13 +23,17 @@ interface KiDetailDetailsPanelProps {
 }
 
 export const KiDetailDetailsPanel = ({ kiId, document }: KiDetailDetailsPanelProps) => {
+  const showAttributes = hasKiDetailAttributes(document);
+
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="contextKiDetailDetailsPanel">
       <KiDetailMetadataSection kiId={kiId} document={document} />
-      <EuiHorizontalRule margin="m" />
-      <KiDetailAttributesSection document={document} />
-      <EuiHorizontalRule margin="m" />
-      <KiDetailReferencesSection document={document} />
+      {showAttributes ? (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <KiDetailAttributesSection document={document} />
+        </>
+      ) : null}
     </EuiPanel>
   );
 };
