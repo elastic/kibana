@@ -26,7 +26,10 @@ import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { addAnonymizationInstruction, deanonymizeMessage } from '@kbn/ai-anonymization-server';
-import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
@@ -46,7 +49,6 @@ import {
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';

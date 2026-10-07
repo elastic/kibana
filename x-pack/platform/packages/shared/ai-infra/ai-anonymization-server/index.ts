@@ -12,3 +12,4 @@ export { RegexWorkerService } from './src/regex_worker_service';
 export { executeRegexRulesTask } from './src/execute_regex_rule_task';
 export { getAnonymizationUiSettings } from './src/ui_settings';
 export type { AnonymizationWorkerConfig, DetectedMatch } from './src/types';
+export type { InferenceAnonymizationOptions } from './src/anonymization_options';
