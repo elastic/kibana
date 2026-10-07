@@ -50,6 +50,8 @@ import type { HypothesesService } from '../../hypotheses/services/hypotheses_ser
 import type { ImpactService } from '../../impact/services/impact_service';
 import type { SubjectsService } from '../../subjects/services/subjects_service';
 import { retryWhileShardUnavailable } from '../../investigation_attachments';
+import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
+import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
 
 /** Bound on the proposals one investigation read returns. */
@@ -60,6 +62,9 @@ const MAX_INVESTIGATION_PROPOSALS = 100;
  * expressions, and an `or` of N comparisons counts N + 1.
  */
 const MAX_ATTACHMENT_IDS_PER_SEARCH = 50;
+
+/** Pages of {@link MAX_INVESTIGATION_CANDIDATES} a candidate search reads: Elasticsearch's result window. */
+const MAX_CANDIDATE_SEARCH_PAGES = 10_000 / MAX_INVESTIGATION_CANDIDATES;
 
 const SEVERITY_RANK: Record<InvestigationSeverity, number> = {
   low: 1,
@@ -147,6 +152,7 @@ export class InvestigationsQueryService {
         sortField === 'severity'
           ? { field: 'updated_at', order: 'desc' }
           : { field: sortField, order: sortOrder },
+      compare: compareConversations(sortField, sortOrder),
     });
     candidates.sort(compareConversations(sortField, sortOrder));
 
@@ -178,6 +184,7 @@ export class InvestigationsQueryService {
       filters,
       inProgressIds,
       searchSort: { field: 'updated_at', order: 'desc' },
+      compare: compareConversations('updated_at', 'desc'),
     });
 
     const counts: InvestigationSeverityCounts = { low: 0, medium: 0, high: 0, critical: 0 };
@@ -236,48 +243,77 @@ export class InvestigationsQueryService {
     );
   }
 
-  /** Every investigation the caller can read that matches the filters, unsorted, capped. */
+  /**
+   * Every investigation the caller can read that matches the filters, capped at
+   * {@link MAX_INVESTIGATION_CANDIDATES}, the first ones in `compare` order. The cap applies only
+   * after the access check and every filter, so investigations the caller cannot read, or that a
+   * filter Agent Builder cannot apply drops, never take a candidate slot.
+   */
   private async findCandidates({
     client,
     spaceId,
     filters,
     inProgressIds,
     searchSort,
+    compare,
   }: {
     client: ConversationPublicClient;
     spaceId: string;
     filters: InvestigationFilters;
     inProgressIds: Set<string>;
     searchSort: ConversationSearchSort;
+    compare: (a: ConversationSummary, b: ConversationSummary) => number;
   }): Promise<ConversationSummary[]> {
-    const ids = await this.findCandidateIds(spaceId, filters, inProgressIds);
+    const matches = (conversation: ConversationSummary) =>
+      matchesFilters(conversation, filters, inProgressIds);
 
-    let conversations: ConversationSummary[];
+    const ids = await this.findCandidateIds(spaceId, filters, inProgressIds);
     if (ids === undefined) {
-      const { results } = await retryWhileShardUnavailable(() =>
-        client.search({
-          filter: buildSearchFilter(filters),
-          sort: searchSort,
-          page: 1,
-          perPage: MAX_INVESTIGATION_CANDIDATES,
-        })
-      );
-      conversations = results;
-    } else if (ids.length === 0) {
+      return this.searchCandidates({ client, filters, searchSort, matches });
+    }
+    if (ids.length === 0) {
       return [];
-    } else {
-      conversations = [
-        ...(
-          await retryWhileShardUnavailable(() =>
-            client.bulkGet(ids.slice(0, MAX_INVESTIGATION_CANDIDATES))
-          )
-        ).values(),
-      ];
     }
 
-    return conversations.filter((conversation) =>
-      matchesFilters(conversation, filters, inProgressIds)
-    );
+    const readable = await bulkGetReadableConversations(client, ids);
+    return [...readable.values()]
+      .filter(matches)
+      .sort(compare)
+      .slice(0, MAX_INVESTIGATION_CANDIDATES);
+  }
+
+  /**
+   * Candidates from an access-checked conversation search, read page by page in `searchSort`
+   * order until {@link MAX_INVESTIGATION_CANDIDATES} of them pass the in-memory filters (the ones
+   * the search filter cannot express, such as `in_progress` or the free-text query) or the
+   * search runs out, within Elasticsearch's result window.
+   */
+  private async searchCandidates({
+    client,
+    filters,
+    searchSort,
+    matches,
+  }: {
+    client: ConversationPublicClient;
+    filters: InvestigationFilters;
+    searchSort: ConversationSearchSort;
+    matches: (conversation: ConversationSummary) => boolean;
+  }): Promise<ConversationSummary[]> {
+    const filter = buildSearchFilter(filters);
+    const candidates: ConversationSummary[] = [];
+    for (let page = 1; page <= MAX_CANDIDATE_SEARCH_PAGES; page++) {
+      const { results } = await retryWhileShardUnavailable(() =>
+        client.search({ filter, sort: searchSort, page, perPage: MAX_INVESTIGATION_CANDIDATES })
+      );
+      candidates.push(...results.filter(matches));
+      if (
+        candidates.length >= MAX_INVESTIGATION_CANDIDATES ||
+        results.length < MAX_INVESTIGATION_CANDIDATES
+      ) {
+        break;
+      }
+    }
+    return candidates.slice(0, MAX_INVESTIGATION_CANDIDATES);
   }
 
   /**
@@ -301,10 +337,11 @@ export class InvestigationsQueryService {
     ];
     if (subjectFilter.length > 0) {
       sets.push(
-        await this.deps
-          .getSubjectsService()
-          .getDocumentService()
-          .searchConversationIds({ spaceId, filter: subjectFilter })
+        await this.deps.getSubjectsService().getDocumentService().searchConversationIds({
+          spaceId,
+          filter: subjectFilter,
+          size: MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS,
+        })
       );
     }
 
@@ -315,6 +352,7 @@ export class InvestigationsQueryService {
           .getDocumentService()
           .searchConversationIds({
             spaceId,
+            size: MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS,
             filter: [
               {
                 nested: {
