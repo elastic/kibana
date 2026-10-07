@@ -17,15 +17,7 @@
  * that changes node/edge `data` must be added there or the memo will swallow it.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -39,12 +31,6 @@ export interface WorkflowGraphPocToggles {
   duplicatePlacement: 'after-original' | 'end-of-sequence';
   /** Whether the red fallback port is always visible or only on hover. */
   fallbackPortVisibility: 'hover-only' | 'always-visible';
-  /**
-   * When true, cancelling or closing the step config flyout during an insert
-   * still writes the draft node into the YAML (with whatever partial state it
-   * has). When false (default) the draft is discarded and the node never lands.
-   */
-  keepNodeOnCancel: boolean;
 }
 
 const DEFAULTS: WorkflowGraphPocToggles = {
@@ -52,7 +38,6 @@ const DEFAULTS: WorkflowGraphPocToggles = {
   continueAfterFallbackPlacement: 'below-last-fallback',
   duplicatePlacement: 'after-original',
   fallbackPortVisibility: 'hover-only',
-  keepNodeOnCancel: false,
 };
 
 // ── Persistence ───────────────────────────────────────────────────────────────
@@ -130,28 +115,6 @@ export const WorkflowSettingsPanel: React.FC = () => {
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="s"
     >
-      <EuiTitle size="xxxs">
-        <h3>Workflow settings</h3>
-      </EuiTitle>
-      <EuiFormRow
-        display="columnCompressed"
-        label="Keep draft on cancel"
-        helpText={
-          toggles.keepNodeOnCancel
-            ? 'Cancelling keeps the draft step in the YAML.'
-            : 'Cancelling discards the draft step (default).'
-        }
-      >
-        <EuiSwitch
-          label={toggles.keepNodeOnCancel ? 'On' : 'Off'}
-          checked={toggles.keepNodeOnCancel}
-          onChange={(e) => set({ keepNodeOnCancel: e.target.checked })}
-          compressed
-        />
-      </EuiFormRow>
-
-      <EuiHorizontalRule margin="s" />
-
       <EuiTitle size="xxxs">
         <h3>POC design toggles</h3>
       </EuiTitle>

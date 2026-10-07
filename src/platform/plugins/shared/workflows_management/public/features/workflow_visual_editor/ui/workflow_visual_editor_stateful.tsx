@@ -8,11 +8,9 @@
  */
 
 import {
-  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFocusTrap,
   EuiLoadingSpinner,
-  EuiText,
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
@@ -20,7 +18,7 @@ import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Document, isSeq, parseDocument, stringify as stringifyYaml } from 'yaml';
+import { Document, isMap, isSeq, parseDocument, stringify as stringifyYaml } from 'yaml';
 import type { Node as YamlNode } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +33,6 @@ import {
   type PendingInsertStepContext,
   type PendingInsertVisual,
   type RenderStepIcon,
-  useWorkflowGraphPocToggles,
   useWorkflowsCapabilities,
   type WorkflowGraphAnchorRect,
   WorkflowGraphCanvasWithoutProvider,
@@ -43,7 +40,6 @@ import {
   type WorkflowGraphInsertionContext,
   WORKFLOWS_SURFACE_RADIUS,
 } from '@kbn/workflows-ui';
-import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import {
   CANVAS_CONFIG_PANEL_MARGIN,
   CanvasConfigPanelShell,
@@ -176,17 +172,27 @@ interface InsertionState {
 
 type PanelState =
   | {
-      readonly mode: 'insert';
-      readonly context: WorkflowGraphInsertionContext;
-      readonly stepType: string;
-      readonly actionLabel: string;
-      readonly fragment: string;
-    }
-  | {
       readonly mode: 'edit';
+      /**
+       * Where this step came from — picks the footer button and its
+       * behavior: 'insert' shows "Remove node" (undo the insert); 'edit'
+       * shows "Reset node" (restore the pre-flyout fragment). Every edit
+       * live-applies to the YAML regardless of origin.
+       */
+      readonly origin: 'insert' | 'edit';
+      /**
+       * Identifies this flyout session so the React `key` can stay stable
+       * across a rename (which changes `stepName`) and only remount when the
+       * user truly switches to editing a different step.
+       */
+      readonly sessionId: number;
       readonly stepName: string;
       readonly stepType: string;
+      readonly actionLabel?: string;
+      /** Baseline fragment captured when the flyout opened — the "Reset node" target. */
       readonly fragment: string;
+      /** YAML snapshot from immediately before the insert — the "Remove node" target. */
+      readonly yamlBeforeOpen: string;
     }
   | {
       readonly mode: 'edit-trigger';
@@ -329,8 +335,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
-  const [liveFragment, setLiveFragment] = useState<string | null>(null);
-  /** After insert Done: clear the draft on the next definition update (not eagerly). */
+  /** After a trigger insert's Done: clear the ghost on the next definition update (not eagerly). */
   const clearPendingAfterDefinitionRef = useRef(false);
   const [settingsSurfaceVariant, setSettingsSurfaceVariantState] =
     useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
@@ -339,14 +344,23 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   );
   const [settingsBKind, setSettingsBKind] = useState<WorkflowSettingsBPanelKind | null>(null);
   const [canvasHeight, setCanvasHeight] = useState(0);
-  const [configPanelDirty, setConfigPanelDirty] = useState(false);
-  /** When set, a discard confirm is open before navigating to this step id (null = deselect). */
-  const [pendingStepSelection, setPendingStepSelection] = useState<string | null | undefined>(
-    undefined
-  );
   const [showCreationEmptyState, setShowCreationEmptyStateLocal] = useState(() =>
     getShowCreationEmptyState()
   );
+  // Refs so the live-apply callback (passed to StepConfigPanel, which calls
+  // it on every draft keystroke) always reads fresh state without the
+  // identity churn a useCallback dependency on yamlString/panel would cause.
+  const yamlStringRef = useRef(yamlString);
+  yamlStringRef.current = yamlString;
+  const panelRef = useRef(panel);
+  panelRef.current = panel;
+  /** Last step fragment this session wrote to the YAML — skips re-dispatching an unchanged draft. */
+  const lastAppliedStepFragmentRef = useRef<string | null>(null);
+  /** Full YAML immediately after this session's last own write — lets Remove node
+   * tell "nothing else touched the YAML since" from "something else did". */
+  const lastAppliedYamlRef = useRef<string | null>(null);
+  /** Counter backing each step panel's `sessionId` (see PanelState). */
+  const nextStepPanelSessionIdRef = useRef(0);
 
   useEffect(
     () =>
@@ -398,8 +412,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     }
   }, [definition, isYamlValid]);
 
-  // Drop the insert draft only after the computed definition has updated, so
-  // Done never briefly shows the empty-canvas CTA between clear and commit.
+  // Drop a trigger insert's ghost only after the computed definition has
+  // updated, so Done never briefly shows the empty-canvas CTA between clear
+  // and commit.
   useLayoutEffect(() => {
     if (!clearPendingAfterDefinitionRef.current) return;
     clearPendingAfterDefinitionRef.current = false;
@@ -489,75 +504,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
 
-  // When the insert flyout is open, compute a live preview of the graph that
-  // includes the in-flight step so the user sees branches (e.g. switch cases)
-  // update as they type — without committing to the Redux store.
-  //
-  // Both workflow and transformed must come from the same preview YAML so that
-  // useWorkflowLayout's topologyFingerprint (derived from workflow) changes when
-  // the preview changes — otherwise dagre skips layout and the new node lands at {0,0}.
-  const previewData = useMemo(() => {
-    if (!panel) return null;
-    // Use liveFragment when the user has edited the step (child effect fires first,
-    // but parent panelKey effect may clear it on the same flush). Fall back to
-    // panel.fragment (the default/initial YAML for the step) so the preview renders
-    // immediately when the panel opens, before the user types anything.
-    const fragment =
-      liveFragment ?? (panel.mode === 'insert' || panel.mode === 'edit' ? panel.fragment : null);
-    if (!fragment) return null;
-    let mutation = null;
-    if (panel.mode === 'insert') {
-      const ctx = panel.context;
-      mutation =
-        ctx.mode === 'prepend-step'
-          ? prependStep(yamlString, fragment)
-          : ctx.mode === 'after'
-          ? insertStepAfterName(yamlString, fragment, ctx.stepName)
-          : ctx.mode === 'branch'
-          ? insertStepIntoBranch(
-              yamlString,
-              fragment,
-              ctx.stepName,
-              ctx.branch,
-              ctx.position ?? 'end'
-            )
-          : ctx.mode === 'fallback'
-          ? setStepFallback(yamlString, ctx.stepName, fragment)
-          : null;
-    } else if (panel.mode === 'edit') {
-      mutation = replaceStepFragment(yamlString, panel.stepName, fragment);
-    }
-    if (!mutation?.success) return null;
-    const parseResult = parseWorkflowYamlForAutocomplete(mutation.yaml);
-    if (!parseResult.success) return null;
-    const previewWorkflow = parseResult.data as WorkflowYaml;
-    return { workflow: previewWorkflow, transformed: transformWorkflowToGraph(previewWorkflow) };
-  }, [liveFragment, panel, yamlString]);
-
-  // Clear the live fragment when the panel closes or switches identity (e.g.
-  // clicking the foreach node while an insert is pending would switch directly
-  // from insert mode to edit mode, leaving the previous fragment in place for
-  // one render and letting replaceStepFragment clobber the wrong step).
-  const panelKey =
-    panel == null
-      ? null
-      : panel.mode === 'edit'
-      ? `edit:${panel.stepName}`
-      : panel.mode === 'edit-trigger'
-      ? `edit-trigger:${panel.triggerIndex}`
-      : panel.mode === 'insert'
-      ? `insert:${panel.context.mode}:${
-          panel.context.mode === 'after' ||
-          panel.context.mode === 'branch' ||
-          panel.context.mode === 'fallback'
-            ? panel.context.stepName
-            : ''
-        }`
-      : `insert-trigger:${panel.mode}`;
-  useEffect(() => {
-    setLiveFragment(null);
-  }, [panelKey]);
-
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
 
   const nodeConfigWarnings = useMemo(() => {
@@ -592,6 +538,22 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [transformed.nodeRefs]
   );
 
+  // Node ids are a slugified form of the step name (spaces/underscores become
+  // hyphens — see IdAllocator), not the step name itself, and `transformed`
+  // only reflects a just-inserted/renamed step on the render after the one
+  // that triggered it. Selecting straight after insert/rename would otherwise
+  // race the still-stale node id lookup, so queue the step name here and let
+  // this effect resolve the real node id once the graph catches up.
+  const pendingSelectStepNameRef = useRef<string | null>(null);
+  useEffect(() => {
+    const name = pendingSelectStepNameRef.current;
+    if (!name) return;
+    const nodeId = nodeIdForStepName(name);
+    if (!nodeId) return;
+    pendingSelectStepNameRef.current = null;
+    setSelectedStep(nodeId);
+  }, [nodeIdForStepName, setSelectedStep]);
+
   const applyMutation = useCallback(
     (result: MutationResult): boolean => {
       if (!result.success) {
@@ -619,7 +581,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       context: WorkflowGraphInsertionContext,
       fragment: string,
       newName: string | undefined
-    ): boolean => {
+    ): MutationResult => {
       let result: MutationResult;
       switch (context.mode) {
         case 'trigger':
@@ -649,7 +611,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         // Node ids follow step names for non-colliding names.
         setFlashNodeId(newName);
       }
-      return ok;
+      return result;
     },
     [yamlString, applyMutation]
   );
@@ -668,7 +630,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [yamlString, connectors]
   );
 
-  /** Selecting an action opens the config panel; triggers open the trigger panel. */
+  /**
+   * Selecting an action for a step position writes the default step straight
+   * into the YAML and opens the config panel in edit mode (origin 'insert') —
+   * every further edit live-applies the same way. Triggers keep the old
+   * draft-then-Done flow (unaffected by this change).
+   */
   const handleInsertAction = useCallback(
     (action: ActionOptionData) => {
       if (!insertion) return;
@@ -690,32 +657,110 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         setInsertion(null);
         return;
       }
-      const pendingContext = toPendingContext(insertion.context, nodeIdForStepName);
+      const context = insertion.context;
+      const yamlBeforeOpen = yamlString;
       const { fragment, name } = defaultFragmentFor(action);
-      if (pendingContext) {
-        setPendingInsert({
-          phase: 'configuring',
-          context: pendingContext,
-          stepType: action.id,
-          label: name ?? action.label,
-        });
-      }
+      setInsertion(null);
+      setPendingInsert(null);
+      if (!name) return;
+      const result = insertFragment(context, fragment, name);
+      if (!result.success) return;
+      lastAppliedStepFragmentRef.current = fragment;
+      lastAppliedYamlRef.current = result.yaml;
       setPanel({
-        mode: 'insert',
-        context: insertion.context,
+        mode: 'edit',
+        origin: 'insert',
+        sessionId: ++nextStepPanelSessionIdRef.current,
+        stepName: name,
         stepType: action.id,
         actionLabel: action.label,
         fragment,
+        yamlBeforeOpen,
       });
-      setInsertion(null);
+      // Node ids are a slugified form of the step name — resolve the real id
+      // once `transformed` catches up (see pendingSelectStepNameRef above).
+      pendingSelectStepNameRef.current = name;
     },
-    [insertion, defaultFragmentFor, nodeIdForStepName]
+    [insertion, defaultFragmentFor, insertFragment, yamlString]
   );
 
+  /**
+   * Live-applies every valid step draft straight to the YAML as the user
+   * types (no Done button) — passed as `onFragmentChange` to StepConfigPanel.
+   * Skips an unchanged, unparseable, empty-named, or name-colliding draft;
+   * that invalid state surfaces via the panel's own close-time check instead.
+   */
+  const handleStepDraftChange = useCallback(
+    (fragment: string) => {
+      const current = panelRef.current;
+      if (!current || current.mode !== 'edit') return;
+      if (fragment === lastAppliedStepFragmentRef.current) return;
+      const doc = parseDocument(fragment);
+      if (doc.errors.length > 0 || !isMap(doc.contents)) return;
+      const nameValue = doc.get('name');
+      const newName = typeof nameValue === 'string' ? nameValue.trim() : '';
+      if (!newName) return;
+      const isRename = newName !== current.stepName;
+      if (isRename && collectStepNames(yamlStringRef.current).has(newName)) return;
+      const result = replaceStepFragment(yamlStringRef.current, current.stepName, fragment);
+      if (!applyMutation(result)) return;
+      lastAppliedStepFragmentRef.current = fragment;
+      lastAppliedYamlRef.current = result.yaml;
+      if (isRename) {
+        // Node ids follow step names — flush so nodeRefs carries the new id
+        // in this same tick (the selection effect below would otherwise miss
+        // the step for the rest of the 250ms computation debounce window).
+        flushWorkflowComputation();
+        setPanel((prev) =>
+          prev?.mode === 'edit' && prev.stepName === current.stepName
+            ? { ...prev, stepName: newName }
+            : prev
+        );
+        // Node ids are a slugified form of the step name — resolve the real
+        // id once `transformed` catches up (see pendingSelectStepNameRef).
+        pendingSelectStepNameRef.current = newName;
+      }
+    },
+    [applyMutation]
+  );
+
+  /**
+   * Footer button: undoes the insert, restoring the pre-flyout graph (origin
+   * 'insert'), or resets the step to its pre-flyout fragment (origin 'edit').
+   */
+  const handleStepRevert = useCallback(() => {
+    const current = panelRef.current;
+    if (!current || current.mode !== 'edit') return;
+    if (current.origin === 'insert') {
+      // Safe only when nothing besides our own live-apply writes touched the
+      // YAML since the insert — otherwise fall back to a plain delete so we
+      // don't clobber unrelated edits (e.g. made from the YAML tab) that
+      // landed while the flyout was open.
+      const safeToRestoreSnapshot =
+        lastAppliedYamlRef.current != null && yamlStringRef.current === lastAppliedYamlRef.current;
+      if (safeToRestoreSnapshot) {
+        applyMutation({ success: true, yaml: current.yamlBeforeOpen });
+      } else {
+        applyMutation(deleteStepByName(yamlStringRef.current, current.stepName));
+      }
+    } else {
+      applyMutation(replaceStepFragment(yamlStringRef.current, current.stepName, current.fragment));
+    }
+    setPanel(null);
+    setSelectedStep(null);
+  }, [applyMutation, setSelectedStep]);
+
+  /** ✕ / Escape: every edit is already live in the YAML, so this just closes. */
+  const handleStepClose = useCallback(() => {
+    setPanel(null);
+    setSelectedStep(null);
+  }, [setSelectedStep]);
+
+  /** Trigger-only: triggers keep the draft-then-Done flow. */
   const handlePanelSave = useCallback(
     (fragment: string) => {
       if (!panel) return;
-      const isInsert = panel.mode === 'insert' || panel.mode === 'insert-trigger';
+      const isInsert = panel.mode === 'insert-trigger';
       // Keep the configuring draft visible until the computed graph includes the
       // new node — clearing it eagerly opens a window where the empty-state CTA
       // flashes (even with a sync flush, an extra render can land in between).
@@ -726,16 +771,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       }
 
       let applied = true;
-      if (panel.mode === 'insert') {
-        const parsedName = parseDocument(fragment).get('name');
-        const newName = typeof parsedName === 'string' ? parsedName : undefined;
-        applied = insertFragment(panel.context, fragment, newName);
-      } else if (panel.mode === 'edit') {
-        const parsedName = parseDocument(fragment).get('name');
-        const newName = typeof parsedName === 'string' ? parsedName : undefined;
-        applied = applyMutation(replaceStepFragment(editorYaml, panel.stepName, fragment));
-        if (applied && newName && newName !== panel.stepName) setSelectedStep(newName);
-      } else if (panel.mode === 'insert-trigger') {
+      if (panel.mode === 'insert-trigger') {
         applied = applyMutation(appendTrigger(editorYaml, fragment));
       } else if (panel.mode === 'edit-trigger') {
         applied = applyMutation(replaceTriggerFragment(editorYaml, panel.triggerIndex, fragment));
@@ -747,21 +783,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       }
       setPanel(null);
     },
-    [panel, insertFragment, applyMutation, editorYaml, setSelectedStep]
+    [panel, applyMutation, editorYaml]
   );
 
-  const pocToggles = useWorkflowGraphPocToggles();
-
+  /** Trigger-only: triggers keep the draft-then-Done flow (Cancel commits the partial draft). */
   const handlePanelCancel = useCallback(() => {
-    // Closing any insert flyout commits the partial fragment so the node
-    // stays on the canvas — the author can keep editing it later.
-    if (panel?.mode === 'insert') {
-      const fragmentToCommit = liveFragment ?? panel.fragment;
-      const nameVal = parseDocument(fragmentToCommit).get('name');
-      const parsedName = typeof nameVal === 'string' ? nameVal : undefined;
-      clearPendingAfterDefinitionRef.current = true;
-      insertFragment(panel.context, fragmentToCommit, parsedName);
-    } else if (panel?.mode === 'insert-trigger') {
+    if (panel?.mode === 'insert-trigger') {
       clearPendingAfterDefinitionRef.current = true;
       applyMutation(appendTrigger(editorYaml, panel.fragment));
     } else {
@@ -770,58 +797,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setPanel(null);
     setSettingsBKind(null);
     setPendingInsert(null);
-    setConfigPanelDirty(false);
-    setPendingStepSelection(undefined);
     setSelectedStep(null);
-  }, [panel, liveFragment, insertFragment, applyMutation, editorYaml, setSelectedStep]);
+  }, [panel, applyMutation, editorYaml, setSelectedStep]);
 
-  const isConfigPanelOpen =
-    panel?.mode === 'edit' ||
-    panel?.mode === 'insert' ||
-    panel?.mode === 'edit-trigger' ||
-    panel?.mode === 'insert-trigger';
-
+  /** Steps live-apply, so switching the canvas/URL selection never loses anything. */
   const requestStepSelect = useCallback(
     (id: string | undefined) => {
-      const next = id ?? null;
-      if (
-        configPanelDirty &&
-        isConfigPanelOpen &&
-        next !== selectedStepId &&
-        (panel?.mode === 'edit' || panel?.mode === 'insert')
-      ) {
-        setPendingStepSelection(next);
-        return;
-      }
       setSettingsBKind(null);
-      setSelectedStep(next);
+      setSelectedStep(id ?? null);
     },
-    [configPanelDirty, isConfigPanelOpen, panel?.mode, selectedStepId, setSelectedStep]
+    [setSelectedStep]
   );
 
-  const handleKeepEditingStep = useCallback(() => {
-    setPendingStepSelection(undefined);
-  }, []);
-
-  const handleDiscardAndSelectStep = useCallback(() => {
-    const next = pendingStepSelection;
-    setPendingStepSelection(undefined);
-    setConfigPanelDirty(false);
-    clearPendingAfterDefinitionRef.current = false;
-    setPendingInsert(null);
-    setSettingsBKind(null);
-    if (next == null) {
-      setPanel(null);
-      setSelectedStep(null);
-      return;
-    }
-    setSelectedStep(next);
-  }, [pendingStepSelection, setSelectedStep]);
-
   const panelIsFallbackStep = useMemo(() => {
-    if (!panel) return false;
-    if (panel.mode === 'insert') return panel.context.mode === 'fallback';
-    if (panel.mode !== 'edit') return false;
+    if (panel?.mode !== 'edit') return false;
     const ref = Object.values(transformed.nodeRefs).find(
       (r) => r.kind === 'step' && r.stepName === panel.stepName
     );
@@ -840,14 +829,26 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           ? step.type
           : String(parseDocument(fragment).get('type') ?? '');
       if (!stepType) return;
+      const current = panelRef.current;
+      // Don't clobber an in-progress trigger insert; skip no-op re-opens
+      // (also covers the step we just opened via insert — same stepName,
+      // same panel, so origin/fragment/yamlBeforeOpen must not be reset).
+      if (current?.mode === 'insert-trigger') return;
+      if (current?.mode === 'edit' && current.stepName === stepName) return;
       setInsertion(null);
       setPendingInsert(null);
       setSettingsBKind(null);
-      setPanel((current) => {
-        // Don't clobber an in-progress insert panel; skip no-op re-opens.
-        if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
-        if (current?.mode === 'edit' && current.stepName === stepName) return current;
-        return { mode: 'edit', stepName, stepType, fragment };
+      // Baseline the live-apply dedup to the fragment we're opening with, so
+      // the panel's first onFragmentChange (its own mount value) is a no-op.
+      lastAppliedStepFragmentRef.current = fragment;
+      setPanel({
+        mode: 'edit',
+        origin: 'edit',
+        sessionId: ++nextStepPanelSessionIdRef.current,
+        stepName,
+        stepType,
+        fragment,
+        yamlBeforeOpen: editorYaml,
       });
     },
     [stepsByName, editorYaml]
@@ -866,7 +867,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       setPendingInsert(null);
       setSettingsBKind(null);
       setPanel((current) => {
-        if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
+        if (current?.mode === 'insert-trigger') return current;
         if (
           current?.mode === 'edit-trigger' &&
           current.triggerIndex === triggerIndex &&
@@ -1210,8 +1211,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       css={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
     >
       <WorkflowGraphCanvasWithoutProvider
-        workflow={previewData?.workflow ?? workflow}
-        transformed={previewData?.transformed ?? transformed}
+        workflow={workflow}
+        transformed={transformed}
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
@@ -1229,7 +1230,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         nodeConfigWarnings={nodeConfigWarnings}
         flashNodeId={flashNodeId}
         emptyState={creationEmptyState}
-        pendingInsert={previewData ? undefined : pendingInsert ?? undefined}
+        pendingInsert={pendingInsert ?? undefined}
         suppressInsertionControls={insertion != null}
         settingsNodes={settingsNodesProp}
         onSettingsNodeSelect={
@@ -1262,59 +1263,28 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           onActionSelected={handleInsertAction}
         />
       )}
-      {panel && (panel.mode === 'edit' || panel.mode === 'insert') && (
+      {panel && panel.mode === 'edit' && (
         <CanvasConfigPanelShell
           width={panelWidth}
           onWidthChange={setStoredPanelWidth}
           canvasWidth={canvasWidth}
         >
           <StepConfigPanel
-            key={
-              panel.mode === 'edit'
-                ? `edit:${panel.stepName}`
-                : `insert:${panel.stepType}:${panel.actionLabel}`
-            }
-            mode={panel.mode}
+            key={panel.sessionId}
+            mode={panel.origin}
             stepType={panel.stepType}
-            actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}
+            actionLabel={panel.actionLabel}
             initialFragment={panel.fragment}
             connectors={connectors}
             workflowDefinition={workflow}
-            onCancel={handlePanelCancel}
-            onSave={handlePanelSave}
+            onClose={handleStepClose}
+            onRevert={handleStepRevert}
             isFallbackStep={panelIsFallbackStep}
             onExpandedChange={setFieldEditorExpanded}
-            onDraftDirtyChange={setConfigPanelDirty}
-            onFragmentChange={panel.mode === 'insert' ? setLiveFragment : undefined}
-            keepNodeOnCancel={panel.mode === 'insert'}
+            onFragmentChange={handleStepDraftChange}
           />
         </CanvasConfigPanelShell>
       )}
-      {pendingStepSelection !== undefined ? (
-        <EuiConfirmModal
-          title={i18n.translate('workflows.stepConfigPanel.discardTitle', {
-            defaultMessage: 'Discard changes to this step?',
-          })}
-          onCancel={handleKeepEditingStep}
-          onConfirm={handleDiscardAndSelectStep}
-          cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
-            defaultMessage: 'Keep editing',
-          })}
-          confirmButtonText={i18n.translate('workflows.stepConfigPanel.discard', {
-            defaultMessage: 'Discard',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton="cancel"
-          data-test-subj="workflowStepConfigPanelLeaveStepModal"
-        >
-          <EuiText size="s">
-            {i18n.translate('workflows.visualEditor.discardOnStepSwitchBody', {
-              defaultMessage:
-                "These edits haven't been applied to the step yet. Leaving this step will discard them.",
-            })}
-          </EuiText>
-        </EuiConfirmModal>
-      ) : null}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (
         <CanvasConfigPanelShell
           width={panelWidth}

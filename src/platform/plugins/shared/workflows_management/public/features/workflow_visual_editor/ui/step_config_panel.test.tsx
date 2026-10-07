@@ -12,7 +12,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { StepConfigPanel, resetStepConfigPanelSessionStateForTests } from './step_config_panel';
+import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
 
 jest.mock('@kbn/code-editor', () => {
   const MockReact = jest.requireActual('react');
@@ -40,7 +40,9 @@ jest.mock('@kbn/code-editor', () => {
         getValue: () => string;
       }) => void;
     }) => {
-      const textareaRef = (MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>)<HTMLTextAreaElement>(null);
+      const textareaRef = (
+        MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>
+      )<HTMLTextAreaElement>(null);
       MockReact.useEffect(() => {
         props.editorDidMount?.({
           focus: () => textareaRef.current?.focus(),
@@ -87,13 +89,23 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-jest.mock('@kbn/monaco', () => ({ XJSON_LANG_ID: 'xjson', YAML_LANG_ID: 'yaml', ESQL_LANG_ID: 'esql' }));
+jest.mock('@kbn/monaco', () => ({
+  XJSON_LANG_ID: 'xjson',
+  YAML_LANG_ID: 'yaml',
+  ESQL_LANG_ID: 'esql',
+}));
 
 jest.mock('@kbn/esql-editor', () => {
   const MockReact = jest.requireActual('react');
   return {
     __esModule: true,
-    default: ({ query, onTextLangQueryChange }: { query: { esql: string }; onTextLangQueryChange: (q: { esql: string }) => void }) =>
+    default: ({
+      query,
+      onTextLangQueryChange,
+    }: {
+      query: { esql: string };
+      onTextLangQueryChange: (q: { esql: string }) => void;
+    }) =>
       MockReact.createElement('textarea', {
         'data-test-subj': 'mocked-esql-editor',
         value: query?.esql ?? '',
@@ -113,8 +125,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
   stepSupportsErrorHandling: (stepType: string | undefined) =>
     Boolean(
-      stepType &&
-        !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
+      stepType && !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
     ),
 }));
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
@@ -122,13 +133,7 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
 }));
 
 jest.mock('../../actions_menu_popover', () => ({
-  ActionsMenu: ({
-    rootTitle,
-    onClose,
-  }: {
-    rootTitle?: string;
-    onClose?: () => void;
-  }) => (
+  ActionsMenu: ({ rootTitle, onClose }: { rootTitle?: string; onClose?: () => void }) => (
     <div data-test-subj="actionsMenuCompact">
       <span>{rootTitle}</span>
       <button type="button" onClick={onClose}>
@@ -162,8 +167,9 @@ with:
 `;
 
 const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPanel>> = {}) => {
-  const onSave = jest.fn();
-  const onCancel = jest.fn();
+  const onClose = jest.fn();
+  const onRevert = jest.fn();
+  const onFragmentChange = jest.fn();
   const view = render(
     <I18nProvider>
       <StepConfigPanel
@@ -171,13 +177,14 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
         stepType="slack"
         initialFragment={FRAGMENT}
         connectors={connectors}
-        onSave={onSave}
-        onCancel={onCancel}
+        onClose={onClose}
+        onRevert={onRevert}
+        onFragmentChange={onFragmentChange}
         {...overrides}
       />
     </I18nProvider>
   );
-  return { onSave, onCancel, unmount: view.unmount };
+  return { onClose, onRevert, onFragmentChange, unmount: view.unmount };
 };
 
 const expandSettingsAccordion = () => {
@@ -365,8 +372,8 @@ with:
           actionLabel="Kibana Request"
           initialFragment={fragment}
           connectors={requestConnectors}
-          onSave={jest.fn()}
-          onCancel={jest.fn()}
+          onClose={jest.fn()}
+          onRevert={jest.fn()}
         />
       </I18nProvider>
     );
@@ -425,7 +432,9 @@ with:
     expect(urlRow).toHaveTextContent('Optional');
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
-    const queryRow = screen.getByTestId('workflowStepConfigField-with.query').closest('.euiFormRow');
+    const queryRow = screen
+      .getByTestId('workflowStepConfigField-with.query')
+      .closest('.euiFormRow');
     expect(queryRow).toHaveTextContent('Optional');
     expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.query')).toBeInTheDocument();
   });
@@ -488,8 +497,8 @@ with:
           stepType="slack"
           initialFragment="name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n"
           connectors={connectors}
-          onSave={jest.fn()}
-          onCancel={jest.fn()}
+          onClose={jest.fn()}
+          onRevert={jest.fn()}
           isFallbackStep
         />
       </I18nProvider>
@@ -506,8 +515,8 @@ with:
     expect(screen.queryByTestId('workflowStepConfigErrorFallback')).not.toBeInTheDocument();
   });
 
-  it('round-trips Form → YAML preserving comments, unknown keys and Liquid', () => {
-    const { onSave } = renderPanel();
+  it('round-trips Form → YAML preserving comments, unknown keys and Liquid; live-applies via onFragmentChange', () => {
+    const { onFragmentChange } = renderPanel();
     fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
       target: { value: 'Changed {{ inputs.user }}' },
     });
@@ -519,8 +528,8 @@ with:
     expect(yaml).toContain('Changed {{ inputs.user }}');
     expect(yaml).toContain('connector-id: abc');
 
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).toHaveBeenCalledWith(yaml);
+    // No Done button — every draft change live-applies through onFragmentChange.
+    expect(onFragmentChange).toHaveBeenLastCalledWith(yaml);
   });
 
   it('shows values the form cannot represent as read-only "Defined in YAML"', () => {
@@ -534,42 +543,33 @@ with:
     expect(screen.getByText('Defined in YAML')).toBeInTheDocument();
   });
 
-  it('validates on blur; Done stays enabled so incomplete/misconfigured state can be applied', () => {
-    const { onSave } = renderPanel({
+  it('validates on blur; incomplete/misconfigured edits still live-apply (no Done gate)', () => {
+    const { onFragmentChange } = renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith: {}\n',
     });
     const messageInput = screen.getByTestId('workflowStepConfigField-with.message');
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
-    // Empty required is apply-able (incomplete badge covers applied state).
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
-    // Mid-typing an empty required field does not accuse; Done stays enabled.
+    // Mid-typing an empty required field does not accuse, and still live-applies
+    // (incomplete state is apply-able — the canvas badge reflects it).
     fireEvent.change(messageInput, { target: { value: '' } });
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
+    expect(onFragmentChange).toHaveBeenCalled();
 
     fireEvent.blur(messageInput);
     expect(messageInput).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('Message is required')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
-
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).toHaveBeenCalled();
-    onSave.mockClear();
 
     // Fast forgiveness once already invalid.
     fireEvent.change(messageInput, { target: { value: 'hello' } });
     expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
 
-    // Misconfigured values (e.g. unclosed template) are still apply-able —
-    // the canvas badge reflects them after Done.
+    // Misconfigured values (e.g. unclosed template) still live-apply — the
+    // canvas badge reflects them; the panel never gates on advisory errors.
     fireEvent.change(messageInput, { target: { value: 'Hi {{ inputs.x' } });
-    expect(screen.getByTestId('workflowStepConfigPanelSave')).toBeEnabled();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).toHaveBeenCalled();
+    expect(onFragmentChange).toHaveBeenLastCalledWith(expect.stringContaining('Hi {{ inputs.x'));
   });
 
   it('renders compact boolean rows with label and switch on one line', () => {
@@ -605,8 +605,8 @@ with:
     expect(label).not.toBeNull();
   });
 
-  it('closes from the header and the YAML view edits flow back to the form', () => {
-    const { onCancel } = renderPanel();
+  it('closes immediately from the header after editing via the YAML view (valid draft, no Done needed)', () => {
+    const { onClose } = renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
@@ -620,63 +620,54 @@ with:
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('renamed');
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('yo');
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
-    // Dirty draft → discard confirm; Confirm closes without applying.
-    expect(onCancel).not.toHaveBeenCalled();
-    expect(screen.getByTestId('workflowStepConfigPanelDiscardModal')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Discard'));
-    expect(onCancel).toHaveBeenCalled();
+    // The draft is valid — already live in the YAML via onFragmentChange — so
+    // ✕ just closes; nothing to discard.
+    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('closes Cancel/X immediately when the draft matches applied state', () => {
-    const { onCancel, unmount } = renderPanel();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelCancel'));
-    expect(onCancel).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+  it('shows Remove node in insert mode and Reset node (disabled until dirty) in edit mode', () => {
+    const { onRevert, unmount } = renderPanel({ mode: 'insert', actionLabel: 'Slack Message' });
+    expect(screen.queryByTestId('workflowStepConfigPanelResetNode')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelRemoveNode'));
+    expect(onRevert).toHaveBeenCalledTimes(1);
     unmount();
 
-    const { onCancel: onCancelClose } = renderPanel();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
-    expect(onCancelClose).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
-  });
-
-  it('prompts to discard dirty edits; Keep editing preserves the draft', () => {
-    const { onCancel } = renderPanel();
+    const { onRevert: onRevertEdit } = renderPanel();
+    expect(screen.queryByTestId('workflowStepConfigPanelRemoveNode')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeDisabled();
     fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
       target: { value: 'Edited locally' },
     });
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelCancel'));
-    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelResetNode'));
+    expect(onRevertEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('closing an invalid draft prompts to discard; Keep editing preserves it', () => {
+    const { onClose } = renderPanel();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
+    fireEvent.change(screen.getByTestId('workflowStepConfigPanelYaml'), {
+      // Malformed indentation — not valid YAML.
+      target: { value: 'name: n\n  type: slack\n' },
+    });
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByTestId('workflowStepConfigPanelDiscardModal')).toBeInTheDocument();
     expect(screen.getByText('Discard changes to this step?')).toBeInTheDocument();
     expect(
       screen.getByText(
-        "These edits haven't been applied to the step yet. Closing now will discard them."
+        "This draft has errors and wasn't applied to the step. Closing now will discard it."
       )
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Keep editing'));
-    expect(onCancel).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('Edited locally');
 
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
     fireEvent.click(screen.getByText('Discard'));
-    expect(onCancel).toHaveBeenCalledTimes(1);
-  });
-
-  it('reports draft dirty state for canvas navigation gating', () => {
-    const onDraftDirtyChange = jest.fn();
-    const { unmount } = renderPanel({ onDraftDirtyChange });
-    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(false);
-
-    fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
-      target: { value: 'Edited locally' },
-    });
-    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(true);
-
-    unmount();
-    expect(onDraftDirtyChange).toHaveBeenLastCalledWith(false);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('wires the shared reference affordance on text and code fields, not name/switches/selects', () => {
@@ -712,8 +703,8 @@ with:
     x: "1"
 `}
           connectors={requestConnectors}
-          onSave={jest.fn()}
-          onCancel={jest.fn()}
+          onClose={jest.fn()}
+          onRevert={jest.fn()}
         />
       </I18nProvider>
     );
@@ -725,27 +716,25 @@ with:
     const headersRow = screen
       .getByTestId('workflowStepConfigField-with.headers')
       .closest('.euiFormRow') as HTMLElement;
-    expect(
-      within(bodyRow).getByTestId('workflowStepConfigDataReference')
-    ).toBeInTheDocument();
-    expect(
-      within(headersRow).getByTestId('workflowStepConfigDataReference')
-    ).toBeInTheDocument();
+    expect(within(bodyRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
+    expect(within(headersRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     const queryRow = screen
       .getByTestId('workflowStepConfigField-with.query')
       .closest('.euiFormRow') as HTMLElement;
-    expect(
-      within(queryRow).getByTestId('workflowStepConfigDataReference')
-    ).toBeInTheDocument();
+    expect(within(queryRow).getByTestId('workflowStepConfigDataReference')).toBeInTheDocument();
 
     // Select (method) has no affordance.
     const method = screen.getByTestId('workflowStepConfigField-with.method');
-    expect(method.querySelector?.('[data-test-subj="workflowStepConfigDataReference"]')).toBeFalsy();
     expect(
-      method.closest('.euiFormRow')?.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+      method.querySelector?.('[data-test-subj="workflowStepConfigDataReference"]')
+    ).toBeFalsy();
+    expect(
+      method
+        .closest('.euiFormRow')
+        ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
     ).toBeNull();
 
     // Step name editor ignores reference triggers.
@@ -785,7 +774,9 @@ with:
       connectors: [],
       initialFragment: 'name: n\ntype: unknown.missing\n',
     });
-    expect(screen.getByTestId('workflowStepConfigPanelEmpty')).toHaveTextContent('Form unavailable');
+    expect(screen.getByTestId('workflowStepConfigPanelEmpty')).toHaveTextContent(
+      'Form unavailable'
+    );
   });
 
   it('resolves createCaseDefaultSpace alias fields in the form', () => {
@@ -805,8 +796,7 @@ with:
     renderPanel({
       stepType: 'kibana.createCaseDefaultSpace',
       connectors,
-      initialFragment:
-        'name: createCase\ntype: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
+      initialFragment: 'name: createCase\ntype: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
     });
     expect(screen.getByTestId('workflowStepConfigField-with.title')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigPanelEmpty')).not.toBeInTheDocument();
@@ -837,7 +827,7 @@ with:
         description: null,
       } as unknown as ConnectorContractUnion,
     ];
-    const onSave = jest.fn();
+    const onFragmentChange = jest.fn();
     render(
       <I18nProvider>
         <StepConfigPanel
@@ -849,15 +839,18 @@ with:
   query: "FROM logs"
 `}
           connectors={esqlConnectors}
-          onSave={onSave}
-          onCancel={jest.fn()}
+          onClose={jest.fn()}
+          onRevert={jest.fn()}
+          onFragmentChange={onFragmentChange}
         />
       </I18nProvider>
     );
 
     const query = screen.getByTestId('workflowStepConfigField-with.query');
     expect(query).toHaveAttribute('data-language', 'esql');
-    expect(query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
+    expect(
+      query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+    ).not.toBeNull();
     // TODO(slice7): ES|QL stays specialized — no expanded field editor.
     expect(
       query.querySelector('[data-test-subj="workflowStepConfigDataReferenceExpand"]')
@@ -870,15 +863,15 @@ with:
       },
     });
 
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).toHaveBeenCalled();
-    const saved = onSave.mock.calls[0][0] as string;
+    // Live-applies via onFragmentChange — no Done button.
+    expect(onFragmentChange).toHaveBeenCalled();
+    const saved = onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string;
     expect(saved).toContain('{{ steps.prev.output }}');
     expect(saved).not.toMatch(/Must be valid JSON/);
   });
 
   it('opens the field-editor sub-flyout from ⤢ and writes through live', () => {
-    const { onSave } = renderPanel();
+    const { onFragmentChange } = renderPanel();
 
     const messageRow = screen
       .getByTestId('workflowStepConfigField-with.message')
@@ -911,9 +904,10 @@ with:
       'Hello {{ consts.name }}'
     );
 
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    expect(onSave).toHaveBeenCalled();
-    expect(onSave.mock.calls[0][0]).toContain('Hello {{ consts.name }}');
+    // Live-applied via onFragmentChange as it was typed — no Done button.
+    expect(onFragmentChange).toHaveBeenCalled();
+    const last = onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string;
+    expect(last).toContain('Hello {{ consts.name }}');
   });
 
   it('shows expand on templatable text/code fields and keeps it off booleans/selects', () => {
@@ -949,7 +943,7 @@ with:
         description: null,
       } as unknown as ConnectorContractUnion,
     ];
-    const { onSave } = renderPanel({
+    const { onFragmentChange } = renderPanel({
       stepType: 'kibana.request',
       connectors: requestConnectors,
       initialFragment: `name: req
@@ -980,8 +974,8 @@ with:
     );
 
     fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
-    const saved = onSave.mock.calls[0][0] as string;
+    // Live-applied via onFragmentChange — no Done button.
+    const saved = onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string;
     // Document keeps structured YAML — display collapse must not flatten the source.
     expect(saved).toMatch(/body:\n\s+fields: null\n\s+id: none/);
   });

@@ -9,7 +9,6 @@
 
 import {
   EuiAccordion,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
@@ -67,6 +66,12 @@ import {
 
 ensureWorkflowGraphEuiIcons();
 
+/**
+ * Where the step the panel is editing came from — every edit live-applies to
+ * the YAML regardless of mode; this only selects the footer button and its
+ * behavior ('insert': "Remove node" undoes the insert; 'edit': "Reset node"
+ * restores the pre-flyout fragment).
+ */
 export type StepConfigPanelMode = 'insert' | 'edit';
 
 export interface StepConfigPanelProps {
@@ -82,8 +87,16 @@ export interface StepConfigPanelProps {
   readonly connectors: readonly ConnectorContractUnion[];
   /** Full workflow definition — powers data-reference sources (triggers/steps/consts). */
   readonly workflowDefinition?: WorkflowYaml;
-  readonly onCancel: () => void;
-  readonly onSave: (fragment: string) => void;
+  /**
+   * Closes the flyout, keeping the node and any edits already applied to the
+   * YAML — ✕, Escape and the field sub-flyout's close-stack all route here.
+   */
+  readonly onClose: () => void;
+  /**
+   * Footer button action: restores the step to its pre-flyout state (mode
+   * 'edit') or removes the node entirely, undoing the insert (mode 'insert').
+   */
+  readonly onRevert: () => void;
   /**
    * True when this panel configures an `on-failure.fallback` step — hides the
    * Error handling section (mirrors canvas error-port eligibility).
@@ -95,20 +108,10 @@ export interface StepConfigPanelProps {
    */
   readonly onExpandedChange?: (expanded: boolean) => void;
   /**
-   * Fires whenever the panel draft diverges from (or returns to) the applied
-   * snapshot — used to gate canvas navigation (selecting another step).
-   */
-  readonly onDraftDirtyChange?: (dirty: boolean) => void;
-  /**
-   * Fires on every draft change with the current fragment string — used for
-   * live graph preview while the flyout is open (insert mode only).
+   * Fires on every draft change with the current fragment string — the
+   * stateful shell live-applies each valid edit straight to the YAML.
    */
   readonly onFragmentChange?: (fragment: string) => void;
-  /**
-   * When true and mode is 'insert', the ✕ button commits the draft fragment
-   * instead of discarding it — the node stays on the canvas for later editing.
-   */
-  readonly keepNodeOnCancel?: boolean;
 }
 
 const CODE_EDITOR_HEIGHT = 160;
@@ -237,13 +240,11 @@ export function StepConfigPanel({
   initialFragment,
   connectors,
   workflowDefinition,
-  onCancel,
-  onSave,
+  onClose,
+  onRevert,
   isFallbackStep = false,
   onExpandedChange,
-  onDraftDirtyChange,
   onFragmentChange,
-  keepNodeOnCancel = false,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -275,18 +276,7 @@ export function StepConfigPanel({
     [onExpandedChange]
   );
 
-  useEffect(() => {
-    onDraftDirtyChange?.(isDraftDirty(fragment, initialFragment));
-  }, [fragment, initialFragment, onDraftDirtyChange]);
-
-  useEffect(
-    () => () => {
-      onDraftDirtyChange?.(false);
-    },
-    [onDraftDirtyChange]
-  );
-
-  // Notify the canvas shell of every draft change so it can power live graph preview.
+  // Notify the canvas shell of every draft change so it can live-apply valid edits.
   useEffect(() => {
     onFragmentChange?.(fragment);
   }, [fragment, onFragmentChange]);
@@ -484,13 +474,16 @@ export function StepConfigPanel({
     setNameError(undefined);
   }, [nameDraft, siblingStepNames, indent]);
 
-  // Done may apply incomplete / misconfigured drafts (canvas badge reflects
-  // applied state). Block only empty name, unparseable mid-edit values, or
-  // invalid YAML — not advisory field validation.
+  // The stateful shell live-applies every valid draft straight to the YAML;
+  // a draft with blocking errors (empty name, unparseable mid-edit value, or
+  // invalid YAML) is never written. Block only those — not advisory field
+  // validation, which can still be applied.
   const hasBlockingDraftErrors = useMemo(() => {
     if (draftErrors.size > 0) return true;
     return isEmptyFieldValue(committedStepName);
   }, [draftErrors, committedStepName]);
+
+  const canApplyDraft = parsed.valid && !hasBlockingDraftErrors;
 
   const closeLabel = i18n.translate('workflows.stepConfigPanel.close', {
     defaultMessage: 'Close',
@@ -502,40 +495,29 @@ export function StepConfigPanel({
     defaultMessage: 'Edit step name',
   });
 
-  const handleSave = useCallback(() => {
-    if (!parsed.valid || hasBlockingDraftErrors) {
-      setShowValidation(true);
-      return;
-    }
-    onSave(fragment);
-  }, [parsed.valid, hasBlockingDraftErrors, onSave, fragment]);
-
-  // Cancel / X / Escape share one close-attempt path: dirty draft → confirm, else close.
-  // Skip while the step-name editor is active (Escape there reverts the name instead).
-  // When keepNodeOnCancel is on and mode is 'insert', X commits the draft instead of
-  // prompting — the caller (stateful) persists it via its onCancel handler.
+  // ✕ / Escape share one close-attempt path: an un-appliable draft (the YAML
+  // the stateful shell never wrote) prompts before discarding it; otherwise
+  // the flyout just closes — everything else is already live in the YAML.
+  // Skipped while the step-name editor is active (Escape there reverts the
+  // name instead).
   const attemptClose = useCallback(() => {
     if (isEditingNameRef.current) return;
-    if (mode === 'insert' && keepNodeOnCancel) {
-      // Commit: onCancel signals the stateful shell to persist via insertFragment.
-      onCancel();
-      return;
-    }
-    if (isDraftDirty(fragment, initialFragment)) {
+    if (!canApplyDraft) {
+      setShowValidation(true);
       setShowDiscardConfirm(true);
       return;
     }
-    onCancel();
-  }, [mode, keepNodeOnCancel, fragment, initialFragment, onCancel]);
+    onClose();
+  }, [canApplyDraft, onClose]);
 
   const handleKeepEditing = useCallback(() => {
     setShowDiscardConfirm(false);
   }, []);
 
-  const handleDiscard = useCallback(() => {
+  const handleDiscardInvalidDraft = useCallback(() => {
     setShowDiscardConfirm(false);
-    onCancel();
-  }, [onCancel]);
+    onClose();
+  }, [onClose]);
 
   const showSettings = !isFallbackStep && stepSupportsErrorHandling(stepType);
 
@@ -969,19 +951,29 @@ export function StepConfigPanel({
       >
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={attemptClose} data-test-subj="workflowStepConfigPanelCancel">
-              {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              isDisabled={!parsed.valid || hasBlockingDraftErrors}
-              data-test-subj="workflowStepConfigPanelSave"
-            >
-              {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Done' })}
-            </EuiButton>
+            {mode === 'insert' ? (
+              <EuiButtonEmpty
+                color="danger"
+                iconType="trash"
+                onClick={onRevert}
+                data-test-subj="workflowStepConfigPanelRemoveNode"
+              >
+                {i18n.translate('workflows.stepConfigPanel.removeNode', {
+                  defaultMessage: 'Remove node',
+                })}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                iconType="editorUndo"
+                onClick={onRevert}
+                isDisabled={!isDraftDirty(fragment, initialFragment)}
+                data-test-subj="workflowStepConfigPanelResetNode"
+              >
+                {i18n.translate('workflows.stepConfigPanel.resetNode', {
+                  defaultMessage: 'Reset node',
+                })}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
@@ -1016,7 +1008,7 @@ export function StepConfigPanel({
             defaultMessage: 'Discard changes to this step?',
           })}
           onCancel={handleKeepEditing}
-          onConfirm={handleDiscard}
+          onConfirm={handleDiscardInvalidDraft}
           cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
             defaultMessage: 'Keep editing',
           })}
@@ -1028,9 +1020,9 @@ export function StepConfigPanel({
           data-test-subj="workflowStepConfigPanelDiscardModal"
         >
           <EuiText size="s">
-            {i18n.translate('workflows.stepConfigPanel.discardBody', {
+            {i18n.translate('workflows.stepConfigPanel.discardInvalidBody', {
               defaultMessage:
-                "These edits haven't been applied to the step yet. Closing now will discard them.",
+                "This draft has errors and wasn't applied to the step. Closing now will discard it.",
             })}
           </EuiText>
         </EuiConfirmModal>
