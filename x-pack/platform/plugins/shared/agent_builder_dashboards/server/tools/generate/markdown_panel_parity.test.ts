@@ -9,7 +9,7 @@ import {
   MARKDOWN_EMBEDDABLE_TYPE as EMBEDDABLE_MARKDOWN_TYPE,
   markdownByValueStateSchema,
 } from '@kbn/dashboard-markdown/server';
-import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigSchema } from '@kbn/dashboard-authoring';
+import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigSchema } from '@kbn/dashboard-agent-authoring';
 
 /**
  * Drift guard: the markdown embeddable type and by-value config the tool accepts

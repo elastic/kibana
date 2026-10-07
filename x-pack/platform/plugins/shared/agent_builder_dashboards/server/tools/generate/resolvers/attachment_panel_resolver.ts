@@ -20,7 +20,7 @@ import {
   type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {

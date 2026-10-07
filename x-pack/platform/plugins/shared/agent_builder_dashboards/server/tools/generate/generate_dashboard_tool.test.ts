@@ -15,12 +15,12 @@ import { retrieveLatestVersion } from './attachment_state';
 import {
   executeDashboardOperations,
   hasValidCreateMetadataOperations,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
-jest.mock('@kbn/dashboard-authoring', () => ({
-  ...jest.requireActual('@kbn/dashboard-authoring'),
+jest.mock('@kbn/dashboard-agent-authoring', () => ({
+  ...jest.requireActual('@kbn/dashboard-agent-authoring'),
   executeDashboardOperations: jest.fn(),
   hasValidCreateMetadataOperations: jest.fn(),
   createControlFieldCapabilitiesResolver: jest.fn(),

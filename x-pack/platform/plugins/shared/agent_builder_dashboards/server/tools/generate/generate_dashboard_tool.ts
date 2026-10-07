@@ -23,7 +23,7 @@ import {
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 import {
   dashboardTools,
   DASHBOARD_UPDATED_UI_EVENT,

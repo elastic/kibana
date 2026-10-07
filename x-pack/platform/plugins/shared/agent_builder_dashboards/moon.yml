@@ -30,7 +30,7 @@ dependsOn:
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/agent-builder-dashboards-common'
-  - '@kbn/dashboard-authoring'
+  - '@kbn/dashboard-agent-authoring'
   - '@kbn/zod'
   - '@kbn/dashboard-markdown'
   - '@kbn/unified-search-plugin'

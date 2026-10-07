@@ -21,7 +21,7 @@ import {
   getErrorMessage,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {

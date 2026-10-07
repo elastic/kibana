@@ -10,7 +10,7 @@ import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };

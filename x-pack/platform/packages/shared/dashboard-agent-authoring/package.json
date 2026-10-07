@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/dashboard-authoring",
+  "name": "@kbn/dashboard-agent-authoring",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0",

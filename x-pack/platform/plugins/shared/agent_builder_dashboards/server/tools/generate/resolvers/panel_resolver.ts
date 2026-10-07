@@ -6,7 +6,7 @@
  */
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import type { ResolvePanelContent } from '@kbn/dashboard-authoring';
+import type { ResolvePanelContent } from '@kbn/dashboard-agent-authoring';
 import { createVisPanelResolver, type VisPanelResolverDeps } from './vis_panel_resolver';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
 

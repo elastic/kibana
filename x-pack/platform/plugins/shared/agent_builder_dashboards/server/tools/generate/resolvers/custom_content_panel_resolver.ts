@@ -18,7 +18,7 @@ import {
   getErrorMessage,
   type CustomContentPanelResolutionRequest,
   type PanelContentAttempt,
-} from '@kbn/dashboard-authoring';
+} from '@kbn/dashboard-agent-authoring';
 
 const resolveCustomContentState = async (
   request: CustomContentPanelResolutionRequest,

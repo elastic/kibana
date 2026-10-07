@@ -611,7 +611,7 @@
     "@kbn/custom-icons": "workspace:*",
     "@kbn/custom-integrations-plugin": "workspace:*",
     "@kbn/dag-layout": "workspace:*",
-    "@kbn/dashboard-authoring": "workspace:*",
+    "@kbn/dashboard-agent-authoring": "workspace:*",
     "@kbn/dashboard-markdown": "workspace:*",
     "@kbn/dashboard-navigation-options-common": "workspace:*",
     "@kbn/dashboard-navigation-options-components": "workspace:*",
