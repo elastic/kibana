@@ -8,9 +8,6 @@
 /**
  * Raw Slack message payload: `text` is the notification and fallback copy, `blocks` is what gets
  * posted, as Slack `markdown` blocks that render standard markdown.
- *
- * Placeholder until Agent Builder depends on Isomer, which will replace it with
- * `Pick<SlackEnvelopeResult, 'text' | 'blocks'>` from `@elastic/isomer-sdk/slack`.
  */
 export interface SlackPayload {
   text: string;
