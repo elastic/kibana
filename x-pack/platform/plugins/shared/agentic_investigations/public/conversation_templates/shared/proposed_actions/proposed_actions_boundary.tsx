@@ -38,3 +38,15 @@ export const ProposedActionsBoundary: React.FC<React.PropsWithChildren> = ({ chi
     </KibanaErrorBoundary>
   </KibanaErrorBoundaryProvider>
 );
+
+/**
+ * For a count beside a heading: a failed chunk load or a render error leaves the heading bare
+ * rather than replacing it with an error prompt, and nothing shows while the chunk loads.
+ */
+export const ProposedActionsCountBoundary: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <KibanaErrorBoundaryProvider>
+    <KibanaErrorBoundary>
+      <React.Suspense fallback={null}>{children}</React.Suspense>
+    </KibanaErrorBoundary>
+  </KibanaErrorBoundaryProvider>
+);
