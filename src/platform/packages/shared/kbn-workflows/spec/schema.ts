@@ -374,12 +374,45 @@ export const HitlSlack2ChannelSchema = z.object({
     ),
 });
 
+const MAX_HITL_HTTP_HEADER_COUNT = 20;
+const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
+
+export const HitlHttpChannelSchema = z.object({
+  url: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .describe('HTTP request URL. Rendered as a Liquid template before the request is sent.'),
+  method: z
+    .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+    .optional()
+    .describe('HTTP method. Defaults to POST.'),
+  headers: z
+    .record(
+      z.string().min(1).max(MAX_HITL_HTTP_HEADER_NAME_LENGTH),
+      z.string().max(MAX_HITL_MESSAGE_LENGTH)
+    )
+    .refine((headers) => Object.keys(headers).length <= MAX_HITL_HTTP_HEADER_COUNT, {
+      message: `At most ${MAX_HITL_HTTP_HEADER_COUNT} headers`,
+    })
+    .optional()
+    .describe('Optional request headers. Names and values are Liquid templates.'),
+  body: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .describe(
+      'Request body template. For waitForInput use {{context.hitl.externalFormLink}}. For waitForApproval use {{context.hitl.externalApproveLink}} and {{context.hitl.externalRejectLink}}.'
+    ),
+});
+
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+  http: 'Send the response links in an HTTP request. Set url and a body template. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
@@ -393,6 +426,7 @@ export const WaitForInputChannelsSchema = z
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
+    http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -404,6 +438,7 @@ export const WaitForApprovalChannelsSchema = z
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+    http: HitlHttpChannelSchema.loose().optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);

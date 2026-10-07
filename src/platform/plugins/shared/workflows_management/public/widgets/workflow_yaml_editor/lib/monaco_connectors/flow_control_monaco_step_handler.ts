@@ -40,14 +40,14 @@ export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
         ? [
             '- `message` _(optional)_ — Message displayed to the user when waiting for input',
             '- `schema` _(optional)_ — JSON Schema describing the expected input payload',
-            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `slack2`)',
+            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `slack2`, `http`)',
           ]
         : connectorType === 'waitForApproval'
         ? [
             '- `message` _(optional)_ — Message displayed to approvers',
             '- `approveLabel` _(optional)_ — Label for the approve action (default: Approve)',
             '- `rejectLabel` _(optional)_ — Label for the reject action (default: Decline)',
-            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `slack2`)',
+            '- `channels` _(optional)_ — External notification channels (`slack`, `slack_api`, `slack2`, `http`)',
           ]
         : ['- `duration` _(required)_ — Duration to wait, e.g. `"5s"`, `"1m"`, `"2h"`'];
 

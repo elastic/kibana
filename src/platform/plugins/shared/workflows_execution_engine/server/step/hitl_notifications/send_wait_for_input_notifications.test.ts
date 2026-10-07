@@ -86,4 +86,36 @@ describe('sendWaitForInputNotifications', () => {
       'Custom: https://kibana.example/form'
     );
   });
+
+  it('posts a rendered form link through the HTTP system connector', async () => {
+    const executeSystemConnector = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        http: {
+          url: 'https://hooks.example/{{context.hitl.externalFormLink}}',
+          method: 'PUT',
+          headers: { 'X-Form': '{{context.hitl.externalFormLink}}' },
+          body: '{"form":"{{context.hitl.externalFormLink}}"}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate: (template) =>
+        template.replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { executeSystemConnector } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(executeSystemConnector).toHaveBeenCalledWith({
+      connectorType: '.http-system',
+      input: {
+        url: 'https://hooks.example/https://kibana.example/form',
+        method: 'PUT',
+        headers: { 'X-Form': 'https://kibana.example/form' },
+        body: '{"form":"https://kibana.example/form"}',
+      },
+      abortController: expect.any(AbortController),
+    });
+  });
 });
