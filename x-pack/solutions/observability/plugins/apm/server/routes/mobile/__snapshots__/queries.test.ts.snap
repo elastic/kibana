@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mobile filters queries getDeviceOSApp queries crash error events when error type is crash 1`] = `
+Object {
+  "aggs": Object {
+    "appVersions": Object {
+      "terms": Object {
+        "field": "service.version",
+        "size": 10,
+      },
+    },
+    "devices": Object {
+      "terms": Object {
+        "field": "device.model.identifier",
+        "size": 10,
+      },
+    },
+    "osVersions": Object {
+      "terms": Object {
+        "field": "host.os.version",
+        "size": 10,
+      },
+    },
+  },
+  "apm": Object {
+    "sources": Array [
+      Object {
+        "documentType": "error",
+        "rollupInterval": "none",
+      },
+    ],
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "service.name": "serviceName",
+          },
+        },
+        Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "epoch_millis",
+              "gte": 0,
+              "lte": 50000,
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "track_total_hits": false,
+}
+`;
+
+exports[`mobile filters queries getDeviceOSApp queries transaction events when no error type is given 1`] = `
+Object {
+  "aggs": Object {
+    "appVersions": Object {
+      "terms": Object {
+        "field": "service.version",
+        "size": 10,
+      },
+    },
+    "devices": Object {
+      "terms": Object {
+        "field": "device.model.identifier",
+        "size": 10,
+      },
+    },
+    "osVersions": Object {
+      "terms": Object {
+        "field": "host.os.version",
+        "size": 10,
+      },
+    },
+  },
+  "apm": Object {
+    "sources": Array [
+      Object {
+        "documentType": "transactionEvent",
+        "rollupInterval": "none",
+      },
+    ],
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "service.name": "serviceName",
+          },
+        },
+        Object {
+          "term": Object {
+            "transaction.type": "mobile",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "epoch_millis",
+              "gte": 0,
+              "lte": 50000,
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "track_total_hits": false,
+}
+`;
+
+exports[`mobile filters queries getNCT queries crash error events when error type is crash 1`] = `
+Object {
+  "aggs": Object {
+    "netConnectionTypes": Object {
+      "terms": Object {
+        "field": "network.connection.type",
+        "size": 10,
+      },
+    },
+  },
+  "apm": Object {
+    "sources": Array [
+      Object {
+        "documentType": "error",
+        "rollupInterval": "none",
+      },
+    ],
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "service.name": "serviceName",
+          },
+        },
+        Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "epoch_millis",
+              "gte": 0,
+              "lte": 50000,
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "track_total_hits": false,
+}
+`;
+
+exports[`mobile filters queries getNCT queries span events when no error type is given 1`] = `
+Object {
+  "aggs": Object {
+    "netConnectionTypes": Object {
+      "terms": Object {
+        "field": "network.connection.type",
+        "size": 10,
+      },
+    },
+  },
+  "apm": Object {
+    "sources": Array [
+      Object {
+        "documentType": "span",
+        "rollupInterval": "none",
+      },
+    ],
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "service.name": "serviceName",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "epoch_millis",
+              "gte": 0,
+              "lte": 50000,
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "track_total_hits": false,
+}
+`;
