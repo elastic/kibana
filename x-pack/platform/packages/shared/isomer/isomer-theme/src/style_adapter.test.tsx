@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Composition, StyleHandle as SdkStyleHandle } from '@elastic/isomer-sdk';
 import { definePrimitive, definePrimitivePack } from '@elastic/isomer-sdk';
+import { md } from '@elastic/isomer-sdk/markdown';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { z } from '@kbn/zod';
 import { borealisDark } from './borealis_tokens.generated';
@@ -93,7 +94,7 @@ describe('isomerStyleAdapter', () => {
           <p className={classNames(context, noteStyles.handles.root)}>{node.text}</p>
         ),
         text: (node) => node.text,
-        markdown: (node) => node.text,
+        markdown: (node) => md.paragraph(node.text),
       },
     });
     const runtime = createIsomerRuntime({
