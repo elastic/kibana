@@ -104,7 +104,7 @@ const buildAlertEvent = ({
 interface BuildAlertActionInput {
   ruleId: AlertAction['rule_id'];
   groupHash: AlertAction['group_hash'];
-  episodeId?: AlertAction['episode_id'];
+  episodeId?: AlertAction['alert_id'];
   actionType: AlertAction['action_type'];
   lastSeriesEventTimestamp: AlertAction['last_series_event_timestamp'];
   timestamp: AlertAction['@timestamp'];
@@ -126,7 +126,7 @@ const buildAlertAction = ({
   last_series_event_timestamp: lastSeriesEventTimestamp,
   rule_id: ruleId,
   group_hash: groupHash,
-  ...(episodeId ? { episode_id: episodeId } : {}),
+  ...(episodeId ? { alert_id: episodeId } : {}),
   ...(expiry ? { expiry } : {}),
   space_id: 'default',
 });
@@ -179,11 +179,23 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.bulkDisable({ ids: [...TEST_RULE_IDS] });
 
-    // Tag rule-001 so the tag-scoped policy (SINGLE_RULE_POLICY_ID) can match it.
+    /*
+     * rule-001 carries the routing tag, so the tag-scoped policy (SINGLE_RULE_POLICY_ID)
+     * matches it. rule-002 carries the same value only as a rule tag, which policies ignore.
+     */
     await apiServices.alertingV2.rules.upsert(
       'rule-001',
       buildCreateRuleData({
-        metadata: { name: 'Dispatcher test rule-001', tags: ['notify-rule-001'] },
+        metadata: { name: 'Dispatcher test rule-001', routing_tags: ['notify-rule-001'] },
+        schedule: { every: '1d' },
+        query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
+      })
+    );
+    await apiServices.alertingV2.rules.upsert(
+      'rule-002',
+      buildCreateRuleData({
+        metadata: { name: 'Dispatcher test rule-002', tags: ['notify-rule-001'] },
         schedule: { every: '1d' },
         query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
         state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
@@ -219,7 +231,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.actionPolicies.upsert(SINGLE_RULE_POLICY_ID, {
       name: 'Tag-scoped policy bound to rule-001',
-      description: 'Must filter to rules tagged notify-rule-001 only',
+      description: 'Must filter to rules with the notify-rule-001 routing tag only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
       matcher: { tags: ['notify-rule-001'] },
     });
@@ -380,7 +392,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       // Each dispatch produces one fire per episode and one notified per
       // action group; with `per_alert` grouping (the default for np-1) the
-      // notified action carries both `action_group_id` and `episode_status`.
+      // notified action carries both `action_group_id` and `alert_status`.
       const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
@@ -399,9 +411,9 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
-        expect(action.episode_status).toBeDefined();
+        expect(action.alert_status).toBeDefined();
 
-        notifiedEpisodeStatuses.add(action.episode_status as string);
+        notifiedEpisodeStatuses.add(action.alert_status as string);
       }
 
       // Two episodes ended `inactive`, one stayed `active` — both statuses
@@ -474,7 +486,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
-        expect(action.episode_status).toBeDefined();
+        expect(action.alert_status).toBeDefined();
         expect(action.group_hash).toBe('rule-1-series-1');
       }
     }
@@ -644,7 +656,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       //  - rule-002 ack only → suppress
       //  - rule-004 series-1 snoozed with a future expiry, series-2 snoozed
       //    indefinitely (no expiry), series-3 has an expired snooze followed
-      //    by an indefinite one → all three suppress (no episode_id). The
+      //    by an indefinite one → all three suppress (no alert_id). The
       //    indefinite snooze guards against the suppression query dropping
       //    null-expiry rows (ES|QL null comparison); series-3 guards against
       //    the latest-snooze aggregation skipping the null expiry and picking
@@ -779,7 +791,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const rule003Fires = fireActions.filter((action) => action.rule_id === 'rule-003');
       expect(rule003Fires).toHaveLength(3);
 
-      // rule-004: all three series suppress (snoozed with null episode_id).
+      // rule-004: all three series suppress (snoozed with null alert_id).
       // series-1 has a future expiry; series-2 has no expiry (indefinite
       // snooze) — a regression guard, since the suppression query previously
       // dropped null-expiry rows and let indefinite snoozes fire; series-3
@@ -1182,7 +1194,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
-        expect(action.episode_status).toBeUndefined();
+        expect(action.alert_status).toBeUndefined();
       }
     }
   );
@@ -1278,7 +1290,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       for (const action of notifiedActions) {
         expect(action.action_group_id).toBeDefined();
-        expect(action.episode_status).toBeDefined();
+        expect(action.alert_status).toBeDefined();
       }
     }
   );
@@ -1573,12 +1585,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'tag-scoped policy / dispatches only for rules with the matching tag and skips unrelated rules',
+    'tag-scoped policy / dispatches only for rules with the matching routing tag, not a matching rule tag',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.enable(SINGLE_RULE_POLICY_ID);
 
       await apiServices.alertingV2.ruleEvents.seed([
-        // Tagged rule: matched by np-1 (catch-all) AND by the tag-scoped policy.
+        // Routing-tagged rule: matched by np-1 (catch-all) AND by the tag-scoped policy.
         buildAlertEvent({
           ruleId: 'rule-001',
           groupHash: 'rule-001-single-series',
@@ -1587,7 +1599,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: relativeTime(20),
         }),
-        // Untagged rule: matched by np-1; the tag-scoped policy MUST NOT match.
+        // Same value as a rule tag only: matched by np-1; the tag-scoped policy MUST NOT match.
         buildAlertEvent({
           ruleId: 'rule-002',
           groupHash: 'rule-002-single-series',
@@ -1610,8 +1622,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         ])
       );
 
-      // rule-002 must produce exactly one fire (np-1 only). A second fire
-      // here would mean the tag-scoped matcher leaked across rules.
+      /*
+       * rule-002 must produce exactly one fire (np-1 only). A second fire
+       * here would mean the tag-scoped matcher matched on rule tags.
+       */
       const rule002Fires = await expectStableCount(apiServices, 1, {
         ruleId: 'rule-002',
         actionTypes: ['fire'],
