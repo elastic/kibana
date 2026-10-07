@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 jest.mock('./deploy_groups', () => ({
   ...jest.requireActual('./deploy_groups'),
@@ -307,6 +307,45 @@ describe('useMiDeploy — kept secret refs', () => {
       expect(second.staticKeys).toStrictEqual({ access_key_id: 'AKID', secret_access_key: '' });
       expect(second.existingSecretRefs).toBe(KEPT_REFS);
     });
+
+    it.each([
+      ['with typed keys', TYPED],
+      ['without typed keys', {}],
+    ])(
+      'updates the deployed policies one at a time, so a replaced secret is never deleted under a policy still on it (%s)',
+      async (_label, authenticateAndDeployStep) => {
+        mockFetchRefs.mockImplementation(async () => FULL_REFS);
+        const started: string[] = [];
+        const releases: Array<() => void> = [];
+        mockUpdate.mockImplementation(
+          (policyId: string) =>
+            new Promise<void>((resolve) => {
+              started.push(policyId);
+              releases.push(resolve);
+            })
+        );
+        const finished = runDeploy(
+          makeParams({
+            deployGroups: [makeGroup('elb'), makeGroup('alb'), makeGroup('vpn')],
+            serviceStatuses: { elb: 'receiving', alb: 'receiving', vpn: 'receiving' },
+            policyIdsByInstance: { elb: 'policy-A', alb: 'policy-C', vpn: 'policy-D' },
+            pendingCleanupPolicyIds: {},
+            isDirty: true,
+            authenticateAndDeployStep,
+          })
+        );
+
+        // Each update starts only once the previous one has finished.
+        for (let i = 0; i < 3; i++) {
+          await waitFor(() => expect(started).toHaveLength(i + 1));
+          await new Promise((r) => setImmediate(r));
+          expect(started).toHaveLength(i + 1);
+          releases[i]();
+        }
+        await finished;
+        expect(started).toEqual(['policy-A', 'policy-C', 'policy-D']);
+      }
+    );
 
     it('does not share anything for a single policy or without typed keys', async () => {
       await runDeploy(makeParams());

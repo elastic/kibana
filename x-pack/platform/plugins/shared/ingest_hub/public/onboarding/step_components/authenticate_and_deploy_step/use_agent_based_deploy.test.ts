@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -1229,6 +1229,68 @@ describe('useAgentBasedDeploy — kept secret refs', () => {
       expect.objectContaining({ method: 'static_keys', access_key_id: '', secret_access_key: '' })
     );
     expect(updates[1].opts.authenticateAndDeployStep.existingSecretRefs).toEqual(FULL_REFS);
+  });
+
+  it('updates the package policies one at a time on a dirty redeploy', async () => {
+    const groupC = {
+      groupId: 'aws-3',
+      instanceIds: ['serviceC'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    const groupD = {
+      groupId: 'aws-4',
+      instanceIds: ['serviceD'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupC, groupD]);
+    const started: string[] = [];
+    const releases: Array<() => void> = [];
+    mockUpdateAgentBasedPolicy.mockImplementation(
+      (policyId: string) =>
+        new Promise<void>((resolve) => {
+          started.push(policyId);
+          releases.push(resolve);
+        })
+    );
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: {
+          serviceA: 'pkg-policy-A',
+          serviceC: 'pkg-policy-C',
+          serviceD: 'pkg-policy-D',
+        },
+        isDirty: true,
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+        agentCredentialMethod: 'assume_role',
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    let finished: Promise<unknown> = Promise.resolve();
+    await act(async () => {
+      finished = result.current.handleDeploy();
+      for (let i = 0; i < 3; i++) {
+        await waitFor(() => expect(started).toHaveLength(i + 1));
+        await new Promise((r) => setImmediate(r));
+        expect(started).toHaveLength(i + 1);
+        releases[i]();
+      }
+      await finished;
+    });
+
+    expect(started).toEqual(['pkg-policy-A', 'pkg-policy-C', 'pkg-policy-D']);
   });
 
   it('exposes the surviving policy for the credential forms', () => {
