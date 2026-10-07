@@ -224,7 +224,8 @@ export const isByOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
   !Array.isArray(arg) && isOptionNode(arg) && arg.name === 'by';
 
 /**
- * Returns the columns defined in the BY clause.
+ * Returns the columns defined in the BY clause, keyed by name with the rightmost
+ * definition winning (as Elasticsearch does when a name is reused).
  * Given | STATS count = COUNT() BY addr = address
  * returns { addr, { type: 'keyword' ... } }
  */
@@ -244,18 +245,32 @@ export const getColumnsDefinedInByClause = (
     }
 
     for (const grouping of arg.args) {
-      if (!isAssignment(grouping) || !isColumn(grouping.args[0])) {
+      // `name = expression` defines a new column, typed from the input columns.
+      if (isAssignment(grouping) && isColumn(grouping.args[0])) {
+        const target = grouping.args[0];
+        const name = getColumnName(target);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping.args[1]),
+          location: target.location,
+          userDefined: true,
+        });
         continue;
       }
 
-      const target = grouping.args[0];
-      const name = getColumnName(target);
-      assignments.set(name, {
-        name,
-        type: typeOf(grouping.args[1]),
-        location: target.location,
-        userDefined: true,
-      });
+      // A bare grouping reusing an assigned name shadows it, so the rightmost
+      // binding (the input column it references) is the one aggregations resolve against.
+      if (isColumn(grouping)) {
+        const name = getColumnName(grouping);
+        if (assignments.has(name)) {
+          assignments.set(name, {
+            name,
+            type: typeOf(grouping),
+            location: grouping.location,
+            userDefined: true,
+          });
+        }
+      }
     }
   }
 

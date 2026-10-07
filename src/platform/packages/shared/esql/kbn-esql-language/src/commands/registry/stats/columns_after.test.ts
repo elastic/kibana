@@ -244,6 +244,32 @@ describe('STATS', () => {
     ]);
   });
 
+  it('types an aggregation from a bare grouping that shadows an earlier assignment', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'doubleField', type: 'double', userDefined: false },
+      { name: 'keywordField', type: 'keyword', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS total = SUM(doubleField) BY doubleField = keywordField, doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'total', type: 'double', userDefined: true, location: { min: 15, max: 19 } },
+      { name: 'doubleField', type: 'double', userDefined: true, location: { min: 71, max: 81 } },
+    ]);
+  });
+
   it('keeps the grouping column when an aggregation output reuses its name', () => {
     const previousCommandFields: ESQLColumnData[] = [
       { name: 'address', type: 'keyword', userDefined: false },

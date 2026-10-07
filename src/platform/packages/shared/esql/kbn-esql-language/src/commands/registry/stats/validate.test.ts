@@ -238,6 +238,20 @@ describe('STATS Validation', () => {
             'Unknown column "missing"',
           ]);
         });
+
+        test('a bare grouping shadows an earlier same-name assignment', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS SUM(doubleField) BY doubleField = keywordField, doubleField',
+            []
+          );
+        });
+
+        test('a later assignment wins over an earlier bare grouping', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS SUM(doubleField) BY doubleField, doubleField = keywordField',
+            [getNoValidCallSignatureError('sum', ['keyword'])]
+          );
+        });
       });
 
       describe('constant-only parameters', () => {
