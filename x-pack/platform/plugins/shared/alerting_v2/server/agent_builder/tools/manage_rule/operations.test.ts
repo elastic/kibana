@@ -737,9 +737,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops, esClient);
 
       expect(result.data.time_field).toBe('@timestamp');
-      expect(result.warnings).toEqual([
-        expect.stringContaining('"event.ingested" was not found'),
-      ]);
+      expect(result.warnings).toEqual([expect.stringContaining('"event.ingested" was not found')]);
       expect(result.warnings?.[0]).toContain('"@timestamp" was auto-selected');
     });
 

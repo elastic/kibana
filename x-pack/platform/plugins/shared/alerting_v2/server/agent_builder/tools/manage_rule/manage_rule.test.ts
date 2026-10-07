@@ -172,7 +172,9 @@ describe('manageRuleTool', () => {
       );
 
       const { results } = result as {
-        results: Array<{ data?: { warnings?: string[]; ruleAttachment?: { time_field?: string } } }>;
+        results: Array<{
+          data?: { warnings?: string[]; ruleAttachment?: { time_field?: string } };
+        }>;
       };
       expect(results[0].data?.warnings).toEqual([expect.stringContaining('event.ingested')]);
       expect(results[0].data?.ruleAttachment?.time_field).toBe('event.ingested');
