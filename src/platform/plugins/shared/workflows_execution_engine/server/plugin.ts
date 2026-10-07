@@ -164,10 +164,6 @@ export class WorkflowsExecutionEnginePlugin
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
-  private coreSetup?: CoreSetup<
-    WorkflowsExecutionEnginePluginStartDeps,
-    WorkflowsExecutionEnginePluginStart
-  >;
   private meteringService?: WorkflowsMeteringService;
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
@@ -252,7 +248,6 @@ export class WorkflowsExecutionEnginePlugin
     const logger = this.logger;
     const config = this.config;
 
-    this.coreSetup = core;
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
       name: 'Workflow',
@@ -1367,18 +1362,9 @@ export class WorkflowsExecutionEnginePlugin
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
-      // AUTO-DETECT: Check if we're already running in a Task Manager context
-      const isRunningInTaskManager =
-        (context.triggeredBy as string | undefined) === 'scheduled' ||
-        (context.source as string | undefined) === 'task-manager' ||
-        request?.isFakeRequest === true;
-
-      // Child executions (triggered by a workflow step) must always be scheduled in their own task,
-      // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
-      // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
       const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
 
-      if (!isRunningInTaskManager && !request) {
+      if (!request) {
         throw new Error('Workflows cannot be executed without the user context');
       }
 
@@ -1440,44 +1426,20 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
-      if (isRunningInTaskManager && !isChildExecution) {
-        // We're already in a task and this is not a child - execute directly without scheduling another task
-        this.logger.debug(
-          `Executing workflow directly (already in Task Manager context): ${workflow.id}`
-        );
-
-        if (!this.coreSetup) {
-          throw new Error('Core setup not available');
-        }
-        const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
-
-        await runWorkflow({
-          workflowExecutionRepository,
-          stepExecutionRepository,
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-          signal: new AbortController().signal, // TODO: We need to think how to pass this properly from outer task
-          logger: this.logger,
-          config: this.config,
-          fakeRequest: request,
-          dependencies,
-          workflowsExecutionEngine,
-          meteringService: this.meteringService,
-          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-        });
-      } else {
-        // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
-        const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, {
-          request: request as KibanaRequest,
-          cloneApiKey: true,
-        });
-        this.logger.debug(
-          `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
-            isChildExecution ? ' (child execution)' : ''
-          }`
-        );
-      }
+      // Always run in the execution's own workflow:run task, even when the caller is itself a
+      // task (fake request, e.g. an Agent Builder run or a rule action). Running inline would tie
+      // the execution to the caller task's timeout, cancellation and API key, and leave no
+      // workflow task for restart recovery once the caller task is gone.
+      const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
+      await plugins.taskManager.schedule(taskInstance, {
+        request,
+        cloneApiKey: true,
+      });
+      this.logger.debug(
+        `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
+          isChildExecution ? ' (child execution)' : ''
+        }`
+      );
 
       return {
         workflowExecutionId: workflowExecution.id,
