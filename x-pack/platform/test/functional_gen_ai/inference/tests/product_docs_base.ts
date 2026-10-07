@@ -219,7 +219,10 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
           defaultInferenceEndpoints.JINAv5
         );
         expect(jinaProductDocs.status).to.be(200);
-        expect(jinaProductDocs.body.installed).to.be(true);
+        expect(jinaProductDocs.body.installed).to.equal(
+          true,
+          `Jina product docs install failed: ${JSON.stringify(jinaProductDocs.body)}`
+        );
 
         const statusResponse = await getProductDocStatus(
           supertest,
