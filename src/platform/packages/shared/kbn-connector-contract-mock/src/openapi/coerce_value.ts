@@ -69,15 +69,53 @@ const findSubschema = (
   pick: (node: SchemaNode) => unknown
 ): unknown => collectParts(schema, document).map(pick).find(isRecord);
 
-const coerceText = (value: string, types: Set<string>): unknown => {
-  if (types.size === 0 || types.has('string')) {
+const matchesPattern = (pattern: string, value: string): boolean => {
+  try {
+    return new RegExp(pattern, 'u').test(value);
+  } catch {
+    return true;
+  }
+};
+
+// Formats that numeric text never satisfies.
+const NON_NUMERIC_FORMATS = new Set([
+  'date',
+  'date-time',
+  'time',
+  'duration',
+  'email',
+  'uri',
+  'url',
+  'uuid',
+]);
+
+// Whether a string-typed part takes the (numeric) text, so it stays text instead of a number.
+const acceptsAsString = (
+  { type, format, pattern, enum: options, const: constant, minLength, maxLength }: SchemaNode,
+  value: string
+): boolean =>
+  (Array.isArray(type) ? type.includes('string') : type === 'string') &&
+  (typeof format !== 'string' || !NON_NUMERIC_FORMATS.has(format)) &&
+  (typeof pattern !== 'string' || matchesPattern(pattern, value)) &&
+  (!Array.isArray(options) || options.includes(value)) &&
+  (constant === undefined || constant === value) &&
+  (typeof minLength !== 'number' || value.length >= minLength) &&
+  (typeof maxLength !== 'number' || value.length <= maxLength);
+
+const coerceText = (value: string, types: Set<string>, parts: SchemaNode[]): unknown => {
+  const numeric = types.has('integer') || types.has('number');
+  if (types.size === 0 || (types.has('string') && !numeric)) {
     return value;
   }
-  if ((types.has('integer') || types.has('number')) && value.trim() !== '') {
+  if (numeric && value.trim() !== '') {
     const number = Number(value);
-    if (Number.isFinite(number)) {
+    const keepsText = types.has('string') && parts.some((part) => acceptsAsString(part, value));
+    if (Number.isFinite(number) && !keepsText) {
       return number;
     }
+  }
+  if (types.has('string')) {
+    return value;
   }
   if (types.has('boolean') && (value === 'true' || value === 'false')) {
     return value === 'true';
@@ -108,5 +146,7 @@ export const coerceValue = (
       })
     );
   }
-  return typeof value === 'string' ? coerceText(value, getSchemaTypes(schema, document)) : value;
+  return typeof value === 'string'
+    ? coerceText(value, getSchemaTypes(schema, document), collectParts(schema, document))
+    : value;
 };
