@@ -124,5 +124,19 @@ describe('processDocuments', () => {
 
       expect(result[0].content_title).toBe('Spaces around');
     });
+
+    it('restores a title cut at an unspaced pipe from the page heading', async () => {
+      const docs = [
+        createDoc({
+          slug: 'esql-kibana',
+          content_title: 'Use ES',
+          content_body: `# Use ES|QL in the Kibana UI\n${ADEQUATE_BODY}`,
+        }),
+      ];
+
+      const result = await processDocuments({ documents: docs, log: createLog() });
+
+      expect(result[0].content_title).toBe('Use ES|QL in the Kibana UI');
+    });
   });
 });

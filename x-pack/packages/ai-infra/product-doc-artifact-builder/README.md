@@ -77,7 +77,7 @@ node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/task
 
 The tests cover:
 - Document count consistency (deduplication, sparse-doc filtering)
-- `content_title` trimming (site-name suffixes stripped, product-name pipes like `ES|QL` preserved)
+- `content_title` trimming (site-name suffixes stripped, product-name pipes like `ES|QL` preserved, titles cut at that pipe restored from the page heading)
 
 ## Building OpenAPI Artifacts
 
