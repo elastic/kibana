@@ -659,7 +659,7 @@ describe('detection rule workflows', () => {
         // default would resurrect every filtered-out candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
-        // where_exp argument; this direct reference keeps the keys resident.
+        // where_exp argument. This direct reference keeps the keys resident.
         expect(String(rows.with?.rule_revision_keys)).toContain(
           '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
         );
@@ -721,7 +721,7 @@ describe('detection rule workflows', () => {
             .filter((line) => line.trimStart().startsWith('BY '))
             .map((line) => line.trim());
 
-          // The watermark stays per rule; both STATS passes split by revision.
+          // The watermark stays per rule. Both STATS passes split by revision.
           expect(groupClauses).toEqual([
             'BY `kibana.alert.rule.uuid`',
             'BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`',
