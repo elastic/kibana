@@ -30,8 +30,8 @@ export interface InboundEventsClientArgs {
   maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
-  inMemoryConnectors: InMemoryConnector[];
   rateLimiter: InboundEventRateLimiter;
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 /**

@@ -81,14 +81,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import {
-  createInboundEventsClient,
-  dispatchConnectorEvents,
-  InboundEventAdmission,
-  InboundEventRateLimiter,
-  registerInboundEventAdmission,
-  type ConnectorEventEmitter,
-} from './inbound';
+import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -502,47 +495,15 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
-    const inboundEventRateLimiter = inboundEventsEnabled
-      ? new InboundEventRateLimiter(actionsConfigUtils.getInboundEventsRateLimit())
-      : undefined;
-    if (inboundEventsEnabled) {
-      const admissionConfig = actionsConfigUtils.getInboundEventsAdmission();
-      if (admissionConfig.enabled) {
-        registerInboundEventAdmission({
-          http: core.http,
-          logger: this.logger,
-          admission: new InboundEventAdmission(admissionConfig),
-          config: admissionConfig,
-          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-          getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-        });
-      }
-    }
-    const inboundEvents =
-      inboundEventsEnabled && inboundEventRateLimiter
-        ? {
-            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-            client: createInboundEventsClient({
-              logger: this.logger,
-              inboundEventsEnabled: true,
-              isActionTypeEnabled: (actionTypeId) =>
-                actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-              maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-              maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-              getStartServices: core.getStartServices,
-              inMemoryConnectors: this.inMemoryConnectors,
-              rateLimiter: inboundEventRateLimiter,
-              emitConnectorEvents: (params) =>
-                dispatchConnectorEvents({
-                  emitter: this.connectorEventEmitter,
-                  params,
-                }),
-            }),
-            getSpaceId: (request: KibanaRequest) =>
-              this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-          }
-        : undefined;
+    const inboundEvents = setupInboundEvents({
+      actionsConfigUtils,
+      http: core.http,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      spaces: this.spaces,
+      inMemoryConnectors: this.inMemoryConnectors,
+      getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
     defineRoutes({
       router,
       licenseState: this.licenseState,
