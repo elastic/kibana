@@ -13,6 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  ESQLFullTextMatch,
   ESQLCallbacks,
   EsqlView,
   EsqlDataset,
@@ -142,6 +143,7 @@ export interface ESQLUserDefinedColumn {
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
   isUnmappedField?: boolean;
+  fullTextMatch?: ESQLFullTextMatch;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;

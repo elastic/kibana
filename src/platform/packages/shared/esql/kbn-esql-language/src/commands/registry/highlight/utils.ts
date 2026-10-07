@@ -23,7 +23,7 @@ import {
   isOptionNode,
 } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
-import { METADATA_FIELDS } from '../options/metadata';
+import { isTextColumn } from '../../definitions/utils/full_text_match';
 
 /**
  * The keyword accepted by the optional `prefix = "..."` modifier. Elasticsearch rejects
@@ -180,9 +180,6 @@ export const getHighlightPrefix = (command: ESQLAstHighlightCommand): string =>
 /** Functions whose first argument is the field the query targets. */
 const FIELD_TARGETING_QUERY_FUNCTIONS = ['match', 'match_phrase', ':'];
 
-/** Column types HIGHLIGHT can highlight; `semantic_text` is treated as `text`. */
-const HIGHLIGHTABLE_COLUMN_TYPES = ['text', 'keyword', 'semantic_text'];
-
 const WILDCARD = '*';
 
 /** Names of the fields a field-targeting query (MATCH, MATCH_PHRASE, `:`) searches. */
@@ -208,19 +205,31 @@ export const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
 
 /** Every text and keyword column, which is what `ON *` covers; metadata columns are excluded. */
 const getHighlightableColumnNames = (columns: ESQLColumnData[]): string[] =>
-  columns
-    .filter(
-      ({ name, type }) =>
-        HIGHLIGHTABLE_COLUMN_TYPES.includes(type) && !METADATA_FIELDS.includes(name)
-    )
-    .map(({ name }) => name);
+  columns.filter(isTextColumn).map(({ name }) => name);
 
 /**
- * The fields HIGHLIGHT highlights. Without ON they come from the query: the field a
+ * The columns an earlier WHERE targets with its positive full-text conditions: the ones it
+ * marked, or every text column when a condition names no field. When nothing is marked the
+ * query cannot be reused, which Elasticsearch rejects, so any text column is assumed to avoid
+ * reporting a valid column as unknown.
+ */
+const getReusedWhereColumnNames = (columns: ESQLColumnData[]): string[] => {
+  const markedColumns = columns.filter(({ fullTextMatch }) => fullTextMatch !== undefined);
+
+  if (
+    markedColumns.length === 0 ||
+    markedColumns.some(({ fullTextMatch }) => fullTextMatch === 'all')
+  ) {
+    return getHighlightableColumnNames(columns);
+  }
+
+  return markedColumns.map(({ name }) => name);
+};
+
+/**
+ * The fields HIGHLIGHT highlights. Without ON they come from the query: the fields a
  * field-targeting query searches, or every text and keyword column. With no query either, they
- * come from an earlier WHERE, which is not looked up here, so any text or keyword column is
- * assumed: a column that is not generated is never reported unknown, at the cost of suggesting
- * a few extra.
+ * come from the earlier WHERE that the columns record.
  */
 const getHighlightFieldNames = (
   command: ESQLAstHighlightCommand,
@@ -229,7 +238,11 @@ const getHighlightFieldNames = (
   const { highlightFields, queryExpression } = command;
 
   if (highlightFields === undefined) {
-    const queryFields = queryExpression === undefined ? [] : getQueryFieldNames(queryExpression);
+    if (queryExpression === undefined) {
+      return getReusedWhereColumnNames(columns);
+    }
+
+    const queryFields = getQueryFieldNames(queryExpression);
 
     return queryFields.length > 0 ? queryFields : getHighlightableColumnNames(columns);
   }
