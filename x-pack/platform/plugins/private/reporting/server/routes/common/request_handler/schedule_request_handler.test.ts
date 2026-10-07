@@ -240,6 +240,143 @@ describe('Handle request to schedule', () => {
       });
     });
 
+    test('creates a scheduled_report saved object with a realm-qualified createdById for a realm-bearing user', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: ['realm:["native","default_native","testymcgee"]'],
+        }),
+        { id: 'mock-report-id' }
+      );
+    });
+
+    test('creates a scheduled_report saved object with createdById resolved via an API key profile lookup', async () => {
+      const apiKeyId = 'skdjtq4u543yt3rhewrh';
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+      (scopedEsClient.asCurrentUser.security.getApiKey as jest.Mock).mockResolvedValue({
+        api_keys: [{ id: apiKeyId, profile_uid: 'profile-from-api-key' }],
+      });
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          authentication_type: 'api_key',
+          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
+          headers: {
+            authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+          },
+        }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: ['profile-from-api-key'],
+          createdByApiKeyId: apiKeyId,
+        }),
+        { id: 'mock-report-id' }
+      );
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+    });
+
+    test('records only the api key id for a UIAM key, whose creator cannot be resolved', async () => {
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+          authentication_realm: { type: '_cloud_api_key', name: '_cloud_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
+          headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+        }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBe('uiam-key-id');
+      expect(attributes.createdById).toBeUndefined();
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).not.toHaveBeenCalled();
+    });
+
+    test('records no api key id for a report created through a session', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBeUndefined();
+    });
+
     test('creates a scheduled_report saved object with notification', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
