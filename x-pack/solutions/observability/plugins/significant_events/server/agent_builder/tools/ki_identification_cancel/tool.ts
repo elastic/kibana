@@ -12,6 +12,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
@@ -23,8 +25,10 @@ const cancelSchema = z.object({
 });
 
 export const createKiIdentificationCancelTool = ({
+  server,
   streamsKIsOnboardingClient,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
@@ -42,6 +46,7 @@ export const createKiIdentificationCancelTool = ({
   schema: cancelSchema,
   handler: async ({ stream_name: streamName }, { request }) => {
     try {
+      await assertCanManageSignificantEvents({ request, server });
       const data = await cancelKiIdentificationToolHandler({
         streamName,
         streamsKIsOnboardingClient,

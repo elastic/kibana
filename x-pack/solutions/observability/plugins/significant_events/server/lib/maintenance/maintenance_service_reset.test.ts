@@ -19,7 +19,6 @@ import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
-import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -59,7 +58,6 @@ describe('SignificantEventsMaintenanceService', () => {
         },
         dataStreams: {
           [DETECTIONS_DATA_STREAM]: 3,
-          [EVENTS_DATA_STREAM]: 0,
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 4,
           [DISCOVERIES_DATA_STREAM]: 4,
         },
@@ -105,9 +103,6 @@ describe('SignificantEventsMaintenanceService', () => {
         { name: DISCOVERIES_DATA_STREAM },
         { ignore: [404] }
       );
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalledWith({
-        name: EVENTS_DATA_STREAM,
-      });
       expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
         name: DETECTIONS_DATA_STREAM,
       });
@@ -118,7 +113,6 @@ describe('SignificantEventsMaintenanceService', () => {
         name: DISCOVERIES_DATA_STREAM,
       });
       expect(streamDocuments.get(DETECTIONS_DATA_STREAM)).toBe(0);
-      expect(streamDocuments.get(EVENTS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -162,17 +156,15 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(initializeClient.mock.calls.map(([name]) => name)).toEqual([
         DETECTIONS_DATA_STREAM,
-        EVENTS_DATA_STREAM,
         KNOWLEDGE_INDICATORS_DATA_STREAM,
       ]);
       expect(
         internalEsClient.indices.createDataStream.mock.calls.map(([{ name }]) => name)
-      ).toEqual([DETECTIONS_DATA_STREAM, EVENTS_DATA_STREAM, KNOWLEDGE_INDICATORS_DATA_STREAM]);
+      ).toEqual([DETECTIONS_DATA_STREAM, KNOWLEDGE_INDICATORS_DATA_STREAM]);
       expect(summary.deleted?.dataStreams).toBe(0);
       expect(summary.partialFailures).toEqual([]);
       expect([...streamDocuments.keys()]).toEqual([
         DETECTIONS_DATA_STREAM,
-        EVENTS_DATA_STREAM,
         KNOWLEDGE_INDICATORS_DATA_STREAM,
       ]);
     });
@@ -195,9 +187,6 @@ describe('SignificantEventsMaintenanceService', () => {
         name: DETECTIONS_DATA_STREAM,
       });
       expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: EVENTS_DATA_STREAM,
-      });
-      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
       });
     });
@@ -206,7 +195,7 @@ describe('SignificantEventsMaintenanceService', () => {
       const { api } = makeManagementApi();
       const { service, initializeClient, esClient } = makeService({
         management: api,
-        dataStreams: { [DETECTIONS_DATA_STREAM]: 3, [EVENTS_DATA_STREAM]: 2 },
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 3 },
       });
       initializeClient.mockRejectedValueOnce(new Error('template install failed'));
 
@@ -220,11 +209,7 @@ describe('SignificantEventsMaintenanceService', () => {
         { name: DETECTIONS_DATA_STREAM },
         expect.anything()
       );
-      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
-        { name: EVENTS_DATA_STREAM },
-        expect.anything()
-      );
-      expect(summary.deleted?.dataStreams).toBe(1);
+      expect(summary.deleted?.dataStreams).toBe(0);
     });
 
     it('refreshes a registered stream before counting so unrefreshed writes are wiped', async () => {
@@ -504,13 +489,12 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         dataStreams: {
           [DETECTIONS_DATA_STREAM]: 1,
-          [EVENTS_DATA_STREAM]: 1,
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 1,
           [DISCOVERIES_DATA_STREAM]: 1,
         },
       });
 
-      expect((await service.reset({ request: REQUEST })).deleted?.dataStreams).toBe(4);
+      expect((await service.reset({ request: REQUEST })).deleted?.dataStreams).toBe(3);
       const second = await service.reset({ request: REQUEST });
 
       expect(second.deleted).toEqual({
@@ -592,7 +576,6 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         dataStreams: {
           [DETECTIONS_DATA_STREAM]: 1,
-          [EVENTS_DATA_STREAM]: 0,
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
         },
       });

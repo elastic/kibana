@@ -17,6 +17,8 @@ import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
+import { GenAiToolValue } from './genai_tool_value';
+import { parseNestedJson, unwrapToolResponse } from './parse_genai_value';
 import { GenAiSection } from './genai_section';
 
 interface DetailRow {
@@ -215,7 +217,7 @@ function ToolCallSection({
               })}
             </GenAiFieldLabel>
             <EuiSpacer size="xs" />
-            <GenAiFieldValue value={argumentsJson} />
+            <GenAiToolValue value={parseNestedJson(argumentsJson)} />
           </div>
         )}
         {resultJson != null && (
@@ -227,7 +229,7 @@ function ToolCallSection({
               })}
             </GenAiFieldLabel>
             <EuiSpacer size="xs" />
-            <GenAiFieldValue value={resultJson} />
+            <GenAiToolValue value={unwrapToolResponse(resultJson)} />
           </div>
         )}
       </GenAiSection>

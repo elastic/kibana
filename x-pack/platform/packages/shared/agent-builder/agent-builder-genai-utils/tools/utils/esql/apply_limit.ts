@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import {
-  Parser,
-  Builder,
-  WrappingPrettyPrinter,
-  isIntegerLiteral,
-  type WrappingPrettyPrinterOptions,
-} from '@elastic/esql';
-
-const defaultPrintOpts: WrappingPrettyPrinterOptions = {
-  wrap: 80,
-  pipeTab: '',
-};
+import { Parser, isIntegerLiteral } from '@elastic/esql';
 
 /**
  * Applies a limit to an ES|QL query string.
@@ -27,6 +16,10 @@ const defaultPrintOpts: WrappingPrettyPrinterOptions = {
  *   a new `| LIMIT <limit>` pipe is appended. ES|QL applies the narrower of the
  *   two at execution time.
  * - Any non-trailing `LIMIT` is left untouched.
+ *
+ * The rest of the query text is preserved as-is rather than re-printed, because
+ * the names of unaliased columns are derived from the query text, e.g. the value
+ * column of `PROMQL index=idx sum(rate(requests))`.
  *
  * If the input query has parse errors, it is returned unchanged so the caller
  * surfaces the error from Elasticsearch against the exact query they provided.
@@ -45,14 +38,12 @@ export const applyLimit = (query: string, limit: number): string => {
 
   if (lastCommand?.name === 'limit' && isIntegerLiteral(lastArg)) {
     const newValue = Math.min(Number(lastArg.value), limit);
-    lastCommand.args[0] = Builder.expression.literal.integer(newValue);
-  } else {
-    const limitCommand = Builder.command({
-      name: 'limit',
-      args: [Builder.expression.literal.integer(limit)],
-    });
-    root.commands.push(limitCommand);
+    const { min, max } = lastArg.location;
+    return `${query.slice(0, min)}${newValue}${query.slice(max + 1)}`;
   }
 
-  return WrappingPrettyPrinter.print(root, defaultPrintOpts);
+  const trimmedQuery = query.trimEnd();
+  // start a new line when the query may end with a `//` line comment, which would swallow the pipe
+  const separator = /\n|\/\//.test(trimmedQuery) ? '\n| ' : ' | ';
+  return `${trimmedQuery}${separator}LIMIT ${limit}`;
 };
