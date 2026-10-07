@@ -318,6 +318,19 @@ describe('useRelayAppConnection', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  it('distinguishes a failed status request from confirmed app unavailability', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    httpGet.mockRejectedValue(new Error('relay unavailable'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+
+    await flush();
+
+    expect(result.current.hasStatusRequestError).toBe(true);
+    expect(result.current.available).toBe(false);
+    consoleErrorSpy.mockRestore();
+  });
+
   it('reflects the status query response in the returned state', async () => {
     httpGet.mockResolvedValue(
       statusResponse(RELAY_APP_CONNECTION_STATUS.error, { error: 'workspace already bound' })
@@ -330,6 +343,7 @@ describe('useRelayAppConnection', () => {
     await flush();
 
     expect(result.current.isLoading).toBe(false);
+    expect(result.current.hasStatusRequestError).toBe(false);
     expect(result.current.available).toBe(true);
     expect(result.current.status).toBe(RELAY_APP_CONNECTION_STATUS.error);
     expect(result.current.error).toBe('workspace already bound');

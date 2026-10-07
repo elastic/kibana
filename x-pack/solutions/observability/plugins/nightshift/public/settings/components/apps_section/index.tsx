@@ -43,11 +43,49 @@ interface AppsSectionProps {
  * `streams.significantEventsAppsEnabled` feature flag is on.
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
-  const { isLoading, available, status, error, isMutating, connect, disconnect } =
-    useRelayAppConnection();
+  const {
+    isLoading,
+    hasStatusRequestError,
+    available,
+    status,
+    error,
+    isMutating,
+    retryStatusRequest,
+    connect,
+    disconnect,
+  } = useRelayAppConnection();
 
   if (isLoading) {
     return null;
+  }
+
+  if (hasStatusRequestError) {
+    return (
+      <>
+        <EuiSpacer />
+        <KbnDangerCallout
+          announceOnMount
+          data-test-subj="nightshiftAppsStatusError"
+          title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
+            defaultMessage: 'Unable to check app availability',
+          })}
+          text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
+            defaultMessage:
+              'Nightshift could not load the current app status. Check the connection and try again.',
+          })}
+          actionProps={{
+            primary: {
+              children: i18n.translate('xpack.nightshift.settings.apps.statusErrorRetry', {
+                defaultMessage: 'Try again',
+              }),
+              iconType: 'refresh',
+              onClick: retryStatusRequest,
+              'data-test-subj': 'nightshiftAppsStatusRetryButton',
+            },
+          }}
+        />
+      </>
+    );
   }
 
   if (!available) {

@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
+import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
@@ -112,10 +113,12 @@ const setup = ({
   isDeveloperMode = false,
   isSaving = false,
   canSaveAdvancedSettings = true,
+  tuningConfig = {},
 }: {
   isDeveloperMode?: boolean;
   isSaving?: boolean;
   canSaveAdvancedSettings?: boolean;
+  tuningConfig?: unknown;
 } = {}) => {
   mockUseDeveloperMode.mockReturnValue({
     isDeveloperMode,
@@ -149,7 +152,7 @@ const setup = ({
           get: jest.fn().mockReturnValue('logs-*'),
         },
         globalClient: {
-          get: jest.fn().mockReturnValue({}),
+          get: jest.fn().mockReturnValue(tuningConfig),
           set: settingsGlobalClientSet,
         },
       },
@@ -231,6 +234,19 @@ describe('DetectionsSettingsTab developer mode', () => {
     expect(screen.getByTestId('streams-settings-tuning-editor')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftAdvancedDeveloperSettingsSection')).toHaveTextContent(
       'Dev'
+    );
+  });
+
+  it('uses the defaults when the stored tuning configuration is invalid', () => {
+    setup({
+      isDeveloperMode: true,
+      tuningConfig: JSON.stringify({ sample_size: 999 }),
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
+
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(
+      JSON.stringify(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG)
     );
   });
 

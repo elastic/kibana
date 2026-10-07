@@ -29,10 +29,12 @@ export const RELAY_APP_CONNECTION_STATUS_QUERY_KEY = ['relayAppConnectionStatus'
 
 export interface UseRelayAppConnection {
   isLoading: boolean;
+  hasStatusRequestError: boolean;
   available: boolean;
   status: RelayAppConnectionStatus;
   error?: string;
   isMutating: boolean;
+  retryStatusRequest: () => void;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
 }
@@ -105,10 +107,14 @@ export function useRelayAppConnection(): UseRelayAppConnection {
 
   return {
     isLoading: statusQuery.isLoading,
+    hasStatusRequestError: statusQuery.data == null && statusQuery.isError,
     available: statusQuery.data?.available ?? false,
     status: statusQuery.data?.status ?? RELAY_APP_CONNECTION_STATUS.notConnected,
     error: statusQuery.data?.error,
     isMutating: connectMutation.isLoading || disconnectMutation.isLoading,
+    retryStatusRequest: () => {
+      void statusQuery.refetch();
+    },
     connect: async () => {
       // Open the tab synchronously, inside the click gesture: `mutateAsync`
       // below awaits a network round-trip, and by the time it resolves the

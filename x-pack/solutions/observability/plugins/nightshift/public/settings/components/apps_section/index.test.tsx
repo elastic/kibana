@@ -17,6 +17,7 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 jest.mock('./use_relay_app_bindings');
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockRetryStatusRequest = jest.fn();
 const mockUseRelayAppConnection = jest.fn();
 jest.mock('./use_relay_app_connection', () => ({
   useRelayAppConnection: () => mockUseRelayAppConnection(),
@@ -69,10 +70,12 @@ describe('AppsSection', () => {
     jest.clearAllMocks();
     mockUseRelayAppConnection.mockReturnValue({
       isLoading: false,
+      hasStatusRequestError: false,
       available: true,
       status: 'connected',
       error: undefined,
       isMutating: false,
+      retryStatusRequest: mockRetryStatusRequest,
       connect: mockConnectWorkspace,
       disconnect: mockDisconnectWorkspace,
     });
@@ -81,10 +84,12 @@ describe('AppsSection', () => {
   it('explains when apps are unavailable in this deployment', () => {
     mockUseRelayAppConnection.mockReturnValue({
       isLoading: false,
+      hasStatusRequestError: false,
       available: false,
       status: 'not_connected',
       error: undefined,
       isMutating: false,
+      retryStatusRequest: mockRetryStatusRequest,
       connect: mockConnectWorkspace,
       disconnect: mockDisconnectWorkspace,
     });
@@ -97,6 +102,30 @@ describe('AppsSection', () => {
     expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
       'Apps require Agent Builder and a configured Relay service.'
     );
+  });
+
+  it('distinguishes a status request failure from app unavailability', () => {
+    mockUseRelayAppConnection.mockReturnValue({
+      isLoading: false,
+      hasStatusRequestError: true,
+      available: false,
+      status: 'not_connected',
+      error: undefined,
+      isMutating: false,
+      retryStatusRequest: mockRetryStatusRequest,
+      connect: mockConnectWorkspace,
+      disconnect: mockDisconnectWorkspace,
+    });
+
+    setup();
+
+    expect(screen.getByTestId('nightshiftAppsStatusError')).toHaveTextContent(
+      'Unable to check app availability'
+    );
+    expect(screen.queryByTestId('nightshiftAppsUnavailable')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftAppsStatusRetryButton'));
+    expect(mockRetryStatusRequest).toHaveBeenCalledTimes(1);
   });
 
   it('binds a channel by entering an id and clicking the Bind button', async () => {

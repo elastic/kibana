@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  resolveSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
@@ -21,13 +22,22 @@ import { configToAnnotatedYaml } from './significant_events_tuning_config_editor
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 
-export const useCanEditSettings = (): boolean => {
+const useSettingsPermissions = () => {
   const { application } = useKibana().services;
-  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
+    application.capabilities.nightshift
+  );
   const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
 
-  return canManageAndConfigure && canSaveAdvancedSettings;
+  return {
+    canManage,
+    canManageAndConfigure,
+    canSaveAdvancedSettings,
+    canEditSettings: canManageAndConfigure && canSaveAdvancedSettings,
+  };
 };
+
+export const useCanEditSettings = (): boolean => useSettingsPermissions().canEditSettings;
 
 export const useDetectionSettingsForm = () => {
   const core = useKibana().services;
@@ -36,12 +46,8 @@ export const useDetectionSettingsForm = () => {
   // routes used by `core.settings.client` / `globalClient` (require
   // `advancedSettings.save`). Gate each section on the engine that owns it so
   // the user never triggers a partial save that 403s halfway through.
-  const nightshiftCapabilities = getNightshiftCapabilities(
-    core.application.capabilities.nightshift
-  );
-  const { canManage, canManageAndConfigure } = nightshiftCapabilities;
-  const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManageAndConfigure && canSaveAdvancedSettings;
+  const { canManage, canManageAndConfigure, canSaveAdvancedSettings, canEditSettings } =
+    useSettingsPermissions();
   const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
 
   // Pause turns these Settings toggles off (and Resume restores only those that
@@ -73,27 +79,22 @@ export const useDetectionSettingsForm = () => {
     canEditSettings && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
 
-  const savedConfigYaml = useMemo(() => {
+  const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(() => {
     try {
       const raw = core.settings.globalClient.get<unknown>(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
         DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
       );
-      const parsed =
-        typeof raw === 'string'
-          ? (JSON.parse(raw) as Partial<SignificantEventsTuningConfig>)
-          : (raw as Partial<SignificantEventsTuningConfig>);
-      return configToAnnotatedYaml({ ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsed });
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return configToAnnotatedYaml(resolveSignificantEventsTuningConfig(parsed));
     } catch {
       return configToAnnotatedYaml(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
-  const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYaml);
+  const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYamlState);
   const [parsedTuningConfig, setParsedTuningConfig] =
     useState<SignificantEventsTuningConfig | null>(null);
-  const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   useEffect(() => {
     if (!isDeveloperMode && !isDeveloperModeSaving) {
