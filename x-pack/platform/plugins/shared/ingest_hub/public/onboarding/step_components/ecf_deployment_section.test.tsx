@@ -19,7 +19,10 @@ jest.mock('../ecf_cloudformation', () => ({
   buildEcfOtelCloudFormationUrl: jest.fn(() => 'https://cf.aws/otel'),
   buildEcfCrowdstrikeCloudFormationUrl: jest.fn(() => 'https://cf.aws/crowdstrike'),
   buildEcfStackConsoleUrl: jest.fn(
-    (arn: string) => `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(arn)}`
+    (arn: string) =>
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        arn
+      )}`
   ),
   isEcfStackArnValid: jest.fn((arn: string) =>
     /^arn:aws(?:-us-gov|-cn)?:cloudformation:[a-z0-9-]+:\d+:stack\//.test(arn.trim())
@@ -812,10 +815,7 @@ describe('useEcfDeployment staleness', () => {
       launchedFamilies: ['unified'],
       launchedServiceIds: { unified: ['cloudtrail'] },
     });
-    mockGetEcfServiceConfigs.mockReturnValue([
-      unifiedConfig('cloudtrail'),
-      unifiedConfig('waf'),
-    ]);
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
     const { result } = renderHook(() =>
       useEcfDeployment({
         instances: [baseInstance('cloudtrail'), baseInstance('waf')],
@@ -866,10 +866,7 @@ describe('useEcfDeployment staleness', () => {
   });
 
   it('onUpdateStack updates the launchedServiceIds snapshot to the current set', () => {
-    mockGetEcfServiceConfigs.mockReturnValue([
-      unifiedConfig('cloudtrail'),
-      unifiedConfig('waf'),
-    ]);
+    mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
     const setter = makeSessionStorageMock({
       launchedFamilies: ['unified'],
       launchedServiceIds: { unified: ['cloudtrail'] },

@@ -428,6 +428,7 @@ const EcfFamilyPanelPostLaunch = ({
       {isStale && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={

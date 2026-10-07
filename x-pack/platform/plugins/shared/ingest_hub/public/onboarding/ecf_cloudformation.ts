@@ -81,12 +81,10 @@ export interface EcfServiceConfig {
  * Matches a CloudFormation stack ARN and captures the region.
  * Supports standard (aws), GovCloud (aws-us-gov), and China (aws-cn) partitions.
  */
-const CFN_STACK_ARN_REGEX =
-  /^arn:aws(?:-us-gov|-cn)?:cloudformation:([a-z0-9-]+):\d+:stack\//;
+const CFN_STACK_ARN_REGEX = /^arn:aws(?:-us-gov|-cn)?:cloudformation:([a-z0-9-]+):\d+:stack\//;
 
 /** Returns true when the trimmed value is a well-formed CloudFormation stack ARN. */
-export const isEcfStackArnValid = (arn: string): boolean =>
-  CFN_STACK_ARN_REGEX.test(arn.trim());
+export const isEcfStackArnValid = (arn: string): boolean => CFN_STACK_ARN_REGEX.test(arn.trim());
 
 /**
  * Builds the AWS Console URL for viewing an existing CloudFormation stack.

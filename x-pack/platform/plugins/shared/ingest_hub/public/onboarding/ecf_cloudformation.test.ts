@@ -591,9 +591,7 @@ describe('buildEcfCrowdstrikeCloudFormationUrl()', () => {
 describe('isEcfStackArnValid()', () => {
   it('accepts a standard aws partition ARN', () => {
     expect(
-      isEcfStackArnValid(
-        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123'
-      )
+      isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123')
     ).toBe(true);
   });
 
@@ -607,17 +605,13 @@ describe('isEcfStackArnValid()', () => {
 
   it('accepts a China (aws-cn) partition ARN', () => {
     expect(
-      isEcfStackArnValid(
-        'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123'
-      )
+      isEcfStackArnValid('arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/my-stack/abc123')
     ).toBe(true);
   });
 
   it('trims surrounding whitespace before validating', () => {
     expect(
-      isEcfStackArnValid(
-        '  arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123  '
-      )
+      isEcfStackArnValid('  arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123  ')
     ).toBe(true);
   });
 
@@ -643,8 +637,7 @@ describe('isEcfStackArnValid()', () => {
 // ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────
 
 describe('buildEcfStackConsoleUrl()', () => {
-  const VALID_ARN =
-    'arn:aws:cloudformation:us-west-2:123456789012:stack/my-stack/abc123-def456';
+  const VALID_ARN = 'arn:aws:cloudformation:us-west-2:123456789012:stack/my-stack/abc123-def456';
 
   it('returns a URL pointing at the CloudFormation console stack info page', () => {
     const url = buildEcfStackConsoleUrl(VALID_ARN);
@@ -672,8 +665,7 @@ describe('buildEcfStackConsoleUrl()', () => {
   });
 
   it('extracts region correctly for a GovCloud ARN', () => {
-    const govArn =
-      'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/my-stack/abc123';
+    const govArn = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/my-stack/abc123';
     const url = buildEcfStackConsoleUrl(govArn);
     expect(url).toContain('region=us-gov-west-1');
   });
