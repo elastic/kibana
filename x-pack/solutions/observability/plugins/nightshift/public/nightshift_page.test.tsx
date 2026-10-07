@@ -29,12 +29,32 @@ jest.mock('./sandbox_secrets/sandbox_secrets_flyout', () => ({
 jest.mock('./automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
+jest.mock('./settings/page', () => ({
+  SettingsPage: ({ headerProps }: { headerProps: { onSandboxSecretsClick?: () => void } }) => {
+    const [draft, setDraft] = React.useState('');
+
+    return (
+      <div data-test-subj="settingsPageStub">
+        <input
+          data-test-subj="settingsPageDraftStub"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+        <button
+          data-test-subj="settingsPageOpenSandboxSecretsStub"
+          onClick={headerProps.onSandboxSecretsClick}
+        >
+          Open sandbox secrets
+        </button>
+      </div>
+    );
+  },
+}));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
-/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
 const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
   const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
@@ -156,12 +176,12 @@ describe('NightshiftPage', () => {
     expect(screen.queryByTestId('nightshiftInvestigationsLink')).not.toBeInTheDocument();
   });
 
-  it('links to Significant Events settings with EBT tracking', async () => {
+  it('links to Nightshift settings with EBT tracking', async () => {
     renderPage();
     await openAppMenuOverflow();
 
     const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
-    expect(settingsLink).toHaveAttribute('href', '/app/significant_events/settings');
+    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings');
 
     let trackedClick: { action: string | null; element: string | null } | undefined;
     const captureTrackedClick = (event: MouseEvent) => {
@@ -184,7 +204,14 @@ describe('NightshiftPage', () => {
         element: 'nightshiftPageHeader',
       })
     );
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/settings');
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/settings');
+  });
+
+  it('renders Settings inside Nightshift', () => {
+    renderPage('/settings/detections');
+
+    expect(screen.getByTestId('settingsPageStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
   describe('sandbox secrets', () => {
@@ -196,7 +223,12 @@ describe('NightshiftPage', () => {
           ...overrides,
           application: {
             ...services.application,
-            capabilities: { nightshift: { manage: true } },
+            capabilities: {
+              nightshift: {
+                ...services.application.capabilities.nightshift,
+                manage: true,
+              },
+            },
           },
         },
       });
@@ -219,6 +251,19 @@ describe('NightshiftPage', () => {
       await act(async () => fireEvent.click(link));
 
       expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
+    });
+
+    it('retains unsaved settings when opening a flyout updates the page shell', () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/settings/detections');
+
+      fireEvent.change(screen.getByTestId('settingsPageDraftStub'), {
+        target: { value: 'unsaved changes' },
+      });
+      fireEvent.click(screen.getByTestId('settingsPageOpenSandboxSecretsStub'));
+
+      expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
+      expect(screen.getByTestId('settingsPageDraftStub')).toHaveValue('unsaved changes');
     });
 
     it('shows the Investigations action when the API and feature flag are available', async () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -409,6 +409,62 @@ describe('ModelDetailFlyout', () => {
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
       expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+    });
+  });
+
+  describe('data retention', () => {
+    it('renders Zero Data Retention when properties include zero-data-retention', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { heuristics: { properties: ['zero-data-retention'] } },
+        }),
+      ]);
+
+      expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
+        'Zero Data Retention'
+      );
+      expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
+    });
+
+    it('renders Retains data and a tooltip when metadata has no zero-data-retention property', async () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { heuristics: { properties: ['multilingual'] } },
+        }),
+      ]);
+
+      const badge = screen.getByTestId('modelDetailFlyoutDataRetentionBadge');
+      expect(badge).toHaveTextContent('Data retained by provider');
+      expect(badge).not.toHaveTextContent('days');
+      expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
+
+      fireEvent.mouseOver(badge);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modelDetailFlyoutDataRetentionTooltip')).toHaveTextContent(
+          'The provider of this model retains the data used with it for a period of time. Your inputs are not used to train the models. Refer to the provider for more information on their policy.'
+        );
+      });
+    });
+
+    it('renders Retains data when metadata has no properties list', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { heuristics: { status: 'ga' } },
+        }),
+      ]);
+
+      expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
+        'Data retained by provider'
+      );
+    });
+
+    it('renders Retains data when metadata is absent', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
+        'Data retained by provider'
+      );
     });
   });
 });
