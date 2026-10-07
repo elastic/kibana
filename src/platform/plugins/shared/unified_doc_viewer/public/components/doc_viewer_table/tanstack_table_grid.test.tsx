@@ -49,9 +49,7 @@ const buildFieldRow = (name: string, value: string, isPinned = false) =>
 const mockRows: FieldRow[] = [buildFieldRow('fieldA', 'valueA'), buildFieldRow('fieldB', 'valueB')];
 
 const openCellActionsBubble = async (gridCell: HTMLElement) => {
-  await userEvent.click(
-    await within(gridCell).findByTestId('tanStackCellActionsButton')
-  );
+  await userEvent.click(await within(gridCell).findByTestId('tanStackCellActionsButton'));
 };
 
 describe('TanStackTableGrid', () => {
@@ -151,7 +149,9 @@ describe('TanStackTableGrid', () => {
 
     await userEvent.unhover(fieldNameCell);
     fieldNameCell.blur();
-    expect(within(fieldNameCell).queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
+    expect(
+      within(fieldNameCell).queryByTestId('tanStackCellActionsButton')
+    ).not.toBeInTheDocument();
 
     const valueCell = screen.getByText('valueB').closest<HTMLElement>('[role="gridcell"]')!;
     valueCell.focus();

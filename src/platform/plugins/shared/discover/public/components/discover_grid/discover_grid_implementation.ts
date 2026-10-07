@@ -18,9 +18,8 @@ export const DEFAULT_DISCOVER_GRID_IMPLEMENTATION: DiscoverGridImplementation = 
 const getStorageKey = (consumer: string) =>
   `${consumer}:${DISCOVER_GRID_IMPLEMENTATION_STORAGE_KEY}`;
 
-export const isDiscoverGridImplementation = (
-  value: unknown
-): value is DiscoverGridImplementation => value === 'tanstack' || value === 'unified';
+export const isDiscoverGridImplementation = (value: unknown): value is DiscoverGridImplementation =>
+  value === 'tanstack' || value === 'unified';
 
 /** Returns a known grid implementation, falling back when the value is missing or invalid. */
 export const resolveDiscoverGridImplementation = (

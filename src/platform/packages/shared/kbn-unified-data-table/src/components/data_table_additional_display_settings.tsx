@@ -341,11 +341,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     !isJsonMode && Boolean(onChangeHeaderRowHeight && onChangeHeaderRowHeightLines);
   const showRowHeight = !isJsonMode && Boolean(onChangeRowHeight && onChangeRowHeightLines);
   const hasControlsAfterViewMode =
-    isJsonMode ||
-    showDensity ||
-    showHeaderRowHeight ||
-    showRowHeight ||
-    Boolean(additionalContent);
+    isJsonMode || showDensity || showHeaderRowHeight || showRowHeight || Boolean(additionalContent);
 
   return (
     <>
