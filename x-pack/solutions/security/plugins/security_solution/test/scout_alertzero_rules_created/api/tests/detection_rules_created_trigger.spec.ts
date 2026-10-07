@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import type { ApiClient } from '../fixtures';
+import type { ApiClient } from '../../../scout/workflows/api/fixtures';
 import {
   apiTest,
   tags,
@@ -18,12 +18,15 @@ import {
   runWorkflow,
   waitForExecution,
   waitForExecutionForRule,
-} from '../fixtures';
+} from '../../../scout/workflows/api/fixtures';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_action';
 const RECORD_EVENT_STEP_ID = 'record_event';
 const CREATE_RULE_STEP_ID = 'create_rule';
+const SETTINGS_URL = '/internal/kibana/settings';
+// The trigger is only emitted while AlertZero is enabled in the space; the setting is off by default.
+const ALERTZERO_ENABLED_SETTING = 'securitySolution:enableAlertZero';
 const SETUP_TIMEOUT_MS = 60_000;
 
 // What AlertZero's rule creation action runs: the `security.createRule` step, started by hand here.
@@ -76,6 +79,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     let editorHeaders: Record<string, string>;
+    // Turning AlertZero on for the space is an administration action.
+    let adminHeaders: Record<string, string>;
     let workflowId: string;
     let createRuleWorkflowId: string;
     const createdRuleIds: string[] = [];
@@ -107,6 +112,18 @@ apiTest.describe(
 
       const editorCredentials = await samlAuth.asInteractiveUser('editor');
       editorHeaders = { ...editorCredentials.cookieHeader, ...testData.COMMON_HEADERS };
+      const adminCredentials = await samlAuth.asInteractiveUser('admin');
+      adminHeaders = {
+        ...adminCredentials.cookieHeader,
+        ...testData.COMMON_HEADERS,
+        ...ELASTIC_INTERNAL_ORIGIN_HEADER,
+      };
+      const settings = await apiClient.post(SETTINGS_URL, {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { changes: { [ALERTZERO_ENABLED_SETTING]: true } },
+      });
+      expect(settings).toHaveStatusCode(200);
       workflowId = await createWorkflow(apiClient, editorHeaders, triggerWorkflowYaml);
       createRuleWorkflowId = await createWorkflow(apiClient, editorHeaders, createRuleWorkflowYaml);
     });
@@ -126,6 +143,12 @@ apiTest.describe(
         // A partial failure answers 500, so a rule left behind fails the suite instead of leaking.
         expect(response).toHaveStatusCode(200);
       }
+
+      await apiClient.post(SETTINGS_URL, {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { changes: { [ALERTZERO_ENABLED_SETTING]: null } },
+      });
     });
 
     apiTest(
