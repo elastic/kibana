@@ -182,8 +182,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // EUI drops the option click under load, and the filter text setElement leaves behind makes
       // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
       const expected = name.trim().toLowerCase();
-      await retry.tryWithRetries(
-        `select [${name}] from [${testTargetId}]`,
+      await retry.try(
         async () => {
           await this.selectOptionFromComboBox(testTargetId, name);
           await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
@@ -192,8 +191,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
             return committed.trim().toLowerCase() === expected;
           });
         },
-        { retryCount: 3, timeout: 60_000 },
-        async () => comboBox.clearInputField(testTargetId)
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
       );
     },
 
@@ -281,8 +283,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
         // Re-select on failure because EUI drops the option click under load, and the filter text
         // setElement leaves behind makes both its own check and the input read back as `field`.
-        await retry.tryWithRetries(
-          `configureDimension - select field [${field}]`,
+        await retry.try(
           async () => {
             await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
             await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
@@ -291,8 +292,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               return committedLabel === field;
             });
           },
-          { retryCount: 3, timeout: 60_000 },
-          async () => comboBox.clearInputField('indexPattern-dimension-field')
+          {
+            description: `configureDimension - select field [${field}]`,
+            timeout: 60_000,
+            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
+          }
         );
       }
 

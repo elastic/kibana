@@ -8,11 +8,6 @@
 import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
-/**
- * Re-exported so consumers of these responses do not need their own dependency on
- * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
- * significant events use, so a tier added there widens these responses too.
- */
 export type { Severity } from '@kbn/significant-events-schema';
 
 export {
@@ -23,10 +18,6 @@ export {
   type InvestigationTriggerType,
 } from './workflows/triggers';
 
-/**
- * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
- * caller is held to and the type the code is written against cannot disagree.
- */
 export type {
   AlertInvestigationContext,
   AlertSnapshot,
@@ -61,16 +52,8 @@ export interface StartInvestigationRequest {
   title?: string;
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
-  /**
-   * Caller-supplied prompt for the investigation agent. Falls back to a generic
-   * message derived from the subject when omitted.
-   */
   message?: string;
-  /**
-   * Stream names the investigation should scope its signal search to.
-   */
   stream_names?: string[];
-  /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   context?: InvestigationContext | AlertInvestigationContext;
 }
@@ -90,7 +73,6 @@ export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 
-/** Subject id a manual investigation persists under when the caller supplies none. */
 export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 
 /** Counts of investigations at each severity tier, zero-filled for all four tiers. */
@@ -139,6 +121,22 @@ export {
 } from './sandbox_secrets';
 
 export {
+  CUSTOM_CONTEXT_API_PATH,
+  MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
+  MAX_CUSTOM_CONTEXT_SNIPPETS,
+  MAX_CUSTOM_CONTEXT_TOTAL_LENGTH,
+  MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH,
+  MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH,
+  MAX_CUSTOM_CONTEXT_VERSION_LENGTH,
+  formatCustomContextInstructions,
+  type CustomContextSnippet,
+  type CustomContextSnippetInput,
+  type GetCustomContextResponse,
+  type PutCustomContextRequest,
+  type PutCustomContextResponse,
+} from './custom_context';
+
+export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_DOC_TYPES,
@@ -155,6 +153,28 @@ export {
   type GetDecisionTreeVersionResponse,
   type GetDecisionTreesAvailabilityResponse,
 } from './decision_trees';
+
+export {
+  MEMORY_INDEX,
+  MEMORY_ARCHIVE_REASONS,
+  MEMORY_FILTERS,
+  type MemoryArchiveReason,
+  type MemoryFilter,
+  type MemoryPage,
+  type MemoryPageSummary,
+  type MemoryStats,
+  type ListMemoryPagesResponse,
+  type GetMemoryPageResponse,
+  type MemoryPageRevision,
+  type StoredMemoryPage,
+} from './memory';
+
+export {
+  canonicalizeTag,
+  canonicalizeTags,
+  MAX_MEMORY_TAG_LENGTH,
+  MAX_MEMORY_TAGS_PER_PAGE,
+} from './memory_tags';
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,

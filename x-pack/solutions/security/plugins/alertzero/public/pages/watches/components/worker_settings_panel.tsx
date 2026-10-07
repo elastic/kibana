@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -35,6 +34,7 @@ import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
+import { ViewExecutionsLink } from './view_executions_link';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -135,6 +135,14 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const accordionButtonStyles = useMemo(
     () => css`
       width: auto;
+      /*
+       * EuiAccordion's trigger is itself a flex item with min-width: auto, whose automatic minimum
+       * size is the band's min-content width. With white-space: nowrap on the title the whole name
+       * is atomic, so that floor is the full name: without this relief the button cannot shrink
+       * below it, neither the badge wrap nor the title ellipsis fires, and a long name pushes the
+       * header past its panel.
+       */
+      min-width: 0;
 
       &,
       &:hover,
@@ -184,15 +192,31 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           alignItems="center"
           gutterSize="s"
           responsive={false}
-          wrap={false}
+          wrap
           css={css`
             width: 100%;
             min-width: 0;
           `}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ maxWidth: '100%' }}>
             <EuiTitle size="s">
-              <TitleTag id={titleId} css={{ margin: 0 }}>
+              {/*
+                The accordion band gives the trailing actions (View executions + Enabled switch)
+                width precedence, which used to squeeze the title until EUI's `overflow-wrap` stacked
+                the name one character per line. `nowrap` keeps it on one line, the group's `wrap`
+                moves the badges to their own line first, and the 100% clamp ellipsizes a name that
+                alone exceeds the band (`title` keeps the full name recoverable).
+              */}
+              <TitleTag
+                id={titleId}
+                title={name}
+                css={{
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {name}
               </TitleTag>
             </EuiTitle>
@@ -253,19 +277,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
       {executionsHref ? (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            iconType="external"
-            iconSide="right"
-            href={executionsHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={settingsI18n.viewExecutionsAriaLabel(name)}
-            data-test-subj={`alertZeroWorkerViewExecutions-${worker.id}`}
-          >
-            {settingsI18n.VIEW_EXECUTIONS}
-          </EuiButtonEmpty>
+          <ViewExecutionsLink
+            workerId={worker.id}
+            workerName={name}
+            executionsHref={executionsHref}
+          />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
