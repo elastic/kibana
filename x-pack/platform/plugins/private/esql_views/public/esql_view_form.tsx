@@ -45,7 +45,7 @@ import { translations } from './translations';
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
-  telemetryClient: EsqlViewsTelemetryClient;
+  telemetryClient?: EsqlViewsTelemetryClient;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -160,10 +160,10 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       };
       if (isEditing) {
         await client.updateView(request);
-        telemetryClient.trackViewEdited();
+        telemetryClient?.trackViewEdited();
       } else {
         await client.createView(request);
-        telemetryClient.trackViewCreated({
+        telemetryClient?.trackViewCreated({
           hasDescription: request.description !== undefined,
           queryLength: query.length,
         });

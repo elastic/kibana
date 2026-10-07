@@ -10,7 +10,7 @@ import { registerEsqlViewsAnalyticsEvents } from './events_registration';
 import { TelemetryClient } from './telemetry_client';
 import type { EsqlViewsTelemetryClient } from './types';
 
-/** Registers the ES|QL views event types during setup and hands out a client to report them. */
+/** Registers the ES|QL views event types and hands out a client to report them. */
 export class TelemetryService {
   private analytics?: AnalyticsServiceSetup;
 
@@ -22,7 +22,7 @@ export class TelemetryService {
   public start(): EsqlViewsTelemetryClient {
     if (!this.analytics) {
       throw new Error(
-        'TelemetryService.setup() has not been invoked, be sure to call it during the plugin setup.'
+        'TelemetryService.setup() has not been invoked, be sure to call it before start().'
       );
     }
 

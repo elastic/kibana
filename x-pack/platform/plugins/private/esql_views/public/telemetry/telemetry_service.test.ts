@@ -44,7 +44,7 @@ describe('TelemetryService', () => {
 
   it('throws when a client is requested before setup', () => {
     expect(() => new TelemetryService().start()).toThrow(
-      'TelemetryService.setup() has not been invoked, be sure to call it during the plugin setup.'
+      'TelemetryService.setup() has not been invoked, be sure to call it before start().'
     );
   });
 

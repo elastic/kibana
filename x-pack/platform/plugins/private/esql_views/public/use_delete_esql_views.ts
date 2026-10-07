@@ -14,7 +14,7 @@ import { translations } from './translations';
 
 interface UseDeleteEsqlViewsOptions {
   client: EsqlViewsClient;
-  telemetryClient: EsqlViewsTelemetryClient;
+  telemetryClient?: EsqlViewsTelemetryClient;
   toasts: IToasts;
   /** Called after every delete attempt, whether it succeeded or failed. */
   onDeleted: () => void;
@@ -66,7 +66,7 @@ export const useDeleteEsqlViews = ({
     try {
       await client.deleteViews(names);
       // One event per delete operation: `count` carries how many views were submitted.
-      telemetryClient.trackViewDeleted({ count: names.length });
+      telemetryClient?.trackViewDeleted({ count: names.length });
       toasts.addSuccess(translations.deleteSuccess(names.length, names[0]));
     } catch (error) {
       toasts.addDanger({

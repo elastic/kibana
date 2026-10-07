@@ -26,7 +26,7 @@ export const mountManagementSection = (
   coreStart: CoreStart,
   { share }: StartDependencies,
   { element, setBreadcrumbs }: ManagementAppMountParams,
-  telemetryClient: EsqlViewsTelemetryClient
+  telemetryClient?: EsqlViewsTelemetryClient
 ) => {
   const { docTitle } = coreStart.chrome;
   docTitle.change(PLUGIN_NAME);

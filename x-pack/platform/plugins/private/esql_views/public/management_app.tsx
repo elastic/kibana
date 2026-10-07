@@ -32,7 +32,7 @@ interface ManagementAppProps {
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
-  telemetryClient: EsqlViewsTelemetryClient;
+  telemetryClient?: EsqlViewsTelemetryClient;
   toasts: IToasts;
 }
 
@@ -54,7 +54,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
 
   useEffect(() => {
-    telemetryClient.trackViewsPageVisited();
+    telemetryClient?.trackViewsPageVisited();
   }, [telemetryClient]);
 
   const onDeleted = useCallback(() => {
