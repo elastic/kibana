@@ -10,11 +10,11 @@
 import type { $ZodISODateTimeParams } from 'zod/v4/core';
 import { z } from 'zod/v4';
 
-type IsoDateTimeParams = Omit<$ZodISODateTimeParams, 'precision'>;
+export type IsoDateTimeOptions = string | $ZodISODateTimeParams;
 
-export type IsoDateTimeOptions = string | IsoDateTimeParams;
-
-const resolveIsoDateTimeParams = (options?: IsoDateTimeOptions): IsoDateTimeParams | undefined =>
+const resolveIsoDateTimeParams = (
+  options?: IsoDateTimeOptions
+): $ZodISODateTimeParams | undefined =>
   typeof options === 'string' ? { message: options } : options;
 
 /**
