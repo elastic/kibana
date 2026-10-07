@@ -14,8 +14,12 @@ import {
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
-import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
+import {
+  ProposedActionsBoundary,
+  ProposedActionsCountBoundary,
+} from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
+import { copyLink } from '../../shared/copy_link';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -28,10 +32,12 @@ export const investigationTemplate: TemplateDefinition = {
   templateId: INVESTIGATION_TEMPLATE_ID,
   register: ({
     templateId,
+    core,
     startDeps,
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    groupedAttachments,
     renderAssignees,
     renderStatus,
   }) => {
@@ -64,32 +70,41 @@ export const investigationTemplate: TemplateDefinition = {
     // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
     // Both read and decide the same proposals; an isolated client here would let a decision made
     // in one leave the other showing it as still pending.
-    const LazyProposedActionsSlot = React.lazy(async () => {
-      const [
-        { KibanaContextProvider },
-        { QueryClientProvider },
-        { ProposedActionsSlot },
-        queryClient,
-      ] = await Promise.all([
-        import('@kbn/kibana-react-plugin/public'),
-        import('@kbn/react-query'),
-        import('../../shared/proposed_actions/proposed_actions_slot'),
-        getSharedInvestigationsQueryClient(),
-      ]);
+    const lazyWithSharedQueryClient = <P extends object>(
+      load: () => Promise<React.ComponentType<P>>
+    ) =>
+      React.lazy(async () => {
+        const [{ KibanaContextProvider }, { QueryClientProvider }, Component, queryClient] =
+          await Promise.all([
+            import('@kbn/kibana-react-plugin/public'),
+            import('@kbn/react-query'),
+            load(),
+            getSharedInvestigationsQueryClient(),
+          ]);
 
-      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
-        React.createElement(
-          KibanaContextProvider,
-          { services },
+        const Wrapped: React.FC<P> = (props) =>
           React.createElement(
-            QueryClientProvider,
-            { client: queryClient },
-            React.createElement(ProposedActionsSlot, props)
-          )
-        );
+            KibanaContextProvider,
+            { services },
+            React.createElement(
+              QueryClientProvider,
+              { client: queryClient },
+              React.createElement(Component, props)
+            )
+          );
 
-      return { default: WrappedSlot };
-    });
+        return { default: Wrapped };
+      });
+
+    const LazyProposedActionsSlot = lazyWithSharedQueryClient(
+      async () =>
+        (await import('../../shared/proposed_actions/proposed_actions_slot')).ProposedActionsSlot
+    );
+
+    const LazyProposedActionsCount = lazyWithSharedQueryClient(
+      async () =>
+        (await import('../../shared/proposed_actions/proposed_actions_count')).ProposedActionsCount
+    );
 
     const LazyConnectedCloseInvestigationModal =
       makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
@@ -118,12 +133,15 @@ export const investigationTemplate: TemplateDefinition = {
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
+      groupedAttachments,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'magnifyExclamation',
       renderAssignees,
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderCloseInvestigationModal,
+      // The flyout's Copy link button confirms success itself; only a failure needs a toast.
+      onCopyLink: (url) => copyLink(core.notifications.toasts, url),
       // Without escalations the footer has no "Open escalation" button.
       renderEscalationModal: escalationsEnabled
         ? (props) =>
@@ -148,6 +166,14 @@ export const investigationTemplate: TemplateDefinition = {
               ProposedActionsBoundary,
               null,
               React.createElement(LazyProposedActionsSlot, props)
+            )
+        : undefined,
+      renderProposedActionsCount: proposals
+        ? (props) =>
+            React.createElement(
+              ProposedActionsCountBoundary,
+              null,
+              React.createElement(LazyProposedActionsCount, props)
             )
         : undefined,
     });

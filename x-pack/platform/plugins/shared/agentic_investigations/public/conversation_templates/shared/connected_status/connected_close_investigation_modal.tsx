@@ -18,9 +18,18 @@ import {
   useInvestigationClosePreview,
 } from '../../../investigations/hooks/use_investigations_api';
 import { statusSignal } from './status_signal';
+import { useSettleDeclinedProposals } from './use_settle_declined_proposals';
 import { getCloseErrorCode } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
 import * as i18n from '../close_confirmation/translations';
+
+export interface ConnectedCloseInvestigationModalProps {
+  /**
+   * Lets a host that renders its own proposal queue take a declined row out of it once its
+   * decision lands, rather than wait for the next refetch to see it.
+   */
+  dropDecidedProposal?: (proposalId: string) => Promise<void> | void;
+}
 
 /**
  * Connected wrapper for `CloseInvestigationModal` for use in the queue page and flyout footer.
@@ -30,13 +39,14 @@ import * as i18n from '../close_confirmation/translations';
  * queries and toasts on completion.
  *
  * The preview is always fresh (staleTime: 0, refetchInterval: 10 000) and the modal shows a
- * spinner while the first fetch is in-flight. On a 409 (proposals changed), the modal stays
- * open and shows a callout prompting the user to review and confirm again.
+ * spinner while the first fetch is in-flight. After a successful close the dismissed proposals read
+ * as `Declining` until their decisions land, then leave the host's queue when it supplies
+ * `dropDecidedProposal`. On a 409 (proposals changed), the modal stays open and shows a callout
+ * prompting the user to review and confirm again.
  */
-export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalRenderProps> = ({
-  investigation,
-  onClose,
-}) => {
+export const ConnectedCloseInvestigationModal: React.FC<
+  CloseInvestigationModalRenderProps & ConnectedCloseInvestigationModalProps
+> = ({ investigation, onClose, dropDecidedProposal }) => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
   const conversationId = investigation.conversationId ?? investigation.id;
@@ -47,71 +57,89 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
     count: number;
   } | null>(null);
 
-  const preview = useInvestigationClosePreview(conversationId, {
+  const {
+    data: previewData,
+    isFetching,
+    isError,
+    refetch: refetchPreview,
+  } = useInvestigationClosePreview(conversationId, {
     enabled: Boolean(conversationId),
   });
   const setStatus = useSetInvestigationStatus();
 
-  const invalidateAll = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
-    void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+  const invalidateInvestigations = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
   }, [queryClient]);
 
+  const invalidateAll = useCallback(() => {
+    invalidateInvestigations();
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+  }, [invalidateInvestigations, queryClient]);
+
+  const settleDeclinedProposals = useSettleDeclinedProposals(dropDecidedProposal);
+
   const handleConfirm = useCallback(
-    ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
-      setStatus.mutate(
-        {
+    async ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
+      try {
+        const result = await setStatus.mutateAsync({
           investigationId: conversationId,
           body: {
             status: 'closed',
             dismiss_reason: dismissReason,
             rationale,
-            expected_proposal_ids: preview.data?.pending_proposals.map((p) => p.id),
+            expected_proposal_ids: previewData?.pending_proposals.map((p) => p.id),
           },
-        },
-        {
-          onSuccess: (result) => {
-            invalidateAll();
-            statusSignal.bump();
-            services.notifications?.toasts.addSuccess(i18n.CLOSE_INVESTIGATION_SUCCESS);
-            if (result.failed_proposal_ids.length > 0) {
-              services.notifications?.toasts.addWarning(i18n.PARTIAL_PROPOSAL_DISMISS_WARNING);
-            }
-            onClose();
-          },
-          onError: (err) => {
-            const code = getCloseErrorCode(err);
-            if (code === 'close_targets_changed') {
-              // Keep the modal open, show the changed-callout and refresh the list.
-              setTargetsChanged(true);
-              void preview.refetch();
-            } else if (code === 'proposal_dismiss_failed') {
-              // Some proposals were dismissed: invalidate so the queue stays fresh.
-              invalidateAll();
-              statusSignal.bump();
-              const ids =
-                (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } })
-                  .body?.attributes?.failed_proposal_ids ?? [];
-              setCloseError({ kind: 'dismiss_failed', count: ids.length });
-              void preview.refetch();
-            } else {
-              services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
-              onClose();
-            }
-          },
+        });
+        invalidateInvestigations();
+        services.notifications?.toasts.addSuccess(i18n.CLOSE_INVESTIGATION_SUCCESS);
+        if (result.failed_proposal_ids.length > 0) {
+          services.notifications?.toasts.addWarning(i18n.PARTIAL_PROPOSAL_DISMISS_WARNING);
         }
-      );
+        // Started before the modal unmounts so the cards never go a beat without `Declining`.
+        const settled = settleDeclinedProposals(result.dismissed_proposal_ids);
+        onClose();
+        await settled;
+      } catch (err) {
+        const code = getCloseErrorCode(err);
+        if (code === 'close_targets_changed') {
+          // Keep the modal open, show the changed-callout and refresh the list.
+          setTargetsChanged(true);
+          refetchPreview();
+        } else if (code === 'proposal_dismiss_failed') {
+          // Some proposals were dismissed: invalidate so the queue stays fresh.
+          invalidateAll();
+          statusSignal.bump();
+          const ids =
+            (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
+              ?.attributes?.failed_proposal_ids ?? [];
+          setCloseError({ kind: 'dismiss_failed', count: ids.length });
+          refetchPreview();
+        } else {
+          services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
+          onClose();
+        }
+      }
     },
-    [conversationId, invalidateAll, onClose, preview, services, setStatus]
+    [
+      conversationId,
+      invalidateAll,
+      invalidateInvestigations,
+      onClose,
+      previewData?.pending_proposals,
+      refetchPreview,
+      services.notifications?.toasts,
+      setStatus,
+      settleDeclinedProposals,
+    ]
   );
 
   return (
     <CloseInvestigationModal
-      preview={preview.data}
-      isRefreshing={preview.isFetching}
+      preview={previewData}
+      isRefreshing={isFetching}
       targetsChanged={targetsChanged}
-      loadError={preview.isError && !preview.data}
-      onRetry={() => void preview.refetch()}
+      loadError={isError && !previewData}
+      onRetry={() => refetchPreview()}
       closeErrorKind={closeError?.kind}
       closeErrorCount={closeError?.count}
       onClose={onClose}

@@ -72,6 +72,10 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
+      workflowTags: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
       /*
       updated_at: {
         type: 'date',
@@ -99,6 +103,21 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
   modelVersions: {
     '1': {
       changes: [],
+      schemas: {
+        forwardCompatibility: (attrs) => attrs,
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            // Allows existence/cardinality aggregations over workflow tag configurations in telemetry.
+            workflowTags: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
+      ],
       schemas: {
         forwardCompatibility: (attrs) => attrs,
         create: schema.object({}, { unknowns: 'allow' }),

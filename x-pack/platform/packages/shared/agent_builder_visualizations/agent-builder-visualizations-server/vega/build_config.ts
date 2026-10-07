@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
+import { removePromqlTimeRangeParams } from '../shared/remove_promql_time_range';
 import { createVegaGraph } from './graph';
 import { extractEsqlFromSpec } from './recover_esql';
 
@@ -65,7 +66,9 @@ export const buildVegaConfig = async ({
 }: BuildVegaConfigParams): Promise<BuildVegaConfigResult> => {
   // If the caller provides ES|QL, keep it only when validation says it is safe.
   // If validation cannot run, keep it and let the graph handle it.
-  let providedEsql = esql;
+  // A PROMQL query generated outside a visualization context binds its time range to
+  // ?_tstart/?_tend, which is redundant here, as the time range is applied by itself.
+  let providedEsql = esql ? removePromqlTimeRangeParams(esql) : esql;
   if (providedEsql) {
     let validationError: string | undefined;
     try {
