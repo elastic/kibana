@@ -154,4 +154,38 @@ describe('resolveSelectiveTestingContext', () => {
     );
     expect(result?.changedFiles).toBe(changedFiles);
   });
+
+  it('passes documentation ignore patterns to getAffectedPackages', async () => {
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set());
+
+    await resolveSelectiveTestingContext(['src/core/README.md']);
+
+    expect(getAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        ignorePatterns: expect.arrayContaining(['**/README*', '**/*.md', '**/CHANGELOG*']),
+      })
+    );
+  });
+
+  it('yields an empty affected-packages set for documentation-only changes', async () => {
+    // getAffectedPackages returns empty because all files are filtered by ignorePatterns.
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set());
+
+    const result = await resolveSelectiveTestingContext(['src/core/README.md', 'docs/guide.md']);
+
+    expect(result).not.toBeNull();
+    expect(result?.affectedPackages.size).toBe(0);
+  });
+
+  it('retains the source package when docs are mixed with source changes', async () => {
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set(['src/core/']));
+
+    const result = await resolveSelectiveTestingContext([
+      'src/core/server/index.ts',
+      'src/core/README.md',
+    ]);
+
+    expect(result?.affectedPackages).toContain('src/core/');
+  });
 });

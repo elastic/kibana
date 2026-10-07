@@ -523,22 +523,25 @@ describe('resolveScoutTestingScope', () => {
     expect(scope).toEqual({ kind: 'full', reason: 'critical-files' });
   });
 
-  it('returns dependency-tree for Jest test files inside critical packages', () => {
-    // A *.test.ts change in kbn-scout or buildkite pipeline-utils should not
-    // trigger a full Scout suite — only Jest needs to run for those.
+  it('returns dependency-tree with no modules for Jest-test-only changes in critical packages', () => {
+    // *.test.ts files are excluded from the Scout module graph in resolve_selective_testing.ts,
+    // so affectedModules is empty — dependency-tree with zero modules selects no configs.
     const scope = resolveScoutTestingScope(
       codeChanges(
         [
           'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
           '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
         ],
-        ['@kbn/scout']
+        [] // @kbn/scout excluded by SCOUT_MODULE_GRAPH_IGNORE in the resolver
       ),
       true,
       log,
       tmpRoot
     );
     expect(scope.kind).toBe('dependency-tree');
+    if (scope.kind === 'dependency-tree') {
+      expect([...scope.affectedModuleIds]).toEqual([]);
+    }
   });
 
   it('returns tests-only for Scout spec files inside the kbn-scout package itself', () => {

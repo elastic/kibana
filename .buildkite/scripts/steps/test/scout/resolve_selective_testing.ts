@@ -49,9 +49,12 @@ const log: ScoutLog = {
   warning: (message) => writeLog(`WARN ${message}`),
 };
 
-// Exclude documentation files from the module graph — they can't affect runtime.
-// Mirrors SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
-const DOCS_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'];
+// Files that cannot affect Scout Playwright test execution and should not inflate
+// the module graph. Doc patterns mirror SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
+const SCOUT_MODULE_GRAPH_IGNORE = [
+  '**/README*', '**/*.md', '**/CHANGELOG*', // documentation noise
+  '**/*.test.ts', // Jest tests — only Jest needs to run, not Playwright
+];
 
 const [mergeBase, outPath] = process.argv.slice(2);
 
@@ -68,7 +71,7 @@ if (!mergeBase || !outPath) {
   const directlyAffected = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: false,
-    ignorePatterns: DOCS_IGNORE_PATTERNS,
+    ignorePatterns: SCOUT_MODULE_GRAPH_IGNORE,
     ignoreUncategorizedChanges: true,
   });
 
@@ -95,7 +98,7 @@ if (!mergeBase || !outPath) {
     await getAffectedPackages(mergeBase, {
       strategy: 'git',
       includeDownstream: true,
-      ignorePatterns: DOCS_IGNORE_PATTERNS,
+      ignorePatterns: SCOUT_MODULE_GRAPH_IGNORE,
       ignoreUncategorizedChanges: true,
     }),
     changedFiles,
