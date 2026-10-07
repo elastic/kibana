@@ -2,6 +2,7 @@
 
 SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
+source "${SCRIPTS_COMMON_DIR}/gcs_tmp_artifacts.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -210,96 +211,67 @@ download_artifact() {
   retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
-GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
-download_tmp_artifact() {
-  local artifact_name="$1" dest_dir="$2" build_id="$3"
-  local region use_gcs=false
+# Restores a moon cache archive into ./.moon/cache, only if it passes validate_moon_cache_archive.
+extract_moon_cache() {
+  local archive="$1" staging_dir
 
-  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
-      use_gcs=true
-      break
-    fi
-  done
-
-  if [[ "$use_gcs" == "true" ]]; then
-    if download_tmp_artifact_from_gcs "$artifact_name" "$dest_dir" "$build_id"; then
-      return 0
-    fi
-    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
-  fi
-
-  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
-  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
-}
-
-upload_tmp_artifact() {
-  local local_path="$1" artifact_name="$2" build_id="$3"
-  local region pids=() failures=0 token_file
-
-  if ! token_file="$(create_gcs_access_token_file "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}")"; then
-    echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
-    return 0
-  fi
-
-  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" "$token_file" &
-    pids+=("$!")
-  done
-
-  for pid in "${pids[@]}"; do
-    if ! wait "$pid"; then
-      failures=$((failures + 1))
-    fi
-  done
-  rm -rf "$(dirname "$token_file")"
-
-  if [[ "$failures" -gt 0 ]]; then
-    echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
-  fi
-
-  return 0
-}
-
-upload_tmp_artifact_to_region() {
-  local local_path="$1" artifact_name="$2" build_id="$3" region="$4" token_file="$5"
-
-  CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False \
-    retry 3 5 gcloud_with_access_token "$token_file" storage cp \
-      "$local_path" \
-      "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
-}
-
-download_tmp_artifact_from_gcs() {
-  local artifact_name="$1" dest_dir="$2" build_id="$3"
-  local bucket="kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" token_file status=0
-
-  token_file="$(create_gcs_access_token_file "$bucket")" || return 1
-  gcloud_with_access_token "$token_file" storage cp \
-    "gs://${bucket}/tmp/builds/${build_id}/${artifact_name}" \
-    "${dest_dir}/${artifact_name}" || status=$?
-  rm -rf "$(dirname "$token_file")"
-  return "$status"
-}
-
-# Mints one impersonated access token and prints its file path, so gcloud storage workers share it instead of each exchanging a Workload Identity token.
-create_gcs_access_token_file() {
-  local bucket="$1" token_dir
-
-  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "$bucket" >&2 || return 1
-  token_dir="$(mktemp -d -t gcs-token-XXXXXX)"
-  if ! gcloud auth print-access-token > "$token_dir/access_token" || [[ ! -s "$token_dir/access_token" ]]; then
-    rm -rf "$token_dir"
+  if ! validate_moon_cache_archive "$archive"; then
+    echo "Skipping moon cache restore." >&2
     return 1
   fi
-  echo "$token_dir/access_token"
+
+  mkdir -p ./.moon
+  staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
+  if ! tar -xf "$archive" --zstd --no-same-owner --no-same-permissions -C "$staging_dir"; then
+    rm -rf "$staging_dir"
+    echo "Failed to extract ${archive}, skipping moon cache restore." >&2
+    return 1
+  fi
+
+  rm -rf ./.moon/cache
+  mv "$staging_dir/.moon/cache" ./.moon/cache
+  rm -rf "$staging_dir"
 }
 
-# Impersonation must be off here: gcloud applies it before reading the token file, which would restart per-worker token requests.
-gcloud_with_access_token() {
-  local token_file="$1"
-  shift
-  CLOUDSDK_AUTH_ACCESS_TOKEN_FILE="$token_file" CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT= gcloud "$@"
+# Checks that a moon cache archive only contains regular files and directories under .moon/cache.
+validate_moon_cache_archive() {
+  local archive="$1" entries names
+
+  # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
+  if ! entries="$(tar -tvf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # `tar -t` prints only the entry paths
+  if ! names="$(tar -tf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # Only regular files ("-") and directories ("d") are allowed: no symlinks, devices or fifos
+  if grep -qv '^[-d]' <<< "$entries"; then
+    echo "${archive} contains entries that are not regular files or directories." >&2
+    return 1
+  fi
+
+  # Some tar implementations list hard links with a regular file type and a " link to <target>" suffix
+  if grep -q ' link to ' <<< "$entries"; then
+    echo "${archive} contains hard links." >&2
+    return 1
+  fi
+
+  # Every entry must be .moon/cache itself or live inside it (relative path, no leading "/" or "./")
+  if grep -qvE '^\.moon/cache(/|$)' <<< "$names"; then
+    echo "${archive} contains entries outside .moon/cache." >&2
+    return 1
+  fi
+
+  # No entry may contain a ".." path segment
+  if grep -qE '(^|/)\.\.(/|$)' <<< "$names"; then
+    echo "${archive} contains parent-directory path segments." >&2
+    return 1
+  fi
 }
 
 print_if_dry_run() {

@@ -7,18 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { createJsWithTsEsmPreset } = require('ts-jest');
-const { dirname } = require('node:path');
-
-const tsJestTransformCfg = createJsWithTsEsmPreset().transform;
-
-/** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: require.resolve('jest-environment-node', { paths: [dirname(process.argv[1])] }),
-  transform: {
-    ...tsJestTransformCfg,
-  },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook)/)',
-  ],
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-schema-string-helpers'],
 };

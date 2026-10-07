@@ -6,7 +6,7 @@
  */
 import { ToolingLog } from '@kbn/tooling-log';
 import { promises as Fs } from 'fs';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { LOGHUB_DIR, LOGHUB_REPO } from './constants';
 
 export async function ensureLoghubRepo({ log }: { log: ToolingLog }) {
