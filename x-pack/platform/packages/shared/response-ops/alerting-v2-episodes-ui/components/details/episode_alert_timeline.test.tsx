@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { LIGHT_THEME } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -42,7 +43,7 @@ jest.mock('../../alert_timeline', () => ({
             windowStartMs: Date.parse('2024-01-01T00:00:00.000Z'),
             windowEndMs: Date.parse('2024-01-01T00:01:00.000Z'),
             height: 44,
-            baseTheme: {},
+            baseTheme: LIGHT_THEME,
             timeZone: 'UTC',
           })}
         </div>
