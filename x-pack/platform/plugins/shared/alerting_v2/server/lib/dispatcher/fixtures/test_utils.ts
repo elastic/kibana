@@ -152,7 +152,7 @@ export function createSuppressionRow(overrides: Partial<SuppressionRow> = {}): S
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    episode_id: 'episode-1',
+    alert_id: 'episode-1',
     should_suppress: false,
     ...overrides,
   };
@@ -166,7 +166,7 @@ export function createEpisodeSuppressionRow(
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    episode_id: 'episode-1',
+    alert_id: 'episode-1',
     should_suppress: false,
     ...overrides,
   };
@@ -190,7 +190,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     id: 'rule-1',
     spaceId: 'default',
     name: 'Test rule',
-    tags: [],
+    routingTags: [],
     ...overrides,
   };
 }

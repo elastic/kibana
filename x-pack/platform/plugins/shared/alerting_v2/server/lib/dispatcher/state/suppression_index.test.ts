@@ -14,7 +14,7 @@ describe('SuppressionIndex', () => {
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: true,
         last_ack_action: 'ack',
       }),
@@ -24,12 +24,12 @@ describe('SuppressionIndex', () => {
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
 
-  it('suppresses by series-level match (null episode_id)', () => {
+  it('suppresses by series-level match (null alert_id)', () => {
     const index = SuppressionIndex.of([
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: null,
+        alert_id: null,
         should_suppress: true,
         last_snooze_action: 'snooze',
       }),
@@ -44,7 +44,7 @@ describe('SuppressionIndex', () => {
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: true,
         last_deactivate_action: 'deactivate',
       }),
@@ -59,7 +59,7 @@ describe('SuppressionIndex', () => {
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: true,
       }),
     ]);
@@ -73,14 +73,14 @@ describe('SuppressionIndex', () => {
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: true,
         last_ack_action: 'ack',
       }),
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: null,
+        alert_id: null,
         should_suppress: true,
         last_snooze_action: 'snooze',
       }),
@@ -95,7 +95,7 @@ describe('SuppressionIndex', () => {
       createSuppressionRow({
         rule_id: 'r1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: false,
       }),
     ]);
@@ -115,7 +115,7 @@ describe('SuppressionIndex', () => {
         source: 'pagerduty',
         rule_id: null,
         group_hash: 'pd-hash',
-        episode_id: 'pd-ep-1',
+        alert_id: 'pd-ep-1',
         should_suppress: true,
         last_ack_action: 'ack',
       }),
@@ -136,7 +136,7 @@ describe('SuppressionIndex', () => {
         source: 'internal',
         rule_id: 'rule-1',
         group_hash: 'hash-1',
-        episode_id: 'ep-internal',
+        alert_id: 'ep-internal',
         should_suppress: true,
         last_ack_action: 'ack',
       }),
@@ -144,7 +144,7 @@ describe('SuppressionIndex', () => {
         source: 'pagerduty',
         rule_id: null,
         group_hash: 'hash-1',
-        episode_id: 'ep-external',
+        alert_id: 'ep-external',
         should_suppress: false,
       }),
     ]);
@@ -168,14 +168,14 @@ describe('SuppressionIndex', () => {
 
   it('does not leak an external series suppression across spaces', () => {
     // Same vendor and group_hash in both spaces; the ack is series-scoped
-    // (episode_id: null) and applies to space-a only.
+    // (alert_id: null) and applies to space-a only.
     const index = SuppressionIndex.of([
       createSuppressionRow({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'space-a',
         group_hash: 'pd-incident-1',
-        episode_id: null,
+        alert_id: null,
         should_suppress: true,
         last_ack_action: 'ack',
       }),
@@ -201,7 +201,7 @@ describe('SuppressionIndex', () => {
         source: 'internal',
         rule_id: 'rule-1',
         group_hash: 'h1',
-        episode_id: 'e1',
+        alert_id: 'e1',
         should_suppress: true,
         last_ack_action: 'ack',
       }),

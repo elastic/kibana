@@ -8,7 +8,7 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
-import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/console/utils';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/definitions/console/utils';
 import type { EditorRequest } from '../../types';
 import { startsWithMethodRegex } from '../constants';
 import { parseLine } from '../tokens_utils';
