@@ -87,13 +87,23 @@ describe('ThreatIntelSupplyService', () => {
     },
   } as unknown as ElasticsearchClient;
 
-  const createService = (spaceIds: string[] = [SPACE_A, SPACE_B]) =>
+  const ensureInstaller = jest.fn(async ({ spaceId }: { spaceId: string }) => {
+    workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
+    workflows.set(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, { enabled: false });
+    workflows.set(`${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-${spaceId}`, { enabled: false });
+  });
+
+  const createService = (
+    spaceIds: string[] = [SPACE_A, SPACE_B],
+    opts?: { withInstaller?: boolean }
+  ) =>
     new ThreatIntelSupplyService({
       management,
       managedWorkflows: Promise.resolve(managedWorkflows),
       logger: loggingSystemMock.createLogger() as Logger,
       getEsClient: async () => esClient,
       enumerateSpaceIds: async () => spaceIds,
+      getWorkflowInstaller: opts?.withInstaller === false ? undefined : () => ensureInstaller,
     });
 
   const seedAllTiWorkflows = (enabled: boolean) => {
@@ -109,6 +119,7 @@ describe('ThreatIntelSupplyService', () => {
     getWorkflow.mockClear();
     updateWorkflow.mockClear();
     getWorkflowStatus.mockClear();
+    ensureInstaller.mockClear();
     (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
     (esClient.inference.get as jest.Mock).mockResolvedValue({});
   });
@@ -163,11 +174,27 @@ describe('ThreatIntelSupplyService', () => {
     expect(updateWorkflow).toHaveBeenCalledWith(ATTR_A, { enabled: true }, SPACE_A, request);
   });
 
-  it('throws supply_not_installed when a TI workflow document is missing', async () => {
+  it('throws supply_not_installed when a TI workflow is missing and no installer is registered', async () => {
     workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
-    await expect(createService().ensureSupplyForSpace(SPACE_A, request)).rejects.toBeInstanceOf(
-      ThreatIntelSupplyNotInstalledError
-    );
+    await expect(
+      createService([SPACE_A, SPACE_B], { withInstaller: false }).ensureSupplyForSpace(
+        SPACE_A,
+        request
+      )
+    ).rejects.toBeInstanceOf(ThreatIntelSupplyNotInstalledError);
+    expect(ensureInstaller).not.toHaveBeenCalled();
+  });
+
+  it('installs missing attribute workflow then enables it when ensuring supply', async () => {
+    workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
+    workflows.set(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, { enabled: false });
+    // ATTR_A intentionally missing (new space lag)
+
+    await createService().ensureSupplyForSpace(SPACE_A, request);
+
+    expect(ensureInstaller).toHaveBeenCalledWith({ spaceId: SPACE_A });
+    expect(updateWorkflow).toHaveBeenCalledWith(ATTR_A, { enabled: true }, SPACE_A, request);
+    expect(workflows.get(ATTR_A)?.enabled).toBe(true);
   });
 
   it('disables attribute when tearing down supply for a space', async () => {

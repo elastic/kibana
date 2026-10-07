@@ -41,6 +41,7 @@ import type {
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
+  ThreatIntelSupplyWorkflowInstaller,
 } from './types';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
@@ -108,6 +109,12 @@ export class AlertZeroPlugin
    */
   private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
 
+  /**
+   * Set by security_solution's `start()` via `registerThreatIntelSupplyWorkflowInstaller`.
+   * May be unset when `ThreatIntelSupplyService` is constructed; that service reads it lazily.
+   */
+  private threatIntelSupplyWorkflowInstaller?: ThreatIntelSupplyWorkflowInstaller;
+
   /** Set in start from `xpack.security.serviceAccounts.enabled`. False until then. */
   private serviceAccountsEnabled = false;
 
@@ -122,6 +129,18 @@ export class AlertZeroPlugin
   ): void => {
     this.alertTriageAttachmentServiceProvider = provider;
   };
+
+  private readonly registerThreatIntelSupplyWorkflowInstaller = (
+    installer: ThreatIntelSupplyWorkflowInstaller
+  ): void => {
+    this.threatIntelSupplyWorkflowInstaller = installer;
+  };
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerAlertTriageAttachmentServiceProvider:
+      this.registerAlertTriageAttachmentServiceProvider,
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -256,10 +275,7 @@ export class AlertZeroPlugin
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
-      return {
-        registerAlertTriageAttachmentServiceProvider:
-          this.registerAlertTriageAttachmentServiceProvider,
-      };
+      return this.alertZeroStartContract();
     }
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
@@ -269,10 +285,7 @@ export class AlertZeroPlugin
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
     if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
-      return {
-        registerAlertTriageAttachmentServiceProvider:
-          this.registerAlertTriageAttachmentServiceProvider,
-      };
+      return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -318,6 +331,8 @@ export class AlertZeroPlugin
             getEsClient: async () => core.elasticsearch.client.asInternalUser,
             enumerateSpaceIds: () =>
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
+            // security_solution registers after this plugin starts; read lazily.
+            getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
           })
         : undefined;
 
@@ -362,10 +377,7 @@ export class AlertZeroPlugin
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
 
-    return {
-      registerAlertTriageAttachmentServiceProvider:
-        this.registerAlertTriageAttachmentServiceProvider,
-    };
+    return this.alertZeroStartContract();
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {

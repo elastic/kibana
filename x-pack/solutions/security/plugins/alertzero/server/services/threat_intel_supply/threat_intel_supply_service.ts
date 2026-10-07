@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { ThreatIntelSupplyWorkflowInstaller } from '../../types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { evaluateHuntSupplyHardGate } from './hard_gate';
 import {
@@ -34,6 +35,11 @@ export interface ThreatIntelSupplyServiceDeps {
   logger: Logger;
   getEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   enumerateSpaceIds: () => Promise<readonly string[]>;
+  /**
+   * Lazily resolves the security_solution-owned installer. May be unset until
+   * that plugin's `start()` registers it.
+   */
+  getWorkflowInstaller?: () => ThreatIntelSupplyWorkflowInstaller | undefined;
 }
 
 /**
@@ -65,51 +71,63 @@ export class ThreatIntelSupplyService {
   }
 
   async ensureSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
-    await this.setWorkflowEnabled(
-      THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-      GLOBAL_WORKFLOW_SPACE_ID,
-      true,
-      request
-    );
-    await this.setWorkflowEnabled(
-      THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-      GLOBAL_WORKFLOW_SPACE_ID,
-      true,
-      request
-    );
-    await this.setWorkflowEnabled(
-      attributeWorkflowIdForSpace(spaceId),
-      spaceId,
-      true,
-      request
-    );
+    await this.setWorkflowEnabled({
+      workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      enabled: true,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: true,
+    });
+    await this.setWorkflowEnabled({
+      workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      enabled: true,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: true,
+    });
+    await this.setWorkflowEnabled({
+      workflowId: attributeWorkflowIdForSpace(spaceId),
+      workflowSpaceId: spaceId,
+      enabled: true,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: true,
+    });
   }
 
   async teardownSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
-    await this.setWorkflowEnabled(
-      attributeWorkflowIdForSpace(spaceId),
-      spaceId,
-      false,
-      request
-    );
+    await this.setWorkflowEnabled({
+      workflowId: attributeWorkflowIdForSpace(spaceId),
+      workflowSpaceId: spaceId,
+      enabled: false,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: false,
+    });
 
     const otherSpaceStillHunting = await this.isHuntEnabledInOtherSpace(spaceId);
     if (otherSpaceStillHunting) {
       return;
     }
 
-    await this.setWorkflowEnabled(
-      THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-      GLOBAL_WORKFLOW_SPACE_ID,
-      false,
-      request
-    );
-    await this.setWorkflowEnabled(
-      THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-      GLOBAL_WORKFLOW_SPACE_ID,
-      false,
-      request
-    );
+    await this.setWorkflowEnabled({
+      workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      enabled: false,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: false,
+    });
+    await this.setWorkflowEnabled({
+      workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      enabled: false,
+      request,
+      huntSpaceId: spaceId,
+      installIfMissing: false,
+    });
   }
 
   /**
@@ -172,20 +190,45 @@ export class ThreatIntelSupplyService {
     return { workflows, hardGate, drift, huntEnabled };
   }
 
-  private async setWorkflowEnabled(
-    workflowId: string,
-    spaceId: string,
-    enabled: boolean,
-    request: KibanaRequest
-  ): Promise<void> {
-    const existing = await this.deps.management.getWorkflow(workflowId, spaceId, request);
+  private async setWorkflowEnabled({
+    workflowId,
+    workflowSpaceId,
+    enabled,
+    request,
+    huntSpaceId,
+    installIfMissing,
+  }: {
+    workflowId: string;
+    workflowSpaceId: string;
+    enabled: boolean;
+    request: KibanaRequest;
+    /** Space whose Hunt enable/teardown triggered this call (used for owner install). */
+    huntSpaceId: string;
+    installIfMissing: boolean;
+  }): Promise<void> {
+    let existing = await this.deps.management.getWorkflow(workflowId, workflowSpaceId, request);
+    if (!existing && installIfMissing) {
+      const installer = this.deps.getWorkflowInstaller?.();
+      if (installer) {
+        this.deps.logger.info(
+          `Threat intel supply workflow ${workflowId} is not installed; asking security_solution to install supply for space '${huntSpaceId}'`
+        );
+        await installer({ spaceId: huntSpaceId });
+        existing = await this.deps.management.getWorkflow(workflowId, workflowSpaceId, request);
+      }
+    }
     if (!existing) {
       throw new ThreatIntelSupplyNotInstalledError(workflowId);
     }
     if (existing.enabled === enabled) {
       return;
     }
-    await this.deps.management.updateWorkflow(workflowId, { enabled }, spaceId, request);
+    await this.deps.management.updateWorkflow(
+      workflowId,
+      { enabled },
+      workflowSpaceId,
+      request
+    );
   }
 
   private async readWorkflowStatus(
