@@ -13,7 +13,7 @@ import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_ta
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
-import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
+import type { MonitorListSortField } from '../../../../../../../common/runtime_types/schemas/sort_field';
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
