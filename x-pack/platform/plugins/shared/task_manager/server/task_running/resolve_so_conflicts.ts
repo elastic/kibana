@@ -21,8 +21,8 @@ import type { Updatable } from './task_runner';
 const MAX_ATTEMPTS = 3;
 
 export function getTaskReclaimReason(
-  currentTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts' | 'startedAt'>,
-  originalTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts' | 'startedAt'>
+  currentTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts'>,
+  originalTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts'>
 ): string | undefined {
   if (currentTask.ownerId !== originalTask.ownerId) {
     return 'task has been claimed by another worker';
@@ -32,9 +32,7 @@ export function getTaskReclaimReason(
     return 'task attempts has been updated by another worker';
   }
 
-  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
-    return 'task startedAt has been updated by another worker';
-  }
+  // `startedAt` is deliberately not checked: the only writer of a non-null value is the claim, which always bumps `attempts` and sets `ownerId`, so the checks above already catch a competing claim.
 
   return undefined;
 }
@@ -133,14 +131,6 @@ async function resolveTaskDocumentConflictsOnce({
       `Unable to resolve task document conflicts for task "${label}": ${reclaimReason}`
     );
   }
-
-  if (currentTask.attempts !== originalTask.attempts) {
-    throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${label}": task attempts has been updated by another worker`
-    );
-  }
-
-  // `startedAt` is deliberately not checked: the only writer of a non-null value is the claim, which always bumps `attempts` and sets `ownerId`, so the checks above already catch a competing claim.
 
   const scheduleChanged = !isEqual(originalTask.schedule, currentTask.schedule);
   const runAtChanged = originalTask.runAt.valueOf() !== currentTask.runAt.valueOf();
