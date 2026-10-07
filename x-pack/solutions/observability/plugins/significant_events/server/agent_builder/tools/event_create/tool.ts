@@ -97,16 +97,18 @@ export function createEventTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({
-          request,
-        });
+        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
         const data = await createEventToolHandler({
-          eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           eventInput: toolParams,
           alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
           logger,
         });
 

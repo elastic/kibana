@@ -11,6 +11,7 @@ tags:
   - watch
   - watch-hunt
 settings:
+  __WORKER_RUN_AS_LINE__:
   # Per-space: prevents a second sweep from starting while the first is still
   # running. It is not an ordering, atomicity, or gate-wait bound, and it is
   # distinct from report_fan_out's own concurrency.max below, which throttles
@@ -159,6 +160,11 @@ steps:
             # having no output at all.
             huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
             hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
+            # What the hunt prepared, for packaging to compare against what it actually finds
+            # attached (`attach_sse`'s foreach can silently drop an item via `continue`). A
+            # missing hunt output (the step errored outright) has nothing to compare, so this
+            # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
+            expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
