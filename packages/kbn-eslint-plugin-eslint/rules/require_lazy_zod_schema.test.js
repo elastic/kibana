@@ -156,6 +156,19 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     {
       code: dedent`
         import { z } from '@kbn/zod';
+        export const Loose = z.looseObject({ value: z.string() });
+        export const Strict = z.strictObject({ value: z.string() });
+      `,
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Loose = lazySchema(() => z.looseObject({ value: z.string() }));
+        export const Strict = lazySchema(() => z.strictObject({ value: z.string() }));
+      `,
+      errors: [EAGER, EAGER],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
         const createSchema = () => z.object({});
         export const Schema = createSchema();
       `,

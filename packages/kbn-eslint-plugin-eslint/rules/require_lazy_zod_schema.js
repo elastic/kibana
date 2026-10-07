@@ -32,6 +32,7 @@ const AUTO_FIX_SCHEMA_METHODS = new Set([
   'extend',
   'int',
   'literal',
+  'looseObject',
   'max',
   'meta',
   'min',
@@ -45,6 +46,7 @@ const AUTO_FIX_SCHEMA_METHODS = new Set([
   'refine',
   'regex',
   'string',
+  'strictObject',
   'superRefine',
   'tuple',
   'union',
@@ -535,7 +537,10 @@ module.exports = {
     let schemaFactoryCandidates;
 
     const reportEagerSchema = (node, declaration, messageId, fixTarget = node, allowFix = true) => {
-      if (!changedLines.touchesChangedLine(fileChangedLines, declaration)) {
+      if (
+        !changedLines.touchesChangedLine(fileChangedLines, declaration) ||
+        changedLines.isUnchangedInAddedFile(context.filename, sourceCode.getText(declaration))
+      ) {
         return;
       }
       const canFix =

@@ -139,13 +139,52 @@ describe('changed-line scope for require_lazy_zod_schema', () => {
 
     expect(linter.verify(code, config, 'schema.ts')).toEqual([]);
   });
+
+  it('keeps an unchanged declaration moved into an added file and reports a new enum', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 2, end: 3 }]);
+    jest
+      .spyOn(changedLines, 'isUnchangedInAddedFile')
+      .mockImplementation((_filename, declaration) => declaration.includes('Moved = z.enum'));
+    const code = [
+      "import { z } from '@kbn/zod';",
+      "export const Moved = z.enum(['a', 'b']);",
+      "export const Added = z.enum(['c', 'd']);",
+    ].join('\n');
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([
+      expect.objectContaining({ messageId: 'eagerZodSchema', line: 3 }),
+    ]);
+  });
+
+  it('does not treat a changed declaration as an unchanged moved schema', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 2, end: 2 }]);
+    jest.spyOn(changedLines, 'isUnchangedInAddedFile').mockReturnValue(false);
+    const code = ["import { z } from '@kbn/zod';", "export const Moved = z.enum(['a', 'c']);"].join(
+      '\n'
+    );
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([
+      expect.objectContaining({ messageId: 'eagerZodSchema', line: 2 }),
+    ]);
+  });
 });
 
 describe('Git diff hunk lines', () => {
   it('keeps the source path of a renamed file', () => {
     expect(changedLines.parseChangedFiles('R100\0old.ts\0new.ts\0M\0other.ts\0')).toEqual({
       changedFiles: new Set(['new.ts', 'other.ts']),
+      addedFiles: new Set(),
+      baseSourceFiles: new Set(['old.ts', 'other.ts']),
       renamedFiles: new Map([['new.ts', 'old.ts']]),
+    });
+  });
+
+  it('tracks added files separately from renamed files', () => {
+    expect(changedLines.parseChangedFiles('A\0new.ts\0R100\0old.ts\0renamed.ts\0')).toEqual({
+      changedFiles: new Set(['new.ts', 'renamed.ts']),
+      addedFiles: new Set(['new.ts']),
+      baseSourceFiles: new Set(['old.ts']),
+      renamedFiles: new Map([['renamed.ts', 'old.ts']]),
     });
   });
 
@@ -156,5 +195,23 @@ describe('Git diff hunk lines', () => {
       { start: 6, end: 7 },
       { start: 11, end: 11 },
     ]);
+  });
+
+  it('keeps removed source declarations in contiguous chunks', () => {
+    expect(
+      changedLines.parseRemovedSourceChunks(
+        "@@ -1,2 +0,0 @@\n-export const Moved =\n-  z.enum(['a']);\n@@ -5 +3,0 @@\n-const Other = true;\n"
+      )
+    ).toEqual(["export const Moved =\n  z.enum(['a']);", 'const Other = true;']);
+  });
+
+  it('matches an exact moved declaration and rejects a changed declaration', () => {
+    const removed = ["export const Moved = z.enum(['a', 'b']);"];
+    expect(
+      changedLines.isDeclarationInRemovedSource("const Moved = z.enum(['a', 'b']);", removed)
+    ).toBe(true);
+    expect(
+      changedLines.isDeclarationInRemovedSource("const Moved = z.enum(['a', 'c']);", removed)
+    ).toBe(false);
   });
 });

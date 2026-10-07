@@ -15,7 +15,7 @@ const ROOT = path.resolve(__dirname, '../../..');
 
 /** @typedef {{ start: number; end: number }} LineRange */
 
-/** @type {{ base: string; changedFiles: Set<string>; renamedFiles: Map<string, string>; untrackedFiles: Set<string>; capturedAt: number } | null | undefined} */
+/** @type {{ base: string; changedFiles: Set<string>; addedFiles: Set<string>; baseSourceFiles: Set<string>; removedSourceChunks: string[] | null; renamedFiles: Map<string, string>; untrackedFiles: Set<string>; capturedAt: number } | null | undefined} */
 let snapshot;
 
 /**
@@ -35,6 +35,8 @@ const git = (args) =>
  */
 const parseChangedFiles = (status) => {
   const changedFiles = new Set();
+  const addedFiles = new Set();
+  const baseSourceFiles = new Set();
   const renamedFiles = new Map();
   const entries = status.split('\0');
   for (let index = 0; index < entries.length - 1; ) {
@@ -44,11 +46,19 @@ const parseChangedFiles = (status) => {
       const newPath = entries[index++];
       changedFiles.add(newPath);
       renamedFiles.set(newPath, oldPath);
+      if (/\.(?:[cm]?[jt]sx?)$/.test(oldPath)) {
+        baseSourceFiles.add(oldPath);
+      }
     } else {
       changedFiles.add(oldPath);
+      if (code.startsWith('A')) {
+        addedFiles.add(oldPath);
+      } else if (/^(?:M|D)/.test(code) && /\.(?:[cm]?[jt]sx?)$/.test(oldPath)) {
+        baseSourceFiles.add(oldPath);
+      }
     }
   }
-  return { changedFiles, renamedFiles };
+  return { changedFiles, addedFiles, baseSourceFiles, renamedFiles };
 };
 
 /**
@@ -77,13 +87,16 @@ const getSnapshot = () => {
       return snapshot;
     }
 
-    const { changedFiles, renamedFiles } = parseChangedFiles(
+    const { changedFiles, addedFiles, baseSourceFiles, renamedFiles } = parseChangedFiles(
       git(['diff', '--name-status', '-z', '--find-renames', base, '--'])
     );
     snapshot = {
       base,
       capturedAt,
       changedFiles,
+      addedFiles,
+      baseSourceFiles,
+      removedSourceChunks: null,
       renamedFiles,
       untrackedFiles: new Set(
         git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0')
@@ -174,4 +187,88 @@ const touchesChangedLine = (ranges, node) =>
       ranges.some(({ start, end }) => start <= node.loc.end.line && end >= node.loc.start.line)
   );
 
-module.exports = { getChangedLines, parseChangedFiles, parseChangedLines, touchesChangedLine };
+/**
+ * Parses contiguous removed source lines from a zero-context diff.
+ * @param {string} diff
+ * @returns {string[]}
+ */
+const parseRemovedSourceChunks = (diff) => {
+  const chunks = [];
+  let current = [];
+  const flush = () => {
+    if (current.length > 0) {
+      chunks.push(current.join('\n'));
+      current = [];
+    }
+  };
+  for (const line of diff.split('\n')) {
+    if (line.startsWith('-') && !line.startsWith('---')) {
+      current.push(line.slice(1));
+    } else {
+      flush();
+    }
+  }
+  flush();
+  return chunks;
+};
+
+/**
+ * Gets contiguous source text removed from changed source files.
+ * @param {string} base
+ * @param {Set<string>} files
+ * @returns {string[]}
+ */
+const getRemovedSourceChunks = (base, files) => {
+  if (files.size === 0) {
+    return [];
+  }
+  const diff = git(['diff', '--no-ext-diff', '--no-color', '--unified=0', base, '--', ...files]);
+  return parseRemovedSourceChunks(diff);
+};
+
+/**
+ * @param {string} declaration
+ * @param {string[]} removedSourceChunks
+ * @returns {boolean}
+ */
+const isDeclarationInRemovedSource = (declaration, removedSourceChunks) =>
+  removedSourceChunks.some((chunk) => chunk.includes(declaration));
+
+/**
+ * Checks whether an exact declaration in an added file already existed in the base tree.
+ * @param {string} filename
+ * @param {string} declaration
+ * @returns {boolean}
+ */
+const isUnchangedInAddedFile = (filename, declaration) => {
+  if (!snapshot || typeof filename !== 'string' || !path.isAbsolute(filename)) {
+    return false;
+  }
+  const relative = path.relative(ROOT, filename).split(path.sep).join('/');
+  if (!snapshot.addedFiles.has(relative) || !declaration.trim()) {
+    return false;
+  }
+
+  try {
+    if (snapshot.removedSourceChunks === null) {
+      snapshot.removedSourceChunks = getRemovedSourceChunks(
+        snapshot.base,
+        snapshot.baseSourceFiles
+      );
+    }
+    return isDeclarationInRemovedSource(declaration, snapshot.removedSourceChunks);
+  } catch {
+    return false;
+  }
+};
+
+module.exports = {
+  getChangedLines,
+  getRemovedSourceChunks,
+  parseRemovedSourceChunks,
+  isUnchangedInAddedFile,
+  isDeclarationInRemovedSource,
+  parseChangedFiles,
+  parseChangedLines,
+  touchesChangedLine,
+};
