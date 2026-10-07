@@ -74,7 +74,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expression: "env == 'production' && region == 'us-west-2'",
     });
     expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
-    expect(response.body.throttle).toStrictEqual({ interval: '5m' });
+    expect(response.body.throttle).toStrictEqual({
+      strategy: 'per_status_interval',
+      interval: '5m',
+    });
     expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
     // API key ownership is server-side only and must never be exposed over the wire.
     expect(response.body.auth).toBeUndefined();
@@ -109,7 +112,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         expression: "env == 'production' && region == 'us-east-1'",
       });
       expect(response.body.group_by).toStrictEqual(['service.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '1m' });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '1m',
+      });
     }
   );
 
@@ -140,7 +146,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       ]);
       expect(response.body.matcher).toMatchObject({ expression: "env == 'production'" });
       expect(response.body.group_by).toStrictEqual(['service.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '1m' });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '1m',
+      });
     }
   );
 
@@ -177,7 +186,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         expression: "env == 'staging' && region == 'eu-central-1'",
       });
       expect(response.body.group_by).toStrictEqual(['service.name', 'host.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '15m' });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '15m',
+      });
     }
   );
 
@@ -210,7 +222,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.description).toBe('dest-policy description');
       expect(response.body.matcher).toMatchObject({ expression: "env == 'staging'" });
       expect(response.body.group_by).toStrictEqual(['host.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '2m' });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '2m',
+      });
     }
   );
 

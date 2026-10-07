@@ -26,7 +26,7 @@ Use \`set_destinations\` to choose which workflows receive notifications (email,
 
 #### \`operation: \\"set_matcher\\"\`
 
-Use \`set_matcher\` to limit which alerts this policy notifies on. An empty or null matcher matches all alerts in the space.
+Use \`set_matcher\` to limit which alerts this policy notifies on. A null matcher matches all alerts in the space; an empty matcher is rejected, so use null instead.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -74,7 +74,7 @@ exports[
 | \`name\` | string | required | The name of the action policy. (min length: 1, max length: 256) |
 | \`description\` | string | optional | A description of the action policy. Absent when the policy has none; send \`null\` on PATCH to clear it. (max length: 1024) |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
-| \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those routing tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. When both \`tags\` and \`expression\` are omitted, the policy applies to all alerts. |
+| \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those routing tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. At least one of \`tags\` and \`expression\` must be set, so an empty \`matcher\` is rejected. Omit \`matcher\` entirely for a catch-all policy that applies to all alerts. |
 | \`group_by\` | string[] | optional | The fields used to group alerts, read by the \`per_field\` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send \`null\` on PATCH to clear it. (min items: 1, max items: 16) |
 | \`grouping_mode\` | \\"per_alert\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. Absent falls back to \`per_alert\`; send \`null\` on PATCH to clear it. |
 | \`throttle\` | object | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send \`null\` on PATCH to clear it. |"

@@ -34,6 +34,10 @@ const unwrap = (schema: z.ZodType): z.ZodType => {
  * object leaves merge independently, arrays and unions are replaced whole, `null` clears a key and
  * absent keys preserve it. The result never contains `null`, so cleared keys are simply gone.
  *
+ * An object left with no keys is cleared along with them, innermost first, because `{}` is not a
+ * value the create schemas accept: clearing the last leaf of a matcher or a throttle clears the
+ * whole block rather than failing validation.
+ *
  * Shared by the rules and action policy clients so the two resources cannot disagree about what a
  * PATCH means. The result is a candidate document, not a validated one — parse it with the create
  * schema before storing it.
@@ -58,11 +62,14 @@ export const applyPatch = (
     const core = field && unwrap(field);
 
     if (core && defOf(core).type === 'object') {
-      merged[key] = applyPatch(
+      const nested = applyPatch(
         core as z.ZodObject<z.core.$ZodShape>,
         merged[key] as Record<string, unknown> | undefined,
         value as Record<string, unknown>
       );
+
+      if (Object.keys(nested).length === 0) delete merged[key];
+      else merged[key] = nested;
       continue;
     }
 

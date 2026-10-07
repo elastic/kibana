@@ -303,7 +303,6 @@ export const ManageDashboardsPopover = ({
         data: { dashboard_id: dashboardId },
       };
     });
-    // Unselecting every dashboard clears the field, which PATCH spells as `null`.
     onSave(mapArtifacts([...otherArtifacts, ...draftDashboardArtifacts]) ?? null);
   }, [existingDashboardArtifacts, onSave, otherArtifacts, selectedIds]);
 

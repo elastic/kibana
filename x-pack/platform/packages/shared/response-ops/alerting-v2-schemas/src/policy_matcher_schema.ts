@@ -37,9 +37,18 @@ export const POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION = `${EXPRESSION_LEAD} O
 const MATCHER_LEAD =
   'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply.';
 
-export const POLICY_MATCHER_DESCRIPTION = `${MATCHER_LEAD} When both \`tags\` and \`expression\` are omitted, the policy applies to all alerts.`;
+export const POLICY_MATCHER_DESCRIPTION = `${MATCHER_LEAD} At least one of \`tags\` and \`expression\` must be set, so an empty \`matcher\` is rejected. Omit \`matcher\` entirely for a catch-all policy that applies to all alerts.`;
 
-export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` to clear it. When \`matcher\` is \`null\`, or when the merged \`tags\` and \`expression\` are both absent, the policy applies to all alerts.`;
+export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` for a catch-all policy that applies to all alerts. An empty \`matcher\` is rejected; clearing the last of \`tags\` and \`expression\` clears the matcher itself, which is also a catch-all.`;
+
+const MATCHER_AT_LEAST_ONE_MESSAGE =
+  'matcher must set at least one of `tags`, `expression`; omit `matcher` (create) or send `matcher: null` (PATCH) for a catch-all policy.';
+
+/** `null` counts as naming a leaf: a PATCH clearing one of the two still says which. */
+const namesAMatcherLeaf = (matcher: {
+  tags?: string[] | null;
+  expression?: string | null;
+}): boolean => matcher.tags !== undefined || matcher.expression !== undefined;
 
 const matcherTagsSchema = z
   .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
@@ -53,7 +62,8 @@ export const policyMatcherSchema = z
     tags: matcherTagsSchema.optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
     expression: matcherExpressionSchema.optional().describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
   })
-  .strict();
+  .strict()
+  .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE });
 
 export type PolicyMatcher = z.infer<typeof policyMatcherSchema>;
 
@@ -65,4 +75,5 @@ export const policyMatcherPatchSchema = z
       .optional()
       .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
   })
-  .strict();
+  .strict()
+  .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE });

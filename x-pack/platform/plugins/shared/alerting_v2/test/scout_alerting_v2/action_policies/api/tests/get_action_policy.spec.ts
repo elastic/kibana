@@ -65,7 +65,10 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         expression: "env == 'production' && region == 'us-east-1'",
       });
       expect(response.body.group_by).toStrictEqual(['service.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '10m' });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '10m',
+      });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
       expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
       // Actors are structured objects, not the legacy bare profile-UID string.

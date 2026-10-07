@@ -55,18 +55,20 @@ const toApiDescription = (
   description: ActionPolicySavedObjectAttributes['description']
 ): ActionPolicyResponse['description'] => description || undefined;
 
-/** Policies stored before the API rejected empty sentinels can hold `tags: []` or `expression: ''`, both meaning "no constraint". */
-const toApiMatcher = (
-  matcher: ActionPolicySavedObjectAttributes['matcher']
+/**
+ * The single matcher representation, shared by storage and the API: a matcher that constrains
+ * nothing is no matcher at all, so a legacy document holding `{}`, `tags: []` or `expression: ''`
+ * reads the same as a catch-all policy.
+ */
+const normalizeMatcher = (
+  matcher: { tags?: string[] | null; expression?: string | null } | null | undefined
 ): ActionPolicyResponse['matcher'] => {
-  if (matcher == null) return undefined;
-
-  const tags = matcher.tags?.length ? matcher.tags : undefined;
-  const expression = matcher.expression || undefined;
+  const tags = matcher?.tags?.length ? matcher.tags : undefined;
+  const expression = matcher?.expression || undefined;
 
   if (tags === undefined && expression === undefined) return undefined;
 
-  return { tags, expression };
+  return { ...(tags ? { tags } : {}), ...(expression ? { expression } : {}) };
 };
 
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
@@ -85,7 +87,7 @@ export const toPatchableActionPolicyData = (
   name: attributes.name,
   description: toApiDescription(attributes.description),
   destinations: attributes.destinations,
-  matcher: toApiMatcher(attributes.matcher),
+  matcher: normalizeMatcher(attributes.matcher),
   group_by: toApiGroupBy(attributes.groupBy),
   grouping_mode: attributes.groupingMode ?? undefined,
   throttle: normalizeThrottle(attributes.throttle),
@@ -102,7 +104,7 @@ const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   name: data.name,
   description: data.description || undefined,
   destinations: data.destinations,
-  matcher: data.matcher,
+  matcher: normalizeMatcher(data.matcher),
   groupBy: data.group_by,
   groupingMode: data.grouping_mode,
   throttle: normalizeThrottle(data.throttle),
@@ -179,7 +181,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     description: toApiDescription(attributes.description),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: toApiMatcher(attributes.matcher),
+    matcher: normalizeMatcher(attributes.matcher),
     group_by: toApiGroupBy(attributes.groupBy),
     grouping_mode: attributes.groupingMode ?? undefined,
     throttle: normalizeThrottle(attributes.throttle),

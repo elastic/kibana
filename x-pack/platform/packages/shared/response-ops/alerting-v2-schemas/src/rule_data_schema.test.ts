@@ -1015,8 +1015,6 @@ describe('createRuleDataSchema', () => {
   describe('artifacts empty-array rejection', () => {
     const artifact = { id: 'artifact-1', type: 'host', data: { value: 'host-a' } };
 
-    // "No artifacts" has one spelling: an absent key. An empty array would be a second one, and
-    // the clear on PATCH is `null`. Replace reuses `createRuleDataSchema`, so it shares the bound.
     it('rejects an empty array on create and replace', () => {
       const result = createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [] });
       expect(result.success).toBe(false);

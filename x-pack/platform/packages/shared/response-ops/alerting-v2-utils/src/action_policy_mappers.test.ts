@@ -12,7 +12,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
   it('fills required defaults for empty data', () => {
     const result = attachmentDataToActionPolicyPayload({});
 
-    // `description` is optional, so an absent one stays absent rather than becoming `''`.
     expect(result).toEqual({
       name: '',
       destinations: [],
@@ -54,5 +53,16 @@ describe('attachmentDataToActionPolicyPayload', () => {
     const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.matcher).toEqual({ tags: ['critical'] });
+  });
+
+  // The API rejects a matcher that constrains nothing, so a catch-all attachment omits the key.
+  it.each([{}, { tags: [] }, { expression: '' }])('omits a matcher set to %p', (matcher) => {
+    const result = attachmentDataToActionPolicyPayload({
+      name: 'Catch-all Policy',
+      destinations: [{ type: 'workflow', id: 'wf-1' }],
+      matcher,
+    });
+
+    expect(result).not.toHaveProperty('matcher');
   });
 });

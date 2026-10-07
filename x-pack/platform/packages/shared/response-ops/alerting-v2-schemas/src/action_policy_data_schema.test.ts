@@ -375,10 +375,8 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.matcher).toBeNull();
     });
 
-    it('accepts a matcher that omits both sub-fields', () => {
-      const result = updateActionPolicyDataSchema.parse({ matcher: {} });
-
-      expect(result.matcher).toEqual({});
+    it('rejects a matcher that omits both sub-fields', () => {
+      expect(updateActionPolicyDataSchema.safeParse({ matcher: {} }).success).toBe(false);
     });
 
     it('accepts a matcher that sets one sub-field and leaves the other out', () => {
@@ -543,6 +541,40 @@ describe('action policy optional fields are never empty', () => {
 
     it('accepts null on patch, which clears the whole block', () => {
       expect(updateActionPolicyDataSchema.parse({ throttle: null })).toEqual({ throttle: null });
+    });
+  });
+
+  describe('matcher', () => {
+    it.each(writeSchemas)('rejects an empty object on %s', (_label, schema) => {
+      const result = schema.safeParse({ ...base, matcher: {} });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toContain('at least one of `tags`, `expression`');
+    });
+
+    it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, matcher: null }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('accepts one leaf alone on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, matcher: { tags: ['prod'] } }).success).toBe(true);
+      expect(schema.safeParse({ ...base, matcher: { expression: 'severity: 1' } }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects an empty object on patch', () => {
+      expect(updateActionPolicyDataSchema.safeParse({ matcher: {} }).success).toBe(false);
+    });
+
+    // Clearing a leaf still names one, and the merge clears the matcher once both are gone.
+    it('accepts a cleared leaf on patch', () => {
+      expect(updateActionPolicyDataSchema.parse({ matcher: { tags: null } })).toEqual({
+        matcher: { tags: null },
+      });
+    });
+
+    it('accepts null on patch, which clears the whole matcher', () => {
+      expect(updateActionPolicyDataSchema.parse({ matcher: null })).toEqual({ matcher: null });
     });
   });
 

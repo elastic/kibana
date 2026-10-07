@@ -130,4 +130,46 @@ describe('applyPatch', () => {
   it('produces a document the create schema accepts', () => {
     expect(createSchema.safeParse(merge({ matcher: { tags: null } })).success).toBe(true);
   });
+
+  describe('clearing the last leaf of an object', () => {
+    it('clears the object too', () => {
+      const merged = applyPatch(
+        createSchema,
+        { name: 'n', matcher: { tags: ['a'] } },
+        { matcher: { tags: null } }
+      );
+
+      expect(merged).not.toHaveProperty('matcher');
+    });
+
+    it('collapses innermost first, so an emptied parent goes with it', () => {
+      const merged = applyPatch(
+        createSchema,
+        { name: 'n', state_transition: { pending: { occurrences: 1 } } },
+        { state_transition: { pending: { occurrences: null } } }
+      );
+
+      expect(merged).not.toHaveProperty('state_transition');
+    });
+
+    it('keeps a parent that still has another child', () => {
+      const merged = applyPatch(
+        createSchema,
+        { name: 'n', state_transition: { pending: { occurrences: 1, timeframe: '5m' } } },
+        { state_transition: { pending: { occurrences: null } } }
+      );
+
+      expect(merged).toEqual({ name: 'n', state_transition: { pending: { timeframe: '5m' } } });
+    });
+
+    it('leaves a document the create schema still accepts', () => {
+      const merged = applyPatch(
+        createSchema,
+        { name: 'n', kind: 'alert', matcher: { tags: ['a'] } },
+        { matcher: { tags: null } }
+      );
+
+      expect(createSchema.safeParse(merged).success).toBe(true);
+    });
+  });
 });

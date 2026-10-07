@@ -937,6 +937,15 @@ describe('ActionPolicyClient', () => {
         expect(res.matcher).toEqual({ tags: ['prod'] });
       });
 
+      // `{}` is not a matcher any write accepts, so losing the last leaf clears the block itself
+      // and the policy becomes a catch-all.
+      it('clears the matcher when its last leaf goes', async () => {
+        const res = await patch({ matcher: { tags: null, expression: null } });
+
+        expect(toStoredDocument(storedByUpdate())).not.toHaveProperty('matcher');
+        expect(res.matcher).toBeUndefined();
+      });
+
       it('sets one throttle leaf and keeps its sibling', async () => {
         const res = await patch({ throttle: { interval: '10m' } });
 

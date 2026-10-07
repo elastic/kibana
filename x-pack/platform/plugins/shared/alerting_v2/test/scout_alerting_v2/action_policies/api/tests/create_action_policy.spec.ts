@@ -416,6 +416,17 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
+  // A catch-all policy omits `matcher`; `{}` would be a second spelling for the same thing.
+  apiTest('validation: rejects an empty matcher object', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({}), matcher: {} },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest('validation: rejects an empty throttle object', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

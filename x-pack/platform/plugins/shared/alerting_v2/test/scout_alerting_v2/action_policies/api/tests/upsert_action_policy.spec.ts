@@ -132,6 +132,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(
       await put({ ...buildCreateActionPolicyData({ name: 'empty-throttle' }), throttle: {} })
     ).toHaveStatusCode(400);
+    expect(
+      await put({ ...buildCreateActionPolicyData({ name: 'empty-matcher' }), matcher: {} })
+    ).toHaveStatusCode(400);
   });
 
   apiTest('matcher: scopes a policy to rules via tags on create-via-PUT', async ({ apiClient }) => {

@@ -18,7 +18,7 @@ export const attachmentDataToActionPolicyPayload = (
   name: data.name ?? '',
   destinations: data.destinations ?? [],
   ...(data.description ? { description: data.description } : {}),
-  ...(data.matcher !== undefined ? { matcher: data.matcher } : {}),
+  ...(data.matcher?.tags?.length || data.matcher?.expression ? { matcher: data.matcher } : {}),
   ...(data.group_by?.length ? { group_by: data.group_by } : {}),
   ...(data.grouping_mode !== undefined ? { grouping_mode: data.grouping_mode } : {}),
   ...(data.throttle !== undefined ? { throttle: data.throttle } : {}),

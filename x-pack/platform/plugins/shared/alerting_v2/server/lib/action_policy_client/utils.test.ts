@@ -127,14 +127,34 @@ describe('reading legacy empty sentinels', () => {
     expect(result.throttle).toStrictEqual({ strategy: 'on_status_change' });
   });
 
+  it.each([{}, { tags: [] }, { expression: '' }, { tags: [], expression: '' }])(
+    'projects a matcher that constrains nothing as absent: %p',
+    (matcher) => {
+      const result = read({ matcher });
+      expect(result.matcher).toBeUndefined();
+      expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+    }
+  );
+
+  it('keeps the leaf a legacy matcher does constrain', () => {
+    const result = read({ matcher: { tags: [], expression: 'severity: 1' } });
+    expect(result.matcher).toStrictEqual({ expression: 'severity: 1' });
+  });
+
   it('offers the same normalised view to a patch merge', () => {
     const patchable = toPatchableActionPolicyData(
-      storedAttributes({ description: '', groupBy: [], throttle: { interval: '5m' } })
+      storedAttributes({
+        description: '',
+        groupBy: [],
+        throttle: { interval: '5m' },
+        matcher: {},
+      })
     );
 
     expect(patchable.description).toBeUndefined();
     expect(patchable.group_by).toBeUndefined();
     expect(patchable.throttle).toBeUndefined();
+    expect(patchable.matcher).toBeUndefined();
   });
 });
 
@@ -170,5 +190,17 @@ describe('writing optional fields', () => {
     });
 
     expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('description');
+  });
+
+  it('stores a matcher that constrains nothing as an absent key', () => {
+    const attrs = buildUpdateActionPolicyAttributes({
+      existing: storedAttributes({ matcher: { tags: ['prod'] } }),
+      data: { ...data, matcher: {} },
+      auth,
+      updatedBy: null,
+      updatedAt: '2026-10-07T00:00:01.000Z',
+    });
+
+    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('matcher');
   });
 });

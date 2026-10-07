@@ -53,7 +53,7 @@ export const setMatcherOperationSchema = z
       .describe('Structured matcher for alerts, or null for a catch-all.'),
   })
   .describe(
-    'Use `set_matcher` to limit which alerts this policy notifies on. An empty or null matcher matches all alerts in the space.'
+    'Use `set_matcher` to limit which alerts this policy notifies on. A null matcher matches all alerts in the space; an empty matcher is rejected, so use null instead.'
   );
 
 export const setGroupingOperationSchema = z
@@ -180,7 +180,6 @@ export const executeActionPolicyOperations = (
       }
 
       case 'set_throttle': {
-        // A throttle configures nothing without a strategy, so there is no partial block to build.
         const strategy = op.strategy ?? next.throttle?.strategy;
         if (strategy === undefined) {
           throw new ActionPolicyOperationValidationError(

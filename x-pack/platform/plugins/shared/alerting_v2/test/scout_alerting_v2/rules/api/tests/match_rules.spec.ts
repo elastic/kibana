@@ -139,7 +139,6 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
       for (const body of [
         {},
         { matcher: null },
-        { matcher: {} },
         { matcher: { expression: 'data.host.name: "host-1"' } },
       ]) {
         const response = await apiClient.post(MATCH_RULES_URL, { headers: readerHeaders, body });
@@ -166,17 +165,21 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
     expect(response.body.per_page).toBe(1);
   });
 
-  apiTest('validation: should return 400 when a matcher field is null', async ({ apiClient }) => {
-    for (const matcher of [{ tags: null }, { expression: null }]) {
-      const response = await apiClient.post(MATCH_RULES_URL, {
-        headers: readerHeaders,
-        body: { matcher },
-      });
+  // A catch-all is spelled by omitting `matcher` or sending `null`, never by an empty object.
+  apiTest(
+    'validation: should return 400 for an empty or half-null matcher',
+    async ({ apiClient }) => {
+      for (const matcher of [{}, { tags: null }, { expression: null }]) {
+        const response = await apiClient.post(MATCH_RULES_URL, {
+          headers: readerHeaders,
+          body: { matcher },
+        });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
     }
-  });
+  );
 
   apiTest('validation: should return 400 for unknown top-level keys', async ({ apiClient }) => {
     const response = await apiClient.post(MATCH_RULES_URL, {

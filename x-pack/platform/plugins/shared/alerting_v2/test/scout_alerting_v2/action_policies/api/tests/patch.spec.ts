@@ -225,6 +225,8 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
       expect(await patch({ group_by: [] })).toHaveStatusCode(400);
       // A throttle is cleared whole, with `throttle: null`, never by nulling its strategy.
       expect(await patch({ throttle: { strategy: null } })).toHaveStatusCode(400);
+      // A matcher that constrains nothing is spelled `matcher: null`, not `{}`.
+      expect(await patch({ matcher: {} })).toHaveStatusCode(400);
 
       const after = await actionPolicySavedObject.getAttributes(created.id);
       expect(after).toStrictEqual(before);
@@ -248,6 +250,46 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     const after = await actionPolicySavedObject.getAttributes(created.id);
     expect(after.throttle).toStrictEqual({ strategy: 'time_interval', interval: '5m' });
   });
+
+  apiTest(
+    'clears the matcher when its last leaf goes, leaving a catch-all policy',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+      const created = await actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'patch-matcher-last-leaf',
+          matcher: { tags: ['prod'] },
+        })
+      );
+
+      await actionPolicies.patch(created.id, { matcher: { tags: null } });
+
+      // `{}` is not a matcher any write accepts, so the merge clears the block with its last leaf.
+      const after = await actionPolicySavedObject.getAttributes(created.id);
+      expect(Object.keys(after)).not.toContain('matcher');
+      expect(findNullPaths(after)).toStrictEqual([]);
+
+      const fetched = await actionPolicies.get(created.id);
+      expect(Object.keys(fetched)).not.toContain('matcher');
+
+      // Absent is not just tidy on disk: the policy now applies to a rule with no routing tags.
+      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
+      );
+      const matched = await apiClient.post(testData.INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+        body: { rule: {} },
+      });
+
+      expect(matched).toHaveStatusCode(200);
+      expect(
+        matched.body.items.find(
+          (item: { action_policy: { id: string }; category: string }) =>
+            item.action_policy.id === created.id
+        )?.category
+      ).toBe('catch_all');
+    }
+  );
 
   apiTest('never writes enabled or the snooze state', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;

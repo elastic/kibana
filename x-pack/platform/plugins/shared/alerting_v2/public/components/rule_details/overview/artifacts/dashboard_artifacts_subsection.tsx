@@ -273,7 +273,6 @@ export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = (
       {
         id: rule.id,
         payload: {
-          // Deleting the last artifact clears the field, which PATCH spells as `null`.
           artifacts:
             mapArtifacts(
               (rule.artifacts ?? []).filter((artifact) => artifact.id !== artifactIdPendingDelete)
