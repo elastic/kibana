@@ -193,7 +193,7 @@ describe('LandingPage', () => {
 
         renderPage();
 
-        expect(screen.queryByText('Enable your workers') != null).toBe(onboarding);
+        expect(screen.queryByText('AlertZero in 90 seconds') != null).toBe(onboarding);
         expect(screen.queryByTestId('conversations-page') != null).toBe(!onboarding);
       }
     );
