@@ -107,6 +107,8 @@ export interface OverviewSlotRenderProps {
   conversation: Conversation;
   attachmentsService: AttachmentServiceStartContract;
   proposedActionsContent?: React.ReactNode;
+  /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
+  proposedActionsCount?: React.ReactNode;
 }
 
 /**

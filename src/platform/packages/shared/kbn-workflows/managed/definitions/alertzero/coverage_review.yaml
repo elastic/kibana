@@ -145,7 +145,7 @@ steps:
       metadata:
         status: open
         description: "{{ steps.gap.output.description }}"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # Manual mode only: ask the analyst before any work on this gap starts. Assisted mode
   # skips this step and goes directly to the check.
