@@ -58,7 +58,8 @@ describe('AutomationsPage', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { nightshift: { manage: true } } },
+        application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
+        http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
     });

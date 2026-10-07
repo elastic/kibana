@@ -46,12 +46,15 @@ const runRange = {
 describe('AutomationDetailFlyout edit lifecycle', () => {
   const onClose = jest.fn();
   const mutate = jest.fn();
+  const navigateToUrl = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mutate.mockReset();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        application: { navigateToUrl },
+        http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
     });
@@ -158,18 +161,30 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('blocks route changes with unsaved changes until they are discarded', () => {
+  it('blocks route changes with unsaved changes and replays the app path without its prefix', () => {
     const history = renderFlyout();
 
     startEditing();
     renameTo('Renamed');
-    act(() => history.push('/automations'));
+    act(() => history.push('/app/nightshift/automations'));
 
     expect(history.location.pathname).toBe('/automations/automation-1');
     fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
 
     expect(history.location.pathname).toBe('/automations');
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('opens another app after discarding unsaved changes', () => {
+    const history = renderFlyout();
+
+    startEditing();
+    renameTo('Renamed');
+    act(() => history.push('/app/discover'));
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/discover');
+    expect(history.location.pathname).toBe('/automations/automation-1');
   });
 
   it.each([

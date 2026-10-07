@@ -35,6 +35,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import { NIGHTSHIFT_APP_ROUTE } from '../../../common/constants';
+import { useKibana } from '../../hooks/use_kibana';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
   toAutomationFormValues,
@@ -144,6 +146,10 @@ export const AutomationDetailFlyout = ({
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const {
+    application,
+    http: { basePath },
+  } = useKibana().services;
   const { pathname, search } = useLocation();
   const statusParam = new URLSearchParams(search).get('status');
   const initialRunFilter = STATUSES.find((status) => status === statusParam);
@@ -227,9 +233,16 @@ export const AutomationDetailFlyout = ({
   useEffect(() => {
     if (!exit || isEditing) return;
     setExit(undefined);
-    if (exit.path) history.push(exit.path);
-    else onClose();
-  }, [exit, isEditing, history, onClose]);
+    if (!exit.path) {
+      onClose();
+      return;
+    }
+    if (exit.path.startsWith(NIGHTSHIFT_APP_ROUTE)) {
+      history.push(exit.path.slice(NIGHTSHIFT_APP_ROUTE.length) || '/');
+      return;
+    }
+    void application.navigateToUrl(basePath.prepend(exit.path));
+  }, [exit, isEditing, history, onClose, application, basePath]);
   const selectAutomation = (selected: Automation) =>
     navigate(`/automations/${selected.id}${isRunsTab ? '/runs' : ''}`);
   useEffect(() => {
