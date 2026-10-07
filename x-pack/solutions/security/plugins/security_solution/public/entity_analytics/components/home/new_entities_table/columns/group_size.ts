@@ -22,8 +22,18 @@ import {
   toList,
   buildSortSuffix,
   buildCursorClause,
+  esc,
 } from '../common';
-import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import type {
+  QueryArgs,
+  RunContext,
+  Row,
+  ColumnDescriptor,
+  PageCursor,
+  SortDir,
+  SortPageContext,
+} from '../common';
+import { shouldSplitSort } from './split_sort';
 
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
@@ -146,6 +156,119 @@ const buildGroupSizeSortQuery = (args: QueryArgs): string => {
   return buildUnfilteredGroupSizeSortQuery(args);
 };
 
+// ── large views ───────────────────────────────────────────────────────────────
+
+/**
+ * Groups with aliases in view: count the alias docs per target, then keep the target when it
+ * exists, has an allowed type, passes the entity filters and is not itself an alias (the same
+ * rows the unfiltered query and the count keep). There are few of them.
+ */
+const buildAliasGroupsQuery = (args: QueryArgs): string =>
+  [
+    `FROM ${entityAliasOf(args.namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+    `| STATS alias_count = COUNT(*) BY group_key = ${RESOLVED_TO_FIELD}`,
+    '| RENAME group_key AS `entity.id`',
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildFilterClause(args.entityExpression),
+    `| EVAL ${GROUP_SIZE_FIELD} = alias_count + 1`,
+    `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
+    `| LIMIT ${MAX_ALIAS_GROUPS + 1}`,
+  ].join('\n');
+
+/**
+ * Entities in view that are not aliases, as groups of one, after `afterId` by entity.id. A top
+ * level query, so Lucene sorts and limits it; inside a FROM subquery it reads every entity.id.
+ * Some of them head a group with aliases, so callers ask for that many extra rows.
+ */
+const buildSingleEntitiesQuery = (args: QueryArgs, afterId: string | null, limit: number) =>
+  [
+    `FROM ${entityAliasOf(args.namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildFilterClause(args.entityExpression),
+    ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : []),
+    `| SORT ${ENTITY_ID_FIELD} ASC`,
+    `| LIMIT ${limit}`,
+    `| EVAL ${GROUP_SIZE_FIELD} = TO_LONG(1)`,
+    buildKeepClause(args, GROUP_SIZE_FIELD),
+  ].join('\n');
+
+const groupSizeOf = (row: Row): number => getNumber(row, GROUP_SIZE_FIELD) ?? 1;
+
+/** `SORT group_size <dir>, entity.id ASC` order. */
+const compareGroups =
+  (direction: SortDir) =>
+  (a: Row, b: Row): number => {
+    const bySize = groupSizeOf(a) - groupSizeOf(b);
+    if (bySize !== 0) return direction === 'desc' ? -bySize : bySize;
+    return (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;
+  };
+
+const isAfterCursor =
+  (cursor: PageCursor | null) =>
+  (row: Row): boolean => {
+    if (cursor == null || typeof cursor.sortValue !== 'number') return true;
+    const size = groupSizeOf(row);
+    if (size === cursor.sortValue) return (getEntityId(row) ?? '') > cursor.entityId;
+    return cursor.sortDirection === 'desc' ? size < cursor.sortValue : size > cursor.sortValue;
+  };
+
+/**
+ * One page of rows plus one for views of SPLIT_SORT_MIN_VIEW_SIZE entities or more, without a
+ * search: the groups with aliases and a page of single entities, merged here. Grouping every
+ * entity in one query took about 20s for 10M entities on ECH; this takes 2–5s. Smaller views
+ * and searches keep the single query.
+ */
+const runGroupSizeSortPage = async (
+  args: QueryArgs,
+  { runQuery, viewSize }: SortPageContext
+): Promise<Row[]> => {
+  if (!shouldSplitSort(args, viewSize)) return runQuery(buildGroupSizeSortQuery(args));
+
+  const groups = await runQuery(buildAliasGroupsQuery(args));
+  if (groups.length > MAX_ALIAS_GROUPS) return runQuery(buildGroupSizeSortQuery(args));
+  const groupIds = new Set(entityIdsOf(groups));
+
+  const { cursor } = args;
+  const limit = args.pageSize + 1;
+  // Groups with aliases (size 2 or more) sort before single entities descending, after them
+  // ascending. Skip the singles when the page can't reach them.
+  const groupsAfterCursor = groups.filter(isAfterCursor(cursor)).length;
+  const needsSingles =
+    args.sort.direction === 'desc'
+      ? groupsAfterCursor < limit
+      : cursor == null || cursor.sortValue === 1;
+  // Single entities sort by entity.id: only a cursor among them skips some.
+  const afterId = cursor?.sortValue === 1 ? cursor.entityId : null;
+  const singles = needsSingles
+    ? (await runQuery(buildSingleEntitiesQuery(args, afterId, limit + groupIds.size)))
+        // A target with aliases is in `groups` with its full size.
+        .filter((row) => !groupIds.has(getEntityId(row) ?? ''))
+    : [];
+
+  const page = [...groups, ...singles]
+    .sort(compareGroups(args.sort.direction))
+    .filter(isAfterCursor(cursor))
+    .slice(0, limit);
+
+  // Entity fields of the page's groups with aliases.
+  const pageGroupIds = entityIdsOf(page).filter((id) => groupIds.has(id));
+  if (!pageGroupIds.length) return page;
+  const docs = await runQuery(
+    [
+      `FROM ${entityAliasOf(args.namespace)}`,
+      `| WHERE ${ENTITY_ID_FIELD} IN (${toList(pageGroupIds)})`,
+      buildKeepClause(args),
+    ].join('\n')
+  );
+  const docsById = new Map(docs.map((doc) => [getEntityId(doc), doc]));
+  return page.map((row) => {
+    const id = getEntityId(row);
+    return id != null && groupIds.has(id) ? { ...docsById.get(id), ...row } : row;
+  });
+};
+
 /**
  * Without a search, there is one group per target or standalone entity, and entity filters
  * apply to it: no aggregation or join needed.
@@ -219,5 +342,6 @@ export const groupSizeColumn = {
   isExpandable: false,
   buildSortQuery: buildGroupSizeSortQuery,
   buildCountQuery: buildGroupSizeCountQuery,
+  runSortPage: runGroupSizeSortPage,
   enrichPage: enrichGroupSize,
 } as const satisfies ColumnDescriptor;
