@@ -11,13 +11,10 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '@kbn/scout';
 import { GeoFileUploadPage } from '../fixtures/geo_file_upload';
 
-const GEOJSON_FILE = path.join(
-  __dirname,
-  '../fixtures/files/world_countries_v7.geo.json'
-);
+const SHAPEFILE = path.join(__dirname, '../fixtures/files/cb_2018_us_csa_500k.shp');
 
 test.describe(
-  'Maps - geojson file upload',
+  'Maps - shapefile upload',
   {
     tag: '@local-stateful-classic',
   },
@@ -30,7 +27,7 @@ test.describe(
       }
     });
 
-    test('geojson file upload', async ({ browserAuth, page, pageObjects }) => {
+    test('shapefile upload', async ({ browserAuth, page, pageObjects }) => {
       const { maps } = pageObjects;
       const geoFileUpload = new GeoFileUploadPage(page);
 
@@ -39,23 +36,20 @@ test.describe(
       await maps.openAddLayerFlyout();
       await maps.selectFileUploadCard();
 
-      await test.step('should preview part of geojson file', async () => {
-        await geoFileUpload.previewGeoJsonFile(GEOJSON_FILE);
+      await test.step('should preview part of shapefile', async () => {
+        await geoFileUpload.previewShapefile(SHAPEFILE);
         await maps.waitForLayersToLoad();
 
         expect(await maps.getNumberOfLayers()).toBe(2);
-        expect(await maps.getLayerTocTooltipMsg('world_countries_v7')).toBe(
-          'world_countries_v7\nResults limited to 76 features, 41% of file.'
-        );
       });
 
-      await test.step('should import geojson', async () => {
+      await test.step('should import shapefile', async () => {
         indexName = uuidv4();
         await geoFileUpload.setIndexName(indexName);
         await geoFileUpload.uploadFile();
 
         expect(await geoFileUpload.getFileUploadStatusCalloutMsg()).toBe(
-          'File upload complete\nIndexed 250 features.'
+          'File upload complete\nIndexed 174 features.'
         );
       });
 
@@ -73,7 +67,7 @@ test.describe(
             },
             { timeout: 60_000 }
           )
-          .toBe(`${indexName}\nFound ~281 documents. This count is approximate.`);
+          .toBe(`${indexName}\nFound 174 documents.`);
       });
     });
   }

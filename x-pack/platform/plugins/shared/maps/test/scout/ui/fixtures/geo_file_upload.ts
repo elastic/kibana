@@ -24,6 +24,20 @@ export class GeoFileUploadPage {
     await expect(this.importFileButton).toBeEnabled({ timeout: 30_000 });
   }
 
+  async previewShapefile(shpPath: string) {
+    await this.page.testSubj.locator('geoFilePicker').setInputFiles(shpPath);
+    await this.page.testSubj
+      .locator('shapefileSideCarFilePicker_dbf')
+      .setInputFiles(shpPath.replace('.shp', '.dbf'));
+    await this.page.testSubj
+      .locator('shapefileSideCarFilePicker_prj')
+      .setInputFiles(shpPath.replace('.shp', '.prj'));
+    await this.page.testSubj
+      .locator('shapefileSideCarFilePicker_shx')
+      .setInputFiles(shpPath.replace('.shp', '.shx'));
+    await expect(this.importFileButton).toBeEnabled({ timeout: 30_000 });
+  }
+
   async setIndexName(name: string) {
     await this.fileUploadIndexNameInput.fill(name);
     await expect.poll(() => this.fileUploadIndexNameInput.inputValue()).toBe(name);
