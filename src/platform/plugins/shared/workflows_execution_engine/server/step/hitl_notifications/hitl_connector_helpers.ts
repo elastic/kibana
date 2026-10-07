@@ -30,6 +30,23 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
   return { channelIds: [channel] };
 }
 
+/** Builds Actions params for a Microsoft Teams `sendChannelMessage` call. */
+export function buildTeamsSendChannelMessageInput(
+  teamId: string,
+  channelId: string,
+  content: string
+) {
+  return {
+    subAction: 'sendChannelMessage' as const,
+    subActionParams: {
+      teamId,
+      channelId,
+      content,
+      contentType: 'text' as const,
+    },
+  };
+}
+
 /**
  * Builds Actions params for a Slack v2 `sendMessage` call.
  * Unfurling is off so Slack does not GET the resume URL.

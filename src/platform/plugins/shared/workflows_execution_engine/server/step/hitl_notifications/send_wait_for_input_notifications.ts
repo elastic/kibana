@@ -16,6 +16,7 @@ import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -24,6 +25,17 @@ type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['c
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildDefaultInputTeamsMessage({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
+  return `${prompt}Open form: ${formUrl}`;
 }
 
 function buildDefaultInputSlackMessage({
@@ -200,5 +212,29 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const content =
+      teamsConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: teamsConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : buildDefaultInputTeamsMessage({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(teamId, channelId, content),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

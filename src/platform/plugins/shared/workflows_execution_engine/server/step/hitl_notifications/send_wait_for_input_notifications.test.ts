@@ -86,4 +86,56 @@ describe('sendWaitForInputNotifications', () => {
       'Custom: https://kibana.example/form'
     );
   });
+
+  it('posts a Teams channel message with the form link and an optional message override', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledWith({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: 'teams-1',
+      input: {
+        subAction: 'sendChannelMessage',
+        subActionParams: {
+          teamId: 'team-1',
+          channelId: 'channel-1',
+          contentType: 'text',
+          content: 'Please provide input\n\nOpen form: https://kibana.example/form',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+
+    execute.mockClear();
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: {
+          'connector-id': 'teams-1',
+          'team-id': 'team-1',
+          'channel-id': 'channel-1',
+          message: 'Respond: {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.content).toBe(
+      'Respond: https://kibana.example/form'
+    );
+  });
 });
