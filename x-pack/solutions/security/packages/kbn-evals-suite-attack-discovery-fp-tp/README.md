@@ -16,16 +16,16 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 
 `encoded-powershell` is authored: encoded PowerShell on a workstation vs. an Intune/SCCM box (see [its README](src/scenarios/encoded_powershell/README.md)):
 
-| Example | Situation | World | Gold outcome |
-| --- | --- | --- | --- |
-| `encoded-powershell.fp` | U1 | FP twin | `false_positive` |
-| `encoded-powershell.tp` | U6 | TP twin | `true_positive` |
-| `encoded-powershell.tp-entities-missing` | U6 | TP twin, no entity documents | `true_positive` |
-| `encoded-powershell.fp-entities-missing` | U1 | FP twin, no entity documents | `inconclusive` |
-| `encoded-powershell.tp-events-missing` | U6 | TP twin, no raw events | `inconclusive` |
-| `encoded-powershell.mixed-world` | U1 | FP entities + TP events | `inconclusive` |
-| `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
-| `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
+| Example                                         | Situation | World                                           | Gold outcome     |
+| ----------------------------------------------- | --------- | ----------------------------------------------- | ---------------- |
+| `encoded-powershell.fp`                         | U1        | FP twin                                         | `false_positive` |
+| `encoded-powershell.tp`                         | U6        | TP twin                                         | `true_positive`  |
+| `encoded-powershell.tp-entities-missing`        | U6        | TP twin, no entity documents                    | `true_positive`  |
+| `encoded-powershell.fp-entities-missing`        | U1        | FP twin, no entity documents                    | `inconclusive`   |
+| `encoded-powershell.tp-events-missing`          | U6        | TP twin, no raw events                          | `inconclusive`   |
+| `encoded-powershell.mixed-world`                | U1        | FP entities + TP events                         | `inconclusive`   |
+| `encoded-powershell.failed-missing-ad`          | U6        | No Attack Discovery document                    | `failed`         |
+| `encoded-powershell.failed-missing-cited-alert` | U6        | The discovery cites an alert that is not seeded | `failed`         |
 
 `mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
 
@@ -95,12 +95,12 @@ Run with `--repetitions 5` or more. Each repetition is a separate run in the rep
 
 Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in this PR), 2026-10-05 on the Azure eval farm: 3 repetitions × 23 examples, 0 errored examples, judge `eis-google-gemini-3-1-pro`, 345 commit-pinned golden documents per model. The sweep refuses a judge that is also a candidate, so the gemini family is not measured and no cell is self-judged.
 
-| Evaluator (n) | claude-5-opus | glm-5-3 | gpt-5-5 |
-| --- | --- | --- | --- |
+| Evaluator (n)          | claude-5-opus        | glm-5-3              | gpt-5-5              |
+| ---------------------- | -------------------- | -------------------- | -------------------- |
 | `OutcomeAccuracy` (69) | 0.870 [0.739, 1.000] | 0.841 [0.696, 0.971] | 0.754 [0.580, 0.913] |
-| LLM criteria (63) | 0.997 | 0.892 | 0.995 |
-| `PayloadConformance` | 1.000 | 1.000 | 1.000 |
-| `UnsafeClose` | 1.000 | 1.000 | 1.000 |
+| LLM criteria (63)      | 0.997                | 0.892                | 0.995                |
+| `PayloadConformance`   | 1.000                | 1.000                | 1.000                |
+| `UnsafeClose`          | 1.000                | 1.000                | 1.000                |
 
 `PayloadConformance` and `UnsafeClose` are constant at 1.000 (all models, all repetitions). `trajectory` is N/A: the managed agent declares no tools.
 
@@ -112,7 +112,6 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 ## Follow-ups (sample-workflow removal done)
 
 1. Add the claim-grounding evaluator.
-2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
+2. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
