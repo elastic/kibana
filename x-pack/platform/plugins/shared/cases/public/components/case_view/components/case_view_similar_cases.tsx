@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI } from '../../../../common/ui/types';
+import { SortFieldCase } from '../../../../common/ui/types';
 
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
 import { ColumnsPopover } from '../../all_cases/components/columns_popover';
@@ -25,6 +26,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
+  const [sortField, setSortField] = useState<SortFieldCase>(SortFieldCase.createdAt);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const { pickerColumns, tableColumns, setPickerColumns } = useSimilarCasesColumnsSelection();
 
@@ -33,9 +36,16 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     page: pageIndex + 1,
     perPage: pageSize,
     enabled: true,
+    sortField,
+    sortOrder,
   });
 
-  const tableOnChangeCallback = useCallback(({ page }: EuiBasicTableOnChange) => {
+  const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
+    if (sort) {
+      setSortField(sort.field as SortFieldCase);
+      setSortOrder(sort.direction);
+      setPageIndex(0);
+    }
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
@@ -50,6 +60,11 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
       pageSizeOptions: CASES_TABLE_PER_PAGE_VALUES,
     }),
     [data.total, pageIndex, pageSize]
+  );
+
+  const sorting = useMemo(
+    () => ({ sort: { field: sortField, direction: sortOrder } }),
+    [sortField, sortOrder]
   );
 
   return (
@@ -79,6 +94,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
         pagination={pagination}
         onChange={tableOnChangeCallback}
         selectedColumns={tableColumns}
+        sorting={sorting}
       />
     </div>
   );
