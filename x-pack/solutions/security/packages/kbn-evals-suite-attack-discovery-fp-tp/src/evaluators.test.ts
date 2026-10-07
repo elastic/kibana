@@ -382,6 +382,52 @@ describe('ClaimGrounding', () => {
     expect(result.label).toBe('N/A');
   });
 
+  it('validates claims for an inconclusive verdict instead of returning N/A', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        outcome: 'inconclusive',
+        payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        raw: {
+          ...groundedRun().raw!,
+          // Every world check skipped-or-neutral; the run still emits an
+          // alert_link claim citing an unseeded alert, which must be scored.
+          checks: (
+            groundedRun().raw!.checks as Array<{ name?: string; status?: string; result?: string }>
+          ).map((check) =>
+            check.name === 'alert_linkage'
+              ? { ...check, status: 'completed', result: 'supports' }
+              : { ...check, status: 'skipped', result: 'neutral' }
+          ),
+          claims: {
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'ghost'] },
+          },
+        },
+      }),
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('ungrounded');
+    expect(result.explanation).toContain('"ghost" not seeded');
+  });
+
+  it('scores 1 for an inconclusive verdict whose emitted claim is grounded', async () => {
+    const run = groundedRun({
+      outcome: 'inconclusive',
+      payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          ],
+        },
+      },
+    });
+    expect(await score(claimGrounding, run, 'inconclusive')).toBe(1);
+  });
+
   it('scores N/A for a truncation downgrade that omits claims', async () => {
     const result = await claimGrounding.evaluate({
       input: {},
@@ -419,6 +465,11 @@ describe('ClaimGrounding', () => {
         payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
         raw: {
           ...groundedRun().raw!,
+          checks: (
+            groundedRun().raw!.checks as Array<{ name?: string; status?: string; result?: string }>
+          ).map((check) =>
+            check.name === 'alert_linkage' ? { ...check, result: 'neutral' } : check
+          ),
           claims: {
             alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
           },
@@ -427,8 +478,10 @@ describe('ClaimGrounding', () => {
       expected: { outcome: 'true_positive' },
       metadata: {},
     });
+    // The link cannot stand in for world claims: alert_linkage does not support
+    // it, and entity_role/alert_linkage alone never suffice for true_positive.
     expect(result.score).toBe(0);
-    expect(result.label).toBe('missing-claims');
+    expect(result.label).toBe('ungrounded');
   });
 
   it('scores 0 with label missing-claims for a TP with empty claims.world', async () => {
@@ -534,8 +587,155 @@ describe('ClaimGrounding', () => {
     });
     expect(result.score).toBe(0.5);
     expect(result.explanation).toContain(
-      'alert_linkage in raw.checks is "neutral", not "supports"'
+      'alert_linkage in raw.checks is "neutral" (status "completed"), not "completed" + "supports"'
     );
+  });
+
+  it('scores 0 for an alert link grounded on a skipped alert_linkage check', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          // A skipped check carries no fresh result; a stale/defaulted `supports`
+          // must not ground the link.
+          checks: (
+            groundedRun().raw!.checks as Array<{ name?: string; status?: string; result?: string }>
+          ).map((check) =>
+            check.name === 'alert_linkage' ? { ...check, status: 'skipped' } : check
+          ),
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-2'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain(
+      'alert_linkage in raw.checks is "supports" (status "skipped"), not "completed" + "supports"'
+    );
+  });
+
+  it('scores 0 when an entity id grounds a process_parent claim (wrong source)', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              // ent-1 is a seeded entity id, but process_parent may only cite
+              // raw event hits.
+              {
+                check: 'process_parent',
+                result: 'contradicts',
+                source: 'entity_store',
+                id: 'ent-1',
+              },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain(
+      'check "process_parent" may only cite raw_event evidence, not entity_store'
+    );
+  });
+
+  it('scores 0 when a raw event id grounds an entity_role claim (wrong source)', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              // ev-1 is a seeded raw event id, but entity_role may only cite
+              // entity store hits.
+              { check: 'entity_role', result: 'contradicts', source: 'raw_event', id: 'ev-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain(
+      'check "entity_role" may only cite entity_store evidence, not raw_event'
+    );
+  });
+
+  it('grounds an entity claim on entity.id, not the document _id', async () => {
+    // The seeded entity's document _id differs from its _source.entity.id; only
+    // entity.id may ground the claim.
+    const run = groundedRun({
+      seededEvidence: {
+        ...groundedRun().seededEvidence,
+        entities: [{ id: 'doc-1', source: { entity: { id: 'ent-1' } } }],
+      },
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+          ],
+        },
+      },
+    });
+    expect(await score(claimGrounding, run, 'false_positive')).toBe(1);
+
+    const byDocId = groundedRun({
+      seededEvidence: {
+        ...groundedRun().seededEvidence,
+        entities: [{ id: 'doc-1', source: { entity: { id: 'ent-1' } } }],
+      },
+      raw: {
+        ...groundedRun().raw!,
+        claims: {
+          world: [
+            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'doc-1' },
+          ],
+        },
+      },
+    });
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: byDocId,
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('id "doc-1" not in the seeded entity_store');
+  });
+
+  it('scores 0 when an alert link cites the same valid alert id twice', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-1'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('alert_ids must cite at least two distinct alerts');
   });
 
   it('scores 0 for a world claim with no source', async () => {

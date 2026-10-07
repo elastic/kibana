@@ -247,18 +247,22 @@ export const claimGrounding: Evaluator = {
 
     const claims = (raw?.claims ?? {}) as RawClaims;
     const worldClaims = claims.world ?? [];
+    const hasEmittedClaims = worldClaims.length > 0 || claims.alert_link !== undefined;
 
-    if (worldClaims.length === 0) {
+    if (!hasEmittedClaims) {
       if (payload.verdict === 'inconclusive') {
-        // Including a downgraded truncation: an inconclusive verdict claims nothing
-        // about the world. Scoring it would pad the mean by the inconclusive rate and
-        // confound model comparison.
+        // Including a downgraded truncation: an inconclusive verdict that emits
+        // no claims claims nothing about the world. Scoring it would pad the
+        // mean by the inconclusive rate and confound model comparison. But an
+        // inconclusive run that DOES emit claims is validated below — verdict
+        // independence holds either way, and an ungrounded claim must not
+        // silently vanish from the score.
         return { score: null, label: 'N/A', explanation: null };
       }
       return {
         score: 0,
         label: 'missing-claims',
-        explanation: 'claims.world is empty but the verdict is not inconclusive',
+        explanation: 'claims is empty but the verdict is not inconclusive',
       };
     }
 
@@ -269,6 +273,15 @@ export const claimGrounding: Evaluator = {
     const checkResults = new Map(
       rawChecks.map((check) => [check.name, { result: check.result, status: check.status }])
     );
+    // The permitted evidence source for each world check, per the managed YAML
+    // prompt: entity ids live in entity store hits, process and event ids in raw
+    // event hits. Seeding a valid id in one source must not ground a claim that
+    // cites the other.
+    const CHECK_SOURCES: Record<string, 'entity_store' | 'raw_event'> = {
+      entity_role: 'entity_store',
+      process_parent: 'raw_event',
+      network_destination: 'raw_event',
+    };
     const seededEntityIds = new Set(
       seededEvidence.entities.map(
         ({ id, source }) => (source.entity as { id?: string } | undefined)?.id ?? id
@@ -279,12 +292,18 @@ export const claimGrounding: Evaluator = {
     for (const claim of worldClaims) {
       total++;
       const claimProblems: string[] = [];
+      const claimSource =
+        claim.source === 'entity_store' || claim.source === 'raw_event' ? claim.source : undefined;
+      // Bind each world claim to the evidence source its check is permitted to
+      // use: entity_role must cite an entity store hit, process_parent and
+      // network_destination a raw event hit.
+      const permittedSource = claim.check ? CHECK_SOURCES[claim.check] : undefined;
       const seeded =
-        claim.source === 'entity_store'
+        claimSource === undefined
+          ? false
+          : claimSource === 'entity_store'
           ? seededEntityIds.has(claim.id ?? '')
-          : claim.source === 'raw_event'
-          ? seededEventIds.has(claim.id ?? '')
-          : false;
+          : seededEventIds.has(claim.id ?? '');
       if (!claim.source) {
         claimProblems.push('no source');
       }
@@ -292,6 +311,16 @@ export const claimGrounding: Evaluator = {
         claimProblems.push('no id');
       } else if (!seeded) {
         claimProblems.push(`id "${claim.id}" not in the seeded ${claim.source ?? 'unknown'}`);
+      } else if (
+        permittedSource !== undefined &&
+        claimSource !== undefined &&
+        permittedSource !== claimSource
+      ) {
+        claimProblems.push(
+          `check "${
+            claim.check ?? ''
+          }" may only cite ${permittedSource} evidence, not ${claimSource}`
+        );
       }
       const check = checkResults.get(claim.check ?? '');
       if (check === undefined) {
@@ -314,15 +343,22 @@ export const claimGrounding: Evaluator = {
     if (alertLink) {
       total++;
       const linkProblems: string[] = [];
-      const alertLinkageResult = checkResults.get('alert_linkage')?.result;
-      if (alertLinkageResult !== 'supports') {
+      const alertLinkage = checkResults.get('alert_linkage');
+      // A skipped check carries no fresh result, so a stale/defaulted `supports`
+      // must not ground the link: require both `completed` and `supports`.
+      if (alertLinkage?.status !== 'completed' || alertLinkage.result !== 'supports') {
         linkProblems.push(
-          `alert_linkage in raw.checks is "${alertLinkageResult ?? 'missing'}", not "supports"`
+          `alert_linkage in raw.checks is "${alertLinkage?.result ?? 'missing'}" ` +
+            `(status "${alertLinkage?.status ?? 'missing'}"), not "completed" + "supports"`
         );
       }
       const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
       if ((alertLink.alert_ids ?? []).length < 2) {
         linkProblems.push('fewer than 2 alert_ids');
+      } else if (new Set(alertLink.alert_ids).size < 2) {
+        // The link must pivot two distinct cited alerts; repeating one id
+        // proves nothing about a shared field across alerts.
+        linkProblems.push('alert_ids must cite at least two distinct alerts');
       }
       for (const alertId of alertLink.alert_ids ?? []) {
         const source = seededAlerts.get(alertId);
