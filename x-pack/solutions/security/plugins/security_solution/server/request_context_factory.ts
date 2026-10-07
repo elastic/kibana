@@ -40,6 +40,8 @@ import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
+import type { SecuritySolutionEventBus } from './events/event_bus';
+import { createRulesCreatedTriggerGate } from './workflows/triggers/rules_created_trigger_gate';
 
 export interface IRequestContextFactory {
   create(
@@ -60,6 +62,9 @@ interface ConstructorOptions {
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
   productFeaturesService: ProductFeaturesService;
+  eventBus?: SecuritySolutionEventBus;
+  /** The optional alertzero plugin's soft-enable switch, which gates `detectionRulesCreated`. */
+  alertZero?: { isEnabled: boolean };
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -141,6 +146,12 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
+    const isRulesCreatedTriggerEnabled = createRulesCreatedTriggerGate({
+      alertZero: options.alertZero,
+      uiSettingsClient: coreContext.uiSettings.client,
+      logger: options.logger,
+    });
+
     return {
       core: coreContext,
 
@@ -197,6 +208,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getProductFeatureService: () => productFeaturesService,
 
+      isRulesCreatedTriggerEnabled,
+
       getDetectionRulesClient: memoize(() => {
         return createDetectionRulesClient({
           rulesClient,
@@ -209,6 +222,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           analytics: core.analytics,
           userProfile: coreStart.userProfile,
           logger: options.logger,
+          eventBus: options.eventBus,
+          isRulesCreatedTriggerEnabled,
+          request,
         });
       }),
 

@@ -98,3 +98,39 @@ export const waitForExecution = async (
   }
   return execution;
 };
+
+/**
+ * Waits for the run an event-driven workflow started for the rule with this id: a workflow can run
+ * for other rules created in the meantime, so a run is matched by the ids in the event that started it.
+ */
+export const waitForExecutionForRule = async (
+  apiClient: ApiClient,
+  headers: Record<string, string>,
+  workflowId: string,
+  ruleId: string,
+  timeoutMs: number = POLL_TIMEOUT_MS
+): Promise<WorkflowExecutionDto> => {
+  const deadline = Date.now() + timeoutMs;
+  // An execution's event never changes, so one that is not for this rule is not looked at again.
+  const notForThisRule = new Set<string>();
+  while (Date.now() <= deadline) {
+    const list = await apiClient.get(`/api/workflows/workflow/${workflowId}/executions`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(list).toHaveStatusCode(200);
+    const { results } = list.body as { results: Array<{ id: string }> };
+    const unchecked = results.filter(({ id }) => !notForThisRule.has(id));
+    for (const { id } of unchecked) {
+      // Read the event before waiting: an unrelated run that is still going must not use up the timeout.
+      const execution = await getExecution(apiClient, headers, id);
+      const { ids } = (execution.context?.event ?? {}) as { ids?: string[] };
+      if (ids?.includes(ruleId)) {
+        return waitForExecution(apiClient, headers, id, Math.max(deadline - Date.now(), 0));
+      }
+      if (ids) notForThisRule.add(id);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`No run of workflow ${workflowId} was started for rule ${ruleId}`);
+};

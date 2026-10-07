@@ -999,6 +999,7 @@
     "security.attackAssigneesChanged",
     "security.attackStatusChanged",
     "security.attackTagsChanged",
+    "security.detectionRulesCreated",
     "security.noteCreated",
     "security.noteUpdated",
     "significant-events.eventCreated",
@@ -1008,11 +1009,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "cb7448bed3962d9642ca34bc964b92f5745ea4534223181e4d53a25c53ad2bff"
+      "sha256": "233ea4dfe6468e33355970cd9a42fff5ab08e7008458cbf63ded2c896f076d95"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "dd86be10c916af5305dc33cb267f2fd4abb009ae89bb444d07eaf1c597e4360b"
+      "sha256": "18a4bb056f4b984451728cdb4acb3b611d614a1ad9ad080a37481c993b622297"
     }
   }
 }

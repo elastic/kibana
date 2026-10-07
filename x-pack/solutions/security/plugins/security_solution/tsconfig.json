@@ -15,6 +15,7 @@
     "test/scout_es_max_response_size/**/*",
     "test/scout_security_attacks_alignment/**/*",
     "test/scout_alertzero/**/*",
+    "test/scout_alertzero_rules_created/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",

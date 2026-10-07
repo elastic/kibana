@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
+import { DetectionRulesCreatedSourceEnum } from '../../../../../../common/workflows/triggers';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
@@ -29,6 +30,7 @@ export const createPrebuiltRules = (
       executor: async (rule) => {
         return detectionRulesClient.createPrebuiltRule({
           params: rule,
+          suppressCreatedEvent: true,
           changeTracking: {
             ...changeTracking,
             metadata: {
@@ -38,6 +40,13 @@ export const createPrebuiltRules = (
           },
         });
       },
+    });
+
+    // One event for the whole install instead of one per rule. Rules created before a partial
+    // failure still count.
+    detectionRulesClient.notifyRulesCreated({
+      rules: result.results.map(({ result: createdRule }) => createdRule),
+      source: DetectionRulesCreatedSourceEnum.prebuilt_install,
     });
 
     logger?.debug(

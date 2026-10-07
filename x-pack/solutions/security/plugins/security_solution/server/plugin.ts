@@ -523,6 +523,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     }
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -535,6 +539,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
       productFeaturesService,
+      eventBus: this.securityEventBus,
+      alertZero: plugins.alertzero,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -688,10 +694,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
-
-    this.securityEventBus = plugins.workflowsExtensions
-      ? new SecuritySolutionEventBus()
-      : undefined;
 
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =

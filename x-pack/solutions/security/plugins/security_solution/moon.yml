@@ -340,6 +340,7 @@ fileGroups:
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
     - test/scout_alertzero/**/*
+    - test/scout_alertzero_rules_created/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

@@ -20,6 +20,7 @@ import type {
   UnresolvedRulePatchProps,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import type { DetectionRulesCreatedSource } from '../../../../../../common/workflows/triggers';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
 import type {
@@ -33,6 +34,11 @@ export type { ImportRuleSuccess, ImportRulesResult, ImportRuleError };
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
+  /**
+   * Emits one `detectionRulesCreated` event for rules created with `suppressCreatedEvent`, so that
+   * a caller creating many rules one at a time fires a single event instead of one per rule.
+   */
+  notifyRulesCreated: (args: NotifyRulesCreatedArgs) => void;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
   bulkCreatePrebuiltRules: (
     args: BulkCreatePrebuiltRulesArgs
@@ -50,14 +56,23 @@ export interface IDetectionRulesClient {
   ) => Promise<RestoreRuleFromHistoryResponse>;
 }
 
+export interface NotifyRulesCreatedArgs {
+  rules: readonly RuleResponse[];
+  source: DetectionRulesCreatedSource;
+}
+
 export interface CreateCustomRuleArgs {
   params: RuleCreateProps;
   changeTracking?: SecurityRuleChangeTracking;
+  /** Skip the per-rule `detectionRulesCreated` event; the caller reports via `notifyRulesCreated`. */
+  suppressCreatedEvent?: boolean;
 }
 
 export interface CreatePrebuiltRuleArgs {
   params: RuleCreateProps;
   changeTracking?: SecurityRuleChangeTracking<never>;
+  /** Skip the per-rule `detectionRulesCreated` event; the caller reports via `notifyRulesCreated`. */
+  suppressCreatedEvent?: boolean;
 }
 
 export interface UpdateRuleArgs {
