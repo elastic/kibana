@@ -40,7 +40,7 @@ describe('createTimelineGroupRenderer', () => {
       </ul>
     );
 
-    expect(screen.getByRole('button', { name: /^Timeline/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Forensic timeline/ })).toBeInTheDocument();
   });
 
   it('renders only the first timeline attachment', () => {
@@ -50,7 +50,7 @@ describe('createTimelineGroupRenderer', () => {
       </ul>
     );
 
-    expect(screen.getAllByRole('button', { name: /^Timeline/ })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /^Forensic timeline/ })).toHaveLength(1);
   });
 
   it('renders the first timeline attachment that has events', () => {
@@ -62,7 +62,7 @@ describe('createTimelineGroupRenderer', () => {
       </ul>
     );
 
-    expect(screen.getAllByRole('button', { name: /^Timeline/ })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /^Forensic timeline/ })).toHaveLength(1);
   });
 
   it('skips a timeline with no events', () => {
