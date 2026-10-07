@@ -23,6 +23,7 @@ export const runSearchTool = async ({
   timeRange,
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   events,
   topSnippetsConfig,
@@ -38,6 +39,7 @@ export const runSearchTool = async ({
   timeRange?: TimeRange;
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
@@ -47,6 +49,7 @@ export const runSearchTool = async ({
   const toolGraph = await createSearchToolGraph({
     modelProvider,
     esClient,
+    internalEsClient,
     logger,
     events,
     topSnippetsConfig,

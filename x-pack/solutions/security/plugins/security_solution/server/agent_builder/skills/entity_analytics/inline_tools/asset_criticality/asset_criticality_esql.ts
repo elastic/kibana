@@ -67,6 +67,7 @@ export const assetCriticalityDynamicInlineToolHandler = async (
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         index: assetCriticalityIndexPattern,
         additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
         execute: 'data',
