@@ -189,7 +189,8 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
   const expectProcessStatuses = async (
     apiClient: ApiClientFixture,
     priority: 'started' | 'stopped',
-    nonPriority: 'started' | 'stopped'
+    // `undefined`: status reports no non-priority process, which is the case with the flag off.
+    nonPriority: 'started' | 'stopped' | undefined
   ) => {
     const engine = await userEngine(apiClient);
     expect({ priority: engine.status, nonPriority: engine.nonPriority?.status }).toStrictEqual({
@@ -201,7 +202,7 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
   /** Installs every type and checks both user processes report the state the flag implies. */
   const install = async (apiClient: ApiClientFixture, dualProcess: boolean) => {
     expect((await installAllEntityTypes(apiClient, publicHeaders)).statusCode).toBe(201);
-    await expectProcessStatuses(apiClient, 'started', dualProcess ? 'started' : 'stopped');
+    await expectProcessStatuses(apiClient, 'started', dualProcess ? 'started' : undefined);
   };
 
   /** Uninstalls and checks no entity survives into the next scenario. */
