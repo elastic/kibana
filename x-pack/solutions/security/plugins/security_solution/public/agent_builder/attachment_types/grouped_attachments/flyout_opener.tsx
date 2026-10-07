@@ -86,7 +86,11 @@ export const GroupedAttachmentFlyoutOpener = ({
     store: bundle.store,
     children: (
       <FlyoutSessionContextProvider
-        value={{ session: 'start', historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY }}
+        value={{
+          session: 'start',
+          historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+          type: 'push',
+        }}
       >
         <DataViewManagerBootstrap />
         <OpenFlyoutOnMount descriptor={descriptor} />
