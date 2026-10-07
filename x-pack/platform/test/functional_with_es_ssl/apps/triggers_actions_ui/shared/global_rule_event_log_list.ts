@@ -95,8 +95,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await PageObjects.common.navigateToApp('triggersActionsUiExample/global_rule_event_log_list');
-      const exists = await testSubjects.exists('ruleEventLogListTable');
-      const spacesSwitchExists = await testSubjects.exists('showAllSpacesSwitch');
+      const exists = await testSubjects.waitForExists('ruleEventLogListTable');
+      const spacesSwitchExists = await testSubjects.waitForExists('showAllSpacesSwitch');
 
       expect(exists).to.be(true);
       expect(spacesSwitchExists).to.be(true);
