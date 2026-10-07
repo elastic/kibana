@@ -198,10 +198,10 @@ describe('PluginInitializeExampleServerPlugin', () => {
       });
     });
 
-    it('the heartbeat logs only while available and never triggers initialize()', () => {
+    it('the heartbeat logs only while available and never triggers initialize()', async () => {
       jest.useFakeTimers();
       const { ctx, plugin } = createPlugin();
-      plugin.start(coreMock.createStart());
+      await plugin.start(coreMock.createStart());
 
       ctx.initialization.getStatus.mockReturnValue({ state: 'initializing', attempts: 0 });
       jest.advanceTimersByTime(60_000);
