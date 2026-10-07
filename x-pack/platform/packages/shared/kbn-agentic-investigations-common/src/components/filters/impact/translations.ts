@@ -11,4 +11,17 @@ export const IMPACT_LABELS = Object.freeze({
   title: i18n.translate('xpack.alertzero.impact.title', {
     defaultMessage: 'Impact',
   }),
+  showMore: (count: number) =>
+    i18n.translate('xpack.alertzero.impact.showMore', {
+      defaultMessage: '+{count}',
+      values: { count },
+    }),
+  showMoreAriaLabel: (count: number) =>
+    i18n.translate('xpack.alertzero.impact.showMoreAriaLabel', {
+      defaultMessage: 'Show {count} more',
+      values: { count },
+    }),
+  showFewer: i18n.translate('xpack.alertzero.impact.showFewer', {
+    defaultMessage: 'Show fewer',
+  }),
 });
