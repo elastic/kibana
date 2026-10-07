@@ -9,8 +9,29 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
+import { SecurityError } from '../../../lib/errors/security_error';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import type { GetScopedClients } from '../../../routes/types';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+
+const buildGetScopedClients = (canWriteKnowledgeIndicators = true): GetScopedClients =>
+  (async () => ({
+    scopedClusterClient: {
+      asCurrentUser: {
+        security: {
+          hasPrivileges: jest.fn(async () => ({
+            index: {
+              '.significant_events-knowledge_indicators': {
+                read: true,
+                write: canWriteKnowledgeIndicators,
+              },
+            },
+          })),
+        },
+      },
+    },
+    isSecurityEnabled: true,
+  })) as unknown as GetScopedClients;
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
@@ -37,18 +58,26 @@ describe('startKiIdentificationToolHandler', () => {
       managementApi,
       streamsKIsOnboardingClient,
       maintenanceService,
+      getScopedClients: buildGetScopedClients(),
       request: httpServerMock.createKibanaRequest(),
     };
   };
 
   it('triggers onboarding workflow and returns tracking Kibana path', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
+    const {
+      managementApi,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      getScopedClients,
+      request,
+    } = setup();
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       streamsKIsOnboardingClient,
       maintenanceService,
+      getScopedClients,
       request,
     });
 
@@ -69,9 +98,8 @@ describe('startKiIdentificationToolHandler', () => {
     );
   });
 
-  it('rejects with SignificantEventsPausedError while paused', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } =
-      setup('paused');
+  it('rejects with a 403 SecurityError without scheduling when write access is missing', async () => {
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
 
     await expect(
       startKiIdentificationToolHandler({
@@ -79,6 +107,30 @@ describe('startKiIdentificationToolHandler', () => {
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,
+        getScopedClients: buildGetScopedClients(false),
+        request,
+      })
+    ).rejects.toBeInstanceOf(SecurityError);
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects with SignificantEventsPausedError while paused', async () => {
+    const {
+      managementApi,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      getScopedClients,
+      request,
+    } = setup('paused');
+
+    await expect(
+      startKiIdentificationToolHandler({
+        streamName: 'logs.nginx',
+        steps: [KIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        getScopedClients,
         request,
       })
     ).rejects.toBeInstanceOf(SignificantEventsPausedError);
@@ -87,7 +139,13 @@ describe('startKiIdentificationToolHandler', () => {
   });
 
   it('throws when workflow is not found', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
+    const {
+      managementApi,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      getScopedClients,
+      request,
+    } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
     await expect(
@@ -96,6 +154,7 @@ describe('startKiIdentificationToolHandler', () => {
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,
+        getScopedClients,
         request,
       })
     ).rejects.toThrow(/Workflow .+ not found/);

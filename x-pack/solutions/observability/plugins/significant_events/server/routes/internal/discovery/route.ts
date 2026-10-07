@@ -15,6 +15,7 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
+import { assertCanWriteSignificantEvents } from '../../../lib/privileges';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -59,7 +60,9 @@ const discoveryExecuteRoute = createServerRoute({
       );
     }
 
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, scopedClusterClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -67,6 +70,10 @@ const discoveryExecuteRoute = createServerRoute({
     const { body } = params;
 
     if (body.action === 'trigger') {
+      await assertCanWriteSignificantEvents({
+        esClient: scopedClusterClient.asCurrentUser,
+        isSecurityEnabled,
+      });
       await assertNotPaused({ maintenanceService, request });
       const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,

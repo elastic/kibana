@@ -54,6 +54,9 @@ export type {
   SignificantEventsRequiredPlugin,
   SignificantEventsUnavailableReason,
   SignificantEventsAvailabilityResponse,
+  SignificantEventsDeploymentAvailability,
+  SignificantEventsResourcePrivileges,
+  SignificantEventsUserPrivileges,
 } from './significant_events_availability';
 
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
