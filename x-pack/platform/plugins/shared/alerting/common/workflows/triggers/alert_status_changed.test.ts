@@ -19,7 +19,7 @@ const validActivePayload = {
     consumer: 'alerts',
     ruleTypeId: '.es-query',
     tags: ['k8s', 'prod'],
-    ruleCategory: 'Elasticsearch query',
+    ruleTypeName: 'Elasticsearch query',
   },
   alert: {
     id: 'alert-instance-1',

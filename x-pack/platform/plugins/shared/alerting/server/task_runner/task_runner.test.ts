@@ -51,6 +51,7 @@ import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -4603,6 +4604,40 @@ describe('Task Runner', () => {
         expect(mockBus.publish).not.toHaveBeenCalled();
       });
 
+      test('reads the setting through a saved objects client that skips the security extension', async () => {
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        // The client is built from the rule's own request, so the read stays space scoped, and
+        // it skips the security extension so a rule owner without config access still reads it.
+        expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ excludedExtensions: [SECURITY_EXTENSION_ID] })
+        );
+        expect(uiSettingsService.asScopedToClient).toHaveBeenCalled();
+        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+      });
+
+      describe('when the rule is muted', () => {
+        // The describe-level beforeEach copies the shared rule fixture, and this beforeAll runs
+        // before it, so every test here sees a muted rule.
+        beforeAll(() => {
+          mockedRuleTypeSavedObject.muteAll = true;
+        });
+        afterAll(() => {
+          mockedRuleTypeSavedObject.muteAll = false;
+        });
+
+        test('still publishes, because muting only suppresses notifications', async () => {
+          newAlertProcessed();
+
+          await createRunnerWithBus().run();
+
+          expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        });
+      });
+
       test('does not read the setting when no alert changed status', async () => {
         await createRunnerWithBus().run();
 
@@ -4681,7 +4716,7 @@ describe('Task Runner', () => {
               consumer: 'bar',
               ruleTypeId: RULE_TYPE_ID,
               tags: ['rule-', '-tags'],
-              ruleCategory: ruleType.name,
+              ruleTypeName: ruleType.name,
             },
             alert: {
               id: 'alert-1',
@@ -4775,12 +4810,28 @@ describe('Task Runner', () => {
       expect(mockBus.publish).not.toHaveBeenCalled();
     });
 
-    test('does not publish when executor records a run error via addLastRunError', async () => {
+    test('publishes when the executor records a run error but finishes, because the alert state is persisted', async () => {
+      // addLastRunError does not make the run result an error, so the new alert state is saved
+      // and its actions are scheduled. Holding the events back would lose them for good, since
+      // the next run sees these alerts as ongoing.
       ruleResultService.getLastRunResults.mockReturnValue({
         errors: [{ message: 'executor error', userError: false }],
         warnings: [],
         outcomeMessage: '',
       });
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not publish when the executor throws', async () => {
+      // A thrown executor makes the run result an error, so the state falls back to the previous
+      // run and the next run classifies these alerts again.
+      ruleType.executor.mockRejectedValue(new Error('executor failed'));
       const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
       alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
         type === 'new' ? { 'alert-1': alert } : {}
@@ -4819,8 +4870,9 @@ describe('Task Runner', () => {
 
     test('does not publish when run is cancelled, even when cancelAlertsOnRuleTimeout is disabled', async () => {
       // With cancelAlertsOnRuleTimeout:false, shouldLogAndScheduleActionsForAlerts() returns
-      // true for a cancelled run. The !this.cancelled guard in the batch-collection condition
-      // must suppress publication in this case.
+      // true for a cancelled run, so alerts are still persisted. A cancelled run must still
+      // publish nothing. The run is cancelled very early here, so this test does not show which
+      // check stops it. The test above covers the check that runs after the rule update.
       ruleType.cancelAlertsOnRuleTimeout = false;
       const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
       alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
