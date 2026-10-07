@@ -8,7 +8,7 @@
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { hasStartEndParams } from '@kbn/esql-utils';
+import { getAnySourceCommandFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
 import {
   executeEsql,
   buildTimeRangeParams,
@@ -26,6 +26,14 @@ import { resolveTimeRange } from './screen_context_utils';
  */
 const MAX_FILTER_LENGTH = 100_000;
 
+const getTimeRangeNotAppliedWarning = (query: string): string => {
+  const example =
+    getAnySourceCommandFromESQLQuery(query) === 'PROMQL'
+      ? 'PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>). Do not add a WHERE clause on @timestamp after PROMQL: its output has no @timestamp column.'
+      : 'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.';
+  return `The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. ${example}`;
+};
+
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
   params: z
@@ -41,7 +49,7 @@ const executeEsqlToolSchema = z.object({
     })
     .optional()
     .describe(
-      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend; otherwise the query runs without it and a warning is returned.'
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend, e.g. `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`, or `PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>)`; otherwise the query runs without it and a warning is returned.'
     ),
   limit: z
     .number()
@@ -168,8 +176,7 @@ If results look incomplete for a time range that reaches far into the past, tell
                 {
                   type: ToolResultType.other as const,
                   data: {
-                    warning:
-                      'The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.',
+                    warning: getTimeRangeNotAppliedWarning(esqlQuery),
                   },
                 },
               ]

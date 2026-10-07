@@ -43,7 +43,7 @@ export const composeFormToCreateRequest = (
       ...(formValues.metadata.routingTags?.length
         ? { routing_tags: formValues.metadata.routingTags }
         : {}),
-      ...(builderType ? { builder_type: builderType } : {}),
+      ...(builderType ? { builder: { type: builderType } } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
@@ -68,7 +68,7 @@ export const composeFormToUpdateRequest = (
     ...rest,
     metadata: {
       ...metadata,
-      builder_type: metadata.builder_type ?? null,
+      builder: metadata.builder ?? null,
       // Empty tags must be sent as an explicit `null` to clear them; omitting
       // the key would preserve the existing tags on a partial update.
       tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
