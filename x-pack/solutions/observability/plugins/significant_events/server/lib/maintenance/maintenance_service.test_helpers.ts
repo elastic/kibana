@@ -222,8 +222,8 @@ export function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
-  const listRuleBackedRuleIdsInternally = jest.fn(async () => params?.ruleBackedRuleIds ?? []);
-  const internalRulesClient = {
+  const internalRuleBackedRules = {
+    listRuleIds: jest.fn(async () => params?.ruleBackedRuleIds ?? []),
     bulkDisableRules: jest.fn(async ({ ids }: { ids: string[] }) => {
       if (ids.length > MAX_BULK_ITEMS) {
         throw new Error(
@@ -233,7 +233,6 @@ export function makeService(params?: {
       return { affected_count: ids.length, errors: [] };
     }),
   };
-  const getUnsafeInternalRulesClient = jest.fn(async () => internalRulesClient);
   const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
   const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
   const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
@@ -366,7 +365,6 @@ export function makeService(params?: {
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
-    alertingVTwo: params?.v2RulesClient === null ? undefined : { getUnsafeInternalRulesClient },
     nightshiftInvestigations: deleteAllInvestigations ? { deleteAllInvestigations } : undefined,
     spaces: {
       spacesService: {
@@ -400,7 +398,7 @@ export function makeService(params?: {
     logger: loggerMock.create(),
     server,
     getScopedClients: getScopedClients as unknown as GetScopedClients,
-    listRuleBackedRuleIdsInternally,
+    internalRuleBackedRules,
   });
 
   return {
@@ -410,8 +408,7 @@ export function makeService(params?: {
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
-    internalRulesClient,
-    getUnsafeInternalRulesClient,
+    internalRuleBackedRules,
     getStreamNamesWithKnowledgeIndicators,
     findStreamNamesWithOwnedRules,
     countKnowledgeIndicators,

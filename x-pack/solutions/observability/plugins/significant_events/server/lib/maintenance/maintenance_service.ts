@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -36,7 +37,7 @@ import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
 import {
   deleteV2Rules,
-  disableRulesInBatches,
+  runRulesInBatches,
   setV2RulesEnabled,
   type RulesToggleResult,
 } from './rules';
@@ -61,6 +62,12 @@ import {
  * touching the snapshot, and always runs as the system.
  */
 type PauseRun = { mode: 'pause'; access: MaintenanceAccess } | { mode: 'reassert' };
+
+/** Lists and disables the rules backing KI queries without a user request. */
+export interface InternalRuleBackedRules {
+  listRuleIds: () => Promise<string[]>;
+  bulkDisableRules: InternalRulesClientApi['bulkDisableRules'];
+}
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -128,13 +135,12 @@ export const createSignificantEventsMaintenanceService = ({
   logger,
   server,
   getScopedClients,
-  listRuleBackedRuleIdsInternally,
+  internalRuleBackedRules,
 }: {
   logger: Logger;
   server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
-  /** Rule ids backing KI queries, read with internal clients (no user request). */
-  listRuleBackedRuleIdsInternally: () => Promise<string[]>;
+  internalRuleBackedRules: InternalRuleBackedRules;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
   const featureSettings = createFeatureSettingsController({ server, getScopedClients });
@@ -193,12 +199,7 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
-  /**
-   * The rule ids backing KI queries and a way to disable them: as the caller
-   * (`user`), or as the internal Kibana user when there is no user (`system`).
-   * Backed rules only live in the default space. `disable` resolves to
-   * `undefined` when alerting v2 is not available.
-   */
+  /** The rule ids backing KI queries and a way to disable them as the caller or the internal user. */
   const resolveBackedRules = async (
     request: KibanaRequest,
     access: MaintenanceAccess
@@ -223,17 +224,11 @@ export const createSignificantEventsMaintenanceService = ({
       }
       case 'system':
         return {
-          ruleIds: await listRuleBackedRuleIdsInternally(),
-          disable: async (ids) => {
-            const { alertingVTwo } = server;
-            if (!alertingVTwo) {
-              return undefined;
-            }
-            const rulesClient = await alertingVTwo.getUnsafeInternalRulesClient();
-            return disableRulesInBatches(ids, (chunk) =>
-              rulesClient.bulkDisableRules({ ids: chunk })
-            );
-          },
+          ruleIds: await internalRuleBackedRules.listRuleIds(),
+          disable: (ids) =>
+            runRulesInBatches(ids, (chunk) =>
+              internalRuleBackedRules.bulkDisableRules({ ids: chunk })
+            ),
         };
       default: {
         const unhandledAccess: never = access;

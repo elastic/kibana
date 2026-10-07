@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
+import { MAX_BULK_ITEMS, type BulkResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import { toMessage } from './to_message';
@@ -22,10 +22,7 @@ export interface RulesToggleResult {
  * and one failure entry per fatal id. A missing rule is treated as "already
  * gone" and reported as neither toggled nor failed.
  */
-export const toRulesToggleResult = (
-  ids: string[],
-  { errors }: Awaited<ReturnType<RulesClientApi['bulkDisableRules']>>
-): RulesToggleResult => {
+export const toRulesToggleResult = (ids: string[], { errors }: BulkResponse): RulesToggleResult => {
   const fatalErrors = errors.filter(
     (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
   );
@@ -40,23 +37,24 @@ export const toRulesToggleResult = (
   };
 };
 
-type BulkDisableResponse = Awaited<ReturnType<RulesClientApi['bulkDisableRules']>>;
-
 /**
- * Disable rules in batches the internal rules client accepts. One failing
- * batch does not stop the rest.
+ * Run a bulk rule operation in batches of `MAX_BULK_ITEMS`. A failing batch
+ * fails each of its ids without stopping the rest.
  */
-export const disableRulesInBatches = async (
+export const runRulesInBatches = async (
   ids: string[],
-  disable: (ids: string[]) => Promise<BulkDisableResponse>
-): Promise<RulesToggleResult> => {
+  run: (chunk: string[]) => Promise<BulkResponse>
+): Promise<RulesToggleResult & { affectedCount: number }> => {
+  let affectedCount = 0;
   const toggledIds: string[] = [];
   const failedIds: string[] = [];
   const failures: SignificantEventsMaintenanceFailure[] = [];
   for (let offset = 0; offset < ids.length; offset += MAX_BULK_ITEMS) {
     const chunk = ids.slice(offset, offset + MAX_BULK_ITEMS);
     try {
-      const result = toRulesToggleResult(chunk, await disable(chunk));
+      const response = await run(chunk);
+      const result = toRulesToggleResult(chunk, response);
+      affectedCount += response.affected_count;
       toggledIds.push(...result.toggledIds);
       failedIds.push(...result.failedIds);
       failures.push(...result.failures);
@@ -66,7 +64,7 @@ export const disableRulesInBatches = async (
       failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
     }
   }
-  return { toggledIds, failedIds, failures };
+  return { affectedCount, toggledIds, failedIds, failures };
 };
 
 /** Toggle `enabled` on a set of alerting v2 signal rules as the caller. */
@@ -82,8 +80,6 @@ export const setV2RulesEnabled = async (
       : await rulesClient.bulkDisableRules({ ids })
   );
 
-const RULE_BULK_SIZE = 100;
-
 export const deleteV2Rules = async (
   rulesClient: RulesClientApi,
   ids: string[]
@@ -92,25 +88,8 @@ export const deleteV2Rules = async (
   failedIds: string[];
   failures: SignificantEventsMaintenanceFailure[];
 }> => {
-  let deleted = 0;
-  const failedIds: string[] = [];
-  const failures: SignificantEventsMaintenanceFailure[] = [];
-  for (let offset = 0; offset < ids.length; offset += RULE_BULK_SIZE) {
-    const chunk = ids.slice(offset, offset + RULE_BULK_SIZE);
-    try {
-      const result = await rulesClient.bulkDeleteRules({ ids: chunk });
-      deleted += result.affected_count;
-      for (const error of result.errors) {
-        if (error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND) {
-          failedIds.push(error.id);
-          failures.push({ target: `rule:${error.id}`, error: error.error.message });
-        }
-      }
-    } catch (error) {
-      const message = toMessage(error);
-      failedIds.push(...chunk);
-      failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
-    }
-  }
-  return { deleted, failedIds, failures };
+  const { affectedCount, failedIds, failures } = await runRulesInBatches(ids, (chunk) =>
+    rulesClient.bulkDeleteRules({ ids: chunk })
+  );
+  return { deleted: affectedCount, failedIds, failures };
 };

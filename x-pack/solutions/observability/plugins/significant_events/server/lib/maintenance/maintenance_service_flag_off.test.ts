@@ -29,8 +29,7 @@ describe('SignificantEventsMaintenanceService', () => {
         soClient,
         getScopedClients,
         v2RulesClient,
-        internalRulesClient,
-        getUnsafeInternalRulesClient,
+        internalRuleBackedRules,
         getInternalSpaceUiSettingsClient,
       } = makeService({
         management: api,
@@ -56,8 +55,7 @@ describe('SignificantEventsMaintenanceService', () => {
         false
       );
       expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
-      expect(getUnsafeInternalRulesClient).toHaveBeenCalled();
-      expect(internalRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
         expect.objectContaining({
           state: 'paused',
@@ -75,7 +73,7 @@ describe('SignificantEventsMaintenanceService', () => {
     it('disables every backed rule when they exceed one internal bulk request', async () => {
       const ruleIds = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
       const { api } = makeManagementApi();
-      const { service, soClient, v2RulesClient, internalRulesClient, getScopedClients } =
+      const { service, soClient, v2RulesClient, internalRuleBackedRules, getScopedClients } =
         makeService({
           management: api,
           ruleBackedRuleIds: ruleIds,
@@ -86,7 +84,9 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pauseOnFlagOff();
 
       expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
-      const batches = internalRulesClient.bulkDisableRules.mock.calls.map(([params]) => params.ids);
+      const batches = internalRuleBackedRules.bulkDisableRules.mock.calls.map(
+        ([params]) => params.ids
+      );
       expect(batches.length).toBeGreaterThan(1);
       expect(batches.every((ids) => ids.length <= MAX_BULK_ITEMS)).toBe(true);
       expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
@@ -171,8 +171,7 @@ describe('SignificantEventsMaintenanceService', () => {
         service,
         soClient,
         getScopedClients,
-        internalRulesClient,
-        getUnsafeInternalRulesClient,
+        internalRuleBackedRules,
         globalUiSettingsClient,
         getInternalSpaceUiSettingsClient,
       } = makeService({
@@ -215,8 +214,7 @@ describe('SignificantEventsMaintenanceService', () => {
         false
       );
       // A rule re-enabled out-of-band while paused is disabled again, without a user.
-      expect(getUnsafeInternalRulesClient).toHaveBeenCalled();
-      expect(internalRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
     });
 
     it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {
