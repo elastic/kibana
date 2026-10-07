@@ -39,6 +39,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/react-hooks",
     "@kbn/react-query",
+    "@kbn/response-ops-rules-apis",
     "@kbn/scout-oblt",
     "@kbn/serverless",
     "@kbn/share-plugin",
