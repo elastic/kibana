@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
 import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
@@ -23,7 +25,7 @@ const DataViewManagerBootstrap = () => {
   useEffect(() => {
     // Only from `pristine`. The init listener reports failure by dispatching `error` and showing
     // a toast, so retrying on `error` would spin: init, fail, toast, init again, for as long as
-    // the summary stays mounted.
+    // the flyout stays mounted.
     if (status === 'pristine') {
       initDataViewManager([]);
     }
@@ -47,20 +49,15 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
   return null;
 };
 
-export interface AttachmentSummaryFlyoutOpenerProps {
+export interface GroupedAttachmentFlyoutOpenerProps {
   descriptor: FlyoutDescriptor;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
-/**
- * The summary renders outside the Security app shell, so `useFlyoutApi`'s dependencies are
- * re-established with `flyoutProviders` — the bundle the flyouts themselves use, as the rule
- * preview attachment does.
- */
-export const AttachmentSummaryFlyoutOpener = ({
+export const GroupedAttachmentFlyoutOpener = ({
   descriptor,
   resolveSecurityCanvasContext,
-}: AttachmentSummaryFlyoutOpenerProps) => {
+}: GroupedAttachmentFlyoutOpenerProps) => {
   const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
 
   useEffect(() => {
@@ -73,7 +70,7 @@ export const AttachmentSummaryFlyoutOpener = ({
       })
       .catch((error) => {
         // Mounted out of view, so there is nowhere to surface this; the row just does not open.
-        window.console.warn('Attachment summary drill-down could not start Security', error);
+        window.console.warn('Grouped attachment could not start Security', error);
       });
     return () => {
       isMounted = false;
@@ -88,10 +85,16 @@ export const AttachmentSummaryFlyoutOpener = ({
     services: bundle.kibanaServices,
     store: bundle.store,
     children: (
-      <>
+      <FlyoutSessionContextProvider
+        value={{
+          session: 'start',
+          historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+          type: 'push',
+        }}
+      >
         <DataViewManagerBootstrap />
         <OpenFlyoutOnMount descriptor={descriptor} />
-      </>
+      </FlyoutSessionContextProvider>
     ),
   });
 };

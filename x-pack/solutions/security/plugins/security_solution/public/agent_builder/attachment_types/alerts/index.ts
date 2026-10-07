@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { registerAttackDiscoveryAttachment } from './attack_discovery_attachment';
-export { registerAttacksFlyoutGroupedAttachment } from './register_attacks_flyout_grouped_attachment';
+export { registerAlertsFlyoutGroupedAttachment } from './register_alerts_flyout_grouped_attachment';

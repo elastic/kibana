@@ -7,7 +7,7 @@
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import { toAlertDescriptor } from './to_flyout_descriptor';
+import { toAlertDescriptor } from './to_alert_descriptor';
 
 const attachmentOf = (type: string, data: unknown): UnknownAttachment => ({
   id: 'attachment-1',
