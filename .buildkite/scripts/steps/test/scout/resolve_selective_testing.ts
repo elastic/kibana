@@ -60,10 +60,15 @@ if (!mergeBase || !outPath) {
   // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
+  // Exclude documentation files from the module graph — they can't affect runtime.
+  // Mirrors SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
+  const DOCS_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'];
+
   // Skip Scout when all affected modules are not related.
   const directlyAffected = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: false,
+    ignorePatterns: DOCS_IGNORE_PATTERNS,
     ignoreUncategorizedChanges: true,
   });
 
@@ -90,6 +95,7 @@ if (!mergeBase || !outPath) {
     await getAffectedPackages(mergeBase, {
       strategy: 'git',
       includeDownstream: true,
+      ignorePatterns: DOCS_IGNORE_PATTERNS,
       ignoreUncategorizedChanges: true,
     }),
     changedFiles,
