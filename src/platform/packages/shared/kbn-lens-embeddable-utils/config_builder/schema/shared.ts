@@ -157,7 +157,7 @@ export type LayerSettingsSchema = z.output<typeof layerSettingsSchema>;
 export const axisTitleSchema = lazySchema(() =>
   z
     .object({
-      text: z.string().default('').optional().meta({ description: 'Axis title text.' }),
+      text: z.string().optional().meta({ description: 'Axis title text.' }),
       visible: z.boolean().optional().meta({ description: 'When `true`, displays the title.' }),
     })
     .strict()

@@ -11,6 +11,9 @@ jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
 import type { SearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { decode } from '@kbn/rison';
 import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 
@@ -221,6 +224,127 @@ describe('ESSearchSource', () => {
         scalingType: SCALING_TYPES.MVT,
       });
       expect(esSearchSource.supportsJoins()).toBe(true);
+    });
+  });
+
+  describe('getGeoJsonWithMeta', () => {
+    const GEO_FIELD_NAME = 'location';
+
+    const makeHit = (id: string) => ({
+      _id: id,
+      _index: 'test-index',
+      fields: {
+        [GEO_FIELD_NAME]: [{ type: 'Point', coordinates: [-70, 40] }],
+      },
+    });
+
+    const makeHits = (count: number) =>
+      Array.from({ length: count }, (_, i) => makeHit(`hit-${i}`));
+
+    const mockIndexPattern = {
+      flattenHit(hit: Record<string, any>) {
+        return {
+          _id: hit._id,
+          _index: hit._index,
+          [GEO_FIELD_NAME]: hit.fields?.[GEO_FIELD_NAME]?.[0],
+        };
+      },
+      metaFields: ['_id', '_index', '_type', '_score'],
+      fields: {
+        getByName(name: string) {
+          return { name, type: 'geo_point', readFromDocValues: false };
+        },
+      },
+    };
+
+    const topHitsRequestMeta: VectorSourceRequestMeta = {
+      isReadOnly: false,
+      filters: [],
+      zoom: 0,
+      fieldNames: [GEO_FIELD_NAME],
+      timeFilters: { from: 'now', to: '15m', mode: 'relative' },
+      sourceMeta: null,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+      isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
+      executionContext: { name: APP_ID },
+    };
+
+    describe('top hits', () => {
+      it('should return features for each top hit across all entities', async () => {
+        const esSearchSource = new ESSearchSource({
+          indexPatternId: 'ipId',
+          geoField: GEO_FIELD_NAME,
+          scalingType: SCALING_TYPES.TOP_HITS,
+          topHitsSplitField: 'machine.os.raw',
+          topHitsSize: 5,
+        });
+        jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
+          hits: makeHits(10),
+          meta: {
+            areResultsTrimmed: false,
+            areEntitiesTrimmed: false,
+            entityCount: 2,
+            totalEntities: 2,
+            warnings: [],
+          },
+        });
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as unknown as DataView);
+        jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
+          name: GEO_FIELD_NAME,
+          type: ES_GEO_FIELD_TYPE.GEO_POINT,
+        } as unknown as DataViewField);
+
+        const { data } = await esSearchSource.getGeoJsonWithMeta(
+          'test',
+          topHitsRequestMeta,
+          jest.fn(),
+          jest.fn(),
+          {} as unknown as Adapters
+        );
+        expect(data.features).toHaveLength(10);
+      });
+
+      it('should pass through meta from top hits response', async () => {
+        const esSearchSource = new ESSearchSource({
+          indexPatternId: 'ipId',
+          geoField: GEO_FIELD_NAME,
+          scalingType: SCALING_TYPES.TOP_HITS,
+          topHitsSplitField: 'machine.os.raw',
+          topHitsSize: 1,
+        });
+        const topHitsMeta = {
+          areResultsTrimmed: true,
+          areEntitiesTrimmed: true,
+          entityCount: 10000,
+          totalEntities: 20000,
+          warnings: [],
+        };
+        jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
+          hits: makeHits(5),
+          meta: topHitsMeta,
+        });
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as unknown as DataView);
+        jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
+          name: GEO_FIELD_NAME,
+          type: ES_GEO_FIELD_TYPE.GEO_POINT,
+        } as unknown as DataViewField);
+
+        const { meta } = await esSearchSource.getGeoJsonWithMeta(
+          'test',
+          topHitsRequestMeta,
+          jest.fn(),
+          jest.fn(),
+          {} as unknown as Adapters
+        );
+        expect(meta).toEqual(topHitsMeta);
+      });
     });
   });
 });

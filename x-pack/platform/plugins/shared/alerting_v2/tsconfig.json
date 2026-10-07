@@ -157,7 +157,8 @@
     "@kbn/licensing-types",
     "@kbn/workflows-yaml",
     "@kbn/tooling-log",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
