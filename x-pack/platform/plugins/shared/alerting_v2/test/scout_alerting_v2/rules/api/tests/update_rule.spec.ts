@@ -959,15 +959,18 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'invalid-merge-rule' },
-          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+          state_transition: {
+            pending: { count: 2, timeframe: '5m', operator: 'and' },
+            recovering: { count: 4 },
+          },
         })
       );
 
-      // Clearing the only leaf a phase holds leaves `pending` configured but
-      // gating nothing, which the merged document has to reject.
+      // Clearing both thresholds leaves `operator` behind, so `pending` stays configured but gates
+      // nothing, which the merged document has to reject.
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
-        body: { state_transition: { pending: { count: null } } },
+        body: { state_transition: { pending: { count: null, timeframe: null } } },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -975,7 +978,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.state_transition).toStrictEqual({
-        pending: { count: 2 },
+        pending: { count: 2, timeframe: '5m', operator: 'and' },
         recovering: { count: 4 },
       });
     }

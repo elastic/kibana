@@ -195,11 +195,44 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
       const created = await rules.create(
         buildCreateRuleData({
           metadata: { name: 'patch-invalid-merge' },
-          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+          state_transition: {
+            pending: { count: 2, timeframe: '5m', operator: 'and' },
+            recovering: { count: 4 },
+          },
         })
       );
 
       const before = await ruleSavedObject.getAttributes(created.id);
+
+      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_ALL_ROLE
+      );
+
+      // `operator` survives both thresholds, so the phase is left configured but gating nothing
+      // rather than emptied, and the merged document has to reject it.
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+        body: { state_transition: { pending: { count: null, timeframe: null } } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_DATA');
+
+      const after = await ruleSavedObject.getAttributes(created.id);
+      expect(after).toStrictEqual(before);
+    }
+  );
+
+  apiTest(
+    'clears a state transition phase when its last leaf goes, keeping the other phase',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const { rules, ruleSavedObject } = apiServices.alertingV2;
+      const created = await rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'patch-state-transition-last-leaf' },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
 
       const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_RULES_ALL_ROLE
@@ -210,11 +243,13 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
         body: { state_transition: { pending: { count: null } } },
       });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_RULE_DATA');
+      expect(response).toHaveStatusCode(200);
 
       const after = await ruleSavedObject.getAttributes(created.id);
-      expect(after).toStrictEqual(before);
+      expect(after.state_transition).toStrictEqual({ recovering: { count: 4 } });
+
+      const stored = await rules.get(created.id);
+      expect(stored.state_transition).toStrictEqual({ recovering: { count: 4 } });
     }
   );
 });
