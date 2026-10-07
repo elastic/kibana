@@ -113,7 +113,7 @@ export class InfraServerPlugin
     });
 
     const sourceStatus = new InfraSourceStatus(
-      new InfraElasticsearchSourceStatusAdapter(framework),
+      new InfraElasticsearchSourceStatusAdapter(framework, this.serverless.isServerless),
       { sources }
     );
 
