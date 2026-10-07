@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
   - '@kbn/es-query'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
