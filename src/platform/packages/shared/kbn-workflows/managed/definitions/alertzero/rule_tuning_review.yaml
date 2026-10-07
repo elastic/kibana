@@ -884,8 +884,6 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
-                  # The revision the diagnosis read, so approving fails instead of
-                  # overwriting a rule that was edited while this waited.
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
                 impact: medium

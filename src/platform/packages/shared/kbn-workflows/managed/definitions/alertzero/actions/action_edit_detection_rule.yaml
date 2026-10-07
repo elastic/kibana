@@ -44,9 +44,8 @@ triggers:
               type: integer
               minimum: 0
               description: >-
-                The rule's `revision` when the proposal was built. When set, the
-                edit fails instead of overwriting a rule that changed since. Not
-                a rule field, so it is never sent to the patch API.
+                The rule's revision when the proposal was created. If the rule
+                has changed since, the edit is not applied.
             query:
               type: string
               maxLength: 65536
@@ -126,10 +125,6 @@ outputs:
   - name: from
     type: string
 steps:
-  # `revision` is the rule's change counter: it moves on every content edit and
-  # ignores enable/disable and run status. `version` does not move on custom
-  # rule edits, so it cannot detect one. Read failures are handled below, so a
-  # deleted rule gets a plain message instead of the raw HTTP error.
   - name: fetch_rule
     type: kibana.request
     with:
@@ -142,11 +137,6 @@ steps:
     on-failure:
       continue: true
 
-  # The fail steps below make the gate record the proposal `failed` and re-offer
-  # it with the message, instead of silently overwriting someone else's edit.
-  # Analysts read the message on the proposal card, so it stays plain text.
-  # kibana.request reports a non-2xx response as an error whose message starts
-  # with `HTTP <status>:`.
   - name: fail_rule_deleted
     type: workflow.fail
     if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
@@ -173,9 +163,8 @@ steps:
         work, so decline it. If the rule keeps producing false positives, a new review
         will follow.
 
-  # The API changes only the keys it receives. `pick` drops absent keys, so only
-  # supplied fields are patched, and `expected_revision` never reaches the
-  # strict patch schema. Keep this list in sync with the editable fields above.
+  # Sends only the rule fields that were given. When you make a new field
+  # editable above, add it here too.
   - name: patch_rule
     type: security.patchRule
     with:
