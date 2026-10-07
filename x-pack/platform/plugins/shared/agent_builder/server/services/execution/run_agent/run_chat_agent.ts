@@ -145,7 +145,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  // A run that stores nothing cannot close a paused round, so it runs a fresh round on top of it.
   ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
   const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
@@ -160,7 +159,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const roundId = providedRoundId ?? uuidv4();
 
-  // Sub-agents of the stored conversation are not this run's: it can't deliver to or address them.
+  // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
     subAgentExecutor: context.subAgentExecutor,
     initialState: storesConversation ? conversation?.state?.background_executions : undefined,

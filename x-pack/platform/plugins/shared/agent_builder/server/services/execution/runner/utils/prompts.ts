@@ -139,7 +139,6 @@ export const getAgentPromptStorageState = ({
 }: {
   input: ConverseInput;
   conversation?: Conversation;
-  /** When false, a paused conversation is not resumed, so its round-scoped responses don't apply. */
   allowResume?: boolean;
 }): PromptStorageState => {
   const isResumingRound =
