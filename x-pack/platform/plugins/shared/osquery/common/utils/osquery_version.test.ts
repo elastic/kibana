@@ -19,8 +19,13 @@ describe('isValidOsqueryVersion', () => {
     }
   );
 
-  it('trims whitespace before checking', () => {
-    expect(isValidOsqueryVersion('  5.19.0  ')).toBe(true);
-    expect(isValidOsqueryVersion('  latest  ')).toBe(false);
+  it('rejects whitespace-padded values, matching the API codec', () => {
+    expect(isValidOsqueryVersion(' 5.10.0')).toBe(false);
+    expect(isValidOsqueryVersion('5.19.0 ')).toBe(false);
+  });
+
+  it('rejects values longer than the API length cap', () => {
+    expect(isValidOsqueryVersion('1'.repeat(64))).toBe(true);
+    expect(isValidOsqueryVersion('1'.repeat(65))).toBe(false);
   });
 });

@@ -28,33 +28,33 @@ const mockSchema = (overrides: Partial<ReturnType<typeof useOsquerySchema>>) =>
 
 describe('useOsqueryVersionOptions', () => {
   describe('helpText', () => {
-    it('should name the detected osquery and integration versions when the package is installed', () => {
+    it('should name the osquery version known to the installed package, without claiming agents run it', () => {
       mockSchema({ osqueryVersion: '5.23.1', pkgVersion: '1.35.0' });
 
       const { result } = renderHook(() => useOsqueryVersionOptions());
 
       expect(result.current.helpText).toBe(
-        'osquery agent version, not the integration version. Detected: 5.23.1 (Osquery Manager 1.35.0)'
+        'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.0: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.'
       );
       expect(result.current.options[0].label).toBe('5.23.1');
     });
 
-    it('should not claim detection when the server serves the fallback schema', () => {
+    it('should not name a package version when the server serves the fallback schema', () => {
       mockSchema({ osqueryVersion: FALLBACK_OSQUERY_VERSION, pkgVersion: undefined });
 
       const { result } = renderHook(() => useOsqueryVersionOptions());
 
       expect(result.current.helpText).toBe(
-        `osquery agent version, not the integration version. Installed osquery version not detected; listing versions up to ${FALLBACK_OSQUERY_VERSION}.`
+        `osquery agent version, not the integration version. No osquery version reported by Osquery Manager; listing versions up to ${FALLBACK_OSQUERY_VERSION}. Agents run the osquery bundled with their Elastic Agent version.`
       );
     });
 
-    it('should not claim detection when the version is the integration version (missing metadata)', () => {
+    it('should fall back when the version is the integration version (missing metadata)', () => {
       mockSchema({ osqueryVersion: '1.35.0', pkgVersion: '1.35.0' });
 
       const { result } = renderHook(() => useOsqueryVersionOptions());
 
-      expect(result.current.helpText).toMatch(/not detected/);
+      expect(result.current.helpText).toMatch(/No osquery version reported by Osquery Manager/);
       expect(result.current.options[0].label).toBe(FALLBACK_OSQUERY_VERSION);
     });
 

@@ -3287,15 +3287,15 @@ components:
     PackQueryVersionInput:
       description: Uses the Osquery versions greater than or equal to the specified
         version string. Formatted as a numeric version string, e.g. `"5.10.0"`,
-        or an empty string for no constraint. Non-numeric values (e.g.
-        `"latest"`) are rejected.
+        or an empty string to inherit the pack's `min_osquery_version` (no
+        constraint if the pack has none). Non-numeric values (e.g. `"latest"`)
+        are rejected.
       example: 5.10.0
       maxLength: 64
       pattern: ^(\d+(\.\d+){0,2})?$
       type: string
     PackQueryVersionInputOrUndefined:
       $ref: '#/components/schemas/PackQueryVersionInput'
-      nullable: true
     PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1

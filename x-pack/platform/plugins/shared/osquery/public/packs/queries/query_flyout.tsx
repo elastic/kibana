@@ -224,9 +224,13 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [versionOptions, packMinOsqueryVersion, overridePackDefaults]
   );
 
-  // Mirrors the serializer: with the toggle off and a pack version default, the
-  // query's `version` is dropped on save, so the inherited value isn't checked.
-  const isVersionInherited = !overridePackDefaults && !!packMinOsqueryVersion;
+  // Mirrors the serializer: the query's `version` is dropped on save when it
+  // inherits the pack default (toggle off) or equals it (toggle on), so that
+  // value isn't checked here; the pack form still flags an invalid default.
+  const queryVersion = watch('version');
+  const isVersionInherited =
+    !!packMinOsqueryVersion &&
+    (!overridePackDefaults || queryVersion?.[0] === packMinOsqueryVersion);
 
   const plainVersionFieldProps = useMemo(
     () => ({

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiText } from '@elastic/eui';
-import { useController } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { isValidOsqueryVersion } from '../../common/utils/osquery_version';
@@ -25,9 +25,9 @@ interface VersionFieldProps {
   /** Optional help text rendered below the field. */
   helpText?: React.ReactNode;
   /**
-   * Skip the stored-value format check. Set when the field shows an inherited
-   * pack default that the serializer drops on save, so an invalid legacy pack
-   * value must not block submitting the query.
+   * Skip the stored-value format check. Set when the field holds the pack
+   * default that the serializer drops on save, so an invalid legacy pack value
+   * must not block submitting the query. Typed input is still checked.
    */
   skipValidation?: boolean;
 }
@@ -38,8 +38,17 @@ const VersionFieldComponent = ({
   helpText,
   skipValidation = false,
 }: VersionFieldProps) => {
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [createError, setCreateErrorState] = useState<string | null>(null);
+  // Read by `validate`, so a rejected typed value blocks submit even when the
+  // blur that rejected it and the Save click land before a re-render.
+  const createErrorRef = useRef<string | null>(null);
+  const setCreateError = useCallback((next: string | null) => {
+    createErrorRef.current = next;
+    setCreateErrorState(next);
+  }, []);
   const isSingleSelection = !!euiFieldProps.singleSelection;
+  const isDisabled = !!euiFieldProps.isDisabled;
+  const { trigger } = useFormContext();
 
   const {
     field: { onChange, value },
@@ -49,6 +58,10 @@ const VersionFieldComponent = ({
     defaultValue: [],
     rules: {
       validate: (v: string[]) => {
+        // The typed value was rejected, so the form value still holds the previous
+        // selection. Block submit until the input is fixed or cleared. A disabled
+        // field can't be edited, so its leftover text must not block.
+        if (createErrorRef.current && !isDisabled) return createErrorRef.current;
         if (skipValidation || !Array.isArray(v) || v.length === 0) return true;
         const invalid = v.find((entry) => !isValidOsqueryVersion(entry));
 
@@ -76,7 +89,7 @@ const VersionFieldComponent = ({
 
       return true;
     },
-    [onChange, value, isSingleSelection]
+    [onChange, value, isSingleSelection, setCreateError]
   );
 
   const onComboChange = useCallback(
@@ -84,10 +97,27 @@ const VersionFieldComponent = ({
       setCreateError(null);
       onChange(options.map((option) => option.label));
     },
-    [onChange]
+    [onChange, setCreateError]
   );
 
-  const displayError = skipValidation ? undefined : createError ?? error?.message;
+  // Editing the rejected text clears its error; EUI re-runs `onCreateOption`
+  // on Enter or blur, which flags the new text if it is still invalid. After a
+  // blocked submit the form state still holds that error, so re-validate.
+  const onSearchChange = useCallback(() => {
+    if (!createErrorRef.current) return;
+    setCreateError(null);
+    if (error) trigger(name);
+  }, [setCreateError, error, trigger, name]);
+
+  // Disabling the field (e.g. the flyout's override toggle turned off) drops any
+  // pending rejection, along with the submit error it produced.
+  useEffect(() => {
+    if (!isDisabled || !createErrorRef.current) return;
+    setCreateError(null);
+    if (error) trigger(name);
+  }, [isDisabled, error, setCreateError, trigger, name]);
+
+  const displayError = createError ?? (skipValidation ? undefined : error?.message);
   const hasError = useMemo(() => !!displayError, [displayError]);
 
   const selectedOptions = useMemo(
@@ -125,6 +155,7 @@ const VersionFieldComponent = ({
         selectedOptions={selectedOptions}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
+        onSearchChange={onSearchChange}
         fullWidth
         data-test-subj="input"
         {...euiFieldProps}

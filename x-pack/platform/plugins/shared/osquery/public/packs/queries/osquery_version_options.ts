@@ -8,8 +8,10 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
 
-// Last known minor for each major older than the live major.
-// This is frozen history — only extended when a new major ships.
+// Last minor of each major older than the live major. Must be updated when a
+// new major ships (add the previous major's last minor) or when another minor
+// ships for an older major (e.g. a 5.24 after 6.0). A missing major lists only
+// `<major>.0.0`.
 const LAST_KNOWN_MINOR: Record<number, number> = { 5: 23 };
 
 // Oldest major the picker lists. Anything below it can't be a live osquery

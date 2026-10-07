@@ -365,7 +365,7 @@ export const ObjectQueries = lazySchema(() => z.object({}).catchall(ObjectQuerie
 export type ObjectQueries = z.infer<typeof ObjectQueries>;
 
 /**
- * Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string for no constraint. Non-numeric values (e.g. `"latest"`) are rejected.
+ * Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack's `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.
  */
 export const PackQueryVersionInput = lazySchema(() =>
   z
@@ -375,7 +375,7 @@ export const PackQueryVersionInput = lazySchema(() =>
 );
 export type PackQueryVersionInput = z.infer<typeof PackQueryVersionInput>;
 
-export const PackQueryVersionInputOrUndefined = lazySchema(() => PackQueryVersionInput.nullable());
+export const PackQueryVersionInputOrUndefined = lazySchema(() => PackQueryVersionInput);
 export type PackQueryVersionInputOrUndefined = z.infer<typeof PackQueryVersionInputOrUndefined>;
 
 export const ObjectQueriesItemInput = lazySchema(() =>

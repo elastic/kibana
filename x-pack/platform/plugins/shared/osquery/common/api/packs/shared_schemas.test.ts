@@ -52,6 +52,24 @@ describe('osqueryVersionString codec', () => {
   it('rejects strings exceeding 64 characters', () => {
     expect(isRight(decode('5'.repeat(65)))).toBe(false);
   });
+
+  it('names the field path when the value exceeds the length cap', () => {
+    const result = packQueryRecordRt.decode({
+      q1: { query: 'select 1;', version: '1'.repeat(65) },
+    });
+    expect(isLeft(result) && result.left[0].message).toBe(
+      'q1.version: string must not exceed 64 characters'
+    );
+  });
+
+  it('names the field path when the value is not a string', () => {
+    const result = packQueryRecordRt.decode({ q1: { query: 'select 1;', version: null } });
+    expect(isLeft(result) && result.left[0].message).toBe('q1.version: expected string');
+  });
+
+  it('rejects a whitespace-padded version', () => {
+    expect(isRight(decode(' 5.10.0'))).toBe(false);
+  });
 });
 
 describe('nonEmptyOsqueryVersionString codec', () => {

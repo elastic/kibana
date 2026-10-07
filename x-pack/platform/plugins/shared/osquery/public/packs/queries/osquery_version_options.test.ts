@@ -45,6 +45,15 @@ describe('getOsqueryVersionOptions', () => {
     expect(labels).toContain('5.0.0');
   });
 
+  // Documents the maintenance contract: a major with no LAST_KNOWN_MINOR entry
+  // collapses to `<major>.0.0`, so the table needs an entry once that major is
+  // no longer the live one.
+  it('lists only <major>.0.0 for an older major missing from LAST_KNOWN_MINOR (7.1.0)', () => {
+    const labels = getOsqueryVersionOptions('7.1.0').map((o) => o.label);
+    expect(labels.slice(0, 5)).toEqual(['7.1.0', '7.0.0', '6.0.0', '5.23.0', '5.22.0']);
+    expect(labels).not.toContain('6.1.0');
+  });
+
   it('falls back to FALLBACK_OSQUERY_VERSION on garbage input', () => {
     expect(getOsqueryVersionOptions('garbage')).toEqual(
       getOsqueryVersionOptions(FALLBACK_OSQUERY_VERSION)

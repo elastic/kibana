@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { NonEmptyString } from '../model/non_empty_string';
-import { OSQUERY_VERSION_REGEX } from '../../utils/osquery_version';
+import { MIN_OSQUERY_VERSION_MAX_LENGTH, OSQUERY_VERSION_REGEX } from '../../utils/osquery_version';
 
 // String-length cap on string fields. Defense at the API edge against
 // blob-sized payloads (RRULE, splay, dates) — SO `unknowns: 'allow'` would
@@ -61,9 +61,9 @@ export const resultTypeRt = t.union([
   t.literal('differential_added_only'),
 ]);
 
-// Length caps match OpenAPI `MinOsqueryVersion.maxLength` / `PackPlatform.maxLength`
-// in `common/api/model/schema/common_attributes.schema.yaml`.
-export const MIN_OSQUERY_VERSION_MAX_LENGTH = 64;
+// Length cap matches OpenAPI `PackPlatform.maxLength` in
+// `common/api/model/schema/common_attributes.schema.yaml`. The version cap lives
+// in `common/utils/osquery_version.ts`, shared with the UI validator.
 export const PLATFORM_MAX_LENGTH = 256;
 
 // Builds a readable field path (e.g. `queries.q1.version`) from an io-ts context.
@@ -82,19 +82,20 @@ const contextPath = (c: t.Context): string =>
 
 // Numeric version string matching the osquery versionAtLeast format. Non-numeric
 // values like "latest" or "5.x" silently disable queries on the agent, so we
-// reject them at the API edge. `allowEmpty` permits "" (no constraint), which
-// per-query `version` accepts but pack-level `min_osquery_version` does not.
+// reject them at the API edge. `allowEmpty` permits "" (inherit the pack's
+// `min_osquery_version`; no constraint if the pack has none), which per-query
+// `version` accepts but pack-level `min_osquery_version` does not.
 const makeOsqueryVersionString = (name: string, allowEmpty: boolean) =>
   new t.Type<string, string, unknown>(
     name,
     (u): u is string => typeof u === 'string',
     (u, c) => {
-      if (typeof u !== 'string') return t.failure(u, c, 'expected string');
+      if (typeof u !== 'string') return t.failure(u, c, `${contextPath(c)}: expected string`);
       if (u.length > MIN_OSQUERY_VERSION_MAX_LENGTH)
         return t.failure(
           u,
           c,
-          `string must not exceed ${MIN_OSQUERY_VERSION_MAX_LENGTH} characters`
+          `${contextPath(c)}: string must not exceed ${MIN_OSQUERY_VERSION_MAX_LENGTH} characters`
         );
       if ((allowEmpty && u === '') || OSQUERY_VERSION_REGEX.test(u)) return t.success(u);
 

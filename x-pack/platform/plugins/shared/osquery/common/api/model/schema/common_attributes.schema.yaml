@@ -270,19 +270,21 @@ components:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
 
-    # Request shape of a pack query version. Empty string means "no constraint".
-    # Kept separate from `Version`, which saved queries and live queries share
-    # and where the value never reaches osqueryd, so it stays unvalidated there.
+    # Request shape of a pack query version. Empty string inherits the pack's
+    # `min_osquery_version` (no constraint if the pack has none). Kept separate
+    # from `Version`, which saved queries and live queries share and where the
+    # value never reaches osqueryd, so it stays unvalidated there.
     PackQueryVersionInput:
-      description: 'Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string for no constraint. Non-numeric values (e.g. `"latest"`) are rejected.'
+      description: 'Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack''s `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.'
       type: string
       maxLength: 64
       pattern: '^(\d+(\.\d+){0,2})?$'
       example: '5.10.0'
 
+    # Not nullable: the request codec has never accepted `null` for a query's
+    # `version` (omit the field instead).
     PackQueryVersionInputOrUndefined:
       $ref: '#/components/schemas/PackQueryVersionInput'
-      nullable: true
 
     # Request shape of a pack query. Same fields as `ObjectQueriesItem` (the
     # response shape), except `version` is format-checked. Responses keep

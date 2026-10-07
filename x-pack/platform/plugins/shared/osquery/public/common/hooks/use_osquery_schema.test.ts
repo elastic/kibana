@@ -133,7 +133,7 @@ describe('useOsquerySchema', () => {
     });
   });
 
-  describe('staleTime: Infinity caching', () => {
+  describe('staleTime caching', () => {
     it('should only make one HTTP request when the hook is rendered twice in the same client', async () => {
       const { result: result1 } = renderHook(() => useOsquerySchema(), {
         wrapper: createWrapper(queryClient),
