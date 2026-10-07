@@ -13,6 +13,7 @@ import type {
   ThrottleStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -45,31 +46,13 @@ const normalizeThrottle = (
   return { strategy, ...(interval ? { interval } : {}) };
 };
 
-/** Policies stored before the API rejected empty sentinels can hold `groupBy: []`, meaning "not grouped by field". */
 const toApiGroupBy = (
   groupBy: ActionPolicySavedObjectAttributes['groupBy']
 ): ActionPolicyResponse['group_by'] => (groupBy?.length ? groupBy : undefined);
 
-/** Policies stored before `description` was optional can hold `''`, meaning "no description". */
 const toApiDescription = (
   description: ActionPolicySavedObjectAttributes['description']
 ): ActionPolicyResponse['description'] => description || undefined;
-
-/**
- * The single matcher representation, shared by storage and the API: a matcher that constrains
- * nothing is no matcher at all, so a legacy document holding `{}`, `tags: []` or `expression: ''`
- * reads the same as a catch-all policy.
- */
-const normalizeMatcher = (
-  matcher: { tags?: string[] | null; expression?: string | null } | null | undefined
-): ActionPolicyResponse['matcher'] => {
-  const tags = matcher?.tags?.length ? matcher.tags : undefined;
-  const expression = matcher?.expression || undefined;
-
-  if (tags === undefined && expression === undefined) return undefined;
-
-  return { ...(tags ? { tags } : {}), ...(expression ? { expression } : {}) };
-};
 
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKey: auth.apiKey,
@@ -102,7 +85,7 @@ export const toPatchableActionPolicyData = (
  */
 const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   name: data.name,
-  description: data.description || undefined,
+  description: data.description,
   destinations: data.destinations,
   matcher: normalizeMatcher(data.matcher),
   groupBy: data.group_by,
@@ -112,7 +95,6 @@ const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
 
 export const buildCreateActionPolicyAttributes = ({
   data,
-  enabled,
   auth,
   createdBy,
   createdAt,
@@ -120,7 +102,6 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt,
 }: {
   data: CreateActionPolicyData;
-  enabled: boolean;
   auth: ApiKeyAttributes;
   createdBy: ActionPolicySavedObjectAttributes['createdBy'];
   createdAt: string;
@@ -129,7 +110,7 @@ export const buildCreateActionPolicyAttributes = ({
 }): ActionPolicySavedObjectAttributes => {
   return {
     ...toStoredPolicyFields(data),
-    enabled,
+    enabled: true,
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,

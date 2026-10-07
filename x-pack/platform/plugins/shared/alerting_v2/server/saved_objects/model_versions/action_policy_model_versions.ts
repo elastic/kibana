@@ -13,7 +13,6 @@ import {
   actionPolicySavedObjectAttributesSchemaV3,
   actionPolicySavedObjectAttributesSchemaV4,
   actionPolicySavedObjectAttributesSchemaV5,
-  actionPolicySavedObjectAttributesSchemaV6,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 import { toActor } from './to_actor';
@@ -210,29 +209,6 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV5,
-    },
-  },
-  '6': {
-    /**
-     * v6 makes `description` optional so a policy without one stores no key at all, rather than an
-     * empty string standing in for "no description". Existing documents are already valid, so there
-     * is nothing to backfill.
-     *
-     * This relaxes an existing attribute, so it is NOT rollback-compatible: the v1-v5 schemas
-     * require `description`, meaning a node rolled back to v5 fails to read any policy written
-     * without one. Accepted while alerting v2 is in technical preview; the SO migration fixtures
-     * all carry a description, so they round-trip through the rollback check.
-     *
-     * `description` is neither encrypted nor part of the decryption AAD, so a plain model version is
-     * correct.
-     */
-    changes: [],
-    schemas: {
-      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV6.extends(
-        {},
-        { unknowns: 'ignore' }
-      ),
-      create: actionPolicySavedObjectAttributesSchemaV6,
     },
   },
 };

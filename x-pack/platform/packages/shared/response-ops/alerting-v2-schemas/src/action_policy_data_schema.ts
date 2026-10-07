@@ -120,14 +120,26 @@ export const needsInterval = (strategy: string | undefined): boolean =>
 export interface ValidationPayload {
   value: {
     grouping_mode?: string | null;
-    throttle?: { strategy?: string; interval?: string } | null;
+    throttle?: { strategy: string; interval?: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
 }
 
-const validateStrategyInterval = (payload: ValidationPayload) => {
-  const { value: data, issues } = payload;
-  const { strategy, interval } = data.throttle ?? {};
+const validateGroupingModeAndStrategy = ({ value: data, issues }: ValidationPayload) => {
+  if (data.throttle == null) return;
+
+  const mode = data.grouping_mode ?? 'per_alert';
+  const { strategy, interval } = data.throttle;
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
+
+  if (!allowed.has(strategy)) {
+    issues.push({
+      code: 'custom',
+      message: `Strategy "${strategy}" is not valid for grouping mode "${mode}"`,
+      path: ['throttle', 'strategy'],
+      input: data,
+    });
+  }
 
   if (needsInterval(strategy) && !interval) {
     issues.push({
@@ -137,30 +149,6 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
       input: data,
     });
   }
-};
-
-/**
- * Runs on the create shape and on the merged PATCH document, where `strategy` is required whenever
- * `throttle` is present — so a `throttle` reaching here without one is rejected rather than skipped.
- */
-const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
-  const { value: data, issues } = payload;
-  if (data.throttle == null) return;
-
-  const mode = data.grouping_mode ?? 'per_alert';
-  const { strategy } = data.throttle;
-  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
-
-  if (strategy === undefined || !allowed.has(strategy)) {
-    issues.push({
-      code: 'custom',
-      message: `Strategy "${strategy}" is not valid for grouping mode "${mode}"`,
-      path: ['throttle', 'strategy'],
-      input: data,
-    });
-  }
-
-  validateStrategyInterval(payload);
 };
 
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
@@ -214,6 +202,8 @@ const THROTTLE_DESCRIPTION =
 const actionPolicyDescriptionSchema = z
   .string()
   .max(MAX_DESCRIPTION_LENGTH)
+  .trim()
+  .min(1)
   .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION);
 
 const actionPolicyGroupBySchema = z

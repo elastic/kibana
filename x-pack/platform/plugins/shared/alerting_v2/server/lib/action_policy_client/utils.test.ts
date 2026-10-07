@@ -165,10 +165,9 @@ describe('writing optional fields', () => {
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   };
 
-  it('stores an empty description as an absent key', () => {
+  it('stores no description when it is omitted', () => {
     const attrs = buildCreateActionPolicyAttributes({
-      data: { ...data, description: '' },
-      enabled: true,
+      data,
       auth,
       createdBy: null,
       createdAt: '2026-10-07T00:00:00.000Z',
@@ -176,11 +175,10 @@ describe('writing optional fields', () => {
       updatedAt: '2026-10-07T00:00:00.000Z',
     });
 
-    // Serialized, because an `undefined` property never reaches Elasticsearch.
-    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('description');
+    expect(attrs.description).toBeUndefined();
   });
 
-  it('stores a cleared description as an absent key on update', () => {
+  it('stores no description once it is cleared on update', () => {
     const attrs = buildUpdateActionPolicyAttributes({
       existing: storedAttributes(),
       data,
@@ -189,10 +187,10 @@ describe('writing optional fields', () => {
       updatedAt: '2026-10-07T00:00:01.000Z',
     });
 
-    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('description');
+    expect(attrs.description).toBeUndefined();
   });
 
-  it('stores a matcher that constrains nothing as an absent key', () => {
+  it('stores no matcher when the one it is given constrains nothing', () => {
     const attrs = buildUpdateActionPolicyAttributes({
       existing: storedAttributes({ matcher: { tags: ['prod'] } }),
       data: { ...data, matcher: {} },
@@ -201,6 +199,6 @@ describe('writing optional fields', () => {
       updatedAt: '2026-10-07T00:00:01.000Z',
     });
 
-    expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('matcher');
+    expect(attrs.matcher).toBeUndefined();
   });
 });

@@ -573,6 +573,7 @@ const GROUPING_FIELDS_DESCRIPTION =
 
 const groupingFieldsSchema = z
   .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+  .min(1)
   .max(MAX_GROUPING_FIELDS);
 
 export const groupingSchema = z

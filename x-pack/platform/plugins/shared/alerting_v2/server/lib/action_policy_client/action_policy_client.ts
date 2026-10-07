@@ -268,7 +268,6 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
-      enabled: true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -353,8 +352,6 @@ export class ActionPolicyClient {
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
-    // Merge in API space, then validate the whole document: a sparse delta cannot satisfy the
-    // cross-field invariants on its own, and the merge result is what actually gets stored.
     const merged = applyPatch(
       createActionPolicyDataSchema,
       toPatchableActionPolicyData(existingPolicy),
@@ -489,8 +486,6 @@ export class ActionPolicyClient {
   }
 
   public async unsnoozeActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    // The state path merges rather than replaces, and a merge cannot remove a key, so this is the
-    // one field still cleared with a `null`. A later patch rewrites the document without it.
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
@@ -553,7 +548,6 @@ export class ActionPolicyClient {
   public async bulkUnsnoozeActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    // See `unsnoozeActionPolicy`: a merging write cannot remove a key.
     return this.executeBulkUpdate(ids, { snoozedUntil: null });
   }
 
@@ -952,24 +946,13 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema. Lifecycle state
-    // (`enabled`, `snoozedUntil`) and audit metadata are not part of that schema, so they are
-    // preserved from storage; only `_enable`/`_disable` and `_snooze`/`_unsnooze` move them. Tags
-    // are preserved too: they are no longer part of the API contract but remain in the saved
-    // object so they can be re-exposed later.
-    const replacementAttrs: ActionPolicySavedObjectAttributes = {
-      ...buildCreateActionPolicyAttributes({
-        data: parsed,
-        enabled: existingAttrs.enabled,
-        auth: apiKeyAttrs,
-        createdBy: existingAttrs.createdBy,
-        createdAt: existingAttrs.createdAt,
-        updatedBy: actor,
-        updatedAt: now,
-      }),
-      snoozedUntil: existingAttrs.snoozedUntil ?? undefined,
-      tags: existingAttrs.tags ?? undefined,
-    };
+    const replacementAttrs = buildUpdateActionPolicyAttributes({
+      existing: existingAttrs,
+      data: parsed,
+      auth: apiKeyAttrs,
+      updatedBy: actor,
+      updatedAt: now,
+    });
 
     try {
       await this.writeActionPolicyAttrs({

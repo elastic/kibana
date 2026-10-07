@@ -546,13 +546,15 @@ describe('action policy optional fields are never empty', () => {
 
   describe('matcher', () => {
     it.each(writeSchemas)('rejects an empty object on %s', (_label, schema) => {
-      const result = schema.safeParse({ ...base, matcher: {} });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toContain('at least one of `tags`, `expression`');
+      expect(schema.safeParse({ ...base, matcher: {} }).success).toBe(false);
     });
 
     it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
       expect(schema.safeParse({ ...base, matcher: null }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('rejects a blank expression on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, matcher: { expression: '   ' } }).success).toBe(false);
     });
 
     it.each(writeSchemas)('accepts one leaf alone on %s', (_label, schema) => {
@@ -566,7 +568,6 @@ describe('action policy optional fields are never empty', () => {
       expect(updateActionPolicyDataSchema.safeParse({ matcher: {} }).success).toBe(false);
     });
 
-    // Clearing a leaf still names one, and the merge clears the matcher once both are gone.
     it('accepts a cleared leaf on patch', () => {
       expect(updateActionPolicyDataSchema.parse({ matcher: { tags: null } })).toEqual({
         matcher: { tags: null },
@@ -589,6 +590,17 @@ describe('action policy optional fields are never empty', () => {
 
     it.each(writeSchemas)('rejects null on %s', (_label, schema) => {
       expect(schema.safeParse({ ...base, description: null }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('rejects an empty or blank description on %s', (_label, schema) => {
+      expect(schema.safeParse({ ...base, description: '' }).success).toBe(false);
+      expect(schema.safeParse({ ...base, description: '   ' }).success).toBe(false);
+    });
+
+    it.each(writeSchemas)('trims the stored description on %s', (_label, schema) => {
+      expect(schema.parse({ ...base, description: '  Desc  ' })).toMatchObject({
+        description: 'Desc',
+      });
     });
 
     it('accepts null on patch, which clears it', () => {

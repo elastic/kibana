@@ -55,7 +55,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
     expect(result.matcher).toEqual({ tags: ['critical'] });
   });
 
-  // The API rejects a matcher that constrains nothing, so a catch-all attachment omits the key.
   it.each([{}, { tags: [] }, { expression: '' }])('omits a matcher set to %p', (matcher) => {
     const result = attachmentDataToActionPolicyPayload({
       name: 'Catch-all Policy',

@@ -290,6 +290,7 @@ describe('rule template create-rule schema coupling', () => {
                     "type": "string",
                   },
                   "maxItems": 16,
+                  "minItems": 1,
                   "type": "array",
                 },
               },

@@ -55,7 +55,7 @@ const matcherTagsSchema = z
   .min(1)
   .max(POLICY_MATCHER_TAGS_MAX);
 
-const matcherExpressionSchema = z.string().min(1).max(MAX_KQL_LENGTH);
+const matcherExpressionSchema = z.string().max(MAX_KQL_LENGTH).trim().min(1);
 
 export const policyMatcherSchema = z
   .object({

@@ -8,22 +8,14 @@
 import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
-  PolicyMatcher,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { DEFAULT_STRATEGY_FOR_MODE } from './constants';
 import type { ActionPolicyFormState } from './types';
 
 export { needsInterval };
-
-/**
- * Collapses a matcher where both `tags` and `expression` are empty/null back to `null`
- * (catch-all). Prevents persisting `{ tags: null, expression: null }` which would be
- * truthy but semantically equivalent to no matcher.
- */
-const normalizeMatcher = (matcher: PolicyMatcher | null): PolicyMatcher | null =>
-  matcher && (matcher.tags?.length || matcher.expression?.trim()) ? matcher : null;
 
 /** An interval the strategy cannot use is omitted on create, where `null` is not a clear signal. */
 const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['throttle'] => ({
@@ -78,10 +70,7 @@ const toMatcherPatch = (
   const normalized = normalizeMatcher(matcher);
   if (!normalized) return null;
 
-  return {
-    tags: normalized.tags?.length ? normalized.tags : null,
-    expression: normalized.expression?.trim() ? normalized.expression : null,
-  };
+  return { tags: normalized.tags ?? null, expression: normalized.expression ?? null };
 };
 
 export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {

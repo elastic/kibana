@@ -36,6 +36,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { applyPatch } from '../apply_patch';
 import {
   toApiArtifacts,
+  toApiGrouping,
   toApiQuery,
   toApiStateTransition,
 } from '../../saved_objects/legacy_rule_shape';
@@ -301,7 +302,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
   recovery: attrs.recovery,
   no_data: attrs.no_data,
   state_transition: toApiStateTransition(attrs.state_transition),
-  grouping: attrs.grouping,
+  grouping: toApiGrouping(attrs.grouping),
   artifacts: toApiArtifacts(attrs.artifacts),
 });
 
@@ -481,7 +482,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     recovery: attrs.recovery,
     no_data: attrs.no_data,
     state_transition: toApiStateTransition(attrs.state_transition),
-    grouping: attrs.grouping,
+    grouping: toApiGrouping(attrs.grouping),
     artifacts: toApiArtifacts(attrs.artifacts),
     enabled: attrs.enabled,
     created_by: attrs.createdBy,

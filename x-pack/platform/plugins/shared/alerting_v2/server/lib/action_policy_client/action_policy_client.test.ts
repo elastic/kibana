@@ -31,10 +31,6 @@ import type { UpdateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
-/** The document as stored: an `undefined` attribute never reaches Elasticsearch. */
-const toStoredDocument = (attributes: unknown): Record<string, unknown> =>
-  JSON.parse(JSON.stringify(attributes));
-
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
@@ -876,6 +872,9 @@ describe('ActionPolicyClient', () => {
   });
 
   describe('updateActionPolicy', () => {
+    const storedByUpdate = () =>
+      mockSavedObjectsClient.update.mock.calls[0][2] as ActionPolicySavedObjectAttributes;
+
     describe('leaf merging', () => {
       const storedAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
@@ -917,9 +916,6 @@ describe('ActionPolicyClient', () => {
       const patch = (data: UpdateActionPolicyData) =>
         client.updateActionPolicy({ data, options: { id: 'policy-leaf' } });
 
-      const storedByUpdate = () =>
-        mockSavedObjectsClient.update.mock.calls[0][2] as ActionPolicySavedObjectAttributes;
-
       it('sets one matcher leaf and keeps its sibling', async () => {
         const res = await patch({ matcher: { tags: ['staging'] } });
 
@@ -937,12 +933,10 @@ describe('ActionPolicyClient', () => {
         expect(res.matcher).toEqual({ tags: ['prod'] });
       });
 
-      // `{}` is not a matcher any write accepts, so losing the last leaf clears the block itself
-      // and the policy becomes a catch-all.
       it('clears the matcher when its last leaf goes', async () => {
         const res = await patch({ matcher: { tags: null, expression: null } });
 
-        expect(toStoredDocument(storedByUpdate())).not.toHaveProperty('matcher');
+        expect(storedByUpdate().matcher).toBeUndefined();
         expect(res.matcher).toBeUndefined();
       });
 
@@ -1039,10 +1033,10 @@ describe('ActionPolicyClient', () => {
         }),
         { version: 'WzEsMV0=', mergeAttributes: false }
       );
-      const [, , attributes] = mockSavedObjectsClient.update.mock.calls[0];
-      expect(toStoredDocument(attributes)).not.toHaveProperty('matcher');
-      expect(toStoredDocument(attributes)).not.toHaveProperty('groupBy');
-      expect(toStoredDocument(attributes)).not.toHaveProperty('throttle');
+      const attributes = storedByUpdate();
+      expect(attributes.matcher).toBeUndefined();
+      expect(attributes.groupBy).toBeUndefined();
+      expect(attributes.throttle).toBeUndefined();
       expect(res.matcher).toBeUndefined();
       expect(res.group_by).toBeUndefined();
       expect(res.throttle).toBeUndefined();
@@ -1088,8 +1082,7 @@ describe('ActionPolicyClient', () => {
         options: { id: 'policy-id-update-1' },
       });
 
-      const [, , attributes] = mockSavedObjectsClient.update.mock.calls[0];
-      expect(toStoredDocument(attributes).throttle).toStrictEqual({ strategy: 'on_status_change' });
+      expect(storedByUpdate().throttle).toStrictEqual({ strategy: 'on_status_change' });
       expect(res.throttle).toEqual({ strategy: 'on_status_change' });
     });
 

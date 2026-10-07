@@ -738,6 +738,21 @@ describe('createRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+
+    it('rejects an empty array on create, where a rule groups by nothing by omitting grouping', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        grouping: { fields: [] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array on patch', () => {
+      const result = updateRuleDataSchema.safeParse({ grouping: { fields: [] } });
+
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('state_transition', () => {

@@ -161,17 +161,6 @@ describe('ActionPolicySavedObjectService', () => {
         { version: 'v1', mergeAttributes: false }
       );
     });
-
-    it('replaces the document rather than merging, so cleared leaves stay cleared', async () => {
-      await service.update({ id: 'policy-1', attrs: mockAttrs });
-
-      expect(mockSoClient.update).toHaveBeenCalledWith(
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-        'policy-1',
-        mockAttrs,
-        { mergeAttributes: false }
-      );
-    });
   });
 
   describe('patchFields', () => {

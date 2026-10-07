@@ -1432,18 +1432,15 @@ describe('RulesClient', () => {
         data: { artifacts: null },
       });
 
-      // Serialized, because an `undefined` property never reaches the wire or Elasticsearch: a
-      // cleared list leaves no key behind, rather than an empty array.
-      expect(JSON.parse(JSON.stringify(response))).not.toHaveProperty('artifacts');
+      expect(response.artifacts).toBeUndefined();
 
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
+      const [{ attrs, id, version, references }] = rulesSavedObjectService.update.mock.calls[0];
+      expect({ id, version, references }).toEqual({
         id: 'rule-id-clear-artifacts',
-        attrs: expect.any(Object),
         version: 'WzEsMV0=',
         references: [],
       });
-      const [{ attrs }] = rulesSavedObjectService.update.mock.calls[0];
-      expect(JSON.parse(JSON.stringify(attrs))).not.toHaveProperty('artifacts');
+      expect(attrs.artifacts).toBeUndefined();
     });
 
     it('uses the server-read version for the optimistic concurrency check', async () => {

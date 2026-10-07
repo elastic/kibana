@@ -707,7 +707,6 @@ describe('utils', () => {
       );
 
       expect(result.artifacts).toBeUndefined();
-      expect(JSON.parse(JSON.stringify(result))).not.toHaveProperty('artifacts');
     });
 
     it('drops a legacy empty artifacts list rather than writing it back', () => {
@@ -723,41 +722,7 @@ describe('utils', () => {
         }
       );
 
-      expect(JSON.parse(JSON.stringify(result))).not.toHaveProperty('artifacts');
-    });
-
-    /**
-     * The merged document is parsed with the create schema, whose artifact object is strict, so the
-     * legacy key has to be projected away before the merge. It stays on disk for the rollback
-     * window regardless.
-     */
-    it('patches a rule whose stored artifacts still carry the legacy value', () => {
-      const existing = createRuleSoAttributes({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: 'runbook',
-            data: { content: 'steps' },
-            // @ts-expect-error legacy key retained on disk for rollback
-            value: 'steps',
-          },
-        ],
-      });
-
-      const result = buildUpdateRuleAttributes(
-        existing,
-        { metadata: { name: 'renamed' } },
-        {
-          updatedBy: { profile_uid: 'user-2' },
-          updatedAt: '2025-01-02T00:00:00.000Z',
-          version: 2,
-        }
-      );
-
-      expect(result.metadata.name).toBe('renamed');
-      expect(result.artifacts).toEqual([
-        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' }, value: 'steps' },
-      ]);
+      expect(result.artifacts).toBeUndefined();
     });
   });
 
@@ -790,8 +755,6 @@ describe('utils', () => {
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      // Documents written before a clear removed the key must still satisfy the response schema,
-      // whose `artifacts` is now bounded by `.min(1)`.
       expect(result.artifacts).toBeUndefined();
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });

@@ -11,7 +11,6 @@ import { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttri
 import { actionPolicySavedObjectAttributesSchemaV3 } from './v3';
 import { actionPolicySavedObjectAttributesSchemaV4 } from './v4';
 import { actionPolicySavedObjectAttributesSchemaV5 } from './v5';
-import { actionPolicySavedObjectAttributesSchemaV6 } from './v6';
 
 export type ActionPolicySavedObjectAttributesV1 = TypeOf<
   typeof actionPolicySavedObjectAttributesSchemaV1
@@ -22,7 +21,7 @@ export type ActionPolicySavedObjectAttributesV2 = TypeOf<
 >;
 
 export type ActionPolicySavedObjectAttributes = TypeOf<
-  typeof actionPolicySavedObjectAttributesSchemaV6
+  typeof actionPolicySavedObjectAttributesSchemaV5
 >;
 
 export {
@@ -31,5 +30,4 @@ export {
   actionPolicySavedObjectAttributesSchemaV3,
   actionPolicySavedObjectAttributesSchemaV4,
   actionPolicySavedObjectAttributesSchemaV5,
-  actionPolicySavedObjectAttributesSchemaV6,
 };
