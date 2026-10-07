@@ -188,6 +188,14 @@ export const createModelProvider = ({
       }
     };
 
+    // Agent Builder otherwise relies on the inference endpoint executor's
+    // default 180s timeout. GLM-class models on multi-tool converse turns
+    // routinely exceed that, and EIS then fails the SSE mid-stream with
+    // `request timeout exceeded`, killing the converse before it completes.
+    // Env-gated so default behaviour is unchanged outside eval stacks.
+    const inferenceTimeoutMs =
+      Number(process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS ?? '') || undefined;
+
     const chatModel = await inference.getChatModel({
       request,
       connectorId,
@@ -198,6 +206,7 @@ export const createModelProvider = ({
         telemetryMetadata: resolvedTelemetryMetadata,
         ...(maxContentLength !== undefined ? { maxContentLength } : {}),
         ...(reasoning ? { reasoning } : {}),
+        ...(inferenceTimeoutMs !== undefined ? { timeout: inferenceTimeoutMs } : {}),
       },
     });
 
