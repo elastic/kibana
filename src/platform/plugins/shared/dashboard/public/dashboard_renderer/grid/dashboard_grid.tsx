@@ -29,7 +29,9 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { SelectionMarquee } from './selection_marquee';
 import { useLayoutStyles } from './use_layout_styles';
+import { usePanelSelectionGestures } from './use_panel_selection_gestures';
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
@@ -56,6 +58,12 @@ export const DashboardGrid = () => {
   }, [dashboardContainerRef, topOffset]);
 
   const appFixedViewport = useAppFixedViewport();
+
+  const marqueeRect = usePanelSelectionGestures({
+    layoutRef,
+    panelRefs,
+    enabled: viewMode === 'edit' && expandedPanelId === undefined,
+  });
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -212,6 +220,7 @@ export const DashboardGrid = () => {
       css={styles.dashboard}
     >
       {memoizedGridLayout}
+      <SelectionMarquee rect={marqueeRect} />
     </div>
   );
 };

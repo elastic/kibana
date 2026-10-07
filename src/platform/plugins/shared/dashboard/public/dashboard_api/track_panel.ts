@@ -114,8 +114,40 @@ export function initializeTrackPanel(
       );
     });
 
+  const selectedPanelIds$ = new BehaviorSubject<string[]>([]);
+  // Selection must not survive a view mode switch, and must drop panels that no longer exist
+  const selectionCleanupSubscription = combineLatest([viewMode$, children$]).subscribe(
+    ([viewMode, children]) => {
+      const current = selectedPanelIds$.value;
+      if (!current.length) return;
+      const next = viewMode === 'edit' ? current.filter((id) => Boolean(children[id])) : [];
+      if (next.length !== current.length) selectedPanelIds$.next(next);
+    }
+  );
+
   return {
     api: {
+      selectedPanelIds$,
+      togglePanelSelection: (panelId: string) => {
+        const current = selectedPanelIds$.value;
+        selectedPanelIds$.next(
+          current.includes(panelId)
+            ? current.filter((id) => id !== panelId)
+            : [...current, panelId]
+        );
+      },
+      clearPanelSelection: () => {
+        if (selectedPanelIds$.value.length) selectedPanelIds$.next([]);
+      },
+      selectPanel: (panelId: string) => {
+        const current = selectedPanelIds$.value;
+        const isOnlySelected = current.length === 1 && current[0] === panelId;
+        selectedPanelIds$.next(isOnlySelected ? [] : [panelId]);
+      },
+      addPanelsToSelection: (panelIds: string[]) => {
+        const next = Array.from(new Set([...selectedPanelIds$.value, ...panelIds]));
+        if (next.length !== selectedPanelIds$.value.length) selectedPanelIds$.next(next);
+      },
       expandedPanelId$,
       expandPanel: (panelId: string) => {
         const isPanelExpanded = panelId === expandedPanelId$.value;
@@ -192,6 +224,7 @@ export function initializeTrackPanel(
     },
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
+      selectionCleanupSubscription.unsubscribe();
     },
   };
 }
