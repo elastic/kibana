@@ -48,8 +48,7 @@ import {
 
 const INTERNAL_API_VERSION = '1';
 
-// Failing: See https://github.com/elastic/kibana/issues/293847
-apiTest.describe.skip(
+apiTest.describe(
   'Agent Builder - converse callback API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {

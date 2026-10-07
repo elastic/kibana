@@ -50,6 +50,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   updateStatus: jest.fn(),
   appendEvents: jest.fn(),
   updateHeartbeat: jest.fn(),
+  markDispatchReady: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
@@ -1078,7 +1079,7 @@ describe('AgentExecutionService', () => {
       });
 
       it('returns and reschedules the existing execution on replay without validating', async () => {
-        const existing = { status: ExecutionStatus.scheduled, eventCount: 0 };
+        const existing = { status: ExecutionStatus.scheduled, dispatchReady: true, eventCount: 0 };
         mockExecutionClient.peek.mockResolvedValueOnce(existing).mockResolvedValueOnce(existing);
         mockExecutionClient.create.mockRejectedValueOnce(conflictError());
 
@@ -1172,6 +1173,7 @@ describe('AgentExecutionService', () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.scheduled,
+        dispatchReady: true,
         eventCount: 0,
       });
 
@@ -1186,6 +1188,21 @@ describe('AgentExecutionService', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('does not dispatch on replay while the original delivery has not persisted what the run reads', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+        conversationId: 'conversation-from-first-request',
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(result.conversationId).toBe('conversation-from-first-request');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
 
     it('rethrows create errors that are not duplicate-execution errors', async () => {
@@ -1376,6 +1393,35 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
+    it('marks the execution ready to dispatch only once the message is written', async () => {
+      let releaseWrite!: () => void;
+      conversationClient.appendEvents.mockReturnValue(
+        new Promise((resolve) => {
+          releaseWrite = () => resolve(conversation);
+        })
+      );
+
+      const pending = converse();
+      await new Promise(process.nextTick);
+
+      const [{ executionId, dispatchReady }] = mockExecutionClient.create.mock.calls[0];
+      expect(dispatchReady).toBe(false);
+      expect(mockExecutionClient.markDispatchReady).not.toHaveBeenCalled();
+
+      releaseWrite();
+      await pending;
+
+      expect(mockExecutionClient.markDispatchReady).toHaveBeenCalledWith(executionId);
+    });
+
+    it('still dispatches the run when marking it ready fails', async () => {
+      mockExecutionClient.markDispatchReady.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await converse({ useTaskManager: false });
+
+      expect(mockHandleAgentExecution).toHaveBeenCalled();
+    });
+
     it('creates the conversation the request asked for, carrying readOnly', async () => {
       conversationClient.exists.mockResolvedValue(false);
 
@@ -1402,6 +1448,10 @@ describe('AgentExecutionService', () => {
 
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).toHaveBeenCalledTimes(1);
+      // Nothing left to write, so a replay may dispatch it straight away.
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ dispatchReady: true })
+      );
     });
 
     it('marks the execution failed, instead of leaving it scheduled, when the write itself fails', async () => {
@@ -1420,6 +1470,7 @@ describe('AgentExecutionService', () => {
       // conversation whose opening message never landed.
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockExecutionClient.markDispatchReady).not.toHaveBeenCalled();
     });
 
     it('waits for the write before handing off to the runner', async () => {
