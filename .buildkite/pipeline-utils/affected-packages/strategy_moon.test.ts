@@ -9,11 +9,11 @@
 
 jest.mock('child_process');
 jest.mock('fs');
-jest.mock('../utils', () => ({ getKibanaDir: () => '/repo' }));
+jest.mock('../utils.ts', () => ({ getKibanaDir: () => '/repo' }));
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
-import { getAffectedProjectsMoon } from './strategy_moon';
+import { getAffectedProjectsMoon } from './strategy_moon.ts';
 
 const mockExecSync = execSync as jest.Mock;
 const mockExistsSync = existsSync as jest.Mock;

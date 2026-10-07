@@ -14,6 +14,7 @@ export type {
   FakeRequestUserFields,
 } from './src/authc';
 export type { CoreAuditService } from './src/audit';
+export type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,

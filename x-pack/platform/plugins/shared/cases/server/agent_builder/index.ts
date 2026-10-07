@@ -14,6 +14,7 @@ import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
 import { attachmentsTool } from './tools/attachment_tools';
 import { observablesTool } from './tools/observable_tools';
+import { findTemplatesTool } from './tools/find_templates_tool';
 import { buildCasesSkill } from './skills/cases_skill';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
@@ -26,6 +27,8 @@ import { createCasesAttachmentType } from './attachments/cases_attachment_type';
  * 2. `platform.core.cases.manage` — create, update, delete, assign, unassign, add tags, set custom field
  * 3. `platform.core.cases.attachments` — add comment/alerts/events, get all attachments
  * 4. `platform.core.cases.observables` — add, update, delete observables
+ * 5. `platform.core.cases.find_templates` — read-only, only when templates are enabled: look up
+ *    case templates by name to resolve a `case_template_id`
  *
  * Also registers the `cases-management` skill, and — only when Cases-as-Data v2
  * is enabled — the `cases-analytics` skill (ES|QL analytics + visualizations over
@@ -49,6 +52,11 @@ export function registerCasesAgentBuilderTools(
     attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(observablesTool(getCasesClient));
+  // Only useful once templates are v2 saved objects that support name-based search; the legacy
+  // per-space configuration templates have no such lookup.
+  if (templatesEnabled) {
+    agentBuilder.tools.register(findTemplatesTool(getCasesClient));
+  }
   agentBuilder.skills.register(buildCasesSkill(templatesEnabled));
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {

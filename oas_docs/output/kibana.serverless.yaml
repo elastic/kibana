@@ -4487,6 +4487,17 @@ paths:
                     nullable: true
                   description: Tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Optional tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   default: ''
                   description: Description of what the tool does.
@@ -5124,6 +5135,17 @@ paths:
                     nullable: true
                   description: Updated tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Updated tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   description: Updated description of what the tool does.
                   type: string
@@ -160213,8 +160235,6 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
-      name: Message
-      type: object
       properties:
         '@timestamp':
           description: The timestamp when the message was created.
@@ -160244,6 +160264,8 @@ components:
       required:
         - '@timestamp'
         - message
+      title: Message
+      type: object
     Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:

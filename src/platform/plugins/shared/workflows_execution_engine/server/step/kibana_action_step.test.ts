@@ -1259,6 +1259,38 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(headers['kbn-xsrf']).toBe('true');
     });
 
+    it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+      const stepWith = {
+        request: {
+          method: 'POST',
+          path: '/api/detection_engine/rules',
+          body: { name: 'r' },
+          headers: { 'x-kbn-alerting-clone-api-key': 'false' },
+        },
+      };
+      const step = {
+        id: 'create_rule',
+        type: 'kibana.request',
+        stepId: 'create_rule',
+        stepType: 'kibana.request',
+        configuration: { name: 'create_rule', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await runStep(kibanaStep, stepWith);
+
+      const fetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
+      const headers = new Headers(fetchOptions.headers);
+      expect(headers.get('authorization')).toBe('ApiKey test-key');
+      expect(headers.get('x-kbn-alerting-clone-api-key')).toBe('true');
+    });
+
     it('preserves the raw body return shape on the JSON-body path (no envelope leak)', async () => {
       mockedFetch.mockResolvedValue(createMockResponse({ id: 'case-1', title: 'Helper Test' }));
 

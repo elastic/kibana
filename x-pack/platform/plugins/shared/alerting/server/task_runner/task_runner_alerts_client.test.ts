@@ -103,6 +103,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_SNOOZED,
+  ALERT_TRACKED,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
@@ -726,6 +727,7 @@ describe('Task Runner', () => {
               [ALERT_SNOOZED]: false,
               [ALERT_START]: DATE_1970,
               [ALERT_STATUS]: 'active',
+              [ALERT_TRACKED]: true,
               [ALERT_TIME_RANGE]: { gte: DATE_1970 },
               [ALERT_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               [ALERT_WORKFLOW_STATUS]: 'open',
