@@ -119,4 +119,11 @@ describe('RuleInlineContent', () => {
     const { queryByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
     expect(queryByText('Every 5 min')).toBeNull();
   });
+
+  it('falls back to the raw interval when its unit is not supported by formatDuration', () => {
+    const attachment = createAttachment();
+    attachment.data.schedule = { every: '250ms' };
+    const { getByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
+    expect(getByText('Every 250ms')).toBeDefined();
+  });
 });

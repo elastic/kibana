@@ -84,7 +84,7 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
                   <strong>
                     {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
                       defaultMessage: 'Every {interval}',
-                      values: { interval: formatDuration(data.schedule.every) },
+                      values: { interval: formatScheduleInterval(data.schedule.every) },
                     })}
                   </strong>
                 </EuiText>
@@ -96,6 +96,15 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+// `formatDuration` throws on units it does not handle (e.g. `ms`, `w`); fall back to the raw value.
+const formatScheduleInterval = (interval: string): string => {
+  try {
+    return formatDuration(interval);
+  } catch {
+    return interval;
+  }
 };
 
 const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
