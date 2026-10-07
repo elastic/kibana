@@ -884,33 +884,30 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   });
 
   it('adds base and resolution risk score distributions to the usage event', async () => {
-    esClient.search.mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (async (params: any) => {
-        const levelField = params?.aggs?.bands?.terms?.field;
-        if (levelField === 'entity.risk.calculated_level') {
-          return {
-            aggregations: {
-              bands: { buckets: [{ key: 'High', doc_count: 2 }] },
-              scorePercentiles: { values: { '50.0': 72, '90.0': 91 } },
-            },
-          };
-        }
-        if (levelField === 'entity.relationships.resolution.risk.calculated_level') {
-          return {
-            aggregations: {
-              bands: { buckets: [{ key: 'Critical', doc_count: 1 }] },
-              scorePercentiles: { values: { '50.0': 40, '90.0': 80 } },
-            },
-          };
-        }
+    esClient.search.mockImplementation((async (params: any) => {
+      const levelField = params?.aggs?.bands?.terms?.field;
+      if (levelField === 'entity.risk.calculated_level') {
         return {
           aggregations: {
-            sources: { buckets: [], sum_other_doc_count: 0 },
+            bands: { buckets: [{ key: 'High', doc_count: 2 }] },
+            scorePercentiles: { values: { '50.0': 72, '90.0': 91 } },
           },
         };
-      }) as any
-    );
+      }
+      if (levelField === 'entity.relationships.resolution.risk.calculated_level') {
+        return {
+          aggregations: {
+            bands: { buckets: [{ key: 'Critical', doc_count: 1 }] },
+            scorePercentiles: { values: { '50.0': 40, '90.0': 80 } },
+          },
+        };
+      }
+      return {
+        aggregations: {
+          sources: { buckets: [], sum_other_doc_count: 0 },
+        },
+      };
+    }) as any);
 
     await runStatusReportTask();
 
@@ -940,19 +937,16 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('reports empty distributions and logs a warning when the search queries fail for an entity type', async () => {
     const [failingType] = ALL_ENTITY_TYPES;
-    esClient.search.mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (async (params: any) => {
-        if (params?.query?.term?.['entity.EngineMetadata.Type'] === failingType) {
-          throw new Error('source_boom');
-        }
-        return {
-          aggregations: {
-            sources: { buckets: [{ key: 'aws', doc_count: 2 }], sum_other_doc_count: 0 },
-          },
-        };
-      }) as any
-    );
+    esClient.search.mockImplementation((async (params: any) => {
+      if (params?.query?.term?.['entity.EngineMetadata.Type'] === failingType) {
+        throw new Error('source_boom');
+      }
+      return {
+        aggregations: {
+          sources: { buckets: [{ key: 'aws', doc_count: 2 }], sum_other_doc_count: 0 },
+        },
+      };
+    }) as any);
 
     // Task resolves — errors are caught inside each distribution function.
     await expect(runStatusReportTask()).resolves.toBeDefined();

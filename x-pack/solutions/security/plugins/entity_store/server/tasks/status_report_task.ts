@@ -379,7 +379,14 @@ async function runTask({
           getStoreSize(esClient, index, entityType, abortSignal),
           getEntitySourceDistribution(esClient, index, entityType, logger, abortSignal),
           getEntityRiskScoreDistribution(esClient, index, entityType, logger, abortSignal, 'base'),
-          getEntityRiskScoreDistribution(esClient, index, entityType, logger, abortSignal, 'resolution'),
+          getEntityRiskScoreDistribution(
+            esClient,
+            index,
+            entityType,
+            logger,
+            abortSignal,
+            'resolution'
+          ),
         ]);
         telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
           storeSize,
