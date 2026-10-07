@@ -109,7 +109,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async detailsFlyoutExists() {
-      return await testSubjects.exists('pipelineDetails');
+      return await testSubjects.waitForExists('pipelineDetails');
     },
 
     async increasePipelineListPageSize() {
