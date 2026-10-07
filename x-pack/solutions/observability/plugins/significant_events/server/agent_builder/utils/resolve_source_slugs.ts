@@ -40,12 +40,13 @@ export async function loadSourceCatalog(sourcesClient: SourcesClient): Promise<S
 }
 
 /**
- * Source for a slug, or for a source id. Ids are accepted because tool results
+ * Source for a slug, or for a source id. Ids win over slugs: a title-derived slug can equal
+ * another source's id, and a caller passing an id never means the slug. Ids are accepted because tool results
  * and workflow inputs (the Discovery detection batch) carry stored ids, and the
  * model copies them back into writes.
  */
 export function findSource(catalog: SourceCatalog, slugOrId: string): NightshiftSource | undefined {
-  return catalog.bySlug.get(slugOrId) ?? catalog.byId.get(slugOrId);
+  return catalog.byId.get(slugOrId) ?? catalog.bySlug.get(slugOrId);
 }
 
 /**

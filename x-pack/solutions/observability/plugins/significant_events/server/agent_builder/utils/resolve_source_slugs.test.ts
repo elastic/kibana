@@ -85,6 +85,19 @@ describe('resolveSourcesBySlug', () => {
     ]);
   });
 
+  it('prefers the source whose id matches over another source whose slug equals that id', () => {
+    const lookalike: NightshiftSource = { ...payments, slug: checkout.id };
+    const collidingCatalog = {
+      bySlug: new Map([[lookalike.slug, lookalike]]),
+      byId: new Map([
+        [checkout.id, checkout],
+        [lookalike.id, lookalike],
+      ]),
+    };
+
+    expect(resolveSourcesBySlug(collidingCatalog, [checkout.id])).toEqual([checkout]);
+  });
+
   it('throws UnknownSourceSlugError naming every missing slug', () => {
     expect(() => resolveSourcesBySlug(catalog, ['checkout', 'missing', 'also-missing'])).toThrow(
       new UnknownSourceSlugError(['missing', 'also-missing'])

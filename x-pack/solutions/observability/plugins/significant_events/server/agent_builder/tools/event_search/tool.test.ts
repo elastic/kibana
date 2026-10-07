@@ -137,6 +137,7 @@ describe('event_search tool', () => {
       expect.objectContaining({
         sources: [
           {
+            id: 'logs.checkout',
             slug: 'logs.checkout',
             title: 'logs.checkout',
             view_name: '$.nightshift.sources.default.logs.checkout',
@@ -204,6 +205,7 @@ describe('event_search tool', () => {
       expect.objectContaining({
         sources: [
           {
+            id: 'source-uuid',
             slug: 'nginx-errors',
             title: 'Nginx errors',
             view_name: '$.nightshift.sources.default.nginx-errors',

@@ -288,8 +288,9 @@ export function createSearchEventsTool({
               type: ToolResultType.other,
               data: {
                 ...data,
+                // Events carry stored source ids, so each ref needs its id to map an event to its view.
                 sources: sourcesForSearchResult(catalog, filterSources, data.events).map(
-                  toSourceRef
+                  (source) => ({ id: source.id, ...toSourceRef(source) })
                 ),
                 events: data.events.map((event) => ({
                   ...event,
