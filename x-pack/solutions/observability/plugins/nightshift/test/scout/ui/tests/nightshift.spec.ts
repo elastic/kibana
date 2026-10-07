@@ -59,7 +59,12 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
       await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
-      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/(general|detections)/);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
+
+      await page.testSubj.locator('nightshiftSettingsTab-investigations').click();
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
+      await expect(page.testSubj.locator('nightshiftRunLimitsEnforcementSwitch')).toBeVisible();
     });
   }
 );

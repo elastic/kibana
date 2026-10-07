@@ -387,17 +387,57 @@ describe('detection rule workflows', () => {
 
       // Manual autonomy stops once for permission to do the work; the entry gate
       // carries no action and a dismissal terminates the run before diagnosis.
-      expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
+      const gate = all.find(({ name }) => name === 'entry_gate')!;
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
+      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
+        'propose_entry',
+        'entry_decision',
+      ]);
+      expect(gate).not.toHaveProperty('else');
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
       // No action, so no inherited category; the queue drops an uncategorised proposal.
       expect(entryInputs.category).toBe('configure');
+      // Only an approval continues: it matches no case and falls through to diagnosis.
+      // A gate nobody answered reports an empty decision and must stop, not pass as an
+      // approval.
+      const entryDecision = all.find(({ name }) => name === 'entry_decision')!;
+      expect(entryDecision.type).toBe('switch');
+      expect(
+        (entryDecision.cases ?? []).map(({ match, steps: caseSteps }) => [
+          match,
+          caseSteps.map(({ name }) => name),
+        ])
+      ).toEqual([
+        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
+        ['expired', ['stop_expired']],
+      ]);
+      expect(entryDecision.default).toBeUndefined();
+      for (const [decision, routed] of [
+        ['approved', ''],
+        ['dismissed', 'dismissed'],
+        ['', 'expired'],
+      ]) {
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(String(entryDecision.expression), {
+            steps: { propose_entry: { output: { decision } } },
+          })
+        ).toBe(routed);
+      }
+      const stopExpired = all.find(({ name }) => name === 'stop_expired')!;
+      expect(stopExpired.type).toBe('workflow.output');
+      expect(stopExpired.with).toEqual({
+        rule_uuid: '{{ inputs.rule_uuid }}',
+        approved: false,
+        applied: false,
+      });
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
       expect(stopIndex).toBeLessThan(diagnoseIndex);
       expect(all[stopIndex].type).toBe('workflow.output');
-      expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
@@ -453,10 +493,10 @@ describe('detection rule workflows', () => {
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
-      expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms; propose_threshold also has a step-level
-      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
-      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
+      // The `entry_gate` if-step guards the entry proposal and the switch guards the
+      // arms; propose_threshold also has a step-level guard (incomplete_threshold_output)
+      // verified by the case-arm assertion above.
+      for (const proposal of [entry, action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -493,7 +533,7 @@ describe('detection rule workflows', () => {
       // starts asking for its own deadline has to be checked against the
       // ceiling here.
       //
-      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // Flattened, not top-level: `propose_entry` sits inside `entry_gate`, and
       // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
@@ -711,7 +751,12 @@ describe('detection rule workflows', () => {
 
         const [declined, dismissed, applied, acknowledged] = tagSteps;
         // A declined entry gate retires the alerts too, or the next sweep re-opens it.
-        expect(declined.if).toContain('steps.record_entry.output.declined == true');
+        const entryDecision = reviewSteps.find(({ name }) => name === 'entry_decision')!;
+        expect(
+          entryDecision.cases
+            ?.find(({ match }) => match === 'dismissed')
+            ?.steps.map(({ name }) => name)
+        ).toContain(declined.name);
         expect(declined.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
