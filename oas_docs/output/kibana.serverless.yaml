@@ -77388,6 +77388,11 @@ paths:
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority:
+                          error: null
+                          lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          samplingRate: null
+                          status: started
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'
@@ -145030,10 +145035,17 @@ components:
       description: Rule metadata.
       type: object
       properties:
-        builder_type:
+        builder:
+          additionalProperties: false
           description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          type: string
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              type: string
+          required:
+            - type
         description:
           description: Human-readable description of the rule.
           maxLength: 1024
@@ -145068,11 +145080,18 @@ components:
       description: Rule metadata.
       type: object
       properties:
-        builder_type:
+        builder:
+          additionalProperties: false
           description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
           nullable: true
-          type: string
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              type: string
+          required:
+            - type
         description:
           description: Human-readable description of the rule.
           maxLength: 1024
