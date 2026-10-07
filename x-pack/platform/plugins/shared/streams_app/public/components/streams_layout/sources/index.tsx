@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
@@ -51,14 +51,14 @@ export const SourcesTab = () => {
     isUnitSaving,
   } = sourcesController;
 
-  const [sourcesPendingDeletion, setSourcesPendingDeletion] = React.useState<SourceViewModel[]>([]);
+  const [sourcesPendingDeletion, setSourcesPendingDeletion] = useState<SourceViewModel[]>([]);
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
-  const showOnCanvas = React.useCallback(
+  const showOnCanvas = useCallback(
     (source: SourceViewModel) => navigateToCanvasSearch(source.name ?? source.id),
     [navigateToCanvasSearch]
   );
 
-  const typeFilterOptions = React.useMemo(
+  const typeFilterOptions = useMemo(
     () =>
       Array.from(new Set(sources.map(({ type }) => type))).map((type) => ({
         key: type,
@@ -67,7 +67,7 @@ export const SourcesTab = () => {
     [sources]
   );
 
-  const statusFilterOptions = React.useMemo(
+  const statusFilterOptions = useMemo(
     () =>
       (Object.keys(SOURCE_STATUS_LABELS) as SourceStatus[]).map((status) => ({
         key: status,
@@ -76,7 +76,7 @@ export const SourcesTab = () => {
     []
   );
 
-  const filteredSources = React.useMemo(() => {
+  const filteredSources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return sources.filter(
@@ -91,7 +91,7 @@ export const SourcesTab = () => {
     );
   }, [query, selectedStatuses, selectedTypes, sources]);
 
-  const sortedSources = React.useMemo(() => {
+  const sortedSources = useMemo(() => {
     const [sort] = sortingColumns;
     if (!sort) {
       return filteredSources;

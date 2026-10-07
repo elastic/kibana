@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -109,13 +109,13 @@ export const SourcesGrid = ({
   onShowOnCanvas,
   onRequestDelete,
 }: SourcesGridProps) => {
-  const selectedSourceIds = React.useMemo(
+  const selectedSourceIds = useMemo(
     () => new Set(selectedSources.map(({ id }) => id)),
     [selectedSources]
   );
   const allSourcesSelected =
     sources.length > 0 && sources.every(({ id }) => selectedSourceIds.has(id));
-  const setSelectedSource = React.useCallback(
+  const setSelectedSource = useCallback(
     (source: SourceViewModel, checked: boolean) => {
       onSelectionChange(
         checked
@@ -125,7 +125,7 @@ export const SourcesGrid = ({
     },
     [onSelectionChange, selectedSources]
   );
-  const leadingControlColumns = React.useMemo<EuiDataGridControlColumn[]>(
+  const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
         id: 'select',
@@ -158,7 +158,7 @@ export const SourcesGrid = ({
     ],
     [allSourcesSelected, onSelectionChange, selectedSourceIds, setSelectedSource, sources]
   );
-  const trailingControlColumns = React.useMemo<EuiDataGridControlColumn[]>(
+  const trailingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
         id: 'rowActions',
@@ -185,7 +185,7 @@ export const SourcesGrid = ({
     ],
     [onRequestDelete, onShowOnCanvas, sources]
   );
-  const renderCellValue = React.useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
+  const renderCellValue = useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
     ({ rowIndex, columnId }) => {
       const source = sources[rowIndex];
       return source ? (
@@ -194,7 +194,7 @@ export const SourcesGrid = ({
     },
     [onOpenSource, sources]
   );
-  const toolbarVisibility = React.useMemo<EuiDataGridProps['toolbarVisibility']>(
+  const toolbarVisibility = useMemo<EuiDataGridProps['toolbarVisibility']>(
     () => ({
       showColumnSelector: true,
       showDisplaySelector: false,

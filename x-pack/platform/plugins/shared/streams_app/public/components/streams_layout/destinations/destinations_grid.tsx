@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -94,7 +94,7 @@ export const DestinationsGrid = ({
   onShowOnCanvas,
   onRequestDelete,
 }: DestinationsGridProps) => {
-  const trailingControlColumns = React.useMemo<EuiDataGridControlColumn[]>(
+  const trailingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
         id: 'rowActions',
@@ -121,7 +121,7 @@ export const DestinationsGrid = ({
     ],
     [destinations, onRequestDelete, onShowOnCanvas]
   );
-  const renderCellValue = React.useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
+  const renderCellValue = useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
     ({ rowIndex, columnId }) => {
       const destination = destinations[rowIndex];
       if (!destination) {

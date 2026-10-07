@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
@@ -46,22 +46,22 @@ export const DestinationsTab = () => {
     isUnitSaving,
   } = destinationsController;
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
-  const showOnCanvas = React.useCallback(
+  const showOnCanvas = useCallback(
     (destination: DestinationViewModel) => navigateToCanvasSearch(destination.name),
     [navigateToCanvasSearch]
   );
-  const [destinationPendingDeletion, setDestinationPendingDeletion] = React.useState<
+  const [destinationPendingDeletion, setDestinationPendingDeletion] = useState<
     DestinationViewModel | undefined
   >();
-  const cancelDeletion = React.useCallback(() => setDestinationPendingDeletion(undefined), []);
-  const confirmDeletion = React.useCallback(() => {
+  const cancelDeletion = useCallback(() => setDestinationPendingDeletion(undefined), []);
+  const confirmDeletion = useCallback(() => {
     if (destinationPendingDeletion) {
       deleteDestination(destinationPendingDeletion.id);
     }
     setDestinationPendingDeletion(undefined);
   }, [deleteDestination, destinationPendingDeletion]);
 
-  const filteredDestinations = React.useMemo(() => {
+  const filteredDestinations = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return destinations.filter(
@@ -75,7 +75,7 @@ export const DestinationsTab = () => {
     );
   }, [destinations, query, selectedTypes]);
 
-  const sortedDestinations = React.useMemo(() => {
+  const sortedDestinations = useMemo(() => {
     const [sort] = sortingColumns;
     if (!sort) {
       return filteredDestinations;
