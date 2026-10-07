@@ -15,6 +15,7 @@ export interface LegendSizeSettingsProps {
   onLegendSizeChange: (size?: LegendSize) => void;
   isVerticalLegend: boolean;
   showAutoOption: boolean;
+  defaultLegendSize?: LegendSize;
 }
 
 const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
@@ -52,6 +53,7 @@ export const LegendSizeSettings = ({
   onLegendSizeChange,
   isVerticalLegend,
   showAutoOption,
+  defaultLegendSize = DEFAULT_LEGEND_SIZE,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -60,8 +62,8 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option: LegendSize) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
-    [onLegendSizeChange]
+    (option: LegendSize) => onLegendSizeChange(option === defaultLegendSize ? undefined : option),
+    [onLegendSizeChange, defaultLegendSize]
   );
 
   if (!isVerticalLegend) return null;
@@ -91,7 +93,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize ?? DEFAULT_LEGEND_SIZE}
+        valueOfSelected={legendSize ?? defaultLegendSize}
         options={options}
         onChange={onLegendSizeOptionChange}
       />

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
+import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
 import type {
   XYConfig,
@@ -93,6 +93,18 @@ function getOutsideLegendSize(legend: XYConfig['legend']): XYLegendSize | undefi
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
+/**
+ * Vertical (left/right) outside legends default to auto width when no size is provided.
+ */
+function getOutsideLegendSizeState(legend: XYConfig['legend']): LegendSize | undefined {
+  const legendSize = legendSizeCompat.toState(getOutsideLegendSize(legend));
+  if (legendSize) {
+    return legendSize;
+  }
+  const position = legend?.position ?? DEFAULT_LEGEND_POSITON;
+  return position === 'left' || position === 'right' ? LegendSize.AUTO : undefined;
+}
+
 function convertSeriesHeaderFromAPI(
   legend?: XYConfig['legend']
 ): Partial<Pick<XYVisualizationState['legend'], 'title' | 'isTitleVisible'>> {
@@ -116,8 +128,6 @@ export function convertLegendToStateFormat(legend: XYConfig['legend']): {
   const legendTruncation = getLegendTruncation(legend);
   const truncateMaxLines = legendTruncation?.max_lines;
   const truncateEnabled = legendTruncation?.enabled;
-  const outsideLegendSize = getOutsideLegendSize(legend);
-
   const newStateLegend: XYVisualizationState['legend'] = {
     ...convertSeriesHeaderFromAPI(legend),
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
@@ -140,7 +150,7 @@ export function convertLegendToStateFormat(legend: XYConfig['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: legendSizeCompat.toState(outsideLegendSize),
+          legendSize: getOutsideLegendSizeState(legend),
           ...(isListLegendLayout
             ? {
                 layout: LegendLayout.List,

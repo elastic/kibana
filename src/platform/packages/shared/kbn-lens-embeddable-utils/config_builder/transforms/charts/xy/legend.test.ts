@@ -288,6 +288,34 @@ describe('XY Legend Transforms', () => {
       });
       expect(apiLegend).not.toHaveProperty('size');
     });
+
+    it.each(['left', 'right'] as const)(
+      'defaults legendSize to auto when size is omitted for %s position',
+      (position) => {
+        const { legend } = convertLegendToStateFormat({
+          visibility: 'auto',
+          placement: 'outside',
+          position,
+        });
+        expect(legend.legendSize).toBe(LegendSize.AUTO);
+      }
+    );
+
+    it('defaults legendSize to auto when position is omitted', () => {
+      const { legend } = convertLegendToStateFormat({ visibility: 'auto' });
+      expect(legend.position).toBe('right');
+      expect(legend.legendSize).toBe(LegendSize.AUTO);
+    });
+
+    it('keeps an explicit size for vertical positions', () => {
+      const { legend } = convertLegendToStateFormat({
+        visibility: 'auto',
+        placement: 'outside',
+        position: 'right',
+        size: 'm',
+      });
+      expect(legend.legendSize).toBe(LegendSize.MEDIUM);
+    });
   });
 
   describe('legend visibility', () => {

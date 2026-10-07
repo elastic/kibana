@@ -194,6 +194,7 @@ export const XyLegendSettings = ({
         });
       }}
       showAutoLegendSizeOption={true}
+      defaultLegendSize={LegendSize.AUTO}
     />
   );
 };
