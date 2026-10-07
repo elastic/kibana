@@ -9937,12 +9937,6 @@
                 },
                 "byOriginType": {
                   "properties": {
-                    "DYNAMIC_KEY": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
-                      }
-                    },
                     "case": {
                       "type": "long",
                       "_meta": {
@@ -10043,12 +10037,6 @@
                 },
                 "byOriginType": {
                   "properties": {
-                    "DYNAMIC_KEY": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
-                      }
-                    },
                     "case": {
                       "type": "long",
                       "_meta": {
@@ -10149,12 +10137,6 @@
                 },
                 "byOriginType": {
                   "properties": {
-                    "DYNAMIC_KEY": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
-                      }
-                    },
                     "case": {
                       "type": "long",
                       "_meta": {
@@ -10255,12 +10237,6 @@
                 },
                 "byOriginType": {
                   "properties": {
-                    "DYNAMIC_KEY": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Runs triggered from this origin type, without its `cases.` prefix"
-                      }
-                    },
                     "case": {
                       "type": "long",
                       "_meta": {

@@ -219,7 +219,7 @@ describe('workflows', () => {
       });
     });
 
-    it('reports origin types it does not know about under their own key', async () => {
+    it('ignores origin types outside the known set', async () => {
       mockResponses(
         makeRunsResponse({
           all: {
@@ -242,7 +242,6 @@ describe('workflows', () => {
         attachment: 0,
         attachments: 0,
         unattributed: 0,
-        comment: 2,
       });
     });
 
