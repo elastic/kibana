@@ -66,7 +66,39 @@ curl -X POST "$KIBANA_URL/api/actions/events/.inboundWebhook/$CONNECTOR_ID" \
 # → 200 {"challenge":"abc"}
 ```
 
-A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector).
+A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector). Once that connector's failed-auth budget is spent, further requests are also **404** and skip the saved-object read. Over the connector rate limit or the in-flight cap, the hub returns **429** with `Retry-After` and `RateLimit: "inbound-events";r=0;t=<seconds>`. The body is “Too many requests. Try again later.”
+
+## Rate limit
+
+Per Kibana process. On when the hub is enabled. `rateLimit.enabled: false` turns the windows off and leaves admission on.
+
+```yaml
+xpack.actions.inboundEvents.rateLimit:
+  enabled: true
+  remoteAddress:
+    limit: 10 # failed auths only, per minute
+    window: 1m
+  connector:
+    limit: 300 # authenticated requests, per minute
+    window: 1m
+```
+
+A rejected token spends the address budget for that socket and that connector (space, type, and connector id). A missing connector does not. A request that authenticates does not. Once the budget is spent the response stays **404**, so it does not show that the connector exists. The socket is `request.socket.remoteAddress`, or `unknown` when the socket has none. The hub does not read `X-Forwarded-For`. On Cloud the socket is often the shared proxy, so each connector has its own 10.
+
+The connector budget counts one authenticated request, including a handshake that passes auth. A request that emits 25 events still costs 1. Each node keeps its own counters.
+
+## Admission
+
+Per Kibana process, taken before the body is read. On when the hub is enabled. `admission.enabled: false` turns the cap off and leaves the windows on.
+
+```yaml
+xpack.actions.inboundEvents.admission:
+  enabled: true
+  maxInFlight: 50 # this process
+  maxInFlightPerConnector: 10
+```
+
+At most 50 inbound requests are in flight at once, and 10 of those may be for one connector. A full cap returns **429** with `Retry-After: 1`. The body is not read. The slot is held until the response is sent or the client disconnects. `maxInFlight` times `maxBodyBytes` is the raw-body budget for this route (50mb at the defaults).
 
 ## Who a matching workflow runs as
 

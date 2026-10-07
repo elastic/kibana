@@ -102,8 +102,8 @@ const NO_ALERTING_ROLE: KibanaRole = {
   ],
 };
 
-/** Matches both the uncapped (`Showing N episode(s)`) and capped toolbar labels. */
-const EPISODES_ITEM_COUNT_RE = /^Showing(?: first)? \d[\d,]* episodes?$/;
+/** Matches both the uncapped (`Showing N alert(s)`) and capped toolbar labels. */
+const ALERTS_ITEM_COUNT_RE = /^Showing(?: first)? \d[\d,]* alerts?$/;
 
 const assertEpisodesInboxHappyPath = async (
   observabilityAlerting: ObservabilityAlertingPage,
@@ -118,7 +118,7 @@ const assertEpisodesInboxHappyPath = async (
   }
 ): Promise<void> => {
   await test.step('page renders without the privilege prompt', async () => {
-    await expect(observabilityAlerting.pageTitle).toHaveText('Alert episodes', {
+    await expect(observabilityAlerting.pageTitle).toHaveText('Alerts', {
       timeout: 60_000,
     });
     await expect(observabilityAlerting.requiredPrivilegesPrompt).not.toBeVisible();
@@ -138,7 +138,7 @@ const assertEpisodesInboxHappyPath = async (
   await test.step('episodes list resolves', async () => {
     await expect(observabilityAlerting.episodesListPage).toBeVisible();
     await expect(observabilityAlerting.episodesTableToolbar).toBeVisible({ timeout: 60_000 });
-    await expect(observabilityAlerting.episodesItemCount).toHaveText(EPISODES_ITEM_COUNT_RE);
+    await expect(observabilityAlerting.episodesItemCount).toHaveText(ALERTS_ITEM_COUNT_RE);
     for (const ruleName of expectedRuleNames) {
       await expect(observabilityAlerting.episodeRuleCell(ruleName)).toBeVisible({
         timeout: 30_000,
