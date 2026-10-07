@@ -60,6 +60,8 @@ const CLUSTER_PREFIX = /^[^:]+:(?!:)/;
 // Each expression is replaced on its own, with one level of nesting for the format, so the
 // literal text between expressions (`<app-{now/d}-logs-{now/d}>`) survives.
 const DATE_MATH_BRACES = /\{(?:[^{}]|\{[^{}]*\})*\}/g;
+// `::failures` reads the failure store: failed documents, not the kind of data the name suggests.
+const NON_DATA_SELECTOR = /::(?!data$)/i;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
 /**
@@ -151,9 +153,13 @@ export const validateSourceQuery = (esql: string): string | undefined => {
     return `Command "${disallowedCommand.name.toUpperCase()}" is not allowed in a source query: only WHERE may follow FROM or TS`;
   }
 
-  const nightshiftView = targetedIndices(firstCommand).find(({ pattern }) =>
-    isNightshiftSourceViewPattern(pattern)
-  );
+  const indices = targetedIndices(firstCommand);
+  const nonDataSelector = indices.find(({ name }) => NON_DATA_SELECTOR.test(name));
+  if (nonDataSelector) {
+    return `Selector in "${nonDataSelector.name}" is not allowed in a source query: only ::data is supported`;
+  }
+
+  const nightshiftView = indices.find(({ pattern }) => isNightshiftSourceViewPattern(pattern));
   if (nightshiftView) {
     return `Nightshift source views cannot be used as a source (found "${nightshiftView.name}")`;
   }

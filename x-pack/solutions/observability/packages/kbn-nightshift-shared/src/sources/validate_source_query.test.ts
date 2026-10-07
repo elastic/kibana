@@ -57,6 +57,15 @@ describe('validateSourceQuery', () => {
       expectRejected('FROM logs-* | WHERE', 'Invalid ES|QL query');
     });
 
+    it.each([
+      'FROM logs-*::failures',
+      'FROM remote:logs-*::failures',
+      'FROM "logs-*::failures"',
+      'FROM logs-*, metrics-*::failures',
+    ])('a selector other than data in %s', (esql) => {
+      expectRejected(esql, 'only ::data is supported');
+    });
+
     it('a first command that is not FROM or TS', () => {
       expectRejected('ROW a = 1', 'must start with FROM or TS');
       expectRejected('SHOW INFO', 'must start with FROM or TS');
