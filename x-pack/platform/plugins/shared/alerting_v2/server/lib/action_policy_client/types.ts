@@ -60,5 +60,10 @@ export interface FindActionPoliciesResponse {
 }
 
 export interface MatchActionPoliciesParams {
-  ruleTags?: string[];
+  routingTags?: string[];
+}
+
+export interface GetRoutingTagsParams {
+  search?: string;
+  policiesPerTag: number;
 }

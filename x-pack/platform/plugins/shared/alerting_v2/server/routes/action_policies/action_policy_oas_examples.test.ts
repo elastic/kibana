@@ -7,6 +7,7 @@
 
 import {
   actionPolicyResponseSchema,
+  actionPolicyRoutingTagsResponseSchema,
   bulkByIdsSchema,
   bulkResponseSchema,
   bulkSnoozeActionPoliciesBodySchema,
@@ -34,6 +35,7 @@ import {
   MATCH_ACTION_POLICIES_REQUEST,
   MATCH_ACTION_POLICIES_RESPONSE,
 } from './match_action_policies_oas_example';
+import { ACTION_POLICY_ROUTING_TAGS_RESPONSE } from './get_action_policy_routing_tags_oas_example';
 import { RULE_EVENT_FIELDS_RESPONSE } from '../suggestions/rule_event_fields_oas_example';
 
 describe('action policy OAS example payloads', () => {
@@ -82,6 +84,12 @@ describe('action policy OAS example payloads', () => {
   it('keeps match response example valid against matchActionPoliciesResponseSchema', () => {
     expect(
       matchActionPoliciesResponseSchema.safeParse(MATCH_ACTION_POLICIES_RESPONSE).success
+    ).toBe(true);
+  });
+
+  it('keeps routing tags response example valid against actionPolicyRoutingTagsResponseSchema', () => {
+    expect(
+      actionPolicyRoutingTagsResponseSchema.safeParse(ACTION_POLICY_ROUTING_TAGS_RESPONSE).success
     ).toBe(true);
   });
 

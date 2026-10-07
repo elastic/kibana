@@ -10,7 +10,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
-import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
@@ -50,13 +49,26 @@ const renderCallout = ({
 
 describe('CoverageOverviewInvalidMitreRulesCallout', () => {
   beforeEach(() => {
-    // Default: no managed version available — falls back to the legacy constant.
-    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: undefined });
+    // Default: a resolved MITRE version so the callout renders in most tests.
+    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: '16.1' });
   });
 
   it('renders nothing when there are no invalidly mapped rules', () => {
     const { container } = renderCallout({ invalidlyMappedRules: emptyInvalidlyMappedRules });
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders nothing when the MITRE framework version is not yet resolved', () => {
+    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: undefined });
+
+    renderCallout({
+      invalidlyMappedRules: {
+        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        disabledRules: [],
+      },
+    });
+
+    expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeNull();
   });
 
   it('renders the callout with singular description when there is one invalid rule', () => {
@@ -70,7 +82,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
     expect(callout).toBeInTheDocument();
     expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
-    expect(callout.textContent).toContain(`currently supported version (${MITRE_ATTACK_VERSION})`);
+    expect(callout.textContent).toContain('currently supported version (v16.1)');
     expect(callout.textContent).toContain('Elastic prebuilt rule mappings were updated');
     expect(
       screen.getByTestId('coverageOverviewInvalidMitreRulesLearnMoreLink')
