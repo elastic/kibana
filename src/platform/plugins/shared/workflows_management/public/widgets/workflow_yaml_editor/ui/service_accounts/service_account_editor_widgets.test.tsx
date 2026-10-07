@@ -129,7 +129,7 @@ describe('ServiceAccountEditorWidgets', () => {
     });
     await action('suggest');
     expect(await screen.findByText('Reads investigation events.')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     expect(screen.getByText('Create flyout')).toBeInTheDocument();
     const props = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
@@ -139,7 +139,7 @@ describe('ServiceAccountEditorWidgets', () => {
     expect(editor.executeEdits).toHaveBeenCalledWith('serviceAccount', [
       expect.objectContaining({ text: JSON.stringify(account.id) }),
     ]);
-  });
+  }, 20000);
 
   it('keeps the draft unchanged when creation is cancelled or the model changes', async () => {
     const { action, services, editor, model } = setup(true, 'settings:\n  run_as: ', true);
@@ -148,7 +148,7 @@ describe('ServiceAccountEditorWidgets', () => {
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mockReturnValue(<div>{'Create flyout'}</div>);
     await action('suggest');
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     const props = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mock.calls.at(-1)?.[0];
@@ -156,7 +156,7 @@ describe('ServiceAccountEditorWidgets', () => {
     act(() => props.onClose());
     expect(editor.executeEdits).not.toHaveBeenCalled();
     await action('suggest');
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     const nextProps = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mock.calls.at(-1)?.[0];

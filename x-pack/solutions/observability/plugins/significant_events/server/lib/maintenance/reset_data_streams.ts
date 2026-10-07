@@ -11,13 +11,11 @@ import type { SignificantEventsMaintenanceFailure } from '../../../common/mainte
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
-import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import { toMessage } from './to_message';
 
 /** Core-registered streams that Reset wipes and recreates so cached clients stay readable. */
 export const RESET_REGISTERED_DATA_STREAMS = [
   DETECTIONS_DATA_STREAM,
-  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_DATA_STREAM,
 ] as const;
 
@@ -151,5 +149,10 @@ export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<
   if (await deleteDiscoveriesDataStream(params)) {
     deleted.add(DISCOVERIES_DATA_STREAM);
   }
+  // NOTE: Significant Events documents in `.rule-events` (Alerting v2's shared data stream) are
+  // NOT cleared here. A direct deleteByQuery on a cross-plugin stream bypasses the owner's
+  // abstraction and requires delete privileges that Nightshift's manage+configure privilege does
+  // not grant — failing silently for non-admins. The correct fix is for alerting_v2 to expose a
+  // `deleteAlertEventsBySource(source)` API. Wire it up once that contract exists.
   return deleted;
 };
