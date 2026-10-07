@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSelect,
   EuiSwitch,
   EuiTab,
   EuiTabs,
@@ -29,21 +30,14 @@ import {
 } from '@elastic/eui';
 import type { Feature } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../util/formatters';
-import type { DetectionModel } from './model';
 import { journey } from './journey_translations';
-
-const categoryOf = (feature: Feature): string =>
-  feature.type === 'entity'
-    ? ['host', 'cluster', 'container', 'pod'].includes(feature.subtype ?? '')
-      ? 'infrastructure'
-      : 'services'
-    : feature.type === 'technology'
-    ? 'technologies'
-    : feature.type === 'dependency'
-    ? 'dependencies'
-    : feature.type === 'infrastructure'
-    ? 'infrastructure'
-    : 'patterns';
+import {
+  filterKnowledge,
+  knowledgeCategory,
+  type KnowledgeFilters,
+  type KnowledgeAssociation,
+} from '../knowledge/knowledge_model';
+import { knowledgeLabels } from '../knowledge/translations';
 
 const copy = {
   finding: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.finding', {
@@ -71,23 +65,31 @@ const copy = {
 
 export const KnowledgeBrowser = ({
   features,
-  model,
+  visibleFeatures,
+  associations,
+  filters,
+  onFiltersChange,
+  onReset,
+  graph,
   onInspect,
   onSelectService,
+  onHighlight,
 }: {
   features: Feature[];
-  model: DetectionModel;
+  visibleFeatures: Feature[];
+  associations: Map<string, KnowledgeAssociation>;
+  filters: KnowledgeFilters;
+  onFiltersChange: (changes: Partial<KnowledgeFilters>) => void;
+  onReset: () => void;
+  graph?: React.ReactNode;
   onInspect: (feature: Feature) => void;
   onSelectService: (id: string) => void;
+  onHighlight: (id?: string) => void;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const [category, setCategory] = useState('all');
-  const [search, setSearch] = useState('');
-  const [showExpired, setShowExpired] = useState(false);
-  const [showExcluded, setShowExcluded] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [limit, setLimit] = useState(36);
-  const categories = [
+  const categories: Array<{ id: KnowledgeFilters['category']; label: string; icon: string }> = [
     { id: 'all', label: journey.allKnowledge, icon: 'documents' },
     { id: 'services', label: journey.services, icon: 'apps' },
     { id: 'technologies', label: journey.technologies, icon: 'wrench' },
@@ -95,46 +97,15 @@ export const KnowledgeBrowser = ({
     { id: 'infrastructure', label: journey.infrastructure, icon: 'database' },
     { id: 'patterns', label: journey.patterns, icon: 'visLine' },
   ];
-  const eligible = features.filter(
-    (feature) =>
-      (showExcluded || !feature.excluded) &&
-      (showExpired || !feature.expires_at || Date.parse(feature.expires_at) > Date.now())
-  );
-  const visible = useMemo(
-    () =>
-      features
-        .filter(
-          (feature) =>
-            (showExcluded || !feature.excluded) &&
-            (showExpired || !feature.expires_at || Date.parse(feature.expires_at) > Date.now()) &&
-            (category === 'all' || categoryOf(feature) === category) &&
-            `${feature.title} ${feature.description} ${feature.stream_name} ${JSON.stringify(
-              feature.properties
-            )}`
-              .toLowerCase()
-              .includes(search.toLowerCase())
-        )
-        .sort((a, b) => Date.parse(b.updated_at ?? '') - Date.parse(a.updated_at ?? '')),
-    [features, category, search, showExcluded, showExpired]
-  );
-  const associations = useMemo(
-    () =>
-      new Map(
-        features.map((feature) => {
-          const entities = model.entities.filter((entity) =>
-            entity.features.some((item) => item.uuid === feature.uuid)
-          );
-          const rules = new Set(
-            entities.flatMap((entity) =>
-              entity.queries
-                .filter((query) => query.features?.some((reference) => reference.id === feature.id))
-                .map((query) => `${query.stream_name}:${query.id}`)
-            )
-          );
-          return [feature.uuid, { entities, rules }];
-        })
-      ),
-    [features, model.entities]
+  const change = (changes: Partial<KnowledgeFilters>): void => {
+    setLimit(36);
+    onFiltersChange(changes);
+  };
+  const eligible = filterKnowledge(
+    features,
+    { ...filters, category: 'all', usage: 'all' },
+    associations,
+    Date.now()
   );
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -193,7 +164,10 @@ export const KnowledgeBrowser = ({
             `}
           >
             <EuiIcon
-              type={categories.find((item) => item.id === categoryOf(feature))?.icon || 'documents'}
+              type={
+                categories.find((item) => item.id === knowledgeCategory(feature))?.icon ||
+                'documents'
+              }
               size="s"
               aria-hidden={true}
             />{' '}
@@ -257,15 +231,15 @@ export const KnowledgeBrowser = ({
       name: copy.usage,
       width: '90px',
       render: (feature: Feature) => {
-        const count = associations.get(feature.uuid)?.rules.size ?? 0;
+        const count = associations.get(feature.uuid)?.queries.length ?? 0;
         return (
           <EuiText size="xs" color={count ? 'default' : 'subdued'}>
             {count
-              ? i18n.translate('xpack.significantEventsApp.knowledgeCatalog.ruleCount', {
-                  defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+              ? i18n.translate('xpack.significantEventsApp.knowledgeCatalog.queryCount', {
+                  defaultMessage: '{count, plural, one {# query} other {# queries}}',
                   values: { count },
                 })
-              : '—'}
+              : knowledgeLabels.missingQueries}
           </EuiText>
         );
       },
@@ -303,15 +277,18 @@ export const KnowledgeBrowser = ({
   ];
   return (
     <div data-test-subj="detectionKnowledgeBrowser">
-      <EuiTabs size="s">
+      {graph && (
+        <>
+          {graph}
+          <EuiSpacer size="l" />
+        </>
+      )}
+      <EuiTabs size="s" expand={false}>
         {categories.map((item) => (
           <EuiTab
             key={item.id}
-            isSelected={category === item.id}
-            onClick={() => {
-              setCategory(item.id);
-              setLimit(36);
-            }}
+            isSelected={filters.category === item.id}
+            onClick={() => change({ category: item.id })}
           >
             {item.label}{' '}
             <span
@@ -322,27 +299,67 @@ export const KnowledgeBrowser = ({
               `}
             >
               {
-                eligible.filter((feature) => item.id === 'all' || categoryOf(feature) === item.id)
-                  .length
+                eligible.filter(
+                  (feature) => item.id === 'all' || knowledgeCategory(feature) === item.id
+                ).length
               }
             </span>
           </EuiTab>
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+        <EuiFlexItem
+          css={css`
+            min-width: 220px;
+          `}
+        >
           <EuiFieldSearch
             data-test-subj="significantEventsAppKnowledgeBrowserFieldSearch"
             compressed
             fullWidth
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setLimit(36);
-            }}
+            value={filters.search}
+            onChange={(event) => change({ search: event.target.value })}
             placeholder={journey.searchKnowledge}
             aria-label={journey.searchKnowledge}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            compressed
+            aria-label={knowledgeLabels.anyConfidence}
+            value={filters.confidence}
+            onChange={(event) =>
+              change({
+                confidence:
+                  event.target.value === 'high'
+                    ? 'high'
+                    : event.target.value === 'review'
+                    ? 'review'
+                    : 'all',
+              })
+            }
+            options={[
+              { value: 'all', text: knowledgeLabels.anyConfidence },
+              { value: 'high', text: knowledgeLabels.highConfidence },
+              { value: 'review', text: knowledgeLabels.reviewConfidence },
+            ]}
+            data-test-subj="knowledgeConfidenceFilter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            compressed
+            aria-label={knowledgeLabels.anyAge}
+            value={filters.freshness}
+            onChange={(event) =>
+              change({ freshness: event.target.value === 'recent' ? 'recent' : 'all' })
+            }
+            options={[
+              { value: 'all', text: knowledgeLabels.anyAge },
+              { value: 'recent', text: knowledgeLabels.recent },
+            ]}
+            data-test-subj="knowledgeFreshnessFilter"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -359,8 +376,8 @@ export const KnowledgeBrowser = ({
                 data-test-subj="knowledgeCatalogFilters"
               >
                 {copy.filters}
-                {showExpired || showExcluded
-                  ? ` · ${Number(showExpired) + Number(showExcluded)}`
+                {filters.showExpired || filters.showExcluded
+                  ? ` · ${Number(filters.showExpired) + Number(filters.showExcluded)}`
                   : ''}
               </EuiButtonEmpty>
             }
@@ -368,29 +385,98 @@ export const KnowledgeBrowser = ({
             <EuiSwitch
               compressed
               label={copy.expired}
-              checked={showExpired}
-              onChange={(event) => {
-                setShowExpired(event.target.checked);
-                setLimit(36);
-              }}
+              checked={filters.showExpired}
+              onChange={(event) => change({ showExpired: event.target.checked })}
             />
             <EuiSpacer size="s" />
             <EuiSwitch
               compressed
               label={journey.showExcluded}
-              checked={showExcluded}
-              onChange={(event) => {
-                setShowExcluded(event.target.checked);
-                setLimit(36);
-              }}
+              checked={filters.showExcluded}
+              onChange={(event) => change({ showExcluded: event.target.checked })}
             />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+        {(
+          [
+            { id: 'all', label: knowledgeLabels.allQueries },
+            { id: 'missing_queries', label: knowledgeLabels.missingQueries },
+            { id: 'with_queries', label: knowledgeLabels.withQueries },
+          ] as const
+        ).map((item) => (
+          <EuiFlexItem key={item.id} grow={false}>
+            <EuiToolTip
+              content={item.id === 'missing_queries' ? knowledgeLabels.missingHint : item.label}
+            >
+              <EuiButtonEmpty
+                size="xs"
+                iconType={
+                  item.id === 'missing_queries'
+                    ? 'search'
+                    : item.id === 'with_queries'
+                    ? 'visLine'
+                    : 'documents'
+                }
+                aria-pressed={filters.usage === item.id}
+                onClick={() => change({ usage: item.id })}
+                data-test-subj={`knowledgeUsageFilter-${item.id}`}
+                css={css`
+                  border-radius: ${euiTheme.border.radius.medium};
+                  background: ${filters.usage === item.id
+                    ? `color-mix(in srgb, ${euiTheme.colors.primary} 12%, transparent)`
+                    : 'transparent'};
+                `}
+              >
+                {item.label} ·{' '}
+                {
+                  eligible.filter(
+                    (feature) =>
+                      (filters.category === 'all' ||
+                        knowledgeCategory(feature) === filters.category) &&
+                      (item.id === 'all' ||
+                        (item.id === 'missing_queries'
+                          ? !associations.get(feature.uuid)?.queries.length
+                          : Boolean(associations.get(feature.uuid)?.queries.length)))
+                  ).length
+                }
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
+
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <strong>{knowledgeLabels.matches}</strong>{' '}
+            <EuiBadge color="hollow">{visibleFeatures.length}</EuiBadge>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="significantEventsAppKnowledgeBrowserButton"
+            size="xs"
+            iconType="cross"
+            onClick={onReset}
+          >
+            {knowledgeLabels.reset}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize="none">
         <EuiBasicTable
-          items={visible.slice(0, limit)}
+          items={visibleFeatures.slice(0, limit)}
+          rowProps={(feature) => ({
+            onMouseEnter: () => onHighlight(feature.uuid),
+            onMouseLeave: () => onHighlight(undefined),
+            onFocus: () => onHighlight(feature.uuid),
+            onBlur: () => onHighlight(undefined),
+          })}
           itemId="uuid"
           columns={columns}
           tableCaption={journey.knowledge}
@@ -404,14 +490,14 @@ export const KnowledgeBrowser = ({
           data-test-subj="knowledgeCatalogTable"
         />
       </EuiPanel>
-      {visible.length > limit && (
+      {visibleFeatures.length > limit && (
         <>
           <EuiSpacer size="m" />
           <EuiButtonEmpty
             data-test-subj="significantEventsAppKnowledgeBrowserButton"
             onClick={() => setLimit(limit + 36)}
           >
-            {journey.browse} · {visible.length - limit}
+            {journey.browse} · {visibleFeatures.length - limit}
           </EuiButtonEmpty>
         </>
       )}

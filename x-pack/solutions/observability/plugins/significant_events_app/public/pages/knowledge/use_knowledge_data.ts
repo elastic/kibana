@@ -10,7 +10,7 @@ import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { getQueryBucketParams } from '../../util/get_query_bucket_params';
 
-export const useKnowledgeData = (rangeFrom: string, rangeTo: string) => {
+export const useKnowledgeData = (rangeFrom: string, rangeTo: string, learning = false) => {
   const {
     dependencies: {
       start: {
@@ -43,7 +43,7 @@ export const useKnowledgeData = (rangeFrom: string, rangeTo: string) => {
       ]);
       return { features, queries };
     },
-    refetchInterval: 15_000,
+    refetchInterval: learning ? 3000 : 15_000,
     refetchOnWindowFocus: true,
     keepPreviousData: true,
   });
