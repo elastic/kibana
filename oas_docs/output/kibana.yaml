@@ -140020,6 +140020,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -150802,6 +150803,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155434,6 +155436,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155667,6 +155670,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -159878,6 +159882,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -161375,6 +161380,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165197,6 +165203,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165287,6 +165294,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165347,6 +165355,34 @@ components:
         - desc
       title: termsRankByCustomDirection
       type: string
+    Kibana_HTTP_APIs_termsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_termsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -165365,7 +165401,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -166050,6 +166085,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -168614,6 +168650,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -171010,6 +171047,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -172998,6 +173036,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
