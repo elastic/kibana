@@ -20,13 +20,13 @@ import {
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
-import type { AttachmentServiceStart } from '../../attachments';
+import type { IsomerService } from '../../isomer';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
-  attachmentsService: AttachmentServiceStart;
+  isomerService: IsomerService;
 }
 
 /**
@@ -106,7 +106,7 @@ class TaskHandlerImpl implements TaskHandler {
       execution,
       events$,
       callbackDeliveryService: this.deps.callbackDeliveryService,
-      attachmentsService: this.deps.attachmentsService,
+      isomerService: this.deps.isomerService,
       logger: this.logger,
     });
 

@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { IsomerServiceImpl } from './isomer';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -260,6 +261,11 @@ export class ServiceManager {
       logger: logger.get('audit'),
     });
 
+    const isomer = new IsomerServiceImpl({
+      attachmentsService: attachments,
+      logger: logger.get('isomer'),
+    });
+
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
@@ -275,7 +281,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
-      attachmentsService: attachments,
+      isomerService: isomer,
     });
 
     executionService = createAgentExecutionService({

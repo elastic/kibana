@@ -19,13 +19,17 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { AttachmentServiceStart } from '../../attachments';
+import { IsomerServiceImpl } from '../../isomer';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 import { deliverCallbackEvents } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
 const projectionDeps = {
-  attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
+  isomerService: new IsomerServiceImpl({
+    attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
+    logger: loggerMock.create(),
+  }),
 };
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({

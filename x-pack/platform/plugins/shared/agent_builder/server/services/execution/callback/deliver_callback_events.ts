@@ -26,8 +26,7 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import type { AttachmentServiceStart } from '../../attachments';
-import { renderIsomerProjection } from '../../isomer';
+import type { IsomerService } from '../../isomer';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
@@ -44,13 +43,13 @@ export const deliverCallbackEvents = ({
   execution,
   events$,
   callbackDeliveryService,
-  attachmentsService,
+  isomerService,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
   callbackDeliveryService: CallbackDeliveryService;
-  attachmentsService: AttachmentServiceStart;
+  isomerService: IsomerService;
   logger: Logger;
 }): Promise<void> => {
   // Only conversation executions have callbacks.
@@ -132,10 +131,8 @@ export const deliverCallbackEvents = ({
             }
 
             // Output for the round's origin, such as the Slack payload of Slack rounds.
-            const projection = renderIsomerProjection(roundCompleteEvent, {
+            const projection = isomerService.renderProjection(roundCompleteEvent, {
               originType: execution.agentParams.origin?.type,
-              attachmentsService,
-              logger,
             });
 
             const event = { ...roundCompleteEvent, projection };

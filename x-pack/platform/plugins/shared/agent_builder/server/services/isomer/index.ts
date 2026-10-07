@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { renderIsomerProjection } from './render_projection';
+export { IsomerServiceImpl, type IsomerService } from './isomer_service';

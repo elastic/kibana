@@ -6,19 +6,10 @@
  */
 
 import type { OriginIsomerProjection } from '@kbn/agent-builder-common';
-import type { Logger } from '@kbn/logging';
-import type { AttachmentServiceStart } from '../attachments';
 import type { Spec } from './pack';
 
-/** What a projection needs to render a round. */
-export interface ProjectionContext {
-  /** Looks up attachment types, whose `toSpec` renders attachments in place of their tags. */
-  attachmentsService: AttachmentServiceStart;
-  logger: Logger;
-}
-
-/** The projection of rounds from one origin type, rendered through Isomer. */
-export interface IsomerProjectionDefinition<
+/** Renders the projection of rounds from one origin type through Isomer. */
+export interface IsomerProjectionRenderer<
   TOrigin extends keyof OriginIsomerProjection = keyof OriginIsomerProjection
 > {
   /** Origin type whose rounds get this projection. */

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { slackProjection } from './slack';
+import { slackProjectionRenderer } from './slack';
 
-describe('slackProjection', () => {
+describe('slackProjectionRenderer', () => {
   it('renders the spec as Block Kit', () => {
     const spec = {
       type: 'view' as const,
       body: [{ type: 'markdown' as const, text: 'There are **3** [alerts](https://example.com).' }],
     };
 
-    expect(slackProjection.render(spec)).toEqual({
+    expect(slackProjectionRenderer.render(spec)).toEqual({
       text: expect.any(String),
       blocks: [
         {
