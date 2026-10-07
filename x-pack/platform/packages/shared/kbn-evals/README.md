@@ -348,12 +348,13 @@ Give the suite its own Vault secret with `vaultSecret`, so rotating its credenti
 | `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
 | No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
 
-Manage the secret with the Vault scripts' `--suite` flag. It keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start), and runs the suite's `scoutHook` on it before uploading, so a config the hook rejects never reaches Vault:
+Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
 
 ```bash
 node scripts/vault/retrieve_secrets.js --vault ci-prod --suite my-suite
 node scripts/vault/upload_secrets.js --vault ci-prod --suite my-suite
 ```
+
 ### Serverless suites (`scoutArch` / `scoutDomain`)
 
 Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` entry says otherwise:

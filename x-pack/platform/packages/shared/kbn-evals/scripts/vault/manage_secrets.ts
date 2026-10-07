@@ -8,7 +8,7 @@
 import execa from 'execa';
 import Path from 'path';
 import Fs from 'fs';
-import { writeFile, readFile } from 'fs/promises';
+import { chmod, writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 import {
@@ -167,7 +167,15 @@ export const resolveVaultTarget = (vault: KbnEvalsVaultType, suiteId?: string): 
     validate: validateSuiteVaultConfig,
     checkBeforeUpload: scoutHook
       ? (config) => {
-          runScoutHook(REPO_ROOT, scoutHook, config);
+          // Only PATH and HOME, so credentials exported in the uploader's shell can't stand in for
+          // ones missing from the config.
+          const { PATH, HOME } = process.env;
+          const env = runScoutHook(REPO_ROOT, scoutHook, config, { env: { PATH, HOME } });
+          if (Object.keys(env).length === 0) {
+            throw new Error(
+              `scoutHook ${scoutHook} produced no env for this config; CI would run only the smoke eval`
+            );
+          }
         }
       : undefined,
   };
@@ -250,7 +258,9 @@ export const retrieveConfigFromVault = async (
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const validated = validate(JSON.parse(value));
   await Fs.promises.mkdir(Path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, JSON.stringify(validated, null, 2));
+  // `mode` only applies when the file is created, so also tighten a copy that already exists.
+  await writeFile(filePath, JSON.stringify(validated, null, 2), { mode: 0o600 });
+  await chmod(filePath, 0o600);
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
 };

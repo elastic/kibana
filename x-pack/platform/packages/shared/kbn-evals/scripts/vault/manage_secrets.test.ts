@@ -6,20 +6,38 @@
  */
 
 import Fs from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import Path from 'path';
+import { chmod, readFile, writeFile } from 'fs/promises';
 import execa from 'execa';
+import { resolveEvalSuites, type EvalSuiteDefinition } from '../../src/cli/suites';
+import { runScoutHook } from '../../src/cli/scout_hook';
 import { resolveVaultTarget, retrieveConfigFromVault, uploadConfigToVault } from './manage_secrets';
 
 jest.mock('execa');
 jest.mock('fs/promises', () => ({
   ...jest.requireActual('fs/promises'),
+  chmod: jest.fn(),
   readFile: jest.fn(),
   writeFile: jest.fn(),
 }));
+jest.mock('../../src/cli/suites');
+jest.mock('../../src/cli/scout_hook');
 
 const mockedExeca = jest.mocked(execa);
+const mockedChmod = jest.mocked(chmod);
 const mockedReadFile = jest.mocked(readFile);
 const mockedWriteFile = jest.mocked(writeFile);
+const mockedResolveEvalSuites = jest.mocked(resolveEvalSuites);
+const mockedRunScoutHook = jest.mocked(runScoutHook);
+
+const SUITE_DIR = '/repo/x-pack/packages/kbn-evals-suite-my-suite';
+const SUITE = {
+  id: 'my-suite',
+  absoluteConfigPath: Path.join(SUITE_DIR, 'playwright.config.ts'),
+  scoutHook: 'x-pack/packages/kbn-evals-suite-my-suite/scout/scout_hook.sh',
+  vaultSecret: 'my-suite',
+} as EvalSuiteDefinition;
+const SUITE_CONFIG = { sandbox: { apiKey: 'sandbox-key', url: 'https://sandbox.example' } };
 
 const CONFIG = {
   openrouter: { baseUrl: 'https://openrouter.example', apiKey: 'or-secret-key' },
@@ -129,7 +147,10 @@ describe('retrieveConfigFromVault', () => {
       'kv/ci-shared/kbn-evals/golden',
     ]);
     expect(options.env?.VAULT_ADDR).toBe('https://vault-ci-prod.elastic.dev');
-    expect(JSON.parse(String(mockedWriteFile.mock.calls[0][1]))).toEqual(CONFIG);
+    const [filePath, contents, writeOptions] = mockedWriteFile.mock.calls[0];
+    expect(JSON.parse(String(contents))).toEqual(CONFIG);
+    expect(writeOptions).toEqual({ mode: 0o600 });
+    expect(mockedChmod).toHaveBeenCalledWith(filePath, 0o600);
   });
 
   it('leaves the local config untouched when the version cannot be read', async () => {
@@ -150,5 +171,86 @@ describe('retrieveConfigFromVault', () => {
 
     await expect(retrieveConfigFromVault(resolveVaultTarget('ci-prod'), 2)).rejects.toThrow();
     expect(mockedWriteFile).not.toHaveBeenCalled();
+  });
+});
+
+describe('suite vault targets', () => {
+  beforeEach(() => {
+    mockedExeca.mockReset();
+    mockedWriteFile.mockReset();
+    mockedRunScoutHook.mockReset();
+    mockedResolveEvalSuites.mockReturnValue([SUITE]);
+    mockedReadFile.mockResolvedValue(JSON.stringify(SUITE_CONFIG) as never);
+    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('rejects an unknown suite and a suite without vaultSecret', () => {
+    expect(() => resolveVaultTarget('ci-prod', 'nope')).toThrow('Unknown eval suite "nope"');
+    mockedResolveEvalSuites.mockReturnValue([{ ...SUITE, vaultSecret: undefined }]);
+    expect(() => resolveVaultTarget('ci-prod', 'my-suite')).toThrow('has no vaultSecret');
+  });
+
+  it("points at the suite's secret and its local vault/config.json", () => {
+    expect(resolveVaultTarget('ci-prod', 'my-suite')).toMatchObject({
+      vaultPath: 'kv/ci-shared/kbn-evals/my-suite',
+      filePath: Path.join(SUITE_DIR, 'vault', 'config.json'),
+      exampleFilePath: Path.join(SUITE_DIR, 'vault', 'config.example.json'),
+    });
+  });
+
+  it('uploads once the hook, run without shell credentials, prints an env', async () => {
+    mockedRunScoutHook.mockReturnValue({ SANDBOX_API_KEY: 'sandbox-key' });
+    mockedExeca.mockResolvedValue({ stdout: '' } as never);
+
+    await uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'));
+
+    const [, hookPath, hookConfig, { env } = {}] = mockedRunScoutHook.mock.calls[0];
+    expect(hookPath).toBe(SUITE.scoutHook);
+    expect(hookConfig).toEqual(SUITE_CONFIG);
+    expect(Object.keys(env ?? {}).sort()).toEqual(['HOME', 'PATH']);
+    expect(mockedExeca.mock.calls[0][1]).toEqual([
+      'kv',
+      'put',
+      'kv/ci-shared/kbn-evals/my-suite',
+      'config=-',
+    ]);
+  });
+
+  it('refuses the upload when the hook prints no env, e.g. for an unedited example', async () => {
+    mockedRunScoutHook.mockReturnValue({});
+
+    await expect(uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'))).rejects.toThrow(
+      'produced no env for this config; CI would run only the smoke eval'
+    );
+    expect(mockedExeca).not.toHaveBeenCalled();
+  });
+
+  it('refuses the upload when the hook fails', async () => {
+    mockedRunScoutHook.mockImplementation(() => {
+      throw new Error('scoutHook exited with code 1');
+    });
+
+    await expect(uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'))).rejects.toThrow(
+      'exited with code 1'
+    );
+    expect(mockedExeca).not.toHaveBeenCalled();
+  });
+
+  it("writes a retrieved suite secret under the suite's vault directory", async () => {
+    mockedExeca.mockResolvedValue({
+      stdout: Buffer.from(JSON.stringify(SUITE_CONFIG)).toString('base64'),
+    } as never);
+
+    await retrieveConfigFromVault(resolveVaultTarget('ci-prod', 'my-suite'));
+
+    const [filePath, contents] = mockedWriteFile.mock.calls[0];
+    expect(filePath).toBe(Path.join(SUITE_DIR, 'vault', 'config.json'));
+    expect(JSON.parse(String(contents))).toEqual(SUITE_CONFIG);
   });
 });
