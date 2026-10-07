@@ -402,7 +402,7 @@ describe('compareScores (grouping, means and direction)', () => {
       }),
     ];
 
-    const results = computePairedTTestResults(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
+    const results = compare(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
 
     expect(
       results.map(({ evaluatorName, direction, meanTarget, meanBaseline }) => ({
