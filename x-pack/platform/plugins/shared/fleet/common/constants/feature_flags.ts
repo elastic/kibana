@@ -10,3 +10,6 @@ export const ENABLE_IAC_PROVISIONER_FLAG = 'fleet.enableIacProvisioner';
 
 /** LaunchDarkly flag that gates the Restart Agent action in the Fleet UI. Fallback is false. */
 export const ENABLE_RESTART_AGENT_ACTION_FLAG = 'fleet.enableRestartAgentAction';
+
+/** LaunchDarkly flag that gates the POC where Kibana creates Federated Identity stacks itself via the AWS SDK. Fallback is false. */
+export const AWS_MANAGED_ONBOARDING_FLAG = 'fleet.awsManagedOnboarding';

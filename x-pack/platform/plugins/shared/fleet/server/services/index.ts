@@ -74,6 +74,8 @@ export type { CloudConnectorServiceInterface } from './cloud_connector';
 export { iacProvisionerService } from './iac_provisioner';
 export type { IacProvisionerService } from './iac_provisioner';
 
+export { awsOnboardingCredentialsService, awsOnboardingStackService } from './aws_onboarding';
+
 export * from './cloud_connectors';
 
 export type { MessageSigningServiceInterface } from './security';

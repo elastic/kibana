@@ -19,6 +19,8 @@ export interface StackArnFieldProps {
   value: string;
   /** Receives the raw input value; callers decide whether and when to trim it. */
   onChange: (value: string) => void;
+  /** Managed onboarding fills the value from the created stack; the user cannot edit it. */
+  readOnly?: boolean;
   'data-test-subj': string;
 }
 
@@ -26,6 +28,7 @@ export interface StackArnFieldProps {
 export const StackArnField: React.FC<StackArnFieldProps> = ({
   value,
   onChange,
+  readOnly = false,
   'data-test-subj': dataTestSubj,
 }) => {
   const isInvalid = isStackArnInvalid(value);
@@ -42,6 +45,7 @@ export const StackArnField: React.FC<StackArnFieldProps> = ({
         fullWidth
         value={value}
         isInvalid={isInvalid}
+        readOnly={readOnly}
         onChange={(e) => onChange(e.target.value)}
         data-test-subj={dataTestSubj}
       />

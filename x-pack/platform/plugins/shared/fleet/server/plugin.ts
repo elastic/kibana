@@ -62,6 +62,7 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../common';
+import { AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import {
@@ -76,6 +77,7 @@ import { runWithCache } from './services/epm/packages/cache';
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
+import { awsOnboardingCredentialsService } from './services/aws_onboarding';
 import {
   calculateRouteAuthz,
   getAuthzFromRequest,
@@ -819,6 +821,12 @@ export class FleetPlugin
     const uninstallTokenService = new UninstallTokenService(
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
+
+    awsOnboardingCredentialsService.start(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE],
       })
     );
 
