@@ -12,7 +12,7 @@ The default `test/scout/` config set has no Fleet Server and no VirtualBox/Multi
 - Host: Vagrant + VirtualBox on CI (`CI=true`), Multipass locally
 - Fleet Server: Docker via `startFleetServerIfNecessary()` after Kibana is up
 
-Both configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks them up. CI runs the UI and API configs on local stateful, then the API config again on local serverless Security complete. Each run boots Elasticsearch, Kibana, and its own Endpoint VM. Cloud serverless (MKI) is not a target: the scan spec is tagged `@local-serverless-security_complete` only.
+Both configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks them up. CI runs them one after the other, so each boots Elasticsearch, Kibana, and its own Endpoint VM.
 
 ## Local
 
@@ -32,14 +32,6 @@ The API project uses the same server config set and a different Playwright confi
 
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
-  --serverConfigSet edr_real_fleet \
-  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts
-```
-
-The scan spec also runs on local serverless. Sibling API specs are stateful-only, so this command runs the scan spec:
-
-```bash
-node scripts/scout run-tests --location local --arch serverless --domain security_complete \
   --serverConfigSet edr_real_fleet \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts
 ```
