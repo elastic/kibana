@@ -58,7 +58,7 @@ import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
-import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../episode_sources';
+import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../alert_sources';
 import * as i18n from '../translations';
 
 /**

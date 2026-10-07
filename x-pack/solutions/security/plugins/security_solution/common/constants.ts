@@ -11,7 +11,6 @@ import {
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
-import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
@@ -524,9 +523,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
   ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
-  // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
-  // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
-  MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

@@ -3,29 +3,22 @@
 exports[`getAuthenticationLensAttributes should render 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-layer-authentication-success-id-generated-uuid",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-layer-authentication-failure-id-generated-uuid",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "6f4dbdc7-35b6-4e20-ac53-1272167e3919",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "auditbeat-mytest-*",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -209,6 +202,28 @@ Object {
             "host.id": "123",
           },
         },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-authentication-success-id-generated-uuid",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-authentication-failure-id-generated-uuid",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "6f4dbdc7-35b6-4e20-ac53-1272167e3919",
+        "type": "index-pattern",
       },
     ],
     "query": Object {

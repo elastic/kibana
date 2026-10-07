@@ -50,6 +50,56 @@ describe('DeploymentMethodCard', () => {
     expect(screen.queryByTestId('editDeploymentMethodModal')).not.toBeInTheDocument();
   });
 
+  describe('availableMethods', () => {
+    it('restricts the select to the listed methods', () => {
+      render(
+        <I18nProvider>
+          <DeploymentMethodCard
+            selectedMethod="agent_based"
+            onChange={jest.fn()}
+            availableMethods={['agent_based']}
+          />
+        </I18nProvider>
+      );
+      fireEvent.click(screen.getByTestId('deploymentMethodCard-editButton'));
+      const options = screen
+        .getByTestId('editDeploymentMethodModal-select')
+        .querySelectorAll('option');
+      expect(options).toHaveLength(1);
+      expect(options[0]).toHaveValue('agent_based');
+    });
+
+    it('summarises the restricted method when the selection is outside the list', () => {
+      // A stale persisted 'managed_integration' must not render a blank summary on a
+      // deployment where only agent_based is offered.
+      render(
+        <I18nProvider>
+          <DeploymentMethodCard
+            selectedMethod="managed_integration"
+            onChange={jest.fn()}
+            availableMethods={['agent_based']}
+          />
+        </I18nProvider>
+      );
+      expect(screen.getByText('Agent-based.')).toBeInTheDocument();
+    });
+
+    it('hides the Edit button entirely when also locked', () => {
+      render(
+        <I18nProvider>
+          <DeploymentMethodCard
+            selectedMethod="agent_based"
+            onChange={jest.fn()}
+            availableMethods={['agent_based']}
+            locked
+          />
+        </I18nProvider>
+      );
+      expect(screen.getByText('Agent-based.')).toBeInTheDocument();
+      expect(screen.queryByTestId('deploymentMethodCard-editButton')).not.toBeInTheDocument();
+    });
+  });
+
   it('Edit button is disabled with tooltip when disabled=true, does not open modal', () => {
     const onChange = jest.fn();
     render(

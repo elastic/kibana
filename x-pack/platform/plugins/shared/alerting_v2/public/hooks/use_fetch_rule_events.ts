@@ -22,15 +22,15 @@ import {
   type TopNSeriesRow,
 } from '../queries/alert_series_activity/top_n_series_query';
 import {
-  buildEpisodeSelectionQuery,
-  MAX_EPISODES_PER_LANE,
-  type EpisodeSelectionRow,
-} from '../queries/alert_series_activity/episode_selection_query';
-import { buildEpisodePhasesQuery } from '../queries/alert_series_activity/episode_phases_query';
+  buildAlertSelectionQuery,
+  MAX_ALERTS_PER_LANE,
+  type AlertSelectionRow,
+} from '../queries/alert_series_activity/alert_selection_query';
+import { buildAlertPhasesQuery } from '../queries/alert_series_activity/alert_phases_query';
 import {
-  buildEpisodeStartsQuery,
-  type EpisodeStartRow,
-} from '../queries/alert_series_activity/episode_starts_query';
+  buildAlertStartsQuery,
+  type AlertStartRow,
+} from '../queries/alert_series_activity/alert_starts_query';
 import {
   buildAlertTimelineSummaryQuery,
   parseAlertTimelineSummaryRow,
@@ -53,7 +53,7 @@ export interface UseFetchRuleEventsOptions {
   windowStartMs: number;
   windowEndMs: number;
   groupingFields?: readonly string[];
-  /** Max episodes drawn per series (lane). Defaults to {@link MAX_EPISODES_PER_LANE}. */
+  /** Max alerts drawn per series (lane). Defaults to {@link MAX_ALERTS_PER_LANE}. */
   perLaneLimit?: number;
   data: DataPublicPluginStart;
 }
@@ -63,7 +63,7 @@ export const useFetchRuleEvents = ({
   windowStartMs,
   windowEndMs,
   groupingFields = [],
-  perLaneLimit = MAX_EPISODES_PER_LANE,
+  perLaneLimit = MAX_ALERTS_PER_LANE,
   data,
 }: UseFetchRuleEventsOptions) => {
   const enabled = Boolean(ruleId) && windowEndMs > windowStartMs;
@@ -95,7 +95,7 @@ export const useFetchRuleEvents = ({
     [topNSeriesQuery.data]
   );
 
-  // --- 2. Episode selection (depends on top-N hashes) — the episodes to draw,
+  // --- 2. Alert selection (depends on top-N hashes) — the alerts to draw,
   // capped per lane so a busy series can't crowd out its neighbours. ---
   const selectionEnabled = enabled && topNSeriesQuery.isSuccess && topNHashes.length > 0;
 
@@ -113,7 +113,7 @@ export const useFetchRuleEvents = ({
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeSelectionQuery({
+          query: buildAlertSelectionQuery({
             ruleId: ruleId!,
             windowStartMs,
             windowEndMs,
@@ -124,26 +124,25 @@ export const useFetchRuleEvents = ({
         },
         abortSignal: signal,
       }),
-    select: (raw) => esqlResponseToObjectRows<EpisodeSelectionRow>(raw),
+    select: (raw) => esqlResponseToObjectRows<AlertSelectionRow>(raw),
   });
 
-  const selectedEpisodeIds = useMemo(
+  const selectedAlertIds = useMemo(
     () => (selectionQuery.data ?? []).map((r) => r['episode.id']),
     [selectionQuery.data]
   );
 
-  // --- 3. Episode phases (depends on the selected episode IDs) — one row per
+  // --- 3. Alert phases (depends on the selected alert IDs) — one row per
   // status phase, bounded to the display window for *drawing* the segments. The
   // true start of each phase comes from the untimed starts query (step 3b). ---
-  const phasesEnabled =
-    selectionEnabled && selectionQuery.isSuccess && selectedEpisodeIds.length > 0;
+  const phasesEnabled = selectionEnabled && selectionQuery.isSuccess && selectedAlertIds.length > 0;
 
   const phasesQuery = useQuery({
     queryKey: ruleOverviewQueryKeys.episodePhases(
       ruleId ?? '',
       windowStartMs,
       windowEndMs,
-      selectedEpisodeIds
+      selectedAlertIds
     ),
     enabled: phasesEnabled,
     refetchOnWindowFocus: false,
@@ -151,11 +150,11 @@ export const useFetchRuleEvents = ({
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodePhasesQuery({
+          query: buildAlertPhasesQuery({
             ruleId: ruleId!,
             windowStartMs,
             windowEndMs,
-            episodeIds: selectedEpisodeIds,
+            alertIds: selectedAlertIds,
           }).print('basic'),
           time_zone: 'UTC',
         },
@@ -164,27 +163,27 @@ export const useFetchRuleEvents = ({
     select: (raw) => esqlResponseToObjectRows<AlertTimelinePhaseRow>(raw),
   });
 
-  // --- 3b. Episode starts (depends on the selected episode IDs) — each episode's
+  // --- 3b. Alert starts (depends on the selected alert IDs) — each alert's
   // true MIN(@timestamp) per status, UNTIMED so the start is independent of the
   // display window. Sibling to the phases query (same gate, no dependency between
   // them) → runs in parallel. Merged into the phase rows below. ---
   const startsQuery = useQuery({
-    queryKey: ruleOverviewQueryKeys.episodeStarts(ruleId ?? '', selectedEpisodeIds),
+    queryKey: ruleOverviewQueryKeys.episodeStarts(ruleId ?? '', selectedAlertIds),
     enabled: phasesEnabled,
     refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeStartsQuery({
+          query: buildAlertStartsQuery({
             ruleId: ruleId!,
-            episodeIds: selectedEpisodeIds,
+            alertIds: selectedAlertIds,
           }).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       }),
-    select: (raw) => esqlResponseToObjectRows<EpisodeStartRow>(raw),
+    select: (raw) => esqlResponseToObjectRows<AlertStartRow>(raw),
   });
 
   // Per-(episode, status) true start, keyed for the merge below.
