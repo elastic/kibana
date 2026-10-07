@@ -206,7 +206,7 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
 describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
   const builderRule = {
     id: 'rule-builder',
-    metadata: { name: 'Builder rule', builder_type: 'threshold' },
+    metadata: { name: 'Builder rule', builder: { type: 'threshold' } },
     query: { base: 'FROM logs-* | STATS count() | WHERE count > 5' },
     time_field: '@timestamp',
   } as unknown as RuleApiResponse;

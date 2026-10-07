@@ -9,25 +9,25 @@ import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getEpisodeDataQueries } from '../queries';
-import { EpisodeTriage } from '../state';
+import { getAlertDataQueries } from '../queries';
+import { AlertTriage } from '../state';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
-import { parseDataJson } from './utils/parse_episode_data';
+import { parseDataJson } from './utils/parse_alert_data';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
-interface RawEpisodeData {
-  episode_id: string;
+interface RawAlertData {
+  alert_id: string;
   data_json: string | null;
 }
 
 @injectable()
-export class HydrateEpisodeDataStep implements DispatcherStep {
-  public readonly name = 'hydrate_episode_data';
+export class HydrateAlertDataStep implements DispatcherStep {
+  public readonly name = 'hydrate_alert_data';
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
@@ -37,60 +37,60 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { triage = EpisodeTriage.empty() } = state;
+    const { triage = AlertTriage.empty() } = state;
 
     if (!triage.hasDispatchable()) {
       return { type: 'continue' };
     }
 
-    const episodeIds = triage.dispatchableEpisodeIds();
+    const alertIds = triage.dispatchableAlertIds();
 
     const { gte, lte } = computeTimestampBounds(triage.dispatchable);
 
     const { signal } = state.input;
 
     const responses = await Promise.all(
-      getEpisodeDataQueries(episodeIds, { gte, lte }).map((request) =>
-        this.queryService.executeQueryRows<RawEpisodeData>({
+      getAlertDataQueries(alertIds, { gte, lte }).map((request) =>
+        this.queryService.executeQueryRows<RawAlertData>({
           query: request.query,
           abortSignal: signal,
         })
       )
     );
 
-    const dataByEpisodeId = new Map<string, string | null>();
+    const dataByAlertId = new Map<string, string | null>();
     for (const row of responses.flat()) {
-      dataByEpisodeId.set(row.episode_id, row.data_json);
+      dataByAlertId.set(row.alert_id, row.data_json);
     }
 
-    const hydrated = dataByEpisodeId.size;
-    const requested = episodeIds.length;
+    const hydrated = dataByAlertId.size;
+    const requested = alertIds.length;
     if (hydrated < requested) {
       logger.warn({
-        code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
+        code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW,
         message: () =>
-          `${requested - hydrated} of ${requested} episodes had no matching rule-events row; ` +
+          `${requested - hydrated} of ${requested} alerts had no matching rule-events row; ` +
           `their data will be absent`,
       });
     }
 
-    const hydratedTriage = triage.mapDispatchable((ep) => {
-      const raw = dataByEpisodeId.get(ep.episode_id);
-      if (raw == null) return ep;
-      return { ...ep, data: parseDataJson(raw) };
+    const hydratedTriage = triage.mapDispatchable((alert) => {
+      const raw = dataByAlertId.get(alert.alert_id);
+      if (raw == null) return alert;
+      return { ...alert, data: parseDataJson(raw) };
     });
 
     return { type: 'continue', data: { triage: hydratedTriage } };
   }
 }
 
-function computeTimestampBounds(episodes: readonly AlertEpisode[]): { gte: string; lte: string } {
+function computeTimestampBounds(alerts: readonly Alert[]): { gte: string; lte: string } {
   const epoch = new Date(0).toISOString();
   let gte: string | undefined;
   let lte: string | undefined;
 
-  for (const ep of episodes) {
-    const parsed = new Date(ep.last_event_timestamp);
+  for (const alert of alerts) {
+    const parsed = new Date(alert.last_event_timestamp);
     if (Number.isNaN(parsed.getTime())) continue;
 
     const ts = parsed.toISOString();

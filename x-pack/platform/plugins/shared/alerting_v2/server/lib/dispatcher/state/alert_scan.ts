@@ -5,47 +5,47 @@
  * 2.0.
  */
 
-import type { AlertEpisode } from '../types';
+import type { Alert } from '../types';
 
 /**
- * Result of the windowed candidate-episode scan (FetchEpisodesStep): the fetched
+ * Result of the windowed candidate-alert scan (FetchAlertsStep): the fetched
  * rows plus whether the scan hit ESQL_QUERY_ROW_LIMIT and deferred a tail.
  */
-export class EpisodeScan {
-  private static readonly EMPTY = new EpisodeScan([], false);
+export class AlertScan {
+  private static readonly EMPTY = new AlertScan([], false);
 
   private constructor(
-    public readonly episodes: readonly AlertEpisode[],
+    public readonly alerts: readonly Alert[],
     /** True when the scan reached ESQL_QUERY_ROW_LIMIT and a tail was deferred. */
     public readonly truncated: boolean
   ) {}
 
   public static of({
-    episodes,
+    alerts,
     truncated = false,
   }: {
-    episodes: readonly AlertEpisode[];
+    alerts: readonly Alert[];
     truncated?: boolean;
-  }): EpisodeScan {
-    return new EpisodeScan(episodes, truncated);
+  }): AlertScan {
+    return new AlertScan(alerts, truncated);
   }
 
-  public static empty(): EpisodeScan {
-    return EpisodeScan.EMPTY;
+  public static empty(): AlertScan {
+    return AlertScan.EMPTY;
   }
 
   public isEmpty(): boolean {
-    return this.episodes.length === 0;
+    return this.alerts.length === 0;
   }
 
   /**
-   * Timestamp of the last fetched episode — rows arrive sorted ascending, so
+   * Timestamp of the last fetched alert — rows arrive sorted ascending, so
    * this is the truncation edge the watermark advances to on a truncated tick.
    * A corrupt timestamp yields an Invalid Date rather than throwing; callers
    * must clamp or guard against it.
    */
   public truncationEdge(): Date | undefined {
-    const lastEpisode = this.episodes[this.episodes.length - 1];
-    return lastEpisode ? new Date(lastEpisode.last_event_timestamp) : undefined;
+    const lastAlert = this.alerts[this.alerts.length - 1];
+    return lastAlert ? new Date(lastAlert.last_event_timestamp) : undefined;
   }
 }
