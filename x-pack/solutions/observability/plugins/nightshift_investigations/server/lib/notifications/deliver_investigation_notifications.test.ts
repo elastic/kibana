@@ -206,12 +206,48 @@ describe('investigation notification lifecycle', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  it('records destination preparation failures and continues to other destinations', async () => {
+    const { send, execute, client } = setup();
+    const inputs = [{ ...destination, type: 'unsupported' }, destination];
+    expect(await send('started', 'exec-1', inputs)).toEqual({
+      sent: 1,
+      failed: 1,
+      unconfirmed: 0,
+    });
+    expect(execute).toHaveBeenCalledTimes(1);
+    const routing = await client.get();
+    expect(routing?.attempts.map(({ status }) => status)).toEqual(['failed', 'sent']);
+    expect(routing?.attempts[0].error).toContain('Unsupported notification type');
+  });
+
   it('Actions setup failure records each failure without posting', async () => {
     const { send, getExecute, execute, client } = setup();
     getExecute.mockRejectedValue(new Error('Actions unavailable'));
-    expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    const inputs = [destination, { ...destination, params: { channel: '#oncall' } }];
+    expect(await send('started', 'exec-1', inputs)).toEqual({
+      sent: 0,
+      failed: 2,
+      unconfirmed: 0,
+    });
+    expect(getExecute).toHaveBeenCalledTimes(1);
     expect(execute).not.toHaveBeenCalled();
-    expect((await client.get())?.attempts[0].error).toBe('Actions unavailable');
+    expect((await client.get())?.attempts.map(({ error }) => error)).toEqual([
+      'Actions unavailable',
+      'Actions unavailable',
+    ]);
+  });
+
+  it('cancellation during Actions setup stops delivery before any claims', async () => {
+    const { send, getExecute, controller, execute, client } = setup();
+    getExecute.mockImplementationOnce(async () => {
+      controller.abort();
+      return execute;
+    });
+    expect(await send('started')).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+    const routing = await client.get();
+    expect(routing?.executions).toHaveLength(1);
+    expect(routing?.attempts).toEqual([]);
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it('cancellation before delivery leaves no claim or attachment', async () => {

@@ -143,9 +143,6 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
-    plugins.spaces?.spacesClient.registerOnSpaceDeleted(async (spaceId) => {
-      await this.getNotificationRoutingService().deleteAllInSpace(spaceId);
-    });
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
     );
@@ -562,13 +559,7 @@ export class NightshiftInvestigationsPlugin
 
     const investigationSweepRepository = createInvestigationSweepRepository(
       coreStart.savedObjects,
-      this.logger,
-      async (conversationIds, spaceId) => {
-        await this.getNotificationRoutingService().deleteByConversationIds(
-          conversationIds,
-          spaceId
-        );
-      }
+      this.logger
     );
 
     return {

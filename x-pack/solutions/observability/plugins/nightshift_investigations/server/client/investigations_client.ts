@@ -684,7 +684,19 @@ export class NightshiftInvestigationsClient {
     return this.ensureConversation(investigationId);
   }
 
-  private async readNotificationExecution(investigationId: string, executionId: string) {
+  /**
+   * Reads the persisted investigation workflow execution using this client's request and space,
+   * verifies its investigation binding, and recovers notification destinations from its inputs.
+   * Shared by investigation initialization and lifecycle delivery so both paths validate the same
+   * execution identity and caller configuration.
+   *
+   * Without an explicit investigation_id input, the execution ID identifies the investigation;
+   * a continuing execution names the existing investigation through that input. Missing runs,
+   * unrelated workflows, or a different investigation binding throw InvestigationNotFoundError.
+   * Omitted destinations resolve to an empty array, while malformed destination inputs fail
+   * schema or connector-specific validation.
+   */
+  private async readInvestigationExecution(investigationId: string, executionId: string) {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
@@ -708,8 +720,20 @@ export class NightshiftInvestigationsClient {
     return { execution, notificationDestinations };
   }
 
-  /** Reads authenticated, space-scoped execution inputs and verifies the investigation's owning run. */
-  async getNotificationExecutionContext(
+  /**
+   * Resolves the context used by nightshift.sendNotifications for each lifecycle phase. After
+   * validating the persisted workflow execution and its inputs, loads the investigation record
+   * and verifies that this execution still owns it and that its conversation has been prepared.
+   * Continuing runs may have a different execution ID from the investigation ID; the record's
+   * execution_id identifies the owning run, falling back to its ID for the original execution.
+   * Missing records, ownership mismatches, or a missing conversation throw InvestigationNotFoundError.
+   *
+   * Returns the stored investigation findings, conversation and workflow IDs, and validated
+   * destinations supplied to this execution. The started phase merges these destinations into
+   * the routing attachment; delivery reads retained destinations and thread state from that
+   * attachment, so follow-up executions can omit destination inputs.
+   */
+  async getInvestigationExecutionContext(
     investigationId: string,
     executionId: string
   ): Promise<{
@@ -718,7 +742,7 @@ export class NightshiftInvestigationsClient {
     workflowId: string;
     notificationDestinations: InvestigationNotificationDestination[];
   }> {
-    const { execution, notificationDestinations } = await this.readNotificationExecution(
+    const { execution, notificationDestinations } = await this.readInvestigationExecution(
       investigationId,
       executionId
     );
@@ -738,6 +762,16 @@ export class NightshiftInvestigationsClient {
     };
   }
 
+  /**
+   * Prepares the investigation's Agent Builder conversation before lifecycle notifications and
+   * the agent run. Reuses the stored conversation_id when present; otherwise uses the investigation
+   * ID so retries resolve to the same conversation, and creates a public investigation conversation
+   * only when the request-scoped client reports it missing.
+   *
+   * If another caller creates the conversation first, reads it again through the scoped client;
+   * access errors and other failures propagate. Once the conversation is available, persists its
+   * ID on the investigation if no pointer was stored, then returns it for the workflow to resume.
+   */
   private async ensureConversation(investigationId: string): Promise<string> {
     if (!this.agentBuilder) {
       throw new InvestigationUnavailableError('agentBuilder is not available');
@@ -796,7 +830,7 @@ export class NightshiftInvestigationsClient {
       if (getOwningExecutionId(existing) !== investigationId) {
         throw InvestigationConflictError.runInProgress(investigationId);
       }
-      await this.readNotificationExecution(investigationId, executionId);
+      await this.readInvestigationExecution(investigationId, executionId);
       return;
     }
 
@@ -804,7 +838,7 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
 
-    const { execution } = await this.readNotificationExecution(investigationId, executionId);
+    const { execution } = await this.readInvestigationExecution(investigationId, executionId);
 
     const startedAt = execution.startedAt ?? new Date().toISOString();
 

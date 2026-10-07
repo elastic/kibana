@@ -15,7 +15,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -51,7 +51,6 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
-  spaces?: SpacesPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;

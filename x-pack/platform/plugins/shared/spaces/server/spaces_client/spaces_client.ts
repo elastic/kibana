@@ -122,8 +122,7 @@ export class SpacesClient implements ISpacesClient {
     private readonly nonGlobalTypeNames: string[],
     private readonly buildFlavour: BuildFlavor,
     private readonly features: FeaturesPluginStart,
-    private readonly npreClient: INpreClient | undefined,
-    private readonly onSpaceDeleted?: (spaceId: string) => Promise<void>
+    private readonly npreClient: INpreClient | undefined
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
@@ -372,7 +371,6 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
-    await this.onSpaceDeleted?.(id);
 
     if (this.npreClient) {
       try {

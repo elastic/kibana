@@ -67,7 +67,7 @@ export const sendNotificationsStepDefinition = ({
       const { investigation_id: investigationId, phase, reason } = inputSchema.parse(context.input);
       const client = getInvestigationsClient(request, spaceId);
       const { investigation, conversationId, workflowId, notificationDestinations } =
-        await client.getNotificationExecutionContext(investigationId, executionId);
+        await client.getInvestigationExecutionContext(investigationId, executionId);
       const routingClient = await getRoutingClient(
         request,
         spaceId,

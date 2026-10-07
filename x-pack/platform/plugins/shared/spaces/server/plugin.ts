@@ -53,8 +53,6 @@ export interface SpacesPluginSetupApi {
    * @internal
    */
   spacesClient: {
-    /** Registers cleanup for data outside Saved Objects after successful space deletion. */
-    registerOnSpaceDeleted: (handler: (spaceId: string) => Promise<void>) => void;
     /**
      * Sets the client repository factory.
      * @internal

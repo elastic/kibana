@@ -1354,7 +1354,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       )
     );
     await expect(
-      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+      makeClient().getInvestigationExecutionContext(EXECUTION_ID, EXECUTION_ID)
     ).resolves.toMatchObject({
       conversationId: 'stored-conversation',
       workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
@@ -1369,7 +1369,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       workflowId: 'unrelated-workflow',
     });
     await expect(
-      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+      makeClient().getInvestigationExecutionContext(EXECUTION_ID, EXECUTION_ID)
     ).rejects.toThrow(InvestigationNotFoundError);
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
     repository.get.mockResolvedValue(
@@ -1379,7 +1379,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       )
     );
     await expect(
-      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+      makeClient().getInvestigationExecutionContext(EXECUTION_ID, EXECUTION_ID)
     ).rejects.toThrow(InvestigationNotFoundError);
   });
 

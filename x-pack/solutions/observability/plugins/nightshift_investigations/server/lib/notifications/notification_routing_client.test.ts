@@ -144,14 +144,4 @@ describe('notification routing attachments', () => {
       value: 'The investigation workflow manages lifecycle notifications to 1 destination(s).',
     });
   });
-
-  it('cleans only the requested conversation and space', async () => {
-    const { client, service, storage } = createRoutingTestContext('ops');
-    await client.initialize('exec-1', 'workflow', [destination]);
-    expect(await service.deleteByConversationIds(['conv-1'], 'default')).toBe(0);
-    expect(await service.deleteByConversationIds(['conv-1'], 'ops')).toBe(1);
-    expect(storage.entries.size).toBe(0);
-    await client.initialize('exec-2', 'workflow', [destination]);
-    expect(await service.deleteAllInSpace('ops')).toBe(1);
-  });
 });

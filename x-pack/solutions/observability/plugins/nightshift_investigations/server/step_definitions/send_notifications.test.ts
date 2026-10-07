@@ -27,7 +27,7 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     data: { ts: '1.2', channel: 'C123' },
   }));
   const getActionsClientWithRequestInSpace = jest.fn(async () => ({ execute }));
-  const getNotificationExecutionContext = jest.fn(async () => ({
+  const getInvestigationExecutionContext = jest.fn(async () => ({
     investigation: {
       investigation_id: 'inv-1',
       title: 'Latency',
@@ -43,7 +43,7 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
   }));
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
-  const getInvestigationsClient = jest.fn(() => ({ getNotificationExecutionContext })) as never;
+  const getInvestigationsClient = jest.fn(() => ({ getInvestigationExecutionContext })) as never;
   const getRoutingClient = jest.fn(async () => routing.client);
   const definition = sendNotificationsStepDefinition({
     investigationLocator,
@@ -72,7 +72,7 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     request,
     execute,
     getActionsClientWithRequestInSpace,
-    getNotificationExecutionContext,
+    getInvestigationExecutionContext,
     getRoutingClient,
     context,
     routing,
@@ -88,13 +88,13 @@ describe('nightshift.sendNotifications step', () => {
         request,
         execute,
         getActionsClientWithRequestInSpace,
-        getNotificationExecutionContext,
+        getInvestigationExecutionContext,
         context,
       } = setup(spaceId);
       expect(await definition.handler(context())).toEqual({
         output: { sent: 1, failed: 0, unconfirmed: 0 },
       });
-      expect(getNotificationExecutionContext).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
+      expect(getInvestigationExecutionContext).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
       expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
       expect(execute).toHaveBeenCalledWith(expect.objectContaining({ actionId: 'saved-slack' }));
       const params = execute.mock.calls[0][0].params.subActionParams as { text: string };
@@ -147,12 +147,12 @@ describe('nightshift.sendNotifications step', () => {
   it('rejects an invalid persisted execution binding before Actions or routing access', async () => {
     const {
       definition,
-      getNotificationExecutionContext,
+      getInvestigationExecutionContext,
       getRoutingClient,
       getActionsClientWithRequestInSpace,
       context,
     } = setup();
-    getNotificationExecutionContext.mockRejectedValue(new Error('Invalid execution'));
+    getInvestigationExecutionContext.mockRejectedValue(new Error('Invalid execution'));
     await expect(definition.handler(context())).rejects.toThrow('Invalid execution');
     expect(getRoutingClient).not.toHaveBeenCalled();
     expect(getActionsClientWithRequestInSpace).not.toHaveBeenCalled();
