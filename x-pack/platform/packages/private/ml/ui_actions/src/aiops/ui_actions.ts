@@ -24,4 +24,13 @@ export interface CategorizeFieldContext {
 }
 
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';
+
+export interface ReverseCategorizeFieldContext {
+  field: DataViewField;
+  dataView: DataView;
+  fieldValue: string;
+  originatingApp: string;
+  projectRouting?: string;
+}
+
 export const ACTION_REVERSE_CATEGORIZE_FIELD = 'ACTION_REVERSE_CATEGORIZE_FIELD';

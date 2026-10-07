@@ -18,8 +18,6 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -33,10 +31,7 @@ export async function showReverseCategorizeFieldFlyout(
   fieldValue: string,
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
-  originatingApp: string,
-  additionalFilter?: CategorizationAdditionalFilter,
-  focusTrapProps?: EuiFlyoutProps['focusTrapProps'],
-  onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void
+  originatingApp: string
 ): Promise<void> {
   const { overlays, application, i18n } = coreStart;
 
@@ -82,8 +77,6 @@ export async function showReverseCategorizeFieldFlyout(
                     savedSearch={null}
                     fieldValue={fieldValue}
                     onClose={onFlyoutClose}
-                    additionalFilter={additionalFilter}
-                    onFilter={onFilter}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>
@@ -97,7 +90,6 @@ export async function showReverseCategorizeFieldFlyout(
           closeButtonProps: { 'aria-label': 'aiopsReverseCategorizeFieldFlyout' },
           onClose: onFlyoutClose,
           size: 'l',
-          focusTrapProps,
         }
       );
 

@@ -21,8 +21,8 @@ import {
   EuiButtonEmpty,
   EuiSkeletonRectangle,
   EuiSkeletonText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import moment from 'moment-timezone';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -30,7 +30,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { Filter } from '@kbn/es-query';
@@ -63,8 +62,6 @@ export interface ReverseCategorizationPageProps {
   selectedField: DataViewField;
   fieldValue: string;
   onClose: () => void;
-  additionalFilter?: CategorizationAdditionalFilter;
-  onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void;
 }
 
 const BAR_TARGET = 60;
@@ -75,8 +72,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   selectedField,
   fieldValue,
   onClose,
-  additionalFilter,
-  onFilter,
 }) => {
   const {
     notifications: { toasts },
@@ -214,7 +209,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         runtimeMappings,
         undefined,
         intervalMs,
-        additionalFilter
+        undefined
       );
 
       if (mounted.current === true) {
@@ -278,7 +273,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     runCategorizeRequest,
     searchQuery,
     intervalMs,
-    additionalFilter,
     fieldValue,
     docsForCategory,
     filters,
@@ -412,27 +406,26 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         <EuiSpacer size="l" />
 
         {matchNotFound === true ? (
-          <EuiCallOut
+          <KbnInfoCallout
             title={i18n.translate(
               'xpack.aiops.logCategorization.reverseCategorization.matchNotFoundTitle',
               { defaultMessage: 'No pattern matches found' }
             )}
-            color="primary"
-            iconType="warning"
             announceOnMount
-          >
-            <FormattedMessage
-              id="xpack.aiops.logCategorization.reverseCategorization.matchNotFoundBody"
-              defaultMessage="Try adjusting the time range or changing the sampling settings to improve results."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.aiops.logCategorization.reverseCategorization.matchNotFoundBody"
+                defaultMessage="Try adjusting the time range or changing the sampling settings to improve results."
+              />
+            }
+          />
         ) : (
           <>
             <EuiText css={{ fontWeight: 'bold' }}>Pattern</EuiText>
             <EuiSpacer size="s" />
             <EuiText>
               {data?.selectedCategory?.regex !== undefined ? (
-                <PatternCellRenderer pattern={data.selectedCategory?.regex} isDetails={false} />
+                <PatternCellRenderer pattern={data.selectedCategory?.regex} />
               ) : (
                 <EuiSkeletonText lines={2} />
               )}
