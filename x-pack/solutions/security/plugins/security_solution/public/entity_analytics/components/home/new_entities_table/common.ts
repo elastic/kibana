@@ -306,16 +306,6 @@ export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 
-export const encodeCursor = (c: PageCursor): string => btoa(JSON.stringify(c));
-
-export const decodeCursor = (s: string): PageCursor => {
-  try {
-    return JSON.parse(atob(s)) as PageCursor;
-  } catch {
-    throw new Error('invalid cursor');
-  }
-};
-
 /**
  * Keeps the rows after the cursor in `SORT field <dir> NULLS LAST, entity.id ASC` order.
  * Null sort values come last, so every page after a non-null cursor also keeps them.
@@ -589,7 +579,7 @@ export const RESOLUTION_GROUPING_ID = 'ea-new-home-resolution';
 
 export interface EntityGridResponse {
   entities: Array<Record<string, unknown>>;
-  next_cursor: string | null;
+  next_cursor: PageCursor | null;
   total: number | null;
 }
 

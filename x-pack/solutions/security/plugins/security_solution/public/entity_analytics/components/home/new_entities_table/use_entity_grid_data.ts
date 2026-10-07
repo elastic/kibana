@@ -21,8 +21,6 @@ import type {
   SortDir,
 } from './common';
 import {
-  decodeCursor,
-  encodeCursor,
   entityIdsOf,
   getEntityId,
   getNumber,
@@ -72,16 +70,20 @@ const entityGridKeys = {
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const buildNextCursor = (pageRows: Row[], args: QueryArgs, hasNextPage: boolean): string | null => {
+const buildNextCursor = (
+  pageRows: Row[],
+  args: QueryArgs,
+  hasNextPage: boolean
+): PageCursor | null => {
   const lastRow = pageRows[pageRows.length - 1];
   if (!hasNextPage || !lastRow) return null;
 
-  return encodeCursor({
+  return {
     sortField: args.sort.field,
     sortDirection: args.sort.direction,
     sortValue: toSortValue(lastRow[args.sort.field]),
     entityId: getEntityId(lastRow) ?? '',
-  });
+  };
 };
 
 interface PageRowsInput {
@@ -195,12 +197,11 @@ export const useEntityGridData = ({
     }
   }
 
-  const cursorStr =
+  const cursor =
     fetchPageIndex === 0
       ? null
       : queryClient.getQueryData<EntityGridResponse>(shellKey(fetchPageIndex - 1))?.next_cursor ??
         null;
-  const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
   const countEsql =
     concreteEntityIndexName && sortColumn
@@ -248,7 +249,7 @@ export const useEntityGridData = ({
       };
     },
     {
-      enabled: !!concreteEntityIndexName && (fetchPageIndex === 0 || cursorStr != null),
+      enabled: !!concreteEntityIndexName && (fetchPageIndex === 0 || cursor != null),
       // Keep painting the last page while the next shell key loads (page/sort/filter).
       // Count stays strict below so pagination totals don't lag behind the tile/filter.
       keepPreviousData: true,
