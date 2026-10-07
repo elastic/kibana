@@ -54,9 +54,9 @@ describe('NotificationControlsSection', () => {
   });
 
   it('passes the expression from the form matcher to useFetchRuleEventFields', () => {
-    renderSection({ ...DEFAULT_FORM_STATE, matcher: { expression: 'episode_status: "active"' } });
+    renderSection({ ...DEFAULT_FORM_STATE, matcher: { expression: 'alert_status: "active"' } });
 
-    expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('episode_status: "active"');
+    expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('alert_status: "active"');
   });
 
   it('populates the group-by combo-box with fields returned by useFetchRuleEventFields', async () => {

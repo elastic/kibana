@@ -69,7 +69,7 @@ const formatMatcherSummary = (matcher: PolicyMatcher | null | undefined): string
   if (!matcher) return matchesAll;
 
   const parts: string[] = [];
-  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
+  if (matcher.tags?.length) parts.push(`routing tags: ${matcher.tags.join(', ')}`);
   if (matcher.expression?.trim()) parts.push(`expr: ${matcher.expression.trim()}`);
 
   return parts.length > 0 ? parts.join(' | ') : matchesAll;
