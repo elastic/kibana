@@ -155,6 +155,12 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
    - `not_checked` only when no backed query KI exists.
    - When an off-topic found row contains a concrete non-benign error, preserve only a redacted signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
 
+3. **Classify `effect` per the `effect` field contract on `platform_sig_events_events_write`** — judge the operation's success vs failure from the row itself, never from `p_value`, `change_point_type`, alert volume, or this signal's own description wording. Only when the row itself genuinely doesn't show success or failure (not merely silent on cause) may the matched query KI's own description break the tie — cite the specific clause it supports in this signal's description; do not inherit the KI description's wording as if it were observed.
+   - Every verdict other than `confirms`, or `off_topic` with a concrete non-benign error, → `effect: "none"`.
+   - Confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens → `effect: "exposure"`, regardless of verdict.
+   - When `effect` is `"outage"`, add one `outage_paths` entry per distinct verified path the row shows failing to complete, named by what traverses it: the caller operation when the evidence names one (`checkout`), otherwise the failing hop (`orders-api -> postgres`). One entry per path — do not split one path by endpoint variant or status code; a URL alone is not a path. Omit `outage_paths` for every other `effect`.
+   - Severity is computed from `effect`, `outage_paths`, KI `severity_score`, and topology — not written directly, and not something to reason about here.
+
 ### Step 5: Consolidate Causal Features and Blast Radius
 
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI search.
@@ -188,6 +194,8 @@ Each entry:
 - `stream_name`: the detection rule's stream
 - `description`: Signal Verdict narrative; never include raw sensitive values from the query row
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
+- `effect`: `none` | `degradation` | `outage` | `exposure` — classified from the same row, per Step 4.3
+- `outage_paths`: `string[]`, one distinct failing path per entry (caller operation, or `source -> target` hop), required when `effect` is `"outage"`, omitted otherwise
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
 - `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet rules. `esql_query` retains `?_tstart` / `?_tend` and any original KI projection, but omits executed ordering and limit tails. `time_range` is the absolute `{ from, to }` window bound at execution — always record it; without it a placeholder query cannot be interpreted. `result`: `"found"` | `"empty"` | `"error"`
 - `metadata`: detection input

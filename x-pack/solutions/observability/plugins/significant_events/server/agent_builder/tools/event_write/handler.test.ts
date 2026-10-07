@@ -216,7 +216,10 @@ describe('eventsWriteHandler', () => {
 
   describe('unchanged_outcome (no-op guard)', () => {
     it('returns EventsWriteNoOpResult when severity and status are unchanged for a snapshot candidate', async () => {
-      const stored = makeStoredEvent('checkout-stable');
+      // severity is computed from signals/topology, not copied from input.severity;
+      // an empty-signal candidate computes to 'low', so the stored fixture matches that to
+      // exercise the no-op path.
+      const stored = makeStoredEvent('checkout-stable', { severity: 'low' });
       const eventClient = makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
       });
@@ -299,10 +302,16 @@ describe('eventsWriteHandler', () => {
           p_value: 0.01,
         },
       };
-      const latest = makeStoredEvent('checkout-stable');
+      // ruleOne has no `effect`, so the merged signal set computes to 'low' regardless of the
+      // input.severity — match the stored fixture to that so the no-op path, not
+      // an escalation write, is what's under test here.
+      const latest = makeStoredEvent('checkout-stable', { severity: 'low' });
       const eventClient = makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({
-          hits: [makeStoredEvent('checkout-stable', { signals: [ruleOne] }), latest],
+          hits: [
+            makeStoredEvent('checkout-stable', { signals: [ruleOne], severity: 'low' }),
+            latest,
+          ],
         }),
       });
 
@@ -313,7 +322,6 @@ describe('eventsWriteHandler', () => {
           ...baseInput,
           event_id: 'checkout-stable',
           status: 'active',
-          severity: 'high',
           signals: [ruleOne],
         },
       });
@@ -1020,7 +1028,8 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   });
 
   it('no-op guard skips when both severity and status are identical to latest', async () => {
-    const stored = makeStoredEvent('checkout-stable');
+    // baseInput has no signals, so the computed severity is 'low' regardless of input.severity.
+    const stored = makeStoredEvent('checkout-stable', { severity: 'low' });
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
@@ -1028,7 +1037,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
       alertEventsClient,
-      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' }],
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'active' }],
     });
 
     expect(results[0]).toMatchObject({
@@ -1067,6 +1076,43 @@ describe('eventsWriteBulkHandler — continuation status', () => {
       expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
     }
   );
+});
+
+describe('eventsWriteBulkHandler — severity floor on inactive', () => {
+  it('floors an otherwise-critical computed severity to low when status is inactive', async () => {
+    const exposureSignal: SignalEntry = {
+      type: 'detection',
+      stream_name: 'logs.checkout',
+      description: 'Found: credentials exposed in logs. Impact: active exposure.',
+      verdict: 'confirms',
+      effect: 'exposure',
+      metadata: {
+        detection_id: 'det-exposure',
+        rule_uuid: 'rule-exposure',
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    } as SignalEntry;
+
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      alertEventsClient,
+      inputs: [
+        {
+          ...baseInput,
+          status: 'inactive',
+          signals: [exposureSignal],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'inactive' });
+    expect(writtenDocs()[0].severity).toBe('low');
+  });
 });
 
 describe('eventsWriteBulkHandler — investigation severity calibration', () => {
@@ -1150,6 +1196,16 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
+    // Severity is computed from the merged signal set, not copied from input.severity; the new confirmed rule must itself classify as "outage" with a critical-band severity_score to compute to 'critical' once the investigation lock unlocks.
+    const newConfirmedRule = {
+      ...makeDetectionSignal('rule-2'),
+      effect: 'outage' as const,
+      outage_paths: ['checkout'],
+      metadata: {
+        ...makeDetectionSignal('rule-2').metadata,
+        severity_score: 90,
+      },
+    };
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
@@ -1159,8 +1215,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
         {
           ...baseInput,
           event_id: stored.event_id,
-          severity: 'critical',
-          signals: [makeDetectionSignal('rule-2')],
+          signals: [newConfirmedRule],
         },
       ],
     });
@@ -1216,6 +1271,19 @@ describe('eventsWriteItemSchema', () => {
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  it('strips a legacy severity/confidence field instead of rejecting the item', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      severity: 'critical',
+      confidence: 0.9,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('severity');
+      expect(result.data).not.toHaveProperty('confidence');
+    }
   });
 
   it.each([

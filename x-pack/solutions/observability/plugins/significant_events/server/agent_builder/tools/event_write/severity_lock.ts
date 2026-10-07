@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  Severity,
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import { addsNewDetectionRules, extractRuleUuids } from './episode_context';
+
+export type EventsWriteSource = 'discovery';
+
+const hasCompletedInvestigation = (event: SignificantEvent): boolean =>
+  event.investigations?.some(({ completed_at: completedAt }) => completedAt !== undefined) ?? false;
+
+const hasNewConfirmedRule = (
+  signals: SignificantEvent['signals'],
+  latestEvent: SignificantEvent
+): boolean =>
+  addsNewDetectionRules(
+    extractRuleUuids((signals ?? []).filter(({ verdict }) => verdict === 'confirms')),
+    extractRuleUuids(latestEvent.signals)
+  );
+
+/**
+ * Preserves an investigated event's current severity unless Discovery supplies an unlock —
+ * resolving the event, reactivating it, or confirming a new rule.
+ *
+ * This is a deliberate post-policy override stage, not part of the severity policy itself
+ */
+export const lockSeverityForCompletedInvestigation = ({
+  source,
+  latestEvent,
+  computedSeverity,
+  proposedStatus,
+  proposedSignals,
+}: {
+  source?: EventsWriteSource;
+  latestEvent?: SignificantEvent;
+  computedSeverity: Severity;
+  proposedStatus: SignificantEventStatus;
+  proposedSignals?: SignificantEvent['signals'];
+}): Severity => {
+  if (
+    source !== 'discovery' ||
+    latestEvent === undefined ||
+    !hasCompletedInvestigation(latestEvent)
+  ) {
+    return computedSeverity;
+  }
+
+  const isResolution = proposedStatus === 'inactive';
+  const isReactivation = latestEvent.status === 'inactive' && proposedStatus === 'active';
+
+  return isResolution || isReactivation || hasNewConfirmedRule(proposedSignals, latestEvent)
+    ? computedSeverity
+    : latestEvent.severity;
+};

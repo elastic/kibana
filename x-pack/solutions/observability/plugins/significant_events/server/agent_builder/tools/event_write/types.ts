@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignalEffect, Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 
 export type EventsWriteInput = Pick<
@@ -15,17 +15,16 @@ export type EventsWriteInput = Pick<
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'
-  | 'severity'
-  | 'confidence'
   | 'assessment_note'
   | 'signals'
   | 'causal_features'
   | 'blast_radius'
   | 'workflow_execution_id'
-> & {
-  event_id?: string;
-  conversation_id?: string;
-};
+> &
+  Partial<Pick<SignificantEvent, 'severity' | 'confidence'>> & {
+    event_id?: string;
+    conversation_id?: string;
+  };
 
 export interface EventsWriteResult {
   index: number;
@@ -35,6 +34,14 @@ export interface EventsWriteResult {
   /** Set when the stored title and symptom_hypothesis were preserved because this continuation
    *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
   narrative_preserved?: true;
+  /** Logged (not gated on) for fleet-wide EBT monitoring of the severity policy's behavior,
+   *  since `.rule-events` itself never leaves the customer's cluster. `severity` and `effect` are
+   *  the coarse, low-cardinality pair that lets a tier skew be told apart from an effect-
+   *  classification skew; breadth, fan-out, and `severity_score` are numeric and only
+   *  interpretable alongside the full document, so they're left to `.rule-events` analysis
+   *  (#1758/#1770) instead of duplicated here. */
+  severity: Severity;
+  effect: SignalEffect;
 }
 
 export interface EventsWriteDuplicateResult {
@@ -91,7 +98,7 @@ export type EventsWriteBulkResult =
 
 export type BulkResults = Array<EventsWriteBulkResult | undefined>;
 
-/** Fills in every still-undefined slot or throws. */
+/** Fills in every still-`undefined` slot or throws — every candidate must resolve to exactly one result. */
 export const alignResults = (results: BulkResults, message: string): EventsWriteBulkResult[] => {
   const aligned: EventsWriteBulkResult[] = [];
   for (const result of results) {

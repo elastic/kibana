@@ -479,6 +479,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       .number()
       .min(0)
       .max(1)
+      .optional()
       .describe(
         'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
           'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'

@@ -35,8 +35,6 @@ const input = {
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: 'high' as const,
-  confidence: 0.8,
 };
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
@@ -126,103 +124,39 @@ describe('events_write tool', () => {
     });
   });
 
-  describe('open high-severity confirms invariant', () => {
-    const signalWith = (verdict: string) => ({
+  it('rejects mixing confirms and not_checked on the same item', () => {
+    const confirmsSignal = {
       type: 'detection' as const,
       stream_name: 'logs.test',
       description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
-      verdict,
-      evidence: { esql_query: 'FROM logs.test', result: 'found' },
+      verdict: 'confirms' as const,
+      evidence: { esql_query: 'FROM logs.test', result: 'found' as const },
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
         change_point_type: 'spike' as const,
         p_value: 0.01,
       },
+    };
+    const quiet = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Rule Y: no backed query KI matched this detection.',
+      verdict: 'not_checked' as const,
+      metadata: {
+        rule_uuid: 'rule-2',
+        detection_id: 'detection-2',
+        change_point_type: 'spike' as const,
+        p_value: 0.2,
+      },
+    };
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, signals: [confirmsSignal, quiet] }],
     });
-
-    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
-      const { event_id: _omitted, ...newEventInput } = input;
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
-      }
-    });
-
-    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('inconclusive')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active high item backed by a confirms signal', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('confirms')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active medium item with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, severity: 'medium' as const, signals: [signalWith('inconclusive')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('rejects mixing confirms and not_checked on the same item', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule Y: no backed query KI matched this detection.',
-        verdict: 'not_checked' as const,
-        metadata: {
-          rule_uuid: 'rule-2',
-          detection_id: 'detection-2',
-          change_point_type: 'spike' as const,
-          p_value: 0.2,
-        },
-      };
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...input, signals: [signalWith('confirms'), quiet] }],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
-      }
-    });
-
-    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('off_topic')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule X: no backed query KI matched this detection.',
-        verdict: 'not_checked',
-        metadata: {
-          rule_uuid: 'rule-1',
-          detection_id: 'detection-1',
-          change_point_type: 'spike' as const,
-          p_value: 0.01,
-        },
-      };
-      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals: [quiet] }] }).success).toBe(
-        true
-      );
-    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+    }
   });
 
   it('normalizes an empty event_id to an omitted event_id', () => {
@@ -231,14 +165,6 @@ describe('events_write tool', () => {
     });
 
     expect(result.items[0].event_id).toBeUndefined();
-  });
-
-  it('accepts medium for known-ongoing events', () => {
-    const result = eventsWriteSchema.safeParse({
-      items: [{ ...input, severity: 'medium' }],
-    });
-
-    expect(result.success).toBe(true);
   });
 
   it('accepts only discovery as the optional caller source', () => {
@@ -448,23 +374,63 @@ describe('events_write tool', () => {
     );
   });
 
-  it('writes unenriched causal features when the lookup fails', async () => {
+  it('fails the write when the Knowledge Indicator lookup fails, rather than writing unchecked topology', async () => {
     getFeatures.mockRejectedValue(new Error('ki index unavailable'));
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
-      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
-    ]);
     const causalFeatures = [{ feature_id: 'checkout-api', name: 'Checkout API' }];
 
-    await invokeHandler(
+    const result = await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       { items: [{ ...input, causal_features: causalFeatures }] },
       createMockToolContext()
     );
 
+    expect(eventsWriteBulkHandler).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain('could not resolve topology');
+  });
+
+  it('drops topology entries whose feature_id resolves to no stored Knowledge Indicator', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'checkout-api',
+          uuid: 'uuid-checkout',
+          stream_name: 'logs.test',
+          type: 'entity',
+          subtype: 'service',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              { feature_id: 'checkout-api', name: 'Checkout API' },
+              { feature_id: 'made-up-service', name: 'Made Up' },
+            ],
+            blast_radius: [{ type: 'entity', feature_id: 'made-up-db', name: 'Made Up DB' }],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventSearchClient: {},
-        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ feature_id: 'checkout-api', subtype: 'service' }),
+            ],
+            blast_radius: [],
+          }),
+        ],
       })
     );
   });

@@ -650,6 +650,20 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       optional: true,
     },
   },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity tier actually stored. Present only when written is true.',
+      optional: true,
+    },
+  },
+  effect: {
+    type: 'keyword',
+    _meta: {
+      description: "The event's worst signal effect. Present only when written is true.",
+      optional: true,
+    },
+  },
 };
 
 const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {

@@ -49,8 +49,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
       title: true,
       symptom_hypothesis: true,
       summary: true,
-      severity: true,
-      confidence: true,
       assessment_note: true,
       signals: true,
       causal_features: true,
@@ -109,9 +107,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
     )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
-      const grounded = signals.filter((s) => s.evidence != null);
-      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
@@ -119,22 +115,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
           code: z.ZodIssueCode.custom,
           message:
             'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
-        });
-      }
-      // Continuations inherit prior severity; this cycle's signals may be
-      // inconclusive (telemetry gap, errored query) without a new confirms.
-      if (
-        item.event_id === undefined &&
-        item.status === 'active' &&
-        (item.severity === 'high' || item.severity === 'critical') &&
-        grounded.length > 0 &&
-        !hasConfirms &&
-        !hasOffTopicObservedError
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
         });
       }
     })
@@ -251,40 +231,47 @@ const enrichCausalFeatures = async (
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
-    return items.map((item) => ({
-      ...item,
-      causal_features: item.causal_features?.map((causalFeature) => {
+    // An entry whose feature_id resolves to no stored indicator is dropped, so presence in the stored event
+    // is the deterministic "this KI exists" gate. Dropped ids are logged for the eval trail.
+    return items.map((item) => {
+      const dropped: string[] = [];
+      const resolvedCausalFeatures = item.causal_features?.flatMap((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
           causalFeature.stream_name,
           item.stream_names
         );
-        return feature
-          ? {
-              ...causalFeature,
-              feature_id: feature.id,
-              type: feature.type,
-              subtype: feature.subtype,
-            }
-          : causalFeature;
-      }),
+        if (!feature) {
+          dropped.push(causalFeature.feature_id);
+          return [];
+        }
+        return [{ ...causalFeature, type: feature.type, subtype: feature.subtype }];
+      });
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
-      blast_radius: item.blast_radius?.map((entry) => {
+      const blastRadius = item.blast_radius?.flatMap((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature
-          ? {
-              ...entry,
-              feature_id: feature.id,
-              subtype: feature.subtype,
-            }
-          : entry;
-      }),
-    }));
+        if (!feature) {
+          dropped.push(entry.feature_id);
+          return [];
+        }
+        return [{ ...entry, subtype: feature.subtype }];
+      });
+      if (dropped.length > 0) {
+        logger.warn(
+          `events_write: dropped ${
+            dropped.length
+          } topology entries with no stored Knowledge Indicator: ${dropped.join(', ')}`
+        );
+      }
+      return { ...item, causal_features: resolvedCausalFeatures, blast_radius: blastRadius };
+    });
   } catch (error) {
+    // Fail loudly: writing topology unchecked would let every entry count toward severity.
     const message = error instanceof Error ? error.message : 'Unknown error';
-    logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
-    return items;
+    throw new Error(
+      `events_write: could not resolve topology against Knowledge Indicators: ${message}`
+    );
   }
 };
 
@@ -315,12 +302,14 @@ export function createEventsWriteTool({
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
+      Signals and topology are merged with prior versions, and severity is computed from that
+      merged set — it is not an input field. No-op if the computed severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
-      investigation makes the stored severity authoritative. It is preserved unless Discovery
-      marks the event inactive, reactivates an inactive event, or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      investigation makes the stored severity authoritative over the newly computed one. It is
+      preserved unless Discovery marks the event inactive, reactivates an inactive event, or
+      submits a confirmed rule UUID absent from the current event. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -387,6 +376,7 @@ export function createEventsWriteTool({
                 written: result.written,
                 stream_names: input.stream_names,
                 error_message: isBulkError ? result.error.reason : undefined,
+                ...(result.written ? { severity: result.severity, effect: result.effect } : {}),
               }),
           });
         });

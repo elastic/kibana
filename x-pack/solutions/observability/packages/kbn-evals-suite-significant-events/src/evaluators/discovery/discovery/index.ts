@@ -11,10 +11,7 @@ import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_c
 import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
-import {
-  createSeverityCalibrationEvaluator,
-  createConfidenceCalibrationEvaluator,
-} from '../common/scores_calibration';
+import { createEffectCalibrationEvaluator } from '../common/scores_calibration';
 import {
   createEvidenceDescriptionEvaluator,
   createNarrativeFieldsEvaluator,
@@ -73,8 +70,7 @@ export const createDiscoveryEvaluators = (
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),
     createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
-    createSeverityCalibrationEvaluator({ criteriaFn }),
-    createConfidenceCalibrationEvaluator({ criteriaFn }),
+    createEffectCalibrationEvaluator({ criteriaFn }),
   ];
 };
 

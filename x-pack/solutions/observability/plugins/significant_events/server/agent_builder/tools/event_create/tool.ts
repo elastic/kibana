@@ -30,8 +30,6 @@ const createEventSchema = lazySchema(() =>
     symptom_hypothesis: true,
     summary: true,
     stream_names: true,
-    severity: true,
-    confidence: true,
   })
 );
 
