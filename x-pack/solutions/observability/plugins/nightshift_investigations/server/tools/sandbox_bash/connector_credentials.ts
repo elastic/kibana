@@ -46,43 +46,9 @@ const toEnvValue = (value: unknown): string | undefined => {
   return JSON.stringify(value);
 };
 
-const getSecretsFromHeaders = (headers: Record<string, string>): Record<string, string> => {
-  const secrets: Record<string, string> = {};
-  const entries = Object.entries(headers);
-  for (const [name, header] of entries) {
-    if (name.toLowerCase() === 'authorization') {
-      const bearer = /^Bearer\s+(.+)$/i.exec(header);
-      if (bearer) {
-        secrets.token = bearer[1];
-        continue;
-      }
-      const apiKey = /^ApiKey\s+(.+)$/i.exec(header);
-      if (apiKey) {
-        secrets.password = apiKey[1];
-        continue;
-      }
-      const basic = /^Basic\s+(.+)$/i.exec(header);
-      if (basic) {
-        const decoded = Buffer.from(basic[1], 'base64').toString('utf8');
-        const separator = decoded.indexOf(':');
-        if (separator >= 0) {
-          secrets.username = decoded.slice(0, separator);
-          secrets.password = decoded.slice(separator + 1);
-          continue;
-        }
-      }
-      secrets.authorization = header;
-      continue;
-    }
-    const isApiKey = entries.length === 1 || /^(x-)?api-?key$/i.test(name);
-    secrets[isApiKey ? 'apiKey' : name] = header;
-  }
-  return secrets;
-};
-
 /**
  * Builds the CONNECTOR_* environment from framework-resolved config and auth headers.
- * Config keys map to CONNECTOR_CONFIG_<KEY>; resolved credentials use CONNECTOR_SECRET_<KEY>.
+ * Config keys map to CONNECTOR_CONFIG_<KEY>; header names map to CONNECTOR_HEADER_<NAME>.
  */
 export const buildConnectorEnv = ({
   connectorId,
@@ -105,13 +71,10 @@ export const buildConnectorEnv = ({
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
-  for (const value of Object.values(headers)) {
-    if (value.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(value);
-  }
-  for (const [key, value] of Object.entries(getSecretsFromHeaders(headers))) {
+  for (const [key, value] of Object.entries(headers)) {
     const envValue = toEnvValue(value);
     if (envValue === undefined) continue;
-    env[`${CONNECTOR_ENV_PREFIX}SECRET_${toEnvKey(key)}`] = envValue;
+    env[`${CONNECTOR_ENV_PREFIX}HEADER_${toEnvKey(key)}`] = envValue;
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 

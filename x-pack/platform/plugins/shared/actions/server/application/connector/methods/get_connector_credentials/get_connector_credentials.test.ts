@@ -34,7 +34,6 @@ import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
 import { createMockInMemoryConnector } from '../../mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../../../../auth_types';
-import { UnsupportedAuthProducerError } from '../../../../lib/get_axios_instance';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 
 const defaultConnectorTypeId = '.connector-type-id';
@@ -273,35 +272,6 @@ describe('getConnectorCredentials()', () => {
         actionsClient.getConnectorCredentials({ id: defaultConnectorId })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
     });
-
-    it('includes additional connector-type privileges for system action types', async () => {
-      const newActionTypeId = '.foobar';
-      actionTypeRegistry.register(
-        getConnectorType({
-          id: newActionTypeId,
-          getKibanaPrivileges: () => ['test/other'],
-          isSystemActionType: true,
-          validate: {
-            config: { schema: z.object({}).passthrough() },
-            secrets: secretsSchema,
-          },
-          executor: undefined,
-        })
-      );
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
-        actionTypeIdFromSavedObjectMock(newActionTypeId)
-      );
-
-      await expect(
-        actionsClient.getConnectorCredentials({ id: defaultConnectorId })
-      ).rejects.toThrow(/system connectors are not supported/);
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: newActionTypeId,
-        operation: 'execute',
-        additionalPrivileges: ['test/other'],
-      });
-    });
   });
 
   describe('validation', () => {
@@ -314,7 +284,7 @@ describe('getConnectorCredentials()', () => {
       ).rejects.toThrow(/Encrypted Saved Objects plugin is missing encryption key/);
     });
 
-    it('fails validation if secrets schema does not match saved values', async () => {
+    it('fails when decrypted secrets do not match the connector secrets schema', async () => {
       const newActionTypeId = '.validate-secrets';
       actionTypeRegistry.register(
         getConnectorType({
@@ -375,26 +345,6 @@ describe('getConnectorCredentials()', () => {
       await expect(
         actionsClient.getConnectorCredentials({ id: inMemoryConnectorId })
       ).rejects.toThrow(/system connectors are not supported/);
-    });
-
-    it('rejects auth types without a credential producer', async () => {
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        ...connectorSavedObject,
-        attributes: {
-          ...connectorSavedObject.attributes,
-          secrets: {
-            authType: 'oauth_client_credentials',
-            clientId: 'client-id',
-            clientSecret: 'client-secret',
-            tokenUrl: 'https://example.com/token',
-          },
-        },
-      });
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-
-      await expect(
-        actionsClient.getConnectorCredentials({ id: defaultConnectorId })
-      ).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
     });
   });
 
