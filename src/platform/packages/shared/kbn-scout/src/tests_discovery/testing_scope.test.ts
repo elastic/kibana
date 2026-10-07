@@ -161,6 +161,26 @@ describe('criticalScoutFilesTouched', () => {
       ])
     ).toBe(true);
   });
+
+  it('returns false for Jest test files inside critical packages', () => {
+    // *.test.ts files cannot affect Playwright test execution — only Jest needs to run.
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+        '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_testing.test.ts',
+      ])
+    ).toBe(false);
+  });
+
+  it('returns true when a critical source file is mixed with a Jest test file', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/runner/index.ts',
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+      ])
+    ).toBe(true);
+  });
 });
 
 describe('deriveScoutConfigsForFile', () => {
@@ -501,6 +521,24 @@ describe('resolveScoutTestingScope', () => {
       tmpRoot
     );
     expect(scope).toEqual({ kind: 'full', reason: 'critical-files' });
+  });
+
+  it('returns dependency-tree for Jest test files inside critical packages', () => {
+    // A *.test.ts change in kbn-scout or buildkite pipeline-utils should not
+    // trigger a full Scout suite — only Jest needs to run for those.
+    const scope = resolveScoutTestingScope(
+      codeChanges(
+        [
+          'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+          '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        ],
+        ['@kbn/scout']
+      ),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('dependency-tree');
   });
 
   it('returns tests-only for Scout spec files inside the kbn-scout package itself', () => {

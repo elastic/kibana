@@ -35,6 +35,8 @@ const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
 const IGNORE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
 const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 const EXCLUDE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS);
+// Jest test files cannot affect Scout Playwright test execution regardless of which package owns them.
+const JEST_TEST_MATCHERS = compileMatchers(['**/*.test.ts']);
 
 const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
   matchers.some((m) => m.match(file));
@@ -53,11 +55,11 @@ const filterExisting = (
   });
 
 /**
- * Returns true when at least one non-noise changed file matches the Scout critical-files list.
+ * Returns true when at least one non-noise, non-Jest-test changed file matches the Scout critical-files list.
  */
 export const criticalScoutFilesTouched = (changedFiles: readonly string[]): boolean =>
   changedFiles
-    .filter((file) => !matchesAny(file, IGNORE_MATCHERS))
+    .filter((file) => !matchesAny(file, IGNORE_MATCHERS) && !matchesAny(file, JEST_TEST_MATCHERS))
     .some((file) => matchesAny(file, CRITICAL_FILES_MATCHERS));
 
 /**
