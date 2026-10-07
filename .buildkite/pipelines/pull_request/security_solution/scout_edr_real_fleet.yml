@@ -1,7 +1,7 @@
 steps:
-  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh
-    label: 'Scout EDR Real Fleet'
-    key: scout-edr-real-fleet
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful
+    label: 'Scout EDR Real Fleet - ESS'
+    key: scout-edr-real-fleet-ess
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
@@ -9,8 +9,27 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-    # Stateful and serverless each boot UI and API (four stacks).
-    timeout_in_minutes: 240
+    # UI stack, then API stack. Serverless is a separate step.
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh serverless
+    label: 'Scout EDR Real Fleet - Serverless'
+    key: scout-edr-real-fleet-serverless
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    # UI stack, then API stack. ESS is a separate step.
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '-1'
