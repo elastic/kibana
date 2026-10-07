@@ -125,27 +125,52 @@ interface WeeklyStep {
   steps?: WeeklyStep[];
 }
 
-// `[suiteId, requested model groups]` for every suite step in llm_evals.yml, including those
-// nested in groups.
-const weeklySuiteModelGroups = (steps: WeeklyStep[]): Array<[string, Set<string>]> =>
+// env of every suite step in llm_evals.yml, including those nested in groups.
+const weeklySuiteEnvs = (steps: WeeklyStep[]): Array<Record<string, string | undefined>> =>
   steps.flatMap(({ env = {}, steps: nested = [] }) => [
-    ...(env.EVAL_SUITE_ID
-      ? [
-          [
-            env.EVAL_SUITE_ID,
-            new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
-          ] as [string, Set<string>],
-        ]
-      : []),
-    ...weeklySuiteModelGroups(nested),
+    ...(env.EVAL_SUITE_ID ? [env] : []),
+    ...weeklySuiteEnvs(nested),
   ]);
 
-const weeklyModelGroupsBySuite = new Map(
-  weeklySuiteModelGroups(
-    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
-      .steps ?? []
-  )
+const weeklyEnvs = weeklySuiteEnvs(
+  (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
+    .steps ?? []
 );
+
+const weeklyModelGroupsBySuite = new Map(
+  weeklyEnvs.map((env) => [
+    env.EVAL_SUITE_ID,
+    new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
+  ])
+);
+
+// Suspected bug to raise with the suite owner; do not change another team's weekly step here.
+const KNOWN_MISMATCHES = new Set(['skill-selection-benchmark']);
+
+describe('weekly eval server config sets', () => {
+  it.each(weeklyEnvs.map((env) => [env.EVAL_SUITE_ID, env] as const))(
+    '%s matches its suite serverConfigSet unless explicitly allowlisted',
+    (suiteId, env) => {
+      const suite = suites.find(({ id }) => id === suiteId);
+      expect(suite).toBeDefined();
+      const actual = env.EVAL_SERVER_CONFIG_SET ?? 'evals_tracing';
+      const expected = suite?.serverConfigSet ?? 'evals_tracing';
+
+      if (KNOWN_MISMATCHES.has(suiteId!)) {
+        // A repaired step must be removed from the allowlist.
+        expect(actual).not.toBe(expected);
+      } else {
+        expect(actual).toBe(expected);
+      }
+    }
+  );
+
+  it('only allowlists suites that still have a weekly step', () => {
+    for (const suiteId of KNOWN_MISMATCHES) {
+      expect(weeklyEnvs.some((env) => env.EVAL_SUITE_ID === suiteId)).toBe(true);
+    }
+  });
+});
 
 describe('evals.suites.json weeklyEisModelGroups', () => {
   it('is covered by the EVAL_MODEL_GROUPS of the suite step in llm_evals.yml', () => {
