@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
+      await testSubjects.existOrFail('visualizeEditInLensButton', { timeout: 10000 });
     });
 
     it('should convert to Lens', async () => {
