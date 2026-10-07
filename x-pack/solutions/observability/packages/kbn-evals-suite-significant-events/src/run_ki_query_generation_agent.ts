@@ -27,6 +27,7 @@ export interface RunKIQueryGenerationAgentParams {
   fetch: HttpHandler;
   log: ToolingLog;
   target: AnalysisTarget;
+  sourceSlug: string;
   connectorId: string;
   existingQueries?: ExistingQuerySummary[];
   groundingContext?: string;
@@ -46,16 +47,18 @@ const normalizedToolId = (toolId: string): string => toolId.replaceAll('.', '_')
 
 export const buildKIQueryGenerationEvalUserMessage = ({
   target,
+  sourceSlug,
   existingQueries,
   groundingContext,
 }: {
   target: AnalysisTarget;
+  sourceSlug: string;
   existingQueries?: ExistingQuerySummary[];
   groundingContext?: string;
 }): string =>
   [
     buildKIQueryGenerationUserMessage(
-      { slug: target.id, description: target.description },
+      { slug: sourceSlug, description: target.description },
       existingQueries
     ),
     QUERY_INTENT_EVAL_INSTRUCTIONS,
@@ -243,6 +246,7 @@ export async function runKIQueryGenerationAgent({
   fetch,
   log,
   target,
+  sourceSlug,
   connectorId,
   existingQueries,
   groundingContext,
@@ -254,6 +258,7 @@ export async function runKIQueryGenerationAgent({
   });
   const userMessage = buildKIQueryGenerationEvalUserMessage({
     target,
+    sourceSlug,
     existingQueries,
     groundingContext,
   });
@@ -262,7 +267,7 @@ export async function runKIQueryGenerationAgent({
     conversationId: conversation.id,
     input: userMessage,
   });
-  const queries = getFinalizedQueries(result.steps, target.id);
+  const queries = getFinalizedQueries(result.steps, sourceSlug);
   return {
     queries,
     queryAttempts: collectQueryAttempts(result.steps),

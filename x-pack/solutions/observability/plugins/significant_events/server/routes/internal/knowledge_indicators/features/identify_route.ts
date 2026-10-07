@@ -146,10 +146,8 @@ const prepareInferredSamplingRoute = createServerRoute({
     } = params.body ?? {};
     const resolvedRunId = runId?.trim() || uuidv4();
 
-    const [{ source }, kiClient] = await Promise.all([
-      sourcesClient.get(sourceId),
-      scopedClients.getKnowledgeIndicatorClient(),
-    ]);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
     return prepareInferredSampling({
       esClient: streamDataEsClient,
@@ -230,7 +228,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
-    const [connectorId, { source }, kiClient] = await Promise.all([
+    const [connectorId, { source }] = await Promise.all([
       resolveNightshiftModelForRequest({
         request,
         inference: server.inference,
@@ -240,8 +238,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
         requestedId: connectorIdOverride,
       }),
       sourcesClient.get(sourceId),
-      scopedClients.getKnowledgeIndicatorClient(),
     ]);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
     // Startup installs the agent in the default space only, and onboarding runs in the space of
     // the request. Without this every iteration outside the default space fails on a missing agent.
@@ -372,10 +370,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
       computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
     } = params.body ?? {};
 
-    const [kiClient, { source }] = await Promise.all([
-      scopedClients.getKnowledgeIndicatorClient(),
-      sourcesClient.get(sourceId),
-    ]);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
     // Enable code_analysis grounding only when the feature flag is on and Agent
     // Builder is available; otherwise the provider is omitted and the computed

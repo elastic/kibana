@@ -24,6 +24,7 @@ import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_s
 import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
   createFeatureSettingsController,
+  requestForSpace,
   hasPausedSettings,
   isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
@@ -43,6 +44,7 @@ import {
   normalizeState,
   normalizeSummary,
   type LoadedMaintenanceState,
+  type MaintenanceRuleTarget,
 } from './state_store';
 import {
   reEnableWorkflow,
@@ -178,7 +180,7 @@ export const createSignificantEventsMaintenanceService = ({
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
         disabledWorkflows: existing?.disabledWorkflows ?? [],
-        disabledRuleIds: existing?.disabledRuleIds ?? [],
+        disabledRules: existing?.disabledRules ?? [],
         pausedSettings: existing?.pausedSettings,
         lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
       });
@@ -284,15 +286,15 @@ export const createSignificantEventsMaintenanceService = ({
     request,
     access,
     previousWorkflows,
-    previousRuleIds,
+    previousRules,
   }: {
     request: KibanaRequest;
     access: MaintenanceAccess;
     previousWorkflows: MaintenanceWorkflowTarget[];
-    previousRuleIds: string[];
+    previousRules: MaintenanceRuleTarget[];
   }): Promise<{
     disabledWorkflows: MaintenanceWorkflowTarget[];
-    disabledRuleIds: string[];
+    disabledRules: MaintenanceRuleTarget[];
     workflowsDisabledThisSweep: number;
     rulesDisabledThisSweep: number;
     failures: SignificantEventsMaintenanceFailure[];
@@ -307,16 +309,24 @@ export const createSignificantEventsMaintenanceService = ({
 
     // Alerting v2 only offers request-scoped rules clients, so a system sweep
     // leaves rules running.
-    const newlyDisabledRuleIds =
-      access === 'user' ? await disableBackedRules(request, failures) : [];
-
-    const disabledRuleIds = [...new Set([...previousRuleIds, ...newlyDisabledRuleIds])];
+    const newlyDisabledRules =
+      access === 'user'
+        ? (
+            await Promise.all(
+              spaceIds.map(async (spaceId) => {
+                const ids = await disableBackedRules(requestForSpace(request, spaceId), failures);
+                return ids.map((id) => ({ id, spaceId }));
+              })
+            )
+          ).flat()
+        : [];
+    const disabledRules = mergeWorkflowTargets(previousRules, newlyDisabledRules);
 
     return {
       disabledWorkflows: mergeWorkflowTargets(previousWorkflows, newlyDisabled),
-      disabledRuleIds,
+      disabledRules,
       workflowsDisabledThisSweep: newlyDisabled.length,
-      rulesDisabledThisSweep: newlyDisabledRuleIds.length,
+      rulesDisabledThisSweep: newlyDisabledRules.length,
       failures,
       spaceIds,
     };
@@ -363,7 +373,7 @@ export const createSignificantEventsMaintenanceService = ({
       request,
       access,
       previousWorkflows: existing?.disabledWorkflows ?? [],
-      previousRuleIds: existing?.disabledRuleIds ?? [],
+      previousRules: existing?.disabledRules ?? [],
     });
 
     // Turn Settings off after the workflow sweep so a settings write failure
@@ -414,7 +424,7 @@ export const createSignificantEventsMaintenanceService = ({
       state: 'paused',
       executionsCancelled: 0,
       workflowsDisabled: disabledWorkflows.length,
-      rulesDisabled: sweep.disabledRuleIds.length,
+      rulesDisabled: sweep.disabledRules.length,
       partialFailures: sweep.failures,
     };
 
@@ -425,7 +435,7 @@ export const createSignificantEventsMaintenanceService = ({
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
         disabledWorkflows,
-        disabledRuleIds: sweep.disabledRuleIds,
+        disabledRules: sweep.disabledRules,
         pausedSettings,
         lastSummary: summary,
       });
@@ -609,10 +619,10 @@ export const createSignificantEventsMaintenanceService = ({
         const existing = await readState();
         const currentState = normalizeState(existing?.state);
         const recordedWorkflows = existing?.disabledWorkflows ?? [];
-        const recordedRuleIds = existing?.disabledRuleIds ?? [];
+        const recordedRules = existing?.disabledRules ?? [];
         const hasRetryInventory =
           recordedWorkflows.length > 0 ||
-          recordedRuleIds.length > 0 ||
+          recordedRules.length > 0 ||
           hasPausedSettings(existing?.pausedSettings);
 
         // Idempotent when fully enabled. Also accept a follow-up Resume while
@@ -675,10 +685,20 @@ export const createSignificantEventsMaintenanceService = ({
           }
         }
 
-        const { failedIds: remainingRuleIds, toggledCount: rulesToggled } = await reEnableRules(
-          request,
-          recordedRuleIds,
-          failures
+        const restoredRules = await Promise.all(
+          [...new Set(recordedRules.map(({ spaceId }) => spaceId))].map(async (spaceId) => {
+            const result = await reEnableRules(
+              requestForSpace(request, spaceId),
+              recordedRules.filter((rule) => rule.spaceId === spaceId).map(({ id }) => id),
+              failures
+            );
+            return { ...result, failedRules: result.failedIds.map((id) => ({ id, spaceId })) };
+          })
+        );
+        const remainingRules = restoredRules.flatMap(({ failedRules }) => failedRules);
+        const rulesToggled = restoredRules.reduce(
+          (count, result) => count + result.toggledCount,
+          0
         );
 
         const remainingSettings = await featureSettings.resumeFeatureSettings({
@@ -691,7 +711,7 @@ export const createSignificantEventsMaintenanceService = ({
           state: 'enabled',
           executionsCancelled: 0,
           workflowsDisabled: remainingWorkflows.length,
-          rulesDisabled: remainingRuleIds.length,
+          rulesDisabled: remainingRules.length,
           partialFailures: failures,
         };
 
@@ -701,7 +721,7 @@ export const createSignificantEventsMaintenanceService = ({
             updatedAt: new Date().toISOString(),
             updatedBy,
             disabledWorkflows: remainingWorkflows,
-            disabledRuleIds: remainingRuleIds,
+            disabledRules: remainingRules,
             pausedSettings: remainingSettings,
             lastSummary: summary,
           });
@@ -720,7 +740,7 @@ export const createSignificantEventsMaintenanceService = ({
           throw writeError;
         }
 
-        const message = `Significant Events resume completed: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${failures.length} failure(s); ${remainingWorkflows.length} workflow(s) / ${remainingRuleIds.length} rule(s) still disabled`;
+        const message = `Significant Events resume completed: toggled on ${workflowsToggled} workflow(s) and ${rulesToggled} rule(s), ${failures.length} failure(s); ${remainingWorkflows.length} workflow(s) / ${remainingRules.length} rule(s) still disabled`;
         if (failures.length === 0) {
           log.info(message);
         } else {
@@ -759,7 +779,7 @@ export const createSignificantEventsMaintenanceService = ({
             updatedAt: new Date().toISOString(),
             updatedBy,
             disabledWorkflows: recoveryWorkflows,
-            disabledRuleIds: existing?.disabledRuleIds ?? [],
+            disabledRules: existing?.disabledRules ?? [],
             pausedSettings: existing?.pausedSettings,
             lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
           });
@@ -797,12 +817,36 @@ export const createSignificantEventsMaintenanceService = ({
           failures.push({ target: 'snapshot:refresh', error: toMessage(error) });
         }
 
-        const { knowledgeIndicators, storedQueries, rules, remainingRuleIds } =
-          await deleteOwnedRules({
-            request,
-            previousRuleIds: existing?.disabledRuleIds ?? [],
-            failures,
-          });
+        const ruleSpaces = [
+          ...new Set([
+            ...spaceIds,
+            ...(existing?.disabledRules ?? []).map(({ spaceId }) => spaceId),
+          ]),
+        ];
+        const deletedRules = await Promise.all(
+          ruleSpaces.map(async (spaceId) => {
+            const result = await deleteOwnedRules({
+              request: requestForSpace(request, spaceId),
+              previousRuleIds: (existing?.disabledRules ?? [])
+                .filter((rule) => rule.spaceId === spaceId)
+                .map(({ id }) => id),
+              failures,
+            });
+            return {
+              ...result,
+              remainingRules: result.remainingRuleIds.map((id) => ({ id, spaceId })),
+            };
+          })
+        );
+        const remainingRules = deletedRules.flatMap((result) => result.remainingRules);
+        const { knowledgeIndicators, storedQueries, rules } = deletedRules.reduce(
+          (total, result) => ({
+            knowledgeIndicators: total.knowledgeIndicators + result.knowledgeIndicators,
+            storedQueries: total.storedQueries + result.storedQueries,
+            rules: total.rules + result.rules,
+          }),
+          { knowledgeIndicators: 0, storedQueries: 0, rules: 0 }
+        );
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
           esClient,
@@ -826,7 +870,7 @@ export const createSignificantEventsMaintenanceService = ({
           state: 'enabled',
           executionsCancelled: 0,
           workflowsDisabled: remainingWorkflows.length,
-          rulesDisabled: remainingRuleIds.length,
+          rulesDisabled: remainingRules.length,
           deleted: {
             knowledgeIndicators: indicatorsWiped ? knowledgeIndicators : 0,
             storedQueries: indicatorsWiped ? storedQueries : 0,
@@ -843,7 +887,7 @@ export const createSignificantEventsMaintenanceService = ({
             updatedAt: new Date().toISOString(),
             updatedBy,
             disabledWorkflows: remainingWorkflows,
-            disabledRuleIds: remainingRuleIds,
+            disabledRules: remainingRules,
             lastSummary: summary,
           });
         } catch (writeError) {

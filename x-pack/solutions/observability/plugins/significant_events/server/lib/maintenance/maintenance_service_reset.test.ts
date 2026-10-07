@@ -131,7 +131,7 @@ describe('SignificantEventsMaintenanceService', () => {
           state: 'enabled',
           updatedBy: 'marco',
           disabledWorkflows: [],
-          disabledRuleIds: [],
+          disabledRules: [],
         }),
         { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
       );
@@ -480,7 +480,10 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.rulesDisabled).toBe(1);
       expect(soClient.create).toHaveBeenLastCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({ state: 'enabled', disabledRuleIds: ['paused-rule'] }),
+        expect.objectContaining({
+          state: 'enabled',
+          disabledRules: [{ id: 'paused-rule', spaceId: 'default' }],
+        }),
         expect.anything()
       );
     });

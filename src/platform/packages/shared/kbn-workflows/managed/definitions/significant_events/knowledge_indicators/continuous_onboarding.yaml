@@ -98,6 +98,7 @@ steps:
               inputs:
                 sourceId: '${{ foreach.item.sourceId }}'
                 sourceSlug: '${{ foreach.item.sourceSlug }}'
+                sourceRevision: '${{ foreach.item.sourceRevision }}'
                 skipFeatures: false
                 skipQueries: false
                 rootTriggeredBy: '${{ execution.triggeredBy }}'

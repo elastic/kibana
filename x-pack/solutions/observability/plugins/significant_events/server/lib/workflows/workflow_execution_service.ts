@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionCollapseField,
@@ -194,6 +194,30 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       inputs ?? {},
       request
     );
+  }
+
+  /** Cancels all active executions, including runs hidden behind newer skipped duplicates. */
+  async cancelActive({
+    spaceId,
+    request,
+    concurrencyGroupKey,
+  }: {
+    spaceId: string;
+    request: KibanaRequest;
+    concurrencyGroupKey: string;
+  }): Promise<string | null> {
+    const { results } = await this.getExecutions(
+      {
+        concurrencyGroupKey,
+        statuses: [...NonTerminalExecutionStatuses],
+        size: 10_000,
+      },
+      spaceId,
+      request
+    );
+    const active = results.filter((execution) => !isTerminalStatus(execution.status));
+    await Promise.all(active.map(({ id }) => this.cancelExecution({ id, spaceId, request })));
+    return active[0]?.id ?? null;
   }
 
   async cancelLatest({

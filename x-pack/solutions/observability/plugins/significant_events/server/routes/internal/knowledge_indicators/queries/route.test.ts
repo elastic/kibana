@@ -141,7 +141,7 @@ describe('reconcileQueriesRoute', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
-          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }),
+          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test', enabled: true } }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -162,6 +162,26 @@ describe('reconcileQueriesRoute', () => {
     });
   });
 
+  it('does not recreate rules for a disabled source', async () => {
+    const replaceSourceQueries = jest.fn();
+    const result = await route.handler({
+      params: { body: { sourceIds: ['disabled-source'] } },
+      request: {},
+      getScopedClients: async () => ({
+        sourcesClient: { get: async () => ({ source: { id: 'disabled-source', enabled: false } }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: async () => ({ replaceSourceQueries }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+      logger: { warn: jest.fn() },
+    } as unknown as HandlerParams);
+
+    expect(replaceSourceQueries).not.toHaveBeenCalled();
+    expect(result.failed).toBe(1);
+    expect(result.reconciled).toBe(0);
+  });
+
   it('continues when one stream fails to reconcile', async () => {
     const replaceSourceQueries = jest
       .fn()
@@ -174,8 +194,8 @@ describe('reconcileQueriesRoute', () => {
         sourcesClient: {
           get: jest
             .fn()
-            .mockResolvedValueOnce({ source: { id: 'logs.a' } })
-            .mockResolvedValueOnce({ source: { id: 'logs.b' } }),
+            .mockResolvedValueOnce({ source: { id: 'logs.a', enabled: true } })
+            .mockResolvedValueOnce({ source: { id: 'logs.b', enabled: true } }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -311,7 +331,7 @@ describe('bulkDeleteQueriesRoute', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test'),
-          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }),
+          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test', enabled: true } }),
         },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({

@@ -133,7 +133,7 @@ export function createFeatureKnowledgeIndicatorTool({
         const [source] = resolveSourcesBySlug(catalog, [slug]);
         sourceId = source.id;
 
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
         const { id } = await createFeatureKnowledgeIndicatorToolHandler({
           kiClient,
           sourceId: source.id,

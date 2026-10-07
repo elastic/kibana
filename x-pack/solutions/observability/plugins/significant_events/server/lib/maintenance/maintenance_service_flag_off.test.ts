@@ -57,7 +57,7 @@ describe('SignificantEventsMaintenanceService', () => {
         expect.objectContaining({
           state: 'paused',
           updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
-          disabledRuleIds: [],
+          disabledRules: [],
           pausedSettings: {
             continuousOnboardingWasEnabled: false,
             scheduledDiscoveryEnabledSpaceIds: ['default', 'space-a'],

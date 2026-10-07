@@ -394,7 +394,7 @@ export function makeService(params?: {
     },
   } as unknown as SignificantEventsServer;
 
-  const getScopedClients = jest.fn(async () => ({
+  const getScopedClients = jest.fn(async (_params: { request: KibanaRequest }) => ({
     getKnowledgeIndicatorClient: async () => ({
       getRuleBackedQueryLinks,
       getSourceIdsWithKnowledgeIndicators,

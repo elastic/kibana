@@ -21,6 +21,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
@@ -35,9 +36,11 @@ const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, 
  * handed to the workflow engine, whose manual trigger only accepts flat scalars.
  */
 export interface SignificantEventsKIsOnboardingInputs {
-  /** Source id. Callers that already hold the slug pass it as `sourceSlug` to skip the lookup. */
+  /** Source id; scheduling resolves its current slug and query revision from the catalog. */
   sourceId: string;
   sourceSlug?: string;
+  sourceRevision?: string;
+  rootTriggeredBy?: 'scheduled';
   features: {
     skip: boolean;
     start: number;
@@ -67,6 +70,8 @@ export interface SignificantEventsKIsOnboardingInputs {
 interface OnboardingWorkflowInputPayload {
   sourceId: string;
   sourceSlug: string;
+  sourceRevision: string;
+  rootTriggeredBy?: 'scheduled';
   skipFeatures: boolean;
   skipQueries: boolean;
   featuresStart: number;
@@ -114,14 +119,18 @@ export interface SignificantEventsKIsOnboardingOutput extends KIsOnboardingResul
 const toWorkflowInputPayload = ({
   inputs,
   sourceSlug,
+  sourceRevision,
 }: {
   inputs: SignificantEventsKIsOnboardingInputs;
   sourceSlug: string;
+  sourceRevision: string;
 }): OnboardingWorkflowInputPayload => {
   const { sourceId, features, queries } = inputs;
   return {
     sourceId,
     sourceSlug,
+    sourceRevision,
+    rootTriggeredBy: inputs.rootTriggeredBy,
     skipFeatures: features.skip,
     skipQueries: queries.skip,
     featuresStart: features.start,
@@ -241,14 +250,18 @@ export class SignificantEventsKIsOnboardingClient {
     inputs: SignificantEventsKIsOnboardingInputs;
     request: KibanaRequest;
   }): Promise<{ executionId: string }> {
-    const sourceSlug = await this.resolveSourceSlug({
-      sourceId: inputs.sourceId,
-      sourceSlug: inputs.sourceSlug,
-      request,
-    });
+    const { source } = await (await this.getSourcesClient(request)).get(inputs.sourceId);
+    if (inputs.sourceRevision && inputs.sourceRevision !== source.esql_updated_at) {
+      throw new StatusError('Source query changed before onboarding could be scheduled', 409);
+    }
+    const sourceSlug = source.slug;
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: request.spaceId,
-      inputs: toWorkflowInputPayload({ inputs, sourceSlug }),
+      inputs: toWorkflowInputPayload({
+        inputs,
+        sourceSlug,
+        sourceRevision: source.esql_updated_at,
+      }),
       request,
     });
 
@@ -371,9 +384,8 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Cancels the latest non-terminal onboarding execution for a source.
-   * No-ops if no active execution exists or the latest execution already reached
-   * a terminal state.
+   * Cancels all non-terminal onboarding executions for a source.
+   * Newer terminal duplicates do not hide an active execution.
    *
    * @returns The ID of the canceled execution, or `null` if nothing was running.
    */
@@ -391,7 +403,7 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Cancels the latest non-terminal onboarding execution for a slug. Unlike
+   * Cancels all non-terminal onboarding executions for a slug. Unlike
    * {@link cancel} it needs no catalog lookup, so it also works for sources that
    * were already deleted.
    */
@@ -402,7 +414,7 @@ export class SignificantEventsKIsOnboardingClient {
     sourceSlug: string;
     request: KibanaRequest;
   }): Promise<string | null> {
-    return this.workflowExecutionService.cancelLatest({
+    return this.workflowExecutionService.cancelActive({
       spaceId: request.spaceId,
       request,
       concurrencyGroupKey: buildConcurrencyKey(sourceSlug),

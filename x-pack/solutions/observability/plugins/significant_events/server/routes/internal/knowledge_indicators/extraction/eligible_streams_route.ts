@@ -30,7 +30,7 @@ import { reconcileSourceCatalog } from '../reconcile_source_catalog';
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 export interface EligibleStreamsResponse {
-  candidates: SourceCandidate[];
+  candidates: Array<SourceCandidate & { sourceRevision: string }>;
   alreadyRunning: SourceClassificationResult['alreadyRunning'];
   upToDate: SourceCandidate[];
   unsupported: string[];
@@ -94,8 +94,14 @@ const eligibleStreamsRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { sourcesClient, uiSettingsClient, licensing, getKnowledgeIndicatorClient } =
-      await getScopedClients({ request });
+    const {
+      sourcesClient,
+      uiSettingsClient,
+      licensing,
+      getKnowledgeIndicatorClient,
+      sourceKnowledgeState,
+      scheduleSourceOnboarding,
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -120,6 +126,8 @@ const eligibleStreamsRoute = createServerRoute({
     const { sources } = await reconcileSourceCatalog({
       sourcesClient,
       kiClient,
+      sourceKnowledgeState,
+      scheduleSourceOnboarding,
       onboardingClient: streamsKIsOnboardingClient,
       maintenanceService,
       request,
@@ -150,8 +158,15 @@ const eligibleStreamsRoute = createServerRoute({
     const now = Date.now();
     const start = now - lookbackHours * 3_600_000;
 
+    const revisions = new Map(sources.map((source) => [source.id, source.esql_updated_at]));
     return {
-      candidates: toSchedule,
+      candidates: toSchedule.map((candidate) => {
+        const sourceRevision = revisions.get(candidate.sourceId);
+        if (sourceRevision === undefined) {
+          throw new Error(`Missing query revision for source ${candidate.sourceId}`);
+        }
+        return { ...candidate, sourceRevision };
+      }),
       alreadyRunning,
       upToDate,
       unsupported,

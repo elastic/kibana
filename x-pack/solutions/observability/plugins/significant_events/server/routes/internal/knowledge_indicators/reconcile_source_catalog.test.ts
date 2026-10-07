@@ -10,11 +10,11 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
-import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
-import type { GetScopedClients } from '../../types';
+import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
 import {
   createSourceChangeListener,
   reconcileSourceCatalog,
+  reconcileSourceRevision,
   resetSourceKnowledge,
 } from './reconcile_source_catalog';
 
@@ -349,138 +349,163 @@ describe('resetSourceKnowledge', () => {
 });
 
 describe('createSourceChangeListener', () => {
-  const setup = ({
-    maintenanceState = 'enabled',
-  }: { maintenanceState?: SignificantEventsMaintenanceState } = {}) => {
-    const kiClient = makeKiClient();
-    const getScopedClients = jest.fn().mockResolvedValue({
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-    });
-    const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
-    const maintenanceService = { getState: jest.fn().mockResolvedValue(maintenanceState) };
+  const source = makeSource({ id: 'source' });
+  const setup = () => {
+    const enqueueReconciliation = jest.fn(async () => {});
+    const ensurePeriodicReconciliation = jest.fn(async () => {});
     const listener = createSourceChangeListener({
-      getScopedClients: getScopedClients as unknown as GetScopedClients,
-      onboardingClient: { cancelBySourceSlug },
-      maintenanceService,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
     });
-    return { listener, kiClient, getScopedClients, cancelBySourceSlug, maintenanceService };
+    return { listener, enqueueReconciliation, ensurePeriodicReconciliation };
   };
 
-  const source = makeSource({ id: 'gone-source' });
-  const enabledSource = makeSource({ id: 'toggled-source', enabled: true });
-  const disabledSource = makeSource({ id: 'toggled-source', enabled: false });
-
-  it('resets the knowledge of a deleted source in the space of the deleting request', async () => {
-    const { listener, kiClient, getScopedClients, cancelBySourceSlug } = setup();
+  it.each<SourceChangeEvent>([
+    { type: 'created', source, request },
+    { type: 'deleted', source, request },
+    { type: 'updated', source: { ...source, enabled: false }, previous: source, request },
+    {
+      type: 'updated',
+      source: { ...source, esql_updated_at: 'new revision' },
+      previous: source,
+      request,
+    },
+  ])('queues a $type change in its request space', async (event) => {
+    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
-
-    await listener({ type: 'deleted', source, request: otherRequest });
-
-    expect(getScopedClients).toHaveBeenCalledWith({ request: otherRequest });
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
-      sourceSlug: 'gone-source-slug',
+    await listener({ ...event, request: otherRequest });
+    expect(enqueueReconciliation).toHaveBeenCalledWith({
+      sourceId: source.id,
+      sourceSlug: source.slug,
       request: otherRequest,
     });
-    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
   });
 
-  it('cancels onboarding, then disables the owned rules of a disabled source', async () => {
-    const { listener, kiClient, cancelBySourceSlug } = setup();
-
-    await listener({
-      type: 'updated',
-      source: disabledSource,
-      previous: enabledSource,
-      request,
-    });
-
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
-      sourceSlug: 'toggled-source-slug',
-      request,
-    });
-    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
-    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
-      kiClient.setSourceRulesEnabled.mock.invocationCallOrder[0]
+  it('retains queued cleanup when periodic recovery setup fails', async () => {
+    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    ensurePeriodicReconciliation.mockRejectedValue(new Error('workflow installation unavailable'));
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'workflow installation unavailable'
     );
-    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
   });
 
-  it('disables the rules of a disabled source even when cancelling its run fails', async () => {
-    const { listener, kiClient, cancelBySourceSlug } = setup();
-    cancelBySourceSlug.mockRejectedValue(new Error('no workflows privilege'));
-
-    await expect(
-      listener({ type: 'updated', source: disabledSource, previous: enabledSource, request })
-    ).rejects.toThrow('no workflows privilege');
-
-    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
+  it('enables periodic recovery when enqueueing the immediate job fails', async () => {
+    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    enqueueReconciliation.mockRejectedValue(new Error('queue unavailable'));
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'queue unavailable'
+    );
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
-  it('disables the rules of a disabled source without reading the maintenance state', async () => {
-    const { listener, kiClient, maintenanceService } = setup();
-    maintenanceService.getState.mockRejectedValue(new Error('saved objects unavailable'));
-
-    await listener({ type: 'updated', source: disabledSource, previous: enabledSource, request });
-
-    expect(maintenanceService.getState).not.toHaveBeenCalled();
-    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
-  });
-
-  it('enables the owned rules of a re-enabled source without touching onboarding', async () => {
-    const { listener, kiClient, cancelBySourceSlug } = setup();
-
+  it('ignores title changes that preserve the query and enabled flag', async () => {
+    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
     await listener({
       type: 'updated',
-      source: enabledSource,
-      previous: disabledSource,
+      source: { ...source, title: 'Renamed' },
+      previous: source,
       request,
     });
-
-    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', true);
-    expect(cancelBySourceSlug).not.toHaveBeenCalled();
+    expect(enqueueReconciliation).not.toHaveBeenCalled();
+    expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
   });
+});
 
-  it('keeps the rules of a re-enabled source off while maintenance is paused', async () => {
-    const { listener, kiClient } = setup({ maintenanceState: 'paused' });
-
-    await listener({
-      type: 'updated',
-      source: enabledSource,
-      previous: disabledSource,
-      request,
+describe('durable source revision reconciliation', () => {
+  const setup = () => {
+    const source = makeSource({ id: 'source', esql_updated_at: 'revision-2' });
+    const state: Parameters<Parameters<SourceKnowledgeStateClient['runExclusive']>[0]['run']>[0] = {
+      revision: 'revision-1',
+      onboardingScheduled: true,
+      lease: null,
+    };
+    const checkpoint = jest.fn(async (patch: Partial<typeof state>) => {
+      Object.assign(state, patch);
     });
-
-    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
-  });
-
-  it('resets the knowledge of a source whose query changed', async () => {
-    const { listener, kiClient, cancelBySourceSlug } = setup();
-    const edited = { ...enabledSource, esql_updated_at: '2026-02-01T00:00:00.000Z' };
-
-    await listener({ type: 'updated', source: edited, previous: enabledSource, request });
-
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'toggled-source-slug', request });
-    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('toggled-source');
-    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('toggled-source');
-    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
-  });
-
-  it('ignores created sources and updates that keep the enabled flag', async () => {
-    const { listener, getScopedClients } = setup();
-    const events: SourceChangeEvent[] = [
-      { type: 'created', source, request },
-      {
-        type: 'updated',
-        source: { ...enabledSource, title: 'Renamed' },
-        previous: enabledSource,
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(async ({ run }) => run({ ...state }, checkpoint)),
+      write: jest.fn(),
+    };
+    const scheduleSourceOnboarding = jest.fn(async () => true);
+    const kiClient = makeKiClient();
+    const onboardingClient = {
+      cancelBySourceSlug: jest.fn(async () => null),
+      getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
+    };
+    const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
+    const reconcile = () =>
+      reconcileSourceRevision({
+        source,
+        sourcesClient,
+        kiClient,
+        onboardingClient,
+        sourceKnowledgeState,
+        scheduleSourceOnboarding,
         request,
-      },
-    ];
+      });
+    return {
+      reconcile,
+      source,
+      state,
+      checkpoint,
+      scheduleSourceOnboarding,
+      kiClient,
+      onboardingClient,
+    };
+  };
 
-    for (const event of events) {
-      await listener(event);
-    }
+  it('starts onboarding for a new source without deleting knowledge', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, kiClient, source } = setup();
+    state.revision = undefined;
+    state.onboardingScheduled = false;
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledWith(source);
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+    expect(state.revision).toBe('revision-2');
+  });
 
-    expect(getScopedClients).not.toHaveBeenCalled();
+  it('retries failed cleanup before scheduling the replacement exactly once', async () => {
+    const { reconcile, state, kiClient, scheduleSourceOnboarding } = setup();
+    kiClient.deleteIndicators.mockRejectedValueOnce(new Error('storage unavailable'));
+    await expect(reconcile()).rejects.toThrow('storage unavailable');
+    expect(state.revision).toBe('revision-1');
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    await reconcile();
+    await reconcile();
+    expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(2);
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state).toEqual({ revision: 'revision-2', onboardingScheduled: true, lease: null });
+  });
+
+  it('waits for cancellation to complete before queuing the replacement', async () => {
+    const { reconcile, state, onboardingClient, scheduleSourceOnboarding, kiClient } = setup();
+    onboardingClient.getNonTerminalExecutions.mockResolvedValueOnce([
+      runningExecution('source-slug'),
+    ]);
+    await expect(reconcile()).rejects.toThrow('previous onboarding');
+    expect(state.onboardingScheduled).toBe(false);
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a failed enqueue without deleting the cleaned revision again', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, kiClient } = setup();
+    scheduleSourceOnboarding.mockRejectedValueOnce(new Error('queue unavailable'));
+    await expect(reconcile()).rejects.toThrow('queue unavailable');
+    expect(state.onboardingScheduled).toBe(false);
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(2);
+    expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves onboarding pending when continuous onboarding is off', async () => {
+    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    scheduleSourceOnboarding.mockResolvedValue(false);
+    await reconcile();
+    expect(state.onboardingScheduled).toBe(false);
   });
 });

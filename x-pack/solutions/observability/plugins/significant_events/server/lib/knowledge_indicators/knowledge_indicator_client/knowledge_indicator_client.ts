@@ -53,6 +53,7 @@ export class KnowledgeIndicatorClient {
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
   private readonly ttlDays: number;
+  private readonly withSourceWrite: NonNullable<KnowledgeIndicatorClientDeps['withSourceWrite']>;
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
@@ -63,6 +64,7 @@ export class KnowledgeIndicatorClient {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
+    this.withSourceWrite = deps.withSourceWrite ?? ((_sourceId, run) => run());
     const revisionReader = new RevisionReader(deps.esClient, deps.logger, deps.space);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
@@ -91,7 +93,7 @@ export class KnowledgeIndicatorClient {
   }
 
   bulk(sourceId: string, operations: KIBulkOperation[]) {
-    return this.writer.bulk(sourceId, operations);
+    return this.withSourceWrite(sourceId, () => this.writer.bulk(sourceId, operations));
   }
 
   getDefaultExpiresAt(): string {
@@ -106,7 +108,7 @@ export class KnowledgeIndicatorClient {
     sourceId: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.writer.keepAlivePersistent(sourceId, options);
+    return this.withSourceWrite(sourceId, () => this.writer.keepAlivePersistent(sourceId, options));
   }
 
   deleteIndicators(sourceId: string) {
@@ -265,19 +267,23 @@ export class KnowledgeIndicatorClient {
     queries: StreamQuery[],
     options?: { currentLinks?: QueryLink[] }
   ): Promise<void> {
-    return this.orchestrator.syncQueries(sourceId, queries, options);
+    return this.withSourceWrite(sourceId, () =>
+      this.orchestrator.syncQueries(sourceId, queries, options)
+    );
   }
 
   async replaceSourceQueries(
     sourceId: string,
     getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
   ): Promise<void> {
-    const { [sourceId]: currentLinks } = await this.getSourceToQueryLinksMap([sourceId]);
-    await this.syncQueries(sourceId, getNextQueries(currentLinks), { currentLinks });
+    await this.withSourceWrite(sourceId, async () => {
+      const { [sourceId]: currentLinks } = await this.getSourceToQueryLinksMap([sourceId]);
+      await this.orchestrator.syncQueries(sourceId, getNextQueries(currentLinks), { currentLinks });
+    });
   }
 
   upsertQuery(sourceId: string, query: StreamQuery): Promise<void> {
-    return this.orchestrator.upsertQuery(sourceId, query);
+    return this.withSourceWrite(sourceId, () => this.orchestrator.upsertQuery(sourceId, query));
   }
 
   deleteQuery(sourceId: string, queryId: string): Promise<void> {
@@ -301,7 +307,9 @@ export class KnowledgeIndicatorClient {
   }
 
   promoteQueries(sourceId: string, queryIds: string[]): Promise<PromoteQueriesResult> {
-    return this.orchestrator.promoteQueries(sourceId, queryIds);
+    return this.withSourceWrite(sourceId, () =>
+      this.orchestrator.promoteQueries(sourceId, queryIds)
+    );
   }
 
   promoteUnbackedQueries(args: {
@@ -309,7 +317,10 @@ export class KnowledgeIndicatorClient {
     minSeverityScore?: number;
     sourceIds: string[];
   }): Promise<PromoteQueriesResult> {
-    return this.orchestrator.promoteUnbackedQueries(args);
+    return this.orchestrator.promoteUnbackedQueries({
+      ...args,
+      promote: (sourceId, ids) => this.promoteQueries(sourceId, ids),
+    });
   }
 
   demoteQueries(sourceId: string, queryIds: string[]): Promise<{ demoted: number }> {
@@ -317,6 +328,6 @@ export class KnowledgeIndicatorClient {
   }
 
   reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.orchestrator.reconcileSource(sourceId);
+    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId));
   }
 }
