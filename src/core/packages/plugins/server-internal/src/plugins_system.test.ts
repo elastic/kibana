@@ -748,7 +748,7 @@ describe('start', () => {
     jest.spyOn(dependency, 'setup').mockReturnValue({});
     jest.spyOn(dependency, 'start').mockReturnValue('dependencyContract');
     const lazyPlugin = createPlugin('lazyPlugin', { required: ['dependency'] });
-    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'hasInitialization', 'get').mockReturnValue(true);
     jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
     jest.spyOn(lazyPlugin, 'start').mockReturnValue('lazyContract');
     jest.spyOn(lazyPlugin, 'runLazyInitialize').mockResolvedValue(undefined);
@@ -817,7 +817,7 @@ describe('start - lazy plugins on a node without the ui role', () => {
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
     const lazyPlugin = createPlugin('lazyPlugin');
-    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'hasInitialization', 'get').mockReturnValue(true);
     jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
     jest.spyOn(lazyPlugin, 'start').mockReturnValue('lazyContract');
     const regularPlugin = createPlugin('regularPlugin');
@@ -947,7 +947,7 @@ describe('setup - lazy plugins cannot be injected dependencies', () => {
 
   const addLazyPlugin = (system: PluginsSystem<PluginType.standard>, id = 'lazyPlugin') => {
     const lazyPlugin = createPlugin(id);
-    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'hasInitialization', 'get').mockReturnValue(true);
     jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
     system.addPlugin(lazyPlugin);
     return lazyPlugin;
@@ -1022,7 +1022,7 @@ describe('setup - lazy plugins cannot be injected dependencies', () => {
     system.addPlugin(dependency);
 
     const lazyPlugin = createPlugin('lazyPlugin', { required: ['normalDependency'] });
-    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'hasInitialization', 'get').mockReturnValue(true);
     jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
     system.addPlugin(lazyPlugin);
 
@@ -1044,7 +1044,7 @@ describe('setup - lazy plugins cannot be injected dependencies', () => {
   it('ignores a browser-only plugin that claims to be lazy, since it cannot be', async () => {
     const system = createSystemWithEngine();
     const browserOnlyLazy = createPlugin('browserOnlyLazy', { server: false });
-    jest.spyOn(browserOnlyLazy, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(browserOnlyLazy, 'hasInitialization', 'get').mockReturnValue(true);
     system.addPlugin(browserOnlyLazy);
 
     const dependent = createPlugin('dependentPlugin', { required: ['browserOnlyLazy'] });

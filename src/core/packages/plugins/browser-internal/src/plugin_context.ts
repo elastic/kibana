@@ -79,7 +79,7 @@ export function createPluginSetupContext<
     analytics: deps.analytics,
     application: {
       register: (app) => {
-        if (!plugin.discoveredPlugin.enableLazyInitialize) {
+        if (!plugin.discoveredPlugin.hasInitialization) {
           deps.application.register(plugin.opaqueId, app);
           return;
         }

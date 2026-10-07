@@ -131,7 +131,7 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.runtimePluginDependencies).toEqual(['some-runtime-dep']);
 });
 
-describe('`enableLazyInitialize`', () => {
+describe('`hasInitialization`', () => {
   function createPlugin(manifestProps: Partial<PluginManifest> = {}) {
     const manifest = createPluginManifest(manifestProps);
     const opaqueId = Symbol();
@@ -150,13 +150,13 @@ describe('`enableLazyInitialize`', () => {
   }
 
   test('reflects the manifest flag even before `init()` has run', () => {
-    const plugin = createPlugin({ enableLazyInitialize: true });
-    expect(plugin.enableLazyInitialize).toBe(true);
+    const plugin = createPlugin({ hasInitialization: true });
+    expect(plugin.hasInitialization).toBe(true);
   });
 
   test('defaults to `false` when unset in the manifest', () => {
     const plugin = createPlugin();
-    expect(plugin.enableLazyInitialize).toBe(false);
+    expect(plugin.hasInitialization).toBe(false);
   });
 });
 
@@ -629,7 +629,7 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
 describe('lazy plugins', () => {
   const createLazyPlugin = () => {
-    const manifest = createPluginManifest({ enableLazyInitialize: true });
+    const manifest = createPluginManifest({ hasInitialization: true });
     const opaqueId = Symbol();
     return new PluginWrapper({
       path: 'plugin-with-initializer-path',

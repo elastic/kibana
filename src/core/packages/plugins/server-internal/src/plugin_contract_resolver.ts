@@ -218,7 +218,7 @@ export class RuntimePluginContractResolver {
     if (!this.lazyPluginNames.has(pluginName)) {
       return Promise.reject(
         new Error(
-          `Plugin "${pluginName}" did not opt into lazy initialization ("enableLazyInitialize" in ` +
+          `Plugin "${pluginName}" did not opt into lazy initialization ("hasInitialization" in ` +
             `its kibana.jsonc), so there is nothing to trigger.`
         )
       );
@@ -285,7 +285,7 @@ export class RuntimePluginContractResolver {
     if (!this.lazyPluginNames.has(target)) {
       throw new Error(
         `lazyInit.${api} only applies to plugins that opted into lazy initialization ` +
-          `("enableLazyInitialize" in kibana.jsonc); "${target}" did not. Use onStart() or ` +
+          `("hasInitialization" in kibana.jsonc); "${target}" did not. Use onStart() or ` +
           `loadPluginContract() for ordinary plugins.`
       );
     }

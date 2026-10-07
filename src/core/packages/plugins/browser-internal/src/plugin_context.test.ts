@@ -106,7 +106,7 @@ describe('createPluginSetupContext', () => {
   it('wraps the app mount behind the initializing gate when the plugin is lazy-init enabled', () => {
     const plugin = createPlugin({
       ...createPluginManifest(testPluginId),
-      enableLazyInitialize: true,
+      hasInitialization: true,
     });
     const deps = createDeps();
     const app = createApp();

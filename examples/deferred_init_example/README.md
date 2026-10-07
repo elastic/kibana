@@ -36,7 +36,7 @@ and `loadPluginContract` hands out the contract.
 
 ## The opt-in (developer experience)
 
-One flag plus one method: `enableLazyInitialize: true` in `kibana.jsonc`, and `lazyInitialize` on
+One flag plus one method: `hasInitialization: true` in `kibana.jsonc`, and `lazyInitialize` on
 the server plugin class (`server/plugin.ts`):
 
 ```ts

@@ -219,7 +219,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
 
   // Defined only for plugins that opted into lazy init, so the router gating below can narrow on
   // it instead of re-checking both conditions (and asserting non-null) at each use.
-  const lazyInitEngine = plugin.enableLazyInitialize ? deferredInitEngine : undefined;
+  const lazyInitEngine = plugin.hasInitialization ? deferredInitEngine : undefined;
 
   // For lazy plugins, hand the plugin a guarded router whose routes return 503 until its deferred
   // phases complete. Resolved lazily (memoized) on first `createRouter()` call. Asset serving via

@@ -162,11 +162,7 @@ export class PluginsSystem<T extends PluginType> {
 
       await plugin.init();
 
-      if (
-        this.type !== PluginType.preboot &&
-        this.deferredInitEngine &&
-        plugin.enableLazyInitialize
-      ) {
+      if (this.type !== PluginType.preboot && this.deferredInitEngine && plugin.hasInitialization) {
         const setupDeps = deps as PluginsServiceSetupDeps;
         const engine = this.deferredInitEngine;
         engine.register(plugin.name);
@@ -258,7 +254,7 @@ export class PluginsSystem<T extends PluginType> {
         // runs the two on this instance's first trigger. Attaching the runner before the loop
         // moves on matters: a dependent may call `loadPluginContract` for this plugin from a
         // request that arrives before the loop finishes.
-        if (this.deferredInitEngine && plugin.enableLazyInitialize) {
+        if (this.deferredInitEngine && plugin.hasInitialization) {
           this.log.debug(`Deferring start of lazy plugin "${pluginName}" to its first trigger...`);
           this.attachDeferredRunner(
             this.deferredInitEngine,
@@ -344,7 +340,7 @@ export class PluginsSystem<T extends PluginType> {
       return;
     }
     const lazyPluginNames = this.satupPlugins.filter(
-      (pluginName) => this.plugins.get(pluginName)!.enableLazyInitialize
+      (pluginName) => this.plugins.get(pluginName)!.hasInitialization
     );
     if (lazyPluginNames.length === 0) {
       return;
@@ -422,7 +418,7 @@ export class PluginsSystem<T extends PluginType> {
             runtimePluginDependencies: plugin.manifest.runtimePluginDependencies,
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
-            enableLazyInitialize: plugin.manifest.enableLazyInitialize,
+            hasInitialization: plugin.manifest.hasInitialization,
           },
         ];
       })
@@ -544,7 +540,7 @@ const buildReverseDependencyMap = (
 const collectLazyPluginNames = (pluginMap: Map<PluginName, PluginWrapper>): Set<PluginName> =>
   new Set(
     [...pluginMap.values()]
-      .filter((plugin) => plugin.enableLazyInitialize && plugin.includesServerPlugin)
+      .filter((plugin) => plugin.hasInitialization && plugin.includesServerPlugin)
       .map(({ name }) => name)
   );
 

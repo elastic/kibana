@@ -294,8 +294,8 @@ describe('createPluginSetupContext', () => {
   describe('plugins.lazyInit', () => {
     // The contract is always defined: the observation methods let an ordinary plugin watch a lazy
     // dependency, so they cannot be reserved for lazy plugins.
-    it('is defined even when the plugin does not have enableLazyInitialize', () => {
-      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: false }));
+    it('is defined even when the plugin does not have hasInitialization', () => {
+      const plugin = createPlugin(createPluginManifest({ hasInitialization: false }));
       const ctx = createPluginSetupContext({
         deps: coreInternalLifecycleMock.createInternalSetup(),
         plugin,
@@ -306,7 +306,7 @@ describe('createPluginSetupContext', () => {
     });
 
     it('scopes every method to the calling plugin and delegates to the runtime resolver', async () => {
-      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const plugin = createPlugin(createPluginManifest({ hasInitialization: true }));
       const runtimeResolver = createRuntimeResolver();
       runtimeResolver.trigger.mockResolvedValue(undefined);
       runtimeResolver.getLazyInitStatus.mockReturnValue('available');
@@ -344,7 +344,7 @@ describe('createPluginSetupContext', () => {
     });
 
     it('trigger rejects when the resolver rejects', async () => {
-      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const plugin = createPlugin(createPluginManifest({ hasInitialization: true }));
       const runtimeResolver = createRuntimeResolver();
       runtimeResolver.trigger.mockRejectedValue(new Error('init failed'));
 
@@ -358,7 +358,7 @@ describe('createPluginSetupContext', () => {
     });
 
     it('is exposed identically on the start context', async () => {
-      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const plugin = createPlugin(createPluginManifest({ hasInitialization: true }));
       const runtimeResolver = createRuntimeResolver();
       runtimeResolver.getLazyInitStatus.mockReturnValue('idle');
 

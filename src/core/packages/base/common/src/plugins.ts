@@ -91,9 +91,8 @@ export interface DiscoveredPlugin {
   readonly enabledOnAnonymousPages?: boolean;
 
   /**
-   * Whether this plugin opted into core-managed lazy/deferred Elasticsearch initialization.
-   * When `true`, core automatically gates the plugin's registered app behind a loading screen
-   * (and its status observable) until the plugin's server-side deferred init completes.
+   * Whether the plugin implements the server-side `initialize()` lifecycle hook.
+   * The browser gates the plugin's apps behind a loading screen until it has succeeded.
    */
-  readonly enableLazyInitialize?: boolean;
+  readonly hasInitialization?: boolean;
 }

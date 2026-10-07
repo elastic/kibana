@@ -272,23 +272,18 @@ export interface PluginManifest {
   readonly enabledOnAnonymousPages?: boolean;
 
   /**
-   * Opt this plugin into core-managed lazy initialization. See {@link Plugin.lazyInitialize}.
-   * Default is false.
+   * Set to `true` when the plugin implements the `initialize()` lifecycle hook
+   * (see the `Plugin` interface).
    *
-   * When set, only `setup()` runs at boot. `lazyInitialize()` and then `start()` run on this
-   * instance's first trigger: a hit on one of the plugin's routes, its browser app loading,
-   * another plugin calling `loadPluginContract()`, or the plugin itself calling
-   * `core.plugins.lazyInit.trigger()`.
+   * Core needs to know before any plugin code runs: while `initialize()` has not
+   * succeeded on this Kibana instance, routes registered through the plugin's
+   * router answer 503 and the plugin's browser apps show a loading screen.
+   * Core throws at boot when the flag and the method disagree. Only standard
+   * plugins with a server entry may set it.
    *
-   * @remarks
-   * Once set, no other plugin may list this one under `requiredPlugins` or `optionalPlugins` --
-   * core rejects that at boot. Those two lists are what core injects into a dependent's
-   * `setup()`/`start()` arguments, and there is no start contract to inject until the deferred
-   * `start()` has run. Dependents must declare this plugin under `runtimePluginDependencies` and
-   * read its start contract with `core.plugins.loadPluginContract()`, which triggers and waits,
-   * or observe it without triggering via `core.plugins.lazyInit`.
+   * Default is `false`.
    */
-  readonly enableLazyInitialize?: boolean;
+  readonly hasInitialization?: boolean;
 }
 
 /**
@@ -327,7 +322,7 @@ export interface Plugin<
 
   /**
    * The plugin's costly, Elasticsearch-backed initialization. Only invoked by core when the
-   * plugin's manifest sets `enableLazyInitialize: true` (see {@link PluginManifest}). For such a
+   * plugin's manifest sets `hasInitialization: true` (see {@link PluginManifest}). For such a
    * plugin the lifecycle is `setup()` at boot, then on this instance's first trigger
    * `lazyInitialize()` followed by `start()`. Nothing else in the plugin runs before that, so
    * `start()` can build its contract over initialized state without readiness checks, and

@@ -10,6 +10,6 @@
     "server": true,
     "requiredPlugins": ["deferredInitExampleDependency"],
     "optionalPlugins": [],
-    "enableLazyInitialize": true
+    "hasInitialization": true
   }
 }

@@ -129,13 +129,10 @@ export class PluginWrapper<
   }
 
   /**
-   * Whether the plugin opted into core-managed deferred (lazy) Elasticsearch initialization via
-   * the manifest's `enableLazyInitialize` flag. Unlike the runner itself, this is known from the
-   * manifest alone, before the plugin instance exists — the browser's `uiPlugins()` snapshot
-   * (built during `discover()`, ahead of `init()`) relies on that to gate the browser app.
+   * Whether the manifest declares that this plugin implements `initialize()`.
    */
-  public get enableLazyInitialize(): boolean {
-    return this.manifest.enableLazyInitialize === true;
+  public get hasInitialization(): boolean {
+    return this.manifest.hasInitialization === true;
   }
 
   /**
@@ -228,7 +225,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (this.enableLazyInitialize && !this.startInvoked) {
+    if (this.hasInitialization && !this.startInvoked) {
       this.startDependencies$.error(
         new Error(
           `Plugin "${this.name}" is stopping without having started; its start services will never be available.`

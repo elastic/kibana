@@ -65,7 +65,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
-    enableLazyInitialize,
+    hasInitialization,
     type,
     __category__,
   } = plugin;
@@ -126,14 +126,14 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(`plugin.enabledOnAnonymousPages`, enabledOnAnonymousPages, `must be a boolean`);
   }
 
-  if (enableLazyInitialize !== undefined && typeof enableLazyInitialize !== 'boolean') {
-    throw err(`plugin.enableLazyInitialize`, enableLazyInitialize, `must be a boolean`);
+  if (hasInitialization !== undefined && typeof hasInitialization !== 'boolean') {
+    throw err(`plugin.hasInitialization`, hasInitialization, `must be a boolean`);
   }
-  if (enableLazyInitialize === true && server !== true) {
+  if (hasInitialization === true && server !== true) {
     throw err(
-      `plugin.enableLazyInitialize`,
-      enableLazyInitialize,
-      `requires plugin.server to be true; deferred initialization is a server-side lifecycle`
+      `plugin.hasInitialization`,
+      hasInitialization,
+      `requires plugin.server to be true; initialize() is a server-side lifecycle`
     );
   }
 
@@ -178,7 +178,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
-    enableLazyInitialize,
+    hasInitialization,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
   };

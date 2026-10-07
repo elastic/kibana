@@ -5,7 +5,7 @@ ordinary, non-lazy required dependency.
 
 ## What it demonstrates
 
-This plugin has no `enableLazyInitialize`, no `lazyInitialize`, nothing special at all. `start()`
+This plugin has no `hasInitialization`, no `lazyInitialize`, nothing special at all. `start()`
 runs at boot like any other plugin's and returns a plain start contract:
 
 ```ts

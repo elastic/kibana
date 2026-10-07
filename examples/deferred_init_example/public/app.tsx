@@ -33,7 +33,7 @@ interface DemoAppProps {
   http: CoreStart['http'];
 }
 
-// Because the plugin's manifest sets `enableLazyInitialize`, core has already gated this app
+// Because the plugin's manifest sets `hasInitialization`, core has already gated this app
 // behind its own loading screen (`core.deferredInit`) until deferred init succeeded — by the
 // time this component mounts, both routes below are guaranteed to serve normally on the first
 // hit, so neither fetch needs a retry loop.

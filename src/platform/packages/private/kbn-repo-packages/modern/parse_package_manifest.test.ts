@@ -31,20 +31,20 @@ const writeManifest = (plugin: Record<string, unknown>): string => {
   return path;
 };
 
-describe('enableLazyInitialize manifest parse', () => {
+describe('hasInitialization manifest parse', () => {
   it('accepts the flag when the plugin has a server entry', () => {
     const path = writeManifest({
       id: 'testLazyPlugin',
       browser: true,
       server: true,
-      enableLazyInitialize: true,
+      hasInitialization: true,
     });
 
     const manifest = readPackageManifest(REPO_ROOT, path);
     if (manifest.type !== 'plugin') {
       throw new Error(`expected a plugin manifest, got "${manifest.type}"`);
     }
-    expect(manifest.plugin.enableLazyInitialize).toBe(true);
+    expect(manifest.plugin.hasInitialization).toBe(true);
   });
 
   it('rejects the flag when the plugin has no server entry', () => {
@@ -52,9 +52,22 @@ describe('enableLazyInitialize manifest parse', () => {
       id: 'testLazyPlugin',
       browser: true,
       server: false,
-      enableLazyInitialize: true,
+      hasInitialization: true,
     });
 
     expect(() => readPackageManifest(REPO_ROOT, path)).toThrow(/requires plugin.server to be true/);
+  });
+
+  it('rejects a non-boolean value', () => {
+    const path = writeManifest({
+      id: 'testLazyPlugin',
+      browser: true,
+      server: true,
+      hasInitialization: 'yes',
+    });
+
+    expect(() => readPackageManifest(REPO_ROOT, path)).toThrow(
+      /"plugin.hasInitialization" \[yes\], must be a boolean/
+    );
   });
 });
