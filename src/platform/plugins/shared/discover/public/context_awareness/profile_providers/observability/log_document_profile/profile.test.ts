@@ -162,6 +162,45 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('in Classic, only matches when the data source is recognized as logs', () => {
+    const record = buildMockRecord('another-index', {
+      'data_stream.type': ['logs'],
+    });
+    const classicRootContext: ContextWithProfileId<RootContext> = {
+      profileId: 'classic-nav-root-profile',
+      solutionType: SolutionType.Default,
+    };
+    const nonLogsDataSourceContext: ContextWithProfileId<DataSourceContext> = {
+      profileId: 'data-source-profile',
+      category: DataSourceCategory.Default,
+    };
+
+    // Claimed only when the logs data source profile set the Logs category (the curated integrations).
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+
+    // Observability navigation is unaffected by the data source category.
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
   describe('getDocViewer', () => {
     it('adds a log overview doc view to the registry', () => {
       const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(

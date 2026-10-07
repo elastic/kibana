@@ -56,16 +56,19 @@ Origin: `profile_providers/observability/logs_data_source_profile` and
 
 `resolve` matches when **both** hold (`logs_data_source_profile/profile.ts`):
 
-- `rootContext.solutionType` is `Observability` **or** `Default`; and
+- `rootContext.solutionType` is `Observability` — the base profile does **not** run in
+  Classic (`Default`); the Classic logs path is the integration sub-profiles below; and
 - `isLogsIndexPattern(extractIndexPatternFrom(params))` is true.
 
 `isLogsIndexPattern` (`@kbn/discover-utils` `logs/logs_context_service.ts`) does a
 **whole-token** match of the index pattern (data view title, or the ES|QL `FROM`
 target) against the base words
 `log, logs, logstash, auditbeat, filebeat, winlogbeat`, plus — when the
-`logsDataAccess` plugin is available — the deployment's configured log sources. A
-token boundary is start/end, a word boundary, `_`, `:` or `,`; e.g. `logs-*`,
-`logs-foo.bar-default`, `filebeat-*` match; `metrics-*`, `mylogs-*` do not.
+`logsDataAccess` plugin is available — the deployment's configured log sources
+(`observability:logSources`). A token boundary is start/end, a word boundary, `_`, `:`
+or `,`; e.g. `logs-*`, `logs-foo.bar-default`, `filebeat-*` match; `metrics-*`,
+`mylogs-*` do not. Because this profile is Observability-only, that
+`observability:logSources` extension is **not** part of Classic logs detection.
 
 Features contributed (all apply once the profile matches, except where noted):
 
@@ -86,9 +89,11 @@ Features contributed (all apply once the profile matches, except where noted):
 
 `logs_data_source_profile/sub_profiles/integration_logs.ts` extends the base logs
 profile per integration. Each sub-profile's `resolve` (`sub_profiles/create_resolve.ts`)
-adds the same `Observability | Default` solution gate and then requires the index
-pattern to match the integration's **base pattern** (whole-string regex). When it
-matches it overrides the default columns (and, for some, recommended fields):
+adds the `Observability | Default` solution gate and then requires the index pattern to
+match the integration's **base pattern** (whole-string regex). In Classic these
+integration sub-profiles are the **only** logs activation path — detection is limited to
+this fixed list, with no `observability:logSources` extension. When it matches it
+overrides the default columns (and, for some, recommended fields):
 
 | Base index pattern | Default columns |
 | --- | --- |
@@ -102,9 +107,13 @@ matches it overrides the default columns (and, for some, recommended fields):
 
 ### Document — `observability-log-document-profile`
 
-`resolve` matches when **both** hold (`log_document_profile/profile.tsx`):
+`resolve` matches when **all** hold (`log_document_profile/profile.tsx`):
 
-- `rootContext.solutionType` is `Observability` **or** `Default`; and
+- `rootContext.solutionType` is `Observability` **or** `Default`;
+- in `Default` (Classic) **only**, the data source already resolved to
+  `DataSourceCategory.Logs` — i.e. a curated integration claimed the source. This keeps
+  ambiguous sources (`logs-*`, `audit-logs`, `filebeat-*`) on the default flyout in Classic,
+  mirroring the data source profile; `Observability` navigation has no such restriction; and
 - the record is a log record — **any** of:
   - `data_stream.type` includes `logs`;
   - the record has any non-null field with a `log.` prefix;
@@ -258,7 +267,7 @@ context (`SolutionType.Default`) and inherit all Classic behavior.
 
 | Tab | Origin | Shown when |
 | --- | --- | --- |
-| Log overview | Logs document | log record (see [Logs › Document](#document--observability-log-document-profile)) |
+| Log overview | Logs document | log record; in Classic only when the source resolved to the Logs data source profile (see [Logs › Document](#document--observability-log-document-profile)) |
 | Overview (trace) | Traces document | trace record: `trace.id` + traces index/data stream |
 | GenAI (Tech Preview) | Traces document | trace record with a `gen_ai.*`-style field |
 | Alert Overview | Security document | Security data source + `event.kind === 'signal'` (non-attack) |
@@ -271,6 +280,9 @@ context (`SolutionType.Default`) and inherit all Classic behavior.
 - **Search stays generic** — see above.
 - **Mixed data is not claimed by Security** — the "every source must be Security"
   rule in `containsOnlySecuritySourcePatterns` (Classic only).
+- **Logs flyout tracks the data source in Classic** — the Log overview tab only resolves
+  when the logs data source profile already claimed the source (`DataSourceCategory.Logs`),
+  so ambiguous `logs-*` / `audit-logs` documents don't get a false-positive flyout.
 - **Precedence** — Security data source is registered before Observability, so it is
   offered each source first; non-Security sources fall through to logs/traces.
 - **Solution navigations are unchanged** — the `Default` acceptance only affects

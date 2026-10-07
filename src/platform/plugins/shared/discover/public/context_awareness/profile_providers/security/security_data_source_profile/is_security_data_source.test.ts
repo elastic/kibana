@@ -29,16 +29,13 @@ describe('containsOnlySecuritySourcePatterns', () => {
       'logs-ti_abusech.malware-default',
       'logs-cloud_security_posture.findings-default',
       'security_solution-acme.misconfiguration_latest',
+      'logs-crowdstrike.alert-default',
+      'logs-crowdstrike.falcon-default',
       'logs-crowdstrike.fdr-default',
-      'logs-crowdstrike.host-default',
-      'logs-crowdstrike.vulnerability-default',
       'logs-sentinel_one.activity-default',
-      'logs-sentinel_one.agent-default',
       'logs-sentinel_one.alert-default',
-      'logs-m365_defender.event-default',
       'logs-m365_defender.alert-default',
-      'logs-m365_defender.log-default',
-      'logs-m365_defender.incident-default',
+      'logs-m365_defender.event-default',
       'remote:.alerts-security.alerts-default',
       'logs-endpoint.events.process-*::data',
     ])('recognizes %s as Security data', (index) => {
@@ -55,6 +52,12 @@ describe('containsOnlySecuritySourcePatterns', () => {
       '.entity_analytics.*',
       'risk-score.risk-score-*',
       '.asset-criticality.asset-criticality-*',
+      // Vendor datasets outside the alert/event allowlist are not Security sources.
+      'logs-crowdstrike.host-default',
+      'logs-crowdstrike.vulnerability-default',
+      'logs-sentinel_one.agent-default',
+      'logs-m365_defender.log-default',
+      'logs-m365_defender.incident-default',
     ])('does not recognize %s as Security data', (index) => {
       expect(containsOnlySecuritySourcePatterns([index], null)).toBe(false);
     });

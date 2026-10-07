@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
-import { DocumentType, SolutionType } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';
@@ -30,9 +30,18 @@ export const createObservabilityLogDocumentProfileProvider = (
     getDocViewer: createGetDocViewer(services),
   },
   resolve: ({ record, rootContext, dataSourceContext }) => {
+    const { solutionType } = rootContext;
+
+    if (solutionType !== SolutionType.Observability && solutionType !== SolutionType.Default) {
+      return { isMatch: false };
+    }
+
+    // In Classic, only surface the Log overview when the logs data source profile claimed the
+    // source (the curated integrations). Ambiguous sources like `logs-*`, `audit-logs` and
+    // `filebeat-*` stay on the default flyout, mirroring the data source profile's restraint.
     if (
-      rootContext.solutionType !== SolutionType.Observability &&
-      rootContext.solutionType !== SolutionType.Default
+      solutionType === SolutionType.Default &&
+      dataSourceContext.category !== DataSourceCategory.Logs
     ) {
       return { isMatch: false };
     }

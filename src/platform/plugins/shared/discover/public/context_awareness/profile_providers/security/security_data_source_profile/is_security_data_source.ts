@@ -27,9 +27,9 @@ const SECURITY_SOURCE_PATTERNS = [
   /^logs-ti_/,
   /^logs-cloud_security_posture\.(?:findings|findings_latest|vulnerabilities|vulnerabilities_latest)-/,
   /^security_solution-.*\.(?:misconfiguration_latest|vulnerability_latest)$/,
-  /^logs-crowdstrike\./,
-  /^logs-sentinel_one\./,
-  /^logs-m365_defender\./,
+  /^logs-crowdstrike\.(?:alert|falcon|fdr)-/,
+  /^logs-sentinel_one\.(?:activity|alert)-/,
+  /^logs-m365_defender\.(?:alert|event)-/,
 ];
 
 /**
