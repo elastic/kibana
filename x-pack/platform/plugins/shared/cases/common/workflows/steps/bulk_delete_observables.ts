@@ -9,13 +9,13 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
-import { MAX_OBSERVABLES_PER_CASE } from '../../constants';
+import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_ID_MAX_LENGTH } from '../../constants';
 import { CasesStepCaseIdSchema } from './shared';
 
 export const BulkDeleteObservablesStepTypeId = 'cases.bulkDeleteObservables';
 
 const ObservableIdsSchema = z
-  .array(z.string().min(1, 'observable_ids values are required'))
+  .array(z.string().min(1, 'observable_ids values are required').max(OBSERVABLE_ID_MAX_LENGTH))
   .min(1)
   .max(MAX_OBSERVABLES_PER_CASE);
 
