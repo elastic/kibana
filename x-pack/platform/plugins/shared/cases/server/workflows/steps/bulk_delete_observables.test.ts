@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
+import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_ID_MAX_LENGTH } from '../../../common/constants';
 import type { CasesClient } from '../../client';
 import { bulkDeleteObservablesStepDefinition } from './bulk_delete_observables';
 import { createStepHandlerContext } from './test_utils';
@@ -41,6 +41,26 @@ describe('bulkDeleteObservablesStepDefinition', () => {
 
     expect(
       definition.inputSchema.safeParse({ case_id: 'case-1', observable_ids: [''] }).success
+    ).toBe(false);
+  });
+
+  it('rejects omitted or null observable_ids', () => {
+    const definition = bulkDeleteObservablesStepDefinition(jest.fn());
+
+    expect(definition.inputSchema.safeParse({ case_id: 'case-1' }).success).toBe(false);
+    expect(
+      definition.inputSchema.safeParse({ case_id: 'case-1', observable_ids: null }).success
+    ).toBe(false);
+  });
+
+  it('rejects an observable_ids value longer than OBSERVABLE_ID_MAX_LENGTH', () => {
+    const definition = bulkDeleteObservablesStepDefinition(jest.fn());
+
+    expect(
+      definition.inputSchema.safeParse({
+        case_id: 'case-1',
+        observable_ids: ['x'.repeat(OBSERVABLE_ID_MAX_LENGTH + 1)],
+      }).success
     ).toBe(false);
   });
 
