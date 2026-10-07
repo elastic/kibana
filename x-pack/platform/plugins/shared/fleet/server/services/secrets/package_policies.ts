@@ -32,6 +32,7 @@ import type {
   SecretReference,
   SecretPath,
 } from '../../types';
+import { PackagePolicyRequestError } from '../../errors';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
@@ -48,8 +49,10 @@ export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
+  /** Used to check that the secret refs the request carries may be reused by the caller. */
+  soClient: SavedObjectsClientContract;
 }): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: SecretReference[] }> {
-  const { packagePolicy, packageInfo, esClient } = opts;
+  const { packagePolicy, packageInfo, esClient, soClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
   const cloudConnectorsSecretReferences =
     packagePolicy.supports_cloud_connector && packagePolicy.cloud_connector_id
@@ -68,6 +71,7 @@ export async function extractAndWriteSecrets(opts: {
   const providedSecretRefs = secretPaths.filter(
     (secretPath) => !!secretPath.value.value?.isSecretRef
   );
+  await assertSecretRefsReusable(soClient, providedSecretRefs);
 
   const hasCloudConnectorSecretReferences =
     packagePolicy.supports_cloud_connector &&
@@ -113,6 +117,34 @@ export async function extractAndWriteSecrets(opts: {
  * original secret values, along with an array of secret references for
  * storage on the package policy object itself.
  */
+/**
+ * A create request may carry refs to existing secrets (to reuse the credentials of a sibling
+ * policy). Secret ids are not credentials of their own, so a ref is only accepted when a package
+ * policy the caller can see already references that secret: this stops a request from pointing a
+ * new policy at an arbitrary secret id.
+ */
+async function assertSecretRefsReusable(
+  soClient: SavedObjectsClientContract,
+  providedSecretRefs: SecretPath[]
+) {
+  const ids = providedSecretRefs.flatMap((secretPath) =>
+    secretPath.value.value.ids ? secretPath.value.value.ids : [secretPath.value.value.id]
+  );
+  if (ids.length === 0) return;
+
+  const referenced = new Set(
+    (await findPackagePoliciesUsingSecrets({ soClient, ids })).map(({ id }) => id)
+  );
+  const unusable = ids.filter((id) => !referenced.has(id));
+  if (unusable.length > 0) {
+    throw new PackagePolicyRequestError(
+      `Cannot reuse secret reference(s) [${unusable.join(
+        ', '
+      )}]: they are not referenced by a package policy you can access`
+    );
+  }
+}
+
 export async function extractAndUpdateSecrets(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;

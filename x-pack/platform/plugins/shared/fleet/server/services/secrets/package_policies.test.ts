@@ -1239,6 +1239,7 @@ describe('Package policy secrets', () => {
 
   describe('extractAndWriteSecrets', () => {
     const esClientMock = elasticsearchServiceMock.createInternalClient();
+    const soClientMock = savedObjectsClientMock.create();
 
     esClientMock.transport.request.mockImplementation(async (req) => {
       return {
@@ -1248,6 +1249,9 @@ describe('Package policy secrets', () => {
 
     beforeEach(() => {
       esClientMock.transport.request.mockClear();
+      // By default no package policy references any secret.
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
     });
 
     const mockIntegrationPackage = {
@@ -1334,6 +1338,7 @@ describe('Package policy secrets', () => {
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
@@ -1351,10 +1356,22 @@ describe('Package policy secrets', () => {
           inputs: [],
         } as unknown as NewPackagePolicy;
 
+        mockedPackagePolicyService.list.mockResolvedValue({
+          total: 1,
+          items: [
+            {
+              id: 'sibling-policy',
+              secret_references: [{ id: 'existing-secret-id' }],
+              policy_ids: ['agent-policy-1'],
+            },
+          ],
+        } as any);
+
         const result = await extractAndWriteSecrets({
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
@@ -1377,10 +1394,22 @@ describe('Package policy secrets', () => {
           inputs: [],
         } as unknown as NewPackagePolicy;
 
+        mockedPackagePolicyService.list.mockResolvedValue({
+          total: 1,
+          items: [
+            {
+              id: 'sibling-policy',
+              secret_references: [{ id: 'multi-1' }, { id: 'multi-2' }],
+              policy_ids: ['agent-policy-1'],
+            },
+          ],
+        } as any);
+
         const result = await extractAndWriteSecrets({
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
@@ -1388,6 +1417,66 @@ describe('Package policy secrets', () => {
         expect(result.secretReferences).toEqual(
           expect.arrayContaining([{ id: 'multi-1' }, { id: 'multi-2' }])
         );
+      });
+    });
+
+    describe('when a var references a secret no accessible package policy uses', () => {
+      it('rejects the request and creates nothing', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': { value: { isSecretRef: true, id: 'someone-elses-secret' } },
+            'pkg-secret-2': { value: 'pkg-secret-2-val' },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        await expect(
+          extractAndWriteSecrets({
+            packagePolicy: mockPackagePolicy,
+            packageInfo: mockIntegrationPackage,
+            esClient: esClientMock,
+            soClient: soClientMock,
+          })
+        ).rejects.toThrow(/someone-elses-secret/);
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('rejects when only some of the ids of a multi-secret var are in use', async () => {
+        mockedPackagePolicyService.list.mockResolvedValue({
+          total: 1,
+          items: [
+            { id: 'sibling', secret_references: [{ id: 'used' }], policy_ids: ['agent-policy-1'] },
+          ],
+        } as any);
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': { value: { isSecretRef: true, ids: ['used', 'unknown'] } },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        await expect(
+          extractAndWriteSecrets({
+            packagePolicy: mockPackagePolicy,
+            packageInfo: mockIntegrationPackage,
+            esClient: esClientMock,
+            soClient: soClientMock,
+          })
+        ).rejects.toThrow(/unknown/);
+      });
+
+      it('does not look anything up for requests that carry no secret refs', async () => {
+        const mockPackagePolicy = {
+          vars: { 'pkg-secret-1': { value: 'pkg-secret-1-val' } },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+        await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+          soClient: soClientMock,
+        });
+        expect(mockedPackagePolicyService.list).not.toHaveBeenCalled();
       });
     });
 
@@ -1409,6 +1498,7 @@ describe('Package policy secrets', () => {
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
@@ -1450,6 +1540,7 @@ describe('Package policy secrets', () => {
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(3);
@@ -1511,6 +1602,7 @@ describe('Package policy secrets', () => {
           packagePolicy: mockPackagePolicy,
           packageInfo: mockIntegrationPackage,
           esClient: esClientMock,
+          soClient: soClientMock,
         });
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(6);
