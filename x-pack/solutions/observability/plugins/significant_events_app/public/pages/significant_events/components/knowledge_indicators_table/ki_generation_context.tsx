@@ -52,22 +52,22 @@ interface KiGenerationContextValue {
   isSourcesError: boolean;
   refetchSources: () => void;
   isInitialGenerationStatusLoading: boolean;
-  generatingStreamNames: string[];
+  generatingSourceIds: string[];
   isGenerating: boolean;
   isScheduling: boolean;
-  streamStatusMap: Record<string, SignificantEventsWorkflowStatusResult>;
+  sourceStatusMap: Record<string, SignificantEventsWorkflowStatusResult>;
   onboardingConfig: OnboardingConfig;
   setOnboardingConfig: (config: OnboardingConfig) => void;
   featuresConnectors: ConnectorState;
   queriesConnectors: ConnectorState;
-  bulkOnboardAll: (streamNames: string[]) => Promise<string[]>;
-  bulkOnboardFeaturesOnly: (streamNames: string[]) => Promise<string[]>;
-  bulkOnboardQueriesOnly: (streamNames: string[]) => Promise<string[]>;
+  bulkOnboardAll: (sourceIds: string[]) => Promise<string[]>;
+  bulkOnboardFeaturesOnly: (sourceIds: string[]) => Promise<string[]>;
+  bulkOnboardQueriesOnly: (sourceIds: string[]) => Promise<string[]>;
   bulkScheduleOnboarding: (
-    streamNames: string[],
+    sourceIds: string[],
     options?: ScheduleOnboardingOptions
   ) => Promise<string[]>;
-  cancelOnboarding: (streamName: string) => Promise<void>;
+  cancelOnboarding: (sourceId: string) => Promise<void>;
 }
 
 const KiGenerationReactContext = createContext<KiGenerationContextValue | null>(null);
@@ -83,8 +83,8 @@ export function KiGenerationProvider({
   onCompleted,
   onFailed,
 }: KiGenerationProviderProps) {
-  const [generatingStreams, setGeneratingStreams] = useState<Set<string>>(new Set());
-  const [streamStatusMap, setStreamStatusMap] = useState<
+  const [generatingSources, setGeneratingSources] = useState<Set<string>>(new Set());
+  const [sourceStatusMap, setSourceStatusMap] = useState<
     Record<string, SignificantEventsWorkflowStatusResult>
   >({});
   const initialStatusFetchDoneRef = useRef(false);
@@ -108,24 +108,24 @@ export function KiGenerationProvider({
   const isSourcesError = sourcesFetch.isError;
   const refetchSources = sourcesFetch.refetch;
 
-  // Adds streams discovered as InProgress (e.g. on initial status fetch after
-  // page refresh) and removes streams that reach a terminal state. Callback
+  // Adds sources discovered as InProgress (e.g. on initial status fetch after
+  // page refresh) and removes sources that reach a terminal state. Callback
   // forwarding is gated on the initial-fetch flag so initial-load updates
   // don't trigger consumer side effects (like error toasts).
-  const onStreamStatusUpdate = useCallback(
-    (streamName: string, statusResult: SignificantEventsWorkflowStatusResult) => {
-      setStreamStatusMap((current) => ({ ...current, [streamName]: statusResult }));
+  const onSourceStatusUpdate = useCallback(
+    (sourceId: string, statusResult: SignificantEventsWorkflowStatusResult) => {
+      setSourceStatusMap((current) => ({ ...current, [sourceId]: statusResult }));
 
       const isInProgress = KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status);
 
-      setGeneratingStreams((current) => {
-        const has = current.has(streamName);
+      setGeneratingSources((current) => {
+        const has = current.has(sourceId);
         if (isInProgress === has) return current;
         const next = new Set(current);
         if (isInProgress) {
-          next.add(streamName);
+          next.add(sourceId);
         } else {
-          next.delete(streamName);
+          next.delete(sourceId);
         }
         return next;
       });
@@ -142,7 +142,7 @@ export function KiGenerationProvider({
     [onCompleted, onFailed]
   );
 
-  const bulkOnboarding = useBulkOnboarding({ onboardingConfig, onStreamStatusUpdate });
+  const bulkOnboarding = useBulkOnboarding({ onboardingConfig, onSourceStatusUpdate });
   const {
     onboardingStatusUpdateQueue,
     processStatusUpdateQueue,
@@ -170,8 +170,8 @@ export function KiGenerationProvider({
     }
   }, [fetchedSources, onboardingStatusUpdateQueue, processStatusUpdateQueue]);
 
-  const isGenerating = generatingStreams.size > 0;
-  const generatingStreamNames = useMemo(() => Array.from(generatingStreams), [generatingStreams]);
+  const isGenerating = generatingSources.size > 0;
+  const generatingSourceIds = useMemo(() => Array.from(generatingSources), [generatingSources]);
 
   // True until we've received at least one status result for every source, so
   // consumers can defer rendering empty/generating UI until the generating set
@@ -182,20 +182,20 @@ export function KiGenerationProvider({
     if (isSourcesLoading) return true;
     // A failed source list leaves nothing to wait for; the loading panel would never clear.
     if (!fetchedSources) return false;
-    return fetchedSources.some(({ id }) => !(id in streamStatusMap));
-  }, [isSourcesLoading, fetchedSources, streamStatusMap]);
+    return fetchedSources.some(({ id }) => !(id in sourceStatusMap));
+  }, [isSourcesLoading, fetchedSources, sourceStatusMap]);
 
   const withGeneratingTracking = useCallback(
-    (action: (streamNames: string[]) => Promise<string[]>) =>
-      async (streamNames: string[]): Promise<string[]> => {
-        if (streamNames.length > 0) {
-          setGeneratingStreams((current) => new Set([...current, ...streamNames]));
+    (action: (sourceIds: string[]) => Promise<string[]>) =>
+      async (sourceIds: string[]): Promise<string[]> => {
+        if (sourceIds.length > 0) {
+          setGeneratingSources((current) => new Set([...current, ...sourceIds]));
         }
-        const succeeded = await action(streamNames);
-        if (succeeded.length < streamNames.length) {
+        const succeeded = await action(sourceIds);
+        if (succeeded.length < sourceIds.length) {
           const succeededSet = new Set(succeeded);
-          const failed = streamNames.filter((s) => !succeededSet.has(s));
-          setGeneratingStreams((current) => {
+          const failed = sourceIds.filter((s) => !succeededSet.has(s));
+          setGeneratingSources((current) => {
             const next = new Set(current);
             failed.forEach((s) => next.delete(s));
             return next;
@@ -219,8 +219,8 @@ export function KiGenerationProvider({
     [withGeneratingTracking, rawBulkOnboardQueriesOnly]
   );
   const bulkScheduleOnboarding = useCallback(
-    (streamNames: string[], options?: ScheduleOnboardingOptions) =>
-      withGeneratingTracking((names) => rawBulkScheduleOnboarding(names, options))(streamNames),
+    (sourceIds: string[], options?: ScheduleOnboardingOptions) =>
+      withGeneratingTracking((names) => rawBulkScheduleOnboarding(names, options))(sourceIds),
     [withGeneratingTracking, rawBulkScheduleOnboarding]
   );
 
@@ -233,9 +233,9 @@ export function KiGenerationProvider({
       isSourcesError,
       refetchSources,
       isInitialGenerationStatusLoading,
-      generatingStreamNames,
+      generatingSourceIds,
       isGenerating,
-      streamStatusMap,
+      sourceStatusMap,
       onboardingConfig,
       setOnboardingConfig,
       featuresConnectors,
@@ -253,9 +253,9 @@ export function KiGenerationProvider({
       isSourcesError,
       refetchSources,
       isInitialGenerationStatusLoading,
-      generatingStreamNames,
+      generatingSourceIds,
       isGenerating,
-      streamStatusMap,
+      sourceStatusMap,
       onboardingConfig,
       setOnboardingConfig,
       bulkOnboardAll,

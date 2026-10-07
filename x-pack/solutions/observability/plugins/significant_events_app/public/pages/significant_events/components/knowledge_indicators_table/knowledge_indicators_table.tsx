@@ -66,7 +66,7 @@ export function KnowledgeIndicatorsTable() {
   const {
     sources,
     isSourcesLoading,
-    generatingStreamNames,
+    generatingSourceIds,
     isGenerating,
     isInitialGenerationStatusLoading,
     isScheduling,
@@ -198,7 +198,7 @@ export function KnowledgeIndicatorsTable() {
           isSourcesLoading={isSourcesLoading}
           selectedSourceIds={generationStreamNames}
           onSelectedSourceIdsChange={setGenerationStreamNames}
-          excludedSourceIds={generatingStreamNames}
+          excludedSourceIds={generatingSourceIds}
           isDisabled={isScheduling}
           fullWidth
         />
@@ -236,7 +236,7 @@ export function KnowledgeIndicatorsTable() {
         title={GENERATION_IN_PROGRESS_TITLE}
         announceOnMount
       >
-        <p>{getGenerationInProgressDescription(generatingStreamNames.map(getSourceTitle))}</p>
+        <p>{getGenerationInProgressDescription(generatingSourceIds.map(getSourceTitle))}</p>
       </EuiCallOut>
     </>
   ) : null;

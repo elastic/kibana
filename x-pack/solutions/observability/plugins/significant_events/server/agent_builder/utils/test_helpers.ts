@@ -14,7 +14,6 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
-import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
@@ -26,7 +25,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient' | 'attachmentClient'
+  'scopedClusterClient' | 'getKnowledgeIndicatorClient' | 'uiSettingsClient'
 >;
 
 export const createMockGetScopedClients = () => {
@@ -44,10 +43,6 @@ export const createMockGetScopedClients = () => {
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
 
-  const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
-    getAttachments: jest.fn().mockResolvedValue([]),
-  };
-
   // Satisfies ensures property names stay in sync with RouteHandlerScopedClients.
   // If a property is renamed or removed from the interface, this will fail.
   const scopedClients: {
@@ -56,7 +51,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     getKnowledgeIndicatorClient,
     uiSettingsClient,
-    attachmentClient,
   };
 
   const getScopedClients = jest
@@ -68,7 +62,6 @@ export const createMockGetScopedClients = () => {
     esClient,
     scopedClusterClient,
     getKnowledgeIndicatorClient,
-    attachmentClient,
     uiSettingsClient,
   };
 };

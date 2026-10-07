@@ -16,7 +16,6 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
@@ -188,14 +187,10 @@ export class SignificantEventsPlugin
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
-    const { streams: streamsSetup } = plugins;
-
     this.getScopedClients = async ({
       request,
-      rulesClientOptions,
     }: {
       request: KibanaRequest;
-      rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
@@ -222,13 +217,8 @@ export class SignificantEventsPlugin
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
-      const [attachmentClient, tuningConfig] = await Promise.all([
-        streamsSetup.getAttachmentClient({ request }),
+      const [tuningConfig, sourcesClient] = await Promise.all([
         getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
-      ]);
-
-      const [streamsClient, sourcesClient] = await Promise.all([
-        streamsSetup.getStreamsClient({ request, rulesClientOptions }),
         pluginsStart.nightshiftSources.getSourcesClient({ request }),
       ]);
 
@@ -300,14 +290,12 @@ export class SignificantEventsPlugin
         streamDataEsClient,
         soClient,
         space,
-        attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         getAlertEventsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
-        streamsClient,
         sourcesClient,
         licensing,
         uiSettingsClient,

@@ -20,19 +20,19 @@ import { getFormattedError } from '../../../util/errors';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
-type StreamStatusUpdateCallback = (
-  streamName: string,
+type SourceStatusUpdateCallback = (
+  sourceId: string,
   result: SignificantEventsWorkflowStatusResult
 ) => void;
 
 interface UseBulkOnboardingOptions {
   onboardingConfig: OnboardingConfig;
-  onStreamStatusUpdate: StreamStatusUpdateCallback;
+  onSourceStatusUpdate: SourceStatusUpdateCallback;
 }
 
 export function useBulkOnboarding({
   onboardingConfig,
-  onStreamStatusUpdate,
+  onSourceStatusUpdate,
 }: UseBulkOnboardingOptions) {
   const {
     core: {
@@ -43,7 +43,7 @@ export function useBulkOnboarding({
   const { scheduleOnboarding, cancelOnboarding } = useOnboardingApi();
   const { getSourceTitle } = useSourcesById();
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
-    useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
+    useOnboardingStatusUpdateQueue(onSourceStatusUpdate);
 
   const [isScheduling, setIsScheduling] = useState(false);
 

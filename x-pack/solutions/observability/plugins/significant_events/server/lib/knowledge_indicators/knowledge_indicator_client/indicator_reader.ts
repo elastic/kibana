@@ -313,6 +313,6 @@ export class IndicatorReader {
    */
   async getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
-    return this.revisionReader.fetchDistinctStreamNames(where, IS_NOT_DELETED);
+    return this.revisionReader.fetchDistinctSourceIds(where, IS_NOT_DELETED);
   }
 }

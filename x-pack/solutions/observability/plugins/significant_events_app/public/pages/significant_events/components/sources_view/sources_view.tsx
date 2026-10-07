@@ -59,8 +59,8 @@ export function SourcesView() {
     setOnboardingConfig,
     featuresConnectors,
     queriesConnectors,
-    generatingStreamNames,
-    streamStatusMap,
+    generatingSourceIds,
+    sourceStatusMap,
     cancelOnboarding,
     bulkScheduleOnboarding,
     bulkOnboardAll,
@@ -87,13 +87,13 @@ export function SourcesView() {
   const isSourceActionable = useCallback(
     (source: NightshiftSource) => {
       // The onboarding route rejects disabled sources.
-      if (!source.enabled || generatingStreamNames.includes(source.id)) {
+      if (!source.enabled || generatingSourceIds.includes(source.id)) {
         return false;
       }
       // No status yet means nothing has run for the source, e.g. it was just created.
-      return !isOnboardingInProgress(streamStatusMap[source.id]?.status);
+      return !isOnboardingInProgress(sourceStatusMap[source.id]?.status);
     },
-    [generatingStreamNames, streamStatusMap]
+    [generatingSourceIds, sourceStatusMap]
   );
 
   // Ids, not objects: the selection then follows refetches, and a deleted source drops out.
@@ -247,11 +247,11 @@ export function SourcesView() {
             <EuiFlexItem>
               <SourcesTable
                 sources={sources}
-                onboardingResultMap={streamStatusMap}
+                onboardingResultMap={sourceStatusMap}
                 loading={isSourcesLoading}
                 searchText={searchText}
                 blocksActivity={blocksActivity}
-                generatingSourceIds={generatingStreamNames}
+                generatingSourceIds={generatingSourceIds}
                 activityBlockTooltip={activityBlockTooltip}
                 canManage={canManage}
                 selection={

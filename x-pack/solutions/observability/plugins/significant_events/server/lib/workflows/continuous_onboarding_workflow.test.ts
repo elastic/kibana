@@ -21,7 +21,7 @@ import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow
 
 // The continuous onboarding workflow YAML lives in the managed workflow
 // definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
-// These tests keep that YAML in sync with the streams constants.
+// These tests keep that YAML in sync with the constants in common/constants.ts.
 const definition = getManagedWorkflowDefinition(
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
 );

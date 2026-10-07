@@ -92,6 +92,18 @@ describe('IndicatorReader.countKnowledgeIndicators', () => {
     expect(deletionFilterIndex).toBeGreaterThan(latestRevisionGroupingIndex);
     expect(countIndex).toBeGreaterThan(deletionFilterIndex);
   });
+
+  it('counts within the client space, grouped by source id', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(3);
+
+    await reader.countKnowledgeIndicators(KI_TYPE_QUERY);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`"${SPACE}"`);
+    expect(query).toContain('BY `source.id`, type, id');
+    expect(query).not.toContain('stream.name');
+  });
 });
 
 describe('IndicatorReader space scoping', () => {

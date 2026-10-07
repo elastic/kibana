@@ -12,13 +12,13 @@ import {
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 
-type StreamOnboardingStatusUpdateCallback = (
-  streamName: string,
+type SourceOnboardingStatusUpdateCallback = (
+  sourceId: string,
   status: SignificantEventsWorkflowStatusResult
 ) => void;
 
 export function useOnboardingStatusUpdateQueue(
-  onStreamStatusUpdate: StreamOnboardingStatusUpdateCallback
+  onSourceStatusUpdate: SourceOnboardingStatusUpdateCallback
 ) {
   const queue = useRef(new Set<string>([]));
   const isProcessing = useRef(false);
@@ -30,20 +30,20 @@ export function useOnboardingStatusUpdateQueue(
       return;
     }
 
-    const streamNames = [...queue.current];
+    const sourceIds = [...queue.current];
 
-    const statuses = await getOnboardingStatuses(streamNames);
+    const statuses = await getOnboardingStatuses(sourceIds);
 
-    for (const streamName of streamNames) {
-      const statusResult = statuses[streamName];
+    for (const sourceId of sourceIds) {
+      const statusResult = statuses[sourceId];
       if (statusResult === undefined) {
         continue;
       }
 
-      onStreamStatusUpdate(streamName, statusResult);
+      onSourceStatusUpdate(sourceId, statusResult);
 
       if (!KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
-        queue.current.delete(streamName);
+        queue.current.delete(sourceId);
       }
     }
 
@@ -51,7 +51,7 @@ export function useOnboardingStatusUpdateQueue(
       await new Promise((res) => setTimeout(res, 2000));
       await updateStatuses();
     }
-  }, [getOnboardingStatuses, onStreamStatusUpdate]);
+  }, [getOnboardingStatuses, onSourceStatusUpdate]);
 
   const processStatusUpdateQueue = useCallback(async () => {
     if (isProcessing.current) {

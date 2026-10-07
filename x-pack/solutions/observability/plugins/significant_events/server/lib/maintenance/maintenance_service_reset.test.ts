@@ -49,11 +49,11 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         indicatorStreams: ['logs.web'],
         ownedRuleStreams: ['logs.web', 'logs.orphan'],
-        queryLinksByStream: {
+        queryLinksBySource: {
           'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
         },
         knowledgeIndicatorCounts: { [KI_TYPE_FEATURE]: 2, [KI_TYPE_QUERY]: 2 },
-        ownedRuleIdsByStream: {
+        ownedRuleIdsBySource: {
           'logs.web': ['linked-rule', 'owned-rule'],
           'logs.orphan': ['orphan-rule'],
         },
@@ -449,7 +449,7 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         v2RulesClient,
         ownedRuleStreams: ['logs.rules'],
-        ownedRuleIdsByStream: {
+        ownedRuleIdsBySource: {
           'logs.rules': ['ok-rule', 'missing-rule', 'failed-rule'],
         },
       });
@@ -485,7 +485,7 @@ describe('SignificantEventsMaintenanceService', () => {
         v2RulesClient,
         ruleBackedRuleIds: ['paused-rule'],
         ownedRuleStreams: ['logs.rules'],
-        ownedRuleIdsByStream: { 'logs.rules': ['new-rule'] },
+        ownedRuleIdsBySource: { 'logs.rules': ['new-rule'] },
       });
       await service.pause({ request: REQUEST });
 

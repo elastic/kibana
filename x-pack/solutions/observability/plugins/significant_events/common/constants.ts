@@ -28,7 +28,7 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
  * Continuous KI extraction workflow
  *
  * A scheduled workflow that periodically identifies knowledge indicators (KI)
- * across eligible streams. It selects streams, schedules feature identification
+ * across eligible sources. It selects sources, schedules feature identification
  * tasks, and polls their status until completion or timeout.
  */
 
@@ -46,13 +46,13 @@ export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //
-// The coordinator starts onboarding for each eligible stream (features AND
-// queries generation) and then polls every stream
-// until it reaches a terminal state. Per-stream onboarding is capped at 30m
+// The coordinator starts onboarding for each eligible source (features AND
+// queries generation) and then polls every source
+// until it reaches a terminal state. Per-source onboarding is capped at 30m
 // and runs in parallel, so the interval must comfortably exceed that ceiling.
 export const COORDINATOR_INTERVAL_MINUTES = 35;
 
-// Stream selection: how many streams to process per run and how often
+// Source selection: how many sources to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;

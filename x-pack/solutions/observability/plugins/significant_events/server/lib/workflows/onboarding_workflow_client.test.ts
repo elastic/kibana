@@ -55,7 +55,7 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   return { client, managementApi, telemetry };
 };
 
-describe('StreamsKIsOnboardingClient', () => {
+describe('SignificantEventsKIsOnboardingClient', () => {
   describe('buildConcurrencyKey', () => {
     it('prepends the prefix to the source slug', () => {
       expect(buildConcurrencyKey('my-source')).toBe('nightshift-source-onboarding-my-source');
@@ -570,7 +570,7 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('getRecentExecutions', () => {
-    it('returns one execution per stream collapsed by concurrencyGroupKey', async () => {
+    it('returns one execution per source collapsed by concurrencyGroupKey', async () => {
       const executions = [
         { id: 'exec-1', status: ExecutionStatus.COMPLETED },
         { id: 'exec-2', status: ExecutionStatus.RUNNING },
