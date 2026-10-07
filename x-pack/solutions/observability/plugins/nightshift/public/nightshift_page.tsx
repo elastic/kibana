@@ -151,9 +151,7 @@ export function NightshiftPage(): React.ReactElement | null {
                   onSandboxSecretsClick: canManageSandboxSecrets
                     ? openSandboxSecretsFlyout
                     : undefined,
-                  onCustomContextClick: canViewCustomContext
-                    ? openCustomContextFlyout
-                    : undefined,
+                  onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
                   onAutomationsClick: canUseAutomations ? navigateToInvestigations : undefined,
                   investigationsHref: canUseAutomations ? investigationsHref : undefined,
                 }}
