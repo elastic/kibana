@@ -131,54 +131,58 @@ const waitForSuccessfulAction = async (
     .toBe('successful');
 };
 
-apiTest.describe('Real agent host isolation', { tag: ['@local-stateful-classic'] }, () => {
-  let requestHeaders: Record<string, string>;
+apiTest.describe(
+  'Real agent host isolation',
+  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
+  () => {
+    let requestHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
-      endpointOperationsAnalystRole()
-    );
-    requestHeaders = {
-      ...apiKeyHeader,
-      ...PUBLIC_API_HEADERS,
-      'kbn-xsrf': 'scout-edr-real-fleet',
-      'Content-Type': 'application/json',
-    };
-  });
-
-  apiTest(
-    'isolates an enrolled host and then releases it',
-    async ({ apiClient, enrolledEndpoint }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      const { agentId } = enrolledEndpoint;
-
-      const sendAction = async (command: 'isolate' | 'unisolate'): Promise<string> => {
-        const response = await apiClient.post(ACTION_ROUTES[command], {
-          headers: requestHeaders,
-          responseType: 'json',
-          body: {
-            endpoint_ids: [agentId],
-            agent_type: 'endpoint',
-          },
-        });
-
-        expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-        const action = (response.body as ActionDetailsBody).data;
-        expect(action.command).toBe(command);
-        expect(action.agents).toContain(agentId);
-
-        return action.id;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        endpointOperationsAnalystRole()
+      );
+      requestHeaders = {
+        ...apiKeyHeader,
+        ...PUBLIC_API_HEADERS,
+        'kbn-xsrf': 'scout-edr-real-fleet',
+        'Content-Type': 'application/json',
       };
+    });
 
-      await waitForIsolation(apiClient, requestHeaders, agentId, false);
+    apiTest(
+      'isolates an enrolled host and then releases it',
+      async ({ apiClient, enrolledEndpoint }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const { agentId } = enrolledEndpoint;
 
-      const isolateActionId = await sendAction('isolate');
-      await waitForSuccessfulAction(apiClient, requestHeaders, isolateActionId);
-      await waitForIsolation(apiClient, requestHeaders, agentId, true);
+        const sendAction = async (command: 'isolate' | 'unisolate'): Promise<string> => {
+          const response = await apiClient.post(ACTION_ROUTES[command], {
+            headers: requestHeaders,
+            responseType: 'json',
+            body: {
+              endpoint_ids: [agentId],
+              agent_type: 'endpoint',
+            },
+          });
 
-      const unisolateActionId = await sendAction('unisolate');
-      await waitForSuccessfulAction(apiClient, requestHeaders, unisolateActionId);
-      await waitForIsolation(apiClient, requestHeaders, agentId, false);
-    }
-  );
-});
+          expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+          const action = (response.body as ActionDetailsBody).data;
+          expect(action.command).toBe(command);
+          expect(action.agents).toContain(agentId);
+
+          return action.id;
+        };
+
+        await waitForIsolation(apiClient, requestHeaders, agentId, false);
+
+        const isolateActionId = await sendAction('isolate');
+        await waitForSuccessfulAction(apiClient, requestHeaders, isolateActionId);
+        await waitForIsolation(apiClient, requestHeaders, agentId, true);
+
+        const unisolateActionId = await sendAction('unisolate');
+        await waitForSuccessfulAction(apiClient, requestHeaders, unisolateActionId);
+        await waitForIsolation(apiClient, requestHeaders, agentId, false);
+      }
+    );
+  }
+);
