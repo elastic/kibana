@@ -80,7 +80,7 @@ export const EpisodeFooterActionMenu = ({
       closePopover={onClose}
       aria-label={i18n.FLYOUT_TAKE_ACTION}
       anchorPosition="upRight"
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       data-test-subj="alertingV2EpisodeFlyoutTakeAction"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
