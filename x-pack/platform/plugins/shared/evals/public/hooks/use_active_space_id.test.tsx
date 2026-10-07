@@ -34,6 +34,15 @@ describe('useActiveSpaceId', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('settles without a space id when the active space cannot be resolved', async () => {
+    const getActiveSpace = jest.fn().mockRejectedValue(new Error('boom'));
+
+    const { result } = renderUseActiveSpaceId({ spaces: { getActiveSpace } });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.spaceId).toBeUndefined();
+  });
+
   it('falls back to the default space when spaces is unavailable', async () => {
     const { result } = renderUseActiveSpaceId({});
 

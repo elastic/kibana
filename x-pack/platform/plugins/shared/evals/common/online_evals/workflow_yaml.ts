@@ -474,3 +474,25 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
     connectorId,
   };
 };
+
+const getStepPath = (step: WorkflowStep | null): unknown =>
+  step?.with && typeof step.with === 'object' ? (step.with as { path?: unknown }).path : undefined;
+
+/** Whether an online eval workflow still calls the evals routes without the workflow space prefix. */
+export const isLegacyOnlineEvalWorkflowYaml = (yaml: string): boolean => {
+  if (!parseOnlineEvalWorkflowYaml(yaml)) {
+    return false;
+  }
+
+  const parsed = parseYamlToJSONWithoutValidation(yaml);
+  if (!parsed.success) {
+    return false;
+  }
+
+  const { steps } = parsed.json as Record<string, unknown>;
+  const evaluateEachStep = getNamedStep(steps, EVALUATE_EACH_STEP_NAME);
+  return (
+    getStepPath(getNamedStep(evaluateEachStep?.steps, EVALUATE_STEP_NAME)) === EVALUATE_PATH ||
+    getStepPath(getNamedStep(evaluateEachStep?.steps, PERSIST_STEP_NAME)) === PERSIST_PATH
+  );
+};
