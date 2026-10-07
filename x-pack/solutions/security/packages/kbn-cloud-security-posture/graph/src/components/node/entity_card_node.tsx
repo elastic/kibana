@@ -29,7 +29,6 @@ import { NodeContainer, NodeShapeContainer, NodeButton, HandleStyleOverride } fr
 import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
 import { getRiskLevel, getRiskScoreColors } from './utils/risk_score';
-import type { RiskLevel } from './utils/risk_score';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_DETAILS_ID,
