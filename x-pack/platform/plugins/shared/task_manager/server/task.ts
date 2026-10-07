@@ -262,6 +262,10 @@ export const taskDefinitionSchema = schema.object(
      */
     priority: schema.maybe(schema.number()),
     /**
+     * Allows `runSoon({ priority })` and a successful run result to change the stored priority.
+     */
+    allowPriorityOverride: schema.maybe(schema.boolean()),
+    /**
      * Cost to run this task type. Defaults to "Normal".
      */
     cost: schema.number({ defaultValue: TaskCost.Normal }),

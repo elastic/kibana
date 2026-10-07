@@ -84,6 +84,11 @@ describe('TaskScheduling', () => {
       maxConcurrency: 2,
       createTaskRunner: jest.fn(),
     },
+    priorityOverride: {
+      title: 'priority override',
+      allowPriorityOverride: true,
+      createTaskRunner: jest.fn(),
+    },
   });
 
   let recordClaimNudgeSpy: jest.SpyInstance;
@@ -1346,6 +1351,7 @@ describe('TaskScheduling', () => {
       [TaskPriority.UserInteractive, undefined, TaskPriority.UserInteractive],
     ])('updates priority from %s with override %s to %s', async (priority, override, expected) => {
       const task = taskManagerMock.createTask({
+        taskType: 'priorityOverride',
         status: TaskStatus.Idle,
         priority,
         version: 'original-version',
@@ -1370,7 +1376,11 @@ describe('TaskScheduling', () => {
     test.each([TaskStatus.Claiming, TaskStatus.Running])(
       'does not promote a task with status %s',
       async (status) => {
-        const task = taskManagerMock.createTask({ status, priority: TaskPriority.Standard });
+        const task = taskManagerMock.createTask({
+          taskType: 'priorityOverride',
+          status,
+          priority: TaskPriority.Standard,
+        });
         mockTaskStore.get.mockResolvedValueOnce(task);
         const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -1380,6 +1390,17 @@ describe('TaskScheduling', () => {
         expect(mockTaskStore.update).not.toHaveBeenCalled();
       }
     );
+
+    test('rejects a priority override for a task type that has not opted in', async () => {
+      const task = taskManagerMock.createTask({ status: TaskStatus.Idle });
+      mockTaskStore.get.mockResolvedValueOnce(task);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await expect(
+        taskScheduling.runSoon(task.id, { priority: TaskPriority.UserInteractive })
+      ).rejects.toThrow('Task type "foo" does not allow priority overrides');
+      expect(mockTaskStore.update).not.toHaveBeenCalled();
+    });
 
     // Opt-in, since a nudged claim can run the task early enough to change what it observes.
     test('does not nudge or force a refresh by default', async () => {
@@ -1481,7 +1502,7 @@ describe('TaskScheduling', () => {
         const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
         mockTaskStore.get.mockResolvedValueOnce(
-          taskManagerMock.createTask({ id, status: TaskStatus.Idle })
+          taskManagerMock.createTask({ id, taskType: 'priorityOverride', status: TaskStatus.Idle })
         );
         mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 

@@ -504,6 +504,7 @@ export class WorkflowsExecutionEnginePlugin
         }),
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
+        allowPriorityOverride: true,
         // Set high timeout for long-running workflows.
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.

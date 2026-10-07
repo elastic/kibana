@@ -744,6 +744,13 @@ export class TaskManagerRunner implements TaskRunner {
           }
 
           const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
+          const allowPriority = this.definition?.allowPriorityOverride === true;
+          if (priority !== undefined && !allowPriority) {
+            this.logger.warn(
+              `Ignoring priority returned by task ${this}: task type does not allow priority overrides`,
+              { tags: [this.taskType] }
+            );
+          }
           return asOk({
             runAt:
               runAt ||
@@ -758,7 +765,7 @@ export class TaskManagerRunner implements TaskRunner {
               ),
             state,
             schedule: updatedTaskSchedule,
-            ...(priority !== undefined ? { priority } : {}),
+            ...(priority !== undefined && allowPriority ? { priority } : {}),
             attempts,
             status: TaskStatus.Idle,
           });

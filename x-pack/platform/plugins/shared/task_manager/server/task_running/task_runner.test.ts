@@ -910,6 +910,7 @@ describe('TaskManagerRunner', () => {
           definitions: {
             bar: {
               title: 'Bar!',
+              allowPriorityOverride: true,
               createTaskRunner: () => ({
                 async run() {
                   return { runAt, state: {}, priority };
@@ -937,6 +938,32 @@ describe('TaskManagerRunner', () => {
         expect(getNextRunAtSpy).not.toHaveBeenCalled();
       }
     );
+
+    test('ignores a returned priority when the task type has not opted in', async () => {
+      const runAt = minutesFromNow(_.random(1, 10));
+      const { runner, store, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { runAt, state: {}, priority: TaskPriority.UserInteractive };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toHaveProperty('runAt', runAt);
+      expect(update).not.toHaveProperty('priority');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('does not allow priority overrides'),
+        { tags: ['bar'] }
+      );
+    });
 
     test('reschedules tasks that return a schedule', async () => {
       const runAt = minutesFromNow(1);

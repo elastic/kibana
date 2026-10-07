@@ -30,6 +30,7 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import {
@@ -67,6 +68,7 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  definitions: TaskTypeDictionary;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
@@ -120,6 +122,7 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly definitions: TaskTypeDictionary;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
   private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
@@ -132,6 +135,7 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.definitions = opts.definitions;
     this.taskPolling = opts.taskPollingLifecycle;
     this.claimNudgeService = opts.claimNudgeService;
   }
@@ -368,6 +372,10 @@ export class TaskScheduling {
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
+
+    if (priority !== undefined && !this.definitions.get(task.taskType)?.allowPriorityOverride) {
+      throw new Error(`Task type "${task.taskType}" does not allow priority overrides`);
+    }
 
     if (task.status === TaskStatus.Unrecognized) {
       throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);

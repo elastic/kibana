@@ -525,6 +525,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
+      definitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
       claimNudgeService: this.claimNudgeService,
     });
