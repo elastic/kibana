@@ -45,8 +45,14 @@ describe('DetectionRulesClient emits detectionRulesCreated', () => {
   let eventBus: SecuritySolutionEventBus;
   let events: Array<{ payload: DetectionRulesCreatedPayload; requestSeen: unknown }>;
 
-  const buildClient = (deps: { withBus?: boolean; withRequest?: boolean } = {}) => {
-    const { withBus = true, withRequest = true } = deps;
+  const buildClient = (
+    deps: {
+      withBus?: boolean;
+      withRequest?: boolean;
+      isRulesCreatedTriggerEnabled?: () => Promise<boolean>;
+    } = {}
+  ) => {
+    const { withBus = true, withRequest = true, isRulesCreatedTriggerEnabled } = deps;
     return createDetectionRulesClient({
       actionsClient: actionsClientMock.create(),
       rulesClient,
@@ -59,6 +65,7 @@ describe('DetectionRulesClient emits detectionRulesCreated', () => {
       logger: loggingSystemMock.createLogger(),
       eventBus: withBus ? eventBus : undefined,
       request: withRequest ? request : undefined,
+      isRulesCreatedTriggerEnabled,
     });
   };
 
@@ -361,6 +368,66 @@ describe('DetectionRulesClient emits detectionRulesCreated', () => {
         buildClient(deps).notifyRulesCreated({ rules: [getRulesSchemaMock()], source: 'api' })
       ).not.toThrow();
       expect(events).toHaveLength(0);
+    });
+  });
+
+  // Only AlertZero consumes the event, and rule creation runs on every deployment, so the gate
+  // decides whether anything is emitted. Whatever it answers, the rule creation itself must succeed.
+  describe('gated on AlertZero', () => {
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+    beforeEach(() => {
+      rulesClient.create.mockResolvedValue(
+        getRuleMock(getQueryRuleParams({ ruleId: 'custom-rule' }), { tags: ['t1'] })
+      );
+    });
+
+    it('creates the rule and emits nothing while the gate is closed', async () => {
+      const isRulesCreatedTriggerEnabled = jest.fn(() => Promise.resolve(false));
+
+      const created = await buildClient({ isRulesCreatedTriggerEnabled }).createCustomRule({
+        params: getCreateRulesSchemaMock(),
+      });
+      await flush();
+
+      expect(created.id).toBeDefined();
+      expect(isRulesCreatedTriggerEnabled).toHaveBeenCalledTimes(1);
+      expect(events).toHaveLength(0);
+    });
+
+    it('emits the event once the gate is open', async () => {
+      const created = await buildClient({
+        isRulesCreatedTriggerEnabled: () => Promise.resolve(true),
+      }).createCustomRule({ params: getCreateRulesSchemaMock() });
+      await flush();
+
+      expect(events).toHaveLength(1);
+      expect(events[0].payload.ids).toEqual([created.id]);
+      expect(events[0].requestSeen).toBe(request);
+    });
+
+    it('creates the rule and emits nothing when the gate fails', async () => {
+      const created = await buildClient({
+        isRulesCreatedTriggerEnabled: () => Promise.reject(new Error('gate down')),
+      }).createCustomRule({ params: getCreateRulesSchemaMock() });
+      await flush();
+
+      expect(created.id).toBeDefined();
+      expect(events).toHaveLength(0);
+    });
+
+    it('applies to batched notifications as well', async () => {
+      const closed = buildClient({ isRulesCreatedTriggerEnabled: () => Promise.resolve(false) });
+      const open = buildClient({ isRulesCreatedTriggerEnabled: () => Promise.resolve(true) });
+      const rules = [getRuleMock(getQueryRuleParams({ ruleId: 'a' }))] as never[];
+
+      closed.notifyRulesCreated({ rules, source: 'prebuilt_install' });
+      await flush();
+      expect(events).toHaveLength(0);
+
+      open.notifyRulesCreated({ rules, source: 'prebuilt_install' });
+      await flush();
+      expect(events).toHaveLength(1);
     });
   });
 });

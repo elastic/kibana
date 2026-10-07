@@ -348,14 +348,17 @@ export const DETECTION_RULES_CREATED_TRIGGER_TITLE = i18n.translate(
 
 export const DETECTION_RULES_CREATED_TRIGGER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.detectionRulesCreated.description',
-  { defaultMessage: 'Emitted when one or more detection rules are created.' }
+  {
+    defaultMessage:
+      'Emitted when one or more detection rules are created, while AlertZero is enabled.',
+  }
 );
 
 export const DETECTION_RULES_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.detectionRulesCreated.documentation.details',
   {
     defaultMessage:
-      'Emitted after detection rules are created through the rule management API, a prebuilt rules install, or an import, and after a rule is duplicated. One event is emitted per creation operation (a create request, a batch of up to 400 prebuilt rules, so a larger install emits one event per batch, a SIEM migration install, an import batch of up to 200 rules, a duplicate request, or a restore of a deleted rule), or per 2,000 rules when an operation creates more. The payload includes event.ids, event.types, event.tags, event.totalCount, and event.source. event.types and event.tags describe the whole batch, not individual rules. The event is emitted after the rules are saved and does not wait for workflows to run. Rules created directly through the alerting API do not fire this trigger.',
+      'Emitted only while AlertZero is enabled in the space: on a deployment without AlertZero, or in a space where the AlertZero setting is off, it never fires. Emitted after detection rules are created through the rule management API, a prebuilt rules install, or an import, and after a rule is duplicated. One event is emitted per creation operation (a create request, a batch of up to 400 prebuilt rules, so a larger install emits one event per batch, a SIEM migration install, an import batch of up to 200 rules, a duplicate request, or a restore of a deleted rule), or per 2,000 rules when an operation creates more. The payload includes event.ids, event.types, event.tags, event.totalCount, and event.source. event.types and event.tags describe the whole batch, not individual rules. The event is emitted after the rules are saved and does not wait for workflows to run. Rules created directly through the alerting API do not fire this trigger.',
   }
 );
 

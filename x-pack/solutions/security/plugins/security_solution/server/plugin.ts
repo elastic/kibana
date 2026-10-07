@@ -540,6 +540,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
       productFeaturesService,
       eventBus: this.securityEventBus,
+      alertZero: plugins.alertzero,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();

@@ -91,6 +91,8 @@ interface DetectionRulesClientParams {
   /** Both are needed to emit `detectionRulesCreated`; omit either to skip emitting. */
   eventBus?: SecuritySolutionEventBus;
   request?: KibanaRequest;
+  /** When given, nothing is emitted unless it resolves to true. Omit it to always emit. */
+  isRulesCreatedTriggerEnabled?: () => Promise<boolean>;
 }
 
 export const createDetectionRulesClient = ({
@@ -106,6 +108,7 @@ export const createDetectionRulesClient = ({
   logger,
   eventBus,
   request,
+  isRulesCreatedTriggerEnabled,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
@@ -114,7 +117,14 @@ export const createDetectionRulesClient = ({
     source: DetectionRulesCreatedSource
   ): void => {
     if (!eventBus || !request) return;
-    emitDetectionRulesCreatedInChunks({ eventBus, request, rules, source, logger });
+    emitDetectionRulesCreatedInChunks({
+      eventBus,
+      request,
+      rules,
+      source,
+      isEnabled: isRulesCreatedTriggerEnabled,
+      logger,
+    });
   };
 
   return {

@@ -66,6 +66,8 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
   getDetectionRulesClient: () => IDetectionRulesClient;
+  /** Whether `detectionRulesCreated` is emitted for this request: only while AlertZero is enabled. */
+  isRulesCreatedTriggerEnabled: () => Promise<boolean>;
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;

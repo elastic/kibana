@@ -429,6 +429,7 @@ export const performBulkActionRoute = (
                     tags,
                   })),
                   source: 'duplicate',
+                  isEnabled: ctx.securitySolution.isRulesCreatedTriggerEnabled,
                   logger,
                 });
               }
