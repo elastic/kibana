@@ -198,13 +198,15 @@ const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
 };
 
 // The HTTP API stores filters in the as-code format, which omits default meta values such as
-// alias: null and negate: false, while filters built in the UI keep them. Both sides are compared
-// after the same conversion. Pinning is not part of the comparison, and a filter that cannot be
+// alias: null and negate: false, while filters built in the UI keep them. Both sides compare the
+// meta after the same conversion. The query is kept as is, because the conversion can drop query
+// options such as slop. Pinning is not part of the comparison, and a filter that cannot be
 // converted is compared as is.
 const toComparableFilters = (filters: Filter[]): Filter[] =>
   filters.map((filter) => {
     const asCodeFilter = fromStoredFilter(omit(filter, '$state'));
-    return (asCodeFilter && toStoredFilter(asCodeFilter)) ?? filter;
+    const storedFilter = asCodeFilter && toStoredFilter(asCodeFilter);
+    return storedFilter ? { ...filter, meta: storedFilter.meta } : filter;
   });
 
 // ad-hoc data view id can change, so we rather compare the ES|QL query itself here

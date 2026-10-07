@@ -629,6 +629,15 @@ describe('selectHasUnsavedChanges', () => {
       expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [pinnedFilter] })).toBe(true);
     });
 
+    it('detects a change to a query option that the HTTP API conversion drops', () => {
+      const slopFilter: Filter = {
+        ...uiFilter,
+        query: { match_phrase: { response: { query: '200', slop: 2 } } },
+      };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [slopFilter] })).toBe(false);
+    });
+
     it('detects a negated filter', () => {
       const negatedFilter: Filter = { ...uiFilter, meta: { ...uiFilter.meta, negate: true } };
 
