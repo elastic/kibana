@@ -14,7 +14,6 @@ import { Redirect, useLocation } from 'react-router-dom';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { parseTemplateYaml } from '@kbn/workflows-library';
 import type { WorkflowsImportRouteState } from '@kbn/workflows-ui';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
@@ -22,7 +21,6 @@ import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryImportPage.libraryBreadcrumb',
@@ -44,9 +42,6 @@ export const LibraryTemplateImportPage = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
   const setWorkflowsBreadcrumbs = useSetWorkflowsBreadcrumbs();
-  const showGraphPreview = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
 
   const location = useLocation<WorkflowsImportRouteState | undefined>();
   const customTemplateYaml = location.state?.customTemplateYaml;
@@ -133,7 +128,7 @@ export const LibraryTemplateImportPage = React.memo(() => {
         <TemplateDetail
           template={template}
           installMode="custom"
-          showGraphPreview={showGraphPreview}
+          showGraphPreview
           backButton={backButton}
         />
       </EuiFlexItem>

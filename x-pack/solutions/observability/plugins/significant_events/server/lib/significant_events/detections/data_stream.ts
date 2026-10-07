@@ -26,7 +26,15 @@ export const detectionsMappings = {
   },
 } satisfies MappingsDefinition;
 
-export type StoredDetection = GetFieldsOf<typeof detectionsMappings>;
+/** `_source`-only fields the Detection and Discovery workflows also persist (mappings are `dynamic: false`). */
+interface UnmappedDetectionFields {
+  stream_name?: string;
+  alert_index?: string;
+  workflow_execution_id?: string;
+  scanned_by?: string;
+}
+
+export type StoredDetection = GetFieldsOf<typeof detectionsMappings> & UnmappedDetectionFields;
 export type { Detection };
 
 export const detectionsDataStream: DataStreamDefinition<
