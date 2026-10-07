@@ -54,10 +54,14 @@ export class AlertStatusChangedWorkflowSubscriber {
       if (!client.isWorkflowsAvailable) return;
       await client.emitEvent(AlertStatusChangedTriggerId, event.payload);
     } catch (err) {
-      this.logger.error(
-        `[alert_status_changed_subscriber] Failed to emit for rule ${event.payload.rule.id}: ${
-          err instanceof Error ? err.message : String(err)
-        }`
+      // One line is logged per failed alert for now. A batched emit will make this one line per
+      // run. It is a warning, not an error, so an unavailable workflows service does not flood
+      // the error log.
+      this.logger.warn(
+        `[alert_status_changed_subscriber] Failed to emit for rule ${event.payload.rule.id} alert ${
+          event.payload.alert.uuid
+        }: ${err instanceof Error ? err.message : String(err)}`,
+        { error: { stack_trace: err instanceof Error ? err.stack : undefined } }
       );
     }
   }

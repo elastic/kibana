@@ -49,7 +49,9 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
 
   constructor(private readonly logger: Logger) {
     this.#emitter.on('error', (err: unknown) =>
-      this.logger.error(`[event_bus] Emitter error: ${err}`)
+      this.logger.error(`[event_bus] Emitter error: ${err}`, {
+        error: { stack_trace: err instanceof Error ? err.stack : undefined },
+      })
     );
   }
 
@@ -83,7 +85,8 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
           this.logger.error(
             `[event_bus] Handler for "${type}" threw: ${
               err instanceof Error ? err.message : String(err)
-            }`
+            }`,
+            { error: { stack_trace: err instanceof Error ? err.stack : undefined } }
           );
         }
       });
