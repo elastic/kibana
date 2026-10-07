@@ -5,33 +5,37 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { encode } from '@kbn/rison';
 import { AI_VALUE_PATH, APP_UI_ID } from '../../constants';
 
-const TimeRangeSchema = z.union([
-  z.object({
-    kind: z.literal('absolute'),
-    from: z.string().nonempty(),
-    to: z.string().nonempty(),
-  }),
-  z.object({
-    kind: z.literal('relative'),
-    fromStr: z.string().nonempty(),
-    toStr: z.string().nonempty(),
-  }),
-]);
+const TimeRangeSchema = lazySchema(() =>
+  z.union([
+    z.object({
+      kind: z.literal('absolute'),
+      from: z.string().nonempty(),
+      to: z.string().nonempty(),
+    }),
+    z.object({
+      kind: z.literal('relative'),
+      fromStr: z.string().nonempty(),
+      toStr: z.string().nonempty(),
+    }),
+  ])
+);
 
-const AIValueReportParamsSchema = z.object({
-  timeRange: TimeRangeSchema,
-  // These are only required when rendering in export mode (e.g. for PDF generation).
-  // When a user clicks "Open ..." from Reporting, we intentionally omit these to avoid
-  // forcing the destination page into export mode UI.
-  insight: z.string().nonempty().optional(),
-  reportDataHash: z.string().nonempty().optional(),
-});
+const AIValueReportParamsSchema = lazySchema(() =>
+  z.object({
+    timeRange: TimeRangeSchema,
+    // These are only required when rendering in export mode (e.g. for PDF generation).
+    // When a user clicks "Open ..." from Reporting, we intentionally omit these to avoid
+    // forcing the destination page into export mode UI.
+    insight: z.string().nonempty().optional(),
+    reportDataHash: z.string().nonempty().optional(),
+  })
+);
 
 export type AIValueReportParams = z.infer<typeof AIValueReportParamsSchema>;
 

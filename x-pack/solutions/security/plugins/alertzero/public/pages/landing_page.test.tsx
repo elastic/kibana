@@ -46,33 +46,13 @@ jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
+jest.mock('../service_accounts/ensure_worker_service_accounts', () => ({
+  ensureWorkerServiceAccounts: async (_http: unknown, _serviceAccounts: unknown, ids: string[]) =>
+    new Map(ids.map((id) => [id, { ok: true, serviceAccountId: 'account-a' }])),
+}));
 
 const mockUseWorkers = useWorkers as jest.Mock;
 
-const withServiceAccountPicker = <T extends { security?: object }>(core: T) => ({
-  ...core,
-  security: {
-    ...core.security,
-    uiApi: {
-      components: {
-        getServiceAccountPicker: ({
-          onSelect,
-        }: {
-          onSelect: (account: { id: string } | null) => void;
-        }) => (
-          <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
-            Select service account
-          </button>
-        ),
-      },
-    },
-  },
-});
-
-const selectServiceAccount = () => {
-  fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
-  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
-};
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
 // useUpdateWorker mock above is kept for completeness; OnboardingPage no longer calls it.
 
@@ -176,6 +156,27 @@ describe('LandingPage', () => {
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
     expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+  });
+
+  describe('onboarding condition', () => {
+    // The count endpoint does not filter by status, so closed investigations are part of `total`.
+    it.each([
+      { investigations: 0, workers: [{ enabled: false }, { enabled: false }], onboarding: true },
+      { investigations: 0, workers: [{ enabled: false }, { enabled: true }], onboarding: false },
+      { investigations: 1, workers: [{ enabled: false }, { enabled: false }], onboarding: false },
+      { investigations: 1, workers: [{ enabled: true }, { enabled: false }], onboarding: false },
+    ])(
+      'onboarding=$onboarding with $investigations investigations and workers $workers',
+      ({ investigations, workers, onboarding }) => {
+        mockUseWorkers.mockReturnValue(workersResult(workers));
+        mockUseInvestigationsCount.mockReturnValue(investigationsResult(investigations));
+
+        renderPage();
+
+        expect(screen.queryByText('AlertZero in 90 seconds') != null).toBe(onboarding);
+        expect(screen.queryByTestId('conversations-page') != null).toBe(!onboarding);
+      }
+    );
   });
 
   it('shows a loading spinner while workers are loading', () => {
@@ -283,14 +284,14 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = withServiceAccountPicker({
+    const core = {
       ...coreStart,
       http: {
         ...coreStart.http,
         get: jest.fn().mockResolvedValue(undefined),
         patch: httpPatch,
       },
-    });
+    };
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -324,7 +325,6 @@ describe('LandingPage', () => {
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
-    selectServiceAccount();
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait until all five PATCHes are in-flight (button becomes disabled).
@@ -385,14 +385,14 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = withServiceAccountPicker({
+    const core = {
       ...coreStart,
       http: {
         ...coreStart.http,
         get: jest.fn().mockResolvedValue(undefined),
         patch: httpPatch,
       },
-    });
+    };
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -420,7 +420,6 @@ describe('LandingPage', () => {
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
-    selectServiceAccount();
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait for all PATCHes to be in-flight.
