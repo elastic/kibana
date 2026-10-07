@@ -20,26 +20,33 @@ export interface ContractSpec {
   readonly dialect: SchemaDialect;
 }
 
-/** A schema with its JSON pointer into the spec document, so refs resolve where they are. */
+/**
+ * A schema with its JSON pointer into the spec document, so refs resolve where they are.
+ * OpenAPI 3.1 and later also allow the boolean schemas `true` and `false`.
+ */
 export interface SpecSchema {
   readonly pointer: string;
-  readonly schema: JsonSchema;
+  readonly schema: JsonSchema | boolean;
 }
 
-export type ParameterLocation = 'path' | 'query' | 'header' | 'cookie';
+/** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
+export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
+
+export interface MediaTypeContent {
+  readonly mediaType: string;
+  readonly schema?: SpecSchema;
+}
 
 export interface OperationParameter {
   readonly name: string;
   readonly in: ParameterLocation;
   readonly required: boolean;
+  /** `style` and `explode` only apply to parameters described by a `schema`, not `content`. */
   readonly style: string;
   readonly explode: boolean;
   readonly schema?: SpecSchema;
-}
-
-export interface MediaTypeContent {
-  readonly mediaType: string;
-  readonly schema?: SpecSchema;
+  /** The single media type of a parameter described by `content` instead of `schema`. */
+  readonly content?: MediaTypeContent;
 }
 
 export interface OperationHeader {
