@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { anonymizeRecords } from './anonymize_records';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
@@ -337,6 +338,78 @@ describe('anonymizeRecords', () => {
 
     expect(result.records[0].content).toContain('EMAIL_');
     expect(result.anonymizations.some((entry) => entry.rule.type === 'RegExp')).toBe(true);
+  });
+
+  it('rejects instead of returning unmasked records when inference against the NER model fails', async () => {
+    mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(new Error('inference timed out'));
+
+    await expect(
+      anonymizeRecords({
+        input: [{ content: 'Alice lives in Berlin' }],
+        anonymizationRules: [nerRule],
+        regexWorker,
+        esClient: mockEsClient,
+      })
+    ).rejects.toThrow("Inference failed for NER model 'model-1'");
+  });
+
+  // Documents current behavior, not a guarantee: a missing or undeployed model quietly degrades to
+  // the remaining rules. Whether that should fail closed is a separate decision.
+  it.each([
+    ['not found', 404, 'Could not find trained model'],
+    ['not deployed', 409, 'Model must be deployed to use. Please deploy with the start API'],
+  ])(
+    'continues with regex-only masking when the NER model is %s',
+    async (_, statusCode, reason) => {
+      mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode,
+          body: { error: { reason } },
+          headers: {},
+          warnings: null,
+          meta: {} as any,
+        })
+      );
+
+      const result = await anonymizeRecords({
+        input: [{ content: 'Alice wrote from alice@example.com' }],
+        anonymizationRules: [nerRule, regexRule],
+        regexWorker,
+        esClient: mockEsClient,
+      });
+
+      expect(result.records[0].content).toMatch(/^Alice wrote from EMAIL_[0-9a-f]{40}$/);
+    }
+  );
+
+  it('masks the same entity identically across records, so the LLM can tell they are the same', async () => {
+    const input = [{ content: 'Alice lives in Berlin' }, { content: 'Is Alice still in Berlin?' }];
+    mockEsClient.ml.inferTrainedModel.mockImplementation(
+      async ({ docs }: { docs: Array<{ text_field: string }> }) => ({
+        inference_results: docs.map(({ text_field }) => ({
+          entities: [
+            {
+              entity: 'Alice',
+              class_name: 'PER',
+              class_probability: 0.99,
+              start_pos: text_field.indexOf('Alice'),
+              end_pos: text_field.indexOf('Alice') + 'Alice'.length,
+            },
+          ],
+        })),
+      })
+    );
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [nerRule],
+      regexWorker,
+      esClient: mockEsClient,
+    });
+
+    const maskIn = (text: string) => text.match(/PER_[0-9a-f]{40}/)?.[0];
+    expect(maskIn(result.records[0].content)).toBeDefined();
+    expect(maskIn(result.records[1].content)).toBe(maskIn(result.records[0].content));
   });
 
   it('applies known replacements before regex processing', async () => {

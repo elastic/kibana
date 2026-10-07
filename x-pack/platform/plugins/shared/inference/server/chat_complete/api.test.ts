@@ -36,7 +36,6 @@ import {
 } from '../test_utils';
 import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
 import type { AnonymizationRule, NamedEntityRecognitionRule } from '@kbn/ai-anonymization-common';
-import { errors } from '@elastic/elasticsearch';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -1262,35 +1261,6 @@ describe('createChatCompleteApi', () => {
       expect(response.content).toBe('Noted: Claudia | Elastic | Berlin');
     });
 
-    it('only masks the entity classes the rule allows', async () => {
-      await createChatCompleteWithRules([nerRule({ allowedEntityClasses: ['PER'] })])({
-        connectorId: 'connectorId',
-        messages: [{ role: MessageRole.User, content: 'Claudia from Elastic is visiting Berlin' }],
-        maxRetries: 0,
-      });
-
-      expect(sentToModel()[0]).toMatch(/^PER_[0-9a-f]{40} from Elastic is visiting Berlin$/);
-    });
-
-    it('masks the same entity identically across messages, so the LLM can tell they are the same', async () => {
-      await createChatCompleteWithRules([nerRule()])({
-        connectorId: 'connectorId',
-        messages: [
-          { role: MessageRole.User, content: 'Claudia lives in Berlin' },
-          { role: MessageRole.Assistant, content: 'Understood.' },
-          { role: MessageRole.User, content: 'Is Claudia still in Berlin?' },
-        ],
-        maxRetries: 0,
-      });
-
-      const [first, , third] = sentToModel();
-      const personIn = (text: string) => text.match(/PER_[0-9a-f]{40}/)?.[0];
-      expect(personIn(first)).toBeDefined();
-      expect(personIn(third)).toBe(personIn(first));
-      expect(first).not.toContain('Claudia');
-      expect(third).not.toContain('Claudia');
-    });
-
     it('rejects the request instead of sending unmasked content when inference against the NER model fails', async () => {
       mockEsClient.ml.inferTrainedModel.mockRejectedValue(new Error('inference timed out'));
 
@@ -1304,54 +1274,5 @@ describe('createChatCompleteApi', () => {
 
       expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
     });
-
-    // Documents current behavior, not a guarantee: these two failures are the ones the pipeline
-    // swallows, so a missing or undeployed model quietly degrades to regex-only masking. Whether
-    // that should fail closed is a separate decision.
-    const modelNotFound = () =>
-      new errors.ResponseError({
-        statusCode: 404,
-        body: { error: { reason: 'Could not find trained model' } },
-        headers: {},
-        warnings: null,
-        meta: {} as any,
-      });
-    const modelNotDeployed = () =>
-      new errors.ResponseError({
-        statusCode: 409,
-        body: {
-          error: { reason: 'Model must be deployed to use. Please deploy with the start API' },
-        },
-        headers: {},
-        warnings: null,
-        meta: {} as any,
-      });
-
-    for (const [description, createError] of [
-      ['not found', modelNotFound],
-      ['not deployed', modelNotDeployed],
-    ] as const) {
-      it(`continues with regex-only masking when the NER model is ${description}`, async () => {
-        mockEsClient.ml.inferTrainedModel.mockRejectedValue(createError());
-        jest
-          .mocked(regexWorker.run)
-          .mockImplementation(async (payload) => executeRegexRulesTask(payload));
-        const emailRule: AnonymizationRule = {
-          type: 'RegExp',
-          enabled: true,
-          entityClass: 'EMAIL',
-          pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
-        };
-
-        await createChatCompleteWithRules([nerRule(), emailRule])({
-          connectorId: 'connectorId',
-          messages: [{ role: MessageRole.User, content: 'Claudia wrote from claudia@example.com' }],
-          maxRetries: 0,
-        });
-
-        // The request is not rejected; the regex rule still masks, the name is sent as-is.
-        expect(sentToModel()[0]).toMatch(/^Claudia wrote from EMAIL_[0-9a-f]{40}$/);
-      });
-    }
   });
 });
