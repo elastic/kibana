@@ -136,7 +136,7 @@ export default function (providerContext: FtrProviderContext) {
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          expect(await cisIntegration.getPostInstallModal()).to.not.be(undefined);
+          expect(await cisIntegration.getPostInstallModal()).to.be(true);
         });
 
         await cisIntegration.navigateToIntegrationCspList();
