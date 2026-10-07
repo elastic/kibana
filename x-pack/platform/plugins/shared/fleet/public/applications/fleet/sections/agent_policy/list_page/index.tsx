@@ -102,9 +102,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       : trimmedSearch;
   };
 
-  // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
-  const isNotHiddenPolicy = (policy: AgentPolicy) => policy.name !== OPAMP_POLICY_NAME;
-
   // Fetch agent policies
   const {
     isLoading,
@@ -120,6 +117,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
+
+  // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
+  const visiblePolicies = (agentPolicyData?.items ?? []).filter(
+    (policy) => policy.name !== OPAMP_POLICY_NAME
+  );
+  const visibleTotal =
+    (agentPolicyData?.total ?? 0) - ((agentPolicyData?.items.length ?? 0) - visiblePolicies.length);
 
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {
@@ -400,13 +404,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
           defaultMessage: 'List of agent policies',
         })}
-        items={agentPolicyData ? agentPolicyData.items.filter(isNotHiddenPolicy) : []}
+        items={visiblePolicies}
         itemId="id"
         columns={columns}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: agentPolicyData ? agentPolicyData.total : 0,
+          totalItemCount: visibleTotal,
           pageSizeOptions,
         }}
         sorting={{ sort: sorting }}
