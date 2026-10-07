@@ -298,6 +298,15 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the tabs bar menu to open', async () => {
       return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
     });
+
+    const recentlyClosedBackButton =
+      '[data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"] [data-test-subj="contextMenuPanelTitleButton"]';
+    if (await this.find.existsByCssSelector(recentlyClosedBackButton)) {
+      await (await this.find.byCssSelector(recentlyClosedBackButton)).click();
+      await this.retry.waitFor('the recently closed root menu to open', async () => {
+        return !(await this.find.existsByCssSelector(recentlyClosedBackButton));
+      });
+    }
   }
 
   public async closeTabsBarMenu() {
