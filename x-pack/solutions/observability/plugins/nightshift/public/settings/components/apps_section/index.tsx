@@ -10,17 +10,19 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCard,
   EuiConfirmModal,
   EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -127,42 +129,55 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
-          <EuiFlexGroup gutterSize="l" wrap>
-            <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
-              <EuiCard
-                display="subdued"
-                textAlign="left"
-                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
-                data-test-subj="streamsSlackAppCard"
-                title={i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
-                  defaultMessage: 'Elastic Slack App',
-                })}
-                description={i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
-                  defaultMessage:
-                    'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
-                })}
-                footer={
-                  <SlackCardFooter
-                    status={status}
-                    error={error}
-                    workspace={workspace}
-                    canEdit={canEdit}
-                    isMutating={isMutating}
-                    onConnect={connect}
-                    onConfirm={confirm}
-                    onDisconnect={disconnect}
-                  />
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiPanel hasBorder hasShadow={false} data-test-subj="streamsSlackAppCard">
+            <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoSlack" size="l" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h4>
+                    {i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
+                      defaultMessage: 'Elastic Slack App',
+                    })}
+                  </h4>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
+                    defaultMessage:
+                      "Ask @Elastic questions in connected Slack channels and send automation results there. This is separate from the Slack connector in Agent Builder and Workflows, which can search, read, and post to Slack with a token you provide, but doesn't add @Elastic to your channels.",
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              {status === RELAY_APP_CONNECTION_STATUS.connected && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="success" iconType="check">
+                    {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
+                      defaultMessage: 'Connected',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <SlackCardBody
+              status={status}
+              error={error}
+              workspace={workspace}
+              canEdit={canEdit}
+              isMutating={isMutating}
+              onConnect={connect}
+              onConfirm={confirm}
+              onDisconnect={disconnect}
+            />
+          </EuiPanel>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>
   );
 }
 
-interface SlackCardFooterProps {
+interface SlackCardBodyProps {
   status: RelayAppConnectionStatus;
   error?: string;
   workspace?: SlackAppWorkspace;
@@ -173,7 +188,7 @@ interface SlackCardFooterProps {
   onDisconnect: () => Promise<void>;
 }
 
-function SlackCardFooter({
+function SlackCardBody({
   status,
   error,
   workspace,
@@ -182,9 +197,7 @@ function SlackCardFooter({
   onConnect,
   onConfirm,
   onDisconnect,
-}: SlackCardFooterProps) {
-  const [showChannels, setShowChannels] = useState(false);
-
+}: SlackCardBodyProps) {
   if (status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation && workspace) {
     return (
       <ConfirmWorkspaceCallout
@@ -233,57 +246,27 @@ function SlackCardFooter({
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false} css={{ width: '100%' }}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="success" iconType="check">
-                    {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
-                      defaultMessage: 'Connected',
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DisconnectWorkspaceButton
-                    canEdit={canEdit}
-                    isMutating={isMutating}
-                    onDisconnect={onDisconnect}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType={showChannels ? 'chevronSingleDown' : 'chevronSingleRight'}
-                onClick={() => setShowChannels((value) => !value)}
-                aria-expanded={showChannels}
-                data-test-subj="streamsSlackAppToggleChannelsButton"
-              >
-                {showChannels
-                  ? i18n.translate('xpack.nightshift.settings.apps.slackHideChannels', {
-                      defaultMessage: 'Hide channels',
-                    })
-                  : i18n.translate('xpack.nightshift.settings.apps.slackShowChannels', {
-                      defaultMessage: 'Show channels',
-                    })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {showChannels && (
-          <EuiFlexItem grow={false} css={{ width: '100%' }}>
-            <SlackConnectionBindings canEdit={canEdit} />
+      <>
+        <EuiFlexGroup
+          responsive={false}
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
+            {workspace && <WorkspaceLabel workspace={workspace} />}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <DisconnectWorkspaceButton
+              canEdit={canEdit}
+              isMutating={isMutating}
+              onDisconnect={onDisconnect}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <SlackConnectionBindings canEdit={canEdit} />
+      </>
     );
   }
 
@@ -310,6 +293,29 @@ function SlackCardFooter({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+const toHost = (url: string): string => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+};
+
+function WorkspaceLabel({ workspace: { tenantKey, name, url } }: { workspace: SlackAppWorkspace }) {
+  const host = url ? toHost(url) : undefined;
+  return (
+    <EuiText size="s" data-test-subj="streamsSlackAppWorkspace">
+      <strong>
+        {i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceLabel', {
+          defaultMessage: 'Workspace:',
+        })}
+      </strong>{' '}
+      {name ?? host ?? tenantKey}
+      {name && host && <EuiTextColor color="subdued">{` (${host})`}</EuiTextColor>}
+    </EuiText>
   );
 }
 
@@ -362,16 +368,16 @@ function ConfirmWorkspaceCallout({
       size="s"
       data-test-subj="streamsSlackAppConfirmWorkspace"
       title={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceTitle', {
-        defaultMessage: 'Confirm the Slack workspace',
+        defaultMessage: 'Is this the right Slack workspace?',
       })}
       text={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceDescription', {
         defaultMessage:
-          'Slack authorized the workspace below. Check the workspace URL, since anyone can choose a workspace name. Confirm only if this is the workspace you meant to connect.',
+          'Check that the workspace URL is the one you meant to connect. Workspace names are not unique, so go by the URL.',
       })}
       actionProps={{
         primary: {
           children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceConfirm', {
-            defaultMessage: 'Confirm workspace',
+            defaultMessage: 'Connect workspace',
           }),
           // Failures are surfaced via a toast in useRelayAppConnection.
           onClick: () => void onConfirm(tenantKey).catch(() => undefined),
@@ -380,7 +386,7 @@ function ConfirmWorkspaceCallout({
         },
         secondary: {
           children: i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceReject', {
-            defaultMessage: 'Not my workspace',
+            defaultMessage: 'Wrong workspace, disconnect',
           }),
           onClick: () => void onReject().catch(() => undefined),
           isDisabled: !canEdit || isMutating,
