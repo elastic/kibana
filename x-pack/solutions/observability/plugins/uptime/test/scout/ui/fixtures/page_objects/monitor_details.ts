@@ -32,7 +32,9 @@ export class MonitorDetailsPage {
     const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
     await this.page.testSubj.click(`o11yFilterGroupButton-${filterType}`);
     for (const title of itemList) {
-      const item = this.page.locator(`li[title="${title}"]`);
+      // The option label is rendered on an inner span, while the checked state
+      // lives on the option element itself.
+      const item = this.page.locator(`li:has(span[title="${title}"])`);
       await expect(item).toBeVisible({ timeout: 10_000 });
       await item.click();
       await expect(item).toHaveAttribute('aria-checked', 'true', { timeout: 10_000 });

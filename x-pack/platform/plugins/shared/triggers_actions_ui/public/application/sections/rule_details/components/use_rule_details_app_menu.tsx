@@ -206,7 +206,7 @@ export const useRuleDetailsAppMenu = ({
         order: 40,
         overflow: true,
         label: VIEW_IN_DISCOVER_LABEL,
-        iconType: 'discoverApp',
+        iconType: 'productDiscover',
         href: http.basePath.prepend(discoverNavigation),
         testId: 'ruleDetails-viewInDiscover',
       });

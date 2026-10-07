@@ -17,23 +17,16 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { SEVERITY_DOT_COLOR, type SeverityDotColor } from '../common/severity';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import {
-  getInvestigationPrimaryText,
   getInvestigationRunTimeLabel,
   getInvestigationSubtitleText,
 } from './investigation_list_presentation';
 
 const MAX_VISIBLE_ENTITY_CHIPS = 3;
-
-const SEVERITY_DOT_COLOR_KEY: Record<Severity, 'danger' | 'warning' | 'primary' | 'success'> = {
-  '80-critical': 'danger',
-  '60-high': 'warning',
-  '40-medium': 'primary',
-  '20-low': 'success',
-};
 
 export interface InvestigationListItemProps {
   investigation: ListInvestigationItem;
@@ -71,7 +64,7 @@ export function InvestigationListItem({
     }
   };
 
-  const primaryText = getInvestigationPrimaryText(investigation);
+  const primaryText = investigation.title;
   const subtitleText =
     getInvestigationSubtitleText(investigation) ??
     getInvestigationRunTimeLabel({
@@ -80,8 +73,8 @@ export function InvestigationListItem({
       status: investigation.status,
     });
 
-  const severityDotColorKey =
-    investigation.severity != null ? SEVERITY_DOT_COLOR_KEY[investigation.severity] : 'primary';
+  const severityDotColor =
+    investigation.severity != null ? SEVERITY_DOT_COLOR[investigation.severity] : 'primary';
 
   return (
     <div
@@ -173,7 +166,7 @@ export function InvestigationListItem({
         {/* entity chips */}
         <EntityChips
           entities={investigation.impact?.entities}
-          severityColorKey={severityDotColorKey}
+          severityColorKey={severityDotColor}
         />
       </EuiFlexGroup>
     </div>
@@ -185,7 +178,7 @@ function EntityChips({
   severityColorKey,
 }: {
   entities?: Array<{ name: string; type?: string }>;
-  severityColorKey: 'danger' | 'warning' | 'primary' | 'success';
+  severityColorKey: SeverityDotColor | 'primary';
 }): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
 
@@ -193,7 +186,11 @@ function EntityChips({
 
   const visible = entities.slice(0, MAX_VISIBLE_ENTITY_CHIPS);
   const overflow = entities.length - visible.length;
-  const dotColor = euiTheme.colors[severityColorKey];
+  // Badge color names (risk/neutral) live on `colors.severity`, not the top-level palette.
+  const dotColor =
+    severityColorKey === 'primary'
+      ? euiTheme.colors.primary
+      : euiTheme.colors.severity[severityColorKey];
 
   return (
     <EuiFlexItem grow={false}>

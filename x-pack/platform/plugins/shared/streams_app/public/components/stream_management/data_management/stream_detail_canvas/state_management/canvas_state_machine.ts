@@ -10,43 +10,50 @@ import { i18n } from '@kbn/i18n';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   type ActionArgs,
+  and,
   assign,
   fromCallback,
   fromPromise,
   type MachineImplementationsFrom,
+  not,
   raise,
   sendTo,
   setup,
+  stateIn,
 } from 'xstate';
+import {
+  createDestinationsMachineImplementations,
+  destinationsStateMachine,
+} from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
+import { getUnitDestinations } from '../../../../streams_layout/destinations/destination_models';
 import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
 } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
-import type { SourcesUnitDefinition } from '../../../../streams_layout/sources/types';
+import { getUnitSources } from '../../../../streams_layout/sources/source_models';
 import {
-  createEmptyUnitDefinition,
-  mockUnitDefinitionRepository,
-  toSourcesUnitDefinition,
-  type UnitDefinitionRepository,
-} from '../../../../streams_layout/sources/unit_definition_repository';
+  createDefaultUnit,
+  type Unit,
+  type UnitRepository,
+} from '../../../../../services/unit_repository';
+import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type { CanvasStateServiceDeps, CanvasUrlInput, CanvasUrlEvent, CanvasState } from './types';
+import {
+  defaultCanvasUrlState,
+  type CanvasCreateHistoryRef,
+  type CanvasStateServiceDeps,
+  type CanvasUrlInput,
+  type CanvasUrlEvent,
+  type CanvasState,
+} from './types';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
-
-const defaultUrlState = {
-  flyoutName: null,
-  flyoutTab: null,
-};
-
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('The unit definition request failed.');
 
 export const canvasStateMachine = setup({
   types: {
@@ -57,6 +64,7 @@ export const canvasStateMachine = setup({
   actors: {
     initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     sourcesMachine: getPlaceholderFor(createSourcesMachineActor),
+    destinationsMachine: getPlaceholderFor(createDestinationsMachineActor),
     loadUnitDefinition: getPlaceholderFor(createLoadUnitDefinitionActor),
     validateUnitDefinition: getPlaceholderFor(createValidateUnitDefinitionActor),
     persistUnitDefinition: getPlaceholderFor(createPersistUnitDefinitionActor),
@@ -81,27 +89,40 @@ export const canvasStateMachine = setup({
       if (event.type !== 'unit.changed') {
         return {};
       }
-      const nextUnit = toSourcesUnitDefinition(event.unitDefinition);
+      const nextUnit = event.unitDefinition;
+      if ('sourceIds' in event || 'destinationIds' in event) {
+        return {
+          nextUnit,
+          savingUnit: nextUnit,
+          savingComponentIds: 'sourceIds' in event ? event.sourceIds : event.destinationIds,
+          savingComponentKind:
+            'sourceIds' in event ? ('source' as const) : ('destination' as const),
+          savingComponentIntent: event.intent,
+          error: undefined,
+        };
+      }
       return {
         nextUnit,
         savingUnit: nextUnit,
-        savingSourceId: event.sourceId,
-        savingSourceIntent: event.intent,
+        savingComponentIds: undefined,
+        savingComponentKind: undefined,
+        savingComponentIntent: 'connect' as const,
         error: undefined,
       };
     }),
     storeNextUnit: assign(({ event }) =>
       event.type === 'unit.stage'
         ? {
-            nextUnit: toSourcesUnitDefinition(event.unitDefinition),
+            nextUnit: event.unitDefinition,
             error: undefined,
           }
         : {}
     ),
     prepareUnitSave: assign({
       savingUnit: ({ context }) => context.nextUnit,
-      savingSourceId: undefined,
-      savingSourceIntent: undefined,
+      savingComponentIds: undefined,
+      savingComponentKind: undefined,
+      savingComponentIntent: undefined,
       error: undefined,
     }),
     storeLoadedUnitDefinition: assign(({ context, event }) =>
@@ -110,8 +131,9 @@ export const canvasStateMachine = setup({
             unit: event.output,
             nextUnit: event.output,
             savingUnit: undefined,
-            savingSourceId: undefined,
-            savingSourceIntent: undefined,
+            savingComponentIds: undefined,
+            savingComponentKind: undefined,
+            savingComponentIntent: undefined,
             error: undefined,
           }
         : context
@@ -120,13 +142,13 @@ export const canvasStateMachine = setup({
       if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
         return {};
       }
-      const hasSubsequentChanges = context.nextUnit !== context.savingUnit;
       return {
         unit: event.output.unitDefinition,
-        nextUnit: hasSubsequentChanges ? context.nextUnit : event.output.unitDefinition,
+        nextUnit: event.output.unitDefinition,
         savingUnit: undefined,
-        savingSourceId: undefined,
-        savingSourceIntent: undefined,
+        savingComponentIds: undefined,
+        savingComponentKind: undefined,
+        savingComponentIntent: undefined,
         error: undefined,
       };
     }),
@@ -135,65 +157,157 @@ export const canvasStateMachine = setup({
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.validateUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? toError(event.error)
+          ? getFormattedError(event.error)
           : undefined,
     }),
-    rollbackFailedSourceSave: assign(({ context }) =>
-      context.savingSourceId
-        ? {
-            nextUnit: context.unit,
-            savingUnit: undefined,
-          }
-        : {}
-    ),
+    rollbackToPersistedUnit: assign({
+      nextUnit: ({ context }) => context.unit,
+      savingUnit: undefined,
+    }),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
-    syncLoadedUnitDefinition: sendTo(
+    notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
+    holdCreateHistory: getPlaceholderFor(createHoldCreateHistoryAction),
+    commitCreateHistory: getPlaceholderFor(createCommitCreateHistoryAction),
+    discardCreateHistory: getPlaceholderFor(createDiscardCreateHistoryAction),
+    notifySourcesUnitSaveStarted: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifyDestinationsUnitSaveStarted: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifySourcesUnitSaveFinished: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
+    notifyDestinationsUnitSaveFinished: sendTo(
+      ({ context }) => context.destinationsRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
+    syncLoadedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
       ({ event }) => {
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           throw new Error('Expected a loaded unit definition');
         }
-        return { type: 'unit.loaded', unitDefinition: event.output };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output };
       }
     ),
-    syncSavedUnitDefinition: sendTo(
+    syncLoadedUnitToDestinations: sendTo(
+      ({ context }) => context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
+          throw new Error('Expected a loaded unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.output };
+      }
+    ),
+    syncStagedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
+      ({ event }) => {
+        if (event.type !== 'unit.stage') {
+          throw new Error('Expected a staged unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+      }
+    ),
+    syncStagedUnitToDestinations: sendTo(
+      ({ context }) => context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'unit.stage') {
+          throw new Error('Expected a staged unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+      }
+    ),
+    syncSavedUnitToOriginator: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.destinationsRef
+          : context.sourcesRef,
       ({ context, event }) => {
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        return event.output.sourceId
-          ? {
-              type: 'unit.persisted',
-              sourceId: event.output.sourceId,
-              unitDefinition: event.output.unitDefinition,
-            }
-          : { type: 'unit.loaded', unitDefinition: context.nextUnit };
+        const componentIds = context.savingComponentIds;
+        if (context.savingComponentKind === 'source' && componentIds?.length) {
+          return {
+            type: 'unit.persisted' as const,
+            sourceIds: componentIds,
+            unitDefinition: event.output.unitDefinition,
+          };
+        }
+        if (context.savingComponentKind === 'destination' && componentIds?.length) {
+          return {
+            type: 'unit.persisted' as const,
+            destinationIds: componentIds,
+            unitDefinition: event.output.unitDefinition,
+          };
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
       }
     ),
-    syncSourceSaveFailure: sendTo(
-      ({ context }) => context.sourcesRef,
-      ({ context, event }) => {
-        if (!context.savingSourceId || !context.savingSourceIntent) {
-          throw new Error('Expected a source mutation to be saving');
+    syncSavedUnitToPeer: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.sourcesRef
+          : context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
+          throw new Error('Expected a persisted unit definition');
         }
-        return {
-          type: 'unit.persistenceFailed',
-          sourceId: context.savingSourceId,
-          unitDefinition: context.unit,
-          message:
-            event.type === 'xstate.error.actor.validateUnitDefinition' ||
-            event.type === 'xstate.error.actor.persistUnitDefinition'
-              ? toError(event.error).message
-              : 'Unable to save the source.',
-          intent: context.savingSourceIntent,
-        };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+      }
+    ),
+    syncComponentSaveFailure: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.destinationsRef
+          : context.sourcesRef,
+      ({ context, event }) => {
+        const intent = context.savingComponentIntent;
+        const componentIds = context.savingComponentIds ?? [];
+        if (
+          !context.savingComponentKind ||
+          componentIds.length === 0 ||
+          (intent !== 'create' && intent !== 'delete')
+        ) {
+          throw new Error('Expected a unit component mutation to be saving');
+        }
+        const message =
+          event.type === 'xstate.error.actor.validateUnitDefinition' ||
+          event.type === 'xstate.error.actor.persistUnitDefinition'
+            ? getFormattedError(event.error).message
+            : i18n.translate('xpack.streams.streamDetailCanvas.unitSaveFailedErrorMessage', {
+                defaultMessage: 'Unable to save the streams configuration.',
+              });
+        return context.savingComponentKind === 'source'
+          ? {
+              type: 'unit.persistenceFailed' as const,
+              sourceIds: componentIds,
+              unitDefinition: context.unit,
+              message,
+              intent,
+            }
+          : {
+              type: 'unit.persistenceFailed' as const,
+              destinationIds: componentIds,
+              unitDefinition: context.unit,
+              message,
+              intent,
+            };
       }
     ),
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
-    isSavingSourceChange: ({ context }) => context.savingSourceId !== undefined,
+    canEditUnit: and([
+      not(stateIn({ ready: { unit: 'validating' } })),
+      not(stateIn({ ready: { unit: 'persisting' } })),
+    ]),
+    isSavingComponentChange: ({ context }) => (context.savingComponentIds?.length ?? 0) > 0,
+    isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
   },
 }).createMachine({
   id: 'canvasMachine',
@@ -224,7 +338,8 @@ export const canvasStateMachine = setup({
           actions: 'storeNodePositions',
         },
         'unit.stage': {
-          actions: 'storeNextUnit',
+          guard: 'canEditUnit',
+          actions: ['storeNextUnit', 'syncStagedUnitToSources', 'syncStagedUnitToDestinations'],
         },
         'flyout.open': {
           actions: [
@@ -270,18 +385,38 @@ export const canvasStateMachine = setup({
             raise({ type: 'url.sync' }),
           ],
         },
+        'search.change': {
+          actions: [
+            {
+              type: 'storeUrlState',
+              params: ({ event, context }) => ({
+                urlState: {
+                  ...context.urlState,
+                  query: event.query || null,
+                },
+              }),
+            },
+            // Typing should not leave one history entry per keystroke.
+            raise({ type: 'url.sync', replace: true }),
+          ],
+        },
       },
       states: {
         unit: {
           initial: 'loading',
           states: {
             loading: {
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'loadUnitDefinition',
                 src: 'loadUnitDefinition',
                 onDone: {
                   target: 'ready',
-                  actions: ['storeLoadedUnitDefinition', 'syncLoadedUnitDefinition'],
+                  actions: [
+                    'storeLoadedUnitDefinition',
+                    'syncLoadedUnitToSources',
+                    'syncLoadedUnitToDestinations',
+                  ],
                 },
                 onError: {
                   target: 'loadFailed',
@@ -295,10 +430,11 @@ export const canvasStateMachine = setup({
               },
             },
             ready: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
@@ -309,12 +445,17 @@ export const canvasStateMachine = setup({
               },
             },
             reloading: {
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'loadUnitDefinition',
                 src: 'loadUnitDefinition',
                 onDone: {
                   target: 'ready',
-                  actions: ['storeLoadedUnitDefinition', 'syncLoadedUnitDefinition'],
+                  actions: [
+                    'storeLoadedUnitDefinition',
+                    'syncLoadedUnitToSources',
+                    'syncLoadedUnitToDestinations',
+                  ],
                 },
                 onError: {
                   target: 'reloadFailed',
@@ -323,22 +464,17 @@ export const canvasStateMachine = setup({
               },
             },
             reloadFailed: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.reload': { target: 'reloading' },
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
               },
             },
             validating: {
-              on: {
-                'unit.changed': {
-                  target: 'validating',
-                  reenter: true,
-                  actions: 'prepareChangedUnitSave',
-                },
-              },
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'validateUnitDefinition',
                 src: 'validateUnitDefinition',
@@ -348,14 +484,20 @@ export const canvasStateMachine = setup({
                 },
                 onError: [
                   {
-                    guard: 'isSavingSourceChange',
+                    guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
+                      'discardCreateHistory',
                       'storeUnitFailure',
-                      'syncSourceSaveFailure',
-                      'rollbackFailedSourceSave',
+                      'rollbackToPersistedUnit',
+                      'syncComponentSaveFailure',
                       'notifyUnitFailure',
                     ],
+                  },
+                  {
+                    guard: 'isSavingConnection',
+                    target: 'saveFailed',
+                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
                   },
                   {
                     target: 'saveFailed',
@@ -365,34 +507,41 @@ export const canvasStateMachine = setup({
               },
             },
             persisting: {
-              on: {
-                'unit.changed': {
-                  target: 'validating',
-                  reenter: true,
-                  actions: 'prepareChangedUnitSave',
-                },
-              },
               invoke: {
                 id: 'persistUnitDefinition',
                 src: 'persistUnitDefinition',
-                input: ({ context }) => ({
-                  unitDefinition: context.savingUnit ?? context.nextUnit,
-                  sourceId: context.savingSourceId,
-                }),
+                input: ({ context }) => context.savingUnit ?? context.nextUnit,
                 onDone: {
                   target: 'ready',
-                  actions: ['storePersistedUnitDefinition', 'syncSavedUnitDefinition'],
+                  // Sync while the saving component is still set. storePersistedUnitDefinition
+                  // clears it, and a later sync would tell the source or destination
+                  // machine the unit merely reloaded, leaving its create flow on "saving".
+                  actions: [
+                    'syncSavedUnitToOriginator',
+                    'syncSavedUnitToPeer',
+                    'notifyUnitSaved',
+                    // Commit while the create intent is still set. storePersistedUnitDefinition
+                    // clears it.
+                    'commitCreateHistory',
+                    'storePersistedUnitDefinition',
+                  ],
                 },
                 onError: [
                   {
-                    guard: 'isSavingSourceChange',
+                    guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
+                      'discardCreateHistory',
                       'storeUnitFailure',
-                      'syncSourceSaveFailure',
-                      'rollbackFailedSourceSave',
+                      'rollbackToPersistedUnit',
+                      'syncComponentSaveFailure',
                       'notifyUnitFailure',
                     ],
+                  },
+                  {
+                    guard: 'isSavingConnection',
+                    target: 'saveFailed',
+                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
                   },
                   {
                     target: 'saveFailed',
@@ -402,10 +551,11 @@ export const canvasStateMachine = setup({
               },
             },
             saveFailed: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.changed': {
                   target: 'validating',
-                  actions: 'prepareChangedUnitSave',
+                  actions: ['prepareChangedUnitSave', 'holdCreateHistory'],
                 },
                 'unit.save': {
                   guard: 'hasUnsavedUnitChanges',
@@ -421,14 +571,15 @@ export const canvasStateMachine = setup({
     },
   },
   context: ({ spawn, self }) => {
-    const unitDefinition = createEmptyUnitDefinition();
+    const unitDefinition = createDefaultUnit();
     return {
-      urlState: defaultUrlState,
+      urlState: defaultCanvasUrlState,
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
-      savingSourceId: undefined,
-      savingSourceIntent: undefined,
+      savingComponentIds: undefined,
+      savingComponentKind: undefined,
+      savingComponentIntent: undefined,
       // Kept in the Canvas parent so API-backed coordinates can be loaded and
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
@@ -437,6 +588,13 @@ export const canvasStateMachine = setup({
         input: {
           unitDefinition,
           metadataBySourceId: {},
+          includeUnconfiguredNodeOnCreate: true,
+          parentRef: self,
+        },
+      }),
+      destinationsRef: spawn('destinationsMachine', {
+        input: {
+          unitDefinition,
           includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
@@ -450,10 +608,13 @@ export function createCanvasMachineImplementations({
   urlStateStorageContainer,
   apiKeyGenerationDeps,
   loadSourceEnvironment,
-  loadUnitDefinition = mockUnitDefinitionRepository.load,
+  loadUnitDefinition,
   validateUnitDefinition = validateCanvasUnitDefinition,
-  persistUnitDefinition = mockUnitDefinitionRepository.persist,
-}: CanvasStateServiceDeps): MachineImplementationsFrom<typeof canvasStateMachine> {
+  persistUnitDefinition,
+  createHistoryRef,
+}: CanvasStateServiceDeps & {
+  createHistoryRef: CanvasCreateHistoryRef;
+}): MachineImplementationsFrom<typeof canvasStateMachine> {
   return {
     actors: {
       initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
@@ -462,6 +623,7 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
+      destinationsMachine: createDestinationsMachineActor({ core }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -469,6 +631,10 @@ export function createCanvasMachineImplementations({
     actions: {
       syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
       notifyUnitFailure: createNotifyUnitFailureAction({ core }),
+      notifyUnitSaved: createNotifyUnitSavedAction({ core }),
+      holdCreateHistory: createHoldCreateHistoryAction(createHistoryRef),
+      commitCreateHistory: createCommitCreateHistoryAction(createHistoryRef),
+      discardCreateHistory: createDiscardCreateHistoryAction(createHistoryRef),
     },
   };
 }
@@ -487,20 +653,36 @@ function createSourcesMachineActor({
   );
 }
 
+function createDestinationsMachineActor({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+  return destinationsStateMachine.provide(
+    createDestinationsMachineImplementations({
+      toasts: core.notifications.toasts,
+    })
+  );
+}
+
 function createLoadUnitDefinitionActor({
   loadUnitDefinition,
 }: {
-  loadUnitDefinition: UnitDefinitionRepository['load'];
+  loadUnitDefinition: UnitRepository['load'];
 }) {
   return fromPromise(async () => loadUnitDefinition());
 }
 
-async function validateCanvasUnitDefinition(unitDefinition: SourcesUnitDefinition): Promise<void> {
-  const sourceIds = unitDefinition.sources.map(({ id }) => id);
+async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void> {
+  const sourceIds = getUnitSources(unitDefinition).map(({ id }) => id);
   if (new Set(sourceIds).size !== sourceIds.length) {
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.duplicateSourceIdsErrorMessage', {
         defaultMessage: 'Source IDs must be unique.',
+      })
+    );
+  }
+  const destinationIds = getUnitDestinations(unitDefinition).map(({ id }) => id);
+  if (new Set(destinationIds).size !== destinationIds.length) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.duplicateDestinationIdsErrorMessage', {
+        defaultMessage: 'Destination IDs must be unique.',
       })
     );
   }
@@ -511,35 +693,77 @@ function createValidateUnitDefinitionActor({
 }: {
   validateUnitDefinition: NonNullable<CanvasStateServiceDeps['validateUnitDefinition']>;
 }) {
-  return fromPromise(async ({ input }: { input: SourcesUnitDefinition }) =>
-    validateUnitDefinition(input)
-  );
+  return fromPromise(async ({ input }: { input: Unit }) => validateUnitDefinition(input));
 }
 
 function createPersistUnitDefinitionActor({
   persistUnitDefinition,
 }: {
-  persistUnitDefinition: UnitDefinitionRepository['persist'];
+  persistUnitDefinition: UnitRepository['persist'];
 }) {
-  return fromPromise(
-    async ({ input }: { input: { unitDefinition: SourcesUnitDefinition; sourceId?: string } }) => ({
-      unitDefinition: await persistUnitDefinition(input.unitDefinition),
-      sourceId: input.sourceId,
-    })
-  );
+  return fromPromise(async ({ input }: { input: Unit }) => ({
+    unitDefinition: await persistUnitDefinition(input),
+  }));
+}
+
+function createHoldCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.hold();
+    }
+  };
+}
+
+function createCommitCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.commit();
+    }
+  };
+}
+
+function createDiscardCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'create') {
+      createHistoryRef.current.discard();
+    }
+  };
+}
+
+function createNotifyUnitSavedAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    // Source and destination creates already toast their own success. This confirms
+    // the canvas Save action, which is the only persist with no component attached.
+    if (context.savingComponentKind || context.savingComponentIntent) {
+      return;
+    }
+    core.notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailCanvas.unitSavedSuccessTitle', {
+        defaultMessage: 'Unit saved successfully',
+      }),
+    });
+  };
 }
 
 function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
-  return ({ event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+  return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     if (
       event.type === 'xstate.error.actor.loadUnitDefinition' ||
       event.type === 'xstate.error.actor.validateUnitDefinition' ||
       event.type === 'xstate.error.actor.persistUnitDefinition'
     ) {
-      core.notifications.toasts.addError(toError(event.error), {
-        title: i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
-          defaultMessage: 'Unable to update the sources configuration',
-        }),
+      core.notifications.toasts.addError(getFormattedError(event.error), {
+        title:
+          context.savingComponentKind === 'destination'
+            ? i18n.translate(
+                'xpack.streams.streamDetailCanvas.destinationsConfigurationErrorMessage',
+                {
+                  defaultMessage: 'Unable to update the destinations configuration',
+                }
+              )
+            : i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
+                defaultMessage: 'Unable to update the sources configuration',
+              }),
       });
     }
   };
@@ -548,9 +772,9 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
 function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
-  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+  return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     urlStateStorageContainer.set(CANVAS_URL_STATE_KEY, context.urlState, {
-      replace: false,
+      replace: event.type === 'url.sync' && event.replace === true,
     });
   };
 }
@@ -565,18 +789,21 @@ function createUrlInitializerActor({
     if (!urlStateValues) {
       return sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
 
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      urlState.data.flyoutTab =
-        urlState.data.flyoutName && !urlState.data.flyoutTab ? 'overview' : urlState.data.flyoutTab;
+      const { flyoutName, flyoutTab, query } = urlState.data;
       sendBack({
         type: 'url.init',
-        urlState: urlState.data,
+        urlState: {
+          flyoutName,
+          flyoutTab: flyoutName && !flyoutTab ? 'overview' : flyoutTab,
+          query: query || null,
+        },
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -584,7 +811,7 @@ function createUrlInitializerActor({
       );
       sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
   });

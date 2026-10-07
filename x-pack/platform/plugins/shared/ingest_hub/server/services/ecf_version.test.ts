@@ -7,7 +7,7 @@
 
 import fetch from 'node-fetch';
 
-import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/ecf_template_version';
+import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_template_version';
 import { getLatestEcfVersion } from './ecf_version';
 
 jest.mock('node-fetch');

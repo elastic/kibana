@@ -176,6 +176,9 @@ list route **annotates** each item with `isRead` and returns the same order to e
   marking it read again updates the override timestamp (i.e. this is not "mute")
 - Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
   rather than a 403. The mark routes reject them, since there is no read state to write.
+- `_unread_status` answers "is there anything unread" as a single boolean for the bell badge,
+  resolved against the same collapsed representatives as the list. It is a read, so it stamps
+  `readAllBefore` for a first-time user just as the list does.
 
 ## Submitting notifications (`forType`)
 
@@ -231,6 +234,49 @@ Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
 ```
 GET /.kibana-notification-center/_search
 ```
+
+## Seeding a local dev stack
+
+`./scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
+the list route and the bell have something to show without waiting for a real producer.
+
+It is a dev script: it assumes Kibana is already running with
+`xpack.notificationCenter.enabled: true`, and that you pass it a matching pair of URLs. Point it
+somewhere else and it will happily seed somewhere else.
+
+```bash
+SEED=x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js
+
+node $SEED --help
+
+# stateful
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
+  --include-unregistered
+
+# serverless: its own credentials, and Elasticsearch on HTTPS
+node $SEED --kibana-url http://localhost:5601 --es-url https://localhost:9200 \
+  --es-username elastic_serverless
+
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 --clean
+```
+
+`--kibana-url` must include the base path, which a dev Kibana mounts itself under. The script
+reads the list route once before writing anything: that is what makes the plugin create the data
+stream, and writing first would let Elasticsearch auto-create a plain index under the same name,
+permanently blocking the plugin from creating it.
+
+The credentials are used for both Elasticsearch and Kibana, which is why serverless needs
+`elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still works.
+
+The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
+writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
+
+Every fixture is backdated, and a user's catch-up marker is stamped at `now` the first time they
+open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
+read. The script therefore logs in as the Elasticsearch user and backdates that marker to 30 days
+ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
+(`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user profile:
+if you browse Kibana as somebody other than `--es-username`, their bell is unaffected.
 
 ## Running tests
 

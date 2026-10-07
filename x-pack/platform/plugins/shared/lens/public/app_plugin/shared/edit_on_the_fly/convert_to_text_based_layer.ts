@@ -13,6 +13,8 @@ import type {
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
+  IndexPattern,
+  OriginalColumn,
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPrivateState,
@@ -39,6 +41,79 @@ const getMetaTypeFromDataType = (dataType: DataType): DatatableColumnType => {
     return 'number';
   }
   return dataType;
+};
+
+/**
+ * Builds a single text-based column for one original form-based column, keeping its
+ * original column ID so the visualization can still reference it.
+ */
+const buildTextBasedColumn = ({
+  sourceColumn,
+  esqlFieldName,
+  layer,
+  indexPattern,
+}: {
+  sourceColumn: OriginalColumn;
+  esqlFieldName: string;
+  layer: FormBasedLayer;
+  indexPattern: IndexPattern | undefined;
+}): TextBasedLayerColumn => {
+  const dataType = sourceColumn.dataType ?? 'string';
+
+  const column: TextBasedLayerColumn = {
+    columnId: sourceColumn.id,
+    fieldName: esqlFieldName,
+    meta: {
+      type: getMetaTypeFromDataType(dataType),
+    },
+  };
+
+  const hasCustomLabel = Boolean(sourceColumn.customLabel);
+
+  column.customLabel = true; // set always to true so we can use the default label as a custom label
+  if (hasCustomLabel) {
+    column.label = sourceColumn.label;
+    // This is a sanity check to satisfy TS for the incoming form based column.
+  } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
+    // use the generated default label
+    column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
+      layer.columns[sourceColumn.id],
+      layer.columns,
+      indexPattern
+    );
+  }
+
+  // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
+  // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
+  const originalCol = layer.columns[sourceColumn.id] as
+    | { params?: { format?: ValueFormatConfig } }
+    | undefined;
+  const hadUserFormat = Boolean(
+    originalCol?.params && 'format' in originalCol.params && originalCol.params.format !== undefined
+  );
+
+  // Only set format when the user had explicitly configured it on the form-based column.
+  // If it was default (no user override), leave column.params.format unset so it stays default.
+  if (hadUserFormat) {
+    let format = sourceColumn.format;
+    if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+      const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+      if (fieldFormat?.id) {
+        format = fieldFormat as typeof sourceColumn.format;
+      }
+    }
+    if (format?.id !== undefined) {
+      column.params = { format: format as ValueFormatConfig };
+    }
+  }
+
+  // ES|QL date histograms drop partial buckets unless told otherwise, while form-based ones keep
+  // them by default. Carry the effective source value so the converted chart shows the same buckets.
+  if (sourceColumn.operationType === 'date_histogram') {
+    column.params = { ...column.params, dropPartials: Boolean(sourceColumn.dropPartials) };
+  }
+
+  return column;
 };
 
 /**
@@ -98,63 +173,13 @@ function buildTextBasedState(
     // Build new text-based columns from esAggsIdMap
     // Keep original column IDs so visualizations can still reference them
     // sourceColumn from esAggsIdMap already has properly computed label (via getDefaultLabel) and format
-    const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).map(
-      ([esqlFieldName, originalColumns]) => {
-        const sourceColumn = originalColumns[0];
-        const dataType = sourceColumn.dataType ?? 'string';
-        const metaType = getMetaTypeFromDataType(dataType);
-
-        const column: TextBasedLayerColumn = {
-          columnId: sourceColumn.id,
-          fieldName: esqlFieldName,
-          meta: {
-            type: metaType,
-          },
-        };
-
-        const hasCustomLabel = Boolean(sourceColumn.customLabel);
-
-        column.customLabel = true; // set always to true so we can use the default label as a custom label
-        if (hasCustomLabel) {
-          column.label = sourceColumn.label;
-          // This is a sanity check to satisfy TS for the incoming form based column.
-        } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
-          // use the generated default label
-          column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
-            layer.columns[sourceColumn.id],
-            layer.columns,
-            indexPattern
-          );
-        }
-
-        // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
-        // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
-        const originalCol = layer.columns[sourceColumn.id] as
-          | { params?: { format?: ValueFormatConfig } }
-          | undefined;
-        const hadUserFormat = Boolean(
-          originalCol?.params &&
-            'format' in originalCol.params &&
-            originalCol.params.format !== undefined
-        );
-
-        // Only set format when the user had explicitly configured it on the form-based column.
-        // If it was default (no user override), leave column.params.format unset so it stays default.
-        if (hadUserFormat) {
-          let format = sourceColumn.format;
-          if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
-            const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
-            if (fieldFormat?.id) {
-              format = fieldFormat as typeof sourceColumn.format;
-            }
-          }
-          if (format?.id !== undefined) {
-            column.params = { format: format as ValueFormatConfig };
-          }
-        }
-
-        return column;
-      }
+    // Several Lens columns can share one ES|QL column (e.g. duplicate metrics), so each entry
+    // of the map yields one text-based column per original column.
+    const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).flatMap(
+      ([esqlFieldName, originalColumns]) =>
+        originalColumns.map((sourceColumn) =>
+          buildTextBasedColumn({ sourceColumn, esqlFieldName, layer, indexPattern })
+        )
     );
 
     newLayers[layerId] = {
@@ -189,7 +214,10 @@ export function convertFormBasedToTextBasedLayer({
   datasourceStates,
   framePublicAPI,
 }: ConvertToEsqlParams): TypedLensSerializedState['attributes'] | undefined {
-  if (layersToConvert.length === 0) {
+  const validLayersToConvert = layersToConvert.filter(
+    (layer) => layer.type === 'data' && layer.isConvertibleToEsql && layer.query.trim().length > 0
+  );
+  if (validLayersToConvert.length === 0) {
     return undefined;
   }
 
@@ -199,7 +227,7 @@ export function convertFormBasedToTextBasedLayer({
   }
 
   const newDatasourceState = buildTextBasedState(
-    layersToConvert,
+    validLayersToConvert,
     formBasedState.layers,
     framePublicAPI
   );
@@ -209,13 +237,23 @@ export function convertFormBasedToTextBasedLayer({
   }
 
   // Ensure the converted layer carries an ES|QL query
-  const firstLayerId = layersToConvert[0].id;
-  if (!newDatasourceState.layers[firstLayerId]?.query) {
+  const firstLayerId = validLayersToConvert[0].id;
+  const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
+
+  if (!esqlQuery?.esql.trim()) {
     return undefined;
   }
 
-  // Build new attributes with textBased datasource
-  // Keep visualization state unchanged - original column IDs are preserved in the text-based layer
+  const convertedLayerIds = new Set(validLayersToConvert.map(({ id }) => id));
+  const remainingFormBasedLayers = Object.fromEntries(
+    Object.entries(formBasedState.layers).filter(([id]) => !convertedLayerIds.has(id))
+  );
+  const hasRemainingFormBasedLayers = Object.keys(remainingFormBasedLayers).length > 0;
+
+  // Build new attributes with converted layers in the text-based datasource and preserve
+  // non-data helper layers (reference lines/annotations) in the form-based datasource.
+  // Callers must not pass a subset of data layers: leaving a form-based data layer
+  // alongside text-based ones creates an invalid mixed state (see useEsqlConversionCheck guard).
   const newAttributes: TypedLensSerializedState['attributes'] = {
     ...attributes,
     state: {
@@ -224,6 +262,9 @@ export function convertFormBasedToTextBasedLayer({
       // chart-scoped KQL/Lucene filter in the top-level slot (if any).
       query: getChartScopedFilterQuery(attributes.state.query),
       datasourceStates: {
+        ...(hasRemainingFormBasedLayers
+          ? { formBased: { ...formBasedState, layers: remainingFormBasedLayers } }
+          : {}),
         textBased: newDatasourceState,
       },
       visualization: visualizationState,

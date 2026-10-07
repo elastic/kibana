@@ -47,4 +47,21 @@ describe('defaultValidationErrorHandler', () => {
       expect(err.output.payload.validation.keys).toEqual(['0.type', 'value']);
     }
   });
+
+  it('HTML-escapes validation keys', () => {
+    expect.assertions(1);
+    const key = '<script>&"\'`';
+    const schema = Joi.object({
+      [key]: Joi.string().required(),
+    });
+    const error = schema.validate({}).error as HapiValidationError;
+
+    error.output = { ...emptyOutput };
+
+    try {
+      defaultValidationErrorHandler({} as Request, {} as ResponseToolkit, error);
+    } catch (err) {
+      expect(err.output.payload.validation.keys).toEqual(['&lt;script&gt;&amp;&quot;&#x27;&#x60;']);
+    }
+  });
 });

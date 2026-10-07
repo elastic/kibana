@@ -59,8 +59,13 @@ import {
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
-import { registerTaskManagerUsageCollector } from './usage';
-import { TASK_MANAGER_INDEX } from './constants';
+import {
+  registerEventLogTelemetryTask,
+  registerTaskManagerUsageCollector,
+  scheduleEventLogTelemetryTask,
+} from './usage';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
+import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -84,10 +89,6 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
-import {
-  UiamApiKeyProvisioningTask,
-  taskManagerUiamProvisioningEvents,
-} from './uiam_api_key_provisioning';
 
 export interface TaskManagerSetupContract {
   /**
@@ -173,8 +174,8 @@ export class TaskManagerPlugin
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
-  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private claimNudgeService?: TaskManagerClaimNudgeService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -307,10 +308,13 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.unsafe.exclude_task_types
+        this.config.unsafe.exclude_task_types,
+        () => core.getStartServices().then(([, , startContract]) => startContract),
+        this.logger
       );
     }
 
+    registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
@@ -327,20 +331,6 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
-
-    taskManagerUiamProvisioningEvents.forEach((eventConfig) =>
-      core.analytics.registerEventType(eventConfig)
-    );
-
-    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-      logger: this.logger,
-      isServerless,
-      analytics: core.analytics,
-    });
-    this.uiamApiKeyProvisioningTask.register({
-      coreSetup: core,
-      taskTypeDictionary: this.definitions,
-    });
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -383,6 +373,7 @@ export class TaskManagerPlugin
     const { savedObjects, elasticsearch, executionContext, security } = core;
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -390,6 +381,15 @@ export class TaskManagerPlugin
       INVALIDATE_API_KEY_SO_NAME,
       TASK_EXECUTION_CONTROL_SO_NAME,
     ]);
+
+    if (this.config.claim_nudge.enabled) {
+      this.claimNudgeService = new TaskManagerClaimNudgeService({
+        logger: this.logger,
+        esClient: elasticsearch.client.asInternalUser,
+        index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+        isServerless,
+      });
+    }
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
       savedObjectsRepository,
@@ -439,8 +439,6 @@ export class TaskManagerPlugin
     });
     this.taskStore = taskStore;
 
-    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
-
     const defaultCapacity = getDefaultCapacity({
       autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
       claimStrategy: this.config?.claim_strategy,
@@ -466,6 +464,8 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      this.claimNudgeService?.start();
+
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
@@ -495,6 +495,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        claimNudgeService: this.claimNudgeService,
       });
     }
 
@@ -525,8 +526,10 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      claimNudgeService: this.claimNudgeService,
     });
 
+    scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
@@ -564,20 +567,12 @@ export class TaskManagerPlugin
       },
     };
 
-    this.uiamApiKeyProvisioningTask
-      ?.start({
-        core,
-        taskScheduling,
-        removeIfExists: (id: string) => removeIfExists(taskStore, id),
-      })
-      .catch(() => {});
-
     return this.startContract;
   }
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
-    this.uiamApiKeyProvisioningTask?.stop();
+    this.claimNudgeService?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
