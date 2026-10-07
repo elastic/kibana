@@ -22,8 +22,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely,
  * so the feature is never registered and the suite's inference override is ignored.
  *
- * Since #295215 alertzero installs no managed workflows unless service accounts are enabled,
- * so `serviceAccountsServerArgs` is spread into `serverArgs`.
+ * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_attack_discovery_fp_tp
