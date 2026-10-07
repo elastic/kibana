@@ -254,6 +254,25 @@ export const createAttachmentPublicClient = ({
       await persist({ conversation, conversationClient, stateManager });
     },
 
+    async restore({ conversationId, attachmentId }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
+      const existing = stateManager.getAttachmentRecord(attachmentId);
+
+      if (!existing) {
+        throw createAttachmentNotFoundError({ attachmentId });
+      }
+      if (existing.active !== false) {
+        throw createAttachmentInvalidError(`Attachment '${attachmentId}' is not deleted`);
+      }
+      if (!stateManager.restore(attachmentId)) {
+        throw createAttachmentInvalidError(`Failed to restore attachment '${attachmentId}'`);
+      }
+
+      await persist({ conversation, conversationClient, stateManager });
+
+      return existing;
+    },
+
     async bulkCreate({
       conversationId,
       attachments,

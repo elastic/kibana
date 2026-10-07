@@ -919,8 +919,21 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.success).toBe(true);
       expect(result.body.attachment).toBeDefined();
-      expect(mockConversationsClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'conv-1' }),
+      expect(mockConversationsClient.update).not.toHaveBeenCalled();
+      expect(mockConversationsClient.appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [
+            expect.objectContaining({
+              type: 'attachment_restored',
+              data: expect.objectContaining({
+                attachment_id: 'att-1',
+                source: 'http_api',
+                format: 2,
+              }),
+            }),
+          ],
+        }),
         { access: 'converse', source: 'http_api' }
       );
     });
@@ -935,7 +948,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
         body: { message: "Attachment 'non-existent' not found" },
       });
     });
@@ -951,9 +965,11 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: "Attachment 'att-1' is not deleted" },
       });
+      expect(mockConversationsClient.appendEvents).not.toHaveBeenCalled();
     });
   });
 
