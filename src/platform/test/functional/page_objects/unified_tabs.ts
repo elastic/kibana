@@ -448,6 +448,12 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   private async openRecentlyClosedGroup(groupIndex: number): Promise<void> {
+    if (
+      groupIndex === 0 &&
+      (await this.testSubjects.exists('unifiedTabs_tabsMenu_restoreAllTabs'))
+    ) {
+      return;
+    }
     const groupItems = await this.retry.try(async () => {
       const items = await this.getRecentlyClosedGroupItems();
       this.assertRecentlyClosedIndexInBounds(groupIndex, items.length, 'Recently closed group');
