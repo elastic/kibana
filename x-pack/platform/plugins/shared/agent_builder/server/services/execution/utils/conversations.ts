@@ -6,8 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -15,19 +18,34 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundOrigin,
   ConverseInput,
+  ExecutionInterruption,
+  ExecutionPartialRunSummary,
   RoundCompleteEvent,
+  RoundCompleteEventData,
+  RoundInput,
+  RoundInterruptedEventData,
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserIdAndName,
   ChatEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import {
   ConversationParentRelation,
+  ConversationRoundStatus,
   isConversationAlreadyExistsError,
   isEventsNativeVersion,
+  isExecutionAbortReason,
+  isExecutionTerminalEvent,
+  isRequestAbortedError,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
   TimelineEventType,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
+  executionTerminatedEventId,
+  resumeExecutionId,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
@@ -35,11 +53,14 @@ import {
   userMessageEvent,
   promptResponseEvent,
   resumeExecutionToEvents,
-  executionTerminatedEventId,
+  interruptedExecutionToEvents,
+  lastTerminatedExecutionIndex,
   nextResumeIndex,
-  resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+import { getPendingResumeRound } from './pending_round';
+import { toClientError } from './convert_errors';
+import { serializeExecutionError } from './serialize_execution_error';
 
 /**
  * Resolves a persisted timeline event by id from the write result we just committed.
@@ -99,59 +120,85 @@ const emitPersistedTimelineThenLifecycle = ({
 };
 
 /**
- * Receipt-time input write.
+ * Writes a `user_message` event onto a conversation, creating the conversation first when the
+ * resolution said so. The single place user messages are persisted: the executing path passes a
+ * round-derived event id, a message appended on its own passes a uuid. Returns the written id so
+ * a later execution can name it as its `trigger_event_id`.
  */
-export const persistRoundInput = async ({
+export const persistUserMessage = async ({
   conversation,
   conversationClient,
-  roundId,
+  eventId,
   receivedAt,
   input,
   author,
   origin,
+  user,
+  additionalEvents = [],
+  attachments,
+  appendRefresh,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  roundId: string;
+  eventId: string;
   receivedAt: Date;
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
-}): Promise<void> => {
+  /** Actor fallback when the poster has no author, for a conversation they do not own. */
+  user?: UserIdAndName;
+  /** Attachment change events to store in the same write, after the message. */
+  additionalEvents?: TimelineEvent[];
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /**
+   * Refresh of the write onto an existing conversation. Creating one always refreshes: the
+   * origin lookup finds conversations by search.
+   */
+  appendRefresh?: Refresh;
+}): Promise<string> => {
   const event = userMessageEvent(
     {
-      id: roundId,
+      id: eventId,
+      createdAt: receivedAt.toISOString(),
       input: {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       },
-      started_at: receivedAt.toISOString(),
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
     },
-    conversation
+    { ...conversation, ...(user ? { user } : {}) }
   );
+
+  const events = [event, ...additionalEvents];
 
   if (conversation.operation === 'CREATE') {
     const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events: [event],
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
-      return;
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        { source: 'execution' }
+      );
+      return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
         throw error;
@@ -160,9 +207,15 @@ export const persistRoundInput = async ({
   }
 
   await conversationClient.appendEvents(
-    { id: conversation.id, events: [event] },
-    { access: 'converse' }
+    { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
+    {
+      access: 'converse',
+      source: 'execution',
+      ...(appendRefresh !== undefined ? { refresh: appendRefresh } : {}),
+    }
   );
+
+  return event.id;
 };
 
 export const appendRoundTerminated$ = ({
@@ -213,7 +266,7 @@ export const appendRoundTerminated$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, events, round };
@@ -285,7 +338,15 @@ export const appendResumeExecution$ = ({
               `appendResumeExecution$: no prior execution stored for round ${round.id}; cannot resume`
             );
           }
-          const promptRequestedEventId = executionTerminatedEventId(round.id, resumeIndex - 1);
+          // The prompt being answered belongs to the last execution that *terminated* (paused);
+          // an interrupted resume in between counts for the index but never owns the pause.
+          const terminatedIndex = lastTerminatedExecutionIndex(conversation, round.id);
+          if (terminatedIndex < 0) {
+            throw new Error(
+              `appendResumeExecution$: round ${round.id} has no terminated execution to resume`
+            );
+          }
+          const promptRequestedEventId = executionTerminatedEventId(round.id, terminatedIndex);
 
           const promptResponse = promptResponseEvent({
             roundId: round.id,
@@ -331,7 +392,7 @@ export const appendResumeExecution$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, executionEvents, round, resumeIndex };
@@ -356,7 +417,232 @@ export const appendResumeExecution$ = ({
   );
 };
 
-export type ConversationOperation = 'CREATE' | 'UPDATE';
+/** True when the conversation's last round is paused on a prompt: the next input resumes it. */
+export const isPendingResumeConversation = (conversation: Conversation): boolean =>
+  getPendingResumeRound(conversation) !== undefined;
+
+export interface PersistExecutionInterruptionParams {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  /** The runner's round id (fresh rounds); a resume uses the pending round's id instead. */
+  roundId: string;
+  receivedAt: Date;
+  /** The converse input as received; the fallback when no processed input is available. */
+  input: ConverseInput;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+  /**
+   * The raw stream error. `RequestAbortedError` ⇒ `execution_aborted`; anything else ⇒
+   * `execution_failed` carrying the client-normalised error.
+   */
+  error: unknown;
+  /** The handler's partial run summary, when `round_interrupted` was emitted. */
+  interrupted?: RoundInterruptedEventData;
+  /** The `round_complete` payload, when the run completed but the success write failed. */
+  completed?: RoundCompleteEventData;
+  logger: Logger;
+}
+
+/**
+ * Persists a failed or aborted execution as a full projection with exactly one terminal event.
+ *
+ * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
+ *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
+ *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
+ *   produced by the run, the rest of it is left as stored.
+ * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
+ *   events re-stamped with `exec_k`; the answered prompt is consumed: the round reads `completed`
+ *   with an `interruption`.
+ *
+ * Both writes carry the client's atomic terminal guard (`skipIfTerminalExistsFor`), so a landed
+ * success write is never overwritten. Returns the written terminal event(s): `[]` when the write
+ * was skipped or failed. Never throws — a write failure is logged; the original error is what the
+ * caller surfaces.
+ */
+export const persistExecutionInterruption = async (
+  params: PersistExecutionInterruptionParams
+): Promise<TimelineEvent[]> => {
+  const {
+    conversation,
+    conversationClient,
+    receivedAt,
+    input,
+    author,
+    origin,
+    error,
+    interrupted,
+    completed,
+    logger,
+  } = params;
+
+  try {
+    const interruption: ExecutionInterruption = isRequestAbortedError(error)
+      ? {
+          type: 'aborted',
+          ...(isExecutionAbortReason(error.meta?.abort_reason)
+            ? { aborted_by: error.meta.abort_reason }
+            : {}),
+        }
+      : { type: 'failed', error: serializeExecutionError(toClientError(error)) };
+
+    const pendingRound = getPendingResumeRound(conversation);
+    const isResume = pendingRound !== undefined;
+    const roundId = pendingRound?.id ?? params.roundId;
+    const executionIndex = isResume ? nextResumeIndex(conversation, roundId) : 0;
+    const executionId =
+      executionIndex === 0
+        ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`
+        : resumeExecutionId(roundId, executionIndex);
+
+    const startedAt =
+      interrupted?.started_at ?? completed?.round.started_at ?? receivedAt.toISOString();
+    const steps = interrupted?.steps ?? completed?.round.steps ?? [];
+    const summary: ExecutionPartialRunSummary =
+      interrupted?.summary ??
+      (completed
+        ? {
+            model_usage: completed.round.model_usage,
+            time_to_last_token: completed.round.time_to_last_token,
+            ...(completed.round.trace_id ? { trace_id: completed.round.trace_id } : {}),
+            ...(completed.round.configuration_overrides
+              ? { configuration_overrides: completed.round.configuration_overrides }
+              : {}),
+          }
+        : { time_to_last_token: Math.max(0, Date.now() - new Date(startedAt).getTime()) });
+    const processedInput = interrupted?.input ?? completed?.round.input;
+    const attachments = interrupted?.attachments ?? completed?.attachments;
+    const attachmentEvents = interrupted?.attachment_events ?? completed?.attachment_events ?? [];
+    const workspaceId = interrupted?.workspace_id ?? completed?.workspace_id;
+
+    const attachmentsUpdate = attachments
+      ? { attachments: { snapshot: conversation.attachments ?? [], produced: attachments } }
+      : {};
+    const workspaceUpdate = workspaceId ? { workspaceId } : {};
+    // A compaction that ran before the interruption must survive it: its summary covers context
+    // the next run would otherwise re-render verbatim. The rest of the state is left as stored.
+    const compactionSummary =
+      interrupted?.compaction_summary ?? completed?.conversation_state?.compaction_summary;
+    const stateUpdate =
+      compactionSummary && !isEqual(compactionSummary, conversation.state?.compaction_summary)
+        ? { state: { ...conversation.state, compaction_summary: compactionSummary } }
+        : {};
+
+    /** `[]` when the client skipped the write because a terminal already existed. */
+    const writtenTerminals = (
+      persisted: Conversation,
+      executionEvents: TimelineEvent[]
+    ): TimelineEvent[] => {
+      const terminals = executionEvents.filter(isExecutionTerminalEvent);
+      const landed = terminals.every((terminal) =>
+        persisted.events?.some((event) => event.id === terminal.id)
+      );
+      if (!landed) {
+        // The stored winner is another terminal (typically a success write whose response was
+        // lost). The stream still surfaces the original error, so the live client and the stored
+        // record disagree for this execution — see the follow-ups in the design doc.
+        logger.warn(
+          `Execution ${executionId} already had a terminal event; interruption write skipped and the stream error may disagree with the stored record`
+        );
+        return [];
+      }
+      return terminals;
+    };
+
+    if (!isResume) {
+      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
+      // the receipt-time event; only `data` is upgraded to the processed input when known.
+      const receiptInput: RoundInput = {
+        message: input.message?.trim() ?? '',
+        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
+      };
+      const userMessage = userMessageEvent(
+        {
+          id: roundUserMessageEventId(roundId),
+          createdAt: receivedAt.toISOString(),
+          input: processedInput ?? receiptInput,
+          ...(author ? { author } : {}),
+          ...(origin ? { origin } : {}),
+        },
+        conversation
+      );
+      const executionEvents = interruptedExecutionToEvents({
+        roundId,
+        executionIndex: 0,
+        startedAt,
+        triggerEventId: userMessage.id,
+        steps,
+        summary,
+        interruption,
+        conversation,
+      });
+      const persisted = await conversationClient.replaceRoundEvents(
+        {
+          id: conversation.id,
+          roundId,
+          events: [userMessage, ...executionEvents, ...attachmentEvents],
+          status: ConversationRoundStatus.completed,
+          skipIfTerminalExistsFor: executionId,
+          ...attachmentsUpdate,
+          ...workspaceUpdate,
+          ...stateUpdate,
+        },
+        { access: 'converse', source: 'execution' }
+      );
+      return writtenTerminals(persisted, executionEvents);
+    }
+
+    const terminatedIndex = lastTerminatedExecutionIndex(conversation, roundId);
+    if (terminatedIndex < 0) {
+      throw new Error(`round ${roundId} is awaiting a prompt but has no terminated execution`);
+    }
+    const promptResponse = promptResponseEvent({
+      roundId,
+      executionIndex,
+      promptRequestedEventId: executionTerminatedEventId(roundId, terminatedIndex),
+      responses: input.prompts ?? {},
+      input: processedInput ?? { message: input.message ?? '' },
+      conversation,
+      author,
+      createdAt: startedAt,
+    });
+    const executionEvents = interruptedExecutionToEvents({
+      roundId,
+      executionIndex,
+      startedAt,
+      triggerEventId: promptResponse.id,
+      steps,
+      summary,
+      interruption,
+      conversation,
+    });
+    // Attachment events were stamped with the initial execution id by the handler; they belong
+    // to exec_k on a resume, exactly as in `appendResumeExecution$`.
+    const resumeAttachmentEvents = attachmentEvents.map((event) => ({
+      ...event,
+      execution_id: executionId,
+    }));
+    const persisted = await conversationClient.appendEvents(
+      {
+        id: conversation.id,
+        events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
+        status: ConversationRoundStatus.completed,
+        skipIfTerminalExistsFor: executionId,
+        ...attachmentsUpdate,
+        ...workspaceUpdate,
+        ...stateUpdate,
+      },
+      { access: 'converse', source: 'execution' }
+    );
+    return writtenTerminals(persisted, executionEvents);
+  } catch (writeError) {
+    logger.error(
+      `Failed to persist interrupted execution for conversation ${conversation.id}: ${
+        writeError instanceof Error ? writeError.message : String(writeError)
+      }`
+    );
+    return [];
+  }
+};
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 

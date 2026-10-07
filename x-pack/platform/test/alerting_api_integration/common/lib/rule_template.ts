@@ -88,12 +88,13 @@ export async function createAlertingV2RuleTemplateSO(
             lookback: '15m',
           },
           query: {
-            format: 'composed',
             base: 'FROM logs-*',
             breach: {
               segment: '| WHERE true',
             },
           },
+          recovery: { strategy: 'no_breach' },
+          no_data: { strategy: 'ignore' },
           time_field: '@timestamp',
         },
       },
@@ -102,7 +103,7 @@ export async function createAlertingV2RuleTemplateSO(
       managed: false,
       namespaces: [space],
       coreMigrationVersion: '8.8.0',
-      typeMigrationVersion: '10.4.0',
+      typeMigrationVersion: '10.6.0',
       updated_at: '2025-09-09T09:57:45.733Z',
       created_at: '2025-09-09T09:57:45.733Z',
     },

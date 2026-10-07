@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 import { testData } from '../fixtures';
 
@@ -36,7 +36,7 @@ const QUERY_WITHOUT_TIME_FIELD = 'FROM kibana_sample_data_flights';
 const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
 const expectDisabledAllTimeState = async (
-  pageObjects: PageObjects,
+  pageObjects: DiscoverPageObjects,
   expected: 'enabled' | 'disabled'
 ) => {
   const { datePicker } = pageObjects;
@@ -51,7 +51,7 @@ const expectDisabledAllTimeState = async (
 };
 
 const expectCurrentEsqlTabState = async (
-  pageObjects: PageObjects,
+  pageObjects: DiscoverPageObjects,
   {
     disabledAllTime,
     query,
@@ -169,7 +169,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
   });
 
   spaceTest('should detect time field change in ES|QL query correctly', async ({ pageObjects }) => {
-    const { datePicker, discover, unifiedTabs } = pageObjects;
+    const { datePicker, discover, unifiedTabs, esqlEditor } = pageObjects;
 
     await spaceTest.step('tab 0: start in ES|QL mode with the default logstash query', async () => {
       await discover.selectTextBaseLang();
@@ -186,7 +186,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await unifiedTabs.createNewTab();
       await expect(discover.getUninitializedPrompt()).toBeVisible();
 
-      await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
+      await esqlEditor.setQuery(QUERY_WITH_TIME_FIELD);
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
       await discover.submitQueryAndWait();
       await expectCurrentEsqlTabState(pageObjects, {

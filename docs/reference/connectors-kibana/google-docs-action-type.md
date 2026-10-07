@@ -11,6 +11,10 @@ applies_to:
 
 The Google Docs connector enables reading documents as Markdown and applying batch updates. This connector is complementary to the [Google Drive connector](/reference/connectors-kibana/google-drive-action-type.md): use Drive to search or list files, then pass the document ID to the actions on this page.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Create connectors in {{kib}} [define-google-docs-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

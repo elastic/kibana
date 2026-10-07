@@ -21,6 +21,7 @@ export class VisualizeEditorPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -117,11 +118,13 @@ export class VisualizeEditorPageObject extends FtrService {
    */
   public async clickBucket(bucketName: string, type = 'buckets') {
     await this.retry.try(async () => {
-      if (
-        !(await this.testSubjects.exists(`visEditorAdd_${type}_${bucketName}`, { timeout: 1000 }))
-      ) {
+      const addButton = await this.testSubjects.find(`visEditorAdd_${type}`);
+      if ((await addButton.getAttribute('aria-expanded')) !== 'true') {
         await this.testSubjects.click(`visEditorAdd_${type}`);
       }
+      await this.testSubjects.existOrFail(`visEditorAdd_${type}_${bucketName}`, {
+        timeout: 5000,
+      });
       await this.testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
     });
   }
@@ -405,11 +408,10 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async inputValueInCodeEditor(value: string) {
-    const codeEditor = await this.find.byCssSelector('.react-monaco-editor-container');
-    const textarea = await codeEditor.findByClassName('monaco-mouse-cursor-text');
-
-    await textarea.click();
-    await this.browser.pressKeys(value);
+    await this.monacoEditor.setCodeEditorValueByCssSelector(
+      '.react-monaco-editor-container',
+      value
+    );
   }
 
   public async clickReset() {

@@ -22,13 +22,13 @@ export function useChildWorkflowExecutions(
 ): { childExecutions: ChildWorkflowExecutionsMap; isLoading: boolean } {
   const api = useWorkflowsApi();
 
-  // Derive a key that changes when workflow.execute steps reach terminal status,
-  // so react-query invalidates cached results and fetches newly available children.
-  const terminalChildKey = useMemo(() => {
+  // Derive a key that changes whenever a workflow.execute step appears or changes status,
+  // so react-query fetches the child run as it starts rather than on the next poll tick.
+  const executeStepKey = useMemo(() => {
     if (!parentExecution?.stepExecutions) return '';
     return parentExecution.stepExecutions
-      .filter((step) => isExecuteSyncStepType(step.stepType) && isTerminalStatus(step.status))
-      .map((step) => step.id)
+      .filter((step) => isExecuteSyncStepType(step.stepType))
+      .map((step) => `${step.id}:${step.status}`)
       .join(',');
   }, [parentExecution?.stepExecutions]);
 
@@ -36,7 +36,7 @@ export function useChildWorkflowExecutions(
   parentExecutionRef.current = parentExecution;
 
   const query = useQuery({
-    queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
+    queryKey: ['childWorkflowExecutions', parentExecution?.id, executeStepKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
       const items = await api.getChildrenExecutions(executionId);
@@ -47,6 +47,9 @@ export function useChildWorkflowExecutions(
       return map;
     },
     enabled: !!parentExecution?.id,
+    // Keep resolved children across executeStepKey changes, so a selected child step
+    // is never briefly resolved against the parent execution.
+    keepPreviousData: true,
     staleTime:
       parentExecution && isTerminalStatus(parentExecution.status)
         ? Infinity

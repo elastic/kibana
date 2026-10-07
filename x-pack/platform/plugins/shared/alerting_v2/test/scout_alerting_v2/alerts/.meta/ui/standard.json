@@ -1,5 +1,5 @@
 {
-  "sha1": "3fe2eaeb1b44a434b2d81620364528077182eacb",
+  "sha1": "79ef89eaf0297bd1983b84bff7503f10408daa9f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,13 @@
       "title": "Alerts management page - privilege-based access alerting_v2_alerts all user sees the full page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_management_privileges.spec.ts",
-        "line": 95,
-        "column": 65
+        "line": 96,
+        "column": 73
       }
     },
     {
@@ -22,12 +23,13 @@
       "title": "Alerts management page - privilege-based access alerting_v2_alerts read user sees the full page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_management_privileges.spec.ts",
         "line": 99,
-        "column": 10
+        "column": 100
       }
     },
     {
@@ -35,12 +37,13 @@
       "title": "Alerts page - read/write privileges editor sees the mutating episode actions menu",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 100,
+        "column": 7
       }
     },
     {
@@ -48,12 +51,13 @@
       "title": "Alerts page - read/write privileges read-only user only sees the read-safe open-in-discover action",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 47,
-        "column": 77
+        "line": 105,
+        "column": 13
       }
     },
     {
@@ -61,12 +65,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 128,
-        "column": 85
+        "line": 137,
+        "column": 11
       }
     },
     {
@@ -74,12 +79,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows edit flow: pencil icon opens flyout with pre-populated name, save updates rule",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 207,
-        "column": 15
+        "line": 223,
+        "column": 89
       }
     },
     {
@@ -87,12 +93,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): a rule with no resolvable time field triggers validation and blocks Next",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 272,
-        "column": 15
+        "line": 286,
+        "column": 89
       }
     },
     {
@@ -100,25 +107,27 @@
       "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): broken composed alert can select timestamp and save",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 323,
-        "column": 9
+        "line": 339,
+        "column": 26
       }
     },
     {
-      "id": "0d4530450053d38-84edadaa6d859e7",
-      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: alert + standalone opens YAML-only",
+      "id": "0d4530450053d38-12f227a92302c43",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: alert + recovery query opens YAML-only",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 380,
-        "column": 15
+        "line": 395,
+        "column": 9
       }
     },
     {
@@ -126,12 +135,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows edit flow (YAML-only): removing all tags in the editor persists",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 414,
-        "column": 10
+        "line": 431,
+        "column": 9
       }
     },
     {
@@ -139,11 +149,12 @@
       "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 467,
+        "line": 483,
         "column": 26
       }
     },
@@ -152,12 +163,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) kind can select timestamp and create",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 517,
-        "column": 26
+        "line": 535,
+        "column": 13
       }
     },
     {
@@ -165,11 +177,12 @@
       "title": "ComposeDiscoverFlyout — create and edit flows step validation: Next disabled without query, name validation blocks advancement",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 554,
+        "line": 577,
         "column": 26
       }
     },
@@ -178,12 +191,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 612,
-        "column": 24
+        "line": 632,
+        "column": 7
       }
     },
     {
@@ -191,12 +205,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: Apply without typing anything shows the empty callout and disables Next",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 637,
-        "column": 9
+        "line": 659,
+        "column": 15
       }
     },
     {
@@ -204,12 +219,13 @@
       "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: base-only query shows the no-alert-condition callout and keeps Next enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 655,
-        "column": 15
+        "line": 678,
+        "column": 13
       }
     },
     {
@@ -217,11 +233,12 @@
       "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: no callout when the query splits into base + alert condition",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 678,
+        "line": 700,
         "column": 26
       }
     },
@@ -230,7 +247,8 @@
       "title": "Discover Alerts menu with alerting v2 should show Alerts menu with the v2 ES|QL rule row and hide v1 entries",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/discover_alerts_menu.spec.ts",
@@ -243,12 +261,13 @@
       "title": "Episode details — action policy history tab mounts the episode-scoped policy history tab from the details route",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/episode_action_policy_history.spec.ts",
-        "line": 39,
-        "column": 48
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -260,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/execution_history_smoke.spec.ts",
-        "line": 121,
-        "column": 24
+        "line": 115,
+        "column": 5
       }
     }
   ]

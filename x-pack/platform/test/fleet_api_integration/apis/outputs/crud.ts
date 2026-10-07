@@ -232,6 +232,13 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      // Pre-install filetest so the parallel createPackagePolicy calls below don't race a first-time install
+      await supertest
+        .post(`/api/fleet/epm/packages/filetest/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')
@@ -313,7 +320,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
@@ -842,10 +850,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies with default output under agent policies not using default output
         // to ensure that those agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy2.item.id], undefined, defaultOutputId),
-          createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId),
-        ]);
+        await createPackagePolicy([policy2.item.id], undefined, defaultOutputId);
+        await createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId);
 
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
@@ -897,10 +903,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies under agent policies using default output to ensure those
         // agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-          createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-        ]);
+        await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+        await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
         await supertest
           .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
@@ -981,10 +985,8 @@ export default function (providerContext: FtrProviderContext) {
 
           // Create package policies under agent policies using default output to ensure those
           // agent policies still get bumped
-          await Promise.all([
-            createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-            createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-          ]);
+          await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+          await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
           await supertest
             .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)

@@ -83,7 +83,7 @@ per-call labels are both emitted under ECS `labels.*`.
 | -------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `ruleExecutor` | `RuleExecutorTaskRunner` once per task; `rule_kind` re-bound after `fetch_rule`; `step` on pipeline/middleware | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`                                                 |
 | `dispatcher`   | `DispatcherTaskRunner` once per tick; `step` in pipeline/steps; entity labels on concrete log calls            | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
-| `director`     | `DirectorService.run` once per run                                                                             | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `episode_id` on transition debug)                              |
+| `director`     | `DirectorService.run` once per run                                                                             | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `alert_id` on transition debug)                              |
 
 Pass the bound logger through pipeline `input` / `state` (or a local `const`
 in director). Steps should log via `state.logger.withLabels({ step })`, not the

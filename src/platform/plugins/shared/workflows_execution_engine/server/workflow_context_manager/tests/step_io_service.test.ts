@@ -259,6 +259,68 @@ describe('StepIoService', () => {
       expect(service.getDataSetVariables()).toEqual({ foo: 1 });
     });
 
+    describe('getDataSetVariables scoped to parallel branches', () => {
+      const branchFrames = (fanOut: string, branch: number): StackFrame[] => [
+        {
+          stepId: fanOut,
+          nestedScopes: [
+            {
+              nodeId: `enter-${fanOut}`,
+              nodeType: 'enter-parallel',
+              scopeId: branch.toString(),
+            },
+          ],
+        },
+      ];
+      const seedDataSet = (
+        state: WorkflowExecutionState,
+        service: StepIoService,
+        id: string,
+        output: JsonValue,
+        scopeStack: StackFrame[]
+      ) => {
+        state.upsertStep({
+          id,
+          stepId: id,
+          stepType: 'data.set',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack,
+        });
+        service.setStepOutput(id, output);
+      };
+
+      it('hides sibling branch writes and keeps root and earlier fan-out writes', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'root', { who: 'root', rootOnly: 'kept' }, []);
+        seedDataSet(state, service, 'a-0', { who: 'a-0' }, branchFrames('fanOutA', 0));
+        seedDataSet(state, service, 'a-1', { who: 'a-1' }, branchFrames('fanOutA', 1));
+
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({
+          who: 'a-0',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 2))).toEqual({
+          who: 'root',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutB', 0))).toEqual({
+          who: 'a-1',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables()).toEqual({ who: 'a-1', rootOnly: 'kept' });
+      });
+
+      it('invalidates every branch view on a new data.set write', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'a-0', { who: 'first' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'first' });
+
+        seedDataSet(state, service, 'a-0-again', { who: 'second' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'second' });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 1))).toEqual({});
+      });
+    });
+
     it('setStepOutput writes the output through state and records the size', () => {
       const { state, service } = buildHarness();
       // The runtime would write the lifecycle fields first; tests exercise
@@ -1760,6 +1822,137 @@ describe('StepIoService', () => {
 
       const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
       expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
+      expect(rehydratedIds).toHaveLength(2);
+    });
+
+    it('does not rehydrate from template-like text in persisted foreach items', async () => {
+      const workflow: WorkflowYaml = {
+        name: 'Foreach items are not a template source',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'unrelated',
+            type: 'console',
+            with: { message: 'unrelated' },
+          } as ConnectorStep,
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          } as ConnectorStep,
+          {
+            name: 'foreach_alert',
+            type: 'foreach',
+            foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+            steps: [
+              {
+                name: 'create_new_case',
+                type: 'console',
+                with: { message: 'case' },
+              } as ConnectorStep,
+              {
+                name: 'add_alert_to_case',
+                type: 'console',
+                with: {
+                  message: 'case={{steps.create_new_case.output.id}} alert={{foreach.item._id}}',
+                },
+              } as ConnectorStep,
+            ],
+          },
+        ],
+      };
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const addAlertNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'add_alert_to_case')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { hits: [{ _id: 'alert-1' }] } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-unrelated',
+        'unrelated',
+        { ok: true },
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-decoy',
+        'decoy',
+        { id: 'decoy' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      const scopeStack: StackFrame[] = [
+        {
+          stepId: 'foreach_alert',
+          nestedScopes: [
+            {
+              nodeId: 'enterForeach_foreach_alert',
+              nodeType: 'enter-foreach',
+              scopeId: '0',
+            },
+          ],
+        },
+      ];
+      const foreachExecutionId = buildStepExecutionId(
+        state.getWorkflowExecutionId(),
+        'foreach_alert',
+        []
+      );
+      state.updateWorkflowExecution({ scopeStack });
+      state.upsertStep({
+        id: foreachExecutionId,
+        stepId: 'foreach_alert',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 2 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(foreachExecutionId, {
+        foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+        items: ['{{ steps.decoy.output }}', '{{ steps[variables.name].output }}'],
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: addAlertNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
+      expect(rehydratedIds).not.toEqual(expect.arrayContaining(['exec-unrelated', 'exec-decoy']));
       expect(rehydratedIds).toHaveLength(2);
     });
 

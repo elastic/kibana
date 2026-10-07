@@ -10,6 +10,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { formatInterval } from '../../format_interval';
 import { GROUPING_MODE_HELP_TEXT } from '../constants';
 import type { ActionPolicyFormState } from '../types';
 
@@ -19,51 +20,6 @@ interface DispatchSummaryInput {
   throttleStrategy: ThrottleStrategy;
   throttleInterval: string;
 }
-
-type DurationUnit = 's' | 'm' | 'h' | 'd';
-
-const isDurationUnit = (c: string): c is DurationUnit => ['s', 'm', 'h', 'd'].includes(c);
-
-const formatInterval = (raw: string): string => {
-  if (!raw) return '';
-  const unit = raw.charAt(raw.length - 1);
-  const value = parseInt(raw, 10);
-  if (Number.isNaN(value) || !isDurationUnit(unit)) return raw;
-  switch (unit) {
-    case 's':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.seconds',
-        {
-          defaultMessage: '{value, plural, one {# second} other {# seconds}}',
-          values: { value },
-        }
-      );
-    case 'm':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.minutes',
-        {
-          defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
-          values: { value },
-        }
-      );
-    case 'h':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.hours',
-        {
-          defaultMessage: '{value, plural, one {# hour} other {# hours}}',
-          values: { value },
-        }
-      );
-    case 'd':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.days',
-        {
-          defaultMessage: '{value, plural, one {# day} other {# days}}',
-          values: { value },
-        }
-      );
-  }
-};
 
 /**
  * Human-readable outcome sentence for the current notification configuration.
@@ -79,36 +35,35 @@ export const getDispatchSummary = ({
   const interval = formatInterval(throttleInterval);
   const fields = groupBy.join(', ');
 
-  if (groupingMode === 'per_episode') {
+  if (groupingMode === 'per_alert') {
     switch (throttleStrategy) {
       case 'on_status_change':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChange',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChange',
           {
-            defaultMessage:
-              'Sends one notification when an episode opens and one when it recovers.',
+            defaultMessage: 'Sends one notification when an alert opens and one when it recovers.',
           }
         );
       case 'per_status_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeNoInterval',
+            'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChangeNoInterval',
             {
               defaultMessage: 'Sends a notification on status change.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeRepeat',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChangeRepeat',
           {
             defaultMessage:
-              'Sends a notification on status change and repeats every {interval} while the episode remains active.',
+              'Sends a notification on status change and repeats every {interval} while the alert remains active.',
             values: { interval },
           }
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.everyEvaluation',
           {
             defaultMessage:
               'Sends a notification for every rule evaluation. No limit on notification frequency.',
@@ -164,7 +119,7 @@ export const getDispatchSummary = ({
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttleNoInterval',
             {
-              defaultMessage: 'Combines all matching episodes into one notification.',
+              defaultMessage: 'Combines all matching alerts into one notification.',
             }
           );
         }
@@ -172,7 +127,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttle',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification at most every {interval}.',
+              'Combines all matching alerts into one notification at most every {interval}.',
             values: { interval },
           }
         );
@@ -181,7 +136,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.everyEvaluation',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
+              'Combines all matching alerts into one notification on every rule evaluation. No limit on notification frequency.',
           }
         );
     }

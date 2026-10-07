@@ -6,140 +6,100 @@
  */
 
 import React, { memo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiBasicTable,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
+import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
+import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { TimelineEventList } from '../timeline';
-
-export type FlyoutTab = 'overview' | 'attachments' | 'timeline';
-
-const getColumns = () => {
-  const cellContent = (value: string) => (
-    <EuiText size="xs" color="subdued">
-      {value}
-    </EuiText>
-  );
-
-  return [
-    {
-      field: 'field',
-      name: DETAILS_FLYOUT_LABELS.overview.fieldColumn,
-      render: (field: string) => cellContent(field),
-    },
-    {
-      field: 'value',
-      name: DETAILS_FLYOUT_LABELS.overview.valueColumn,
-      render: (value: string) => cellContent(value),
-    },
-  ];
-};
 
 const SUMMARY_LIMIT = 120;
 
-export const OverviewTab = memo<{ investigation: Investigation }>(({ investigation }) => {
-  const { euiTheme } = useEuiTheme();
-  const { summary, affectedSurface, severity } = investigation;
-  const [expanded, setExpanded] = useState(false);
+const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
+  FlyoutGroupedAttachments.ALERTS,
+  FlyoutGroupedAttachments.ATTACKS,
+  FlyoutGroupedAttachments.RULES,
+];
 
-  const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-  const displayedSummary =
-    isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
+export interface OverviewTabProps {
+  investigation: Investigation;
+  attachments: VersionedAttachment[] | undefined;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /**
+   * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
+   * package cannot fetch a conversation's proposals itself, so a host that can (see
+   * `renderProposedActions` on `registerAgenticInvestigationTemplateUI`) owns both the fetch and
+   * what appears while it is empty or loading.
+   */
+  proposedActionsContent?: React.ReactNode;
+  /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
+  proposedActionsCount?: React.ReactNode;
+}
 
-  interface ImpactRow {
-    field: string;
-    value: string;
-  }
-  const impactRows: ImpactRow[] = [
-    affectedSurface
-      ? { field: DETAILS_FLYOUT_LABELS.overview.compromised, value: affectedSurface }
-      : null,
-    severity ? { field: DETAILS_FLYOUT_LABELS.overview.severity, value: severity } : null,
-  ].filter((row): row is ImpactRow => row !== null);
+export const OverviewTab = memo<OverviewTabProps>(
+  ({
+    investigation,
+    attachments,
+    groupedAttachments,
+    proposedActionsContent,
+    proposedActionsCount,
+  }) => {
+    const { summary } = investigation;
+    const [expanded, setExpanded] = useState(false);
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {summary && (
-        <EuiFlexItem>
-          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
-            <EuiText size="s" color="subdued">
-              <p>{displayedSummary}</p>
-            </EuiText>
-            {isCondensed && (
-              <div>
-                <EuiButtonEmpty size="s" flush="left" onClick={() => setExpanded((prev) => !prev)}>
-                  {expanded
-                    ? DETAILS_FLYOUT_LABELS.overview.showLess
-                    : DETAILS_FLYOUT_LABELS.overview.showMore}
-                </EuiButtonEmpty>
-              </div>
-            )}
-          </DetailsBlock>
-        </EuiFlexItem>
-      )}
+    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
+    const displayedSummary =
+      isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
 
-      {impactRows.length > 0 && (
-        <EuiFlexItem>
-          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>
-            <EuiPanel hasBorder paddingSize="none" style={{ borderRadius: euiTheme.size.s }}>
-              <EuiBasicTable
-                tableCaption={DETAILS_FLYOUT_LABELS.overview.tableCaption}
-                rowHeader="field"
-                items={impactRows}
-                columns={getColumns()}
-                tableLayout="auto"
-              />
-            </EuiPanel>
-          </DetailsBlock>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-});
-OverviewTab.displayName = 'OverviewTab';
+    const attachmentsSection = (
+      <GroupedAttachmentsSection
+        attachments={attachments}
+        registry={groupedAttachments}
+        order={GROUPED_ATTACHMENTS_ORDER}
+      />
+    );
 
-export const AttachmentsTab = memo(() => (
-  <EuiEmptyPrompt
-    iconType="paperClip"
-    title={<h3>{DETAILS_FLYOUT_LABELS.attachments.emptyTitle}</h3>}
-    body={
-      <EuiText size="s" color="subdued">
-        <p>{DETAILS_FLYOUT_LABELS.attachments.emptyBody}</p>
-      </EuiText>
-    }
-  />
-));
-AttachmentsTab.displayName = 'AttachmentsTab';
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {summary && (
+          <EuiFlexItem>
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
+              <EuiText size="s" color="subdued">
+                <p>{displayedSummary}</p>
+              </EuiText>
+              {isCondensed && (
+                <div>
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    onClick={() => setExpanded((prev) => !prev)}
+                  >
+                    {expanded
+                      ? DETAILS_FLYOUT_LABELS.overview.showLess
+                      : DETAILS_FLYOUT_LABELS.overview.showMore}
+                  </EuiButtonEmpty>
+                </div>
+              )}
+              {attachmentsSection}
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
 
-export const TimelineTab = memo<{ events: Investigation['events'] }>(({ events }) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
-    <EuiFlexItem>
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{DETAILS_FLYOUT_LABELS.sections.timeline}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <span>{events.length}</span>
-          </EuiText>
-        </EuiFlexItem>
+        {!summary && attachmentsSection}
+
+        {proposedActionsContent && (
+          <EuiFlexItem>
+            <DetailsBlock
+              title={DETAILS_FLYOUT_LABELS.sections.proposedActions}
+              titleAppend={proposedActionsCount}
+            >
+              {proposedActionsContent}
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <TimelineEventList events={events} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
-TimelineTab.displayName = 'TimelineTab';
+    );
+  }
+);
+OverviewTab.displayName = 'OverviewTab';

@@ -14,7 +14,7 @@ import { createFieldFormatMock } from '../test_utils';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public/context';
 import { formatId } from './constants';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
@@ -77,5 +77,15 @@ describe('BytesFormatEditor', () => {
     );
     expect(screen.getByText('256')).toBeVisible();
     expect(screen.getByText('512')).toBeVisible();
+  });
+
+  it('should fire change with the new pattern when the pattern input changes', () => {
+    renderBytesFormatEditor();
+
+    fireEvent.change(screen.getByTestId('numberEditorFormatPattern'), {
+      target: { value: '0b' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ pattern: '0b' });
   });
 });

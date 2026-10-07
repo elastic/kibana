@@ -21,6 +21,8 @@ const ALL_CAPABILITIES = {
   alerting_v2_execution_history: { read: true, all: true },
 };
 
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+
 jest.mock('@kbn/core-di-browser', () => {
   const actual = jest.requireActual('react');
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -31,6 +33,9 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({ capabilities: ALL_CAPABILITIES });
+      }
+      if (token === 'uiSettings') {
+        return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
       }
       return {};
     },
@@ -54,8 +59,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({
@@ -128,6 +133,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    alerts: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>
@@ -207,7 +219,7 @@ describe('composable pages', () => {
       const hostApp = createAlertingV2HostApp('observability', {
         rules: '/alerting',
         ruleLibrary: '/alerting/library',
-        episodes: '/alerting/inbox',
+        alerts: '/alerting/inbox',
         actionPolicies: '/alerting/action-policies',
         executionHistory: '/alerting/execution-history',
       });
@@ -253,6 +265,19 @@ describe('composable pages', () => {
         <AlertingV2RulesPage {...defaultProps()} />
       );
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
+    });
+
+    it('RulesPage redirects sequence-builder URLs to the list when experimental features are disabled', () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/create',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+      expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
+      mockAlertingV2ExperimentalFeaturesEnabled = true;
     });
 
     it('ActionPoliciesPage renders list when parent route matches', () => {
