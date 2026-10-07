@@ -13,7 +13,8 @@
  */
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
-import type { FilterReference, StoredAsCodeFilter } from './types';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
+import type { StoredAsCodeFilter } from './types';
 
 const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern'; // cannot import from plugin @kbn/data-views-plugin/common
 
@@ -23,13 +24,13 @@ const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern'; // cannot import from plugi
 export function extractFilterReferences(
   filters: AsCodeFilter[] | undefined,
   options?: { refNamePrefix?: string }
-): { filters?: StoredAsCodeFilter[]; references: FilterReference[] } {
+): { filters?: StoredAsCodeFilter[]; references: SavedObjectReference[] } {
   if (!filters) {
     return { filters, references: [] };
   }
 
   const refNamePrefix = options?.refNamePrefix ? `${options.refNamePrefix}.` : '';
-  const references: FilterReference[] = [];
+  const references: SavedObjectReference[] = [];
   const storedFilters = filters.map((filter, index) => {
     const { data_view_id: dataViewId, ...rest } = filter;
     if (!dataViewId) {
@@ -45,7 +46,7 @@ export function extractFilterReferences(
 
 function injectFilterReference(
   filter: StoredAsCodeFilter,
-  references: FilterReference[] = []
+  references: SavedObjectReference[] = []
 ): AsCodeFilter {
   const { data_view_ref_name: refName, ...rest } = filter;
   if (!refName) {
@@ -64,7 +65,7 @@ function injectFilterReference(
  */
 export function injectFilterReferences(
   filters: StoredAsCodeFilter[] | undefined,
-  references: FilterReference[] = []
+  references: SavedObjectReference[] = []
 ): AsCodeFilter[] | undefined {
   return filters?.map((filter) => injectFilterReference(filter, references));
 }

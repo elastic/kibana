@@ -34,4 +34,4 @@ export {
 export { FilterConversionError } from './src/errors';
 
 // Types
-export type { FilterReference, StoredAsCodeFilter, StoredFilter } from './src/types';
+export type { StoredAsCodeFilter, StoredFilter } from './src/types';
