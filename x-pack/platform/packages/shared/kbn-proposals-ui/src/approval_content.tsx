@@ -284,8 +284,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             isPending={approvalPhase === 'pending'}
             previousExecutionError={proposal.previousExecutionError}
             isExpired={isExpired}
-            // Undecided, so the only writer of `rationale` is the workflow that expired it.
-            expiredReason={proposal.decision ? undefined : proposal.rationale}
+            expiredReason={proposal.rationale}
             data-test-subj={dataTestSubj}
           />
         )}

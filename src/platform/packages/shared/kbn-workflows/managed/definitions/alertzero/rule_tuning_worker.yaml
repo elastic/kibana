@@ -93,12 +93,8 @@ consts:
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
-  # A pending tuning proposal whose rule was edited or deleted since can never be
-  # applied: the edit-rule action refuses it. Expiring it here takes Approve and
-  # Decline away from the analyst instead of offering a decision that will fail.
-  # Its review stays parked on the gate until the original deadline, which then
-  # re-settles it as expired and keeps `rationale`, so the reason survives.
-  # Fails open: a failed read skips the check until the next sweep.
+  # Expire pending tuning proposals whose rule was edited or deleted after they
+  # were created, so nobody is asked to approve a change that can't be applied.
   - name: list_pending_tuning_proposals
     type: kibana.request
     with:
@@ -118,8 +114,6 @@ steps:
     type: foreach
     foreach: "${{ steps.list_pending_tuning_proposals.output.proposals | default: consts.no_rows | where: 'actionWorkflowId', 'system-alertzero-action-edit-rule' }}"
     steps:
-      # Same read the edit-rule action makes on approval, so both agree on what
-      # counts as changed: `revision` moves on content edits only.
       - name: fetch_proposal_rule
         type: kibana.request
         with:
@@ -130,8 +124,6 @@ steps:
         on-failure:
           continue: true
 
-      # Each update tolerates a conflict: an analyst may decide the proposal
-      # between the list and this write, and their decision wins.
       - name: expire_deleted_rule_proposal
         type: proposals.updateProposal
         if: "${{ steps.fetch_proposal_rule.error != nil and steps.fetch_proposal_rule.error.message contains 'HTTP 404' }}"
@@ -144,7 +136,6 @@ steps:
         on-failure:
           continue: true
 
-      # Proposals created before `expected_revision` existed are left alone.
       - name: expire_changed_rule_proposal
         type: proposals.updateProposal
         if: >-

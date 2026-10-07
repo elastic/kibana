@@ -23,7 +23,7 @@ interface ApprovalStatusCalloutsProps {
    * hold for either cause since this flag does not distinguish them.
    */
   isExpired: boolean;
-  /** Why the workflow expired the proposal early, when it said; shown under the expired title. */
+  /** Why the proposal expired, if known. */
   expiredReason?: string;
   'data-test-subj'?: string;
 }

@@ -277,7 +277,7 @@ describe('ApprovalContent', () => {
     ).toBeInTheDocument();
   });
 
-  it('explains why the workflow expired the proposal early, when it said', () => {
+  it('shows why the proposal expired', () => {
     const reason =
       "The rule was deleted after this proposal was created, so this tuning can't be applied.";
     renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
