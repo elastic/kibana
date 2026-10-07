@@ -20,16 +20,6 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     });
   });
 
-  it('builds a clean path for the standalone Settings page', async () => {
-    const { path } = await locator.getLocation({
-      tab: 'settings',
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-    });
-
-    expect(path).toBe('/settings');
-  });
-
   it('builds a path for the cortex tab', async () => {
     const { path } = await locator.getLocation({ tab: 'cortex' });
 
@@ -54,6 +44,30 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     });
 
     expect(path).toBe('/knowledge_indicators?stream=logs&stream=logs.nginx');
+  });
+
+  it('serializes significant events filters as repeated keys', async () => {
+    const { path } = await locator.getLocation({
+      tab: 'significant_events',
+      status: ['open', 'closed'],
+      severity: ['80-critical', '60-high'],
+      stream: 'logs',
+    });
+
+    expect(path).toBe(
+      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high&stream=logs'
+    );
+  });
+
+  it('encodes an empty status/severity selection explicitly and omits other empty arrays', async () => {
+    const { path } = await locator.getLocation({
+      tab: 'significant_events',
+      status: [],
+      severity: [],
+      stream: [],
+    });
+
+    expect(path).toBe('/significant_events?status=&severity=');
   });
 
   it('omits undefined params', async () => {

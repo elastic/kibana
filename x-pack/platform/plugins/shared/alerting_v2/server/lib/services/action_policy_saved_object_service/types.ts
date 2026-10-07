@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectError } from '@kbn/core/types';
-import type { KueryNode } from '@kbn/es-query';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 
 export type ActionPolicySavedObjectBulkGetItem =
@@ -28,6 +27,14 @@ export type ActionPolicySavedObjectBulkUpdateItem =
 export type ActionPolicySavedObjectBulkDeleteItem =
   | { id: string }
   | { id: string; error: SavedObjectError };
+
+/** The subset of an action policy needed to attribute it to the routing tags it matches on. */
+export interface ActionPolicyRoutingTagSource {
+  id: string;
+  name: string;
+  enabled: boolean;
+  matcher?: ActionPolicySavedObjectAttributes['matcher'];
+}
 
 export interface ActionPolicySavedObjectServiceContract {
   create(params: {
@@ -53,13 +60,21 @@ export interface ActionPolicySavedObjectServiceContract {
   findAllDecrypted(params?: {
     filter?: { enabled: boolean };
   }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
+  /**
+   * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields
+   * needed to group them by routing tag. `isTruncated` is true when more policies exist.
+   */
+  findRoutingTagSources(params: { maxPolicies: number }): Promise<{
+    policies: ActionPolicyRoutingTagSource[];
+    isTruncated: boolean;
+  }>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(params: { ids: string[] }): Promise<ActionPolicySavedObjectBulkDeleteItem[]>;
   find(params: {
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{

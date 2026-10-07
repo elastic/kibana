@@ -36,17 +36,17 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertingV2HostApp } from '../locators';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
 
-import { CLASSIC_EPISODES_DATA_SOURCE } from '../episode_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
@@ -61,14 +61,14 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
   privilegeCheck,
   tabs,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   children: React.ReactNode;
@@ -167,7 +167,7 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
   privilegeCheck,
   createActions,
   manageRulesHref,
@@ -182,14 +182,14 @@ export const AlertingV2EpisodesPage = ({
     () =>
       createActions
         ? {
-            ...CLASSIC_EPISODES_DATA_SOURCE,
+            ...CLASSIC_ALERTS_DATA_SOURCE,
             createActions,
           }
-        : CLASSIC_EPISODES_DATA_SOURCE,
+        : CLASSIC_ALERTS_DATA_SOURCE,
     [createActions]
   );
 
-  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
+  const kibanaReactServices: AlertsKibanaServices = useMemo(
     () => ({
       ...coreStart,
       share: container.get(PluginStart('share')) as SharePluginStart,

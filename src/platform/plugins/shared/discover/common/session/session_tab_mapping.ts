@@ -8,11 +8,12 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiTabBase,
+import {
+  discoverSessionApiClassicTabSchema,
+  type DiscoverSessionApiClassicTab,
+  type DiscoverSessionApiEsqlTab,
+  type DiscoverSessionApiTab,
+  type DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
@@ -44,26 +45,17 @@ type StoredSessionSettings = Pick<
   | 'esqlApproximation'
 >;
 
-/** Session display, time, and query settings as API fields. */
-type ApiSessionSettings = Pick<
-  DiscoverSessionApiTab,
-  | 'hide_chart'
-  | 'hide_table'
-  | 'hide_aggregated_preview'
-  | 'breakdown_field'
-  | 'chart_interval'
-  | 'time_range'
-  | 'refresh_interval'
-> &
-  Partial<Pick<DiscoverSessionApiEsqlTab, 'esql_approximation'>>;
-
 /** Maps API display, time, and query settings to tab fields, including inline Data View usage. */
 export const toStoredSessionSettings = (tab: DiscoverSessionApiTab): StoredSessionSettings => ({
   hideChart: tab.hide_chart,
   hideTable: tab.hide_table,
-  hideAggregatedPreview: tab.hide_aggregated_preview,
+  ...('hide_aggregated_preview' in tab &&
+    tab.hide_aggregated_preview !== undefined && {
+      hideAggregatedPreview: tab.hide_aggregated_preview,
+    }),
   breakdownField: tab.breakdown_field,
-  chartInterval: tab.chart_interval,
+  ...('chart_interval' in tab &&
+    tab.chart_interval !== undefined && { chartInterval: tab.chart_interval }),
   timeRestore: tab.time_range !== undefined,
   timeRange: tab.time_range,
   refreshInterval: tab.refresh_interval,
@@ -72,57 +64,60 @@ export const toStoredSessionSettings = (tab: DiscoverSessionApiTab): StoredSessi
     tab.esql_approximation !== undefined && { esqlApproximation: tab.esql_approximation }),
 });
 
-/** Maps session display, time, and query settings to API fields. */
-export const fromStoredSessionSettings = (
-  tab: Omit<DiscoverSessionTabAttributes, 'kibanaSavedObjectMeta'>
-): ApiSessionSettings => ({
+const fromStoredCommonSessionSettings = (
+  tab: DiscoverSessionTab | DiscoverSessionTabAttributes
+) => ({
   hide_chart: tab.hideChart ?? false,
   hide_table: tab.hideTable ?? false,
-  ...(tab.hideAggregatedPreview !== undefined && {
-    hide_aggregated_preview: tab.hideAggregatedPreview,
-  }),
   ...(tab.breakdownField !== undefined && {
     breakdown_field: tab.breakdownField,
-  }),
-  ...(tab.chartInterval !== undefined && {
-    chart_interval: tab.chartInterval as NonNullable<DiscoverSessionApiTab['chart_interval']>,
   }),
   ...(tab.timeRestore && tab.timeRange !== undefined && { time_range: tab.timeRange }),
   ...(tab.refreshInterval !== undefined && {
     refresh_interval: tab.refreshInterval,
   }),
-  ...(tab.isTextBasedQuery &&
-    tab.esqlApproximation !== undefined && {
-      esql_approximation: tab.esqlApproximation,
-    }),
 });
 
-/**
- * Adds saved type settings to a session API tab, rejecting Metrics settings on a non-ES|QL tab.
- * Panels map the same settings with `fromStoredTabTypeState` and fall back to a default tab.
- */
+/** Maps Classic session settings, including the field statistics preview preference. */
+export const fromStoredClassicSessionSettings = (
+  tab: DiscoverSessionTab | DiscoverSessionTabAttributes
+) => ({
+  ...fromStoredCommonSessionSettings(tab),
+  ...(tab.chartInterval !== undefined && {
+    chart_interval: discoverSessionApiClassicTabSchema.shape.chart_interval
+      .catch('auto')
+      .parse(tab.chartInterval),
+  }),
+  ...(tab.hideAggregatedPreview !== undefined && {
+    hide_aggregated_preview: tab.hideAggregatedPreview,
+  }),
+});
+
+/** Maps ES|QL session settings, including approximation when present. */
+export const fromStoredEsqlSessionSettings = (
+  tab: DiscoverSessionTab | DiscoverSessionTabAttributes
+) => ({
+  ...fromStoredCommonSessionSettings(tab),
+  ...(tab.esqlApproximation !== undefined && {
+    esql_approximation: tab.esqlApproximation,
+  }),
+});
+
+/** Adds saved type settings, ignoring Metrics settings on non-ES|QL tabs. */
 export const applySessionTabTypeState = (
   apiTab: TabWithoutTypeState,
   tabTypeState: DiscoverSessionTabAttributes['tabTypeState']
 ): DiscoverSessionApiTab => {
-  const apiTabTypeState = fromStoredTabTypeState(tabTypeState);
-
-  if (apiTabTypeState.type === DiscoverTabType.Default) {
-    return { ...apiTab, ...apiTabTypeState };
-  }
-
   if (!isDiscoverSessionEsqlTab(apiTab)) {
-    throw new Error(
-      `Metrics tab "${apiTab.label}" with ID "${apiTab.id}" requires an ES|QL data source.`
-    );
+    return { ...apiTab, type: DiscoverTabType.Default };
   }
 
-  return { ...apiTab, ...apiTabTypeState };
+  return { ...apiTab, ...fromStoredTabTypeState(tabTypeState) };
 };
 
 /**
- * Maps session search and table state to API fields, keeping pinned conditions and omitting
- * inline IDs without changing the original filters.
+ * Maps session search and table state to public API fields, keeping pinned conditions and
+ * omitting inline IDs without changing the original filters.
  */
 export const fromStoredSessionSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
@@ -133,12 +128,20 @@ export const fromStoredSessionSearchAndTable = (
   }
 
   const transformedTab = fromStoredSearchAndTable(tab, pinnedFiltersToAppFilters(searchSource));
+  if (isDiscoverSessionEsqlTab(transformedTab)) {
+    return transformedTab;
+  }
+
   const { index } = searchSource;
   const inlineDataViewId = index && typeof index !== 'string' ? index.id : undefined;
-  return omitInlineDataViewIdFromFilters(transformedTab, inlineDataViewId);
+  return {
+    ...transformedTab,
+    filters: omitInlineDataViewIdFromFilters(transformedTab.filters, inlineDataViewId),
+  };
 };
 
-const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) => {
+/** Keeps pinned conditions in session exports without changing the original filters. */
+export const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) => {
   const { filter: filters } = searchSource;
 
   if (!Array.isArray(filters) || !filters.some(isFilterPinned)) {
@@ -151,15 +154,16 @@ const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) =
   };
 };
 
+/** Omits references to the current inline view, leaving references to other views unchanged. */
 const omitInlineDataViewIdFromFilters = (
-  tab: DiscoverSessionApiTabBase,
+  filters: DiscoverSessionApiClassicTab['filters'],
   inlineDataViewId: string | undefined
-): DiscoverSessionApiTabBase => {
-  if (inlineDataViewId === undefined || isDiscoverSessionEsqlTab(tab)) {
-    return tab;
+) => {
+  if (inlineDataViewId === undefined) {
+    return filters;
   }
 
-  const filters = tab.filters.map((filter) => {
+  return filters.map((filter) => {
     if (filter.data_view_id !== inlineDataViewId) {
       return filter;
     }
@@ -167,6 +171,4 @@ const omitInlineDataViewIdFromFilters = (
     const { data_view_id: _inlineDataViewId, ...filterWithoutDataViewId } = filter;
     return filterWithoutDataViewId;
   });
-
-  return { ...tab, filters };
 };
