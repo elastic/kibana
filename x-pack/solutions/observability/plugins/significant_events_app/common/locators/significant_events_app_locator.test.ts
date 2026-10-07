@@ -60,11 +60,11 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     const { path } = await locator.getLocation({
       tab: 'significant_events',
       status: ['open', 'closed'],
-      severity: ['80-critical', '60-high'],
+      severity: ['critical', 'high'],
     });
 
     expect(path).toBe(
-      '/significant_events?status=open&status=closed&severity=80-critical&severity=60-high'
+      '/significant_events?status=open&status=closed&severity=critical&severity=high'
     );
   });
 
