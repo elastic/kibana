@@ -156,6 +156,8 @@ steps:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Download potential duplicate flaky-test-fixer PRs
+    # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
+    continue-on-error: true
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME }}
@@ -381,7 +383,7 @@ Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. P
 - `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
 - `flaky-run-count.json` — `{ triggeredByBot }`: the deterministic, pre-computed number of `/flaky` runs `kibanamachine` has already triggered on this PR (see [Number of runs](#number-of-runs)).
 - `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
-- `duplicate-candidates.json` — `{ team, candidates }`: `team` is this PR's owning team (read from its `failed-test` issue's `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Same team means same owning code area, not necessarily the same test — so confirm each against the diffs. See [Duplicate detection](#duplicate-detection).
+- `duplicate-candidates.json` — `{ team, candidates }`: `team` is this PR's owning team (read from its `failed-test` issue's `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Same team means same owning code area, not necessarily the same test — so confirm each against the diffs. See [Duplicate detection](#duplicate-detection). Absent if detection failed — treat that as "no candidates".
 
 Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
 

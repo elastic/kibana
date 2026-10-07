@@ -30,23 +30,29 @@ jobs:
           persist-credentials: false
 
       - name: Find potential duplicate flaky-test fix PRs
+        # Non-fatal: a lookup failure must not block verification. No file is written, and the
+        # verifier treats a missing file as "no candidates".
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
-            await writeDuplicateCandidates({
-              github,
-              core,
-              prNumber: Number(process.env.PR_NUMBER),
-              outputDir: '/tmp/flaky-test-fix-candidates',
-            });
+            try {
+              await writeDuplicateCandidates({
+                github,
+                core,
+                prNumber: Number(process.env.PR_NUMBER),
+                outputDir: '/tmp/flaky-test-fix-candidates',
+              });
+            } catch (err) {
+              core.warning(`Duplicate detection failed: ${err.message}`);
+            }
 
       - name: Upload potential duplicate flaky-test fixes
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ inputs.artifact_name }}
           path: /tmp/flaky-test-fix-candidates/duplicate-candidates.json
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
