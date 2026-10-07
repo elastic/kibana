@@ -421,8 +421,21 @@ export const executeRuleOperations = async (
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
 
           resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
+          const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+          const wasTimeFieldReplaced =
+            Boolean(next.time_field) &&
+            Boolean(resolvedTimeField) &&
+            resolvedTimeField !== next.time_field;
+          if (wasTimeFieldReplaced) {
+            warnings.push(
+              `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                `\`date_nanos\` field on ${
+                  sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                }, so "${resolvedTimeField}" was auto-selected instead. ` +
+                `Use \`set_time_field\` if a different date field is needed.`
+            );
+          }
           if (resolvedTimeField === null) {
-            const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
             if (next.time_field) {
               warnings.push(
                 `The current time_field "${next.time_field}" was not found as a \`date\` or ` +

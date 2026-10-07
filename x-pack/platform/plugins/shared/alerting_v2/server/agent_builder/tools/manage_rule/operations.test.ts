@@ -719,6 +719,51 @@ describe('executeRuleOperations', () => {
       expect(result.data.query).toBeDefined();
     });
 
+    it('warns when the existing time_field is replaced by an auto-selected date field', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event.ingested' },
+        { operation: 'set_query', query: { base: 'FROM only-timestamp | STATS COUNT(*)' } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('@timestamp');
+      expect(result.warnings).toEqual([
+        expect.stringContaining('"event.ingested" was not found'),
+      ]);
+      expect(result.warnings?.[0]).toContain('"@timestamp" was auto-selected');
+    });
+
+    it('does not warn when the existing time_field is on the new index', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event.ingested' },
+        { operation: 'set_query', query: { base: 'FROM multi-date | STATS COUNT(*)' } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('event.ingested');
+      expect(result.warnings).toBeUndefined();
+    });
+
     it('warns instead of throwing when existing time_field is not on the new index', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
