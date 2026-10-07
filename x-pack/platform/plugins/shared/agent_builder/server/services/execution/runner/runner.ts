@@ -437,11 +437,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         interactive,
         parentExecutionId,
         storeConversation,
-        readOnlyConversation,
+        readOnlyConversation: readOnlyConversationParam,
         ...otherParams
       } = params;
       const { agentId } = params;
       const { nextInput, conversation } = params.agentParams;
+      const readOnlyConversation =
+        readOnlyConversationParam ?? (storeConversation === false && conversation !== undefined);
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,

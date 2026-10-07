@@ -43,7 +43,8 @@ export interface RunAgentParams {
    */
   storeConversation?: boolean;
   /**
-   * True when the run loaded an existing conversation but stores nothing to it. Defaults to false.
+   * True when the run loaded an existing conversation but stores nothing to it. Defaults to true
+   * when `storeConversation` is false and `agentParams.conversation` is set, false otherwise.
    */
   readOnlyConversation?: boolean;
   /**

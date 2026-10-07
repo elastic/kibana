@@ -13,6 +13,7 @@ import type {
   RunAgentParams,
   ToolHandlerFn,
   RunApprovals,
+  AgentHandlerContext,
 } from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -30,6 +31,7 @@ import {
   createToolRegistryMock,
 } from '../../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createEmptyConversation } from '../../../test_utils/conversations';
 import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -318,6 +320,52 @@ describe('AgentBuilder runner', () => {
 
       expect(response).toEqual({
         result: 'someResult',
+      });
+    });
+
+    describe('storage flags', () => {
+      const runWith = async (params: Partial<RunAgentParams>) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' }, ...params.agentParams },
+          request: scopedRunnerDeps.request,
+          ...params,
+        } as RunAgentParams);
+        const { storeConversation, readOnlyConversation } = agentHandler.mock
+          .calls[0][1] as AgentHandlerContext;
+        return { storeConversation, readOnlyConversation };
+      };
+      const conversation = createEmptyConversation({ id: 'conversation-1' });
+
+      it('treats a run that stores nothing on a given conversation as read-only by default', async () => {
+        const context = await runWith({
+          storeConversation: false,
+          agentParams: { nextInput: { message: 'dolly' }, conversation },
+        });
+        expect(context).toEqual({ storeConversation: false, readOnlyConversation: true });
+      });
+
+      it('does not treat a run without a conversation as read-only', async () => {
+        const context = await runWith({ storeConversation: false });
+        expect(context).toEqual({ storeConversation: false, readOnlyConversation: false });
+      });
+
+      it('keeps an explicit readOnlyConversation', async () => {
+        const context = await runWith({
+          storeConversation: false,
+          readOnlyConversation: false,
+          agentParams: { nextInput: { message: 'dolly' }, conversation },
+        });
+        expect(context.readOnlyConversation).toBe(false);
+      });
+
+      it('defaults to a storing, non read-only run', async () => {
+        const context = await runWith({
+          agentParams: { nextInput: { message: 'dolly' }, conversation },
+        });
+        expect(context).toEqual({ storeConversation: true, readOnlyConversation: false });
       });
     });
 
