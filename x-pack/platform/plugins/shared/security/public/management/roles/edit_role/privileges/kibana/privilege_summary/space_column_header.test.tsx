@@ -53,7 +53,8 @@ const spaces = [
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
 const uiApi = getUiApi({ spacesManager, getStartServices });
-// Avatars render synchronously here; the lazy-loading wrapper is owned and covered by the spaces plugin.
+// Render avatars synchronously: this suite covers how SpaceColumnHeader lays out avatars, and the
+// lazy-loading wrapper behind getSpaceAvatar has its own tests in the spaces plugin (lazy_wrapper.test.tsx).
 const spacesApiUi: SpacesApiUi = {
   ...uiApi,
   components: {
