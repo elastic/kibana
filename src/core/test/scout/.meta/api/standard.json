@@ -1,5 +1,5 @@
 {
-  "sha1": "77536c8a138c9091d2b333d449698d3bb4e16540",
+  "sha1": "bc0d70467c3ca1d01e46d5b138dd64f07089772d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -304,7 +304,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 22,
+        "line": 30,
         "column": 10
       }
     },
@@ -330,7 +330,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 10
       }
     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import qs from 'query-string';
 import type { History, Location } from 'history';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
@@ -145,7 +145,7 @@ export const decodeRisonUrlState = (value: string | undefined): RisonValue | und
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString: Record<string, any> = parse(queryString, { sort: false });
+  const parsedQueryString: Record<string, any> = qs.parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;

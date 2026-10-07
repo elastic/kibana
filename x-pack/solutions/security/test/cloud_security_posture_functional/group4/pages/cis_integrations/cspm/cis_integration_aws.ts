@@ -212,13 +212,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN,
           tempAccessSessionToken
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID
@@ -255,13 +255,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME,
           sharedCredentialProfileName
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE
@@ -403,13 +403,13 @@ export default function (providerContext: FtrProviderContext) {
           AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME,
           sharedCredentialProfileName
         );
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await cisIntegration.clickPolicyToBeEdited(integrationName);
           expect(
             (await cisIntegration.getValueInEditPage(
               AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE

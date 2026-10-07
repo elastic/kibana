@@ -9,7 +9,7 @@
 
 const { accessSync, mkdirSync } = require('fs');
 const { join } = require('path');
-const simpleGit = require('simple-git');
+const { simpleGit } = require('simple-git');
 
 // Note: The generated allowlists have not yet been merged to ES
 // so this script may fail until code in this branch has been merged:

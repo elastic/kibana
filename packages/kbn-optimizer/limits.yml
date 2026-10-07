@@ -1,8 +1,8 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 48000
-  agentBuilderPlatform: 8886
+  agentBuilder: 51600
+  agentBuilderPlatform: 11500
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -19,7 +19,7 @@ pageLoadAssetSize:
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
-  cloudExperiments: 103984
+  cloudExperiments: 174034
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 19743
@@ -42,7 +42,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 66000
-  dataVisualizer: 32727
+  dataVisualizer: 32920
   developerToolbar: 4467
   devTools: 8109
   discover: 30538
@@ -54,10 +54,10 @@ pageLoadAssetSize:
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 9718
+  entityStore: 12700
   esql: 21193
   esqlDataGrid: 10209
-  esUiShared: 101220
+  esUiShared: 101436
   evals: 34345
   eventAnnotation: 22361
   eventAnnotationListing: 13164
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 89000
+  ml: 92028
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -157,7 +157,7 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchInferenceEndpoints: 10571
   searchNavigation: 8900
-  searchNotebooks: 18826
+  searchNotebooks: 20190
   searchPlayground: 12122
   searchprofiler: 6509
   searchQueryRules: 6689

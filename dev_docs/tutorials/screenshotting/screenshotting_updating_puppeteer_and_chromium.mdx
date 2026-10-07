@@ -158,7 +158,7 @@ Once you have your VM, you can SSH into the instance and follow the instructions
 
   **Note**: If you have issues connecting, ensure that your local SSH keys are added to your GCP account. You can do this by navigating to the [Metadata section](https://console.cloud.google.com/compute/metadata/sshKeys?project=elastic-kibana-184716) of the GCP Cloud Console and adding your public SSH key.
 - Once you are SSH'd into the instance, follow the instructions in the [build script](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium)  
-- It is likely that you will not have permissions within the VM to upload the build artifacts into the destination bucket. In this case, you will see the following error at the end of the script:
+- It is likely that you will not have permissions within the VM to upload the build artifacts into the destination bucket. In this case, you will see a permission error at the end of the script, like this example from the older `gsutil`-based build script:
   ```
    > gsutil cp /home/ying/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip gs://headless_shell_staging
   Copying file:///home/ying/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip [Content-Type=application/zip]...
@@ -184,8 +184,8 @@ Once you have your VM, you can SSH into the instance and follow the instructions
 - Once both files are built and copied, compute the `archiveChecksum` and `binaryChecksum` and update [https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts). We can use the downloaded `sha256` file as a sanity check.
 - Upload the build artifacts and the sha256 files to the GCP storage buckets:
   ```
-  gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell_staging
-  gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell
+  gcloud storage cp ./chromium-fe621c5-locales-linux_* gs://headless_shell_staging
+  gcloud storage cp ./chromium-fe621c5-locales-linux_* gs://headless_shell
   ```
 
 You are done with the build! At this point you can delete the VM and move on to testing!
@@ -219,10 +219,9 @@ CI also runs against the build too pulling the assets we upload to the buckets, 
 
 You will need access to the `elastic-kibana` project on Google Cloud Console. Check your access [here](https://console.cloud.google.com/compute/instances?project=elastic-kibana-184716). If you do not have access, contact your manager.
 
-#### Google Cloud CLI and `gsutil`
+#### Google Cloud CLI
 
 - Install Google Cloud CLI [as explained here](https://cloud.google.com/sdk/docs/install). Alternatively, you can install using [brew](https://formulae.brew.sh/cask/google-cloud-sdk).
-- Install `gsutil` [as explained here](https://cloud.google.com/storage/docs/gsutil_install)
 - Set up and authenticate with the CLI: `gcloud init`
 - When running `gcloud init`, you will be prompted for some inputs. Here are some suggested responses:
 
@@ -236,4 +235,3 @@ You will need access to the `elastic-kibana` project on Google Cloud Console. Ch
    disable_usage_reporting: 'True'
    project: elastic-kibana-184716
  ```
-
