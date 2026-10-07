@@ -159,6 +159,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/tooling-log'
   - '@kbn/test'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
