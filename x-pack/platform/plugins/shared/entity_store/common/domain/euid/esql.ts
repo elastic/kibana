@@ -30,6 +30,7 @@ import {
 } from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
+  assertEmittableEntityType,
   documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
@@ -557,6 +558,7 @@ function appendTypeIdIfNeeded(
   mustPrependTypeId: boolean
 ) {
   if (mustPrependTypeId) {
+    assertEmittableEntityType(entityType);
     return `CONCAT("${entityType}:", ${euidLogic})`;
   }
   return euidLogic;

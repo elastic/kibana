@@ -17,7 +17,7 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import type { EuidGateOptions } from './commons';
-import { isEuidField, waiveForAlerts } from './commons';
+import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -137,7 +137,11 @@ export function getEuidPainlessEvaluationFromDefinition(
 ): string {
   const { applyPostAggFilter = true } = options ?? {};
   const { identityField, type: entityType } = entityDefinition;
-  const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
+  let prefixExpr = '';
+  if (!identityField.skipTypePrepend) {
+    assertEmittableEntityType(entityType);
+    prefixExpr = `"${entityType}:" + `;
+  }
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;

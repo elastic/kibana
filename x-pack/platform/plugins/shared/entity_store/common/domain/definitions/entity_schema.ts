@@ -17,6 +17,25 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 /** Registry type name. Wider than the closed `EntityType`, which only covers the built-ins. */
 export type EntityDefinitionType = string;
 
+/**
+ * Registry type names: lowercase alphanumeric segments separated by `.`, `_` or `-`, starting with
+ * a letter. Separators cannot lead, trail or repeat. Examples: `host`, `k8s.pod`, `aws_s3-bucket`.
+ * Length is capped separately by `ENTITY_DEFINITION_TYPE_MAX_LENGTH`.
+ */
+export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
+export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
+
+/** Returns why `type` is not a valid entity definition type name, or `undefined` when it is valid. */
+export const validateEntityDefinitionType = (type: string): string | undefined => {
+  if (type.length > ENTITY_DEFINITION_TYPE_MAX_LENGTH) {
+    return `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`;
+  }
+  if (!ENTITY_DEFINITION_TYPE_PATTERN.test(type)) {
+    return `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`;
+  }
+  return undefined;
+};
+
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
 export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);

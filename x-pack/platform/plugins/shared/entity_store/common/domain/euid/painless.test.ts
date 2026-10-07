@@ -7,6 +7,7 @@
 
 import { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { hostEntityDefinition } from '../definitions/host';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   getEuidPainlessEvaluation,
@@ -336,5 +337,23 @@ describe('FromDefinition variants', () => {
     expect(getEuidPainlessEvaluationForSearchFromDefinition(definition)).toEqual(
       getEuidPainlessEvaluationForSearch(type)
     );
+  });
+});
+
+describe('type prefix validation', () => {
+  const badDefinition = { ...hostEntityDefinition, type: 'a"b' };
+
+  it('throws when the type name cannot be emitted as a prefix', () => {
+    expect(() => getEuidPainlessEvaluationFromDefinition(badDefinition)).toThrow(
+      'Cannot emit the entity type prefix'
+    );
+  });
+
+  it('does not throw when the type prefix is skipped', () => {
+    const definition = {
+      ...badDefinition,
+      identityField: { ...badDefinition.identityField, skipTypePrepend: true },
+    };
+    expect(() => getEuidPainlessEvaluationFromDefinition(definition)).not.toThrow();
   });
 });

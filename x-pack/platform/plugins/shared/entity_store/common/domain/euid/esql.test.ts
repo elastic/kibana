@@ -33,6 +33,7 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinition, getEntityDefinitionWithoutId } from '../definitions/registry';
 import { userEntityDefinition } from '../definitions/user';
+import { hostEntityDefinition } from '../definitions/host';
 
 const normalize = (s: string) =>
   s
@@ -820,5 +821,23 @@ describe('definition type names in compiled output', () => {
     expect(getEuidKqlFilterBasedOnDocumentFromDefinition(definition, doc)).toEqual(
       getEuidKqlFilterBasedOnDocumentFromDefinition(builtIn, doc)
     );
+  });
+});
+
+describe('type prefix validation', () => {
+  const badDefinition = { ...hostEntityDefinition, type: 'a"b' };
+
+  it('throws when the type name cannot be emitted as a prefix', () => {
+    expect(() => getEuidEsqlEvaluationFromDefinition(badDefinition, 'entity.id')).toThrow(
+      'Cannot emit the entity type prefix'
+    );
+  });
+
+  it('does not throw when the type prefix is skipped', () => {
+    const definition = {
+      ...badDefinition,
+      identityField: { ...badDefinition.identityField, skipTypePrepend: true },
+    };
+    expect(() => getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')).not.toThrow();
   });
 });
