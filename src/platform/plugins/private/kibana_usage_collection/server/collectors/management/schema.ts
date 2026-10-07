@@ -1069,4 +1069,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the V1 Observability alerts table is shown when Alerting v2 is enabled.',
     },
   },
+  'alerting:v1:alertStatusWorkflowTrigger:enabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether workflows can be started by v1 alert status changes in a space (the alerting.v1.alertStatusChanged trigger).',
+    },
+  },
 };
