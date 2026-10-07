@@ -146,7 +146,7 @@ const createWorker = (
   };
   return {
     ...worker,
-    // Turning a worker on requires an account. Tests that click the switch start from one.
+    // Workers that already have an account skip prebuilt account setup on save.
     settings: { ...worker.settings, serviceAccountId: 'kibana/az-worker-1' },
   };
 };
