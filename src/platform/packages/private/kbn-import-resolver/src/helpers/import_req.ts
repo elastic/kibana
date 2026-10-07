@@ -82,7 +82,9 @@ interface RelativeImportReqOptions extends WrapOptions {
 
 export function getRelativeImportReq(options: RelativeImportReqOptions) {
   const relative = normalizePath(Path.relative(options.dirname, options.absolute));
-  const request = relative.startsWith('.') ? relative : `./${relative}`;
+  // `Path.relative` never returns a leading `./`, so only `..` marks a parent path; a
+  // dot-prefixed directory such as `.oxlint/` still needs `./` to stay a relative request.
+  const request = relative === '..' || relative.startsWith('../') ? relative : `./${relative}`;
 
   return wrap(
     options.preserveFileExtensions

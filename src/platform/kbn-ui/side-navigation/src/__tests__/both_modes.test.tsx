@@ -279,7 +279,7 @@ describe('Both modes', () => {
 
         const sidePanel = screen.getByTestId(sidePanelId);
 
-        let overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
+        const overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
 
         const tlsCertificatesLink = within(sidePanel).getByTestId(
           sidePanelItemId('tls_certificates')
@@ -296,9 +296,8 @@ describe('Both modes', () => {
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).toHaveAttribute('aria-current', 'page');
 
-        // "Overview" becomes stale and leads to incorrect assertions, we need to re-query the link
-        overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
-
+        // The same element is updated in place; a remount would restart the label slide.
+        expect(overviewLink).toBe(within(sidePanel).getByTestId(sidePanelItemId('apps_overview')));
         expect(overviewLink).toHaveAttribute('aria-current', 'page');
         expect(overviewLink).toHaveAttribute('data-highlighted', 'true');
       });

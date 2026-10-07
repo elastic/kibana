@@ -272,7 +272,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  // The list needs a saved workflow id. The detail flyout only needs the selected
+  // execution, including a test run of a workflow that has not been saved yet.
+  const canShowExecutionUi = isExecutionsViewEnabled && canReadWorkflowExecution;
   const sidebarExecutionList =
     !isExecutionsViewEnabled &&
     id &&
@@ -293,7 +295,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
+          onOpenExecutionList={canShowExecutionUi && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -306,14 +308,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {showExecutionFlyouts && id && isExecutionListOpen && (
+            {canShowExecutionUi && id && isExecutionListOpen && (
               <WorkflowExecutionListFlyout
                 workflowId={id}
                 onClose={onCloseExecutionList}
                 isHidden={Boolean(selectedExecutionId)}
               />
             )}
-            {showExecutionFlyouts && selectedExecutionId && (
+            {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
                 workflowName={workflowName ?? ''}

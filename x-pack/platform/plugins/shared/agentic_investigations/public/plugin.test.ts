@@ -65,6 +65,19 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     );
   });
 
+  it('registers the impact, subject, and hypotheses attachment renderers', () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    createPlugin().start(coreMock.createStart(), { agentBuilder });
+
+    const types = agentBuilder.attachments.addAttachmentType.mock.calls.map(([type]) => type);
+    expect(types).toEqual([
+      'investigation_impact',
+      'investigation_subject',
+      'investigation_hypotheses',
+    ]);
+  });
+
   it('registers nothing without Agent Builder', () => {
     const plugin = createPlugin();
 
