@@ -88,15 +88,22 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
-  // Hide agentless policies by default unless showAgentless toggle is enabled
-  const getSearchWithDefaults = (newSearch: string) => {
+  const getKuery = (newSearch: string) => {
     const kueryHideOpAMP = `NOT ${agentPolicySavedObjectType}.name:"${OPAMP_POLICY_NAME}"`;
-    if (showAgentless) {
-      return newSearch.trim() ? `(${kueryHideOpAMP}) AND (${newSearch})` : kueryHideOpAMP;
+    const trimmedSearch = newSearch.trim();
+    if (!trimmedSearch) {
+      return kueryHideOpAMP;
     }
-    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true AND (${kueryHideOpAMP})`;
-    return newSearch.trim() ? `(${defaultSearch}) AND (${newSearch})` : defaultSearch;
+    // Free text is not valid in a saved object filter, combining it with another clause would make the server search for the whole string
+    // A colon inside quotes is part of a phrase, not a field query
+    const withoutQuoted = trimmedSearch.replace(/"(?:[^"\\]|\\.)*"/g, '');
+    return withoutQuoted.includes(':')
+      ? `(${kueryHideOpAMP}) AND (${trimmedSearch})`
+      : trimmedSearch;
   };
+
+  // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
+  const isNotHiddenPolicy = (policy: AgentPolicy) => policy.name !== OPAMP_POLICY_NAME;
 
   // Fetch agent policies
   const {
@@ -108,7 +115,8 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
-    kuery: getSearchWithDefaults(search),
+    kuery: getKuery(search),
+    showAgentless,
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
@@ -392,7 +400,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
           defaultMessage: 'List of agent policies',
         })}
-        items={agentPolicyData ? agentPolicyData.items : []}
+        items={agentPolicyData ? agentPolicyData.items.filter(isNotHiddenPolicy) : []}
         itemId="id"
         columns={columns}
         pagination={{
