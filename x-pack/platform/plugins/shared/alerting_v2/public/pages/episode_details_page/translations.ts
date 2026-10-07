@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const EPISODE_DETAILS_BREADCRUMB_FALLBACK = i18n.translate(
   'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
   {
-    defaultMessage: 'Alert episode',
+    defaultMessage: 'Alert',
   }
 );
 
@@ -83,25 +83,25 @@ export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
 export const EPISODE_NOT_FOUND_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.episodeNotFoundTitle',
   {
-    defaultMessage: 'Unable to load episode',
+    defaultMessage: 'Unable to load alert',
   }
 );
 
 export const EPISODE_NOT_FOUND_BODY = i18n.translate(
   'xpack.alertingV2.episodes.episodeNotFoundBody',
   {
-    defaultMessage: 'The alert episode could not be found or an error occurred while loading it.',
+    defaultMessage: 'The alert could not be found or an error occurred while loading it.',
   }
 );
 
 export const BACK_TO_ALERT_EPISODES = i18n.translate('xpack.alertingV2.episodes.backToEpisodes', {
-  defaultMessage: 'Back to alert episodes',
+  defaultMessage: 'Back to alerts',
 });
 
 export const EPISODES_LIST_BACK_LABEL = i18n.translate(
   'xpack.alertingV2.episodeDetails.episodesListBackLabel',
   {
-    defaultMessage: 'Alert episodes',
+    defaultMessage: 'Alerts',
   }
 );
 
@@ -187,7 +187,7 @@ export const getSnoozedUntilTooltip = (expiry: Date): string =>
 export const LOADING_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.loadingRuleTitle',
   {
-    defaultMessage: 'Episode details',
+    defaultMessage: 'Alert details',
   }
 );
 
@@ -195,7 +195,7 @@ export const LOADING_RULE_TITLE = i18n.translate(
 export const SIDEBAR_TITLE_EPISODE_DETAILS = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarTitle',
   {
-    defaultMessage: 'Episode details',
+    defaultMessage: 'Alert details',
   }
 );
 
@@ -220,7 +220,7 @@ export const SIDEBAR_TAB_TITLE_DETAILS = i18n.translate(
   }
 );
 
-/** --- Episode details list --- */
+/** --- Alert details list --- */
 export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
   defaultMessage: 'Grouping fields',
 });
@@ -243,7 +243,7 @@ export const ACTIONS_OVERVIEW_TITLE = i18n.translate(
 export const ACTIONS_OVERVIEW_EMPTY = i18n.translate(
   'xpack.alertingV2.episodeDetails.actionsOverviewEmpty',
   {
-    defaultMessage: 'No actions have been taken on this episode.',
+    defaultMessage: 'No actions have been taken on this alert.',
   }
 );
 

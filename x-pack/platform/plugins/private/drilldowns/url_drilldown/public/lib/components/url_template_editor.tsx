@@ -76,7 +76,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       return;
     }
 
-    const { dispose } = monaco.languages.registerCompletionItemProvider(HANDLEBARS_LANG_ID, {
+    const disposable = monaco.languages.registerCompletionItemProvider(HANDLEBARS_LANG_ID, {
       triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
         const { lineNumber } = position;
@@ -127,7 +127,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     });
 
     return () => {
-      dispose();
+      disposable.dispose();
     };
   }, [variables]);
 
