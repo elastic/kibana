@@ -147,7 +147,7 @@ export const deleteFleetServerHostHandler: RequestHandler<
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    await fleetServerHostService.delete(esClient, request.params.itemId);
+    await fleetServerHostService.delete(esClient, request.params.itemId, { request });
     const body = {
       id: request.params.itemId,
     };

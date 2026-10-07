@@ -308,6 +308,36 @@ describe('Field editor Preview panel', () => {
       ]);
     });
 
+    it('should display all the values when the script emits multiple values', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['a', 'b'] });
+      const {
+        actions: { fields, waitForUpdates, getRenderedFieldsPreview, toggleFormRow },
+      } = testBed;
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("emit('a'); emit('b');");
+      await waitForUpdates();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: '[a, b]' }]);
+    });
+
+    it('should display "Value not set" when the script emits no value', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [] });
+      const {
+        actions: { fields, waitForUpdates, getRenderedFieldsPreview, toggleFormRow },
+      } = testBed;
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("if (false) { emit('a'); }");
+      await waitForUpdates();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'Value not set' },
+      ]);
+    });
+
     describe('read from _source', () => {
       test('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
         const {
@@ -865,6 +895,23 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates();
       expect(exists('typeField_0')).toBe(true);
       expect(exists('typeField_1')).toBe(false);
+    });
+
+    it('should display all the values of a multi-value subfield and detect its type', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1, 2] } });
+      testBed = await setup();
+      const {
+        find,
+        actions: { fields, waitForUpdates, getRenderedFieldsPreview },
+      } = testBed;
+
+      await fields.updateName('myRuntimeField');
+      await fields.updateType('composite', 'Composite');
+      await fields.updateScript("emit('a',1); emit('a',2)");
+      await waitForUpdates();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField.a', value: '[1, 2]' }]);
+      expect(find('typeField_0').props().value).toBe('double');
     });
   });
 });

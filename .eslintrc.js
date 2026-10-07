@@ -11,6 +11,7 @@ require('@kbn/babel-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
 
 /**
  * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
@@ -41,6 +42,11 @@ const scoutRestrictedFtrPatterns = {
   message:
     "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
 };
+
+const SCOUT_TEST_FILE_GLOBS = [
+  `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
+  'packages/**/test/scout{_*,}/**/*.ts',
+];
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -222,8 +228,12 @@ const DEV_PATTERNS = [
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
 ];
 
-/** Restricted imports with suggested alternatives */
-const RESTRICTED_IMPORTS = [
+/**
+ * Security-related restricted imports. These are enforced by the dedicated
+ * `@kbn/eslint/security_imports_restriction` rule so that local
+ * `no-restricted-imports` overrides cannot silently drop them.
+ */
+const SECURITY_RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
@@ -282,6 +292,15 @@ const RESTRICTED_IMPORTS = [
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
@@ -424,11 +443,6 @@ const RESTRICTED_IMPORTS = [
   {
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
-  },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
   },
 ];
 
@@ -1048,6 +1062,7 @@ module.exports = {
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
           {
@@ -1727,13 +1742,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
-        'x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts',
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
@@ -2240,7 +2249,7 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
-      globals: { canvas: true, $: true },
+      globals: { canvas: true },
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
@@ -2249,12 +2258,37 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
-      env: {
-        jquery: true,
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/**/*.{js,ts,tsx,d.ts}',
+        'x-pack/platform/plugins/private/canvas/public/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/chart/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/sparkline/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ...require('@kbn/eslint-config/restricted_globals'),
+          {
+            name: '$',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+          {
+            name: 'jQuery',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+        ],
       },
     },
-
+    {
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/index.js',
+        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
     /**
      * TSVB overrides
      */
@@ -2691,18 +2725,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -2765,10 +2803,11 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Default for every Scout suite; the solution overrides below re-declare
+      // `no-restricted-imports` for their own paths and take precedence.
+      files: SCOUT_TEST_FILE_GLOBS,
+      // Scout's own `ScoutPage` fixture is built on top of Playwright, so it has to import it.
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/**'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2812,7 +2851,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/observability/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2848,7 +2887,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/search/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2880,7 +2919,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/security/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2917,12 +2956,8 @@ module.exports = {
     },
     // Custom rules for scout tests
     {
-      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
-      files: [
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Every Scout suite, excluding the Scout framework's own tests
+      files: SCOUT_TEST_FILE_GLOBS,
       excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
@@ -2950,6 +2985,29 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
         ],
       },
     },
@@ -3010,22 +3068,24 @@ module.exports = {
     },
     {
       // Allow axios in files that already use it. New axios imports are blocked
-      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
-      // as consumers migrate to the native `fetch` API. Placed last so it wins
-      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution block). The trade-off: the allowlisted files that
-      // overlap with that block lose their `*legacy*` pattern check; verified
-      // that none of them currently import any path matching `*legacy*`. The
-      // workflows_management overlap is gone, and this comment can be dropped
-      // entirely once the remaining security_solution consumers migrate. The
-      // js-yaml freeze is handled separately via
-      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
-      // so it does not interact with this override.
+      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
+      // shrink as consumers migrate to the native `fetch` API.
+      // The `no-restricted-imports` entry preserves this block's historical
+      // behavior: it is placed last, so the allowlisted files that overlap with
+      // an earlier override (e.g. the security_solution block) lose that
+      // override's `*legacy*` pattern check; verified that none of them
+      // currently import any path matching `*legacy*`. The workflows_management
+      // overlap is gone, and this entry can be dropped entirely once the
+      // remaining security_solution consumers migrate. The js-yaml freeze is
+      // handled separately via @kbn/eslint/module_migration in
+      // packages/kbn-eslint-config/.eslintrc.js so it does not interact with
+      // this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
-        'no-restricted-imports': [
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': [
           'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

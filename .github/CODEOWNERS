@@ -631,6 +631,7 @@ src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-schema-string-helpers @elastic/kibana-security @elastic/kibana-core
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/shared/kbn-scout-synthtrace @elastic/appex-qa
 src/platform/packages/shared/kbn-search-agent @elastic/search-kibana
@@ -2517,7 +2518,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
-/src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
+/src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-discover
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management

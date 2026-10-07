@@ -33,10 +33,8 @@ export function hasYarnInstallLeftovers() {
 
 /**
  * Verify pnpm is available before we spawn it, and warn on version drift.
- * We deliberately don't ship a package.json "packageManager" field: it makes
- * yarn refuse to run, and docs.elastic.dev (plus a few leftover tools) still
- * invoke yarn. So we detect pnpm ourselves and point devs at corepack, pinning
- * from "engines.pnpm".
+ * Corepack uses package.json "packageManager" to provision the pinned version;
+ * this check covers environments where Corepack is not enabled or is shadowed.
  *
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
@@ -79,7 +77,7 @@ export function ensurePnpmAvailable(log) {
 }
 
 /**
- * Read the pinned pnpm version from package.json "engines" (e.g. "~11.27.0" -> "11.27.0").
+ * Read the pinned pnpm version from package.json "engines"
  * @returns {string}
  */
 function getRequiredPnpmVersion() {
@@ -122,7 +120,11 @@ export async function pnpmInstallDeps(log, { offline, quiet, frozenLockfile, for
   }
 
   const args = ['install', '--config.confirmModulesPurge=false'];
-  if (frozenLockfile) args.push('--frozen-lockfile');
+  if (frozenLockfile) {
+    args.push('--frozen-lockfile');
+  } else {
+    args.push('--no-frozen-lockfile');
+  }
   if (offline) args.push('--offline');
   if (quiet) args.push('--reporter=silent');
 

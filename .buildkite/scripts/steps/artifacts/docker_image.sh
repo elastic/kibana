@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# node scripts/build rebuilds the shared webpack bundles without the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
@@ -164,7 +167,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
 
   echo "--- Validate CDN assets"
-  ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
 
