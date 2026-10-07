@@ -21,7 +21,7 @@ export const vegaSpecSchema = z
     z
       .object({
         format: z.literal('hjson'),
-        value: z.string().min(1).meta({
+        value: z.string().min(1).max(1_000_000).meta({
           description:
             'The Vega or Vega-Lite specification in HJSON format. Comments and unquoted keys are preserved.',
         }),
