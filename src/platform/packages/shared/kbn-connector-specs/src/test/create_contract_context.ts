@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { generateKeyPairSync, webcrypto } from 'crypto';
 import axios from 'axios';
 import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
@@ -51,7 +52,29 @@ const findAuthType = (id: string): NormalizedAuthType => {
   return authType as NormalizedAuthType;
 };
 
+let serviceAccountJson: string | undefined;
+
+// A key auth types can sign with, generated once, as the mock accepts any signature.
+const sampleServiceAccountJson = (): string => {
+  serviceAccountJson ??= JSON.stringify({
+    type: 'service_account',
+    project_id: 'contract-mock',
+    private_key_id: 'contract-mock',
+    private_key: generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+    }).privateKey,
+    client_email: 'contract-mock@contract-mock.iam.gserviceaccount.com',
+    client_id: 'contract-mock',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+  });
+  return serviceAccountJson;
+};
+
 const placeholdersFor = (key: string): readonly string[] => [
+  ...(key === 'serviceAccountJson' ? [sampleServiceAccountJson()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
   'contract-mock@example.com',
@@ -92,11 +115,43 @@ const silentLogger: Logger = {
   get: () => silentLogger,
 };
 
-const authContext: AuthContext = {
+const createAuthContext = (mockFetch: typeof fetch): AuthContext => ({
   getCustomHostSettings: () => undefined,
   getToken: async () => ACCESS_TOKEN,
   logger: silentLogger,
   sslSettings: {},
+  fetch: mockFetch,
+});
+
+// Auth types sign with Web Crypto, which jest environments leave out.
+const ensureWebCrypto = () => {
+  if (!globalThis.crypto?.subtle) {
+    Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
+  }
+};
+
+let guards = 0;
+let globalFetch: typeof fetch | undefined;
+
+/**
+ * Runs `run` with the global `fetch` failing, so code that should use the context's `fetch`
+ * can't reach the network unnoticed.
+ */
+const withoutGlobalFetch = async <T>(run: () => Promise<T>): Promise<T> => {
+  if (guards++ === 0) {
+    globalFetch = globalThis.fetch;
+    globalThis.fetch = async (input) => {
+      const url = input instanceof Request ? input.url : String(input);
+      throw new Error(`${url} was requested with the global fetch, bypassing the contract mock`);
+    };
+  }
+  try {
+    return await run();
+  } finally {
+    if (--guards === 0 && globalFetch) {
+      globalThis.fetch = globalFetch;
+    }
+  }
 };
 
 /**
@@ -129,7 +184,10 @@ export const createContractContext = async ({
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
-  await findAuthType(id).configure(authContext, client, authSecrets);
+  ensureWebCrypto();
+  await withoutGlobalFetch(() =>
+    findAuthType(id).configure(createAuthContext(mock.fetch), client, authSecrets)
+  );
 
   const ctx: ActionContext = {
     client,
@@ -139,6 +197,7 @@ export const createContractContext = async ({
     getClient: async (clientType) => {
       throw new Error(`Client ${String(clientType)} is not available in contract tests`);
     },
+    fetch: mock.fetch,
   };
 
   const runAction = async (name: string, input: unknown): Promise<unknown> => {
@@ -146,7 +205,8 @@ export const createContractContext = async ({
     if (!action) {
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
-    return action.handler(ctx, await action.input.parseAsync(input));
+    const parsed = await action.input.parseAsync(input);
+    return withoutGlobalFetch(() => action.handler(ctx, parsed));
   };
 
   return { ctx, mock, runAction };

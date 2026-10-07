@@ -31,6 +31,8 @@ interface Route {
   readonly servers: readonly ServerPrefix[];
   readonly path: RegExp;
   readonly parameterNames: readonly string[];
+  /** The length of the template's text outside parameters. */
+  readonly literalLength: number;
 }
 
 const TEMPLATE_PARAMETER = /\{([^}]+)\}/;
@@ -63,6 +65,7 @@ const compileRoute = (operation: ContractOperation): Route => {
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
     parameterNames,
+    literalLength: operation.path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
 
@@ -92,7 +95,9 @@ const decodePathSegment = (segment: string): string => {
 
 /**
  * Creates a router that finds the operation for a request. When several path templates match,
- * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`.
+ * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
+ * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
+ * `/items/{id}`.
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
@@ -108,7 +113,11 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
     }
     const [best] = candidates
       .filter(({ route }) => route.operation.method === method.toLowerCase())
-      .sort((a, b) => a.route.parameterNames.length - b.route.parameterNames.length);
+      .sort(
+        (a, b) =>
+          a.route.parameterNames.length - b.route.parameterNames.length ||
+          b.route.literalLength - a.route.literalLength
+      );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
       return {

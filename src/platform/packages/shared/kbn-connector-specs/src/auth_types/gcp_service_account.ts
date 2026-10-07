@@ -57,7 +57,7 @@ export const GcpServiceAccountAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'gcp_service_account',
   schema: authSchema,
   configure: async (
-    _: AuthContext,
+    ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
@@ -67,7 +67,8 @@ export const GcpServiceAccountAuth: AuthTypeSpec<AuthSchemaType> = {
     const { accessToken } = await getGcpAccessToken(
       serviceAccount.client_email,
       serviceAccount.private_key,
-      scope
+      scope,
+      ctx.fetch
     );
 
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
