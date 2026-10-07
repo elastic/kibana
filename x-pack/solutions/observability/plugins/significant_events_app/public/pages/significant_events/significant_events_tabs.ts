@@ -15,6 +15,7 @@ const SIGNIFICANT_EVENTS_TABS = [
   SIGNIFICANT_EVENTS_TAB,
   'cortex',
   'decision_trees',
+  'memory',
 ] as const;
 
 export type SignificantEventsTabId = (typeof SIGNIFICANT_EVENTS_TABS)[number];

@@ -60,7 +60,6 @@ const toRuleEventsGroupHash = (eventId: string): string =>
     .digest('hex');
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
-const useRuleEventsRead = process.env.SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ === 'true';
 
 /** Events data stream — the index the discovery agent writes to via events_write. */
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
@@ -159,7 +158,7 @@ evaluate.describe(
             if (!replayedSnapshotKeys.has(key)) {
               // Ensure KI features index is available by replaying the snapshot once per source.
               await cleanSignificantEventsDataStreams(esClient, log, {
-                includeRuleEvents: useRuleEventsRead,
+                includeRuleEvents: true,
               });
               for (const name of SIGEVENTS_WIRED_ROOTS) {
                 await esClient.indices.deleteDataStream({ name }).catch(() => {});
@@ -271,12 +270,12 @@ evaluate.describe(
                   // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
                   await cleanSignificantEventsDataStreams(esClient, log, {
                     includeLogs: false,
-                    includeRuleEvents: useRuleEventsRead,
+                    includeRuleEvents: true,
                   });
 
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log, {
-                      includeRuleEvents: useRuleEventsRead,
+                      includeRuleEvents: true,
                     });
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
                       await esClient.indices.deleteDataStream({ name }).catch(() => {});
@@ -508,7 +507,7 @@ evaluate.describe(
                     // The cycles within this task still share state.
                     await cleanSignificantEventsDataStreams(esClient, log, {
                       includeLogs: false,
-                      includeRuleEvents: useRuleEventsRead,
+                      includeRuleEvents: true,
                     });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
@@ -520,7 +519,7 @@ evaluate.describe(
 
                     if (run.snapshotKey !== lastReplayedSnapshotKey) {
                       await cleanSignificantEventsDataStreams(esClient, log, {
-                        includeRuleEvents: useRuleEventsRead,
+                        includeRuleEvents: true,
                       });
                       for (const name of SIGEVENTS_WIRED_ROOTS) {
                         await esClient.indices.deleteDataStream({ name }).catch(() => {});
@@ -645,10 +644,9 @@ evaluate.describe(
                             document: seededEvent,
                           });
                           seededDocumentIds.push(response._id);
-                          // When the flag is on, also write to .rule-events so the agent's
-                          // RuleEventsClient (which reads from that index) can find the seeded
-                          // episode in the next cycle's event_search call.
-                          if (useRuleEventsRead && seededEvent.event_id) {
+                          // Also write to .rule-events so the agent's RuleEventsClient can find
+                          // the seeded episode in the next cycle's event_search call.
+                          if (seededEvent.event_id) {
                             const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
                             await esClient.index({
                               index: RULE_EVENTS_DATA_STREAM,
@@ -659,7 +657,7 @@ evaluate.describe(
                                 type: 'alert',
                                 space_id: 'default',
                                 severity: seededEvent.severity,
-                                episode: {
+                                alert: {
                                   status: seededEvent.status,
                                 },
                                 data: {
@@ -683,11 +681,9 @@ evaluate.describe(
                           await esClient.indices.refresh({
                             index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                           });
-                          if (useRuleEventsRead) {
-                            await esClient.indices.refresh({
-                              index: RULE_EVENTS_DATA_STREAM,
-                            });
-                          }
+                          await esClient.indices.refresh({
+                            index: RULE_EVENTS_DATA_STREAM,
+                          });
                         }
                       }
                     } finally {
@@ -698,7 +694,7 @@ evaluate.describe(
                           refresh: true,
                         });
                       }
-                      if (useRuleEventsRead && seededGroupHashes.length > 0) {
+                      if (seededGroupHashes.length > 0) {
                         await esClient.deleteByQuery({
                           index: RULE_EVENTS_DATA_STREAM,
                           query: { terms: { group_hash: seededGroupHashes } },
@@ -730,7 +726,7 @@ evaluate.describe(
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log, {
-            includeRuleEvents: useRuleEventsRead,
+            includeRuleEvents: true,
           });
         });
       });

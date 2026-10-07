@@ -11,9 +11,7 @@ import {
   EVENT_STATUS_CHANGED_TRIGGER_ID,
   type SignificantEventTriggerBasePayload,
 } from '../../../common/workflows/triggers';
-import type { EventClient } from '../../lib/significant_events/events';
-
-type TriggerEmittingClient = Pick<EventClient, 'emitTrigger'>;
+import type { TriggerEmitter } from './emit';
 
 type SignificantEventSource = Pick<
   SignificantEvent,
@@ -50,11 +48,12 @@ const emitBestEffort = (emit: () => void): void => {
  * status) for a single written event version.
  */
 export const emitSignificantEventWriteTriggers = ({
-  eventClient,
+  emitTrigger,
   significantEvent,
   priorSignificantEvent,
 }: {
-  eventClient: TriggerEmittingClient;
+  /** Fire-and-forget workflow trigger emitter; omitted when workflows are unavailable. */
+  emitTrigger: TriggerEmitter | undefined;
   /** The newly written (append-only) significant event version. */
   significantEvent: SignificantEventSource;
   /** The latest version of this event_id that existed before this write, if any. */
@@ -62,15 +61,12 @@ export const emitSignificantEventWriteTriggers = ({
 }): void =>
   emitBestEffort(() => {
     if (!priorSignificantEvent) {
-      eventClient.emitTrigger(
-        EVENT_CREATED_TRIGGER_ID,
-        baseSignificantEventPayload(significantEvent)
-      );
+      emitTrigger?.(EVENT_CREATED_TRIGGER_ID, baseSignificantEventPayload(significantEvent));
       return;
     }
 
     if (priorSignificantEvent.status !== significantEvent.status) {
-      eventClient.emitTrigger(EVENT_STATUS_CHANGED_TRIGGER_ID, {
+      emitTrigger?.(EVENT_STATUS_CHANGED_TRIGGER_ID, {
         ...baseSignificantEventPayload(significantEvent),
         previous_status: priorSignificantEvent.status,
       });

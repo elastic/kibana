@@ -33,13 +33,17 @@ export const SparklineCellRenderer: FC<
   DataGridCellValueElementProps & {
     services: ProfileProviderServices;
     density: DataGridDensity | undefined;
+    isDetails: boolean;
   }
-> = ({ services, row, columnId, density, setCellProps }) => {
+> = ({ services, row, columnId, density, setCellProps, isDetails }) => {
   const { euiTheme } = useEuiTheme();
   const cellPadding = getDataGridDensityPadding(euiTheme, density ?? DataGridDensity.COMPACT);
-  const fallbackHeight = useMemo(
-    () => mathWithUnits(euiTheme.size.l, (l) => l * 2),
-    [euiTheme.size.l]
+
+  // In the details view, the chart renders at a fixed height.
+  // But needs to be made slightly taller to even the padding at the top and bottom.
+  const detailsHeight = useMemo(
+    () => mathWithUnits([euiTheme.size.xxxl, euiTheme.size.s], (xxxxl, s) => xxxxl + s),
+    [euiTheme.size.xxxl, euiTheme.size.s]
   );
 
   useEffect(() => {
@@ -54,8 +58,14 @@ export const SparklineCellRenderer: FC<
 
   return (
     <>
-      <div css={{ minHeight: fallbackHeight }} />
-      <div css={{ position: 'absolute', inset: cellPadding }}>
+      <div css={{ minHeight: euiTheme.size.xxxl }} />
+      <div
+        css={{
+          position: 'absolute',
+          inset: cellPadding,
+          ...(isDetails && { height: detailsHeight, bottom: 'auto' }),
+        }}
+      >
         <SparklineRenderer charts={services.charts} values={row.flattened[columnId]} />
       </div>
     </>

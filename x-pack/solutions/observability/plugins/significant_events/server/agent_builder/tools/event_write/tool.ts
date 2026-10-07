@@ -333,10 +333,10 @@ export function createEventsWriteTool({
       let storedItems: EventsWriteInput[] | undefined;
       try {
         const {
-          getEventClient,
           getEventSearchClient,
           getKnowledgeIndicatorClient,
           getAlertEventsClient,
+          emitTrigger,
           licensing,
           sourcesClient,
         } = await getScopedClients({
@@ -354,7 +354,6 @@ export function createEventsWriteTool({
         );
 
         const data = await eventsWriteBulkHandler({
-          eventClient: await getEventClient(),
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
@@ -362,6 +361,7 @@ export function createEventsWriteTool({
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
           alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
           logger,
         });
 

@@ -262,7 +262,7 @@ export function createSearchEventsTool({
         const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
-          eventClient: await getEventSearchClient(),
+          eventSearchClient: await getEventSearchClient(),
           params: {
             ...searchParams,
             source_ids: slugs ? filterSources.map((source) => source.id) : undefined,
