@@ -78,7 +78,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
     datasetsClient: createDatasetsClientMock(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
-    featureFlags: { enableFederatedIdentityAuth: true },
+    featureFlags: {},
     cloudInfo: {
       jwtIssuer: 'https://issuer.example.com',
       deploymentId: 'deployment:abc123',
