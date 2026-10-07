@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PopoverAnchorPosition } from '@elastic/eui';
+import type { EuiPopoverRef, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -44,7 +44,7 @@ export const HoverPopover = React.memo<PropsWithChildren<HoverPopoverProps>>(
     const [isOpen, setIsOpen] = useState(hoverContent != null);
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
-    const popoverRef = useRef<EuiPopover>(null);
+    const popoverRef = useRef<EuiPopoverRef>(null);
 
     const tryClosePopover = useCallback(() => {
       setHoverTimeout((prevHoverTimeout) => {

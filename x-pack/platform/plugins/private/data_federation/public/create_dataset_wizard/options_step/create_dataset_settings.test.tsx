@@ -106,6 +106,9 @@ describe('CreateDatasetSettings', () => {
     await act(async () => {
       fireEvent.click(getByTestId(optionTestId));
     });
+    await waitFor(() => {
+      expect(document.querySelector(`[data-test-subj="${optionTestId}"]`)).not.toBeInTheDocument();
+    });
   };
 
   it('shows the format select', () => {

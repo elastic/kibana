@@ -32,7 +32,7 @@ import { EBT_FIELD_POPOVER_BREAKDOWN_ELEMENT } from './ebt_constants';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
-  closePopover: EuiPopoverProps['closePopover'];
+  closePopover: NonNullable<EuiPopoverProps['closePopover']>;
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;

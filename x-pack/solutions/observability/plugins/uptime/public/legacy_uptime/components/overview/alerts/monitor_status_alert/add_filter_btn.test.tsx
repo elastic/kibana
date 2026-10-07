@@ -32,13 +32,9 @@ describe('AddFilterButton component', () => {
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
-        display="inline-block"
-        hasArrow={false}
         id="singlePanel"
         isOpen={false}
-        ownFocus={true}
         panelPaddingSize="none"
-        repositionToCrossAxis={true}
       >
         <EuiContextMenuPanelClass
           items={
@@ -99,13 +95,9 @@ describe('AddFilterButton component', () => {
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
-        display="inline-block"
-        hasArrow={false}
         id="singlePanel"
         isOpen={false}
-        ownFocus={true}
         panelPaddingSize="none"
-        repositionToCrossAxis={true}
       >
         <EuiContextMenuPanelClass
           items={
@@ -153,13 +145,9 @@ describe('AddFilterButton component', () => {
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
-        display="inline-block"
-        hasArrow={false}
         id="singlePanel"
         isOpen={false}
-        ownFocus={true}
         panelPaddingSize="none"
-        repositionToCrossAxis={true}
       >
         <EuiContextMenuPanelClass
           items={Array []}

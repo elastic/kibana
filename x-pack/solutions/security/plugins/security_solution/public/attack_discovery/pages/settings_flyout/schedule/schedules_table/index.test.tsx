@@ -502,7 +502,7 @@ describe('SchedulesTable', () => {
     });
 
     it('routes bulk delete through the workflow bulk hook, not the public API', async () => {
-      const { container, getByTestId, getAllByText } = renderTable();
+      const { container, getByTestId } = renderTable();
 
       selectSchedule(container, mockFindAttackDiscoverySchedules.schedules[0].id);
       act(() => {
@@ -511,9 +511,7 @@ describe('SchedulesTable', () => {
       act(() => {
         fireEvent.click(getByTestId('schedulesTableBulkDeleteButton'));
       });
-      act(() => {
-        fireEvent.click(getAllByText('Delete')[1]);
-      });
+      confirmDeleteInModal(getByTestId);
 
       await waitFor(() => {
         expect(mockWorkflowBulkDeleteMutateAsync).toHaveBeenCalledWith({

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -191,7 +191,9 @@ describe('HomePageStatPanel', () => {
       const item = screen.getByTestId('manageDashboardsAction');
       fireEvent.click(item);
 
-      await waitForElementToBeRemoved(item);
+      await waitFor(() => {
+        expect(document.body).not.toContainElement(item);
+      });
     });
   });
 

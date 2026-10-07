@@ -903,6 +903,9 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (isVisorOpenRef.current) {
                       setIsVisorOpen(false);
                     }
+                  });
+
+                  const mouseUpDisposable = editor.onMouseUp((e) => {
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
                     }
@@ -966,6 +969,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   const listenerDisposables = [
                     mouseDownDisposable,
+                    mouseUpDisposable,
                     focusDisposable,
                     layoutChangeDisposable,
                     tabKeyDisposable,

@@ -51,6 +51,7 @@ export class HostsPage {
   public readonly addFilterButton: Locator;
   public readonly excludeButton: Locator;
   public readonly availableFilterOptions: Locator;
+  private openFilterControlFieldName?: string;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
@@ -185,14 +186,19 @@ export class HostsPage {
       state: 'visible',
       timeout: EXTENDED_TIMEOUT,
     });
+    this.openFilterControlFieldName = fieldName;
   }
 
   public async closeFilterControl() {
-    await this.page.keyboard.press('Escape');
+    if (!this.openFilterControlFieldName) {
+      throw new Error('Cannot close a filter control that was not opened by this page object');
+    }
+    await this.page.getByTestId(`optionsList-control-${this.openFilterControlFieldName}`).click();
     await this.availableFilterOptions.waitFor({
       state: 'hidden',
       timeout: EXTENDED_TIMEOUT,
     });
+    this.openFilterControlFieldName = undefined;
   }
 
   public async enableExcludeMode() {

@@ -165,8 +165,6 @@ describe('SharedBadge', () => {
     await user.click(screen.getByTestId('sharedBadgeButton'));
     // Click the enabled shared option
     await user.click(screen.getByTestId('shared'));
-    // Re-open the popover to check the disabled state
-    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Assert the shared option is disabled
     const sharedOption = await screen.findByTestId('shared');
 
@@ -185,8 +183,6 @@ describe('SharedBadge', () => {
     await user.click(screen.getByTestId('sharedBadgeButton'));
     // Click the enabled shared option
     await user.click(screen.getByTestId('shared'));
-    // Re-open the popover to check the disabled state
-    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Assert the notShared option is disabled
     const notSharedOption = await screen.findByTestId('notShared');
     expect(notSharedOption).toHaveAttribute('aria-disabled', 'true');

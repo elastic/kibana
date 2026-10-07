@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  screen,
-  fireEvent,
-  within,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { EuiSelectTestHarness } from '@kbn/test-eui-helpers';
 
 import type { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
@@ -100,19 +94,19 @@ export const createNodeAllocationActions = (phase: Phase) => {
         case 'node_roles': {
           const option = screen.getByTestId('defaultDataAllocationOption');
           fireEvent.click(option);
-          await waitForElementToBeRemoved(option);
+          await waitFor(() => expect(option).not.toBeInTheDocument());
           break;
         }
         case 'node_attrs': {
           const customOption = screen.getByTestId('customDataAllocationOption');
           fireEvent.click(customOption);
-          await waitForElementToBeRemoved(customOption);
+          await waitFor(() => expect(customOption).not.toBeInTheDocument());
           break;
         }
         default:
           const option = screen.getByTestId('noneDataAllocationOption');
           fireEvent.click(option);
-          await waitForElementToBeRemoved(option);
+          await waitFor(() => expect(option).not.toBeInTheDocument());
       }
     },
     setSelectedNodeAttribute: async (value: string) => {

@@ -227,9 +227,14 @@ describe('rule_event_log_list_table', () => {
     fireEvent.click(screen.getByTestId('eventLogStatusFilterButton'));
     fireEvent.click(screen.getByTestId('eventLogStatusFilter-success'));
 
+    await waitFor(() => {
+      expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(
+        expect.objectContaining({ outcomeFilter: ['success'] })
+      );
+    });
+
     // Filter by failure as well
-    fireEvent.click(screen.getByTestId('eventLogStatusFilterButton'));
-    fireEvent.click(screen.getByTestId('eventLogStatusFilter-failure'));
+    fireEvent.click(await screen.findByTestId('eventLogStatusFilter-failure'));
 
     await waitFor(() => {
       expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(

@@ -9,19 +9,16 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 /**
  * Best-effort close for the common "View" filter popover.
- *
- * - This helper encodes a deterministic close mechanism for a known popover (toggle by viewButton
- *   and panel state represented by filterList + data-popover-open).
  */
 export const closeViewFilterPopoverIfOpen = async () => {
   const filterList = screen.queryByTestId('filterList');
   const viewButton = screen.queryByTestId('viewButton');
 
   if (!filterList || !viewButton) return;
-  if (filterList.getAttribute('data-popover-open') !== 'true') return;
+  if (viewButton.getAttribute('aria-expanded') !== 'true') return;
 
   fireEvent.click(viewButton);
   await waitFor(() => {
-    expect(screen.queryByTestId('filterList')?.getAttribute('data-popover-open')).not.toBe('true');
+    expect(viewButton).toHaveAttribute('aria-expanded', 'false');
   });
 };

@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -89,13 +89,23 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   // Keep a ref that always points to the latest expression prop so debounced
   // callbacks never close over a stale snapshot.
   const expressionRef = useRef(expression);
-  expressionRef.current = expression;
+  useLayoutEffect(() => {
+    expressionRef.current = expression;
+  }, [expression]);
+
+  const updateRuleParams = useCallback(
+    (nextExpression: MetricExpression) => {
+      expressionRef.current = nextExpression;
+      setRuleParams(expressionId, nextExpression);
+    },
+    [expressionId, setRuleParams]
+  );
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
+      updateRuleParams({ ...expressionRef.current, comparator: c as COMPARATORS });
     },
-    [expressionId, expression, setRuleParams]
+    [updateRuleParams]
   );
 
   const convertThreshold = useCallback(
@@ -107,69 +117,62 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const updateThreshold = useCallback(
     (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
-      if (t.join() !== expression.threshold.join()) {
-        setRuleParams(expressionId, { ...expression, threshold: t });
+      if (t.join() !== expressionRef.current.threshold.join()) {
+        updateRuleParams({ ...expressionRef.current, threshold: t });
       }
     },
-    [expressionId, expression, convertThreshold, setRuleParams]
+    [convertThreshold, updateRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
+      updateRuleParams({ ...expressionRef.current, warningComparator: c as COMPARATORS });
     },
-    [expressionId, expression, setRuleParams]
+    [updateRuleParams]
   );
 
   const updateWarningThreshold = useCallback(
     (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
-      if (t.join() !== expression.warningThreshold?.join()) {
-        setRuleParams(expressionId, { ...expression, warningThreshold: t });
+      if (t.join() !== expressionRef.current.warningThreshold?.join()) {
+        updateRuleParams({ ...expressionRef.current, warningThreshold: t });
       }
     },
-    [expressionId, expression, convertThreshold, setRuleParams]
+    [convertThreshold, updateRuleParams]
   );
 
   const toggleWarningThreshold = useCallback(() => {
     if (!displayWarningThreshold) {
       setDisplayWarningThreshold(true);
       setWarningJustAdded(true);
-      setRuleParams(expressionId, {
-        ...expression,
+      updateRuleParams({
+        ...expressionRef.current,
         warningComparator: comparator,
         warningThreshold: [],
       });
     } else {
       setDisplayWarningThreshold(false);
       setWarningJustAdded(false);
-      setRuleParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+      updateRuleParams(
+        omit(expressionRef.current, 'warningComparator', 'warningThreshold') as MetricExpression
+      );
     }
-  }, [
-    displayWarningThreshold,
-    setDisplayWarningThreshold,
-    setRuleParams,
-    comparator,
-    expression,
-    expressionId,
-  ]);
+  }, [displayWarningThreshold, setDisplayWarningThreshold, comparator, updateRuleParams]);
 
   const handleCustomMetricChange = useCallback(
     (exp: any) => {
-      setRuleParams(expressionId, exp);
+      updateRuleParams(exp);
     },
-    [expressionId, setRuleParams]
+    [updateRuleParams]
   );
   // Pass only the new label value; read the rest of the expression from the ref
   // at fire time so the 300ms delay never overwrites unrelated fields.
   const debouncedLabelChange = useMemo(
     () =>
       debounce((labelValue: string) => {
-        setRuleParams(expressionId, { ...expressionRef.current, label: labelValue });
+        updateRuleParams({ ...expressionRef.current, label: labelValue });
       }, 300),
-    // expressionRef is a stable ref object; expressionId and setRuleParams are stable too
-
-    [expressionId, setRuleParams]
+    [updateRuleParams]
   );
 
   const criticalThresholdExpression = (

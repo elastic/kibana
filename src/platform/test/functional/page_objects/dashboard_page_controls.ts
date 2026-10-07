@@ -468,9 +468,10 @@ export class DashboardPageControls extends FtrService {
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
     const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
+    const searchInput = await this.testSubjects.find('optionsList-control-search-input');
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      await searchInput._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
 
       const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
       const activeDescendantId = await list.getAttribute('aria-activedescendant');

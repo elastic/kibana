@@ -40,7 +40,7 @@ export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
       // rather than a label match. The helper still owns the search box.
       await page.testSubj.click(`dimensionSelectorOption-${dimensionName}`);
       if (await selectable.isVisible()) {
-        await page.keyboard.press('Escape');
+        await button.click();
         await selectable.waitFor({ state: 'hidden' });
       }
     },

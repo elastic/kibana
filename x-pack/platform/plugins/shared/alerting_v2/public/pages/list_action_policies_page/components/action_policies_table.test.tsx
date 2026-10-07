@@ -421,7 +421,6 @@ describe('ActionPoliciesTable', () => {
         expect(lastFindItemsFilters().enabled).toMatchObject({ include: ['enabled'] })
       );
 
-      await openStateFilter();
       await clickFilterOption('Enabled');
 
       await waitFor(() => {

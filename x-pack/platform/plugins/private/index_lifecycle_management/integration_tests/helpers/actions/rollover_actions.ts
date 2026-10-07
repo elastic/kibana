@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  screen,
-  fireEvent,
-  within,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 
 const addRolloverField = async (buttonTestSubj: string, field: string) => {
   fireEvent.click(screen.getByTestId(buttonTestSubj));
@@ -46,7 +40,7 @@ const setUnits = async (unitTestSubj: string, units?: string) => {
 
     const filterOption = await screen.findByTestId(`filter-option-${units}`);
     fireEvent.click(filterOption);
-    await waitForElementToBeRemoved(filterOption);
+    await waitFor(() => expect(filterOption).not.toBeInTheDocument());
   }
 };
 

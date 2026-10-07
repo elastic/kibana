@@ -530,7 +530,10 @@ export class AgentBuilderApp {
       },
       getHref: async () => {
         await row.getByTestId('euiCollapsedItemActionsButton').click();
-        return actionInPortal.getAttribute('href');
+        const href = await actionInPortal.getAttribute('href');
+        await row.getByTestId('euiCollapsedItemActionsButton').click();
+        await actionInPortal.waitFor({ state: 'detached' });
+        return href;
       },
     };
   }

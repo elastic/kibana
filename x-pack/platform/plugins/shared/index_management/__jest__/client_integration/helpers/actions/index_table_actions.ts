@@ -67,8 +67,9 @@ export const createIndexTableActions = () => {
     fireEvent.click(option);
 
     // Best-effort cleanup: close the popover if it remains open after the action is chosen.
-    const panel = menu.closest('[data-popover-panel="true"]');
-    if (panel?.getAttribute('data-popover-open') === 'true') {
+    const openMenu = screen.queryByTestId('indexContextMenu');
+    const openPanel = openMenu?.closest('[data-popover-panel="true"]');
+    if (openPanel?.getAttribute('data-popover-open') === 'true') {
       const toggle = screen.queryByTestId('indexActionsContextMenuButton');
       if (toggle) {
         fireEvent.click(toggle);

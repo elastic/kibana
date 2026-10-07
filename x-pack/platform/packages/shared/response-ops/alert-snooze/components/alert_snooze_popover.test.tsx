@@ -151,10 +151,6 @@ describe('AlertSnoozePopover', () => {
       render(<AlertSnoozePopover onApply={onApplyMock} />, { wrapper });
       await openPopover();
 
-      // While open the EUI popover panel sets `data-popover-open="true"`
-      // (asynchronously after a layout effect). After close, EUI keeps the
-      // panel mounted in JSDOM but removes the attribute, so we assert on
-      // that rather than panel presence.
       await waitFor(() => {
         expect(screen.getByRole('dialog')).toHaveAttribute('data-popover-open', 'true');
       });
@@ -162,7 +158,7 @@ describe('AlertSnoozePopover', () => {
       fireEvent.click(await screen.findByTestId('alertSnoozeApplyButton'));
 
       await waitFor(() => {
-        expect(screen.getByRole('dialog')).not.toHaveAttribute('data-popover-open');
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       });
     });
   });

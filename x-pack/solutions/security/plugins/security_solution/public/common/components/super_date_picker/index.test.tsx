@@ -187,24 +187,34 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
       });
 
+      const openQuickMenu = () => {
+        if (
+          wrapper.find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]').length === 0
+        ) {
+          wrapper
+            .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+            .first()
+            .simulate('click');
+          wrapper.update();
+        }
+      };
+
       test('Today is in Recently used date ranges', () => {
+        openQuickMenu();
         expect(
           wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text()
         ).toContain('Today');
       });
 
       test('Today and "Last ${x} hours" where ${x} is in hours are in Recently used date ranges', () => {
-        wrapper
-          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
+        openQuickMenu();
 
         wrapper
           .find('button[data-test-subj="superDatePickerQuickSelectApplyButton"]')
           .first()
           .simulate('click');
         wrapper.update();
+        openQuickMenu();
 
         const ranges = wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text();
         expect(ranges).toContain('Today');
@@ -212,17 +222,14 @@ describe('SIEM Super Date Picker', () => {
       });
 
       test('Make sure that it does not add any duplicate if you click again on today', () => {
-        wrapper
-          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
+        openQuickMenu();
 
         wrapper
           .find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
           .simulate('click');
         wrapper.update();
+        openQuickMenu();
 
         const text = wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text();
         expect(text.match(/Today/g)).toHaveLength(1);
@@ -270,11 +277,15 @@ describe('SIEM Super Date Picker', () => {
       });
 
       test('Make sure we can stop the stream live', () => {
-        wrapper
-          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
+        if (
+          wrapper.find('button[data-test-subj="superDatePickerToggleRefreshButton"]').length === 0
+        ) {
+          wrapper
+            .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+            .first()
+            .simulate('click');
+          wrapper.update();
+        }
 
         wrapper
           .find('button[data-test-subj="superDatePickerToggleRefreshButton"]')

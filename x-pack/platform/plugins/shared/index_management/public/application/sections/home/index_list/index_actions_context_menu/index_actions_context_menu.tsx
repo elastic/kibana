@@ -224,6 +224,7 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
+          closePopover();
           history.push(
             getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
           );
@@ -235,6 +236,7 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
+          closePopover();
           history.push(
             getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
           );
@@ -246,6 +248,7 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
+          closePopover();
           history.push(
             getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
           );
@@ -258,6 +261,7 @@ export const IndexActionsContextMenu = ({
             defaultMessage: 'Show index stats',
           }),
           onClick: () => {
+            closePopover();
             history.push(
               getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Stats)
             );

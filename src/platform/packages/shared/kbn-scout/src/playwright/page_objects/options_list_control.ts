@@ -29,13 +29,13 @@ interface SelectOptionOptions extends OptionsListInteractionOptions {
  * Readiness signal: `optionsList-control-available-options` — waits until suggestions have
  * loaded, not merely until the popover has mounted.
  *
- * Close mechanism: Escape key rather than re-clicking the toggle. Selecting an option
- * re-renders the control, so a click aimed at the toggle button can land on a detached node
- * and leave the popover open.
+ * Close mechanism: re-query and click the control toggle. The popover now unmounts
+ * synchronously, so this avoids relying on focus-dependent Escape handling.
  */
 export class OptionsListControl {
   /** Visible when the popover is open and options have loaded. */
   private readonly availableOptions: Locator;
+  private openControlId?: string;
 
   constructor(private readonly page: ScoutPage) {
     this.availableOptions = this.page.testSubj.locator('optionsList-control-available-options');
@@ -47,6 +47,7 @@ export class OptionsListControl {
   async openPopover(controlId: string, options?: OptionsListInteractionOptions): Promise<void> {
     await this.page.testSubj.locator(`optionsList-control-${controlId}`).click();
     await this.availableOptions.waitFor({ state: 'visible', timeout: options?.timeout });
+    this.openControlId = controlId;
   }
 
   /**
@@ -54,9 +55,13 @@ export class OptionsListControl {
    */
   async ensurePopoverIsClosed(options?: OptionsListInteractionOptions): Promise<void> {
     if (await this.availableOptions.isVisible()) {
-      await this.page.keyboard.press('Escape');
+      if (!this.openControlId) {
+        throw new Error('Cannot close an options-list popover that was not opened by this helper');
+      }
+      await this.page.testSubj.locator(`optionsList-control-${this.openControlId}`).click();
       await this.availableOptions.waitFor({ state: 'hidden', timeout: options?.timeout });
     }
+    this.openControlId = undefined;
   }
 
   /**

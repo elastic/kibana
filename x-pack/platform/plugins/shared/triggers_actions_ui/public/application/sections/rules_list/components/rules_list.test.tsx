@@ -495,7 +495,7 @@ describe('rules_list ', () => {
 
   it('can filter by last response', async () => {
     const onLastRunOutcomeFilterChangeMock = jest.fn();
-    renderWithProviders(
+    const { unmount } = renderWithProviders(
       <RulesList
         lastRunOutcomeFilter={['failed']}
         onLastRunOutcomeFilterChange={onLastRunOutcomeFilterChangeMock}
@@ -509,9 +509,16 @@ describe('rules_list ', () => {
         ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
       })
     );
-    await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
-    fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
-    fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomefailedFilterOption')[0]);
+
+    unmount();
+    renderWithProviders(
+      <RulesList
+        lastRunOutcomeFilter={['failed', 'succeeded']}
+        onLastRunOutcomeFilterChange={onLastRunOutcomeFilterChangeMock}
+      />
+    );
+    fireEvent.click((await screen.findAllByTestId('ruleLastRunOutcomeFilterButton'))[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleLastRunOutcomefailedFilterOption'))[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleLastRunOutcomesFilter: ['succeeded'],

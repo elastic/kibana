@@ -117,7 +117,6 @@ describe('AISummarySection (v2)', () => {
     ).toHaveTextContent('DETAILS (ANONYMIZED)');
 
     // Toggle OFF → with replacements
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
     await user.click(await screen.findByTestId('overview-tab-toggle-anonymized'));
 
     expect(

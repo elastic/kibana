@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
 import { render } from '../../../utils/testing';
 import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
@@ -78,7 +78,7 @@ describe('JourneyStepScreenshotContainer', () => {
     expect(getByText(euiPopoverMessage)).toBeInTheDocument();
 
     fireEvent.mouseLeave(img);
-    await waitForElementToBeRemoved(queryByText(euiPopoverMessage));
+    expect(queryByText(euiPopoverMessage)).not.toBeInTheDocument();
   });
 
   it('opens dialog when img is clicked and shows step numbers', async () => {

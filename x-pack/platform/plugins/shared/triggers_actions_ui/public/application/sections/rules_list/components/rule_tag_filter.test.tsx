@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
@@ -80,8 +80,6 @@ describe('rule_tag_filter', () => {
 
     // Close popover
     fireEvent.click(await screen.findByTestId('ruleTagFilterButton'));
-    await waitForElementToBeRemoved(() => screen.queryByTestId('ruleTagFilterSelectable'));
-
     expect(screen.queryByTestId('ruleTagFilterSelectable')).not.toBeInTheDocument();
   });
 

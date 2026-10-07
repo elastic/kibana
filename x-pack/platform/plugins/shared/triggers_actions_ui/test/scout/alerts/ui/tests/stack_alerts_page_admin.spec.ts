@@ -66,12 +66,7 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
       .locator(`[data-test-subj="quick-filters-item-Security${SOLUTION_FILTER_SUFFIX}"]`)
       .click();
 
-    // Clicking a filter closes the menu — re-open it and assert that no
-    // non-Security solution filter is enabled (they're exclusive with SIEM).
-    await page.testSubj.click('showQueryBarMenu');
-    const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
-
-    const enabledNonSecurityFilters = reopenedMenu.locator(
+    const enabledNonSecurityFilters = menu.locator(
       `[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]:not([data-test-subj*="Security"]):not([disabled])`
     );
     await expect(enabledNonSecurityFilters).toHaveCount(0);
@@ -86,9 +81,7 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
       .first();
     await firstNonSecurityFilter.click();
 
-    await page.testSubj.click('showQueryBarMenu');
-    const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
-    const securityFilter = reopenedMenu.locator(
+    const securityFilter = menu.locator(
       `[data-test-subj="quick-filters-item-Security${SOLUTION_FILTER_SUFFIX}"]`
     );
     await expect(securityFilter).toBeDisabled();

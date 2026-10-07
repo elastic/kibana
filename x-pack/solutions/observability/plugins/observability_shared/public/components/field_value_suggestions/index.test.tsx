@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FieldValueSuggestions } from '.';
-import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import * as obsHooks from '../../hooks/use_es_search';
 
@@ -108,7 +108,7 @@ describe('FieldValueSuggestions', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith(['US'], []);
 
-    await waitForElementToBeRemoved(() => screen.queryByText('Apply'));
+    expect(screen.queryByText('Apply')).not.toBeInTheDocument();
 
     rerender(
       <EuiThemeProvider>

@@ -294,7 +294,6 @@ describe('<RelatedAlertsByAncestry />', () => {
     // (defaults to the "Relative" tab since the default start value is "now-1d"), and change
     // the relative count from 1 to 7 to simulate the user picking a new range.
     fireEvent.click(screen.getByTestId('superDatePickerShowDatesButton'));
-    fireEvent.click(screen.getByTestId('superDatePickerstartDatePopoverButton'));
     fireEvent.change(screen.getByTestId('superDatePickerRelativeDateInputNumber'), {
       target: { value: '7' },
     });

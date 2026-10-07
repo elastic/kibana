@@ -83,7 +83,7 @@ const fillForm = async () => {
   fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
   fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
   fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
-  await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-workflow_reader'));
+  expect(screen.queryByTestId('roleOption-workflow_reader')).not.toBeInTheDocument();
 };
 
 describe('ServiceAccountsApp', () => {
@@ -367,7 +367,7 @@ describe('ServiceAccountsApp', () => {
     fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
     fireEvent.click(screen.getByTestId('roleOption-viewer'));
     fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
-    await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-viewer'));
+    expect(screen.queryByTestId('roleOption-viewer')).not.toBeInTheDocument();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 

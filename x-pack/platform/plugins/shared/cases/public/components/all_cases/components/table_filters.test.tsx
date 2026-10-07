@@ -982,7 +982,6 @@ describe('CasesTableFilters ', () => {
       await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
 
-      await userEvent.click(await screen.findByTestId(MORE_FILTERS_TEST_ID));
       await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
 
       allFilters = within(filterBar).getAllByRole('button');
