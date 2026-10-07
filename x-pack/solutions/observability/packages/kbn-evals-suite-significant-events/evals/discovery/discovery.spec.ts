@@ -60,10 +60,8 @@ const toRuleEventsGroupHash = (eventId: string): string =>
     .digest('hex');
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
-const useRuleEventsRead = process.env.SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ === 'true';
 
 /** Events data stream — the index the discovery agent writes to via events_write. */
-const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 evaluate.describe(
   'Nightshift Triager - Discovery Agent',
@@ -158,9 +156,7 @@ evaluate.describe(
 
             if (!replayedSnapshotKeys.has(key)) {
               // Ensure KI features index is available by replaying the snapshot once per source.
-              await cleanSignificantEventsDataStreams(esClient, log, {
-                includeRuleEvents: useRuleEventsRead,
-              });
+              await cleanSignificantEventsDataStreams(esClient, log, {});
               for (const name of SIGEVENTS_WIRED_ROOTS) {
                 await esClient.indices.deleteDataStream({ name }).catch(() => {});
                 await esClient.indices
@@ -271,13 +267,10 @@ evaluate.describe(
                   // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
                   await cleanSignificantEventsDataStreams(esClient, log, {
                     includeLogs: false,
-                    includeRuleEvents: useRuleEventsRead,
                   });
 
                   if (snapshotKey !== lastReplayedSnapshotKey) {
-                    await cleanSignificantEventsDataStreams(esClient, log, {
-                      includeRuleEvents: useRuleEventsRead,
-                    });
+                    await cleanSignificantEventsDataStreams(esClient, log, {});
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
                       await esClient.indices.deleteDataStream({ name }).catch(() => {});
                       await esClient.indices
@@ -508,7 +501,6 @@ evaluate.describe(
                     // The cycles within this task still share state.
                     await cleanSignificantEventsDataStreams(esClient, log, {
                       includeLogs: false,
-                      includeRuleEvents: useRuleEventsRead,
                     });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
@@ -519,9 +511,7 @@ evaluate.describe(
                     }
 
                     if (run.snapshotKey !== lastReplayedSnapshotKey) {
-                      await cleanSignificantEventsDataStreams(esClient, log, {
-                        includeRuleEvents: useRuleEventsRead,
-                      });
+                      await cleanSignificantEventsDataStreams(esClient, log, {});
                       for (const name of SIGEVENTS_WIRED_ROOTS) {
                         await esClient.indices.deleteDataStream({ name }).catch(() => {});
                         await esClient.indices
@@ -563,7 +553,6 @@ evaluate.describe(
                     // find the previous run's active episodes and either reuse a foreign event ID or
                     // produce spurious noise. Deleting by explicit IDs is safer than wiping the
                     // entire stream and works correctly even when concurrency > 1.
-                    const seededDocumentIds: string[] = [];
                     // Tracks series written to RULE_EVENTS_DATA_STREAM for flag-on cleanup; this also
                     // removes the agent's dual-written versions of the same series.
                     const seededGroupHashes: string[] = [];
@@ -603,7 +592,7 @@ evaluate.describe(
                         );
                         if (significantEvents.some((event) => event.event_id)) {
                           await esClient.indices.refresh({
-                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            index: RULE_EVENTS_DATA_STREAM,
                           });
                         }
                         const producedEventIds = significantEvents
@@ -640,65 +629,46 @@ evaluate.describe(
                             ...(i === 0 && run.seedStatus ? { status: run.seedStatus } : {}),
                           };
 
-                          const response = await esClient.index({
-                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                            document: seededEvent,
-                          });
-                          seededDocumentIds.push(response._id);
-                          // When the flag is on, also write to .rule-events so the agent's
-                          // RuleEventsClient (which reads from that index) can find the seeded
-                          // episode in the next cycle's event_search call.
-                          if (useRuleEventsRead && seededEvent.event_id) {
-                            const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
-                            await esClient.index({
-                              index: RULE_EVENTS_DATA_STREAM,
-                              document: {
-                                '@timestamp': seededEvent['@timestamp'],
-                                group_hash: groupHash,
-                                source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-                                type: 'alert',
-                                space_id: 'default',
-                                severity: seededEvent.severity,
-                                episode: {
-                                  status: seededEvent.status,
-                                },
-                                data: {
-                                  event_id: seededEvent.event_id,
-                                  rule_name: seededEvent.title,
-                                  title: seededEvent.title,
-                                  summary: seededEvent.summary,
-                                  stream_names: seededEvent.stream_names,
-                                  confidence: seededEvent.confidence,
-                                  symptom_hypothesis: seededEvent.symptom_hypothesis,
-                                  signals: seededEvent.signals,
-                                  causal_features: seededEvent.causal_features,
-                                  blast_radius: seededEvent.blast_radius,
-                                },
+                          // Write to .rule-events so the agent's RuleEventsClient can find the
+                          // seeded episode in the next cycle's event_search call.
+                          // event_id is guaranteed non-empty by the `continue` guard above.
+                          const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
+                          await esClient.index({
+                            index: RULE_EVENTS_DATA_STREAM,
+                            document: {
+                              '@timestamp': seededEvent['@timestamp'],
+                              group_hash: groupHash,
+                              source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+                              type: 'alert',
+                              space_id: 'default',
+                              severity: seededEvent.severity,
+                              alert: {
+                                status: seededEvent.status,
                               },
-                            });
-                            seededGroupHashes.push(groupHash);
-                          }
+                              data: {
+                                event_id: seededEvent.event_id,
+                                rule_name: seededEvent.title,
+                                title: seededEvent.title,
+                                summary: seededEvent.summary,
+                                stream_names: seededEvent.stream_names,
+                                confidence: seededEvent.confidence,
+                                symptom_hypothesis: seededEvent.symptom_hypothesis,
+                                signals: seededEvent.signals,
+                                causal_features: seededEvent.causal_features,
+                                blast_radius: seededEvent.blast_radius,
+                              },
+                            },
+                          });
+                          seededGroupHashes.push(groupHash);
                         }
                         if (producedEventIds.length > 0) {
                           await esClient.indices.refresh({
-                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            index: RULE_EVENTS_DATA_STREAM,
                           });
-                          if (useRuleEventsRead) {
-                            await esClient.indices.refresh({
-                              index: RULE_EVENTS_DATA_STREAM,
-                            });
-                          }
                         }
                       }
                     } finally {
-                      if (seededDocumentIds.length > 0) {
-                        await esClient.deleteByQuery({
-                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                          query: { ids: { values: seededDocumentIds } },
-                          refresh: true,
-                        });
-                      }
-                      if (useRuleEventsRead && seededGroupHashes.length > 0) {
+                      if (seededGroupHashes.length > 0) {
                         await esClient.deleteByQuery({
                           index: RULE_EVENTS_DATA_STREAM,
                           query: { terms: { group_hash: seededGroupHashes } },
@@ -729,9 +699,7 @@ evaluate.describe(
           log.debug('Cleaning up discovery test data');
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
-          await cleanSignificantEventsDataStreams(esClient, log, {
-            includeRuleEvents: useRuleEventsRead,
-          });
+          await cleanSignificantEventsDataStreams(esClient, log, {});
         });
       });
     }

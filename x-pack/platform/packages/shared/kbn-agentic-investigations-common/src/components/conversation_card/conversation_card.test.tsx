@@ -17,8 +17,7 @@ const investigation: Investigation = {
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   events: [],
@@ -36,6 +35,7 @@ const renderCard = (
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
@@ -85,6 +85,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
@@ -102,6 +103,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}

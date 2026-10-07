@@ -5,84 +5,51 @@
  * 2.0.
  */
 
-import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
-import { act, fireEvent } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
+import { useGetActionState } from '../../hooks';
 import { MissingEncryptionKeyCallout } from './missing_encryption_key_callout';
 
+jest.mock('../../hooks', () => ({ useGetActionState: jest.fn() }));
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: { docLinks: { links: { kibana: { secureSavedObject: 'http://doc.link' } } } },
+  }),
+}));
+
+const useGetActionStateMock = useGetActionState as jest.Mock;
+
 describe('Missing encryption key callout', () => {
-  let render: () => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
-  let mockedContext: AppContextTestRender;
-  let asyncActions: Promise<unknown> = Promise.resolve();
-  const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
+  const renderCallout = (canEncrypt: boolean): RenderResult => {
+    useGetActionStateMock.mockReturnValue({ data: { data: { canEncrypt } } });
 
-  const policyListApiHandlers = policyListApiPathHandlers();
-
-  const apiReturnsEncryptionKeyIsSet = (canEncrypt: boolean) => {
-    mockedContext.coreStart.http.get.mockImplementation((...args) => {
-      const [path] = args;
-      if (typeof path === 'string') {
-        // GET datasouce
-        if (path === ACTION_STATE_ROUTE) {
-          asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
-          return Promise.resolve({
-            data: { canEncrypt },
-          });
-        }
-
-        // Get action state
-        // Used in tests that route back to the list
-        if (policyListApiHandlers[path]) {
-          asyncActions = asyncActions.then(async () => sleep());
-          return Promise.resolve(policyListApiHandlers[path]());
-        }
-      }
-
-      return Promise.reject(new Error(`unknown API call (not MOCKED): ${path}`));
-    });
+    return render(<MissingEncryptionKeyCallout />, { wrapper: I18nProvider });
   };
-
-  beforeEach(() => {
-    mockedContext = createAppRootMockRenderer();
-    render = () => (renderResult = mockedContext.render(<MissingEncryptionKeyCallout />));
-  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should be visible when encryption key not set', async () => {
-    apiReturnsEncryptionKeyIsSet(false);
-    render();
-    await asyncActions;
-    const callout = renderResult.queryByTestId('missingEncryptionKeyCallout');
-    expect(callout).toBeTruthy();
+  it('should be visible when encryption key not set', () => {
+    const { queryByTestId } = renderCallout(false);
+
+    expect(queryByTestId('missingEncryptionKeyCallout')).toBeTruthy();
   });
 
-  it('should not be visible when encryption key is set', async () => {
-    apiReturnsEncryptionKeyIsSet(true);
-    render();
-    await asyncActions;
-    const callout = renderResult.queryByTestId('missingEncryptionKeyCallout');
-    expect(callout).toBeFalsy();
+  it('should not be visible when encryption key is set', () => {
+    const { queryByTestId } = renderCallout(true);
+
+    expect(queryByTestId('missingEncryptionKeyCallout')).toBeFalsy();
   });
 
-  it('should be able to dismiss when visible', async () => {
-    apiReturnsEncryptionKeyIsSet(false);
-    render();
-    await asyncActions;
-    let callout = renderResult.queryByTestId('missingEncryptionKeyCallout');
-    expect(callout).toBeTruthy();
+  it('should be able to dismiss when visible', () => {
+    const { queryByTestId, getByTestId } = renderCallout(false);
+    expect(queryByTestId('missingEncryptionKeyCallout')).toBeTruthy();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('dismissEncryptionKeyCallout'));
-    });
+    fireEvent.click(getByTestId('dismissEncryptionKeyCallout'));
 
-    callout = renderResult.queryByTestId('missingEncryptionKeyCallout');
-    expect(callout).toBeFalsy();
+    expect(queryByTestId('missingEncryptionKeyCallout')).toBeFalsy();
   });
 });

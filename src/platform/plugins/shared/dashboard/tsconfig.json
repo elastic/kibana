@@ -16,6 +16,7 @@
     "test/scout_test_plugins/**/*",
   ],
   "kbn_references": [
+    "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/inspector-plugin",
     "@kbn/kibana-react-plugin",

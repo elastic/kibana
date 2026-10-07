@@ -46,3 +46,10 @@ export type {
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
 } from './escalation';
+
+export {
+  ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+  ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  escalationInvestigationEventSchema,
+} from './conversation_events';
+export type { EscalationInvestigationEventData } from './conversation_events';
