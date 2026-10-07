@@ -306,6 +306,7 @@ export class AgenticInvestigationsPlugin
           subjects: subjects.getDocumentService(),
           impact: this.requireImpactService().getDocumentService(),
           hypotheses: this.requireHypothesesService().getDocumentService(),
+          deleteClaims: (ids, spaceId) => subjects.deleteClaimsByConversationIds(ids, spaceId),
           deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
         });
       },

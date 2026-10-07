@@ -133,6 +133,17 @@ export class SubjectClaimsService {
     return this.deleteMatching([{ term: { spaceId } }]);
   }
 
+  /** Maintenance: removes the claims the given investigations hold in the space. */
+  async deleteByConversationIds(conversationIds: string[], spaceId: string): Promise<number> {
+    if (conversationIds.length === 0) {
+      return 0;
+    }
+    return this.deleteMatching([
+      { term: { spaceId } },
+      { terms: { conversationId: conversationIds } },
+    ]);
+  }
+
   /** Maintenance: removes every claim in every space. Callers authorize this themselves. */
   async deleteAllAcrossSpaces(): Promise<number> {
     return this.deleteMatching([]);
