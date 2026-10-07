@@ -10,6 +10,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardReadResponseBody } from './api';
+import type { getDashboardStateSchema } from './api/dashboard_state_schemas';
 
 /**
  * Client interface for dashboard CRUD operations
@@ -32,6 +33,16 @@ export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
   /** Client for dashboard CRUD operations. */
   client: DashboardServerClient;
+  /**
+   * Returns the strict as-code dashboard state schema used by the dashboard API, built once from
+   * every registered embeddable schema.
+   */
+  getDashboardStateSchema: () => ReturnType<typeof getDashboardStateSchema>;
+  /**
+   * Returns the as-code dashboard state schema used for dashboard application requests, built
+   * once. Dashboard-level fields are strict, while panels are only checked to be objects.
+   */
+  getDashboardAppStateSchema: () => ReturnType<typeof getDashboardStateSchema>;
   /**
    * Scans dashboards with pagination.
    *

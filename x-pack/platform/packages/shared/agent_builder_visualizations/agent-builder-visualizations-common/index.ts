@@ -22,6 +22,9 @@ export {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
+  readVegaPanelSpec,
+  toVegaPanelSpec,
   VEGA_VIS_TYPE,
   type VegaConfig,
+  type VegaPanelSpec,
 } from './vega_saved_vis';

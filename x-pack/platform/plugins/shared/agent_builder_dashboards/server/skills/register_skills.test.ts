@@ -7,8 +7,12 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardsSkill as skill } from './dashboards_skill';
+import { createDashboardsSkill } from './dashboards_skill';
 import { registerSkills } from './register_skills';
+
+const skill = createDashboardsSkill({ getDashboardStateSchema: jest.fn() });
+const enhanceContent =
+  skill.referencedContent?.find(({ name }) => name === 'enhance-dashboard')?.content ?? '';
 
 describe('registerSkills', () => {
   it('registers the dashboards skill', async () => {
@@ -17,7 +21,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, { getDashboardStateSchema: jest.fn() });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
@@ -28,55 +32,59 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
+  it('inlines the dashboard composition guidance and leaves the grid to the layout step', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+    expect(enhanceContent).toContain('The layout is arranged automatically');
+    expect(skill.content).not.toContain('Grid Packing Rules');
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
   it('delegates enhance presentation defaults to the chart author', () => {
-    expect(skill.content).toContain('Improving an Existing Dashboard (Enhance)');
-    expect(skill.content).toContain('applyChartRules: true');
-    expect(skill.content).toContain('for every existing ES|QL Lens panel');
-    expect(skill.content).toContain('preserveESQL: true');
-    expect(skill.content).toContain(
-      'a query change and presentation enhancement can share one edit'
+    expect(skill.content).toContain('`enhance-dashboard.md`');
+    expect(skill.content).not.toContain('Edit every existing ES|QL Lens panel');
+    expect(enhanceContent).toContain('Improving an Existing Dashboard (Enhance)');
+    expect(enhanceContent).toContain('applyChartRules: true');
+    expect(enhanceContent).toContain('Edit every existing ES|QL Lens panel');
+    expect(enhanceContent).toContain('preserveESQL: true');
+    expect(enhanceContent).toContain(
+      'omit `preserveESQL` and describe only that change alongside the enhancement request'
     );
     // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
     expect(skill.content).not.toContain('CHART RULES FOR');
+    expect(enhanceContent).not.toContain('apply_color_to');
   });
 
   it('assesses the dashboard and asks which enhance mode to apply', () => {
-    expect(skill.content).toContain(
+    expect(enhanceContent).toContain(
       `Call \`${platformCoreTools.getIndexMapping}\` once per distinct index pattern`
     );
-    expect(skill.content).toContain('Do not run queries by default');
-    expect(skill.content).toContain(`call \`${internalTools.askUserQuestion}\` on its own`);
-    expect(skill.content).toContain('"How would you like to enhance this dashboard?"');
-    expect(skill.content).toContain('"Appearance and content" and "Appearance only"');
-    expect(skill.content).toContain('Ask even when you found no gaps');
-    expect(skill.content).toContain('Content mode is the default');
-    expect(skill.content).toContain('If the request already says what to change, do not call');
+    expect(enhanceContent).toContain('Do not run queries by default');
+    expect(enhanceContent).toContain(`call \`${internalTools.askUserQuestion}\` on its own`);
+    expect(enhanceContent).toContain('"How would you like to enhance this dashboard?"');
+    expect(enhanceContent).toContain('"Appearance and content" and "Appearance only"');
+    expect(enhanceContent).toContain('Ask even when you found no gaps');
+    expect(enhanceContent).toContain('Content mode is the default');
+    expect(enhanceContent).toContain('If the request already says what to change, do not call');
   });
 
   it('separates appearance-only and content enhance modes', () => {
-    expect(skill.content).toContain('**Appearance mode.** Keep every chart panel ID');
-    expect(skill.content).toContain('Markdown panels may be rewritten or removed.');
-    expect(skill.content).toContain(
+    expect(enhanceContent).toContain('**Appearance mode.** Keep every chart panel id');
+    expect(enhanceContent).toContain('Markdown panels may be rewritten or removed.');
+    expect(enhanceContent).toContain(
       'Do not add, remove, or recreate other panels, add controls, or change queries'
     );
-    expect(skill.content).toContain(
+    expect(enhanceContent).toContain(
       "Skip this step when the user's message already asks for appearance only"
     );
-    expect(skill.content).toContain('**Content mode.** Do everything appearance mode does');
-    expect(skill.content).toContain('`remove_panels`');
-    expect(skill.content).toContain(
-      'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
+    expect(enhanceContent).toContain('**Content mode.** Do everything appearance mode does');
+    expect(enhanceContent).toContain('Remove panels that meet the removal criteria with `remove`');
+    expect(enhanceContent).toContain(
+      'replace non-ES|QL panels with new ES|QL Lens content under the same id without asking again'
     );
-    expect(skill.content).toContain('Keep the existing time range');
-    expect(skill.content).toContain('In content mode, confirm the resulting panel set');
+    expect(enhanceContent).toContain('Keep the existing time range');
+    expect(enhanceContent).toContain('In content mode, confirm the resulting panel set');
   });
 
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
@@ -84,8 +92,5 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
   });
 });

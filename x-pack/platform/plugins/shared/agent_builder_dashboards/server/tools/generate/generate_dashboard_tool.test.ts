@@ -12,17 +12,20 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { executeDashboardOperations, hasValidCreateMetadataOperations } from './core';
+import { executeDashboardUpsert, hasValidNewDashboardMetadata } from '@kbn/dashboard-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
-jest.mock('./core', () => ({
-  ...jest.requireActual('./core'),
-  executeDashboardOperations: jest.fn(),
-  hasValidCreateMetadataOperations: jest.fn(),
-  createPanelResolver: jest.fn(),
-  createAttachmentPanelResolver: jest.fn(),
+jest.mock('@kbn/dashboard-authoring', () => ({
+  ...jest.requireActual('@kbn/dashboard-authoring'),
+  executeDashboardUpsert: jest.fn(),
+  hasValidNewDashboardMetadata: jest.fn(),
   createControlFieldCapabilitiesResolver: jest.fn(),
+}));
+jest.mock('./layout_arranger', () => ({ createLayoutArranger: jest.fn() }));
+jest.mock('./resolvers/panel_resolver', () => ({ createPanelResolver: jest.fn() }));
+jest.mock('./resolvers/attachment_panel_resolver', () => ({
+  createAttachmentPanelResolver: jest.fn(),
 }));
 jest.mock('./time_range', () => ({
   applyDefaultDashboardTimeRange: jest.fn(
@@ -39,16 +42,19 @@ jest.mock('@kbn/custom-content-server', () => ({
 const mockRetrieveLatestVersion = retrieveLatestVersion as jest.MockedFunction<
   typeof retrieveLatestVersion
 >;
-const mockExecuteDashboardOperations = executeDashboardOperations as jest.MockedFunction<
-  typeof executeDashboardOperations
+const mockExecuteDashboardUpsert = executeDashboardUpsert as jest.MockedFunction<
+  typeof executeDashboardUpsert
 >;
-const mockHasValidCreateMetadataOperations =
-  hasValidCreateMetadataOperations as jest.MockedFunction<typeof hasValidCreateMetadataOperations>;
+const mockHasValidNewDashboardMetadata = hasValidNewDashboardMetadata as jest.MockedFunction<
+  typeof hasValidNewDashboardMetadata
+>;
 
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (dashboardAttachmentId?: string) => {
-  const tool = generateDashboardTool();
+  const tool = generateDashboardTool({
+    getDashboardStateSchema: jest.fn().mockResolvedValue({}),
+  });
   const sendUiEvent = jest.fn();
   const ctx = {
     logger: { info: jest.fn(), error: jest.fn() },
@@ -60,7 +66,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, operations: [] } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardAttachmentId } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
@@ -70,12 +76,12 @@ const callHandler = async (dashboardAttachmentId?: string) => {
 describe('generateDashboardTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHasValidCreateMetadataOperations.mockReturnValue(true);
-    mockExecuteDashboardOperations.mockResolvedValue({
+    mockHasValidNewDashboardMetadata.mockReturnValue(true);
+    mockExecuteDashboardUpsert.mockResolvedValue({
       dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
-    } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
+    } as unknown as Awaited<ReturnType<typeof executeDashboardUpsert>>);
   });
 
   it.each([
@@ -101,11 +107,11 @@ describe('generateDashboardTool handler', () => {
   it.each([
     [
       'a new dashboard is missing its metadata',
-      () => mockHasValidCreateMetadataOperations.mockReturnValue(false),
+      () => mockHasValidNewDashboardMetadata.mockReturnValue(false),
     ],
     [
       'generating the dashboard fails',
-      () => mockExecuteDashboardOperations.mockRejectedValue(new Error('boom')),
+      () => mockExecuteDashboardUpsert.mockRejectedValue(new Error('boom')),
     ],
   ])('does not send a UI event when %s', async (_, arrange) => {
     mockRetrieveLatestVersion.mockReturnValue(undefined);
