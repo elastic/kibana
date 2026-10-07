@@ -49,7 +49,7 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelEditRequest;
 
 /** Adds a new custom content panel. */
-export const customContentPanelRequestSchema = z.object({
+const customContentPanelRequestSchema = z.object({
   source: z.literal('request'),
   renderer: z
     .literal('custom_content')
@@ -74,7 +74,7 @@ export const customContentPanelRequestSchema = z.object({
 });
 
 /** Edits an existing custom content panel by id. */
-export const customContentEditPanelRequestSchema = z
+const customContentEditPanelRequestSchema = z
   .object({
     source: z.literal('request'),
     renderer: z

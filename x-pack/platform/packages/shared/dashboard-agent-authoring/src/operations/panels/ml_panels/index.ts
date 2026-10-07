@@ -58,7 +58,7 @@ export const anomalyChartsPanelConfigSchema = z.object({
     ),
 });
 
-export const anomalyChartsPanelConfigInputSchema = z.object({
+const anomalyChartsPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_anomaly_charts'),
   grid: panelGridSchema,
@@ -103,7 +103,7 @@ export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type',
   anomalySwimlaneViewByConfigSchema,
 ]);
 
-export const anomalySwimlaneConfigInputSchema = z.object({
+const anomalySwimlaneConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_anomaly_swimlane'),
   grid: panelGridSchema,
@@ -141,7 +141,7 @@ export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateS
     ),
 });
 
-export const singleMetricViewerConfigInputSchema = z.object({
+const singleMetricViewerConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_single_metric_viewer'),
   grid: panelGridSchema,

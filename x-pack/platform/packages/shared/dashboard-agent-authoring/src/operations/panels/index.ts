@@ -49,7 +49,12 @@ const CONFIG_PANEL_KINDS = [
   singleMetricViewerPanelKind,
 ] as const;
 
-const REQUEST_PANEL_KINDS = [lensPanelKind, vegaPanelKind, customContentPanelKind] as const;
+/** Every request kind must have a `PanelResolutionRequest` the host can resolve. */
+const REQUEST_PANEL_KINDS = [
+  lensPanelKind,
+  vegaPanelKind,
+  customContentPanelKind,
+] as const satisfies ReadonlyArray<{ readonly renderer: PanelRenderer }>;
 
 type ConfigPanelKind = (typeof CONFIG_PANEL_KINDS)[number];
 type RequestPanelKind = (typeof REQUEST_PANEL_KINDS)[number];
@@ -173,9 +178,10 @@ export type PanelResolutionRequest =
   | CustomContentPanelResolutionRequest;
 
 /** Engine that renders a `source: 'request'` panel. */
-export type PanelRenderer = RequestPanelKind['renderer'];
+export type PanelRenderer = NonNullable<PanelResolutionRequest['renderer']>;
 
-const requestPanelKindByRenderer = new Map<PanelRenderer, RequestPanelKind>(
+/** Keyed by the kinds' renderers, so a resolvable renderer without a kind fails to compile below. */
+const requestPanelKindByRenderer = new Map<RequestPanelKind['renderer'], RequestPanelKind>(
   REQUEST_PANEL_KINDS.map((kind) => [kind.renderer, kind])
 );
 
