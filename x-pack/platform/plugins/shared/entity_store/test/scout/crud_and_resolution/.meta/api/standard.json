@@ -1,5 +1,5 @@
 {
-  "sha1": "62e8c7bbb3ef9c06e0a40c861375835be87bcb2c",
+  "sha1": "29744f7698ce018ff3779a8939774d0caf741128",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1088,8 +1088,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
-        "line": 42,
+        "line": 52,
         "column": 16
+      }
+    },
+    {
+      "id": "fc8fec24ce63075-e6c43c81299ce12",
+      "title": "Entity Store Status API tests reports a nonPriority block only for types that run one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
+        "line": 71,
+        "column": 9
       }
     }
   ]
