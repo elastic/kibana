@@ -2,7 +2,7 @@
 
 exports[`Should display error message when value is outside of range 1`] = `
 <div>
-  <EuiRangeClass
+  <EuiRange
     max={10}
     min={0}
     onChange={[Function]}
@@ -24,7 +24,7 @@ exports[`Should display error message when value is outside of range 1`] = `
 `;
 
 exports[`Should pass slider props to slider 1`] = `
-<EuiRangeClass
+<EuiRange
   max={10}
   min={0}
   onChange={[Function]}
@@ -36,7 +36,7 @@ exports[`Should pass slider props to slider 1`] = `
 `;
 
 exports[`Should render slider 1`] = `
-<EuiRangeClass
+<EuiRange
   max={10}
   min={0}
   onChange={[Function]}

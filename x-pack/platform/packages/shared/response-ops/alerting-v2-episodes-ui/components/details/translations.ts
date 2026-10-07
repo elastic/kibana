@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',
   {
-    defaultMessage: 'Could not load episode details.',
+    defaultMessage: 'Could not load alert details.',
   }
 );
 
@@ -47,7 +47,7 @@ export const ACTIONS_OVERVIEW_SNOOZED_UNTIL = i18n.translate(
 export const FLYOUT_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.ariaLabel',
   {
-    defaultMessage: 'Alert episode details',
+    defaultMessage: 'Alert details',
   }
 );
 
@@ -190,7 +190,7 @@ export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.f
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
   {
-    defaultMessage: 'Alert episode',
+    defaultMessage: 'Alert',
   }
 );
 
@@ -198,21 +198,21 @@ export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
 export const LIFECYCLE_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.title',
   {
-    defaultMessage: 'Episode timeline',
+    defaultMessage: 'Alert timeline',
   }
 );
 
 export const LIFECYCLE_HEATMAP_EMPTY_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.emptyTitle',
   {
-    defaultMessage: 'No events in this episode yet',
+    defaultMessage: 'No events in this alert yet',
   }
 );
 
 export const LIFECYCLE_HEATMAP_EMPTY_BODY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.emptyBody',
   {
-    defaultMessage: 'Status changes across the episode lifecycle will appear here.',
+    defaultMessage: 'Status changes across the alert lifecycle will appear here.',
   }
 );
 
@@ -305,7 +305,7 @@ export const SEVERITY_HEATMAP_DETAIL_PANEL_EMPTY = i18n.translate(
 export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmapSection.loadError',
   {
-    defaultMessage: 'Could not load episode severity.',
+    defaultMessage: 'Could not load alert severity.',
   }
 );
 
@@ -313,7 +313,7 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
 export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
   {
-    defaultMessage: 'Could not load episode timeline.',
+    defaultMessage: 'Could not load alert timeline.',
   }
 );
 
@@ -420,7 +420,7 @@ export const METADATA_SECTION_ERROR = i18n.translate(
 export const METADATA_SECTION_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataSection.empty',
   {
-    defaultMessage: 'No evaluation data is available for this episode.',
+    defaultMessage: 'No evaluation data is available for this alert.',
   }
 );
 
@@ -436,7 +436,7 @@ export const getMetadataTableStaleDataCallout = (timestamp: string): string =>
 export const RELATED_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.relatedSection.loadError',
   {
-    defaultMessage: 'Could not load related episodes.',
+    defaultMessage: 'Could not load related alerts.',
   }
 );
 
@@ -504,7 +504,7 @@ export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.details.
 export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.runbookSection.loadError',
   {
-    defaultMessage: 'Could not load the runbook for this episode.',
+    defaultMessage: 'Could not load the runbook for this alert.',
   }
 );
 
