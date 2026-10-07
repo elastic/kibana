@@ -171,7 +171,32 @@ export const useEcfDeployment = ({
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
   const hasAnyEcf = hasEcfUnified || hasEcfOtel || hasEcfCrowdstrike;
 
+  // Compute staleness before isDone so isDone can reflect it.
+  const currentServiceIdsByFamily = useMemo(
+    () => ({
+      unified: [...new Set(ecfUnifiedConfigs.map((c) => c.serviceId))].sort(),
+      otel: [...new Set(ecfOtelConfigs.map((c) => c.serviceId))].sort(),
+      crowdstrike: [...ecfCrowdstrikeServices].sort(),
+    }),
+    [ecfUnifiedConfigs, ecfOtelConfigs, ecfCrowdstrikeServices]
+  );
+
+  // A family is stale when it was launched AND a service-ID snapshot exists AND the current
+  // set differs from the snapshot. Old sessions without a snapshot are never considered stale.
+  const isStaleByFamily = useMemo(() => {
+    const check = (family: EcfTemplateFamily): boolean => {
+      if (!launchedFamilies.includes(family)) return false;
+      const snapshot = launchedServiceIds[family];
+      if (snapshot === undefined) return false;
+      return JSON.stringify(snapshot) !== JSON.stringify(currentServiceIdsByFamily[family]);
+    };
+    return { unified: check('unified'), otel: check('otel'), crowdstrike: check('crowdstrike') };
+  }, [launchedFamilies, launchedServiceIds, currentServiceIdsByFamily]);
+
+  const anyStale = Object.values(isStaleByFamily).some(Boolean);
+
   const isDone =
+    !anyStale &&
     (!hasEcfUnified || launchedFamilies.includes('unified')) &&
     (!hasEcfOtel || launchedFamilies.includes('otel')) &&
     (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));
@@ -252,29 +277,6 @@ export const useEcfDeployment = ({
       stackNames.crowdstrike,
     ]
   );
-
-  // Sorted service IDs per family at the current moment — compared against the snapshot taken
-  // at launch time to decide whether the family's stack is out of sync.
-  const currentServiceIdsByFamily = useMemo(
-    () => ({
-      unified: [...new Set(ecfUnifiedConfigs.map((c) => c.serviceId))].sort(),
-      otel: [...new Set(ecfOtelConfigs.map((c) => c.serviceId))].sort(),
-      crowdstrike: [...ecfCrowdstrikeServices].sort(),
-    }),
-    [ecfUnifiedConfigs, ecfOtelConfigs, ecfCrowdstrikeServices]
-  );
-
-  // A family is stale when it was launched AND a service-ID snapshot exists AND the current
-  // set differs from the snapshot. Old sessions without a snapshot are never considered stale.
-  const isStaleByFamily = useMemo(() => {
-    const check = (family: EcfTemplateFamily): boolean => {
-      if (!launchedFamilies.includes(family)) return false;
-      const snapshot = launchedServiceIds[family];
-      if (snapshot === undefined) return false;
-      return JSON.stringify(snapshot) !== JSON.stringify(currentServiceIdsByFamily[family]);
-    };
-    return { unified: check('unified'), otel: check('otel'), crowdstrike: check('crowdstrike') };
-  }, [launchedFamilies, launchedServiceIds, currentServiceIdsByFamily]);
 
   const onLaunch = (family: EcfTemplateFamily) => {
     setPersistedLaunchStep({
@@ -724,6 +726,7 @@ export const EcfDeploymentSection = ({
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
 
   const isDone =
+    !Object.values(isStaleByFamily).some(Boolean) &&
     (!hasEcfUnified || launchedFamilies.includes('unified')) &&
     (!hasEcfOtel || launchedFamilies.includes('otel')) &&
     (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));

@@ -203,9 +203,12 @@ describe('useEcfDeployment', () => {
       expect(result.current.isDone).toBe(false);
     });
 
-    it('is true once all required families are launched', () => {
+    it('is true once all required families are launched and none are stale', () => {
       mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
-      makeSessionStorageMock({ launchedFamilies: ['unified'] });
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+      });
       const { result } = renderHook(() =>
         useEcfDeployment({
           instances: [baseInstance('cloudtrail')],
@@ -216,6 +219,25 @@ describe('useEcfDeployment', () => {
         })
       );
       expect(result.current.isDone).toBe(true);
+    });
+
+    it('is false when a launched family is stale', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      // snapshot has vpcflow, current selection is cloudtrail → stale
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['vpcflow'] },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      expect(result.current.isDone).toBe(false);
     });
   });
 
@@ -346,6 +368,15 @@ describe('EcfDeploymentSection', () => {
 
     it('does not render Done badge when not all families are launched', () => {
       renderSection({ ecfUnifiedConfigs: [unifiedConfig('cloudtrail')], launchedFamilies: [] });
+      expect(screen.queryByText('Done')).not.toBeInTheDocument();
+    });
+
+    it('does not render Done badge when a launched family is stale', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
       expect(screen.queryByText('Done')).not.toBeInTheDocument();
     });
 
