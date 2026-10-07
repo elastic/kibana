@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { EngineDescriptor, LogExtractionConfig, HistorySnapshotState } from './saved_objects';
 import type { EntityStoreStatus } from '../../common';
 import type { ENTITY_STORE_STATUS } from './constants';
 
 export type { EntityStoreStatus };
 
-export const EngineComponentResource = z.enum([
-  'entity_definition',
-  'index_template',
-  'task',
-  'index',
-  'ilm_policy',
-  'component_template',
-]);
+export const EngineComponentResource = lazySchema(() =>
+  z.enum([
+    'entity_definition',
+    'index_template',
+    'task',
+    'index',
+    'ilm_policy',
+    'component_template',
+  ])
+);
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
 
 export type BaseComponentStatus = z.infer<typeof BaseComponentStatus>;
-export const BaseComponentStatus = z.object({
-  id: z.string(),
-  installed: z.boolean(),
-  resource: EngineComponentResource,
-});
+export const BaseComponentStatus = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    installed: z.boolean(),
+    resource: EngineComponentResource,
+  })
+);
 
 export type TaskComponentStatus = z.infer<typeof TaskComponentStatus>;
-export const TaskComponentStatus = BaseComponentStatus.merge(
-  z.object({
-    status: z.string(),
-    remainingLogsToExtract: z.number().nullable(),
-    runs: z.number(),
-    lastError: z.string(),
-  })
+export const TaskComponentStatus = lazySchema(() =>
+  BaseComponentStatus.merge(
+    z.object({
+      status: z.string(),
+      remainingLogsToExtract: z.number().nullable(),
+      runs: z.number(),
+      lastError: z.string(),
+    })
+  )
 );
 
 export type EngineComponentStatus = BaseComponentStatus | TaskComponentStatus;
