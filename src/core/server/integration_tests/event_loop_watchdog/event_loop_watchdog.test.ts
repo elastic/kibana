@@ -25,8 +25,9 @@ const limits = {
   windowMs: 3_000,
   minFlaggedWindowMs: 500,
   maxSessionMs: 60_000,
-  maxKeptProfiles: 10,
 };
+// one ranked file, then only records: a later, smaller block is logged but not written
+const admissionLimits = { maxLargest: 1, minGrowth: 1.25, maxRanked: 1, maxFiles: 10 };
 
 function spinTheEventLoop(ms: number) {
   const until = performance.now() + ms;
@@ -80,6 +81,7 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
       sanitizeRoot: REPO_ROOT,
       diagnosticDir,
       limits,
+      admissionLimits,
       loadProfiler: async () => {
         const loaded = await loadPprof();
         const stop = loaded.time.stop.bind(loaded.time);
@@ -130,7 +132,8 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
       expect(message).toContain('workflow step:test.cpuSpin in task manager:run workflow:run');
       const profile = (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana
         .event_loop_watchdog.profile;
-      expect(profile).toMatchObject({ scope: 'blocks', kept: `1/${limits.maxKeptProfiles}` });
+      expect(profile).toMatchObject({ scope: 'blocks', kept: 1 });
+      expect(Path.basename(profile.file)).toMatch(/^event-loop-block-\d{6}ms-/);
       expect(profile.samples).toBeGreaterThan(0);
 
       const decoded = Profile.decode(Zlib.gunzipSync(Fs.readFileSync(profile.file)));
@@ -155,6 +158,22 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
       (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
         .profile.scope
     ).toBe('blocks');
+  });
+
+  it('writes only windows with a larger block, logging the others', async () => {
+    spinTheEventLoop(1_000);
+    await waitFor(() => profileLogs()[0]);
+    await sleep(200); // let a heartbeat follow the rotation, as after the profiler start
+    spinTheEventLoop(300);
+    const [message, meta] = await waitFor(() =>
+      logger.info.mock.calls.find(([m]) => String(m).startsWith('Event loop block profile #2'))
+    );
+    expect(message).toMatch(/Not written: not above ~\d+ms/);
+    expect(
+      (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
+        .profile
+    ).toMatchObject({ kept: 2, notWritten: expect.any(String) });
+    expect(Fs.readdirSync(diagnosticDir)).toHaveLength(1);
   });
 
   it('discards windows without blocks', async () => {

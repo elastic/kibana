@@ -11,7 +11,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import type { Logger } from '@kbn/logging';
 import {
   INNER_CONTEXT_LABEL,
-  MAX_KEPT_PROFILES,
   MAX_SESSION_MS,
   MIN_FLAGGED_WINDOW_MS,
   OUTER_CONTEXT_LABEL,
@@ -36,14 +35,12 @@ export interface SessionLimits {
   windowMs: number;
   minFlaggedWindowMs: number;
   maxSessionMs: number;
-  maxKeptProfiles: number;
 }
 
 export const DEFAULT_LIMITS: SessionLimits = {
   windowMs: WINDOW_MS,
   minFlaggedWindowMs: MIN_FLAGGED_WINDOW_MS,
   maxSessionMs: MAX_SESSION_MS,
-  maxKeptProfiles: MAX_KEPT_PROFILES,
 };
 
 export interface ProfilingSessionParams {
@@ -54,8 +51,8 @@ export interface ProfilingSessionParams {
   now(): number;
   /** Publishes rotation boundaries so that stalls they cause are not reported as blocks. */
   markRotation(phase: 'start' | 'end', atUs: number): void;
-  /** `kept` reads e.g. `3/100`. */
-  onKeep(profile: PprofProfile, window: ProfileWindow, kept: string): void;
+  /** `kept` counts the windows kept in the session, including this one. */
+  onKeep(profile: PprofProfile, window: ProfileWindow, kept: number): void;
 }
 
 const LOW_CARDINALITY_LABELS = [OUTER_CONTEXT_LABEL, INNER_CONTEXT_LABEL];
@@ -87,7 +84,7 @@ const generateLabels: GenerateLabels = ({ context }) =>
 
 /**
  * Samples the main thread continuously in rotating windows, keeping only windows the watchdog
- * flagged as containing a block. Bounded by {@link MAX_SESSION_MS} and {@link MAX_KEPT_PROFILES}.
+ * flagged as containing a block. Bounded by {@link MAX_SESSION_MS}; the worker bounds the files.
  */
 export class ProfilingSession {
   private active = false;
@@ -132,13 +129,11 @@ export class ProfilingSession {
     } catch (error) {
       logger.warn(`Event loop profiling continues without labels: ${error.message}`);
     }
-    const { windowMs, maxSessionMs, maxKeptProfiles } = this.limits;
+    const { windowMs, maxSessionMs } = this.limits;
     logger.info(
       `Event loop profiling started (${Math.round(1e6 / SAMPLING_INTERVAL_US)}Hz, ${
         windowMs / 1000
-      }s windows, max ${
-        maxSessionMs / 60_000
-      }min or ${maxKeptProfiles} profiles; start took ${Math.round(
+      }s windows, max ${maxSessionMs / 60_000}min; start took ${Math.round(
         (this.startedAt - startingAt) / 1000
       )}ms${details})`
     );
@@ -180,9 +175,7 @@ export class ProfilingSession {
     } finally {
       markRotation('end', now());
     }
-    logger.info(
-      `Event loop profiling ended (${reason}); kept ${this.kept}/${this.limits.maxKeptProfiles} profiles`
-    );
+    logger.info(`Event loop profiling ended (${reason}); kept ${this.kept} profiles`);
   }
 
   private rotate(): void {
@@ -202,8 +195,6 @@ export class ProfilingSession {
     const window = { startUs: this.windowStartedAt, endUs: startUs };
     this.windowStartedAt = startUs;
     if (!keep) return;
-    this.kept++;
-    onKeep(profile, window, `${this.kept}/${this.limits.maxKeptProfiles}`);
-    if (this.kept >= this.limits.maxKeptProfiles) this.end('profile limit reached');
+    onKeep(profile, window, ++this.kept);
   }
 }

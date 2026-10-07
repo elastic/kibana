@@ -195,12 +195,15 @@ export const trimToBlocks = (
 const describeLabel = ({ outer, inner }: LabelSummary) =>
   inner && outer ? `${inner} in ${outer}` : inner ?? outer ?? 'unlabelled';
 
+/** Where a kept profile went: a written file, or why it was not written. */
+export type ProfileOutcome = { file: string } | { notWritten: string };
+
 /** Single-line, human-readable form of a kept profile. */
 export const formatSummary = (
   summary: ProfileSummary,
   blockedMs: readonly number[],
-  kept: string,
-  file?: string
+  kept: number,
+  outcome: ProfileOutcome
 ): string => {
   const blocks = blockedMs.map((ms) => `~${Math.round(ms)}ms`).join(', ') || 'none recorded';
   const samples =
@@ -217,7 +220,9 @@ export const formatSummary = (
     .slice(0, 3)
     .map((label) => `${label.percent}% ${describeLabel(label)}`)
     .join(', ');
-  return `Event loop block profile ${kept}: blocks [${blocks}], ${samples}. Top: ${
+  const output =
+    'file' in outcome ? `File: ${outcome.file}` : `Not written: ${outcome.notWritten}.`;
+  return `Event loop block profile #${kept}: blocks [${blocks}], ${samples}. Top: ${
     frames || 'none'
-  }. Labels: ${labels || 'none'}.${file ? ` File: ${file}` : ''}`;
+  }. Labels: ${labels || 'none'}. ${output}`;
 };

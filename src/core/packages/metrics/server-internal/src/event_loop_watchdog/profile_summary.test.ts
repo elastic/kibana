@@ -122,11 +122,14 @@ describe('summarizeProfile', () => {
 
   it('formats a single readable line', () => {
     const summary = summarizeProfile(profile, [[1_000, 2_000]], ROOT);
-    expect(formatSummary(summary, [1203], '1/100', '/diag/x.pb.gz')).toBe(
-      'Event loop block profile 1/100: blocks [~1203ms], 5/15 samples in blocks. ' +
+    expect(formatSummary(summary, [1203], 1, { file: '/diag/x.pb.gz' })).toBe(
+      'Event loop block profile #1: blocks [~1203ms], 5/15 samples in blocks. ' +
         'Top: 80% now (src/now.ts:10) <- handler (src/handler.ts:10) <- run (src/run.ts:10); ' +
         '20% handler (src/handler.ts:10) <- run (src/run.ts:10). ' +
         'Labels: 80% workflow step:test.cpuSpin in task manager:run x, 20% unlabelled. File: /diag/x.pb.gz'
+    );
+    expect(formatSummary(summary, [1203], 2, { notWritten: 'file limit (100) reached' })).toMatch(
+      /^Event loop block profile #2: .* Not written: file limit \(100\) reached\.$/
     );
   });
 });

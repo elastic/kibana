@@ -9,7 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ProfilingSession, toLabels, type PprofTime } from './profiling_session';
-import { MAX_KEPT_PROFILES, MAX_SESSION_MS, SAMPLING_INTERVAL_US } from './types';
+import { MAX_SESSION_MS, SAMPLING_INTERVAL_US } from './types';
 
 const S = 1_000_000;
 
@@ -79,7 +79,7 @@ describe('ProfilingSession', () => {
     expect(params.onKeep).toHaveBeenCalledWith(
       time.stop.mock.results[0].value,
       { startUs: 1_000 * S, endUs: 1_010 * S },
-      `1/${MAX_KEPT_PROFILES}`
+      1
     );
     // the next window is only kept if another block is flagged
     advance(60, 1);
@@ -98,13 +98,11 @@ describe('ProfilingSession', () => {
     expect(generateLabels({ node: {} as never })).toEqual({});
   });
 
-  it('ends after the profile limit', () => {
-    for (let i = 0; i < MAX_KEPT_PROFILES; i++) advance(10, i + 1);
-    expect(params.onKeep).toHaveBeenCalledTimes(MAX_KEPT_PROFILES);
-    expect(time.stop).toHaveBeenLastCalledWith(false);
-    expect(session.isActive).toBe(false);
-    advance(60, MAX_KEPT_PROFILES + 1);
-    expect(params.onKeep).toHaveBeenCalledTimes(MAX_KEPT_PROFILES);
+  it('keeps flagged windows for the whole session: the worker bounds the files written', () => {
+    for (let i = 0; i < 500; i++) advance(10, i + 1);
+    expect(params.onKeep).toHaveBeenCalledTimes(500);
+    expect(params.onKeep).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 500);
+    expect(session.isActive).toBe(true);
   });
 
   it('ends after the time limit, publishing the final stop as a rotation', () => {

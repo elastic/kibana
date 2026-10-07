@@ -8,6 +8,7 @@
  */
 
 import type { LogMeta } from '@kbn/logging';
+import type { AdmissionLimits } from './admission';
 
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
@@ -21,7 +22,14 @@ export const WINDOW_MS = 60_000;
 /** A window holding a block is rotated early, but never before it is this old. */
 export const MIN_FLAGGED_WINDOW_MS = 10_000;
 export const MAX_SESSION_MS = 2 * 60 * 60 * 1000;
-export const MAX_KEPT_PROFILES = 100;
+/** Files are written for windows holding one of this many largest blocks written so far... */
+export const MAX_LARGEST_FILES = 10;
+/** ...exceeding the smallest of them by this factor once ranked (records: the largest). */
+export const MIN_BLOCK_GROWTH = 1.25;
+/** Files written for ranking; the rest of the cap is reserved for records. */
+export const MAX_RANKED_FILES = 70;
+/** Safety cap on files written per worker. */
+export const MAX_WRITTEN_FILES = 100;
 
 /** Label holding each sample's epoch timestamp in microseconds, to locate blocks in a window. */
 export const TIMESTAMP_LABEL = 'timestamp_us';
@@ -57,6 +65,7 @@ export interface WatchdogWorkerData {
   shared: SharedArrayBuffer;
   sanitizeRoot: string;
   diagnosticDir?: string;
+  admissionLimits?: AdmissionLimits;
 }
 
 export interface ProfileMessage {
@@ -64,8 +73,8 @@ export interface ProfileMessage {
   bytes: Uint8Array;
   windowStartUs: number;
   windowEndUs: number;
-  /** e.g. `3/100` */
-  kept: string;
+  /** Number of windows kept so far in the session, including this one. */
+  kept: number;
 }
 export type MainToWorkerMessage = ProfileMessage;
 

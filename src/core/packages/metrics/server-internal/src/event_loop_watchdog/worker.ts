@@ -22,7 +22,14 @@ import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { Profile } from 'pprof-format';
 import { BlockDetector, type DetectedBlock } from './block_detector';
-import { formatSummary, summarizeProfile, trimToBlocks, type TimeRange } from './profile_summary';
+import { WriteAdmission } from './admission';
+import {
+  formatSummary,
+  summarizeProfile,
+  trimToBlocks,
+  type ProfileOutcome,
+  type TimeRange,
+} from './profile_summary';
 import {
   BLOCK_THRESHOLD_MS,
   CONTEXT_MARGIN_MS,
@@ -55,15 +62,17 @@ export const overlapsRotation = (
   rotationStartUs <= endUs &&
   (rotationEndUs < rotationStartUs || rotationEndUs >= startUs);
 
-const fileName = (date: Date) =>
-  `event-loop-block-${date.toISOString().replace(/[:.]/g, '-')}-${Os.hostname()}-${
-    process.pid
-  }.pb.gz`;
+/** Leads with the largest block, zero-padded, so that sorted listings surface the worst first. */
+const fileName = (maxBlockedMs: number, date: Date) =>
+  `event-loop-block-${String(Math.round(maxBlockedMs)).padStart(6, '0')}ms-${date
+    .toISOString()
+    .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.pb.gz`;
 
 export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void => {
   const { sanitizeRoot, diagnosticDir } = data;
   const shared = new BigInt64Array(data.shared);
   const detector = new BlockDetector(BLOCK_THRESHOLD_MS);
+  const admission = new WriteAdmission(data.admissionLimits);
   const blocks: Block[] = [];
   const epochOffsetUs =
     Math.round((performance.timeOrigin + performance.now()) * 1000) - monotonicUs();
@@ -123,24 +132,38 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     const profile = Profile.decode(bytes);
     // Summarise the whole window first: the summary reports how many of its samples were in blocks.
     const summary = summarizeProfile(profile, ranges, sanitizeRoot);
-    let file: string | undefined;
-    if (diagnosticDir) {
-      // Without samples in blocks, the whole window is the only evidence: keep it.
-      if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
-      file = Path.join(diagnosticDir, fileName(new Date()));
-      await Fs.writeFile(file, await gzip(profile.encode()));
-    }
     const blockedMs = windowBlocks.map(({ blockedMs: ms }) => Math.round(ms));
-    log('warn', formatSummary(summary, blockedMs, kept, file), {
+    const maxBlockedMs = Math.max(0, ...blockedMs);
+    let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
+    if (diagnosticDir) {
+      const admitted = admission.admit(maxBlockedMs);
+      if (admitted.write) {
+        // Without samples in blocks, the whole window is the only evidence: keep it.
+        if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
+        const file = Path.join(diagnosticDir, fileName(maxBlockedMs, new Date()));
+        await Fs.writeFile(file, await gzip(profile.encode()));
+        outcome = { file };
+      } else {
+        outcome = { notWritten: admitted.reason };
+      }
+    }
+    // Written profiles are the ones to look at; the others still count towards block frequency.
+    log('file' in outcome ? 'warn' : 'info', formatSummary(summary, blockedMs, kept, outcome), {
       tags: ['event-loop-watchdog'],
-      kibana: { event_loop_watchdog: { profile: { ...summary, kept, blockedMs, file } } },
+      kibana: {
+        event_loop_watchdog: { profile: { ...summary, kept, blockedMs, maxBlockedMs, ...outcome } },
+      },
     });
   };
 
+  // One profile at a time: bounds the worker's memory to a single decoded profile.
+  let processing = Promise.resolve();
   port.on('message', (message: MainToWorkerMessage) => {
-    onProfile(message).catch((error) =>
-      log('error', `Failed to process event loop block profile: ${error.message}`)
-    );
+    processing = processing
+      .then(() => onProfile(message))
+      .catch((error) =>
+        log('error', `Failed to process event loop block profile: ${error.message}`)
+      );
   });
   const timer = setInterval(poll, POLL_INTERVAL_MS);
   port.on('close', () => clearInterval(timer));

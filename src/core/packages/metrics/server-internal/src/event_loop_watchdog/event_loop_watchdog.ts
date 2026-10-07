@@ -15,6 +15,7 @@ import type {
   PostMessage,
 } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
+import type { AdmissionLimits } from './admission';
 import { ProfilingSession } from './profiling_session';
 import type { PprofProfile, PprofTime, ProfileWindow, SessionLimits } from './profiling_session';
 import {
@@ -56,6 +57,7 @@ export interface EventLoopWatchdogParams {
   diagnosticDir?: string;
   loadProfiler?: () => Promise<LoadedPprof>;
   limits?: SessionLimits;
+  admissionLimits?: AdmissionLimits;
   workerEntry?: string;
 }
 
@@ -76,7 +78,8 @@ export class EventLoopWatchdog {
   public start(): void {
     if (this.worker) return;
     if (this.stopping) throw new Error('Cannot start the watchdog while it is stopping');
-    const { threads, logger, sanitizeRoot, diagnosticDir, workerEntry } = this.params;
+    const { threads, logger, sanitizeRoot, diagnosticDir, admissionLimits, workerEntry } =
+      this.params;
     const shared = new BigInt64Array(
       new SharedArrayBuffer(SLOT_COUNT * BigInt64Array.BYTES_PER_ELEMENT)
     );
@@ -106,6 +109,7 @@ export class EventLoopWatchdog {
       shared: shared.buffer as SharedArrayBuffer,
       sanitizeRoot,
       diagnosticDir,
+      admissionLimits,
     };
     this.worker = threads.createWorker<MainToWorkerMessage, WorkerToMainMessage>({
       filename: workerEntry ?? WORKER_ENTRY,
@@ -193,7 +197,7 @@ export class EventLoopWatchdog {
     }
   }
 
-  private sendProfile(profile: PprofProfile, window: ProfileWindow, kept: string): void {
+  private sendProfile(profile: PprofProfile, window: ProfileWindow, kept: number): void {
     // Only the worker that flagged the window knows its blocks.
     const { post } = this;
     profile
@@ -213,7 +217,7 @@ export class EventLoopWatchdog {
         );
       })
       .catch((error) =>
-        this.params.logger.warn(`Dropped event loop block profile ${kept}: ${error.message}`)
+        this.params.logger.warn(`Dropped event loop block profile #${kept}: ${error.message}`)
       );
   }
 }
