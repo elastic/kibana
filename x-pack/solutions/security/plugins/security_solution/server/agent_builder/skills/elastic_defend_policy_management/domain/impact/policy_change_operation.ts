@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
-import type { PolicyConfig } from '../../../../../../common/endpoint/types';
+import type { PolicyConfig, PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
 import {
   POLICY_COUPLING_PROTECTIONS,
   type PolicyCouplingProtection,
@@ -23,6 +23,21 @@ const POLICY_CHANGES_MAX = 50;
 export const POLICY_CHANGE_PROTECTIONS = POLICY_COUPLING_PROTECTIONS;
 
 export type PolicyChangeProtection = PolicyCouplingProtection;
+
+export type PolicyAssessmentAdvisory =
+  | {
+      code: 'protection_weakened';
+      protection: 'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection';
+      os: readonly PolicyOperatingSystem[];
+      to: 'detect' | 'off';
+      text: string;
+    }
+  | {
+      code: 'global_manifest_version_stale';
+      value: string;
+      ageDays: number;
+      text: string;
+    };
 
 export const POLICY_CHANGE_PREPARATION_ERROR_CODE = {
   invalid_input: 'invalid_input',
@@ -194,6 +209,7 @@ export interface PolicyChangeAssessment {
   readonly normalizedDiff: readonly PolicyDiffEntry[];
   readonly sideEffects: readonly PolicyChangeSideEffect[];
   readonly globalBlockers: readonly PolicyAssessmentBlocker[];
+  readonly advisories: readonly PolicyAssessmentAdvisory[];
 }
 
 export const parseAssessPolicyChangeParams = (value: unknown): AssessPolicyChangeParams => {

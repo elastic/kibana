@@ -117,10 +117,10 @@ metadata or a tool error. Never fabricate a proposed change to obtain assess.
 
 ### Restate only returned live-read facts
 For get, including baseline get, compare, including a returned compare row with a baseline side, rollout status, assess, and apply, reports may restate returned identities, rows, paths,
-and values. Apply may restate returned before, after, requestedChanges, sideEffects, residual, and enrollment. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state. \`after\` and \`residual\` describe the policy Fleet returned. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
+and values. Apply may restate returned before, after, requestedChanges, sideEffects, residual, and enrollment. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state. \`after\` and \`residual\` describe the policy Fleet returned. Describe \`sideEffects\` as derived-setting updates, not as consequences. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
 or path name does not entail its behavioural meaning. Before answering, remove any provider,
 other-product, blocking, coverage, warning, eligibility, or other consequence not explicitly
-returned.
+returned. Do not add consequences beyond advisory text and returned rows. An empty \`advisories\` or \`sideEffects\` does not mean the change has no consequences; never say it does.
 
 ### Disclose partiality when a result is truncated
 Whenever a returned truncation marker is true, state that the displayed result is partial and do not claim completeness, unchanged state, a no-op, or the absence of an undisplayed path beyond the returned rows. When \`name_string_truncated\` is true, a later get call passes \`policy.id\` as \`idOrName\` inside \`selector\`; compare, rollout status, and assess \`idOrName\` calls must pass \`policy.id\`, not the presented \`name\`; apply \`idOrName\` calls have the same stable-id requirement; the truncated name is not an exact stored name.
@@ -231,6 +231,7 @@ intent report, not a missing impact, only when no returned truncation marker is 
 with \`path\`, \`from\`, \`to\`, \`originKind\`, and \`eligibility\`. Copy \`normalizedDiff\` separately from
 \`expandedChanges\`. Copy \`sideEffects\` and \`policy.id\`, \`policy.name\`,
 \`policy.revision\`, and \`policy.version\`. \`revision\` does not substitute for \`version\`.
+Report every returned advisory text in the assessment report. Advisories are returned facts, allowed by the restate rule.
 Report Fleet blast radius \`population\` and \`source\`. Copy the complete numeric \`status\` map
 key-for-key. Verify every nonzero status value before answering. Use status.all as the
 enrolled-agent headline only when that key is present; if it is absent, say the headline is
@@ -247,7 +248,7 @@ Handle specific rejection reasons as follows:
 - \`derived_setting\`: Explain that the setting is not directly writable but can change as a side effect of another change; do not submit it as an operation, and check the assessment's \`sideEffects\` before saying it will stay different or will match.
 
 ### Apply a confirmed policy change
-After a successful assessment, if the user requests applying the same policy operations in this conversation, call \`${APPLY_POLICY_CHANGE_TOOL_ID}\` with that assessment's version, never its revision and never a replacement get version. Every apply invocation requires a successful preview and fresh user confirmation before the handler can write. A user request to apply only if they confirm is a request to start this gated flow: call the apply tool so it presents the confirmation card; do not ask for or wait for a separate free-text confirmation. The write can occur only after the user accepts that card. Do not apply advanced settings: follow Hand off advanced writes to the UI. Agent-policy assignments remain Fleet-owned and outside this skill.
+After a successful assessment, if the user requests applying the same policy operations in this conversation, call \`${APPLY_POLICY_CHANGE_TOOL_ID}\` with that assessment's version, never its revision and never a replacement get version. Every apply invocation requires a successful preview and fresh user confirmation before the handler can write. A user request to apply only if they confirm is a request to start this gated flow: call the apply tool so it presents the confirmation card; do not ask for or wait for a separate free-text confirmation. The confirmation card is the pre-confirmation advisory surface; do not add a free-text confirmation step. The write can occur only after the user accepts that card. Do not apply advanced settings: follow Hand off advanced writes to the UI. Agent-policy assignments remain Fleet-owned and outside this skill.
 
 The assessment report is assess-only and uses no extra inline or knowledge tool; that restriction ends when the user subsequently requests the gated apply. Apply is not a readiness or rollout claim.
 
