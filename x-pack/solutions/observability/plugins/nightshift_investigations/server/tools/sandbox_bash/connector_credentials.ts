@@ -30,8 +30,7 @@ export interface ConnectorCredentialDeps {
 
 export type ResolveConnectorCredentials = (
   connectorId: string,
-  callContext: SandboxCallContext,
-  options?: { minimumValiditySeconds?: number; forceRefresh?: boolean }
+  callContext: SandboxCallContext
 ) => Promise<ConnectorCredentialResolution>;
 
 const toEnvKey = (segment: string): string =>
@@ -56,15 +55,11 @@ export const buildConnectorEnv = ({
   actionTypeId,
   config,
   headers,
-  expiresAt,
-  expiresInSeconds,
 }: {
   connectorId: string;
   actionTypeId: string;
   config: Record<string, unknown>;
   headers: Record<string, string>;
-  expiresAt?: string;
-  expiresInSeconds?: number;
 }): ConnectorCredentialEnv => {
   const env: Record<string, string> = {
     [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
@@ -81,13 +76,6 @@ export const buildConnectorEnv = ({
     if (envValue === undefined) continue;
     env[`${CONNECTOR_ENV_PREFIX}HEADER_${toEnvKey(key)}`] = envValue;
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
-  }
-
-  if (expiresAt !== undefined) {
-    env[`${CONNECTOR_ENV_PREFIX}EXPIRES_AT`] = expiresAt;
-  }
-  if (expiresInSeconds !== undefined) {
-    env[`${CONNECTOR_ENV_PREFIX}EXPIRES_IN_SECONDS`] = String(expiresInSeconds);
   }
 
   return { env, secretValues };
@@ -110,7 +98,7 @@ export const createConnectorCredentialResolver =
     getDeps: () => ConnectorCredentialDeps;
     logger: Logger;
   }): ResolveConnectorCredentials =>
-  async (connectorId, callContext, options) => {
+  async (connectorId, callContext) => {
     const { actions } = getDeps();
 
     if (!actions) {
@@ -128,11 +116,7 @@ export const createConnectorCredentialResolver =
 
     try {
       const actionsClient = await actions.getActionsClientWithRequest(callContext.request);
-      const credentials = await actionsClient.getConnectorCredentials({
-        id: connectorId,
-        minimumValiditySeconds: options?.minimumValiditySeconds,
-        forceRefresh: options?.forceRefresh,
-      });
+      const credentials = await actionsClient.getConnectorCredentials({ id: connectorId });
 
       logger.debug(
         `Injecting credentials for connector ${connectorId} into a single sandbox command`

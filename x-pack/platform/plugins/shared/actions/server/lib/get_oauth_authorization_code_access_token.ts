@@ -43,10 +43,6 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
    * even if it hasn't "expired" according to the stored timestamp.
    */
   forceRefresh?: boolean;
-  /**
-   * Refresh when the stored token would expire before this many seconds elapse.
-   */
-  minimumValiditySeconds?: number;
   tokenResponseOptions?: TokenResponseOptions;
 }
 
@@ -64,7 +60,6 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   authMode,
   profileUid,
   forceRefresh = false,
-  minimumValiditySeconds,
   tokenResponseOptions,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
@@ -93,7 +88,6 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     connectorTokenClient,
     authMethod: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
     forceRefresh,
-    minimumValiditySeconds,
     isPerUser,
     profileUid,
     authMode,

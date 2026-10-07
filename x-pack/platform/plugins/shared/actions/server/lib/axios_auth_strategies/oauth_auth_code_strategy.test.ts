@@ -284,33 +284,6 @@ describe('OAuthAuthCodeStrategy', () => {
       );
     });
 
-    it('forwards minimum validity and force-refresh options to the authorization-code helper', async () => {
-      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer token');
-
-      const opts: OAuthGetTokenOpts = {
-        authType: 'oauth',
-        tokenUrl: 'https://provider.example.com/token',
-        clientId: 'id',
-        clientSecret: 'secret',
-        minimumValiditySeconds: 600,
-        forceRefresh: true,
-      };
-      await strategy.getToken(opts, {
-        ...baseDeps,
-        profileUid: 'profile-1',
-        authMode: 'per-user',
-      });
-
-      expect(mockGetOAuthAuthorizationCodeAccessToken).toHaveBeenCalledWith(
-        expect.objectContaining({
-          forceRefresh: true,
-          minimumValiditySeconds: 600,
-          profileUid: 'profile-1',
-          authMode: 'per-user',
-        })
-      );
-    });
-
     it('includes additionalFields when present in opts', async () => {
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer token');
 

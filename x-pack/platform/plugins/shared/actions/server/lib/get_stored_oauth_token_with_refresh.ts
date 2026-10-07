@@ -38,11 +38,6 @@ export interface GetStoredTokenWithRefreshOpts {
    * even if it hasn't "expired" according to the stored timestamp.
    */
   forceRefresh?: boolean;
-  /**
-   * Refresh when the stored token would expire before this many seconds elapse.
-   * Tokens with enough remaining lifetime are reused.
-   */
-  minimumValiditySeconds?: number;
   isPerUser?: boolean;
   /** Required when `isPerUser` is true to look up the per-user stored token. */
   profileUid?: string;
@@ -113,7 +108,6 @@ export const getStoredTokenWithRefresh = async ({
   connectorTokenClient,
   authMethod,
   forceRefresh = false,
-  minimumValiditySeconds,
   isPerUser = false,
   profileUid,
   authMode,
@@ -164,12 +158,8 @@ export const getStoredTokenWithRefresh = async ({
 
       const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = extractedTokens;
 
-      const remainingMs = expiresAt - now;
-      const minimumValidityMs = (minimumValiditySeconds ?? 0) * 1000;
-      const hasEnoughValidity = remainingMs > minimumValidityMs;
-
-      if (!forceRefresh && hasEnoughValidity) {
-        // Token still valid for the requested lifetime
+      if (!forceRefresh && expiresAt > now) {
+        // Token still valid
         logger.debug(`Using stored access token for connectorId: ${connectorId}`);
         if (storedAccessToken === null) {
           logger.warn(

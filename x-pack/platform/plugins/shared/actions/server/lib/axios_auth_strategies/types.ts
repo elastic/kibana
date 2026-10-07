@@ -19,8 +19,6 @@ export interface AuthStrategyDeps {
   configurationUtilities: ActionsConfigurationUtilities;
   authMode?: AuthMode;
   profileUid?: string;
-  minimumValiditySeconds?: number;
-  forceRefresh?: boolean;
 }
 
 export interface AxiosAuthStrategy {

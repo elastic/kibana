@@ -7,8 +7,6 @@
 
 export interface GetConnectorCredentialsOptions {
   id: string;
-  minimumValiditySeconds?: number;
-  forceRefresh?: boolean;
 }
 
 export interface ResolvedConnectorCredentials {
@@ -16,6 +14,4 @@ export interface ResolvedConnectorCredentials {
   actionTypeId: string;
   config: Record<string, unknown>;
   headers: Record<string, string>;
-  expiresAt?: string;
-  expiresInSeconds?: number;
 }

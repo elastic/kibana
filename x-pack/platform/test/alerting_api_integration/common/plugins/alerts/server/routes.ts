@@ -894,13 +894,6 @@ export function defineRoutes(
         params: schema.object({
           id: schema.string({ maxLength: 128 }),
         }),
-        body: schema.object(
-          {
-            minimumValiditySeconds: schema.maybe(schema.number({ min: 0, max: 86400 })),
-            forceRefresh: schema.maybe(schema.boolean()),
-          },
-          { defaultValue: {} }
-        ),
       },
     },
     async (
@@ -913,21 +906,11 @@ export function defineRoutes(
 
       try {
         return res.ok({
-          body: await actionsClient.getConnectorCredentials({
-            id: req.params.id,
-            minimumValiditySeconds: req.body.minimumValiditySeconds,
-            forceRefresh: req.body.forceRefresh,
-          }),
+          body: await actionsClient.getConnectorCredentials({ id: req.params.id }),
         });
       } catch (err) {
-        const statusCode = err.isBoom
-          ? err.output.statusCode
-          : err.output?.statusCode ?? err.statusCode;
-        if (statusCode === 403) {
+        if (err.isBoom && err.output.statusCode === 403) {
           return res.forbidden({ body: err });
-        }
-        if (statusCode === 404) {
-          return res.notFound({ body: err });
         }
 
         throw err;

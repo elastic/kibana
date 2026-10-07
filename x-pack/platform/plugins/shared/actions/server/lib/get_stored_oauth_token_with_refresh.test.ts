@@ -235,48 +235,6 @@ describe('getStoredTokenWithRefresh', () => {
     });
   });
 
-  describe('minimumValiditySeconds', () => {
-    it('reuses a token that still covers the requested lifetime', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: validToken,
-      });
-
-      const result = await getStoredTokenWithRefresh({
-        ...baseOpts,
-        minimumValiditySeconds: 60,
-      });
-
-      expect(result).toBe('stored-access-token');
-      expect(refreshFn).not.toHaveBeenCalled();
-    });
-
-    it('refreshes a token that cannot cover the requested lifetime', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          ...validToken,
-          expiresAt: new Date('2024-01-15T12:00:30.000Z').toISOString(),
-        },
-      });
-      refreshFn.mockResolvedValueOnce(refreshResponse);
-
-      const result = await getStoredTokenWithRefresh({
-        ...baseOpts,
-        minimumValiditySeconds: 600,
-      });
-
-      expect(result).toBe('Bearer new-access-token');
-      expect(refreshFn).toHaveBeenCalledTimes(1);
-      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
-        expect.objectContaining({
-          expiresIn: 3600,
-          refreshTokenExpiresIn: 604800,
-        })
-      );
-    });
-  });
-
   describe('error handling', () => {
     it('returns null and logs an error when refreshFn throws a non-auth error', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({

@@ -154,51 +154,10 @@ describe('getAxiosInstance', () => {
     });
     const credential = getCredential({
       connectorId: '1',
-      secrets: { authType: 'oauth_client_credentials' },
+      secrets: { authType: 'oauth_authorization_code' },
     });
 
     await expect(credential.getAuthHeaders()).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
-  });
-
-  test('returns OAuth authorization-code headers and forwards validity options', async () => {
-    const mockGetToken = getOAuthAuthorizationCodeAccessToken as jest.Mock;
-    mockGetToken.mockResolvedValue('bearer xoxp-access-token');
-
-    const getCredential = getCredentialWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const credential = getCredential({
-      connectorId: 'slack-connector',
-      connectorTokenClient,
-      secrets: {
-        authType: 'oauth_authorization_code',
-        clientId: 'slack-client-id',
-        clientSecret: 'slack-client-secret',
-        tokenUrl: 'https://slack.com/api/oauth.v2.access',
-        authorizationUrl: 'https://slack.com/oauth/v2/authorize',
-        scope: 'channels:read chat:write',
-      },
-      profileUid: 'profile-1',
-      authMode: 'per-user',
-    });
-
-    await expect(
-      credential.getAuthHeaders({ minimumValiditySeconds: 600, forceRefresh: true })
-    ).resolves.toEqual({
-      Authorization: 'Bearer xoxp-access-token',
-    });
-
-    expect(mockGetToken).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connectorId: 'slack-connector',
-        forceRefresh: true,
-        minimumValiditySeconds: 600,
-        profileUid: 'profile-1',
-        authMode: 'per-user',
-      })
-    );
   });
 
   test('returns axios instance configured for basic auth', async () => {

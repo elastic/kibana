@@ -135,7 +135,6 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
             `/api/alerts_fixture/${defaultSingleFileConnectorId}/_test_get_connector_credentials`
           )
           .set('kbn-xsrf', 'foo')
-          .send({})
           .expect(200);
 
         const encoded = Buffer.from(`${username}:${password}`).toString('base64');

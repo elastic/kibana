@@ -380,51 +380,6 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
     });
   });
 
-  describe('minimumValiditySeconds', () => {
-    it('delegates the requested lifetime with per-user identity', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: validPerUserToken,
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        authMode: 'per-user',
-        profileUid: 'profile-1',
-        minimumValiditySeconds: 60,
-      });
-
-      expect(result).toBe('stored-per-user-access-token');
-      expect(connectorTokenClient.get).toHaveBeenCalledWith({
-        profileUid: 'profile-1',
-        connectorId: 'connector-1',
-        tokenType: 'access_token',
-      });
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
-    });
-
-    it('refreshes a per-user token that cannot cover the requested lifetime', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          ...validPerUserToken,
-          expiresAt: new Date('2024-01-15T12:00:30.000Z').toISOString(),
-        },
-      });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        authMode: 'per-user',
-        profileUid: 'profile-1',
-        minimumValiditySeconds: 600,
-      });
-
-      expect(result).toBe('Bearer new-access-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('error handling', () => {
     it('returns null and logs an error when requestOAuthRefreshToken throws a non-auth error', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({

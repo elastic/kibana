@@ -143,8 +143,6 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       scope: opts.scope,
       authMode,
       profileUid,
-      forceRefresh: opts.forceRefresh ?? deps.forceRefresh,
-      minimumValiditySeconds: opts.minimumValiditySeconds ?? deps.minimumValiditySeconds,
       tokenResponseOptions: buildTokenResponseOptions({
         accessTokenPath: opts.accessTokenPath,
         tokenTypePath: opts.tokenTypePath,
