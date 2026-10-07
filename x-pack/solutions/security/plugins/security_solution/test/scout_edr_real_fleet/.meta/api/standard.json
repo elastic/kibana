@@ -1,0 +1,36 @@
+{
+  "sha1": "0d5d9c2719a235854b54e8bc817dd18296f6ae19",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7059439f41fbd5c-3ad3b8245a78adb",
+      "title": "Endpoint artifact changes on a live host creating and deleting a global trusted application bumps the applied revision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/artifact_policy_revision.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "520d757d08531dc-111d588549633d2",
+      "title": "Endpoint generated alerts promotes an alert from a live Endpoint to a Detection Engine alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/endpoint_generated_alerts.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    }
+  ]
+}
