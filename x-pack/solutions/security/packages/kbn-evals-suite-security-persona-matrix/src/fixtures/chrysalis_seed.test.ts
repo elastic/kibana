@@ -147,4 +147,73 @@ describe('chrysalis_seed (enriched profile)', () => {
       expect(scopedDelete?.[0].query).toEqual({ ids: { values: seededIds } });
     });
   });
+
+  describe('seedChrysalisAlerts (parity profile) restamping', () => {
+    afterEach(() => {
+      delete process.env.SEED_PROFILE;
+      jest.clearAllMocks();
+    });
+
+    const loadParity = () => {
+      jest.resetModules();
+      process.env.SEED_PROFILE = 'parity';
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./chrysalis_seed') as typeof import('./chrysalis_seed');
+    };
+
+    it('shifts nested first_seen by the same offset as @timestamp', async () => {
+      const { seedChrysalisAlerts } = loadParity();
+      const { PARITY_DOCS } =
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require('./chrysalis_parity_docs') as typeof import('./chrysalis_parity_docs');
+      const client = createClient();
+
+      await seedChrysalisAlerts({ esClient: asEs(client), log });
+
+      // Find the bulk body for the threat-intel index and its source doc.
+      const tiIndex = 'logs-ti_chrysalis_sim-default';
+      const tiCall = client.bulk.mock.calls.find(
+        ([arg]) => (arg as { index: string }).index === tiIndex
+      );
+      expect(tiCall).toBeDefined();
+      const seededDocs = (tiCall?.[0] as { operations: unknown[] }).operations.filter(
+        (op) => typeof op === 'object' && op !== null && !('create' in (op as object))
+      ) as Array<Record<string, unknown>>;
+
+      const seeded = seededDocs.find(
+        (d) =>
+          (d['threat'] as { indicator?: { first_seen?: unknown } } | undefined)?.indicator
+            ?.first_seen !== undefined
+      );
+      expect(seeded).toBeDefined();
+
+      const seededIndicator = (seeded!['threat'] as { indicator: Record<string, unknown> })
+        .indicator;
+      const srcDoc = PARITY_DOCS.find(
+        ({ index, doc }) =>
+          index === tiIndex &&
+          (doc['threat'] as { indicator?: Record<string, unknown> } | undefined)?.indicator
+            ?.description === seededIndicator.description
+      )!.doc;
+      const srcIndicator = (srcDoc['threat'] as { indicator: Record<string, unknown> }).indicator;
+      expect(srcIndicator.first_seen).toBeDefined();
+
+      const tsOffset =
+        Date.parse(seeded!['@timestamp'] as string) - Date.parse(srcDoc['@timestamp'] as string);
+      const firstSeenOffset =
+        Date.parse(seededIndicator.first_seen as string) -
+        Date.parse(srcIndicator.first_seen as string);
+      const lastSeenOffset =
+        Date.parse(seededIndicator.last_seen as string) -
+        Date.parse(srcIndicator.last_seen as string);
+
+      // Same doc → identical offset across @timestamp and the nested keys.
+      expect(firstSeenOffset).toBe(tsOffset);
+      expect(lastSeenOffset).toBe(tsOffset);
+
+      // Offset is a real shift to ~now (positive, large).
+      const now = Date.now();
+      expect(Date.parse(seeded!['@timestamp'] as string)).toBeGreaterThan(now - 10 * 60 * 1000);
+    });
+  });
 });

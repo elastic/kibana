@@ -313,6 +313,77 @@ describe('MitreAttackDataClient.list', () => {
     expect(listFindArgs.sortOrder).toBe('asc');
   });
 
+  it('returns tactics ordered by position and techniques/subtechniques in repository (name) order', async () => {
+    const tactic1 = getMockMitreTactic({ id: 'TA0003', position: 2, name: 'Zeta' });
+    const tactic2 = getMockMitreTactic({ id: 'TA0001', position: 0, name: 'Alpha' });
+    const tactic3 = getMockMitreTactic({ id: 'TA0002', position: 1, name: 'Mid' });
+    const technique1 = getMockMitreTechnique({ id: 'T0001', name: 'Alpha Technique' });
+    const technique2 = getMockMitreTechnique({ id: 'T0002', name: 'Beta Technique' });
+
+    savedObjectsRepository.find
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:any',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      })
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: `enterprise:15.1:${tactic1.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic1,
+          },
+          {
+            id: `enterprise:15.1:${tactic2.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic2,
+          },
+          {
+            id: `enterprise:15.1:${tactic3.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: tactic3,
+          },
+          {
+            id: `enterprise:15.1:${technique1.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: technique1,
+          },
+          {
+            id: `enterprise:15.1:${technique2.id}`,
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 1.0,
+            attributes: technique2,
+          },
+        ],
+        total: 5,
+        per_page: 10000,
+        page: 1,
+      });
+
+    const result = await buildClient().list();
+
+    expect(result.tactics.map((t) => t.id)).toEqual(['TA0001', 'TA0002', 'TA0003']);
+    expect(result.techniques.map((t) => t.id)).toEqual(['T0001', 'T0002']);
+  });
+
   it('returns the empty collection and issues no repository call when ensureInitialized() resolves false', async () => {
     dataService.ensureInitialized.mockResolvedValueOnce(false);
 

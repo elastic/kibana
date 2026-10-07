@@ -28,6 +28,7 @@ import { reviseProposalTool } from './agent_builder/tools/revise_proposal_tool';
 import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
 import { registerStepDefinitions } from './step_types';
 import { createProposalsStorageClient } from './storage/proposals_storage';
+import { createProposalTool } from './tools/create_proposal_tool';
 import type {
   ProposalsPluginSetup,
   ProposalsPluginStart,
@@ -86,6 +87,17 @@ export class ProposalsPlugin
       privileges: this.getProposalPrivilegesChecker(coreSetup),
       logger: this.logger,
     });
+
+    // Lets an agent propose an action in its own conversation through the gate workflow.
+    // Registered in setup but run only after start, so the service is resolved per call.
+    agentBuilder.tools.register(
+      createProposalTool({
+        getProposalsService: () => this.requireProposalsService(),
+        getWorkflowsApi: () => this.requireWorkflowsApi(),
+        privileges: this.getProposalPrivilegesChecker(coreSetup),
+        logger: this.logger,
+      })
+    );
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an

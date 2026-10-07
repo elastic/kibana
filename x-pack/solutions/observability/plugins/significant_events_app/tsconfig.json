@@ -11,6 +11,7 @@
     "@kbn/app-header",
     "@kbn/calculate-auto",
     "@kbn/charts-plugin",
+    "@kbn/charts-theme",
     "@kbn/cloud-plugin",
     "@kbn/code-editor",
     "@kbn/core",

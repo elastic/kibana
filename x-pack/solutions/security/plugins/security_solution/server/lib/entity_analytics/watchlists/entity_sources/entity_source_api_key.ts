@@ -13,6 +13,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 const INSUFFICIENT_INDEX_PRIVILEGES_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.api.insufficientIndexPrivileges',
@@ -26,9 +27,17 @@ export const grantEntitySourceApiKey = async (
   request: KibanaRequest,
   sourceName?: string
 ) => {
+  // `getCurrentUser().authentication_type` is the primary signal, but it can fail to resolve for
+  // fake requests (e.g. Agent Builder tool calls run via Task Manager with a stored API key),
+  // silently leaving `authentication_type` undefined even though the request is genuinely
+  // API-key authenticated. Fall back to the raw Authorization header scheme, which is always
+  // present on these requests.
   const isApiKeyAuthentication = () => {
     const user = securityService.authc.getCurrentUser(request);
-    return user?.authentication_type === 'api_key';
+    if (user?.authentication_type) {
+      return user.authentication_type === 'api_key';
+    }
+    return HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'apikey';
   };
 
   const keyName = sourceName ? `watchlist-entity-source:${sourceName}` : 'watchlist-entity-source';
