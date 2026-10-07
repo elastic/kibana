@@ -6,23 +6,14 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
+import type {
   StatusCheckFiltersType,
   AtomicStatusCheckParamsType,
   StatusCheckParamsType,
   RangeUnitType,
   GetMonitorAvailabilityParamsType,
   MonitorAvailabilityType,
-} from '../zod/alerts';
-
-export {
-  StatusCheckFiltersType,
-  AtomicStatusCheckParamsType,
-  StatusCheckParamsType,
-  RangeUnitType,
-  GetMonitorAvailabilityParamsType,
-  MonitorAvailabilityType,
-};
+} from '../schemas/alerts';
 
 export type StatusCheckFilters = SchemaOutput<typeof StatusCheckFiltersType>;
 export type AtomicStatusCheckParams = SchemaOutput<typeof AtomicStatusCheckParamsType>;

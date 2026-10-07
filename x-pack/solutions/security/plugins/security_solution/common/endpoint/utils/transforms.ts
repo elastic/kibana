@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
@@ -16,6 +19,7 @@ import {
   METADATA_CURRENT_TRANSFORM_V2,
   METADATA_TRANSFORMS_PATTERN,
   METADATA_TRANSFORMS_PATTERN_V2,
+  METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
 } from '../constants';
@@ -82,10 +86,34 @@ export const startMetadataTransforms = usageTracker.track(
     await startTransformWithRetry(esClient, currentTransformId);
 
     if (agentIds.length > 0) {
-      await waitForCurrentMetdataDocs(esClient, agentIds);
+      await waitForMetadataDocs({
+        esClient,
+        index: metadataCurrentIndexPattern,
+        agentIdField: 'agent.id',
+        agentIds,
+        transformId: currentTransformId,
+        label: 'current endpoint metadata',
+      });
     }
 
     await startTransformWithRetry(esClient, unitedTransformId);
+
+    // Host APIs read the united index. The current index can be ready while this
+    // transform is still catching up, or while a parallel test has stopped it.
+    // METADATA_UNITED_INDEX is the v1 destination. isEndpointPackageV2() is still
+    // a stub; when it starts returning true, this index must follow the same
+    // versioning as unitedTransformId above.
+    if (agentIds.length > 0) {
+      await waitForMetadataDocs({
+        esClient,
+        index: METADATA_UNITED_INDEX,
+        agentIdField: 'united.endpoint.agent.id',
+        agentIds,
+        transformId: unitedTransformId,
+        label: 'united endpoint metadata',
+        extraFilters: [{ term: { 'united.agent.active': { value: true } } }],
+      });
+    }
   }
 );
 
@@ -122,11 +150,11 @@ const isTransformAlreadyStartedError = (err: unknown): boolean => {
   const error = err as {
     statusCode?: number;
     body?: { error?: { type?: string } };
+    meta?: { body?: { error?: { type?: string } } };
   };
+  const errorType = error.body?.error?.type ?? error.meta?.body?.error?.type;
 
-  return (
-    error.statusCode === 409 || error.body?.error?.type === 'resource_already_exists_exception'
-  );
+  return error.statusCode === 409 || errorType === 'resource_already_exists_exception';
 };
 
 async function startTransformWithRetry(
@@ -206,39 +234,64 @@ async function areMetadataTransformsReady(esClient: Client, version: string): Pr
   );
 }
 
-async function waitForCurrentMetdataDocs(esClient: Client, agentIds: string[]) {
-  const query = agentIds.length
-    ? {
+async function waitForMetadataDocs({
+  esClient,
+  index,
+  agentIdField,
+  agentIds,
+  transformId,
+  label,
+  extraFilters = [],
+}: {
+  esClient: Client;
+  index: string;
+  agentIdField: string;
+  agentIds: string[];
+  transformId: string;
+  label: string;
+  extraFilters?: QueryDslQueryContainer[];
+}): Promise<void> {
+  const size = agentIds.length;
+  let lastDistinctAgents = 0;
+  const areDocsReady = async (): Promise<boolean> => {
+    // Count distinct agents, not documents. A restarted transform can write a
+    // second doc for the same agent, and an exact document count then never matches.
+    const response = await esClient.search({
+      index,
+      query: {
         bool: {
-          filter: [
-            {
-              terms: {
-                'agent.id': agentIds,
-              },
-            },
-          ],
+          filter: [{ terms: { [agentIdField]: agentIds } }, ...extraFilters],
         },
-      }
-    : {
-        match_all: {},
-      };
-  const size = agentIds.length || 1;
-  const areCurrentDocsReady = async (): Promise<boolean> =>
-    (
-      await esClient.search({
-        index: metadataCurrentIndexPattern,
-        query,
-        size,
-        rest_total_hits_as_int: true,
-      })
-    ).hits.total === size;
+      },
+      size: 0,
+      aggs: {
+        agents: {
+          cardinality: { field: agentIdField },
+        },
+      },
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    lastDistinctAgents =
+      (response.aggregations as { agents?: { value?: number } } | undefined)?.agents?.value ?? 0;
 
-  const isReady = await waitFor(areCurrentDocsReady);
+    if (lastDistinctAgents >= size) {
+      return true;
+    }
+
+    // Parallel suites share these transforms and stop them while indexing.
+    await startTransformWithRetry(esClient, transformId);
+    return false;
+  };
+
+  // Poll every 5s for 4 minutes. Another worker can stop the shared transform
+  // near the end of a shorter window, and the sync delay then needs another cycle.
+  const isReady = await waitFor(areDocsReady, 5_000, 49);
   if (!isReady) {
     throw new Error(
-      `Timed out waiting for ${size} current endpoint metadata docs${
-        agentIds.length ? ` for agent ids [${agentIds.join(', ')}]` : ''
-      }`
+      `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(
+        ', '
+      )}] (last distinct agent count: ${lastDistinctAgents})`
     );
   }
 }
