@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiSearchBarProps,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
@@ -38,6 +43,8 @@ export interface ServiceAccountsTableProps {
   isLoadingMore: boolean;
   hasLoadMoreError: boolean;
   onLoadMore: () => void;
+  /** Shows a delete action on each row when set. */
+  onDeleteAccount?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
 const unavailableValue = (tabIndex?: number) => (
@@ -76,6 +83,7 @@ export const ServiceAccountsTable = ({
   isLoadingMore,
   hasLoadMoreError,
   onLoadMore,
+  onDeleteAccount,
 }: ServiceAccountsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const roleOptions = useMemo(
@@ -222,6 +230,35 @@ export const ServiceAccountsTable = ({
     []
   );
 
+  const columnsWithActions = useMemo(() => {
+    if (!onDeleteAccount) {
+      return columns;
+    }
+
+    const actionsColumn: EuiTableActionsColumnType<ServiceAccountTableItem> = {
+      name: i18n.translate('xpack.security.management.serviceAccounts.table.actionsColumn', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate('xpack.security.management.serviceAccounts.table.deleteAction', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate(
+            'xpack.security.management.serviceAccounts.table.deleteActionDescription',
+            { defaultMessage: 'Delete this service account' }
+          ),
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
+          onClick: onDeleteAccount,
+          'data-test-subj': 'serviceAccountsDeleteAction',
+        },
+      ],
+    };
+    return [...columns, actionsColumn];
+  }, [columns, onDeleteAccount]);
+
   return (
     <>
       <EuiInMemoryTable
@@ -233,7 +270,7 @@ export const ServiceAccountsTable = ({
           }
         )}
         rowHeader="name"
-        columns={columns}
+        columns={columnsWithActions}
         items={serviceAccounts}
         pagination={{ pageIndex, initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         onTableChange={({ page }: CriteriaWithPagination<ServiceAccountTableItem>) =>
