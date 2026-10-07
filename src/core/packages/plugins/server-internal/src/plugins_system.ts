@@ -50,7 +50,7 @@ export class PluginsSystem<T extends PluginType> {
     private readonly deferredInitEngine?: DeferredInitEngine
   ) {
     this.log = coreContext.logger.get('plugins-system', this.type);
-    this.runtimeResolver = new RuntimePluginContractResolver(this.log.get('contract-resolver'));
+    this.runtimeResolver = new RuntimePluginContractResolver();
   }
 
   /**

@@ -129,6 +129,7 @@ export class PluginsService
       nodeInfo: {
         roles: node.roles,
       },
+      deferredInitEngine: this.deferredInitEngine,
     });
     this.standardPluginsSystem.setNodeRoles(node.roles);
 

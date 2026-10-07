@@ -27,6 +27,7 @@ import type { PluginsConfigType } from '../plugins_config';
 import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
+import { DeferredInitEngine } from '../deferred_init';
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),
@@ -168,6 +169,8 @@ const packageMock = {
 const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, 'plugins', ...segments);
 const manifestPath = (...pluginPath: string[]) => resolve(pluginDir(...pluginPath), 'kibana.json');
 
+const deferredInitEngine = new DeferredInitEngine(loggingSystemMock.create().get());
+
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let instanceInfo: InstanceInfo;
@@ -241,6 +244,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -268,6 +272,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -335,6 +340,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -373,6 +379,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs({}, { createCwd: false });
@@ -401,6 +408,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -437,6 +445,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -482,6 +491,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -506,6 +516,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     mockFs(
@@ -535,6 +546,7 @@ describe('plugins discovery system', () => {
       coreContext,
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     const pluginFolder = pluginDir('../ext-plugins');
@@ -580,6 +592,7 @@ describe('plugins discovery system', () => {
       },
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([
@@ -609,6 +622,7 @@ describe('plugins discovery system', () => {
       },
       instanceInfo,
       nodeInfo,
+      deferredInitEngine,
     });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
@@ -631,6 +645,7 @@ describe('plugins discovery system', () => {
         coreContext,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       const [plugin, ...empty] = await firstValueFrom(plugin$.pipe(toArray()));
@@ -689,6 +704,7 @@ describe('plugins discovery system', () => {
         coreContext,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       const plugins = await firstValueFrom(plugin$.pipe(toArray()));
@@ -725,6 +741,7 @@ describe('plugins discovery system', () => {
         coreContext,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       const plugins = await firstValueFrom(plugin$.pipe(toArray()));
@@ -771,6 +788,7 @@ describe('plugins discovery system', () => {
         coreContext,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
@@ -799,6 +817,7 @@ describe('plugins discovery system', () => {
         coreContext,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       }).plugin$;
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
