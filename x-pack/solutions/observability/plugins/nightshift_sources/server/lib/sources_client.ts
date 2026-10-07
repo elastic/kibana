@@ -89,7 +89,7 @@ export class SourcesClient {
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
     const parsed = parseSourceWrite(createSourceRequestSchema, input);
-    validateSourceQuery(parsed.esql);
+    const type = validateSourceQuery({ esql: parsed.esql });
     await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
@@ -97,6 +97,7 @@ export class SourcesClient {
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
       ...parsed,
+      type,
       slug,
       view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
       enabled: true,
@@ -136,8 +137,10 @@ export class SourcesClient {
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
-    validateSourceQuery(parsed.esql);
+    // A metadata-only save keeps the stored type. The query did not change.
+    let type = previous.type;
     if (esqlChanged) {
+      type = validateSourceQuery({ esql: parsed.esql });
       await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
     }
 
@@ -150,6 +153,7 @@ export class SourcesClient {
       description: parsed.description,
       tags: parsed.tags,
       esql: parsed.esql,
+      type,
       updated_at: now,
       esql_updated_at: esqlChanged
         ? nextEsqlUpdatedAt(previous.esql_updated_at, now)

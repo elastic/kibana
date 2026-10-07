@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { sourceTypeSchema } from './source_type';
 import { MAX_SOURCE_SLUG_LENGTH, MAX_SOURCE_VIEW_NAME_LENGTH } from './view_name';
 
 export const MAX_SOURCE_TITLE_LENGTH = 256;
@@ -62,6 +63,8 @@ const nightshiftSourceSchema = z.object({
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema,
   esql: sourceEsqlSchema,
+  /** Derived from `esql` on write. Callers cannot set it. */
+  type: sourceTypeSchema,
   slug: nightshiftSourceSlugSchema,
   view_name: z.string().min(1).max(MAX_SOURCE_VIEW_NAME_LENGTH),
   enabled: z.boolean(),

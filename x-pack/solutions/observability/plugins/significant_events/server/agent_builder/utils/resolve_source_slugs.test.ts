@@ -21,6 +21,7 @@ const checkout: NightshiftSource = {
   title: 'Checkout',
   tags: [],
   esql: 'FROM logs-checkout',
+  type: 'logs',
   slug: 'checkout',
   view_name: '$.nightshift.sources.default.checkout',
   enabled: true,

@@ -6,10 +6,21 @@
  */
 
 import {
+  analyzeSourceQuery,
   getSourceCommandQuery,
   hasMultipleSourceIndices,
   validateSourceQuery,
 } from './validate_source_query';
+
+const expectType = (esql: string, type: string): void => {
+  expect(analyzeSourceQuery({ esql })).toEqual({ type });
+};
+
+const expectTypeError = (esql: string, messagePart: string): void => {
+  expect(analyzeSourceQuery({ esql })).toEqual({
+    error: expect.stringContaining(messagePart),
+  });
+};
 
 const expectRejected = (esql: string, messagePart: string) => {
   expect(validateSourceQuery(esql)).toContain(messagePart);
@@ -28,6 +39,14 @@ describe('validateSourceQuery', () => {
       'FROM *',
       'FROM $.logs.nginx',
       'FROM $.logs.*',
+      'FROM remote:logs-*',
+      'FROM logs-*, remote:logs-* | WHERE x > 1',
+      'FROM *:logs-*',
+      'TS remote:metrics-*',
+      'FROM logs-* METADATA _id',
+      'FROM logs-* METADATA _id, _source | WHERE x > 1',
+      'TS metrics-* METADATA _id',
+      'FROM logs-*, -remote:*',
     ])('%s', (esql) => {
       expect(validateSourceQuery(esql)).toBeUndefined();
     });
@@ -36,6 +55,15 @@ describe('validateSourceQuery', () => {
   describe('rejects', () => {
     it('a query that does not parse', () => {
       expectRejected('FROM logs-* | WHERE', 'Invalid ES|QL query');
+    });
+
+    it.each([
+      'FROM logs-*::failures',
+      'FROM remote:logs-*::failures',
+      'FROM "logs-*::failures"',
+      'FROM logs-*, metrics-*::failures',
+    ])('a selector other than data in %s', (esql) => {
+      expectRejected(esql, 'only ::data is supported');
     });
 
     it('a first command that is not FROM or TS', () => {
@@ -62,22 +90,6 @@ describe('validateSourceQuery', () => {
       );
     });
 
-    it('METADATA on FROM', () => {
-      expectRejected('FROM logs-* METADATA _id', 'METADATA is not allowed');
-      expectRejected('FROM logs-* METADATA _id, _source | WHERE x > 1', 'METADATA is not allowed');
-    });
-
-    // Assumption check against @elastic/esql: TS must produce the same `option` node for
-    // METADATA as FROM does.
-    it('METADATA on TS', () => {
-      expectRejected('TS metrics-* METADATA _id', 'METADATA is not allowed');
-    });
-
-    it('a remote cluster prefix', () => {
-      expectRejected('FROM remote:logs-*', 'Remote cluster references are not allowed');
-      expectRejected('FROM logs-*, remote:logs-* | WHERE x > 1', 'found "remote:logs-*"');
-    });
-
     it('a Nightshift source view', () => {
       expectRejected(
         'FROM $.nightshift.sources.*',
@@ -101,6 +113,79 @@ describe('validateSourceQuery', () => {
       expectRejected('FROM $.*.sources.*-*', 'found "$.*.sources.*-*"');
       expectRejected('FROM $.*-*', 'found "$.*-*"');
     });
+
+    it('a Nightshift source view on a remote cluster', () => {
+      expectRejected(
+        'FROM remote:$.nightshift.sources.*',
+        'Nightshift source views cannot be used as a source'
+      );
+      expectRejected('FROM *:$.nightshift.*', 'found "*:$.nightshift.*"');
+    });
+  });
+});
+
+describe('source type', () => {
+  it('derives one type when every index matches that type', () => {
+    expectType('FROM logs-*', 'logs');
+    expectType('FROM logs-* METADATA _id', 'logs');
+    expectType('FROM logs-*, filebeat-*', 'logs');
+    expectType('FROM logs.otel.queries-test', 'logs');
+    expectType('FROM traces-apm*', 'traces');
+    expectType('FROM metrics-system.cpu-*', 'metrics');
+    expectType('TS metrics-*', 'metrics');
+    expectType('TS my-tsdb-*', 'metrics');
+    expectType('FROM my-a-*, my-b-*', 'unknown');
+    expectType('FROM apm-*', 'unknown');
+    expectType('FROM metrics-logstash.node-*', 'metrics');
+    expectType('FROM metrics-microsoft_sqlserver.transaction_log-*', 'metrics');
+    expectType('FROM remote:logs-*', 'logs');
+    expectType('FROM *:logs-*, cluster:filebeat-*', 'logs');
+    expectType('FROM remote:metrics-logstash.node-*', 'metrics');
+    expectType('TS remote:my-tsdb-*', 'metrics');
+    expectType('FROM logs-*, -remote:*', 'logs');
+    expectType('FROM logs-*, cluster:-traces-*', 'logs');
+    expectType('FROM logs-foo.metrics-*', 'logs');
+    // The `+01:00` form only parses quoted.
+    expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>"', 'logs');
+    expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>", logs-*', 'logs');
+    expectType('FROM remote:<logs-{now/d}>', 'logs');
+    expectType('FROM <app-{now/d}-logs-{now/d}>', 'logs');
+    expectType('FROM <app-{now/d}-logs-{now/d}>, logs-*', 'logs');
+  });
+
+  it('rejects an unscoped wildcard', () => {
+    expectTypeError('FROM *', 'unscoped wildcard');
+    expectTypeError('FROM *-*', 'unscoped wildcard');
+    expectTypeError('FROM *log*', 'unscoped wildcard');
+    expectTypeError('FROM cluster:*', 'Index "cluster:*" is an unscoped wildcard');
+    expectTypeError('FROM *:*', 'Index "*:*" is an unscoped wildcard');
+    expectTypeError('FROM "remote:*"', 'unscoped wildcard');
+    expectTypeError('FROM `*`', 'unscoped wildcard');
+  });
+
+  it('rejects indices of more than one type', () => {
+    expectTypeError('FROM logs-*, traces-*', 'mixes logs (logs-*) and traces (traces-*)');
+    expectTypeError('FROM logs-*, my-app-*', 'mixes logs (logs-*) and unknown (my-app-*)');
+    expectTypeError('FROM traces-apm*, apm-*', 'mixes traces (traces-apm*) and unknown (apm-*)');
+    expectTypeError('TS logs-*', 'mixes logs (logs-*) and metrics (TS)');
+    expectTypeError(
+      'FROM remote:logs-*, other:traces-*',
+      'mixes logs (remote:logs-*) and traces (other:traces-*)'
+    );
+  });
+
+  it('rejects one index that matches more than one type', () => {
+    expectTypeError('FROM logs-traces-*', 'matches more than one kind of data (logs, traces)');
+    expectTypeError('FROM metrics-logs-*', 'matches more than one kind of data (logs, metrics)');
+    expectTypeError('TS logs-traces-*', 'matches more than one kind of data (logs, traces)');
+  });
+});
+
+describe('analyzeSourceQuery', () => {
+  it('returns the structural error without classifying', () => {
+    expect(analyzeSourceQuery({ esql: 'ROW a = 1' })).toEqual({
+      error: expect.stringContaining('must start with FROM or TS'),
+    });
   });
 });
 
@@ -121,5 +206,10 @@ describe('hasMultipleSourceIndices', () => {
 
   it('is true when FROM names several indices', () => {
     expect(hasMultipleSourceIndices('FROM logs-a, logs-b* | WHERE status >= 500')).toBe(true);
+    expect(hasMultipleSourceIndices('FROM remote:logs-a, logs-b')).toBe(true);
+  });
+
+  it('ignores an exclusion when counting targets', () => {
+    expect(hasMultipleSourceIndices('FROM logs-*, -remote:*')).toBe(false);
   });
 });

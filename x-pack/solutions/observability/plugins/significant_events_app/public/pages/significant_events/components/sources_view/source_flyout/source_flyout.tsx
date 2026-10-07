@@ -43,6 +43,7 @@ import { useSourcesApi } from '../../../../../hooks/use_sources_api';
 import { getFormattedError } from '../../../../../util/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
+import { validateSourceEsql } from './validate_source_esql';
 
 interface SourceFormValues {
   title: string;
@@ -60,7 +61,7 @@ interface SourceFlyoutProps {
 }
 
 // Title, description and tags limits are checked before sending, so a 400 from the sources
-// API is about the query (parse, allowed commands, or the `LIMIT 0` probe).
+// API is about the query (parse, allowed commands, the one-type check, or the `LIMIT 0` probe).
 const isBadRequest = (error: unknown) => isHttpFetchError(error) && error.response?.status === 400;
 
 export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyoutProps) {
@@ -74,16 +75,16 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
   const [preview, setPreview] = useState({ esql: source?.esql ?? '', runId: 0 });
-  const runPreview = (esql: string) => setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
 
-  const { control, getValues, handleSubmit, setError, formState } = useForm<SourceFormValues>({
-    defaultValues: {
-      title: source?.title ?? '',
-      description: source?.description ?? '',
-      tags: source?.tags ?? [],
-      esql: source?.esql ?? '',
-    },
-  });
+  const { control, getValues, handleSubmit, setError, clearErrors, formState } =
+    useForm<SourceFormValues>({
+      defaultValues: {
+        title: source?.title ?? '',
+        description: source?.description ?? '',
+        tags: source?.tags ?? [],
+        esql: source?.esql ?? '',
+      },
+    });
 
   // Values held back while the user confirms that a new query resets the source's knowledge.
   const [pendingQueryChange, setPendingQueryChange] = useState<SourceFormValues>();
@@ -110,6 +111,20 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
       }
       toasts.addError(getFormattedError(error), { title: SAVE_ERROR_TOAST_TITLE });
     }
+  };
+
+  // Only the structural rules gate a run. The one-type rule is checked on save, so a user whose
+  // query mixes kinds can still preview it to see what to split.
+  const runPreview = (esql: string) => {
+    const structuralError = validateSourceQuery(esql);
+    if (structuralError) {
+      setError('esql', { message: structuralError });
+      // An older result next to an error on the new query would read as the new query's data.
+      setPreview(({ runId }) => ({ esql: '', runId }));
+      return;
+    }
+    clearErrors('esql');
+    setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
   };
 
   const save = handleSubmit(async (values) => {
@@ -243,7 +258,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                   <Controller
                     name="esql"
                     control={control}
-                    rules={{ validate: (esql) => validateSourceQuery(esql) ?? true }}
+                    rules={{ validate: validateSourceEsql }}
                     render={({ field, fieldState }) => (
                       <EuiFormRow
                         label={QUERY_LABEL}
@@ -255,7 +270,11 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                         <ESQLLangEditor
                           dataTestSubj="significantEventsAppSourceFlyoutQueryEditor"
                           query={{ esql: field.value }}
-                          onTextLangQueryChange={({ esql }) => field.onChange(esql)}
+                          onTextLangQueryChange={({ esql }) => {
+                            // A run error is set by hand, so it would otherwise outlive the edit.
+                            clearErrors('esql');
+                            field.onChange(esql);
+                          }}
                           onTextLangQuerySubmit={async (query) => {
                             if (query) {
                               runPreview(query.esql);
@@ -376,7 +395,8 @@ const QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.qu
 });
 
 const QUERY_HELP_TEXT = i18n.translate('xpack.significantEventsApp.sources.flyout.queryHelpText', {
-  defaultMessage: 'Start with FROM or TS; only WHERE may follow. Run the query to preview it.',
+  defaultMessage:
+    'Start with FROM or TS; only WHERE may follow. A TS command is metrics. Every index must be the same kind of data. Index names decide the kind, for example logs-*, metrics-* or traces-*. Run the query to preview it.',
 });
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.runQueryLabel', {

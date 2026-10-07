@@ -103,10 +103,14 @@ export {
   type UpdateSourceRequest,
 } from './src/sources/schema';
 
+export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/source_type';
+
 export {
+  analyzeSourceQuery,
   getSourceCommandQuery,
   hasMultipleSourceIndices,
   validateSourceQuery,
+  type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
 export {

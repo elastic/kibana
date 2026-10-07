@@ -75,6 +75,7 @@ export const sourceWithSlug = (
   title: slug,
   tags: [],
   esql: '',
+  type: 'unknown',
   slug,
   view_name: `$.nightshift.sources.default.${slug}`,
   enabled: true,

@@ -21,6 +21,7 @@ const makeSource = (id: string): NightshiftSource => ({
   title: id,
   tags: [],
   esql: 'FROM logs-*',
+  type: 'logs',
   slug: id,
   view_name: `$.nightshift.sources.default.${id}`,
   enabled: true,
