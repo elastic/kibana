@@ -307,28 +307,32 @@ describe('Quick search visor', () => {
       );
     }
 
-    it('should show the mode buttons when license is enterprise and connector exists', async () => {
-      const { getByTestId, getByText } = renderWithI18n(renderWithEnterprise({ ...props }));
+    it('should show icon-only mode buttons and start in natural language when AI is available', async () => {
+      const { getByTestId, queryByText } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-        expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
-        expect(getByText('Query with AI')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
+      });
+      expect(queryByText('Query with AI')).not.toBeInTheDocument();
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-label', 'Filter your data');
+    });
+
+    it('should switch to filter mode and back to natural language', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
+      });
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorModeKql'));
       });
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    it('should switch to NL mode when Ask AI is clicked', async () => {
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-      });
       await act(async () => {
         await userEvent.click(getByTestId('esqlVisorAskAiButton'));
       });
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
-      expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-      expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
@@ -458,12 +462,8 @@ describe('Quick search visor', () => {
     it('should return to KQL mode when the KQL mode button is clicked', async () => {
       const { getByTestId, queryByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       });
-      await act(async () => {
-        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
-      });
-      expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       await act(async () => {
         await userEvent.click(getByTestId('esqlVisorModeKql'));
       });

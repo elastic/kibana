@@ -105,7 +105,7 @@ export const visorStyles = (
         border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
       }
     `,
-    kqlModeButton: css`
+    modeIconButton: css`
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -124,7 +124,7 @@ export const visorStyles = (
         }
       }
     `,
-    kqlModeButtonActive: css`
+    modeIconButtonActive: css`
       .euiButtonIcon,
       .euiButtonIcon:hover,
       .euiButtonIcon:focus,

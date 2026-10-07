@@ -20,7 +20,7 @@ import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AiButton } from '@kbn/ui-ai-components';
+import { AiButtonIcon } from '@kbn/ui-ai-components';
 import {
   getEffectiveProjectRouting,
   usePickerProjectRouting,
@@ -33,7 +33,6 @@ import {
   nlPlaceholder,
   generatingLabel,
   stopLabel,
-  aiModeLabel,
   aiModeTooltip,
   kqlModeLabel,
   visorModeLegend,
@@ -81,7 +80,7 @@ export function QuickSearchVisor({
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
+  const [visorMode, setVisorMode] = useState(VisorMode.KQL);
   const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
   const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
@@ -98,6 +97,7 @@ export function QuickSearchVisor({
     onNlSubmit: submitNl,
     onStopGeneration,
   } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
+  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
   const pickerProjectRouting = usePickerProjectRouting();
@@ -129,14 +129,21 @@ export function QuickSearchVisor({
   }, [isDisabled, disableSubmitAction, query, submitNl]);
 
   const onVisorModeChange = useCallback(
-    (id: string) => {
-      setVisorMode(id as VisorMode);
+    (id: VisorMode) => {
+      setVisorMode(id);
       if (id === VisorMode.KQL) {
         onStopGeneration();
       }
     },
     [onStopGeneration]
   );
+
+  // License and connector are known only after the first render. Start in natural language once they are.
+  useEffect(() => {
+    if (showAskAiButton) {
+      setVisorMode(VisorMode.NaturalLanguage);
+    }
+  }, [showAskAiButton]);
 
   useEffect(() => {
     const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
@@ -192,8 +199,6 @@ export function QuickSearchVisor({
     return null;
   }
 
-  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
-
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -221,10 +226,10 @@ export function QuickSearchVisor({
               {showAskAiButton && (
                 <EuiFlexItem grow={false} css={styles.modeToggleWrapper}>
                   <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
-                    <span css={[styles.kqlModeButton, isKqlMode && styles.kqlModeButtonActive]}>
+                    <span css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}>
                       <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
-                          iconType="query"
+                          iconType="magnify"
                           size="xs"
                           iconSize="m"
                           color="text"
@@ -237,21 +242,39 @@ export function QuickSearchVisor({
                         />
                       </EuiToolTip>
                     </span>
-                    <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-                      <AiButton
-                        iconType={SparklesIcon as unknown as 'sparkles'}
-                        size="xs"
-                        iconSize="m"
-                        variant="outlined"
-                        aria-pressed={!isKqlMode}
-                        isSelected={!isKqlMode}
-                        onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
-                        data-test-subj="esqlVisorAskAiButton"
-                        css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
-                      >
-                        {aiModeLabel}
-                      </AiButton>
-                    </EuiToolTip>
+                    {isKqlMode ? (
+                      <span css={styles.modeIconButton}>
+                        <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType={SparklesIcon}
+                            size="xs"
+                            iconSize="m"
+                            color="text"
+                            display="empty"
+                            aria-label={aiModeTooltip}
+                            aria-pressed={false}
+                            isSelected={false}
+                            onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
+                            data-test-subj="esqlVisorAskAiButton"
+                          />
+                        </EuiToolTip>
+                      </span>
+                    ) : (
+                      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+                        <AiButtonIcon
+                          iconType={SparklesIcon as unknown as 'sparkles'}
+                          size="xs"
+                          iconSize="m"
+                          variant="outlined"
+                          aria-label={aiModeTooltip}
+                          aria-pressed
+                          isSelected
+                          onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
+                          data-test-subj="esqlVisorAskAiButton"
+                          css={[styles.aiButtonSparkleHover, styles.aiButtonSelected]}
+                        />
+                      </EuiToolTip>
+                    )}
                   </div>
                 </EuiFlexItem>
               )}
