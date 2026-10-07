@@ -87,7 +87,7 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
               routing: 'forbid',
             },
             metadata: {
-              golden_id: 'era-011b',
+              golden_id: 'era-011c',
               row_type: 'negative_routing',
             },
           },

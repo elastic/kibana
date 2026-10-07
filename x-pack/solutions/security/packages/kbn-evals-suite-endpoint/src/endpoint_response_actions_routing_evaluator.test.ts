@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EndpointResponseActionsRouting } from './endpoint_response_actions_routing_evaluator';
 import {
   createEndpointResponseActionsRoutingEvaluator,
   ENDPOINT_RESPONSE_ACTIONS_SKILL_ID,
@@ -33,7 +34,7 @@ const evaluateWith = async ({
   requiredTool,
   steps = [],
 }: {
-  routing?: 'forbid' | 'require' | 'require_troubleshooting';
+  routing?: EndpointResponseActionsRouting;
   requiredTool?: string;
   steps?: unknown[];
 }) =>
@@ -87,10 +88,36 @@ describe('createEndpointResponseActionsRoutingEvaluator', () => {
     expect(result).toEqual({ score: 0, label: 'fail' });
   });
 
-  it('mixed row accepts troubleshooting SKILL.md read without ERA status', async () => {
+  it('mixed row rejects an errored troubleshooting load even with ERA status', async () => {
     const result = await evaluateWith({
       routing: 'require_troubleshooting',
       steps: [
+        {
+          type: 'tool_call',
+          tool_id: GET_ENDPOINT_STATUS_TOOL_ID,
+          results: [{ type: 'resource' }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: 'load_skill',
+          params: { skill: 'elastic-defend-configuration-troubleshooting' },
+          results: [{ type: 'error' }],
+        },
+      ],
+    });
+
+    expect(result).toEqual({ score: 0, label: 'fail' });
+  });
+
+  it('mixed row accepts troubleshooting SKILL.md read with ERA status', async () => {
+    const result = await evaluateWith({
+      routing: 'require_troubleshooting',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: GET_ENDPOINT_STATUS_TOOL_ID,
+          results: [{ type: 'resource' }],
+        },
         {
           type: 'tool_call',
           tool_id: 'read_file',

@@ -17,6 +17,7 @@ import type { SecurityDatasetExample } from './evaluate_dataset';
  * `endpoint_response_actions_routing_evaluator.test.ts`.
  */
 export const ENDPOINT_RESPONSE_ACTIONS_SKILL_ID = 'endpoint-response-actions';
+const TROUBLESHOOTING_SKILL_ID = 'elastic-defend-configuration-troubleshooting';
 export const GET_ENDPOINT_STATUS_TOOL_ID = 'endpoint-response-actions.get_endpoint_status';
 export const LIST_ENDPOINTS_TOOL_ID = 'endpoint-response-actions.list_endpoints';
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID =
@@ -84,6 +85,7 @@ const hasSuccessfulToolCall = (steps: ToolCallStep[], toolId: string): boolean =
  * Deterministic routing evaluator. In `require` mode a call of the required
  * tool with a non-error result passes — a "not found" tool result still counts
  * as correct routing, since this is a routing check, not a data check.
+ * `require_troubleshooting` requires a non-error troubleshooting skill activation.
  */
 export function createEndpointResponseActionsRoutingEvaluator(): Evaluator<
   SecurityDatasetExample,
@@ -98,8 +100,8 @@ export function createEndpointResponseActionsRoutingEvaluator(): Evaluator<
       const routing = expected?.routing ?? 'forbid';
 
       if (routing === 'require_troubleshooting') {
-        const passed = steps.some((step) =>
-          isSkillActivation(step, 'elastic-defend-configuration-troubleshooting')
+        const passed = steps.some(
+          (step) => isSkillActivation(step, TROUBLESHOOTING_SKILL_ID) && hasNonErrorResult(step)
         );
         return { score: passed ? 1 : 0, label: passed ? 'pass' : 'fail' };
       }

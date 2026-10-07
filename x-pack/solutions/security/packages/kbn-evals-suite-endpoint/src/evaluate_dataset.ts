@@ -13,6 +13,7 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
+import type { EndpointResponseActionsRouting } from './endpoint_response_actions_routing_evaluator';
 import { converseQuestionToTaskOutput } from './converse_task';
 
 export interface SecurityDatasetExample extends Example {
@@ -22,7 +23,7 @@ export interface SecurityDatasetExample extends Example {
   output: {
     criteria: string[];
     /** Optional deterministic routing contract enforced by extra evaluators. */
-    routing?: 'forbid' | 'require' | 'require_troubleshooting';
+    routing?: EndpointResponseActionsRouting;
     required_tool?: string;
   };
 }
