@@ -398,6 +398,50 @@ describe('investigation attachment type', () => {
     );
   });
 
+  it('applies document read authorization to resolution and staleness without exposing unreadable data', async () => {
+    const storage = createInMemoryStorage<NoteDocument>();
+    const service = note.createServiceFromStorage(storage);
+    storage.put(noteId(), body());
+    const assertCanReadDocument = jest.fn().mockRejectedValue(new Error('Conversation unreadable'));
+    const definition = note.createAttachmentType({
+      getService: () => service,
+      assertCanRead: async () => {},
+      assertCanReadDocument,
+      logger: loggerMock.create(),
+    });
+    await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toBeUndefined();
+    await expect(
+      definition.isStale?.(
+        {
+          id: noteId(),
+          type: TYPE,
+          origin: noteId(),
+          current_version: 1,
+          active: true,
+          versions: [
+            {
+              version: 1,
+              data: { id: noteId(), ...body() },
+              created_at: '',
+              content_hash: '',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+        resolveContext
+      )
+    ).resolves.toBe(false);
+    expect(assertCanReadDocument).toHaveBeenCalledWith(resolveContext.request, {
+      id: noteId(),
+      ...body(),
+    });
+    assertCanReadDocument.mockResolvedValue(undefined);
+    await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toEqual({
+      id: noteId(),
+      ...body(),
+    });
+  });
+
   it('resolves an origin from the index of the caller space', async () => {
     const { storage, service } = setup();
     storage.put(noteId(), body());

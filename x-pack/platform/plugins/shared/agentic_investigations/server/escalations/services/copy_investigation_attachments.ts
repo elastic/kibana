@@ -36,7 +36,10 @@ export const copyInvestigationAttachments = async ({
   logger: Logger;
 }): Promise<{ copied: number; failed: number }> => {
   const source = (investigation.attachments ?? []).filter(
-    (att) => att.active !== false && att.type !== 'screen_context'
+    (att) =>
+      att.active !== false &&
+      att.type !== 'screen_context' &&
+      att.type !== 'nightshift.notification_routing'
   );
 
   if (source.length === 0) {

@@ -11,9 +11,9 @@ import { investigationNotificationDestinationSchema } from '../../../common';
 import type {
   GetInvestigationResponse,
   InvestigationNotificationDestination,
-  InvestigationNotificationOutcome,
 } from '../../../common';
 import { InvalidNotificationDestinationError } from '../../client/errors';
+import type { NotificationPhase, NotificationOutcome } from './notification_routing';
 import { slackNotificationHandler } from './slack_notification';
 
 export type NotifiableInvestigation = Pick<
@@ -33,13 +33,15 @@ export type ExecuteConnector = (
 
 export interface NotificationDelivery {
   params: JsonObject;
-  getOutcome: (response: ActionTypeExecutorResult<unknown>) => InvestigationNotificationOutcome;
+  getOutcome: (response: ActionTypeExecutorResult<unknown>) => NotificationOutcome;
 }
 
 export interface NotificationDeliveryContext {
   notificationDestination: InvestigationNotificationDestination;
   investigation: NotifiableInvestigation;
   url: string;
+  phase: NotificationPhase;
+  reason?: string;
 }
 
 export interface NotificationHandler {

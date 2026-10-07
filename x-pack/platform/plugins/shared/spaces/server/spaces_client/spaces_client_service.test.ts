@@ -195,3 +195,34 @@ describe('SpacesClientService', () => {
     });
   });
 });
+
+describe('space deletion cleanup', () => {
+  it('runs registered handlers only after successful deletion and isolates cleanup failures', async () => {
+    const service = new SpacesClientService(debugLogger, 'traditional');
+    const setup = service.setup({ config$: Rx.of(spacesConfig) });
+    const first = jest.fn().mockRejectedValue(new Error('cleanup unavailable'));
+    const second = jest.fn().mockResolvedValue(undefined);
+    setup.registerOnSpaceDeleted(first);
+    setup.registerOnSpaceDeleted(second);
+    const core = coreMock.createStart();
+    const repository = core.savedObjects.createScopedRepository(
+      httpServerMock.createKibanaRequest()
+    );
+    jest
+      .mocked(repository.get)
+      .mockResolvedValue({ id: 'ops', type: 'space', attributes: { name: 'Ops' }, references: [] });
+    const client = service
+      .start(core, featuresPluginMock.createStart(), undefined)
+      .createSpacesClient(httpServerMock.createKibanaRequest());
+    await client.delete('ops');
+    expect(repository.delete).toHaveBeenCalledWith('space', 'ops');
+    expect(first).toHaveBeenCalledWith('ops');
+    expect(second).toHaveBeenCalledWith('ops');
+    first.mockClear();
+    second.mockClear();
+    jest.mocked(repository.deleteByNamespace).mockRejectedValueOnce(new Error('deletion failed'));
+    await expect(client.delete('ops')).rejects.toThrow('deletion failed');
+    expect(first).not.toHaveBeenCalled();
+    expect(second).not.toHaveBeenCalled();
+  });
+});

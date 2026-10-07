@@ -29,9 +29,7 @@ export type {
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
   InvestigationContext,
-  InvestigationNotification,
   InvestigationNotificationDestination,
-  InvestigationNotificationOutcome,
   InvestigationSubject,
 } from './schemas';
 
@@ -39,7 +37,6 @@ export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
-  investigationNotificationSchema,
   investigationNotificationDestinationSchema,
   investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
@@ -50,7 +47,6 @@ export {
 import type {
   AlertInvestigationContext,
   InvestigationContext,
-  InvestigationNotification,
   InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
@@ -68,7 +64,7 @@ export interface StartInvestigationRequest {
    */
   concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
-  /** Destinations to send the outcome to once the investigation settles. */
+  /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
 }
 
@@ -134,10 +130,6 @@ export interface GetInvestigationResponse extends InvestigationStructuredOutput 
   executed_by?: string;
   error?: string;
   conversation_id?: string;
-  /** Immutable destinations recorded when the investigation starts. */
-  readonly notificationDestinations?: readonly InvestigationNotificationDestination[];
-  /** Delivery attempts and their results, linked to a destination by destination_index. */
-  notifications?: InvestigationNotification[];
 }
 
 export interface InvestigationStatusEvent {

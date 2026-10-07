@@ -30,6 +30,11 @@ export interface InvestigationAttachmentTypeOptions<
    * origin without data), so they check it before reading.
    */
   assertCanRead: (request: KibanaRequest) => Promise<void>;
+  /** Applies the entity's existing read authorization to the resolved document. */
+  assertCanReadDocument?: (
+    request: KibanaRequest,
+    document: InvestigationAttachmentDocument<TStored>
+  ) => Promise<void>;
   logger: Logger;
   /** Text the LLM sees for this attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
@@ -66,6 +71,7 @@ export const createInvestigationAttachmentType = <
   schema,
   getService,
   assertCanRead,
+  assertCanReadDocument,
   logger,
   format,
   agentDescription,
@@ -88,7 +94,11 @@ export const createInvestigationAttachmentType = <
   resolve: async (origin, context) => {
     try {
       await assertCanRead(context.request);
-      return await getService().get(origin, context.spaceId);
+      const document = await getService().get(origin, context.spaceId);
+      if (document) {
+        await assertCanReadDocument?.(context.request, document);
+      }
+      return document;
     } catch (error) {
       logger.warn(`Failed to resolve ${type} for origin "${origin}": ${error}`);
       return undefined;
@@ -105,6 +115,7 @@ export const createInvestigationAttachmentType = <
       if (!current) {
         return false;
       }
+      await assertCanReadDocument?.(context.request, current);
       return isStale(latest.data, current);
     } catch (error) {
       logger.warn(`Failed to check staleness for ${type} "${attachment.origin}": ${error}`);

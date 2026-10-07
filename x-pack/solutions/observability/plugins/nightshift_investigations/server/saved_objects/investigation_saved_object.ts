@@ -19,7 +19,6 @@ import {
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   MAX_KEYWORD_LENGTH,
-  MAX_INVESTIGATION_NOTIFICATIONS,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
 import { MAX_THREAD_SEEN_EVENTS } from '../storage/types';
@@ -100,7 +99,9 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
-// Adds impact details, notification state, the owning run and chat thread without new mappings.
+// Adds the impact summary and evidence, makes impact entities optional, and drops blind spots.
+// Also adds the run that owns the investigation and the chat thread it belongs to. Records are
+// only looked up by id, so none of these are queried beyond the existing flattened `impact` mapping.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   blind_spots: undefined,
   impact: schema.maybe(
@@ -114,8 +115,6 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
       ),
     })
   ),
-  notificationDestinations: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
-  notifications: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
   execution_id: optionalKeyword,
   // Every write sets the thread's surface, workspace, channel and thread_ts. They are optional here
   // only because an existing model version cannot gain required fields.

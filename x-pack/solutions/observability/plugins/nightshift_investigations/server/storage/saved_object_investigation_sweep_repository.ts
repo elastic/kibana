@@ -28,15 +28,23 @@ export interface SavedObjectInvestigationSweepRepositoryDeps {
   /** Unscoped, so a single search covers every space. */
   savedObjects: ISavedObjectsRepository;
   logger: Logger;
+  cleanupNotifications?: (conversationIds: string[], spaceId: string) => Promise<void>;
 }
 
 export class SavedObjectInvestigationSweepRepository implements InvestigationSweepRepository {
   private readonly savedObjects: ISavedObjectsRepository;
   private readonly logger: Logger;
 
-  constructor({ savedObjects, logger }: SavedObjectInvestigationSweepRepositoryDeps) {
+  private readonly cleanupNotifications?: SavedObjectInvestigationSweepRepositoryDeps['cleanupNotifications'];
+
+  constructor({
+    savedObjects,
+    logger,
+    cleanupNotifications,
+  }: SavedObjectInvestigationSweepRepositoryDeps) {
     this.savedObjects = savedObjects;
     this.logger = logger;
+    this.cleanupNotifications = cleanupNotifications;
   }
 
   async findAcrossSpaces<
@@ -101,7 +109,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       namespaces: ['*'],
       perPage: DELETE_BATCH_SIZE,
-      fields: [],
+      fields: ['conversation_id'],
     });
 
     try {
@@ -124,20 +132,47 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
                 { namespace: spaceId }
               );
 
+              const conversationIds = statuses
+                .filter(({ success }) => success)
+                .flatMap(({ id }) => {
+                  const investigation = savedObjects.find((record) => record.id === id);
+                  return investigation?.attributes.conversation_id
+                    ? [investigation.attributes.conversation_id]
+                    : [];
+                });
+              const cleanupFailures: DeleteAllInvestigationsFailure[] = [];
+              try {
+                await this.cleanupNotifications?.(conversationIds, spaceId);
+              } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                cleanupFailures.push(
+                  ...statuses
+                    .filter(({ success }) => success)
+                    .map(({ id }) => ({
+                      id,
+                      spaceId,
+                      error: `Notification routing cleanup failed: ${message}`,
+                    }))
+                );
+              }
+
               return {
                 deleted: statuses.filter(({ success }) => success).length,
-                failures: statuses.flatMap<DeleteAllInvestigationsFailure>((status) => {
-                  if (status.success || status.error?.statusCode === 404) {
-                    return [];
-                  }
-                  return [
-                    {
-                      id: status.id,
-                      spaceId,
-                      error: status.error?.message ?? 'investigation was not deleted',
-                    },
-                  ];
-                }),
+                failures: [
+                  ...cleanupFailures,
+                  ...statuses.flatMap<DeleteAllInvestigationsFailure>((status) => {
+                    if (status.success || status.error?.statusCode === 404) {
+                      return [];
+                    }
+                    return [
+                      {
+                        id: status.id,
+                        spaceId,
+                        error: status.error?.message ?? 'investigation was not deleted',
+                      },
+                    ];
+                  }),
+                ],
               };
             } catch (error) {
               const message = error instanceof Error ? error.message : String(error);
@@ -181,9 +216,11 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
 /** Builds a repository that reaches every space, for use outside a request. */
 export const createInvestigationSweepRepository = (
   savedObjects: SavedObjectsServiceStart,
-  logger: Logger
+  logger: Logger,
+  cleanupNotifications?: SavedObjectInvestigationSweepRepositoryDeps['cleanupNotifications']
 ): InvestigationSweepRepository =>
   new SavedObjectInvestigationSweepRepository({
     savedObjects: savedObjects.createInternalRepository([NIGHTSHIFT_INVESTIGATION_SO_TYPE]),
     logger,
+    cleanupNotifications,
   });

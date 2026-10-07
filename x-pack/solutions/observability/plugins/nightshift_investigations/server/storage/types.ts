@@ -6,8 +6,6 @@
  */
 
 import type {
-  InvestigationNotification,
-  InvestigationNotificationDestination,
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -52,8 +50,6 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string | null;
   conversation_id?: string;
-  readonly notificationDestinations?: readonly InvestigationNotificationDestination[];
-  notifications?: InvestigationNotification[];
   /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
   execution_id?: string;
   thread?: InvestigationThread;
@@ -82,7 +78,6 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string | null;
   conversation_id?: string;
-  notifications?: InvestigationNotification[];
   execution_id?: string;
   thread?: InvestigationThread;
 }

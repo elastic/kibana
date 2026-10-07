@@ -85,21 +85,6 @@ export const investigationNotificationDestinationsSchema = z
   .array(investigationNotificationDestinationSchema)
   .max(MAX_INVESTIGATION_NOTIFICATIONS);
 
-/** A durable delivery attempt linked to an immutable destination; attempts never auto-resend. */
-export const investigationNotificationSchema = z.strictObject({
-  destination_index: z
-    .number()
-    .int()
-    .min(0)
-    .max(MAX_INVESTIGATION_NOTIFICATIONS - 1),
-  status: z.enum(['sent', 'failed', 'unconfirmed']),
-  attempt_id: z.string().min(1).max(100),
-  attempted_at: z.string().min(1).max(64),
-  message_ts: z.string().max(100).optional(),
-  error: z.string().max(MAX_TEXT_LENGTH).optional(),
-  sent_at: z.string().max(64).optional(),
-});
-
 export const alertSnapshotGroupSchema = z.object({
   field: z.string().max(500),
   value: z.string().max(1000),
@@ -227,11 +212,6 @@ export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<
   typeof investigationNotificationDestinationSchema
 >;
-export type InvestigationNotificationOutcome = Pick<
-  InvestigationNotification,
-  'message_ts' | 'error' | 'sent_at'
-> & { status: 'sent' | 'failed' | 'unconfirmed' };
-export type InvestigationNotification = z.infer<typeof investigationNotificationSchema>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
 export type AlertSnapshot = z.infer<typeof alertSnapshotSchema>;

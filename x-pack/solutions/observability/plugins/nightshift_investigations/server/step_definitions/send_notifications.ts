@@ -10,6 +10,10 @@ import { brandSpaceId } from '@kbn/core-spaces-common';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import type { KibanaRequest } from '@kbn/core/server';
+import { notificationPhaseSchema } from '../lib/notifications/notification_routing';
+import type { NotificationRoutingClient } from '../lib/notifications/notification_routing_client';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
@@ -20,24 +24,33 @@ const inputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_KEYWORD_LENGTH)
-    .describe('The settled investigation whose recorded destinations should receive notifications'),
+    .describe('The investigation receiving lifecycle notifications'),
+  phase: notificationPhaseSchema,
+  reason: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
 export const sendNotificationsStepDefinition = ({
   investigationLocator,
   getInvestigationsClient,
   getActions,
+  getRoutingClient,
 }: {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
   getActions: () => ActionsPluginStart | undefined;
+  getRoutingClient: (
+    request: KibanaRequest,
+    spaceId: string,
+    conversationId: string,
+    investigationId: string
+  ) => Promise<NotificationRoutingClient>;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.sendNotifications',
     label: 'Send Nightshift Notifications',
     category: StepCategory.Ai,
     description:
-      'Sends the outcome of a settled investigation to its recorded destinations and stores each delivery attempt on the investigation.',
+      'Sends investigation lifecycle messages and records their delivery in the notification routing attachment.',
     inputSchema,
     outputSchema: z.object({
       sent: z.number().describe('Destinations that received the message in this run'),
@@ -51,17 +64,25 @@ export const sendNotificationsStepDefinition = ({
         execution: { id: executionId },
         workflow: { spaceId },
       } = context.contextManager.getContext();
-      const { investigation_id: investigationId } = inputSchema.parse(context.input);
-      if (investigationId !== executionId) {
-        throw new Error('Notifications can only be sent for the current investigation execution');
-      }
-
-      // Reads the settled record rather than the agent output so the message matches Kibana.
+      const { investigation_id: investigationId, phase, reason } = inputSchema.parse(context.input);
       const client = getInvestigationsClient(request, spaceId);
-      const investigation = await client.get(investigationId);
+      const { investigation, conversationId, workflowId, notificationDestinations } =
+        await client.getNotificationExecutionContext(investigationId, executionId);
+      const routingClient = await getRoutingClient(
+        request,
+        spaceId,
+        conversationId,
+        investigationId
+      );
       // Without server.publicBaseUrl, the server locator returns a relative URL.
       const output = await deliverInvestigationNotifications({
         investigation,
+        executionId,
+        workflowId,
+        notificationDestinations,
+        phase,
+        reason,
+        routingClient,
         investigationUrl: new URL(
           investigationLocator.getRedirectUrl({ investigationId }, { spaceId }),
           kibanaUrl
@@ -78,7 +99,6 @@ export const sendNotificationsStepDefinition = ({
           );
           return (execution) => actionsClient.execute(execution);
         },
-        client,
         signal: context.abortSignal,
       });
       return { output };

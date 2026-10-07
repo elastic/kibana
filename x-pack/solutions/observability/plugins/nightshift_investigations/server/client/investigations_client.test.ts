@@ -10,6 +10,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
+import {
+  createConversationNotFoundError,
+  createConversationAlreadyExistsError,
+} from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -63,7 +67,10 @@ const mockWorkflowsManagement = {
   management: mockManagement,
 } as unknown as WorkflowsServerPluginSetup;
 
-const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
+const mockConversations = { get: jest.fn(), create: jest.fn() };
+const mockAgentBuilder = {
+  conversations: { getScopedClient: jest.fn(async () => mockConversations) },
+} as never as AgentBuilderPluginStart;
 
 const mockLogger = {
   info: jest.fn(),
@@ -156,6 +163,8 @@ beforeEach(() => {
   getSetting.mockResolvedValue(false);
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   repository = createMockRepository();
+  mockConversations.get.mockResolvedValue({ id: 'conv-1' });
+  mockConversations.create.mockResolvedValue({ id: 'conv-1' });
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
@@ -1257,14 +1266,121 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     ...overrides,
   });
 
-  it('is a no-op when the record is already running', async () => {
+  beforeEach(() => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.create.mockImplementation(async ({ id, attributes }) => {
+      repository.get.mockResolvedValue({ ...attributes, id, version: 'created' });
+    });
+  });
+
+  it('validates recovered inputs and ensures the conversation when already running', async () => {
     repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
 
     await makeClient().ensureOrCreate(EXECUTION_ID);
 
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(mockManagement.getWorkflowExecution).toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({ patch: { conversation_id: EXECUTION_ID } })
+    );
+  });
+
+  it('creates an idempotent public conversation before persisting its pointer', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
+    mockConversations.get.mockRejectedValueOnce(
+      createConversationNotFoundError({ conversationId: EXECUTION_ID })
+    );
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
+    expect(mockConversations.create).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      agentId: 'nightshift.investigation',
+      title: 'Latency is too high',
+      accessControl: { access_mode: 'public' },
+    });
+    expect(repository.update).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      version: '1',
+      patch: { conversation_id: EXECUTION_ID },
+    });
+    expect(mockAgentBuilder.conversations.getScopedClient).toHaveBeenCalledWith({
+      request: mockRequest,
+    });
+  });
+
+  it('recovers the conversation after a crash before the pointer was saved', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
+    repository.update.mockRejectedValueOnce(new Error('Pointer persistence failed'));
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      'Pointer persistence failed'
+    );
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
+    expect(mockConversations.create).not.toHaveBeenCalled();
+    expect(mockConversations.get).toHaveBeenNthCalledWith(1, EXECUTION_ID);
+    expect(mockConversations.get).toHaveBeenNthCalledWith(2, EXECUTION_ID);
+  });
+
+  it('rechecks access when another caller created the conversation first', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
+    mockConversations.get.mockRejectedValueOnce(
+      createConversationNotFoundError({ conversationId: EXECUTION_ID })
+    );
+    mockConversations.create.mockRejectedValueOnce(
+      createConversationAlreadyExistsError({ conversationId: EXECUTION_ID })
+    );
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
+    expect(mockConversations.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses the stored conversation and propagates access errors', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'running', conversation_id: 'stored-conversation' },
+        { id: EXECUTION_ID }
+      )
+    );
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe('stored-conversation');
+    expect(mockConversations.create).not.toHaveBeenCalled();
     expect(repository.update).not.toHaveBeenCalled();
+    mockConversations.get.mockRejectedValueOnce(new Error('Access denied'));
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow('Access denied');
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('validates notification execution identity through authenticated space-scoped reads', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'running', conversation_id: 'stored-conversation' },
+        { id: EXECUTION_ID }
+      )
+    );
+    await expect(
+      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+    ).resolves.toMatchObject({
+      conversationId: 'stored-conversation',
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      notificationDestinations: [],
+    });
+    expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(EXECUTION_ID, SPACE_ID, {
+      includeOutput: false,
+      request: mockRequest,
+    });
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      ...makeEnsureExecution(),
+      workflowId: 'unrelated-workflow',
+    });
+    await expect(
+      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+    ).rejects.toThrow(InvestigationNotFoundError);
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { execution_id: 'another-execution', conversation_id: 'stored-conversation' },
+        { id: EXECUTION_ID }
+      )
+    );
+    await expect(
+      makeClient().getNotificationExecutionContext(EXECUTION_ID, EXECUTION_ID)
+    ).rejects.toThrow(InvestigationNotFoundError);
   });
 
   it.each<InvestigationStatus>(['completed', 'failed', 'cancelled'])(
@@ -1304,26 +1420,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('uses the stored pending record without recovering unused destination inputs', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ status: 'pending' }, { id: EXECUTION_ID, version: 'v1' })
-    );
+  it('rejects malformed recovered destinations for a stored pending investigation', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'pending' }, { id: EXECUTION_ID }));
     mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({ context: { inputs: { notificationDestinations: 'unused' } } })
+      makeEnsureExecution({ context: { inputs: { notificationDestinations: 'bad' } } })
     );
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: EXECUTION_ID,
-      patch: {
-        status: 'running',
-        started_at: '2024-01-01T00:00:00Z',
-        executed_by: 'workflow-user',
-      },
-      version: 'v1',
-    });
-    expect(repository.create).not.toHaveBeenCalled();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('treats losing the pending-to-running race to its own retried ensure as a no-op', async () => {
@@ -1341,9 +1444,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         )
       );
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'running', conversation_id: EXECUTION_ID }, { id: EXECUTION_ID })
+    );
+    repository.update.mockRejectedValueOnce(new InvestigationStaleWriteError(EXECUTION_ID));
 
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
   });
 
   it('throws InvestigationConflictError when it loses the pending-to-running race to another run', async () => {
@@ -1361,7 +1467,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         )
       );
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'running', conversation_id: EXECUTION_ID }, { id: EXECUTION_ID })
+    );
+    repository.update.mockRejectedValueOnce(new InvestigationStaleWriteError(EXECUTION_ID));
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
       InvestigationConflictError
@@ -1477,7 +1586,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     await makeClient().ensureOrCreate(EXECUTION_ID);
 
-    expect(repository.update).toHaveBeenCalledTimes(1);
+    expect(
+      repository.update.mock.calls.filter(([call]) => call.patch.status === 'cancelled')
+    ).toHaveLength(1);
     expect(repository.update).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'inv-old',
@@ -1499,7 +1610,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     await makeClient().ensureOrCreate(EXECUTION_ID);
 
-    expect(repository.update).not.toHaveBeenCalled();
+    expect(repository.update.mock.calls.some(([call]) => call.patch.status === 'cancelled')).toBe(
+      false
+    );
   });
 
   it('still creates the record when the superseded cancel loses a write race', async () => {
@@ -1512,9 +1625,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         ),
       ])
     );
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-old'));
+    repository.update.mockRejectedValueOnce(new InvestigationStaleWriteError('inv-old'));
 
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
 
     expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-old'));
@@ -1548,7 +1661,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       })
     );
 
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         id: EXECUTION_ID,
@@ -1584,9 +1697,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
   it('tolerates a conflict from a concurrent ensure', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.get
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
     repository.create.mockRejectedValue(new InvestigationAlreadyExistsError(EXECUTION_ID));
 
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBe(EXECUTION_ID);
   });
 
   describe('subject recovery from execution inputs', () => {
@@ -1734,6 +1850,9 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
 
   beforeEach(() => {
     repository.get.mockResolvedValue(undefined);
+    repository.create.mockImplementation(async ({ id, attributes }) => {
+      repository.get.mockResolvedValue({ ...attributes, id, version: 'created' });
+    });
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-notify');
   });
@@ -1752,7 +1871,7 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'exec-notify',
-        attributes: expect.objectContaining({ notificationDestinations }),
+        attributes: expect.not.objectContaining({ notificationDestinations }),
       })
     );
   });
@@ -1812,7 +1931,9 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
     await makeClient().ensureOrCreate('exec-notify');
 
     expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ attributes: expect.objectContaining({ notificationDestinations }) })
+      expect.objectContaining({
+        attributes: expect.not.objectContaining({ notificationDestinations }),
+      })
     );
   });
 
@@ -1842,23 +1963,11 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
     }
   );
 
-  it('get() returns the stored destinations and delivery results', async () => {
-    const delivered = [
-      {
-        destination_index: 0,
-        attempt_id: 'a',
-        attempted_at: '2026-10-02T00:00:00.000Z',
-        status: 'sent' as const,
-        message_ts: '1.2',
-      },
-    ];
-    repository.get.mockResolvedValue(
-      makeRecord({ notificationDestinations, notifications: delivered })
-    );
-
-    await expect(makeClient().get('inv-1')).resolves.toEqual(
-      expect.objectContaining({ notificationDestinations, notifications: delivered })
-    );
+  it('get() omits delivery diagnostics from the investigation API', async () => {
+    repository.get.mockResolvedValue(makeRecord());
+    const response = await makeClient().get('inv-1');
+    expect(response).not.toHaveProperty('notificationDestinations');
+    expect(response).not.toHaveProperty('notifications');
   });
 
   it.each(invalidNotificationDestinations)(
@@ -1877,219 +1986,6 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
       expect(repository.create).not.toHaveBeenCalled();
     }
   );
-});
-
-describe('Nightshift notification delivery claims', () => {
-  const destination = { type: 'slack' as const, connector_id: 'c', params: { channel: '#alerts' } };
-  let stored: InvestigationRecord;
-  beforeEach(() => {
-    stored = makeRecord({
-      notificationDestinations: [destination, { ...destination, params: { channel: '#oncall' } }],
-    });
-    repository.get.mockImplementation(async () => structuredClone(stored));
-    repository.update.mockImplementation(async ({ patch }) => {
-      stored = { ...stored, ...patch };
-    });
-  });
-
-  it('persists a claim without changing destinations or passing a version', async () => {
-    const claim = await makeClient().claimNotificationDestination('inv-1', 0, 'attempt-1');
-    expect(claim).toMatchObject({
-      destination_index: 0,
-      status: 'unconfirmed',
-      attempt_id: 'attempt-1',
-    });
-    expect(stored.notifications).toEqual([claim]);
-    expect(stored.notificationDestinations).toEqual([
-      destination,
-      { ...destination, params: { channel: '#oncall' } },
-    ]);
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: { notifications: [claim] },
-    });
-  });
-
-  it('does not coordinate overlapping claims for the same destination', async () => {
-    const client = makeClient();
-    const claims = await Promise.all([
-      client.claimNotificationDestination('inv-1', 0, 'attempt-1'),
-      client.claimNotificationDestination('inv-1', 0, 'attempt-2'),
-    ]);
-    expect(claims.filter(Boolean)).toHaveLength(2);
-    expect(stored.notifications).toEqual([claims[1]]);
-    expect(repository.update).toHaveBeenCalledTimes(2);
-  });
-
-  it('preserves other stored attempts when destinations are claimed and finalized sequentially', async () => {
-    const client = makeClient();
-    await client.claimNotificationDestination('inv-1', 0, 'a');
-    await client.claimNotificationDestination('inv-1', 1, 'b');
-    await client.recordNotificationOutcome('inv-1', 0, 'a', { status: 'sent', message_ts: '1.2' });
-    await client.recordNotificationOutcome('inv-1', 1, 'b', {
-      status: 'failed',
-      error: 'not in channel',
-    });
-    expect(stored.notifications).toEqual([
-      expect.objectContaining({ status: 'sent', message_ts: '1.2', attempt_id: 'a' }),
-      expect.objectContaining({ status: 'failed', error: 'not in channel', attempt_id: 'b' }),
-    ]);
-    expect(repository.update.mock.calls.every(([update]) => !('version' in update))).toBe(true);
-  });
-
-  it('finalizes by destination and attempt IDs when attempts are stored out of destination order', async () => {
-    const client = makeClient();
-    const originalDestinations = structuredClone(stored.notificationDestinations);
-    await client.claimNotificationDestination('inv-1', 1, 'second-destination');
-    await client.claimNotificationDestination('inv-1', 0, 'first-destination');
-    await client.recordNotificationOutcome('inv-1', 0, 'first-destination', {
-      status: 'sent',
-      message_ts: '1.2',
-    });
-    expect(stored.notifications).toEqual([
-      expect.objectContaining({
-        destination_index: 1,
-        status: 'unconfirmed',
-        attempt_id: 'second-destination',
-      }),
-      expect.objectContaining({
-        destination_index: 0,
-        status: 'sent',
-        attempt_id: 'first-destination',
-        message_ts: '1.2',
-      }),
-    ]);
-    expect(stored.notificationDestinations).toEqual(originalDestinations);
-    await expect(
-      client.recordNotificationOutcome('inv-1', 1, 'first-destination', { status: 'sent' })
-    ).rejects.toThrow(InvestigationConflictError);
-  });
-
-  it.each(['sent', 'failed', 'unconfirmed'] as const)(
-    'does not reclaim a %s destination',
-    async (status) => {
-      stored.notifications = [
-        { destination_index: 0, status, attempt_id: 'a', attempted_at: '2026-10-02T00:00:00.000Z' },
-      ];
-      await expect(
-        makeClient().claimNotificationDestination('inv-1', 0, 'new')
-      ).resolves.toBeUndefined();
-      expect(repository.update).not.toHaveBeenCalled();
-    }
-  );
-
-  it.each(invalidNotificationDestinations)(
-    'claims without revalidating or changing stored destination params (%j)',
-    async (notificationDestination) => {
-      stored = makeRecord({ notificationDestinations: [notificationDestination] });
-      await expect(makeClient().claimNotificationDestination('inv-1', 0, 'a')).resolves.toEqual(
-        expect.objectContaining({ destination_index: 0, attempt_id: 'a', status: 'unconfirmed' })
-      );
-      expect(stored.notificationDestinations).toEqual([notificationDestination]);
-      expect(stored.notifications).toHaveLength(1);
-    }
-  );
-
-  it('does not claim a nonterminal record', async () => {
-    stored.status = 'running';
-    await expect(
-      makeClient().claimNotificationDestination('inv-1', 0, 'a')
-    ).resolves.toBeUndefined();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('rejects an outcome belonging to another attempt', async () => {
-    await makeClient().claimNotificationDestination('inv-1', 0, 'owner');
-    repository.update.mockClear();
-    await expect(
-      makeClient().recordNotificationOutcome('inv-1', 0, 'other', { status: 'sent' })
-    ).rejects.toThrow(InvestigationConflictError);
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('clears obsolete outcome fields when finalizing its own attempt', async () => {
-    stored.notifications = [
-      {
-        destination_index: 0,
-        attempted_at: '2026-10-02T00:00:00.000Z',
-        status: 'unconfirmed',
-        attempt_id: 'a',
-        error: 'old error',
-        message_ts: 'old',
-        sent_at: 'old',
-      },
-    ];
-    await makeClient().recordNotificationOutcome('inv-1', 0, 'a', {
-      status: 'sent',
-      message_ts: 'new',
-      sent_at: 'now',
-    });
-    expect(stored.notifications?.[0]).toMatchObject({
-      status: 'sent',
-      message_ts: 'new',
-      sent_at: 'now',
-    });
-    expect(stored.notifications?.[0]?.error).toBeUndefined();
-  });
-
-  it.each(['claim', 'outcome'] as const)(
-    'propagates a %s write conflict without retrying',
-    async (operation) => {
-      stored.notifications =
-        operation === 'outcome'
-          ? [
-              {
-                destination_index: 0,
-                status: 'unconfirmed',
-                attempt_id: 'a',
-                attempted_at: '2026-10-02T00:00:00.000Z',
-              },
-            ]
-          : [];
-      const error = new InvestigationStaleWriteError('inv-1');
-      repository.update.mockRejectedValue(error);
-      const client = makeClient();
-      await expect(
-        operation === 'claim'
-          ? client.claimNotificationDestination('inv-1', 0, 'a')
-          : client.recordNotificationOutcome('inv-1', 0, 'a', { status: 'sent' })
-      ).rejects.toBe(error);
-      expect(repository.update).toHaveBeenCalledTimes(1);
-    }
-  );
-
-  it('does not retry a storage error', async () => {
-    repository.update.mockRejectedValue(new Error('storage unavailable'));
-    await expect(makeClient().claimNotificationDestination('inv-1', 0, 'a')).rejects.toThrow(
-      'storage unavailable'
-    );
-    expect(repository.update).toHaveBeenCalledTimes(1);
-  });
-
-  it('claims and finalizes without a saved object version', async () => {
-    stored.version = undefined;
-    const client = makeClient();
-    await client.claimNotificationDestination('inv-1', 0, 'a');
-    await client.recordNotificationOutcome('inv-1', 0, 'a', { status: 'sent', message_ts: '1.2' });
-    expect(stored.notifications?.[0]).toMatchObject({
-      status: 'sent',
-      attempt_id: 'a',
-      message_ts: '1.2',
-    });
-    expect(repository.update).toHaveBeenCalledTimes(2);
-    expect(repository.update.mock.calls.every(([update]) => !('version' in update))).toBe(true);
-  });
-
-  it('rejects missing investigations', async () => {
-    repository.get.mockResolvedValue(undefined);
-    const client = makeClient();
-    await expect(client.claimNotificationDestination('missing', 0, 'a')).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    await expect(
-      client.recordNotificationOutcome('missing', 0, 'a', { status: 'sent' })
-    ).rejects.toThrow(InvestigationNotFoundError);
-  });
 });
 
 describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investigation', () => {
@@ -2214,6 +2110,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
       .mockRejectedValueOnce(new InvestigationStaleWriteError(INVESTIGATION_ID))
       .mockResolvedValueOnce(undefined);
 
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'running', conversation_id: 'conv-slack', execution_id: EXECUTION_ID })
+    );
     await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
       'conv-slack'
     );

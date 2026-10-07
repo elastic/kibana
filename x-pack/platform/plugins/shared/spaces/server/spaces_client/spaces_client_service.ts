@@ -40,6 +40,8 @@ export type SpacesClientRepositoryFactory = (
 ) => ISavedObjectsRepository;
 
 export interface SpacesClientServiceSetup {
+  /** Runs after a space is deleted, for cleanup of data stored outside Saved Objects. */
+  registerOnSpaceDeleted: (handler: (spaceId: string) => Promise<void>) => void;
   /**
    * Sets the factory that should be used to create the Saved Objects Repository
    * whenever a new instance of the SpacesClient is created. By default, a repository
@@ -73,6 +75,8 @@ export class SpacesClientService {
 
   private config?: ConfigType;
 
+  private readonly spaceDeletedHandlers: Array<(spaceId: string) => Promise<void>> = [];
+
   private clientWrapper?: SpacesClientWrapper;
 
   constructor(
@@ -86,6 +90,7 @@ export class SpacesClientService {
     });
 
     return {
+      registerOnSpaceDeleted: (handler) => this.spaceDeletedHandlers.push(handler),
       setClientRepositoryFactory: (repositoryFactory: SpacesClientRepositoryFactory) => {
         if (this.repositoryFactory) {
           throw new Error(`Repository factory has already been set`);
@@ -130,7 +135,17 @@ export class SpacesClientService {
           nonGlobalTypeNames,
           this.buildFlavour,
           features,
-          cps?.createNpreClient(request)
+          cps?.createNpreClient(request),
+          async (spaceId) => {
+            const results = await Promise.allSettled(
+              this.spaceDeletedHandlers.map((handler) => handler(spaceId))
+            );
+            for (const result of results) {
+              if (result.status === 'rejected') {
+                this.debugLogger(`Space cleanup failed for "${spaceId}": ${result.reason}`);
+              }
+            }
+          }
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

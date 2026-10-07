@@ -111,6 +111,7 @@ describe('formatInvestigationSlackMessage', () => {
     expect(
       formatInvestigationSlackMessage({
         investigation: completed({ status: 'failed', error: 'Agent timed out after 30m' }),
+        phase: 'failed',
         url: URL,
         automationName: 'Prod critical alerts',
       })
@@ -123,17 +124,26 @@ describe('formatInvestigationSlackMessage', () => {
     );
   });
 
-  it('posts a short stopped message for a cancelled investigation', () => {
-    expect(
-      formatInvestigationSlackMessage({
-        investigation: completed({ status: 'cancelled' }),
-        url: URL,
-      })
-    ).toBe(
-      [
-        '*Checkout latency spike* — Investigation was stopped before it completed.',
-        `<${URL}|Open the investigation in Kibana>`,
-      ].join('\n')
-    );
+  it('posts a started announcement without findings', () => {
+    const message = formatInvestigationSlackMessage({
+      investigation: completed(),
+      phase: 'started',
+      url: URL,
+      automationName: 'Alerts',
+    });
+    expect(message).toContain('Investigation started');
+    expect(message).toContain('Automation: Alerts');
+    expect(message).not.toContain('CPU was saturated');
+  });
+
+  it('bounds the entire message while preserving the locator link', () => {
+    const message = formatInvestigationSlackMessage({
+      investigation: completed({ title: '<'.repeat(512), summary: '&'.repeat(10000) }),
+      phase: 'failed',
+      reason: '<'.repeat(10000),
+      url: URL,
+    });
+    expect(message.length).toBeLessThanOrEqual(4000);
+    expect(message).toContain(`<${URL}|Open the investigation in Kibana>`);
   });
 });

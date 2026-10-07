@@ -10,6 +10,7 @@ import { spacesClientMock } from '../mocks';
 
 const createSpacesClientServiceSetupMock = () =>
   ({
+    registerOnSpaceDeleted: jest.fn(),
     registerClientWrapper: jest.fn(),
     setClientRepositoryFactory: jest.fn(),
   } as jest.Mocked<SpacesClientServiceSetup>);

@@ -6,6 +6,7 @@
  */
 
 import type { Severity } from '@kbn/significant-events-schema';
+import type { NotificationPhase } from './notification_routing';
 import type { NotifiableInvestigation } from './notification_delivery';
 
 /** Slack truncates long messages; a channel post is a pointer, the detail lives in Kibana. */
@@ -38,26 +39,30 @@ export const formatInvestigationSlackMessage = ({
   investigation,
   url,
   automationName,
+  phase = 'completed',
+  reason,
 }: {
   investigation: NotifiableInvestigation;
   url: string;
   automationName?: string;
+  phase?: NotificationPhase;
+  reason?: string;
 }): string => {
   const title = escapeMrkdwn(oneLine(investigation.title) || 'Investigation');
   const automation = automationName ? `Automation: ${escapeMrkdwn(oneLine(automationName))}` : '';
   const link = `<${url}|Open the investigation in Kibana>`;
-
-  if (investigation.status === 'failed') {
-    const reason = investigation.error ? `: ${escapeMrkdwn(oneLine(investigation.error))}` : '';
-    return [`*${title}* — Investigation failed${reason}`, automation, link]
-      .filter(Boolean)
-      .join('\n');
+  const render = (lines: string[]): string =>
+    `${truncate(lines.filter(Boolean).join('\n'), Math.max(0, 4000 - link.length - 1))}\n${link}`;
+  if (phase === 'started') {
+    return render([`*${title}* — Investigation started`, automation]);
   }
 
-  if (investigation.status === 'cancelled') {
-    return [`*${title}* — Investigation was stopped before it completed.`, automation, link]
-      .filter(Boolean)
-      .join('\n');
+  if (phase === 'failed') {
+    const failureReason = reason || investigation.error || 'Investigation failed';
+    return render([
+      `*${title}* — Investigation failed: ${escapeMrkdwn(oneLine(failureReason))}`,
+      automation,
+    ]);
   }
 
   const severity = investigation.severity
@@ -80,14 +85,11 @@ export const formatInvestigationSlackMessage = ({
   const topAction = investigation.recommendations?.[0]?.title;
   const action = topAction ? `Proposed action: ${escapeMrkdwn(oneLine(topAction))}` : '';
 
-  return [
+  return render([
     `*${title}* — Investigation completed`,
     [severity, automation].filter(Boolean).join(' · '),
     summary,
     impact,
     action,
-    link,
-  ]
-    .filter(Boolean)
-    .join('\n');
+  ]);
 };

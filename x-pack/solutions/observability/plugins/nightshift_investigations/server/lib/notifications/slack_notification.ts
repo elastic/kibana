@@ -32,7 +32,7 @@ export const slackNotificationHandler: NotificationHandler = {
   validateParams: (params) => {
     parseSlackNotificationParams(params);
   },
-  prepareDelivery: ({ notificationDestination, investigation, url }) => {
+  prepareDelivery: ({ notificationDestination, investigation, url, phase, reason }) => {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
@@ -44,6 +44,8 @@ export const slackNotificationHandler: NotificationHandler = {
           text: formatInvestigationSlackMessage({
             investigation,
             url,
+            phase,
+            reason,
             automationName: notificationDestination.automation_name,
           }),
           ...(threadTs ? { threadTs } : {}),
@@ -58,10 +60,26 @@ export const slackNotificationHandler: NotificationHandler = {
         }
         const data = response.data;
         const messageTs = data && typeof data === 'object' && 'ts' in data ? data.ts : undefined;
-        if (typeof messageTs !== 'string' || !messageTs.trim() || messageTs.length > 100) {
+        if (
+          typeof messageTs !== 'string' ||
+          messageTs.length > 100 ||
+          !/^\d+\.\d+$/.test(messageTs)
+        ) {
           return { status: 'unconfirmed', error: 'Slack returned no valid message ID' };
         }
-        return { status: 'sent', message_ts: messageTs, sent_at: new Date().toISOString() };
+        const resolvedChannel =
+          data && typeof data === 'object' && 'channel' in data ? data.channel : undefined;
+        return {
+          status: 'sent',
+          message_ts: messageTs,
+          sent_at: new Date().toISOString(),
+          channel:
+            typeof resolvedChannel === 'string' &&
+            resolvedChannel.trim() &&
+            resolvedChannel.length <= 500
+              ? resolvedChannel
+              : channel,
+        };
       },
     };
   },

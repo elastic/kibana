@@ -76,6 +76,11 @@ export interface InvestigationAttachmentTypeDeps<TStored extends StoredInvestiga
   getService: () => InvestigationAttachmentDocService<TStored>;
   /** Checked before `resolve` and `isStale` read the index by a caller-supplied origin. */
   assertCanRead: (request: KibanaRequest) => Promise<void>;
+  /** Applies the entity's existing read authorization to the resolved document. */
+  assertCanReadDocument?: (
+    request: KibanaRequest,
+    document: InvestigationAttachmentDocument<TStored>
+  ) => Promise<void>;
   logger: Logger;
 }
 
@@ -158,13 +163,19 @@ export const defineInvestigationAttachment = <
 
   const buildAttachmentType = <TId extends string>(
     type: TId,
-    { getService, assertCanRead, logger }: InvestigationAttachmentTypeDeps<TStored>
+    {
+      getService,
+      assertCanRead,
+      assertCanReadDocument,
+      logger,
+    }: InvestigationAttachmentTypeDeps<TStored>
   ) =>
     createInvestigationAttachmentType<TId, TStored>({
       type,
       schema: config.schema,
       getService,
       assertCanRead,
+      assertCanReadDocument,
       logger,
       format: config.format,
       agentDescription: config.agentDescription,

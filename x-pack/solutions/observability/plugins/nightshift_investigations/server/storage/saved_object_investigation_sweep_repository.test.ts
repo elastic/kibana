@@ -204,7 +204,7 @@ describe('SavedObjectInvestigationSweepRepository', () => {
         type: TYPE,
         namespaces: ['*'],
         perPage: 1000,
-        fields: [],
+        fields: ['conversation_id'],
       });
       expect(finder.close).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
@@ -334,4 +334,46 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       );
     });
   });
+});
+
+it('cleans routing only for successfully deleted investigations and preserves deletion counts on cleanup failure', async () => {
+  const { savedObjects, logger } = createRepository();
+  const cleanupNotifications = jest.fn().mockRejectedValue(new Error('index unavailable'));
+  const repository = new SavedObjectInvestigationSweepRepository({
+    savedObjects,
+    logger,
+    cleanupNotifications,
+  });
+  const records = ['success', 'failure'].map((id) => ({
+    ...foundInvestigation({ id, namespaces: ['ops'] }),
+    attributes: {
+      status: 'running' as const,
+      created_at: '2026-10-07T00:00:00Z',
+      conversation_id: `conv-${id}`,
+    },
+  }));
+  savedObjects.createPointInTimeFinder.mockReturnValue(createFinder([findResponse(records)]));
+  savedObjects.bulkDelete.mockResolvedValue({
+    statuses: [
+      { id: 'success', type: TYPE, success: true },
+      {
+        id: 'failure',
+        type: TYPE,
+        success: false,
+        error: { statusCode: 500, message: 'SO unavailable', error: 'internal' },
+      },
+    ],
+  });
+  const result = await repository.deleteAllAcrossSpaces();
+  expect(cleanupNotifications).toHaveBeenCalledWith(['conv-success'], 'ops');
+  expect(result.deleted).toBe(1);
+  expect(result.failures).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: 'success',
+        error: 'Notification routing cleanup failed: index unavailable',
+      }),
+      expect.objectContaining({ id: 'failure', error: 'SO unavailable' }),
+    ])
+  );
 });

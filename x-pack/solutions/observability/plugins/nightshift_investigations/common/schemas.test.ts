@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  investigationNotificationDestinationsSchema,
-  investigationNotificationSchema,
-} from './schemas';
+import { investigationNotificationDestinationsSchema } from './schemas';
 
 const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
 
@@ -133,36 +130,5 @@ describe('notification destination input', () => {
     expect(
       investigationNotificationDestinationsSchema.safeParse(Array(21).fill(destination)).success
     ).toBe(false);
-  });
-  it('stores bounded unconfirmed attempts separately from destinations', () => {
-    const notification = {
-      destination_index: 0,
-      status: 'unconfirmed',
-      attempt_id: 'id',
-      attempted_at: new Date().toISOString(),
-    };
-    expect(investigationNotificationSchema.safeParse(notification).success).toBe(true);
-    expect(
-      investigationNotificationSchema.safeParse({ ...notification, ...destination }).success
-    ).toBe(false);
-    expect(
-      investigationNotificationSchema.safeParse({ ...notification, attempt_id: 'x'.repeat(101) })
-        .success
-    ).toBe(false);
-    expect(
-      investigationNotificationSchema.safeParse({ ...notification, attempted_at: 'x'.repeat(65) })
-        .success
-    ).toBe(false);
-    for (const destinationIndex of [-1, 20, 0.5])
-      expect(
-        investigationNotificationSchema.safeParse({
-          ...notification,
-          destination_index: destinationIndex,
-        }).success
-      ).toBe(false);
-    for (const field of ['destination_index', 'status', 'attempt_id', 'attempted_at']) {
-      const incomplete = { ...notification, [field]: undefined };
-      expect(investigationNotificationSchema.safeParse(incomplete).success).toBe(false);
-    }
   });
 });

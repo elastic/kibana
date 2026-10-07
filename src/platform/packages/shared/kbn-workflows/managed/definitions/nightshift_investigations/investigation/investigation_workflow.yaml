@@ -47,7 +47,7 @@ triggers:
         notificationDestinations:
           type: array
           maxItems: 20
-          description: Destinations that receive the settled investigation outcome.
+          description: Destinations that receive investigation lifecycle messages.
           items:
             type: object
             additionalProperties: false
@@ -131,6 +131,14 @@ steps:
     on-failure:
       continue: true
 
+  - name: notify_started
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: started
+    on-failure:
+      continue: true
+
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
@@ -139,8 +147,6 @@ steps:
     aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
-    create-conversation: true
-    public-conversation: true
     timeout: 1800s
     with:
       # Correlates the workflow and generated agent executions for live progress lookup.
@@ -757,12 +763,22 @@ steps:
     on-failure:
       continue: true
 
-  # Sends the settled outcome to the recorded destinations and stores each delivery attempt.
-  # Notification failures are recorded without failing the investigation workflow.
-  - name: notify_destinations
+  - name: notify_completed
     type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error == null }}'
     with:
-      investigation_id: '{{ execution.id }}'
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: completed
+    on-failure:
+      continue: true
+
+  - name: notify_failed
+    type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: failed
+      reason: "${{ steps.investigate.error.message | default: 'Investigation failed' | truncate: 10000 }}"
     on-failure:
       continue: true
 
