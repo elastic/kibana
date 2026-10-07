@@ -9,9 +9,6 @@ examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-dashboards
 examples/data_streams_example @elastic/kibana-core
 examples/data_view_field_editor_example @elastic/kibana-discover
-examples/deferred_init_example @elastic/kibana-core
-examples/deferred_init_example_consumer @elastic/kibana-core
-examples/deferred_init_example_dependency @elastic/kibana-core
 examples/dependency_injection @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-discover
@@ -32,6 +29,8 @@ examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
+examples/plugin_initialize_example @elastic/kibana-core
+examples/plugin_initialize_example_consumer @elastic/kibana-core
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-discover
@@ -285,7 +284,6 @@ src/core/packages/plugins/contracts-browser @elastic/kibana-core
 src/core/packages/plugins/contracts-server @elastic/kibana-core
 src/core/packages/plugins/deferred-init-browser @elastic/kibana-core
 src/core/packages/plugins/deferred-init-browser-internal @elastic/kibana-core
-src/core/packages/plugins/deferred-init-browser-mocks @elastic/kibana-core
 src/core/packages/plugins/deferred-init-common @elastic/kibana-core
 src/core/packages/plugins/server @elastic/kibana-core
 src/core/packages/plugins/server-internal @elastic/kibana-core
