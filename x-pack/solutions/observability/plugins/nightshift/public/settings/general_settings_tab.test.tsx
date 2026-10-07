@@ -21,7 +21,7 @@ jest.mock('./components/apps_section', () => ({
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const renderTab = (capabilities: {
-  nightshift?: Record<string, boolean>;
+  nightshift?: Record<string, unknown>;
   streams?: { manage: boolean };
 }) => {
   mockUseKibana.mockReturnValue({
