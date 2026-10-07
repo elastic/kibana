@@ -46,6 +46,7 @@ import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 import { recordCypressResult } from './cypress_result_report';
 import { hasUnresolvedFailures, routeGroupFailure } from './group_failure_routing';
+import { routeRunResult, runWithAssertionRetry } from './cypress_run_result';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -270,25 +271,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
-
-      const isCypressFailedRunResult = (
-        runResult:
-          | CypressCommandLine.CypressRunResult
-          | CypressCommandLine.CypressFailedRunResult
-          | undefined
-      ): runResult is CypressCommandLine.CypressFailedRunResult =>
-        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
-
-      const isTestAssertionFailure = (
-        runResult:
-          | CypressCommandLine.CypressRunResult
-          | CypressCommandLine.CypressFailedRunResult
-          | undefined
-      ): boolean => {
-        if (!runResult) return false;
-        const asRunResult = runResult as CypressCommandLine.CypressRunResult;
-        return Boolean(asRunResult.totalFailed && asRunResult.totalFailed > 0 && asRunResult.runs);
-      };
 
       const runSpecGroups = async (
         specGroups: SpecGroup[],
@@ -586,78 +568,25 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   },
                 });
               } else {
-                let runResult = await executeCypressRun(isRetryRun);
-
-                if (isTestAssertionFailure(runResult) && !isRetryRun) {
-                  log.info(
-                    `Test assertion failure detected for ${filePath}, retrying in-place against the same stack (with video enabled)...`
-                  );
-                  runResult = await executeCypressRun(true);
-                }
-
+                const runResult = await runWithAssertionRetry({
+                  execute: executeCypressRun,
+                  record: recordCypressResult,
+                  spec: filePath,
+                  isRetryRun,
+                });
                 results.push(runResult);
-
-                const asRun = runResult as CypressCommandLine.CypressRunResult;
-                const asFailed = runResult as CypressCommandLine.CypressFailedRunResult;
-                const durationMs = asRun?.totalDuration;
-
-                if (runResult === undefined) {
-                  // cypress.run() resolved undefined - anomalous, treat like a
-                  // thrown error and route to infra retry. Never checkpoint.
-                  log.error(`Cypress returned no result for ${filePath}; routing to infra retry.`);
-                  recordCypressResult({
+                if (
+                  routeRunResult({
+                    result: runResult,
                     spec: filePath,
-                    kind: 'undefined_result',
-                    isRetryRun,
-                    durationMs,
-                  });
-                  if (!infraFailedSpecFilePaths.includes(filePath)) {
-                    infraFailedSpecFilePaths.push(filePath);
-                  }
-                } else if (isCypressFailedRunResult(runResult)) {
-                  if (!infraFailedSpecFilePaths.includes(filePath)) {
-                    infraFailedSpecFilePaths.push(filePath);
-                  }
-                  log.error(
-                    `Cypress failed to run ${filePath}: ${asFailed.message ?? 'no message'}`
-                  );
-                  recordCypressResult({
-                    spec: filePath,
-                    kind: 'runner_failure',
-                    status: asFailed.status,
-                    message: asFailed.message,
-                    isRetryRun,
-                    durationMs,
-                  });
-                } else if (asRun?.runs && asRun.totalFailed === 0) {
-                  // Real success: both `runs` present and `totalFailed === 0`.
-                  // Strict `=== 0` (not `!asRun.totalFailed`) is deliberate:
-                  // the falsy collapse is the same pattern that produced the
-                  // original false-green bug (an `undefined` totalFailed would
-                  // satisfy `!totalFailed` and route here as a checkpointed
-                  // success).
-                  recordCypressResult({
-                    spec: filePath,
-                    kind: 'success',
-                    totalFailed: 0,
-                    isRetryRun,
-                    durationMs,
-                  });
-                  _.pull(failedSpecFilePaths, filePath);
-                  completedSpecFilePaths.push(filePath);
-                  if (!isOpen && isInBuildkite()) {
-                    markSpecCompleted(filePath).catch(() => {});
-                  }
-                } else {
-                  // Assertion failure: already went through the in-place retry
-                  // above. Leave in failedSpecFilePaths, do not checkpoint.
-                  recordCypressResult({
-                    spec: filePath,
-                    kind: 'assertion_failure',
-                    totalFailed: asRun?.totalFailed,
-                    isRetryRun,
-                    durationMs,
-                  });
+                    failedSpecFilePaths,
+                    infraFailedSpecFilePaths,
+                    completedSpecFilePaths,
+                  }) &&
+                  !isOpen &&
+                  isInBuildkite()
+                ) {
+                  markSpecCompleted(filePath).catch(() => {});
                 }
               }
             }
