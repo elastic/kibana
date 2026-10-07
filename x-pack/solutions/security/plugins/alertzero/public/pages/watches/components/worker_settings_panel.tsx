@@ -105,7 +105,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
   const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
-  const [hardGateOk, setHardGateOk] = useState(true);
+  // Start locked until supply status says the hard-gate is ok. Already-on workers can
+  // still turn off because cannotEnable requires !enabled.
+  const [hardGateOk, setHardGateOk] = useState(false);
   const handleHardGateChange = useCallback((ok: boolean) => {
     setHardGateOk(ok);
   }, []);

@@ -1774,6 +1774,50 @@ describe('WorkersService', () => {
       expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
     });
 
+    it('re-ensures TI supply after Hunt enable so a concurrent teardown can be repaired', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledTimes(2);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(1, SPACE, request);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(2, SPACE, request);
+    });
+
+    it('tears down TI supply when Hunt enable fails after ensure', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+      harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+
+      await expect(
+        service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('enable write failed');
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalled();
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
     it('does not ensure TI supply when enable is rejected for a missing service account', async () => {
       const harness = createPersistentHarness();
       const threatIntelSupply = makeThreatIntelSupply();

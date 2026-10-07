@@ -345,6 +345,16 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
     expect(screen.queryByTestId('alertZeroThreatIntelSupplySection')).not.toBeInTheDocument();
   });
 
+  it('disables Enabled while supply status is still loading', () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+    renderHuntPanel();
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+  });
+
   it('disables Enabled when the hard-gate fails', async () => {
     useHuntThreatIntelSupplyStatus.mockReturnValue({
       data: {

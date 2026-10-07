@@ -233,12 +233,9 @@ const ThreatIntelSupplySectionComponent: React.FC<ThreatIntelSupplySectionProps>
     if (!onHardGateChange) {
       return;
     }
-    // Treat a failed status fetch like a failed hard-gate: do not allow enable.
-    if (isError) {
+    // Parent defaults hardGateOk to false, so Enable stays locked until status arrives.
+    if (isError || !data) {
       onHardGateChange(false);
-      return;
-    }
-    if (!data) {
       return;
     }
     onHardGateChange(data.hardGate.ok);
