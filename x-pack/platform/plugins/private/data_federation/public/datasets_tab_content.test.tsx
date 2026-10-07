@@ -12,6 +12,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { DatasetsTabContent } from './datasets_tab_content';
+import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
 type MockDatasetsClient = Pick<DataFederationKibanaServices['datasetsClient'], 'add' | 'delete'>;
@@ -95,13 +96,15 @@ const createDataSet = ({
 
 const createServicesMock = ({
   datasetsClient,
+  addDanger = jest.fn(),
 }: {
   datasetsClient: MockDatasetsClient;
+  addDanger?: jest.Mock;
 }): DataFederationKibanaServices =>
   ({
     dataSourcesClient: { get: jest.fn() },
     datasetsClient,
-    toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    toasts: { addDanger, addSuccess: jest.fn() },
     docLinks: {
       links: {
         dataFederation: {
@@ -125,15 +128,17 @@ const renderComponent = async ({
   dataSets,
   datasetsClient,
   loadDataSets,
+  addDanger,
 }: {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   datasetsClient: MockDatasetsClient;
   loadDataSets: () => Promise<void>;
+  addDanger?: jest.Mock;
 }) => {
   return render(
     <EuiProvider>
-      <KibanaContextProvider services={createServicesMock({ datasetsClient })}>
+      <KibanaContextProvider services={createServicesMock({ datasetsClient, addDanger })}>
         <DatasetsTabContent
           dataSources={dataSources}
           dataSets={dataSets}
@@ -167,5 +172,31 @@ describe('DatasetsTabContent', () => {
       expect(deleteMock).toHaveBeenCalledWith('set1');
       expect(loadDataSets).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('reports a refresh failure after a successful delete in a toast', async () => {
+    const loadDataSets = jest.fn().mockRejectedValue(new Error('list unavailable'));
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const addDanger = jest.fn();
+
+    await renderComponent({
+      dataSources: [createDataSource('ds1')],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+      datasetsClient: { add: jest.fn(), delete: deleteMock },
+      loadDataSets,
+      addDanger,
+    });
+
+    fireEvent.click(document.querySelector('[data-test-subj="mockDeleteFirst"]') as Element);
+    fireEvent.click(document.querySelector('[data-test-subj="mockConfirmDelete"]') as Element);
+
+    await waitFor(() => {
+      expect(addDanger).toHaveBeenCalledWith({
+        title: mainTranslations.refreshDataSetsErrorTitle,
+        text: 'list unavailable',
+      });
+    });
+    expect(deleteMock).toHaveBeenCalledWith('set1');
+    expect(document.querySelector('[data-test-subj="mockDeleteError"]')).toBeNull();
   });
 });

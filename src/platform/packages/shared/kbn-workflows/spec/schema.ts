@@ -314,12 +314,7 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
-export const WaitForApprovalSlackChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+const hitlChannelMessageField = {
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -327,9 +322,17 @@ export const WaitForApprovalSlackChannelSchema = z.object({
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
     ),
+};
+
+export const HitlSlackChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
 });
 
-export const WaitForApprovalSlackApiChannelSchema = z.object({
+export const HitlSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -347,28 +350,63 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .describe(
       'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
     ),
-  message: z
+});
+
+export const HitlSlack2ChannelSchema = z.object({
+  'connector-id': z
     .string()
-    .max(MAX_HITL_MESSAGE_LENGTH)
-    .optional()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack (v2) connector saved object id or name'),
+  channels: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe(
+          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+        )
+    )
+    .min(1)
     .describe(
-      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
     ),
 });
 
-export const WaitForApprovalChannelsSchema = z
+const hitlChannelDescriptions = {
+  slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
+  slack_api:
+    'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
+  slack2:
+    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+} as const;
+
+export const WaitForInputChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional().describe(
-      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
-    ),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
-      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
-    ),
+    slack: HitlSlackChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack2),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
-export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: HitlSlackChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+  })
+  .optional()
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
 export const WaitForInputStepInputSchema = z
   .object({
@@ -380,7 +418,7 @@ export const WaitForInputStepInputSchema = z
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
-    channels: HitlExternalChannelsSchema,
+    channels: WaitForInputChannelsSchema,
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({

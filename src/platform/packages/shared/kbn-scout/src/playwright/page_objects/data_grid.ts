@@ -21,6 +21,12 @@ const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
+export type DataGridDocumentsDisplayMode = 'Table' | 'JSON';
+
+const DOCUMENTS_DISPLAY_MODE_TEST_SUBJS: Readonly<Record<DataGridDocumentsDisplayMode, string>> = {
+  Table: 'unifiedDataTableViewModeSettings_viewMode_table',
+  JSON: 'unifiedDataTableViewModeSettings_viewMode_json',
+};
 
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
@@ -230,6 +236,13 @@ export class DataGrid {
     return (await selectedButton.innerText()).trim() as DataGridDensity;
   }
 
+  async getCurrentDocumentsDisplayMode(): Promise<DataGridDocumentsDisplayMode> {
+    const jsonButton = this.page.getByTestId(DOCUMENTS_DISPLAY_MODE_TEST_SUBJS.JSON);
+    await jsonButton.waitFor({ state: 'visible' });
+
+    return (await jsonButton.getAttribute('aria-pressed')) === 'true' ? 'JSON' : 'Table';
+  }
+
   getPageButton(pageIndex: number): Locator {
     return this.getPaginationContainer().locator(
       `[data-test-subj="pagination-button-${pageIndex}"]`
@@ -346,6 +359,18 @@ export class DataGrid {
 
   getInTableSearchMatchesCounter(): Locator {
     return this.page.testSubj.locator(IN_TABLE_SEARCH_COUNTER_TEST_SUBJ);
+  }
+
+  /**
+   * Returns the tree row of a field in a JSON view cell, e.g. `machine.os` for `{ machine: { os } }`.
+   */
+  getJsonTreeItem(rowIndex: number, fieldPath: string): Locator {
+    // Mirrors the JSON tree viewer's node ids, which prefix every key with its length
+    const nodeId = fieldPath
+      .split('.')
+      .reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
+
+    return this.getCell(rowIndex, '_source').getByTestId(`jsonTreeViewerRow-${nodeId}`);
   }
 
   async getNumberOfSelectedRows(): Promise<number> {
@@ -662,6 +687,13 @@ export class DataGrid {
 
     await buttonGroup.waitFor({ state: 'visible' });
     await buttonGroup.locator(`[data-text="${newValue}"]`).click();
+  }
+
+  async setDocumentsDisplayMode(newValue: DataGridDocumentsDisplayMode) {
+    await this.openGridDisplaySettings();
+    await this.page.testSubj.click(DOCUMENTS_DISPLAY_MODE_TEST_SUBJS[newValue]);
+    // Switching the mode remounts the grid, which closes the display settings popover
+    await this.getExpandedDisplaySelectorButton().waitFor({ state: 'hidden' });
   }
 
   async setRowHeight(newValue: DataGridRowHeight, scope: 'row' | 'header' = 'row') {

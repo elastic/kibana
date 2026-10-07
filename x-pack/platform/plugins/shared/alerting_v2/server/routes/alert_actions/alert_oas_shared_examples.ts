@@ -29,9 +29,9 @@ export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
 
 /** Shared 400 body for episode-level alert-action routes (missing path params). */
 export const INVALID_EPISODE_ACTION_PARAMS_RESPONSE = invalidResponseExample({
-  summary: 'Path is missing required alert_id',
-  message: 'alert_id: Required',
-  details: { errors: { alert_id: ['Required'] } },
+  summary: 'Path is missing required id',
+  message: 'id: Required',
+  details: { errors: { id: ['Required'] } },
 });
 
 /** Shared 404 body for series-level alert-action routes. */

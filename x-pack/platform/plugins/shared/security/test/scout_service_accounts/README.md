@@ -3,12 +3,12 @@
 These tests use real Elasticsearch and local UIAM through the `service_accounts`
 Scout server configuration. Role loading and service account responses are not mocked.
 
-- UI: opens the creation flyout, loads and selects multiple roles, checks that
-  Serverless omits the description field, and cancels. Runs on Security and Search.
-- API: creates an account through Kibana, reads its persisted name and roles back,
-  and rejects descriptions on Serverless. Runs on Search because the local UIAM
-  client certificate identifies an Elasticsearch project. Account creation uses
-  the seeded organization-admin API key; Scout's browser admin is a project admin.
+- UI: opens the creation flyout, checks that it offers a description field, loads
+  and selects multiple roles, and cancels. Runs on Security and Search.
+- API: creates an account through Kibana, and reads its persisted name, roles and
+  description back. Runs on Search because the local UIAM client certificate
+  identifies an Elasticsearch project. Account creation uses the seeded
+  organization-admin API key; Scout's browser admin is a project admin.
 
 Local built-in roles are file-based and are not returned by Elasticsearch's role
 query API. The UI test therefore creates native roles. It still exercises the

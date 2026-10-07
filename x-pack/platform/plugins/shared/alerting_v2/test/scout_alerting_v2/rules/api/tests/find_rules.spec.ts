@@ -358,6 +358,15 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest('filter: rejects malformed KQL with a 400', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ filter: 'enabled:', per_page: 100 }), {
+      headers: adminHeaders,
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('INVALID_FILTER_SYNTAX');
+  });
+
   apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(findRulesUrl({ per_page: MAX_PER_PAGE + 1 }), {
       headers: adminHeaders,

@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export {
-  BaseActions,
-  hasAvailableActions,
-  type CardActionType,
-  type BaseActionsProps,
-} from './base_actions';
+export { BaseActions, type CardActionType, type BaseActionsProps } from './base_actions';
 export { ActionButton } from './action_button';
+export { COPY_LINK_ACTION, getCopyLinkFlyoutAction } from './copy_link_action';
