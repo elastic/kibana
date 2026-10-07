@@ -60,8 +60,8 @@ export interface AgentDefinition {
   readonly: boolean;
   /**
    * When true, the agent is hidden from UI listings (agent picker, management page) by default.
-   * For built-in agents, set explicitly at registration time.
-   * For persisted agents, derived automatically: system-created non-chat agents are hidden.
+   * Built-in agents must set this explicitly during registration; it defaults to false.
+   * Persisted agents derive it automatically: system-created non-chat agents are hidden.
    */
   hidden?: boolean;
   /**

@@ -87,8 +87,7 @@ export const toInternalDefinition = async ({
         : {}),
     },
     type,
-    // Non-chat built-ins are system agents — hidden by default unless explicitly overridden.
-    hidden: definition.hidden ?? type !== chatAgentTypeId,
+    hidden: definition.hidden ?? false,
     access_control: undefined,
     created_by: undefined,
     readonly: true,
