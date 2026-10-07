@@ -760,6 +760,86 @@ describe('ClaimGrounding', () => {
     expect(result.explanation).toContain('alert_ids must cite at least two distinct alerts');
   });
 
+  it('scores 0 when an alert link pivots on a field outside the prompt allowlist', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+            ],
+            alert_link: {
+              field: 'kibana.space_ids',
+              value: 'default',
+              alert_ids: ['alert-1', 'alert-2'],
+            },
+          },
+        },
+        seededEvidence: {
+          ...groundedRun().seededEvidence,
+          alerts: [
+            { id: 'alert-1', source: { 'kibana.space_ids': ['default'] } },
+            { id: 'alert-2', source: { kibana: { space_ids: ['default'] } } },
+          ],
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('field "kibana.space_ids" is not an allowed pivot');
+  });
+
+  it('does not count a repeated world claim more than once', async () => {
+    const grounded = {
+      check: 'entity_role',
+      result: 'contradicts',
+      source: 'entity_store',
+      id: 'ent-1',
+    };
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              grounded,
+              grounded,
+              grounded,
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'nope' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+  });
+
+  it('scores 0 for a world claim whose check is not a world check', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'alert_linkage', result: 'supports', source: 'entity_store', id: 'ent-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('check "alert_linkage" is not a world check');
+  });
+
   it('scores 0 for a world claim with no source', async () => {
     const result = await claimGrounding.evaluate({
       input: {},

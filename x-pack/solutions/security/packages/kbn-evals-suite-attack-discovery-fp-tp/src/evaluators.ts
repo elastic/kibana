@@ -223,10 +223,37 @@ const pivotCarries = (actual: unknown, claimed: unknown): boolean =>
     .includes(String(claimed));
 
 /**
- * Grounds the model's `claims` against the seeded documents without an LLM: every
- * cited id must exist in the seed, every claimed result must match the run's own
- * `raw.checks`, and an alert link must pivot every listed alert through a field the
- * alerts actually carry. Score = grounded claims / total claims.
+ * Pivot fields the managed prompt permits in `claims.alert_link.field`
+ * (`claims.alert_link.field` enum in attack_discovery_fp_tp_analysis.yaml). A field
+ * outside this list, such as `kibana.space_ids`, is shared by every alert and proves
+ * no linkage.
+ */
+const ALERT_LINK_FIELDS: ReadonlySet<string> = new Set([
+  'user.name',
+  'user.id',
+  'host.id',
+  'host.name',
+  'process.entity_id',
+  'process.pid',
+  'agent.id',
+  'source.ip',
+]);
+
+/**
+ * Grounds the model's `claims` against the seeded documents without an LLM.
+ *
+ * What is checked against what:
+ * - Cited ids (`claims.world[].id`, `claims.alert_link.alert_ids`) are checked against
+ *   the seeded documents, from the evidence source each check is permitted to use.
+ * - The claimed `result` is checked only against the model's own `raw.checks`
+ *   (self-consistency). It is NOT checked against the seed, so a wrong but internally
+ *   consistent verdict still scores as grounded. A wrong verdict is caught by
+ *   OutcomeAccuracy and PayloadConformance, not by this evaluator.
+ * - An alert link must use an allowlisted pivot field, and every listed alert must
+ *   carry the claimed value for it.
+ *
+ * World claims are deduplicated on (check, source, id) so repeating one grounded claim
+ * does not inflate the score. Score = grounded claims / total claims.
  */
 export const claimGrounding: Evaluator = {
   name: 'ClaimGrounding',
@@ -300,7 +327,14 @@ export const claimGrounding: Evaluator = {
     );
     const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
 
-    for (const claim of worldClaims) {
+    // Repeating one claim must not raise the score, so count each (check, source, id) once.
+    const claimKeys = worldClaims.map((claim) =>
+      JSON.stringify([claim.check, claim.source, claim.id])
+    );
+    const uniqueWorldClaims = worldClaims.filter(
+      (_, index) => claimKeys.indexOf(claimKeys[index]) === index
+    );
+    for (const claim of uniqueWorldClaims) {
       total++;
       const claimProblems: string[] = [];
       const claimSource =
@@ -333,6 +367,13 @@ export const claimGrounding: Evaluator = {
           }" may only cite ${permittedSource} evidence, not ${claimSource}`
         );
       }
+      if (permittedSource === undefined) {
+        claimProblems.push(
+          `check "${claim.check ?? ''}" is not a world check (expected one of ${Object.keys(
+            CHECK_SOURCES
+          ).join(', ')})`
+        );
+      }
       const check = checkResults.get(claim.check ?? '');
       if (check === undefined) {
         claimProblems.push(`check "${claim.check ?? ''}" missing from raw.checks`);
@@ -360,6 +401,13 @@ export const claimGrounding: Evaluator = {
         linkProblems.push(
           `alert_linkage in raw.checks is "${alertLinkage?.result ?? 'missing'}" ` +
             `(status "${alertLinkage?.status ?? 'missing'}"), not "completed" + "supports"`
+        );
+      }
+      if (!ALERT_LINK_FIELDS.has(alertLink.field ?? '')) {
+        linkProblems.push(
+          `field "${alertLink.field ?? ''}" is not an allowed pivot (expected one of ${[
+            ...ALERT_LINK_FIELDS,
+          ].join(', ')})`
         );
       }
       const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
