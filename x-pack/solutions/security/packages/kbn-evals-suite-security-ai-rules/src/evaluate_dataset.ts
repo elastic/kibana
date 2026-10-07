@@ -183,6 +183,29 @@ function skipAgentErrors(
   };
 }
 
+/**
+ * Trajectory counterpart to {@link skipAgentErrors}: returns N/A only when no tool sequence was
+ * observed. A converse round that completed but produced no rule still carries the tools the
+ * agent called (possibly none, possibly the wrong ones) next to its `error`, and that sequence is
+ * exactly what Tool Trajectory measures — suppressing it would hide the agent skipping
+ * `security.create_detection_rule`. Only a request that never returned a response (the task's
+ * catch path, which sets no `toolCalls`) is an agent/environment failure here.
+ */
+function skipUnobservedTrajectories(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const output = args.output as RuleGenerationTaskOutput;
+      if (output?.error && output.toolCalls === undefined) {
+        return AGENT_ERROR_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------
 // CODE evaluators — deterministic, no LLM required
 // ---------------------------------------------------------------------------
@@ -488,8 +511,11 @@ export function defaultGoldenSequence(
  * because there is no canonical multi-tool order to enforce; a misordered but complete
  * sequence is reported through `orderScore`, not treated as an extra call.
  *
- * Wrapping: agent/env errors and missing-index failures already return N/A via
- * `skipAgentErrors` / `skipMissingIndexFailures`, so we don't double-wrap.
+ * Wrapping (done at registration): missing-index failures return N/A via
+ * `skipMissingIndexFailures`, and requests that never returned a response return N/A via
+ * `skipUnobservedTrajectories`. Unlike the rule-quality evaluators it is NOT wrapped in
+ * `skipAgentErrors`: a completed round with no rule still carries its observed tool calls, and
+ * an empty or wrong sequence there is the failure this evaluator exists to score.
  */
 export function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   const inner = createTrajectoryEvaluator({
@@ -564,7 +590,9 @@ export function createEvaluateDataset({
     // Tool Trajectory — tool-call coverage + order vs. the golden sequence the
     // detection-rule-edit SKILL.md prescribes. Applies to negatives too (golden = []),
     // and penalizes extra/duplicate calls so the advertised exact sequence is enforced.
-    skip(createRuleTrajectoryEvaluator()),
+    // A completed round that returned no rule is still scored on the tools it called; only
+    // missing-index failures and requests that never returned a response are N/A.
+    skipMissingIndexFailures(skipUnobservedTrajectories(createRuleTrajectoryEvaluator())),
     // Trace-based observability (zero per-example LLM cost — reads OTel spans).
     // The `reportDisplayOptions` in evaluate.ts has already declared formatting for these.
     ...Object.values(evaluators.traceBasedEvaluators),

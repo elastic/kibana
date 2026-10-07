@@ -36,6 +36,7 @@ const createHarness = () => {
       warning: jest.fn(),
       error: jest.fn(),
       debug: jest.fn(),
+      success: jest.fn(),
     } as unknown as FactoryDeps['log'],
   };
 
@@ -76,5 +77,130 @@ describe('createEvaluateDataset', () => {
     await createEvaluateDataset(deps)({ dataset });
 
     expect(registeredEvaluatorNames(runExperiment)).toEqual([SKILL_INVOCATION_EVALUATOR]);
+  });
+
+  describe('Tool Trajectory on the task path', () => {
+    const POSITIVE_EXPECTED = { name: 'process_spawn', category: 'execution' };
+    const NEGATIVE_EXPECTED = { name: 'impossible_request', category: 'negative' };
+
+    interface Experiment {
+      task: (example: { input: { prompt: string }; output: unknown }) => Promise<unknown>;
+    }
+    interface RegisteredEvaluator {
+      name: string;
+      evaluate: (args: Record<string, unknown>) => Promise<{
+        score?: number | null;
+        label?: string;
+        explanation?: string;
+      }>;
+    }
+
+    // Runs one example through the real task closure and the registered evaluators, exactly as
+    // the executor does: the task's return value is the `output` every evaluator receives.
+    const runExample = async (
+      generateRule: () => Promise<unknown>,
+      expected: Record<string, unknown>
+    ) => {
+      const { deps, runExperiment } = createHarness();
+      (deps.chatClient.generateRule as jest.Mock).mockImplementation(generateRule);
+
+      await createEvaluateDataset(deps)({ dataset });
+
+      const [experiment, evaluators] = runExperiment.mock.calls[0] as [
+        Experiment,
+        RegisteredEvaluator[]
+      ];
+      const input = { prompt: 'detect suspicious process spawns' };
+      const output = await experiment.task({ input, output: expected });
+      const scoreWith = (name: string) => {
+        const evaluator = evaluators.find((candidate) => candidate.name === name);
+        if (!evaluator) throw new Error(`evaluator ${name} is not registered`);
+        return evaluator.evaluate({ input, output, expected, metadata: null });
+      };
+      return { output, scoreWith };
+    };
+
+    it('scores a completed round that never called the rule tool instead of skipping it', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({ error: 'No rule returned from agent', traceId: 'trace-1', toolCalls: [] }),
+        POSITIVE_EXPECTED
+      );
+
+      const result = await scoreWith('Tool Trajectory');
+      expect(result.score).toBe(0);
+      expect(result.label).not.toBe('N/A');
+    });
+
+    it('scores a completed round that called only the wrong tools', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({
+          error: 'No rule returned from agent',
+          traceId: 'trace-2',
+          toolCalls: ['platform.core.search', 'platform.core.execute_esql'],
+        }),
+        POSITIVE_EXPECTED
+      );
+
+      const result = await scoreWith('Tool Trajectory');
+      expect(result.score).toBe(0);
+      expect(result.label).not.toBe('N/A');
+    });
+
+    it('keeps rule-quality evaluators N/A for the same completed no-rule round', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({ error: 'No rule returned from agent', traceId: 'trace-3', toolCalls: [] }),
+        POSITIVE_EXPECTED
+      );
+
+      expect((await scoreWith('Field Coverage')).score).toBeNull();
+    });
+
+    it('returns N/A when the converse request never returned a response', async () => {
+      const { output, scoreWith } = await runExample(async () => {
+        throw new Error('socket hang up');
+      }, POSITIVE_EXPECTED);
+
+      expect(output).toEqual({ error: 'socket hang up' });
+      const result = await scoreWith('Tool Trajectory');
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('N/A');
+    });
+
+    it('returns N/A for missing-index failures even when tool calls were observed', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({
+          error: 'Could not discover a suitable index for this rule',
+          traceId: 'trace-4',
+          toolCalls: ['security.create_detection_rule'],
+        }),
+        POSITIVE_EXPECTED
+      );
+
+      const result = await scoreWith('Tool Trajectory');
+      expect(result.score).toBeNull();
+      expect(result.explanation).toMatch(/missing index/);
+    });
+
+    it('scores the exact expected sequence as a perfect trajectory', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({
+          generatedRule: { name: 'Suspicious process spawn', query: 'FROM logs-* | LIMIT 1' },
+          traceId: 'trace-5',
+          toolCalls: ['security.create_detection_rule'],
+        }),
+        POSITIVE_EXPECTED
+      );
+
+      expect((await scoreWith('Tool Trajectory')).score).toBe(1);
+    });
+
+    it('scores a refused negative case with no tool calls as a perfect trajectory', async () => {
+      const { scoreWith } = await runExample(
+        async () => ({ error: 'No rule returned from agent', traceId: 'trace-6', toolCalls: [] }),
+        NEGATIVE_EXPECTED
+      );
+
+      expect((await scoreWith('Tool Trajectory')).score).toBe(1);
+    });
   });
 });
