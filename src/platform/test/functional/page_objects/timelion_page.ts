@@ -13,16 +13,33 @@ import { FtrService } from '../ftr_provider_context';
 export class TimelionPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
 
   public async getSuggestionItemsText() {
     let lists: WebElementWrapper[] = [];
+    let manuallyTriggered = false;
     await this.retry.try(async () => {
       const editorSuggestions = await this.monacoEditor.getCodeEditorSuggestWidget();
       lists = await editorSuggestions.findAllByClassName('monaco-list-row');
       if (lists.length === 0) {
-        throw new Error('suggestion list not populated');
+        // A manually triggered suggest shows "No suggestions." or "Loading..." instead of hiding,
+        // so the next attempt reveals whether the provider returned an empty list.
+        const widgetText = await editorSuggestions.getVisibleText();
+        await this.browser.execute(() => {
+          window.MonacoEnvironment?.monaco?.editor
+            ?.getEditors()?.[0]
+            ?.trigger('ftr', 'editor.action.triggerSuggest', {});
+        });
+        manuallyTriggered = true;
+        throw new Error(`suggestion list not populated (widget text: "${widgetText}")`);
       }
     });
+    if (manuallyTriggered) {
+      this.log.warning(
+        'Suggestions appeared only after manually triggering suggest; the original suggest session was cancelled'
+      );
+    }
     return await Promise.all(lists.map(async (element) => await element.getVisibleText()));
   }
 
