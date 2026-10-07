@@ -312,6 +312,12 @@ export class DashboardPageObject extends FtrService {
 
   public async switchToEditMode() {
     this.log.debug('Switching to edit mode');
+    await this.retry.waitFor('dashboard mode to be available', async () => {
+      return (
+        (await this.testSubjects.exists('dashboardViewOnlyMode')) ||
+        (await this.testSubjects.exists('dashboardEditMode'))
+      );
+    });
     if (!(await this.testSubjects.exists('dashboardViewOnlyMode'))) {
       await this.testSubjects.click('dashboardEditMode');
     }
