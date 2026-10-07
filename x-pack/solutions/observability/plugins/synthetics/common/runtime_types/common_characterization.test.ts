@@ -21,7 +21,7 @@ import {
   NonEmptyString,
   nonEmptyArray,
   TimeoutString,
-} from './zod/common';
+} from './schemas/common';
 import { inlineScriptIsFullJourneyMessage, nonEmptyFieldMessage } from './validation_messages';
 
 const namespaceCorpus = {
