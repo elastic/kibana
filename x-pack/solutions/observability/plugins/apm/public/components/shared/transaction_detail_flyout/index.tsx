@@ -43,7 +43,6 @@ const ACTIONS_BUTTON_LABEL = i18n.translate(
 );
 
 interface TransactionDetailFlyoutContentProps {
-  transactionName: string;
   onClose: () => void;
   historyKey: symbol;
   isFiltersStale: boolean;
@@ -52,17 +51,16 @@ interface TransactionDetailFlyoutContentProps {
 
 /**
  * Authors the `FlyoutTemplate` tree. Rendered inside the flyout's context provider so the header and
- * footer hooks have access; the template assembly requires the zones and their parts to be direct
- * children of `<FlyoutTemplate>`, so they are composed here rather than in sub-components.
+ * footer hooks have access. The template assembly only recognizes zones and parts that are direct
+ * children of `<FlyoutTemplate>`, so they cannot be wrapped in sub-components.
  */
 function TransactionDetailFlyoutContent({
-  transactionName,
   onClose,
   historyKey,
   isFiltersStale,
   isFiltersPending,
 }: TransactionDetailFlyoutContentProps) {
-  const { titleNode, metaBlocks, badges } = useTransactionDetailFlyoutHeader({ isFiltersPending });
+  const { titleNode, titleText, metaBlocks, badges } = useTransactionDetailFlyoutHeader();
   const { panels, isLoading, hasActions } = useTransactionDetailFlyoutFooterMenu();
 
   return (
@@ -74,7 +72,7 @@ function TransactionDetailFlyoutContent({
       session="inherit"
       historyKey={historyKey}
     >
-      <FlyoutTemplate.Header title={titleNode} titleText={transactionName}>
+      <FlyoutTemplate.Header title={titleNode} titleText={titleText} isLoading={isFiltersPending}>
         {metaBlocks}
         {badges}
       </FlyoutTemplate.Header>
@@ -129,7 +127,7 @@ export function TransactionDetailFlyout({
   indicesSource,
   alertsCount,
 }: TransactionDetailFlyoutComponentProps) {
-  const { transactionName, rangeFrom, rangeTo, start, end } = filters;
+  const { rangeFrom, rangeTo, start, end } = filters;
   const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
   const indices = useResolvedApmIndices({ http: deps.core.http, indicesSource });
 
@@ -169,7 +167,6 @@ export function TransactionDetailFlyout({
   return (
     <TransactionDetailFlyoutContextProvider value={contextValue}>
       <TransactionDetailFlyoutContent
-        transactionName={transactionName}
         onClose={onClose}
         historyKey={historyKey}
         isFiltersStale={isFiltersStale}

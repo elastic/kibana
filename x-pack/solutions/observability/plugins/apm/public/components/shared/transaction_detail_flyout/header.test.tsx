@@ -34,11 +34,11 @@ jest.mock('./summary', () => ({
   ],
 }));
 
-function HeaderInTemplate({ isFiltersPending }: { isFiltersPending: boolean }) {
-  const { titleNode, metaBlocks, badges } = useTransactionDetailFlyoutHeader({ isFiltersPending });
+function HeaderInTemplate() {
+  const { titleNode, titleText, metaBlocks, badges } = useTransactionDetailFlyoutHeader();
   return (
     <FlyoutTemplate onClose={jest.fn()} session="never">
-      <FlyoutTemplate.Header title={titleNode} titleText="GET /api/orders">
+      <FlyoutTemplate.Header title={titleNode} titleText={titleText}>
         {metaBlocks}
         {badges}
       </FlyoutTemplate.Header>
@@ -47,10 +47,10 @@ function HeaderInTemplate({ isFiltersPending }: { isFiltersPending: boolean }) {
   );
 }
 
-function renderHeader(isFiltersPending = false) {
+function renderHeader() {
   return render(
     <IntlProvider locale="en">
-      <HeaderInTemplate isFiltersPending={isFiltersPending} />
+      <HeaderInTemplate />
     </IntlProvider>
   );
 }
@@ -110,14 +110,6 @@ describe('useTransactionDetailFlyoutHeader', () => {
 
     expect(screen.getByTestId('transactionDetailFlyoutTitle')).toHaveTextContent('GET /api/orders');
     expect(screen.queryByTestId('transactionDetailFlyoutTitleLink')).not.toBeInTheDocument();
-  });
-
-  it('shows a spinner next to the title while filters are pending', () => {
-    renderHeader(true);
-
-    const spinner = screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner');
-    expect(spinner).toHaveAttribute('aria-label', 'Updating filters');
-    expect(screen.getByTestId('transactionDetailFlyoutTitle')).toContainElement(spinner);
   });
 
   it('renders the environment, transaction type, and date range as header meta blocks', () => {

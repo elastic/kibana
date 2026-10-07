@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { TransactionDetailFlyout, TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY } from '.';
+import type { TransactionDetailFlyoutFooterMenu } from './footer';
 
 const mockUseResolvedApmIndices = jest.fn((_args: unknown): APMIndices | null | undefined => null);
 jest.mock('../../../hooks/use_apm_indices', () => ({
@@ -17,6 +18,7 @@ jest.mock('../../../hooks/use_apm_indices', () => ({
 }));
 
 const mockFlyoutTemplateProps = jest.fn();
+const mockPrimaryActionMenuProps = jest.fn();
 
 // A lightweight stand-in for the template that renders the zones' children and records the root
 // props, so the container's wiring can be asserted in isolation.
@@ -28,13 +30,16 @@ jest.mock('@kbn/flyout-template', () => {
   };
   FlyoutTemplate.Header = ({
     title,
+    isLoading,
     children,
   }: {
     title: React.ReactNode;
+    isLoading?: boolean;
     children?: React.ReactNode;
   }) => (
     <header>
       {title}
+      {isLoading ? <span data-test-subj="flyoutHeaderTitleLoading" /> : null}
       {children}
     </header>
   );
@@ -42,13 +47,16 @@ jest.mock('@kbn/flyout-template', () => {
     Callout: ({ title, ...rest }: { title: React.ReactNode }) => <div {...rest}>{title}</div>,
   });
   FlyoutTemplate.Footer = Object.assign(passthrough, {
-    PrimaryActionMenu: () => <div data-test-subj="transactionDetailFlyoutFooter">footer</div>,
+    PrimaryActionMenu: (props: Record<string, unknown>) => {
+      mockPrimaryActionMenuProps(props);
+      return <div data-test-subj="transactionDetailFlyoutFooter">footer</div>;
+    },
   });
   return { __esModule: true, FlyoutTemplate };
 });
 
 jest.mock('./header', () => ({
-  useTransactionDetailFlyoutHeader: ({ isFiltersPending }: { isFiltersPending?: boolean }) => {
+  useTransactionDetailFlyoutHeader: () => {
     const { useTransactionDetailFlyoutContext } = jest.requireActual(
       './transaction_detail_flyout_context'
     );
@@ -56,25 +64,23 @@ jest.mock('./header', () => ({
       filters: { transactionName },
     } = useTransactionDetailFlyoutContext();
     return {
-      titleNode: (
-        <span data-test-subj="transactionDetailFlyoutTitle">
-          {transactionName}
-          {isFiltersPending ? (
-            <span data-test-subj="transactionDetailFlyoutFiltersPendingSpinner" />
-          ) : null}
-        </span>
-      ),
+      titleNode: <span data-test-subj="transactionDetailFlyoutTitle">{transactionName}</span>,
+      titleText: transactionName,
       metaBlocks: [],
       badges: [],
     };
   },
 }));
+const EMPTY_FOOTER_MENU: TransactionDetailFlyoutFooterMenu = {
+  panels: [{ id: 0, items: [] }],
+  isLoading: false,
+  hasActions: false,
+};
+const mockUseTransactionDetailFlyoutFooterMenu = jest.fn(
+  (): TransactionDetailFlyoutFooterMenu => EMPTY_FOOTER_MENU
+);
 jest.mock('./footer', () => ({
-  useTransactionDetailFlyoutFooterMenu: () => ({
-    panels: [{ id: 0, items: [] }],
-    isLoading: false,
-    hasActions: false,
-  }),
+  useTransactionDetailFlyoutFooterMenu: () => mockUseTransactionDetailFlyoutFooterMenu(),
 }));
 
 jest.mock('./latency_distribution', () => ({
@@ -155,6 +161,7 @@ describe('TransactionDetailFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseResolvedApmIndices.mockReturnValue(null);
+    mockUseTransactionDetailFlyoutFooterMenu.mockReturnValue(EMPTY_FOOTER_MENU);
   });
 
   it('renders the transaction name in the header and flyout content', () => {
@@ -207,7 +214,38 @@ describe('TransactionDetailFlyout', () => {
   it('shows a spinner next to the title while filters are pending', () => {
     render(<TransactionDetailFlyout {...BASE_PROPS} isFiltersPending />);
 
-    expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
+    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
+  });
+
+  it('passes the footer menu state and open-actions telemetry to the actions button', () => {
+    const panels = [{ id: 0, items: [{ name: 'Open transaction details', href: '/details' }] }];
+    mockUseTransactionDetailFlyoutFooterMenu.mockReturnValue({
+      panels,
+      isLoading: true,
+      hasActions: true,
+    });
+
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(mockPrimaryActionMenuProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        label: 'Actions',
+        panels,
+        'data-test-subj': 'transactionDetailFlyoutActionsButton',
+        isLoading: true,
+        isDisabled: false,
+        'data-ebt-action': 'openActions',
+        'data-ebt-element': 'transactionDetailFlyoutActionsMenu',
+      })
+    );
+  });
+
+  it('disables the actions button when no actions are available', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(mockPrimaryActionMenuProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isDisabled: true, isLoading: false })
+    );
   });
 
   it('opens the full-trace waterfall with absolute start/end and relative locator ranges', () => {

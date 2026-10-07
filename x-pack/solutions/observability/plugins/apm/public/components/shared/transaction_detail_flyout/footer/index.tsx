@@ -23,8 +23,7 @@ export interface TransactionDetailFlyoutFooterMenu {
 
 /**
  * Resolves the transaction detail flyout footer "Actions" menu as `Footer.PrimaryActionMenu`
- * panels. The item test subjects match the pre-template menu
- * (`transactionDetailFlyoutActionsMenuItem-*`).
+ * panels. Items use the `transactionDetailFlyoutActionsMenuItem-*` test subjects.
  */
 export function useTransactionDetailFlyoutFooterMenu(): TransactionDetailFlyoutFooterMenu {
   const {

@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
 import { getAlertsBadgeDescriptor } from '../badge/alerts_badge';
+import { renderAlertsHeaderBadge } from '../badge/alerts_header_badge';
 import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { useTransactionDetailFlyoutAlertsBadge } from './hooks/use_transaction_detail_flyout_alerts_badge';
 import { useTransactionDetailFlyoutLinks } from './hooks/use_transaction_detail_flyout_links';
 import { useTransactionDetailFlyoutSummaryItems } from './summary';
 import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
 
-const { Badge, MetaBlock } = FlyoutTemplate.Header;
-
-const FILTERS_PENDING_ARIA_LABEL = i18n.translate(
-  'xpack.apm.transactionDetailFlyout.filtersPendingAriaLabel',
-  {
-    defaultMessage: 'Updating filters',
-  }
-);
+const { MetaBlock } = FlyoutTemplate.Header;
 
 const TITLE_LINK_TOOLTIP = i18n.translate('xpack.apm.transactionDetailFlyout.titleLinkTooltip', {
   defaultMessage: 'Open transaction details',
@@ -33,21 +27,18 @@ const TITLE_LINK_TOOLTIP = i18n.translate('xpack.apm.transactionDetailFlyout.tit
 
 export interface TransactionDetailFlyoutHeaderParts {
   titleNode: ReactNode;
+  titleText: string;
   metaBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
- * Resolves the transaction detail flyout header content for `FlyoutTemplate.Header`: the title node,
- * the environment / transaction type / date range meta blocks, and the alerts badge. The template
- * owns the heading element and only renders parts that are direct children of the header, so the
- * parts are returned as element arrays.
+ * Resolves the transaction detail flyout header content for `FlyoutTemplate.Header`: the title node
+ * and its plain-text form, the environment / transaction type / date range meta blocks, and the
+ * alerts badge. The template owns the heading element and only renders parts that are direct
+ * children of the header, so the parts are returned as element arrays.
  */
-export function useTransactionDetailFlyoutHeader({
-  isFiltersPending = false,
-}: {
-  isFiltersPending?: boolean;
-} = {}): TransactionDetailFlyoutHeaderParts {
+export function useTransactionDetailFlyoutHeader(): TransactionDetailFlyoutHeaderParts {
   const {
     filters: { serviceName, transactionName },
   } = useTransactionDetailFlyoutContext();
@@ -78,27 +69,7 @@ export function useTransactionDetailFlyoutHeader({
     transactionName
   );
 
-  // The header renders only its curated parts, so the transient spinner rides in the title node.
-  const titleNode = (
-    <span data-test-subj="transactionDetailFlyoutTitle">
-      {isFiltersPending ? (
-        <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem component="span" grow={false}>
-            {titleContent}
-          </EuiFlexItem>
-          <EuiFlexItem component="span" grow={false}>
-            <EuiLoadingSpinner
-              size="m"
-              data-test-subj="transactionDetailFlyoutFiltersPendingSpinner"
-              aria-label={FILTERS_PENDING_ARIA_LABEL}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        titleContent
-      )}
-    </span>
-  );
+  const titleNode = <span data-test-subj="transactionDetailFlyoutTitle">{titleContent}</span>;
 
   const metaBlocks = summaryItems.map(({ id, title, value }) => (
     <MetaBlock
@@ -126,39 +97,8 @@ export function useTransactionDetailFlyoutHeader({
       },
     });
 
-    badges.push(
-      descriptor.href ? (
-        <Badge
-          key="alerts"
-          id="alerts"
-          color={descriptor.color}
-          iconType={descriptor.iconType}
-          data-test-subj={descriptor['data-test-subj']}
-          toolTipContent={descriptor.toolTipContent}
-          toolTipPosition="bottom"
-          href={descriptor.href}
-          aria-label={descriptor.ariaLabel}
-          {...descriptor.ebtProps}
-        >
-          {descriptor.label}
-        </Badge>
-      ) : (
-        <Badge
-          key="alerts"
-          id="alerts"
-          color={descriptor.color}
-          iconType={descriptor.iconType}
-          data-test-subj={descriptor['data-test-subj']}
-          toolTipContent={descriptor.toolTipContent}
-          toolTipPosition="bottom"
-          role="img"
-          aria-label={descriptor.ariaLabel}
-        >
-          {descriptor.label}
-        </Badge>
-      )
-    );
+    badges.push(renderAlertsHeaderBadge(descriptor));
   }
 
-  return { titleNode, metaBlocks, badges };
+  return { titleNode, titleText: transactionName, metaBlocks, badges };
 }
