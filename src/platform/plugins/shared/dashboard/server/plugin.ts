@@ -31,6 +31,7 @@ import { registerContentInsights } from '@kbn/content-management-content-insight
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStartApi } from '@kbn/spaces-plugin/server/plugin';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -63,7 +64,7 @@ export interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
-  spaces?: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup; // TODO: remove this
 }
 
 export interface StartDeps {
@@ -73,6 +74,7 @@ export interface StartDeps {
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStartApi;
 }
 
 export class DashboardPlugin
@@ -154,7 +156,6 @@ export class DashboardPlugin
       },
     };
     core.uiSettings.register(dashboardUiSettings);
-    console.log({ plugins });
     registerRoutes(core, plugins, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({

@@ -26,6 +26,7 @@ export const createDashboardChangeHistoryAdapter = (
         signal,
       });
       if (dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
+        // the first item is always the most recent
         response.items[0] = {
           ...response.items[0],
           metadata: { unsavedChanges: true },
@@ -61,7 +62,7 @@ export const createDashboardChangeHistoryAdapter = (
               signal,
             }
           );
-          console.log({ response });
+          // console.log({ response });
           dashboardApi.setState(response.snapshot);
           dashboardApi.runQuickSave();
           // const result = await dashboardClient.update(objectId, response.snapshot);

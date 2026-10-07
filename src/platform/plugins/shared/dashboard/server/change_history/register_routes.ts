@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import equal from 'fast-deep-equal';
+
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { ObjectChange } from '@kbn/change-history';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
@@ -82,13 +84,24 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
       } catch {
         return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
       }
+
+      const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
+      const { items: previousHistoryItem } = await client.getHistory(
+        spaceId,
+        'dashboard',
+        req.params.id,
+        {
+          size: 1,
+        }
+      );
+      if (equal(previousHistoryItem[0]?.object.snapshot, req.body)) return res.notModified({}); // do not log new version if no changes
+
       console.log('!!!!!! TYPEOF', typeof req.body);
       const change: ObjectChange = {
         objectType: 'dashboard',
         objectId: req.params.id,
         snapshot: req.body, // post-change state
       };
-      const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
       await client.log(change, {
         action: 'dashboard_update',
         username: user.username,

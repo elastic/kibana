@@ -15,6 +15,12 @@ import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from '.
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
   projectRouting?: string;
   esqlApproximation?: boolean;
+  /**
+   * Monotonic per-dashboard counter, incremented on each content change and used as the
+   * change history `sequence`. Not to be confused with the legacy `version` attribute, which
+   * stored the Kibana version.
+   */
+  historySequence?: number;
 } & {
   /**
    * To avoid defining a new SO version, I am adding the new key `pinned_panels` here

@@ -9,10 +9,11 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { css } from '@emotion/react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
-import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import type { DashboardApi, DashboardInitializationState } from '..';
@@ -20,8 +21,6 @@ import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
 import { coreServices, unifiedSearchService } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
-import { toStoredFilters } from '@kbn/as-code-filters-transforms';
-import { css } from '@emotion/react';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -56,7 +55,13 @@ export const DashboardChangeHistoryProvider = ({
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
-      renderPreview={(props) => <DashboardPreview {...props} setPreviewTitle={setPreviewTitle} />}
+      renderPreview={(props) => (
+        <DashboardPreview
+          {...props}
+          setPreviewTitle={setPreviewTitle}
+          inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
+        />
+      )}
       renderBadge={renderDashboardChangeHistoryBadge}
       labels={{
         previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
@@ -87,8 +92,10 @@ export const DashboardChangeHistoryProvider = ({
 
 const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
-}> = ({ objectId, change, compareSpec, diffTelemetry, setPreviewTitle }) => {
+  inheritedTimeRange?: DashboardState['time_range'];
+}> = ({ objectId, change, compareSpec, diffTelemetry, setPreviewTitle, inheritedTimeRange }) => {
   const initialState = useRef<DashboardInitializationState>({
+    time_range: inheritedTimeRange,
     ...change,
     viewMode: 'view' as const,
   });
@@ -123,16 +130,29 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     );
   }, []);
 
+  const searchBarVisibilityProps = useMemo(() => {
+    return {
+      showFilterBar: ((change.snapshot as DashboardState).filters ?? []).length > 0,
+      showQueryInput: Boolean((change.snapshot as DashboardState).query?.expression !== ''),
+      showDatePicker: Boolean((change.snapshot as DashboardState).time_range), // if time range is saved, then `time_restore` is true
+    };
+  }, [change.snapshot]);
+
   return (
     <div
       css={css`
         overflow: scroll;
       `}
     >
-      <unifiedSearchService.ui.SearchBar
-        appName={DASHBOARD_APP_ID}
-        filters={toStoredFilters((change.snapshot as DashboardState).filters)}
-      />
+      {Object.values(searchBarVisibilityProps).some((visible) => visible) && (
+        <unifiedSearchService.ui.SearchBar
+          appName={DASHBOARD_APP_ID}
+          filters={toStoredFilters((change.snapshot as DashboardState).filters)}
+          disableSubscribingToGlobalDataServices
+          isDisabled={true}
+          {...searchBarVisibilityProps}
+        />
+      )}
       {memoized}
     </div>
   );

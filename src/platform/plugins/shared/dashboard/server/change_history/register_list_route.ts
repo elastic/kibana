@@ -93,7 +93,14 @@ export const registerHistoryListRoute = (
       }
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
 
-      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id);
+      const { total, items } = await client.getHistory(
+        spaceId,
+        'dashboard',
+        req.params.id
+        // {
+        // additionalFilters: [{ term: { 'event.action': 'dashboard_update' } }],
+        // }
+      );
 
       const [coreStart] = await coreSetup.getStartServices();
       const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
@@ -113,7 +120,7 @@ export const registerHistoryListRoute = (
                     jsondiffpatch.diff(item.object.snapshot, items[index + 1].object.snapshot)
                   )
                 : undefined;
-            console.log({ changes });
+            console.log({ changes, sequence: item.object.sequence });
             return {
               id: item.event.id,
               action: item.event.action,
@@ -123,6 +130,7 @@ export const registerHistoryListRoute = (
                 name: profile?.user.full_name || user.name,
                 id: user.id,
               },
+              version: item.object.sequence,
               ...(changes ? { changes: { count: changes.length } } : {}),
             };
           }),

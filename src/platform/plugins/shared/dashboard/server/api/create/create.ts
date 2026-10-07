@@ -11,6 +11,7 @@ import type { RequestTiming } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { INITIAL_HISTORY_SEQUENCE } from '../../change_history/history_sequence';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
@@ -38,7 +39,7 @@ export async function create(
   );
   const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    soAttributes,
+    { ...soAttributes, historySequence: INITIAL_HISTORY_SEQUENCE },
     {
       ...(id !== undefined && { id }),
       references: soReferences,

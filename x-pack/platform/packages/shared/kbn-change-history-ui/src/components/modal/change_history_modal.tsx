@@ -325,7 +325,11 @@ export function ChangeHistoryModal(): JSX.Element | null {
               />
             </ChangeHistoryPreviewShell>
 
-            <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>
+            <ChangeHistorySidebarPanel
+              title={i18n.TIMELINE_PANEL_TITLE}
+              onClose={closeModal}
+              headerActions={<>test</>}
+            >
               {renderSidebarContent()}
             </ChangeHistorySidebarPanel>
           </div>

@@ -22,6 +22,7 @@ import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { spacesService } from '../../kibana_services';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -90,12 +91,14 @@ export function registerUpdateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          console.log({ spacesService });
           const { body, operation } = await update(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
             req.serverTiming,
+            spacesService?.getSpaceId(req),
             isDashboardAppRequest
           );
           if (operation === 'create') {

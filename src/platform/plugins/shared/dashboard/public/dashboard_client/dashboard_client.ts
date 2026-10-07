@@ -124,6 +124,7 @@ export const dashboardClient = {
         body: JSON.stringify(dashboardState),
       }
     );
+    // console.log({ updateResponse });
     cache.delete(id);
     return updateResponse;
   },

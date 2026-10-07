@@ -39,6 +39,8 @@ export const getWorkflowChangeHistoryVersionNumber = (
 export const getWorkflowChangeHistoryRowDisplay = (
   item: WorkflowChangeHistoryRowLike
 ): WorkflowChangeHistoryRowDisplay => {
+  console.log({ item });
+
   if (item.id === WORKFLOW_UNSAVED_CHANGE_ID) {
     return {
       kind: 'unsaved',

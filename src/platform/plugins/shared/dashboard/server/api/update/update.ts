@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import equal from 'fast-deep-equal';
+
 import Boom from '@hapi/boom';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -24,6 +26,11 @@ import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
+import {
+  getNextHistorySequence,
+  INITIAL_HISTORY_SEQUENCE,
+} from '../../change_history/history_sequence';
+import { addToHistory } from '../../change_history/util';
 
 /**
  * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
@@ -41,6 +48,7 @@ export async function update(
   id: string,
   updateBody: DashboardState,
   serverTiming?: RequestTiming,
+  spaceId: string = 'default',
   isDashboardAppRequest: boolean = false
 ): Promise<{
   body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
@@ -64,11 +72,11 @@ export async function update(
   }
 
   let existingAccessMode: SavedObjectAccessControl['accessMode'] | undefined;
-  let isNewDocument = false;
 
   // Determine whether the document already exists.
+  let existing: SavedObject<DashboardSavedObjectAttributes> | undefined;
   try {
-    const existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id
     );
@@ -77,11 +85,11 @@ export async function update(
     if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw e;
     }
-    isNewDocument = true;
   }
-
+  // await new Promise((r) => setTimeout(r, 30000));
+  // console.log('AFTER AWAIT');
   // Create path
-  if (isNewDocument) {
+  if (!existing) {
     asCodeIdSchema.parse(id);
 
     const body = await create(
@@ -119,13 +127,32 @@ export async function update(
     savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
-      soAttributes,
+      {
+        ...soAttributes,
+        historySequence: getNextHistorySequence(existing, {
+          attributes: soAttributes,
+          references: soReferences,
+        }),
+      },
       {
         references: soReferences,
         /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
         mergeAttributes: false,
+        /** optimistic concurrency control: throws a 409 if the document changed since `existing` was read */
+        version: existing.version,
       }
     );
+    addToHistory({
+      ctx: requestCtx,
+      dashboardId: id,
+      snapshot: updateBody,
+      spaceId,
+      sequence: {
+        previous: existing.attributes.historySequence,
+        current: savedObject.attributes.historySequence ?? INITIAL_HISTORY_SEQUENCE,
+      },
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+    });
   } catch (e) {
     // if update failed, let's attempt to roll back the access mode change if we changed it
     if (shouldChangeAccessMode) {
