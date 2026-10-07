@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout/ui';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { XYVisualizationState } from '@kbn/lens-plugin/public';
+import { isLensLegacyAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
@@ -20,12 +21,18 @@ import {
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../common/constants';
 import type { DiscoverTestFixtures, DiscoverWorkerFixtures } from '../fixtures';
-import { spaceTest } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const ESQL_QUERY = 'from logstash-* | limit 10';
 const BREAKDOWN_QUERY = 'from logstash-*';
 const STATS_QUERY = 'from logstash-* | stats averageB = avg(bytes) by extension';
 const BREAKDOWN_LEGEND_LABELS = ['css', 'gif', 'jpg', 'php', 'png'];
+const TIME_FILTER_INDEX = `scout-discover-lens-time-${uuidv4()}`;
+const TIME_FILTER_QUERY = `FROM ${TIME_FILTER_INDEX}`;
+const TIME_FILTER_RANGE = {
+  from: '2015-09-20T10:00:00.000Z',
+  to: '2015-09-20T11:00:00.000Z',
+};
 
 // Use a copy that Discover has never opened so local tab state cannot mask lost chart settings.
 const roundTripSavedVisualization = async (
@@ -221,6 +228,131 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.teardownDiscoverDefaults();
+    });
+
+    spaceTest.describe('Lens as-code time filtering', () => {
+      spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
+        await esClient.indices.create({
+          index: TIME_FILTER_INDEX,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              service: { type: 'keyword' },
+            },
+          },
+        });
+        const { errors } = await esClient.bulk({
+          index: TIME_FILTER_INDEX,
+          refresh: 'wait_for',
+          operations: [
+            { index: {} },
+            { '@timestamp': '2015-09-20T10:15:00.000Z', service: 'early' },
+            { index: {} },
+            { '@timestamp': '2015-09-20T10:45:00.000Z', service: 'late' },
+            { index: {} },
+            { '@timestamp': '2015-09-20T12:15:00.000Z', service: 'outside' },
+          ],
+        });
+        expect(errors).toBe(false);
+        await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+        await scoutSpace.uiSettings.setDefaultTime(TIME_FILTER_RANGE);
+      });
+
+      spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
+        await esClient.indices.delete({ index: TIME_FILTER_INDEX, ignore_unavailable: true });
+        await scoutSpace.uiSettings.unset('dateFormat:tz');
+        await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+      });
+
+      spaceTest(
+        'filters a reused histogram by time after a Lens as-code round trip',
+        async ({ pageObjects, kbnClient, scoutSpace, apiServices }) => {
+          const { discover, datePicker } = pageObjects;
+          const sessionName = `ESQL Lens time filter ${scoutSpace.id}`;
+          const getRequestData = async (): Promise<
+            UnifiedHistogramVisContext['requestData'] | null
+          > =>
+            JSON.parse(
+              (await discover.getHistogramChart().getAttribute('data-request-data')) ?? 'null'
+            );
+
+          await discover.writeAndSubmitEsqlQuery(TIME_FILTER_QUERY);
+          await discover.chooseBreakdownField('service');
+          await discover.changeVisualizationShape('Line');
+          await discover.saveSearch(sessionName);
+
+          const { saved_objects: sessions } =
+            await kbnClient.savedObjects.find<DiscoverSessionAttributes>({
+              type: 'search',
+              space: scoutSpace.id,
+            });
+          const savedSession = sessions.find(({ attributes }) => attributes.title === sessionName);
+          const savedVisContext = savedSession?.attributes.tabs[0].attributes.visContext;
+          if (
+            !savedVisContext ||
+            !('attributes' in savedVisContext) ||
+            !isLensLegacyAttributes(savedVisContext.attributes)
+          ) {
+            throw new Error('Expected saved Lens attributes');
+          }
+          expect(savedVisContext).toMatchObject({
+            suggestionType: 'histogramForESQL',
+            requestData: { timeField: '@timestamp' },
+            attributes: { state: { visualization: { preferredSeriesType: 'line' } } },
+          });
+
+          const builder = new LensConfigBuilder(undefined, true);
+          const attributes = builder.fromAPIFormat(builder.toAPIFormat(savedVisContext.attributes));
+          const layers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+          expect(layers).toHaveLength(1);
+          expect(layers[0].timeField).toBeUndefined();
+
+          const sessionId = await apiServices.discover.create(
+            {
+              title: `${sessionName} round trip`,
+              tabs: [
+                {
+                  id: 'tab-1',
+                  label: 'Time filter',
+                  data_source: { type: 'esql', query: TIME_FILTER_QUERY },
+                  time_range: TIME_FILTER_RANGE,
+                  breakdown_field: 'service',
+                  vis_context: { suggestion_type: 'histogramForESQL', attributes },
+                },
+              ],
+            },
+            scoutSpace.id
+          );
+          const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+            type: 'search',
+            id: sessionId,
+            space: scoutSpace.id,
+          });
+          const { visContext } = storedSession.attributes.tabs[0].attributes;
+          if (!visContext || !('requestData' in visContext)) {
+            throw new Error('Expected the round-tripped chart fingerprint');
+          }
+          const { requestData } = visContext;
+          expect(requestData).toMatchObject({ breakdownField: 'service' });
+          expect(requestData.timeField).toBeUndefined();
+
+          await discover.goto({ queryMode: 'esql', savedSearchId: sessionId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(['early', 'late']);
+          await expect.poll(getRequestData).toStrictEqual(requestData);
+
+          // Equal-duration windows keep the generated histogram query unchanged.
+          await datePicker.setAbsoluteRange({
+            from: 'Sep 20, 2015 @ 10:30:00.000',
+            to: 'Sep 20, 2015 @ 11:30:00.000',
+          });
+          await expect.poll(() => discover.getHistogramLegendLabels()).toStrictEqual(['late']);
+          await expect.poll(getRequestData).toStrictEqual(requestData);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+        }
+      );
     });
 
     spaceTest(

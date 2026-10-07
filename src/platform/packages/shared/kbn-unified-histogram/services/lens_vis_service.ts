@@ -905,8 +905,17 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   queryParams: QueryParams;
   requestData: UnifiedHistogramVisContext['requestData'];
 }): boolean {
-  // requestData should match
-  if (
+  if (queryParams.dataSource.kind === 'esql') {
+    const layers = externalVisContext.attributes.state?.datasourceStates?.textBased?.layers ?? {};
+    // Lens hydrates missing time fields, but an explicit field must still match the current source.
+    if (
+      Object.values(layers).some(
+        (layer) => layer.timeField && layer.timeField !== queryParams.dataSource.timeFieldName
+      )
+    ) {
+      return false;
+    }
+  } else if (
     (Object.keys(requestData) as Array<keyof UnifiedHistogramVisContext['requestData']>).some(
       (key) => !isEqual(requestData[key], externalVisContext.requestData[key])
     )
