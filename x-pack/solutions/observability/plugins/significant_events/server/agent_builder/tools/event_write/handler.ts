@@ -14,6 +14,7 @@ import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
+  createBulkWriteOutcomeUnknownError,
   type CompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
@@ -36,8 +37,11 @@ import {
 import {
   alignResults,
   type BulkResults,
+  type DedupCandidate,
   type EventsWriteBulkResult,
   type EventsWriteInput,
+  type EventsWriteNoOpResult,
+  type EventsWriteResult,
   type WriteCandidate,
 } from './types';
 
