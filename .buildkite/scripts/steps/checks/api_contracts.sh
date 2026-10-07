@@ -47,7 +47,7 @@ wait $SERVERLESS_PID || SERVERLESS_EXIT=$?
 if [ $STACK_EXIT -ne 0 ] || [ $SERVERLESS_EXIT -ne 0 ]; then
   echo --- Notify API owners
   if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-    ts-node .buildkite/scripts/steps/checks/notify_api_contract_owners.ts \
+    node .buildkite/scripts/steps/checks/notify_api_contract_owners.ts \
       "$STACK_REPORT" "$SERVERLESS_REPORT" || echo "Warning: failed to post PR notification"
   fi
   exit 1

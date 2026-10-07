@@ -107,7 +107,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
           title: 'Synthetics Sync Private Location Monitors Task',
           description:
-            'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
+            'This task syncs private location monitor package policies, handling maintenance window changes.',
           timeout: '10m',
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
@@ -180,9 +180,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         disableAutoSync: false,
-        hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        maxCleanUpRetries: 2,
       });
     });
 
@@ -218,8 +216,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         disableAutoSync: false,
-        maxCleanUpRetries: 2,
-        hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
       });
     });
@@ -248,8 +244,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
-        hasAlreadyDoneCleanup: false,
-        maxCleanUpRetries: 2,
       });
     });
 
@@ -391,7 +385,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const syncSpy = jest
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
-        .mockResolvedValue(undefined);
+        .mockResolvedValue({ failedCreatesBySpace: [] });
 
       const result = await task.runTask({ taskInstance });
 
@@ -408,6 +402,69 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...taskInstance.state,
         privateLocationId: undefined,
       });
+      expect(result).not.toHaveProperty('schedule');
+    });
+
+    it('should not return a schedule when a per-location sync fails', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      jest
+        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+        .mockRejectedValue(new Error('create failed'));
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeDefined();
+      // a schedule here would convert this one-shot task into a recurring one
+      expect(result).not.toHaveProperty('schedule');
+      expect(result.state.privateLocationId).toBeUndefined();
+    });
+
+    it('should skip MW sync when there are no private locations', async () => {
+      const taskInstance = getMockTaskInstance();
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeUndefined();
+      expect(result.state.hasAlreadyDoneCleanup).toBeUndefined();
+      expect(mockTaskManagerStart.schedule).not.toHaveBeenCalled();
+    });
+
+    it('should fail the per-location run when the sync reports failed creates', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+        failedCreatesBySpace: [{ spaceId: 'space1', count: 2 }],
+      });
+
+      const result = await task.runTask({ taskInstance });
+
+      // the recreate did not fully succeed, so cleanup must be able to re-attempt it
+      expect(result.error).toBeDefined();
+      expect(result).not.toHaveProperty('schedule');
     });
   });
 
@@ -615,122 +672,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
   });
 
-  describe('cleanUpDuplicatedPackagePolicies', () => {
-    let mockFinder: any;
-
-    beforeEach(() => {
-      // // Mock finder
-      let closed = false;
-      mockFinder = {
-        async *find() {
-          if (closed) throw new Error('Finder closed');
-          yield {
-            saved_objects: [
-              {
-                id: 'monitor1',
-                attributes: {
-                  origin: 'ui',
-                  locations: [{ id: 'loc1', isServiceManaged: false }],
-                  id: 'monitor1',
-                },
-                namespaces: ['space1'],
-              },
-            ],
-          };
-        },
-        close: jest.fn().mockImplementation(() => {
-          closed = true;
-          return Promise.resolve();
-        }),
-      };
-      mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
-      task = new SyncPrivateLocationMonitorsTask(
-        mockServerSetup as any,
-        mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
-      );
-    });
-
-    it('should not delete any policies if all are expected', async () => {
-      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
-        (async function* () {
-          yield ['monitor1-loc1'];
-        })()
-      );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
-      expect(result.performCleanupSync).toBe(false);
-    });
-
-    it('should delete unexpected policies and set performCleanupSync true', async () => {
-      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
-        (async function* () {
-          yield ['monitor1-loc1', 'unexpected-policy'];
-        })()
-      );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
-        mockSoClient,
-        expect.anything(),
-        ['unexpected-policy'],
-        { force: true, ignoreMissing: true, spaceIds: ['*'] }
-      );
-      expect(result.performCleanupSync).toBe(true);
-    });
-
-    it('should set performCleanupSync true if expected policies are missing', async () => {
-      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
-        (async function* () {
-          yield [];
-        })()
-      );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(result.performCleanupSync).toBe(true);
-    });
-
-    it('should handle errors gracefully and return performCleanupSync', async () => {
-      mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(result).toHaveProperty('performCleanupSync');
-    });
-
-    it('should skip cleanup if hasAlreadyDoneCleanup is true', async () => {
-      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performCleanupSync).toBe(false);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as it has already been done once'
-      );
-    });
-
-    it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {
-      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(result.performCleanupSync).toBe(false);
-      expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(3);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
-      );
-    });
-
-    it('should decrement maxCleanUpRetries and eventually skip after failures', async () => {
-      // Simulate error in fetchAllItemIds
-      mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
-      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 2 };
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(state.maxCleanUpRetries).toBe(1);
-      expect(result).toHaveProperty('performCleanupSync');
-      // Call again to reach 0
-      await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
-      expect(state.hasAlreadyDoneCleanup).toBe(true);
-      expect(state.maxCleanUpRetries).toBe(3);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
-      );
-    });
-  });
-
   describe('schedule resolution in runTask', () => {
     const mockPrivateLocations = [
       { id: 'pl-1', label: 'Private Location 1', isServiceManaged: false, agentPolicyId: 'p-1' },
@@ -750,7 +691,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(scheduleOf(result)).toEqual({ interval: '15m' });
     });
 
-    it('falls back to DEFAULT_TASK_SCHEDULE when task has no schedule', async () => {
+    it('returns DEFAULT_TASK_SCHEDULE when the instance has no schedule', async () => {
       const taskInstance = getMockTaskInstance();
       const result = await task.runTask({ taskInstance });
       expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
