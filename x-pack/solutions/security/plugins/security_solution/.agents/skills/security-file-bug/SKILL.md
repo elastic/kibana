@@ -49,37 +49,11 @@ Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SE
 
 ## Fileable checklist
 
-Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar:
-
-- Exact error quoted, or console/logs heading with the typed error, or they said there is none / `Unknown`
-- Numbered steps someone else can follow
-- Version or `Unknown`
-- Four always-ask fields answered or `Unknown`
-- Create title is `[<team name>]` + symptom (`format-title`; no clipped title)
-- Stamp: `Filed via security-file-bug`
-- Path B create includes `sec-eng-prod:exploratory-tester`
-- `scan-sensitive` exit 0, or they confirmed the hits should stay / be stripped
+Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>]` + symptom (`format-title`; no clipped title). Stamp: `Filed via security-file-bug`.
 
 ## Scripts
 
-Every GitHub label read and every GitHub write goes through `scripts/file-bug.py`. JSON on stdout. Exit `0` ok, `1` fail (stderr), `2` ask the human.
-
-| Subcommand | Purpose |
-|---|---|
-| `from-findings` | One finding from `parse-findings.py` JSONL |
-| `check-pack` | Thin-pack gaps (exit 2 if missing) |
-| `check-draft` | Fileable-bar gaps (exit 2 if not fileable) |
-| `scan-sensitive` | Emails / case IDs / NDA (exit 2 if hits) |
-| `render-body` | Pack → template body + stamp |
-| `infer-team` | Area / slug / route → `Team:*` |
-| `format-title` | `[<team name>] …` (exit 2 if longer than 72) |
-| `infer-deployment` | ECH / serverless / both, or ask |
-| `parse-search` | `gh search --json` → matches |
-| `decide` | `create` / `comment` / `reopen_comment` / `ask` |
-| `validate-labels` | Keep labels the repo has (`--search` each; no `--limit 1000`) |
-| `write` | Agreed `gh` write |
-| `upload` | User-attachments (before write) |
-| `embed-uploads` | Local paths → uploaded URLs (`--out` writes the body file) |
+Every GitHub label read and write goes through `python3 …/scripts/file-bug.py <cmd>`. JSON on stdout. Exit `0` ok, `1` fail, `2` ask. Validate labels with `--search` (never `gh label list --limit 1000`).
 
 ## Flow
 
@@ -128,7 +102,7 @@ Always include `bug` on a new issue. Path B also `sec-eng-prod:exploratory-teste
 
 ### 4. Write (only after yes)
 
-Upload first, embed into a **new** body file, write **that** file (not the pre-embed `body.md`):
+Upload first, embed into a **new** body file, write **that** file (not the pre-embed `body.md`). `embed-uploads` wraps images as `![filename](url)` and videos as `<video src="url" controls></video>` on their own paragraph so GitHub shows a player. Never write a bare image or video URL (a URL in a sentence is a link).
 
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py upload \
@@ -150,21 +124,13 @@ A failed **create** must not be retried. A **comment** is not retried. If `reope
 
 Stop. You are about to write without a yes, or to file the wrong body:
 
-- “They said file finding 2, I can create now.” → that is draft permission only.
-- “I’ll ask the four always-ask questions in one message.” → **Hard stop** after each.
-- “2 and 5 are the same session, one ticket.” → two issues.
+- “They said file finding 2, I can create now.” → draft only.
+- “I’ll batch the always-ask questions.” → **Hard stop** after each.
+- “2 and 5 are one ticket.” → two issues. Do not combine findings.
 - “embed wrote JSON, I’ll `write --body-file body.md`.” → write `embedded.md`.
-- “Title is long, I’ll clip it.” → `format-title` exit 2; ask them to shorten.
-
-## Common mistakes
-
-- Combining unrelated findings in one issue.
-- Filing local paths because `write` still pointed at `body.md`.
-- `gh label list --limit 1000` (truncates `Team:*`). Use `validate-labels --search`.
-- Retrying a failed create or comment.
-- Dropping `sec-eng-prod:exploratory-tester` on a tester finding.
-- Writing `_unknown_` instead of `Unknown`.
-- Assuming Scout is always local / stateful.
+- “I’ll paste the uploaded image or video URL as-is.” → images must be `![filename](url)`; videos must be `<video src="url" controls></video>` on their own paragraph.
+- “Title is long, I’ll clip it.” → `format-title` exit 2.
+- Retrying a failed create or comment. Dropping `sec-eng-prod:exploratory-tester`. Writing `_unknown_`. Assuming Scout is always local.
 
 ## Out of scope
 

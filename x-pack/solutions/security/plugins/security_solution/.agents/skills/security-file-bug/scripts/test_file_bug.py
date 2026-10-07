@@ -607,12 +607,52 @@ class CheckDraftTest(unittest.TestCase):
 
 
 class EmbedUploadsTest(unittest.TestCase):
-    def test_replaces_local_paths(self):
+    def test_wraps_image_paths_as_markdown(self):
         body = "See /tmp/session/screenshots/leak.png"
         updated = embed_uploads(
             body, [("/tmp/session/screenshots/leak.png", "https://img/leak.png")]
         )
-        self.assertEqual(updated, "See https://img/leak.png")
+        self.assertEqual(updated, "See ![leak.png](https://img/leak.png)")
+
+    def test_unwraps_backticked_image_path(self):
+        body = "See `/tmp/shot.png`"
+        updated = embed_uploads(body, [("/tmp/shot.png", "https://img/shot.png")])
+        self.assertEqual(updated, "See ![shot.png](https://img/shot.png)")
+
+    def test_keeps_existing_image_alt_text(self):
+        body = "![Before reload](/tmp/shot.png)"
+        updated = embed_uploads(body, [("/tmp/shot.png", "https://img/shot.png")])
+        self.assertEqual(updated, "![Before reload](https://img/shot.png)")
+
+    def test_wraps_video_as_player_on_own_paragraph(self):
+        body = "Recording: /tmp/flow.mp4"
+        updated = embed_uploads(body, [("/tmp/flow.mp4", "https://img/flow.mp4")])
+        self.assertEqual(
+            updated,
+            "Recording:\n\n<video src=\"https://img/flow.mp4\" controls></video>\n\n",
+        )
+
+    def test_replaces_markdown_image_video_with_player(self):
+        body = "![](/tmp/flow.mp4)"
+        updated = embed_uploads(body, [("/tmp/flow.mp4", "https://img/flow.mp4")])
+        self.assertEqual(
+            updated, '\n\n<video src="https://img/flow.mp4" controls></video>\n\n'
+        )
+
+    def test_mixed_image_and_video(self):
+        body = "/tmp/shot.png\n/tmp/flow.mp4"
+        updated = embed_uploads(
+            body,
+            [
+                ("/tmp/shot.png", "https://img/shot.png"),
+                ("/tmp/flow.mp4", "https://img/flow.mp4"),
+            ],
+        )
+        self.assertEqual(
+            updated,
+            "![shot.png](https://img/shot.png)\n\n"
+            '<video src="https://img/flow.mp4" controls></video>\n\n',
+        )
 
 
 class UploadEvidenceTest(unittest.TestCase):
@@ -1056,8 +1096,11 @@ class FileBugCliTest(unittest.TestCase):
                 str(dest),
             )
             self.assertEqual(result.returncode, 0)
-            self.assertIn("https://img/shot.png", dest.read_text(encoding="utf-8"))
-            self.assertIn("https://img/shot.png", json.loads(result.stdout)["body"])
+            embedded = dest.read_text(encoding="utf-8")
+            self.assertEqual(embedded, "See ![shot.png](https://img/shot.png)\n")
+            self.assertEqual(
+                json.loads(result.stdout)["body"], "See ![shot.png](https://img/shot.png)\n"
+            )
 
 
 TESTER_PARSE = (
@@ -1166,7 +1209,7 @@ class SkillProtocolTest(unittest.TestCase):
 
     def test_red_flags_and_mistakes(self):
         self.assertIn("## Red flags", self.skill)
-        self.assertIn("## Common mistakes", self.skill)
+        self.assertNotIn("## Common mistakes", self.skill)
 
     def test_human_gate(self):
         self.assertIn("create a bug", self.text.lower())
@@ -1236,6 +1279,8 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("vague", self.text.lower())
         self.assertIn("user-attachments", self.text)
         self.assertIn("embed-uploads", self.text)
+        self.assertIn("![filename](url)", self.text)
+        self.assertIn('<video src="url" controls></video>', self.text)
         self.assertIn("--search", self.text)
         self.assertIn("Video:", self.text)
         self.assertIn("clipped title", self.text)

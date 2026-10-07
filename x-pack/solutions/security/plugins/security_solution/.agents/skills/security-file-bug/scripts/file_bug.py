@@ -930,6 +930,7 @@ _ASSET_URL = (
     "?name={name}&content_type={content_type}&repository_id={repository_id}"
 )
 _VIDEO_SUFFIXES = frozenset({".mp4", ".mov", ".webm"})
+_IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp"})
 _MIME_BY_SUFFIX = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
@@ -1105,12 +1106,70 @@ def _repository_id(repo: str, run_gh: GhRunner) -> int:
     return int(stdout.strip())
 
 
+def _is_image_upload(path: str) -> bool:
+    return Path(path).suffix.lower() in _IMAGE_SUFFIXES
+
+
+def _is_video_upload(path: str) -> bool:
+    return Path(path).suffix.lower() in _VIDEO_SUFFIXES
+
+
+def _video_embed(url: str) -> str:
+    return f'<video src="{url}" controls></video>'
+
+
+def _isolate_as_paragraph(body: str, token: str) -> str:
+    """Put `token` alone in its paragraph so GitHub shows a player, not a link."""
+    isolated = re.sub(
+        rf"[ \t]*{re.escape(token)}[ \t]*",
+        f"\n\n{token}\n\n",
+        body,
+    )
+    return re.sub(r"\n{3,}", "\n\n", isolated)
+
+
+def _embed_video(body: str, path: str, url: str) -> str:
+    embed = _video_embed(url)
+    result = re.sub(
+        rf"!\[[^\]]*\]\(`?{re.escape(path)}`?\)",
+        embed,
+        body,
+    )
+    result = result.replace(f"`{path}`", embed)
+    result = result.replace(path, embed)
+    return _isolate_as_paragraph(result, embed)
+
+
+def _markdown_for_upload(path: str, url: str) -> str:
+    if _is_image_upload(path):
+        return f"![{Path(path).name}]({url})"
+    if _is_video_upload(path):
+        return _video_embed(url)
+    return url
+
+
 def embed_uploads(body: str, uploaded: list) -> str:
+    """Replace local evidence paths so GitHub inlines images and videos.
+
+    Images become ``![name](url)``. Videos become a ``<video>`` player on its
+    own paragraph (a URL in a sentence renders as a link). A path already
+    inside ``](path)`` only has the URL swapped so existing alt text is kept.
+    """
     result = body
-    for path, url in uploaded:
+    ordered = sorted(uploaded, key=lambda pair: len(str(pair[0])), reverse=True)
+    for path, url in ordered:
         path_text = str(path)
-        result = result.replace(f"`{path_text}`", str(url))
-        result = result.replace(path_text, str(url))
+        url_text = str(url)
+        if not path_text or not url_text:
+            continue
+        if _is_video_upload(path_text):
+            result = _embed_video(result, path_text, url_text)
+            continue
+        result = result.replace(f"](`{path_text}`)", f"]({url_text})")
+        result = result.replace(f"]({path_text})", f"]({url_text})")
+        replacement = _markdown_for_upload(path_text, url_text)
+        result = result.replace(f"`{path_text}`", replacement)
+        result = result.replace(path_text, replacement)
     return result
 
 

@@ -486,7 +486,8 @@ def _build_parser() -> argparse.ArgumentParser:
     upload.set_defaults(handler=_cmd_upload)
 
     embed = subparsers.add_parser(
-        "embed-uploads", help="Replace local evidence paths with uploaded URLs"
+        "embed-uploads",
+        help="Replace local evidence paths with ![name](url) for images, <video> for video",
     )
     embed.add_argument("--body", required=True)
     embed.add_argument("--map", required=True, help="upload JSON or {\"uploaded\":[...]}")
