@@ -6,7 +6,6 @@
  */
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { i18n } from '@kbn/i18n';
 import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
 import {
   anonymizationSettingsSchema,
@@ -17,36 +16,11 @@ export function getAnonymizationUiSettings(): Record<string, UiSettingsParams> {
   return {
     [aiAnonymizationSettings]: {
       category: ['general'],
-      name: i18n.translate('xpack.aiAnonymization.settings.label', {
-        defaultMessage: 'Anonymization Settings',
-      }),
       value: JSON.stringify(DEFAULT_ANONYMIZATION_SETTINGS, null, 2),
-      description: i18n.translate('xpack.aiAnonymization.settings.description', {
-        defaultMessage: `Configuration for the anonymization pipeline
-          <ul>
-            <li><strong>maskingEnabled:</strong> master switch for the whole pipeline (off by default)</li>
-            <li><strong>onFailure:</strong> "block" (fail the request) or "allow_unsafe" (proceed unmasked, without applying any regular-expression rule) when a regular-expression rule cannot run</li>
-            <li><strong>rules:</strong> list of anonymization rules
-              <ul>
-                <li><strong>type:</strong> "NER" or "RegExp"</li>
-                <li><strong>entityClass:</strong> (RegExp type only) eg: EMAIL, URL, IP</li>
-                <li><strong>pattern:</strong> (RegExp type only) the regular-expression string to match</li>
-                <li><strong>modelId:</strong> (NER type only) ID of the NER (Named Entity Recognition) model to use</li>
-                <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
-                <li><strong>timeoutSeconds:</strong> (NER type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
-              </ul>
-            </li>
-          </ul>`,
-        values: {
-          ul: (chunks) => `<ul>${chunks}</ul>`,
-          li: (chunks) => `<li>${chunks}</li>`,
-          strong: (chunks) => `<strong>${chunks}</strong>`,
-          em: (chunks) => `<em>${chunks}</em>`,
-        },
-      }),
-      // Managed from the Anonymization page, so it is not listed in Advanced Settings: `readonly`
-      // removes it from that page, and `readonlyMode: 'ui'` (not 'strict') keeps writes through the
-      // settings client and the API working, which the page and `kibana.yml` overrides rely on.
+      // Managed from the Anonymization page, so it is not listed in Advanced Settings and needs no
+      // name or description there. `readonly` removes it from that page, and `readonlyMode: 'ui'`
+      // (not 'strict') keeps writes through the settings client and the API working, which the
+      // page and `kibana.yml` overrides rely on.
       readonly: true,
       readonlyMode: 'ui',
       schema: anonymizationSettingsSchema,
