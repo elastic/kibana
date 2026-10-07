@@ -12,10 +12,18 @@ jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
 }));
 
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { upsertComment } from '#pipeline-utils';
 import {
   buildCommentBody,
+  dedupeByChange,
   GITHUB_COMMENT_MAX_LENGTH,
+  notifyApiContractOwners,
   postedCommentLength,
+  readImpactReports,
+  RESOLVED_COMMENT_BODY,
   type ImpactEntry,
 } from './notify_api_contract_owners.ts';
 
@@ -370,6 +378,118 @@ describe('buildCommentBody', () => {
       expect(body).toContain('The approved breaking change(s) still ship with this PR');
       expect(body).not.toContain('**Fix the breaking change**');
       expect(body).not.toContain('/api/approved-huge');
+    });
+  });
+});
+
+describe('dedupeByChange', () => {
+  it('collapses the same change from the stack and serverless reports into one row', () => {
+    const change = entry({ oasdiffId: 'request-parameter-removed', reason: "deleted 'simulate'" });
+
+    expect(dedupeByChange([change, { ...change }])).toEqual([change]);
+  });
+
+  it('keeps distinct changes to the same endpoint under the same rule', () => {
+    const first = entry({ oasdiffId: 'request-property-removed', reason: "removed 'name'" });
+    const second = entry({ oasdiffId: 'request-property-removed', reason: "removed 'type'" });
+
+    expect(dedupeByChange([first, second])).toEqual([first, second]);
+  });
+
+  it('keeps kbn: rule changes at different source locations apart', () => {
+    const tightening = entry({
+      oasdiffId: 'kbn:request-additional-properties-tightened',
+      reason: 'Request body schema disallows extra fields',
+    });
+
+    expect(
+      dedupeByChange([
+        { ...tightening, source: '/components/schemas/A' },
+        { ...tightening, source: '/components/schemas/B' },
+      ])
+    ).toHaveLength(2);
+  });
+});
+
+describe('reading reports and posting', () => {
+  let dir: string;
+  const report = (name: string, contents: string): string => {
+    const reportPath = join(dir, name);
+    writeFileSync(reportPath, contents);
+    return reportPath;
+  };
+  const emptyReport = (name: string) => report(name, JSON.stringify({ entries: [] }));
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'api-contracts-notifier-'));
+    jest.mocked(upsertComment).mockClear();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+    jest.restoreAllMocks();
+  });
+
+  describe('readImpactReports', () => {
+    it('merges the entries of every report and marks the read complete', () => {
+      const stack = report('stack.json', JSON.stringify({ entries: [entry()] }));
+      const serverless = report(
+        'serverless.json',
+        JSON.stringify({ entries: [entry({ path: '/api/two' })] })
+      );
+
+      expect(readImpactReports([stack, serverless])).toEqual({
+        entries: [entry(), entry({ path: '/api/two' })],
+        complete: true,
+      });
+    });
+
+    it.each([
+      ['missing', () => join(dir, 'missing.json')],
+      ['unparseable', () => report('bad.json', '{ not json')],
+      ['unrecognized', () => report('odd.json', JSON.stringify({ changes: [] }))],
+    ])('marks the read incomplete when a report is %s', (_kind, makePath) => {
+      const result = readImpactReports([emptyReport('stack.json'), makePath()]);
+
+      expect(result).toEqual({ entries: [], complete: false });
+    });
+
+    it('treats no report paths as incomplete', () => {
+      expect(readImpactReports([])).toEqual({ entries: [], complete: false });
+    });
+  });
+
+  describe('notifyApiContractOwners', () => {
+    it('replaces the comment with the full report when there are changes', async () => {
+      await notifyApiContractOwners([
+        report('stack.json', JSON.stringify({ entries: [entry()] })),
+        report('serverless.json', JSON.stringify({ entries: [entry()] })),
+      ]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: buildCommentBody([entry()]),
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: true,
+      });
+    });
+
+    it('only updates an earlier comment when every check ran clean', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), emptyReport('serverless.json')]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: RESOLVED_COMMENT_BODY,
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: false,
+        createIfMissing: false,
+      });
+    });
+
+    it('leaves the comment alone when a check did not write its report', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), join(dir, 'missing.json')]);
+
+      expect(upsertComment).not.toHaveBeenCalled();
     });
   });
 });

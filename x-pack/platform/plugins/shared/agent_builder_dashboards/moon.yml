@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/agent-builder-dashboards-common'
   - '@kbn/dashboard-agent-authoring'
   - '@kbn/zod'
-  - '@kbn/dashboard-markdown'
   - '@kbn/unified-search-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/share-plugin'

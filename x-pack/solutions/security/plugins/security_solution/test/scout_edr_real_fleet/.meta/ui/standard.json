@@ -9,7 +9,8 @@
       "title": "Automated response actions shows isolate, kill-process, and failed suspend-process on the alert flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts",
