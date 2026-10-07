@@ -12,17 +12,22 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { executeDashboardOperations, hasValidCreateMetadataOperations } from './core';
+import {
+  executeDashboardOperations,
+  hasValidCreateMetadataOperations,
+} from '@kbn/dashboard-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
-jest.mock('./core', () => ({
-  ...jest.requireActual('./core'),
+jest.mock('@kbn/dashboard-authoring', () => ({
+  ...jest.requireActual('@kbn/dashboard-authoring'),
   executeDashboardOperations: jest.fn(),
   hasValidCreateMetadataOperations: jest.fn(),
-  createPanelResolver: jest.fn(),
-  createAttachmentPanelResolver: jest.fn(),
   createControlFieldCapabilitiesResolver: jest.fn(),
+}));
+jest.mock('./resolvers/panel_resolver', () => ({ createPanelResolver: jest.fn() }));
+jest.mock('./resolvers/attachment_panel_resolver', () => ({
+  createAttachmentPanelResolver: jest.fn(),
 }));
 jest.mock('./time_range', () => ({
   applyDefaultDashboardTimeRange: jest.fn(
@@ -48,7 +53,9 @@ const mockHasValidCreateMetadataOperations =
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (dashboardAttachmentId?: string) => {
-  const tool = generateDashboardTool();
+  const tool = generateDashboardTool({
+    getDashboardStateSchema: jest.fn().mockResolvedValue({}),
+  });
   const sendUiEvent = jest.fn();
   const ctx = {
     logger: { info: jest.fn(), error: jest.fn() },
