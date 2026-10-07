@@ -15,4 +15,4 @@ export type {
   ResolveSpecOptions,
 } from './spec/resolve_spec';
 export { renderIsomerProjection } from './projections/render_isomer_projection';
-export type { ProjectionContext, RenderProjection } from './projections/types';
+export type { ProjectionContext, IsomerProjectionDefinition } from './projections/types';

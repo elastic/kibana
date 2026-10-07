@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   ConversationOriginType,
-  type OriginIsomerProjection,
-  type RoundCompleteEvent,
+  OriginIsomerProjection,
+  RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { renderSlackProjection } from '../slack/render_slack_projection';
-import type { ProjectionContext, RenderProjection } from './types';
+import { slackProjection } from '../slack/slack_projection';
+import type { ProjectionContext, IsomerProjectionDefinition } from './types';
 
-/** Renders the projection of rounds from each origin type. */
-const renderers: {
-  [TOrigin in keyof OriginIsomerProjection]-?: RenderProjection<
-    NonNullable<OriginIsomerProjection[TOrigin]>
-  >;
-} = {
-  [ConversationOriginType.Slack]: renderSlackProjection,
-};
+/** The projections of rounds, one per origin type. */
+const projectionDefinitions: IsomerProjectionDefinition[] = [slackProjection];
 
 /**
  * Renders the projection of the round's origin through Isomer. Returns nothing when the origin
@@ -30,11 +24,17 @@ export const renderIsomerProjection = (
   event: RoundCompleteEvent,
   { originType, ...context }: ProjectionContext & { originType?: ConversationOriginType }
 ): OriginIsomerProjection | undefined => {
-  if (!originType) {
-    return;
+  const definition = projectionDefinitions.find(({ id }) => id === originType);
+
+  if (!definition) {
+    return undefined;
   }
 
-  const projection = renderers[originType](event, context);
+  const projection = definition.render(event, context);
 
-  return projection && { [originType]: projection };
+  if (!projection) {
+    return undefined;
+  }
+
+  return { [definition.id]: projection };
 };
