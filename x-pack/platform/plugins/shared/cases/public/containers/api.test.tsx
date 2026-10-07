@@ -1512,7 +1512,7 @@ describe('Cases API', () => {
         `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_delete`,
         {
           method: 'POST',
-          body: JSON.stringify({ ids: observableIds }),
+          body: JSON.stringify({ observableIds }),
           signal: abortCtrl.signal,
         }
       );

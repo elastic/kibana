@@ -720,7 +720,7 @@ export const bulkDeleteObservables = async (
     getCaseBulkDeleteObservablesUrl(caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ ids: observableIds }),
+      body: JSON.stringify({ observableIds }),
       signal,
     }
   );
