@@ -192,7 +192,9 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel', { timeout: 500 });
+    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel', {
+      timeout: 500,
+    });
     if (isOpenAlready) return;
 
     await this.testSubjects.click('showQueryBarMenu');
