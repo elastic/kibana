@@ -264,9 +264,7 @@ export const createAttachmentPublicClient = ({
       if (existing.active !== false) {
         throw createAttachmentInvalidError(`Attachment '${attachmentId}' is not deleted`);
       }
-      if (!stateManager.restore(attachmentId)) {
-        throw createAttachmentInvalidError(`Failed to restore attachment '${attachmentId}'`);
-      }
+      stateManager.restore(attachmentId);
 
       await persist({ conversation, conversationClient, stateManager });
 

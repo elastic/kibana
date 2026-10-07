@@ -5,23 +5,42 @@
  * 2.0.
  */
 
+import { firstValueFrom, lastValueFrom, of, toArray } from 'rxjs';
 import type { BaseMessage } from '@langchain/core/messages';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
+  ChatAgentEvent,
   CompactionCursor,
   CompactionSummary,
+  Conversation,
   ConversationRoundStep,
+  ConverseInput,
+  RoundCompleteEvent,
   TimelineEvent,
   ToolCallStep,
   ToolResult,
 } from '@kbn/agent-builder-common';
 import {
+  CONVERSATION_SCHEMA_VERSION,
+  ChatEventType,
+  ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolResultType,
   createPreExecutionWorkflowStep,
   createSubstitutionStep,
+  isEventsNativeVersion,
+  isRoundCompleteEvent,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
-import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type {
+  ConversationStateManager,
+  ModelProvider,
+  ToolResultStore,
+} from '@kbn/agent-builder-server/runner';
 import {
   T0,
   attachmentEventFixture,
@@ -29,11 +48,35 @@ import {
   processedCustomEventFixture,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
-import type { ProcessedTimelineEvent } from './context_timeline';
-import type { ProcessedConversation } from './prepare_conversation';
+import {
+  createConversationClientMock,
+  createEmptyConversation,
+  createRound,
+} from '../../../../test_utils/conversations';
+import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
+import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
+import { roundsToEvents, userMessageActor } from '../../../conversation/client/rounds_to_events';
+import { sourceEvents } from '../../../conversation/client/source_events';
+import {
+  appendResumeExecution$,
+  appendRoundTerminated$,
+  persistUserMessage,
+  type ConversationWithOperation,
+} from '../../utils/conversations';
+import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
+import { prepareConversation, type ProcessedConversation } from './prepare_conversation';
 import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import { listVisibleUnits } from './context_coverage';
-import { inheritedAttachmentEvents } from '../run_attachment_events';
+import {
+  RunAttachmentEvents,
+  inheritedAttachmentEvents,
+  runTriggerEventId,
+} from '../run_attachment_events';
+import { RunTracker } from '../run_tracker';
+import { applyStepUpdates, stepUpdates } from '../step_state';
+import { addRoundCompleteEvent } from './add_round_complete_event';
+import { buildResumeAnchors, pausedItems } from './attachment_placement';
+import { getPendingTurn, type PendingTurn } from './conversation_turn';
 import {
   buildContextView,
   renderUnit,
@@ -582,5 +625,427 @@ describe('renderUnit', () => {
     expect(rendered[2]).toContain('SECOND_INPUT');
     expect(rendered[2]).toContain('SECOND_ANSWER');
     expect(rendered[3]).toContain('RAW_x1');
+  });
+});
+
+describe('prompt-cache stability through persistence and reload', () => {
+  const author = { id: 'user-1', username: 'alice' };
+  const agentId = 'agent-1';
+
+  /** The handler context of one run: a real attachment state manager over the stored attachments. */
+  const handlerContext = (attachments: VersionedAttachment[] = []) => {
+    const context = createAgentHandlerContextMock();
+    context.attachments.getTypeDefinition.mockImplementation((type) => ({
+      id: type,
+      validate: jest.fn(),
+      format: jest.fn(),
+      getAgentDescription: () => `${type} instructions`,
+    }));
+    context.attachmentStateManager = createAttachmentStateManager(attachments, {
+      getTypeDefinition: (type: string) => ({
+        id: type,
+        validate: (input: unknown) => ({ valid: true, data: input }),
+        format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+      }),
+    });
+    return context;
+  };
+
+  /**
+   * A stored conversation behind the conversation client: a legacy document reads with its events
+   * derived from its rounds, and `appendEvents` / `replaceRoundEvents` apply as the client does.
+   */
+  const conversationStore = (initial: Conversation) => {
+    let stored = initial;
+    const read = (): ConversationWithOperation => ({
+      ...stored,
+      events:
+        isEventsNativeVersion(stored.schema_version) && stored.events?.length
+          ? stored.events
+          : roundsToEvents(stored),
+      operation: 'UPDATE',
+    });
+    const write = (
+      events: NonNullable<Conversation['events']>,
+      attachments?: { produced: VersionedAttachment[] }
+    ): Conversation => {
+      stored = {
+        ...stored,
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events,
+        ...(attachments ? { attachments: attachments.produced } : {}),
+      };
+      return stored;
+    };
+    const client = createConversationClientMock();
+    client.appendEvents.mockImplementation(async ({ events, attachments }) => {
+      const current = read().events ?? [];
+      const ids = new Set(current.map(({ id }) => id));
+      return write([...current, ...events.filter(({ id }) => !ids.has(id))], attachments);
+    });
+    client.replaceRoundEvents.mockImplementation(async ({ roundId, events, attachments }) => {
+      const current = read().events ?? [];
+      const isRoundEvent = ({ id }: { id: string }) => id.startsWith(`${roundId}::`);
+      const others = current.filter((event) => !isRoundEvent(event));
+      const otherIds = new Set(others.map(({ id }) => id));
+      const firstRoundIndex = current.findIndex(isRoundEvent);
+      const insertAt = firstRoundIndex === -1 ? others.length : firstRoundIndex;
+      return write(
+        [
+          ...others.slice(0, insertAt),
+          ...events.filter(({ id }) => !otherIds.has(id)),
+          ...others.slice(insertAt),
+        ],
+        attachments
+      );
+    });
+    return { client, read };
+  };
+
+  const toolCallIds = (steps: ConversationRoundStep[]) =>
+    steps.flatMap((step) =>
+      step.type === ConversationRoundStepType.toolCall ? [step.tool_call_id] : []
+    );
+
+  const currentRun = (
+    roundId: string,
+    steps: ConversationRoundStep[],
+    attachmentEvents: CurrentRun['attachmentEvents'] = []
+  ): CurrentRun => ({
+    ...run(steps, { renderState: renderStateOf(toolCallIds(steps)) }),
+    roundId,
+    attachmentEvents,
+  });
+
+  /** What a provider caches on: each message's role, content and tool call links. */
+  const serialized = (messages: BaseMessage[]) =>
+    JSON.stringify(
+      messages.map((message) => ({
+        type: message.getType(),
+        content: message.content,
+        toolCalls: 'tool_calls' in message ? message.tool_calls : undefined,
+        toolCallId: 'tool_call_id' in message ? message.tool_call_id : undefined,
+      }))
+    );
+
+  /** The `round_complete` event the run emits once the graph stream ends on `steps`. */
+  const completeRound = async ({
+    tracker,
+    steps,
+    pendingTurn,
+    roundId,
+    message,
+    startTime,
+    context,
+    runAttachmentEvents,
+  }: {
+    tracker: RunTracker;
+    steps: ConversationRoundStep[];
+    pendingTurn?: PendingTurn;
+    roundId: string;
+    message: string;
+    startTime: Date;
+    context: ReturnType<typeof handlerContext>;
+    runAttachmentEvents: RunAttachmentEvents;
+  }): Promise<RoundCompleteEvent> => {
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent('g', {
+        steps,
+        toolRenderState: renderStateOf(toolCallIds(steps)),
+      })
+    );
+    const answer = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'm', message_content: 'ANSWER' },
+    } as ChatAgentEvent;
+    const events = await firstValueFrom(
+      of(answer).pipe(
+        addRoundCompleteEvent({
+          pendingTurn,
+          tracker,
+          userInput: { message },
+          author,
+          startTime,
+          endTime: new Date(startTime.getTime() + 1_000),
+          getConversationState: () => ({}),
+          modelProvider: { getUsageStats: () => ({ calls: [] }) } as unknown as ModelProvider,
+          mainConnectorId: 'connector',
+          stateManager: {} as unknown as ConversationStateManager,
+          attachmentStateManager: context.attachmentStateManager,
+          roundId,
+          runAttachmentEvents,
+        }),
+        toArray()
+      )
+    );
+    const roundComplete = events.find(isRoundCompleteEvent);
+    if (!roundComplete) {
+      throw new Error('expected a round_complete event');
+    }
+    return roundComplete;
+  };
+
+  /** The next turn's context: the stored conversation reloaded and prepared as a run does. */
+  const renderNextTurn = async (reloaded: Conversation) =>
+    renderVisibleContext(
+      {
+        conversation: await prepareConversation({
+          timeline: eventsForContext(reloaded),
+          nextInput: { message: 'NEXT' },
+          nextInputAuthor: author,
+          context: handlerContext(reloaded.attachments),
+          resumeAnchors: buildResumeAnchors(sourceEvents(reloaded)),
+        }),
+        run: currentRun('next-round', []),
+        phase: 'research',
+        conversationTimestamp: new Date().toISOString(),
+      },
+      deps()
+    );
+
+  it('renders a round with input and parallel tool attachment events identically once persisted and reloaded', async () => {
+    const startTime = new Date();
+    const roundId = 'r1';
+    const store = conversationStore(
+      createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: agentId,
+        user: author,
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events: [],
+      })
+    );
+    const nextInput: ConverseInput = {
+      message: 'Q',
+      attachments: [
+        { id: 'in-1', type: 'text', data: 'first input' },
+        { id: 'in-2', type: 'esql', data: 'FROM logs' },
+      ],
+    };
+
+    // the message is stored on receipt, before the run reads the conversation
+    await persistUserMessage({
+      conversation: store.read(),
+      conversationClient: store.client,
+      eventId: roundUserMessageEventId(roundId),
+      receivedAt: startTime,
+      input: nextInput,
+      author,
+    });
+    const received = store.read();
+
+    const context = handlerContext(received.attachments);
+    const processed = await prepareConversation({
+      timeline: eventsForContext(received),
+      nextInput,
+      nextInputAuthor: author,
+      context,
+      resumeAnchors: buildResumeAnchors(sourceEvents(received)),
+    });
+    const runAttachmentEvents = new RunAttachmentEvents({
+      attachmentStateManager: context.attachmentStateManager,
+      roundId,
+      triggerEventId: runTriggerEventId({ conversation: received, roundId }),
+      inputActor: userMessageActor(received, { author }),
+      agentId,
+    });
+    const chatInputEvents = runAttachmentEvents.drainChatInput();
+    processed.nextInput = { ...processed.nextInput, attachment_events: chatInputEvents };
+
+    // one tool batch of two parallel calls, each changing an attachment
+    const steps = [call('c1'), call('c2')].map((step) => ({
+      ...step,
+      tool_call_group_id: 'batch',
+    }));
+    await context.attachmentStateManager
+      .forToolCall('c1')
+      .add({ id: 'tool-1', type: 'dashboard', data: { panels: [] } });
+    await context.attachmentStateManager
+      .forToolCall('c2')
+      .add({ id: 'tool-2', type: 'text', data: 'note' });
+    const toolEvents = runAttachmentEvents.drainToolCalls(['c1', 'c2']);
+
+    const during = await renderVisibleContext(
+      {
+        conversation: processed,
+        run: currentRun(roundId, steps, toolEvents),
+        phase: 'research',
+        conversationTimestamp: startTime.toISOString(),
+      },
+      deps()
+    );
+
+    const roundComplete = await completeRound({
+      tracker: new RunTracker({ graphName: 'g' }),
+      steps,
+      roundId,
+      message: processed.nextInput.message,
+      startTime,
+      context,
+      runAttachmentEvents,
+    });
+    await lastValueFrom(
+      appendRoundTerminated$({
+        conversation: received,
+        conversationClient: store.client,
+        roundCompletedEvents$: of(roundComplete),
+      })
+    );
+    const later = await renderNextTurn(store.read());
+
+    expect(chatInputEvents).toHaveLength(2);
+    expect(toolEvents).toHaveLength(2);
+    expect(String(during[0].content).match(/type="attachment_added"/g)).toHaveLength(2);
+    const notice = String(during[during.length - 1].content);
+    expect(notice).toContain('attachment_id="tool-1"');
+    expect(notice).toContain('attachment_id="tool-2"');
+    expect(during[during.length - 2].getType()).toBe('tool');
+    expect(later.length).toBeGreaterThan(during.length);
+    expect(serialized(later.slice(0, during.length))).toEqual(serialized(during));
+  });
+
+  it("renders a legacy paused round's resume input after the paused call, identically once the resume is persisted", async () => {
+    const pausedCall: ToolCallStep = { ...call('c1'), results: [] };
+    const store = conversationStore(
+      createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: agentId,
+        user: author,
+        rounds: [
+          createRound({
+            id: 'r',
+            status: ConversationRoundStatus.awaitingPrompt,
+            input: { message: 'Q' },
+            steps: [pausedCall],
+            pending_prompts: [{ id: 'confirm', type: AgentPromptType.confirmation }],
+            state: {
+              version: 2,
+              agent: {
+                current_cycle: 1,
+                error_count: 0,
+                nodes: [
+                  {
+                    step: 'execute_tool',
+                    tool_call_id: 'c1',
+                    tool_id: pausedCall.tool_id,
+                    tool_params: {},
+                    tool_state: undefined,
+                  },
+                ],
+              },
+            },
+            started_at: T0,
+          }),
+        ],
+      })
+    );
+    const paused = store.read();
+    expect(isEventsNativeVersion(paused.schema_version)).toBe(false);
+    const pendingTurn = getPendingTurn(paused);
+    if (!pendingTurn?.terminated) {
+      throw new Error('expected a paused turn');
+    }
+    const { compatRound } = pendingTurn;
+
+    const triggerEventId = runTriggerEventId({
+      conversation: paused,
+      pendingTurnId: pendingTurn.id,
+      roundId: 'resume-run',
+    });
+    const resumeAnchors = buildResumeAnchors(sourceEvents(paused));
+    resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
+    const resumeInput: ConverseInput = {
+      message: '',
+      prompts: { confirm: { allow: true } },
+      attachments: [{ id: 'resume-in', type: 'text', data: 'sent with the answer' }],
+    };
+
+    const context = handlerContext(paused.attachments);
+    const processed = await prepareConversation({
+      timeline: eventsForContext(paused),
+      nextInput: resumeInput,
+      nextInputAuthor: compatRound.author,
+      context,
+      resumeAnchors,
+    });
+    const runAttachmentEvents = new RunAttachmentEvents({
+      attachmentStateManager: context.attachmentStateManager,
+      roundId: pendingTurn.id,
+      triggerEventId,
+      inputActor: userMessageActor(paused, {
+        author: compatRound.author,
+        origin: compatRound.origin,
+      }),
+      agentId,
+    });
+    const chatInputEvents = runAttachmentEvents.drainChatInput();
+
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({
+      steps: pendingTurn.steps,
+      inherited: { steps: pendingTurn.steps, pendingToolCallIds: ['c1'] },
+    });
+    const steps = applyStepUpdates(pendingTurn.steps, [
+      stepUpdates.resolveToolCall({
+        toolCallId: 'c1',
+        toolId: pausedCall.tool_id,
+        results: call('c1').results,
+        progression: [],
+      }),
+      stepUpdates.appendToolCall(call('c2')),
+    ]);
+
+    const during = await renderVisibleContext(
+      {
+        conversation: processed,
+        run: currentRun(pendingTurn.id, steps, [
+          ...inheritedAttachmentEvents(processed.timeline, pendingTurn.id),
+          ...chatInputEvents,
+        ]),
+        phase: 'research',
+        conversationTimestamp: compatRound.started_at,
+      },
+      deps()
+    );
+
+    const roundComplete = await completeRound({
+      tracker,
+      steps,
+      pendingTurn,
+      roundId: 'resume-run',
+      message: processed.nextInput.message,
+      startTime: new Date(),
+      context,
+      runAttachmentEvents,
+    });
+    await lastValueFrom(
+      appendResumeExecution$({
+        conversation: paused,
+        conversationClient: store.client,
+        roundCompletedEvents$: of(roundComplete),
+        input: resumeInput,
+        author,
+      })
+    );
+    const reloaded = store.read();
+    const later = await renderNextTurn(reloaded);
+
+    expect(triggerEventId).toBe('r::prompt_response::1');
+    expect(
+      reloaded.events?.find((event) => event.type === TimelineEventType.promptResponse)
+    ).toMatchObject({
+      id: triggerEventId,
+      data: { prompt_requested_event_id: 'r::execution_terminated' },
+    });
+    expect(buildResumeAnchors(sourceEvents(reloaded)).get(triggerEventId)).toEqual(
+      resumeAnchors.get(triggerEventId)
+    );
+    const noticeIndex = during.findIndex((message) =>
+      String(message.content).includes('attachment_id="resume-in"')
+    );
+    expect(noticeIndex).toBeGreaterThan(0);
+    expect(during[noticeIndex - 1]).toEqual(expect.objectContaining({ tool_call_id: 'c1' }));
+    expect(later.length).toBeGreaterThan(during.length);
+    expect(serialized(later.slice(0, during.length))).toEqual(serialized(during));
   });
 });

@@ -444,7 +444,7 @@ export interface PersistExecutionInterruptionParams {
  * Persists a failed or aborted execution as a full projection with exactly one terminal event.
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
- *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
+ *   write, its `data` always the `{ message }` receipt input) + `execution_started` + steps +
  *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
  *   produced by the run, the rest of it is left as stored.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
