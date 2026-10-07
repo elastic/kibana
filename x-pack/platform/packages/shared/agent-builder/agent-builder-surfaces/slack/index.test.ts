@@ -15,7 +15,7 @@ import {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ProjectionContext } from '../projections/types';
-import { slackProjection } from './slack_projection';
+import { slackProjection } from '.';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
