@@ -13,10 +13,11 @@ import type { WorkerWarningReason } from './worker_warning_content';
 import * as settingsI18n from '../settings_translations';
 
 /**
- * Warning reasons for a Worker the space has no model for. The header icon is a tooltip, which
- * can't hold a working link, so only interactive surfaces such as the post-save notice get one.
+ * Warning reasons for a Worker's `blockingReasons`; `no_model` is the only one so far. The header
+ * icon is a tooltip, which can't hold a working link, so only interactive surfaces such as the
+ * post-save notice get one.
  */
-export const getModelWarningReasons = (
+export const getBlockingWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
   { withLink }: { withLink: boolean }
 ): WorkerWarningReason[] => {

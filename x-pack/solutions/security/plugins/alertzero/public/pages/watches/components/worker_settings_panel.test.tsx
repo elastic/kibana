@@ -19,7 +19,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { WorkerSettingsPanel } from './worker_settings_panel';
-import { getModelWarningReasons } from './worker_model_reasons';
+import { getBlockingWarningReasons } from './blocking_warning_reasons';
 
 const WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 /** Not `<workerId>-<spaceId>`, so a client that rebuilds that convention fails this test. */
@@ -91,7 +91,7 @@ const renderPanel = (
           onToggle={jest.fn()}
           enabled={enabled}
           settings={settings}
-          warningReasons={getModelWarningReasons(worker, { withLink: false })}
+          warningReasons={getBlockingWarningReasons(worker, { withLink: false })}
           settingsLocked={false}
           isSaving={false}
           canWrite

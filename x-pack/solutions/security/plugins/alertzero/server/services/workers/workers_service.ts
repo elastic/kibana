@@ -87,6 +87,9 @@ const templateValuesEqual = (
   left != null &&
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
+/** Why enabling any Worker in the space was refused before anything was written. */
+export type SpaceEnableBlockedReason = 'noModel';
+
 /** Why an Alert Triage Worker enable was refused before anything was written. */
 export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisWorkflowDisabled'
@@ -94,7 +97,7 @@ export type AlertTriageEnableBlockedReason =
   | 'ruleAttachmentUnavailable';
 
 /** Why a Worker enable was refused before anything was written. */
-export type WorkerEnableBlockedReason = AlertTriageEnableBlockedReason | 'noModel';
+export type WorkerEnableBlockedReason = SpaceEnableBlockedReason | AlertTriageEnableBlockedReason;
 
 const readServiceAccountId = (
   values: Record<string, unknown> | null | undefined

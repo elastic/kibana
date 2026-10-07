@@ -16,7 +16,7 @@ import {
 } from '@kbn/alertzero-common';
 import type { Worker } from '@kbn/alertzero-common';
 import type { WorkerWarningReason } from '../components/worker_warning_content';
-import { getModelWarningReasons } from '../components/worker_model_reasons';
+import { getBlockingWarningReasons } from '../components/blocking_warning_reasons';
 import { workerName } from '../workers/translations';
 import * as i18nShared from './translations';
 
@@ -173,7 +173,7 @@ export const getWorkerWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
   enabledById: WorkerEnabledById
 ): WorkerWarningReason[] => [
-  ...getModelWarningReasons(worker, { withLink: false }),
+  ...getBlockingWarningReasons(worker, { withLink: false }),
   ...getDisabledProviderReasons(worker.id, enabledById),
   ...getStrandedDependentReasons(worker.id, enabledById),
 ];
@@ -192,7 +192,7 @@ export const getBlockedAfterSaveNotices = (
     .map((worker) => ({
       workerId: worker.id,
       reasons: [
-        ...(worker.enabled ? getModelWarningReasons(worker, { withLink: true }) : []),
+        ...(worker.enabled ? getBlockingWarningReasons(worker, { withLink: true }) : []),
         ...(enabledBeforeSave.get(worker.id) === false && enabledAfterSave.get(worker.id) === true
           ? getDisabledProviderReasons(worker.id, enabledAfterSave)
           : []),
