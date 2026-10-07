@@ -7,6 +7,9 @@
 
 import type { CypressResultRecord } from './cypress_result_report';
 
+export const getSpecFailureSeed = (isOpen: boolean, filePath: string): string[] =>
+  isOpen ? [] : [filePath];
+
 export const hasUnresolvedFailures = (
   failedSpecFilePaths: readonly string[],
   hasFailedRetryTests: boolean

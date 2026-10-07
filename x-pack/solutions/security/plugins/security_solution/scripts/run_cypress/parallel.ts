@@ -45,7 +45,11 @@ import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 import { recordCypressResult } from './cypress_result_report';
-import { hasUnresolvedFailures, routeGroupFailure } from './group_failure_routing';
+import {
+  getSpecFailureSeed,
+  hasUnresolvedFailures,
+  routeGroupFailure,
+} from './group_failure_routing';
 import { routeRunResult, runWithAssertionRetry } from './cypress_run_result';
 
 const filterCompletedSpecs = async (
@@ -521,7 +525,7 @@ ${JSON.stringify(
             };
 
             for (const filePath of group.specFilePaths) {
-              failedSpecFilePaths.push(filePath);
+              failedSpecFilePaths.push(...getSpecFailureSeed(isOpen, filePath));
 
               log.info(`
 ----------------------------------------------

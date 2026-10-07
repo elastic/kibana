@@ -5,7 +5,54 @@
  * 2.0.
  */
 
-import { hasUnresolvedFailures, routeGroupFailure } from './group_failure_routing';
+import {
+  getSpecFailureSeed,
+  hasUnresolvedFailures,
+  routeGroupFailure,
+} from './group_failure_routing';
+
+describe('spec failure seeding', () => {
+  it('leaves no unresolved failures after a normal interactive close', () => {
+    const failed: string[] = [];
+    failed.push(...getSpecFailureSeed(true, 'a.cy.ts'));
+
+    expect(failed).toEqual([]);
+    expect(hasUnresolvedFailures(failed, false)).toBe(false);
+  });
+
+  it('keeps a run spec unresolved when no result was routed', () => {
+    const failed: string[] = [];
+    failed.push(...getSpecFailureSeed(false, 'a.cy.ts'));
+
+    expect(failed).toEqual(['a.cy.ts']);
+    expect(hasUnresolvedFailures(failed, false)).toBe(true);
+  });
+
+  it('still fails when interactive group setup throws before any spec starts', () => {
+    const failed: string[] = getSpecFailureSeed(true, 'a.cy.ts');
+    const infraFailed: string[] = [];
+    const records = routeGroupFailure({
+      specFilePaths: ['a.cy.ts'],
+      failedSpecFilePaths: failed,
+      infraFailedSpecFilePaths: infraFailed,
+      message: 'setup failed',
+      isRetryRun: false,
+    });
+
+    expect(failed).toEqual(['a.cy.ts']);
+    expect(infraFailed).toEqual(['a.cy.ts']);
+    expect(records).toEqual([
+      {
+        spec: 'a.cy.ts',
+        kind: 'runner_failure',
+        status: 'thrown',
+        message: 'setup failed',
+        isRetryRun: false,
+      },
+    ]);
+    expect(hasUnresolvedFailures(failed, false)).toBe(true);
+  });
+});
 
 describe('hasUnresolvedFailures', () => {
   it('fails when an initial failure remains after an unrelated successful retry', () => {
