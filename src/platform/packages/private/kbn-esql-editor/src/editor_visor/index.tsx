@@ -13,7 +13,7 @@ import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AiButtonIcon } from '@kbn/ui-ai-components';
+import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
 import {
   getEffectiveProjectRouting,
   usePickerProjectRouting,
@@ -50,41 +50,32 @@ function AskAiButton({
   onSelect: () => void;
   styles: VisorStyles;
 }) {
-  if (isSelected) {
-    return (
-      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-        <AiButtonIcon
-          iconType={SparklesIcon as unknown as 'sparkles'}
-          size="xs"
-          iconSize="m"
-          variant="outlined"
-          aria-label={aiModeTooltip}
-          aria-pressed
-          isSelected
-          onClick={onSelect}
-          data-test-subj="esqlVisorAskAiButton"
-          css={[styles.modeIconButton, styles.aiButtonSparkleHover, styles.aiButtonSelected]}
-        />
-      </EuiToolTip>
-    );
-  }
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
 
   return (
-    <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType={SparklesIcon}
-        size="xs"
-        iconSize="m"
-        color="text"
-        display="empty"
-        aria-label={aiModeTooltip}
-        aria-pressed={false}
-        isSelected={false}
-        onClick={onSelect}
-        data-test-subj="esqlVisorAskAiButton"
-        css={styles.modeIconButton}
-      />
-    </EuiToolTip>
+    <>
+      {isSelected && <SvgAiGradientDefs gradientId={gradientId} colors={colors} />}
+      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={SparklesIcon}
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={aiModeTooltip}
+          aria-pressed={isSelected}
+          isSelected={isSelected}
+          onClick={onSelect}
+          data-test-subj="esqlVisorAskAiButton"
+          css={[
+            styles.modeIconButton,
+            isSelected && styles.aiButtonSparkleHover,
+            isSelected && styles.aiButtonSelected,
+            isSelected && iconGradientCss,
+          ]}
+        />
+      </EuiToolTip>
+    </>
   );
 }
 
