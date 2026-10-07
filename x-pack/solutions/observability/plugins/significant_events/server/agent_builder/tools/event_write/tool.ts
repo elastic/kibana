@@ -255,14 +255,21 @@ const enrichCausalFeatures = async (
           item.stream_names
         );
         return feature
-          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          ? {
+              ...causalFeature,
+              type: feature.type,
+              subtype: feature.subtype,
+              // Enriched once here, read by computeTopologyBreadth as the severity-computation's
+              // fan-out input (#1759) — never re-synced if the indicator's confidence changes.
+              confidence: feature.confidence,
+            }
           : causalFeature;
       }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
-      // indicator's subtype is enriched.
+      // indicator's subtype and confidence are enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature ? { ...entry, subtype: feature.subtype } : entry;
+        return feature ? { ...entry, subtype: feature.subtype, confidence: feature.confidence } : entry;
       }),
     }));
   } catch (error) {
