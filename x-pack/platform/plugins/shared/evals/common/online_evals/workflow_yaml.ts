@@ -20,6 +20,13 @@ const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
+// `kibana.request` paths are sent as Kibana-root paths, so the workflow space must be
+// explicit for the evals routes to resolve evaluators and stamp scores in that space.
+const SPACE_PATH_PREFIX_TEMPLATE = '/s/{{ workflow.spaceId }}';
+const EVALUATE_PATH = '/internal/evals/_evaluate';
+const PERSIST_PATH = '/internal/evals/online_scores';
+const SPACE_EVALUATE_PATH = `${SPACE_PATH_PREFIX_TEMPLATE}${EVALUATE_PATH}`;
+const SPACE_PERSIST_PATH = `${SPACE_PATH_PREFIX_TEMPLATE}${PERSIST_PATH}`;
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
 // stringifies plain `{{ }}` interpolations, which would turn this array into a
 // string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
@@ -193,6 +200,10 @@ const getNamedStep = (steps: unknown, expectedName: string): WorkflowStep | null
   return toWorkflowStep(maybeStep);
 };
 
+// Workflows created by older builds use the unprefixed path, which targets the default space.
+const isStepPath = (path: unknown, routePath: string): boolean =>
+  path === `${SPACE_PATH_PREFIX_TEMPLATE}${routePath}` || path === routePath;
+
 export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): string => {
   const {
     name,
@@ -240,7 +251,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/_evaluate',
+              path: SPACE_EVALUATE_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -264,7 +275,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/online_scores',
+              path: SPACE_PERSIST_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -368,7 +379,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !evaluateStepWith ||
     evaluateStepWith.method !== 'POST' ||
-    evaluateStepWith.path !== '/internal/evals/_evaluate'
+    !isStepPath(evaluateStepWith.path, EVALUATE_PATH)
   ) {
     return undefined;
   }
@@ -425,7 +436,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !persistStepWith ||
     persistStepWith.method !== 'POST' ||
-    persistStepWith.path !== '/internal/evals/online_scores'
+    !isStepPath(persistStepWith.path, PERSIST_PATH)
   ) {
     return undefined;
   }

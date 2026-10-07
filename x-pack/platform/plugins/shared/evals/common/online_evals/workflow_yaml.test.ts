@@ -72,6 +72,21 @@ describe('online eval workflow yaml', () => {
     expect(yaml).not.toContain('attributes.evaluator.name IS NULL');
   });
 
+  it('targets the workflow space for the evaluate and persist steps', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
+
+    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/_evaluate');
+    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/online_scores');
+  });
+
+  it('parses legacy workflows whose step paths have no space prefix', () => {
+    const config = getConfig();
+    const yaml = buildOnlineEvalWorkflowYaml(config).replaceAll('/s/{{ workflow.spaceId }}', '');
+
+    expect(yaml).toContain('path: /internal/evals/_evaluate');
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+  });
+
   it('returns undefined for non-online-evals workflows', () => {
     const config = getConfig();
     const yaml = buildOnlineEvalWorkflowYaml(config).replace('evals-online', 'not-online');
