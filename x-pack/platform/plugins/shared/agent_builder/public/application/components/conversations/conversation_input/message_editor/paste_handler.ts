@@ -7,6 +7,7 @@
 
 import type { RefObject } from 'react';
 import DOMPurify from 'dompurify';
+import { SUPPORTED_PDF_MIME_TYPE } from '@kbn/agent-builder-common/attachments';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
@@ -75,7 +76,9 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   if (!onPasteFile || !event.clipboardData) return false;
 
   const imageItem = Array.from(event.clipboardData.items).find(
-    (item) => item.kind === 'file' && item.type.startsWith('image/')
+    (item) =>
+      item.kind === 'file' &&
+      (item.type.startsWith('image/') || item.type === SUPPORTED_PDF_MIME_TYPE)
   );
   if (!imageItem) return false;
 

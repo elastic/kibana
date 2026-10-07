@@ -304,11 +304,16 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
-  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
-    useImageUpload({
-      addErrorToast,
-      messageEditorController,
-    });
+  const {
+    uploadingNames,
+    isUploadingPdf,
+    handlePasteFile,
+    handleAfterInput,
+    handleRemoveAttachment,
+  } = useImageUpload({
+    addErrorToast,
+    messageEditorController,
+  });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -325,7 +330,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     !isAgentIdValid ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0;
+    uploadingNames.size > 0 ||
+    isUploadingPdf;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
