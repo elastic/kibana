@@ -19,8 +19,6 @@ const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/
   '@kbn/dev/storybook/aliases'
 );
 
-const GITHUB_CONTEXT = 'Build and Publish Storybooks';
-
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
     ? `pr-${process.env.BUILDKITE_PULL_REQUEST}`
@@ -66,18 +64,6 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
     });
   });
 };
-
-const ghStatus = (state: string, description: string) =>
-  exec(
-    [
-      `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
-      `-f state=${state}`,
-      `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
-      `-f context="${GITHUB_CONTEXT}"`,
-      `-f description="${description}"`,
-      `--silent`,
-    ].join(' ')
-  );
 
 const build = async () => {
   console.log('--- Building Storybooks');
@@ -154,13 +140,6 @@ const upload = () => {
 };
 
 (async () => {
-  try {
-    ghStatus('pending', 'Building Storybooks');
-    await build();
-    upload();
-    ghStatus('success', 'Storybooks built');
-  } catch (error) {
-    ghStatus('error', 'Building Storybooks failed');
-    throw error;
-  }
+  await build();
+  upload();
 })();
