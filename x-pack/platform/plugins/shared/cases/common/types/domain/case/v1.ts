@@ -70,6 +70,7 @@ export const CaseSeverityRt = rt.union([
 
 export const ExtractObservablesSourceRt = rt.union([
   rt.literal('explicit'),
+  rt.literal('template'),
   rt.literal('space_default'),
   rt.literal('rule'),
 ]);

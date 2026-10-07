@@ -918,7 +918,12 @@ export class CasesConnectorExecutor {
         ...v2Template.settings,
         ...(extractObservablesOverride != null
           ? { extractObservables: extractObservablesOverride, extractObservablesSource: 'rule' }
-          : { extractObservablesSource: 'space_default' }),
+          : {
+              extractObservablesSource:
+                v2Template.settings?.extractObservables !== undefined
+                  ? 'template'
+                  : 'space_default',
+            }),
       },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
@@ -1013,7 +1018,13 @@ export class CasesConnectorExecutor {
             extractObservables: extractObservablesOverride,
             extractObservablesSource: 'rule' as const,
           }
-        : { ...baseSettings, extractObservablesSource: 'space_default' as const };
+        : {
+            ...baseSettings,
+            extractObservablesSource:
+              caseFieldsFromTemplate?.settings?.extractObservables !== undefined
+                ? ('template' as const)
+                : ('space_default' as const),
+          };
 
     return {
       id: caseId,

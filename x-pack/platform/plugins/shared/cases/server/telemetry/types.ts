@@ -319,6 +319,7 @@ export interface CasesTelemetry {
         extractObservablesOn: number;
         extractObservablesOff: number;
         extractObservablesSourceExplicit: number;
+        extractObservablesSourceTemplate: number;
         extractObservablesSourceSpaceDefault: number;
         extractObservablesSourceRule: number;
         observables: ObservablesTelemetry;

@@ -134,6 +134,10 @@ export const getCasesTelemetryData = async ({
           aggregationsBuckets.extractObservablesSource,
           'explicit'
         ),
+        extractObservablesSourceTemplate: findValueInBuckets(
+          aggregationsBuckets.extractObservablesSource,
+          'template'
+        ),
         extractObservablesSourceSpaceDefault: findValueInBuckets(
           aggregationsBuckets.extractObservablesSource,
           'space_default'

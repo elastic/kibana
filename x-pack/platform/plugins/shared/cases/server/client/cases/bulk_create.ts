@@ -563,7 +563,7 @@ const createBulkCreateCaseRequest = async ({
       settings: { ...caseWithoutId.settings, extractObservablesSource: 'explicit' },
     };
   }
-  // Otherwise the source was already stamped by the connector executor ('rule' or 'space_default').
+  // Otherwise the source was already stamped by the connector executor ('rule', 'template' or 'space_default').
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 

@@ -339,6 +339,12 @@ export const casesSchema: CasesTelemetrySchema = {
             'Cases where extractObservables was explicitly set by the API caller or UI toggle',
         },
       },
+      extractObservablesSourceTemplate: {
+        type: 'long',
+        _meta: {
+          description: 'Cases where extractObservables was set by the case template',
+        },
+      },
       extractObservablesSourceSpaceDefault: {
         type: 'long',
         _meta: {
