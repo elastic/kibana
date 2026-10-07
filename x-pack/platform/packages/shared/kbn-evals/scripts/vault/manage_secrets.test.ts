@@ -226,7 +226,7 @@ describe('suite vault targets', () => {
     mockedRunScoutHook.mockReturnValue({});
 
     await expect(uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'))).rejects.toThrow(
-      'produced no env for this config; CI would run only the smoke eval'
+      "produced no env for this config; CI would start Scout without this suite's env"
     );
     expect(mockedExeca).not.toHaveBeenCalled();
   });

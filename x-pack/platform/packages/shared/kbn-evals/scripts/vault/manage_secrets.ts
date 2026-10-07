@@ -173,7 +173,7 @@ export const resolveVaultTarget = (vault: KbnEvalsVaultType, suiteId?: string): 
           const env = runScoutHook(REPO_ROOT, scoutHook, config, { env: { PATH, HOME } });
           if (Object.keys(env).length === 0) {
             throw new Error(
-              `scoutHook ${scoutHook} produced no env for this config; CI would run only the smoke eval`
+              `scoutHook ${scoutHook} produced no env for this config; CI would start Scout without this suite's env`
             );
           }
         }
