@@ -6,7 +6,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_OBSERVABLES_PER_CASE } from '../../../constants';
+import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_ID_MAX_LENGTH } from '../../../constants';
 import {
   AddObservableRequestRt,
   BulkDeleteObservablesRequestRt,
@@ -125,7 +125,21 @@ describe('BulkDeleteObservablesRequestRt', () => {
     });
 
     expect(query._tag).toBe('Left');
-    expect(PathReporter.report(query)).toContain('string must have length >= 1');
+    expect(PathReporter.report(query)).toContain(
+      'The observableId field cannot be an empty string.'
+    );
+  });
+
+  it('rejects observableIds entries longer than OBSERVABLE_ID_MAX_LENGTH', () => {
+    const query = BulkDeleteObservablesRequestRt.decode({
+      caseId: 'case-1',
+      observableIds: ['a'.repeat(OBSERVABLE_ID_MAX_LENGTH + 1)],
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)).toContain(
+      `The length of the observableId is too long. The maximum length is ${OBSERVABLE_ID_MAX_LENGTH}.`
+    );
   });
 
   it('rejects requests missing required fields', () => {

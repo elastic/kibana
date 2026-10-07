@@ -961,7 +961,7 @@ export const bulkDeleteObservables = async ({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .set(headers)
-    .send({ ids })
+    .send({ observableIds: ids })
     .expect(expectedHttpCode);
 
   return updatedCase;

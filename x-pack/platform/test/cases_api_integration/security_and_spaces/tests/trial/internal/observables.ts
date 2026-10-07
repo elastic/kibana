@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
 import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { secOnly } from '../../../../common/lib/authentication/users';
+import { secOnly, secOnlyRead } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -190,29 +190,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedCase.observables[0].value).to.be('127.0.0.3');
       });
 
-      it('deletes existing ids and ignores missing ids', async () => {
+      it('returns 404 when any of the requested ids does not exist', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1');
 
-        const updatedCase = await bulkDeleteObservables({
+        const body = await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
           ids: [observableId, 'missing-observable-id'],
+          expectedHttpCode: 404,
         });
 
-        expect(updatedCase.observables.length).to.be(0);
+        expect((body as unknown as { message: string }).message).to.contain(
+          'missing-observable-id'
+        );
       });
 
       it('returns 404 when none of the requested ids exist', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         await addIpv4Observable(postedCase.id, '127.0.0.1');
 
-        await bulkDeleteObservables({
+        const body = await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
           ids: ['missing-id-1', 'missing-id-2'],
           expectedHttpCode: 404,
         });
+
+        const message = (body as unknown as { message: string }).message;
+        expect(message).to.contain('missing-id-1');
+        expect(message).to.contain('missing-id-2');
       });
 
       it('returns 400 when ids is an empty array', async () => {
@@ -262,7 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
             userAction.payload?.observables?.actionType === 'delete'
         );
 
-        expect(deleteUserActions.length).to.be.greaterThan(0);
+        expect(deleteUserActions.length).to.be(1);
         const lastDeleteUserAction = deleteUserActions[
           deleteUserActions.length - 1
         ] as ObservablesUserAction;
@@ -279,6 +286,20 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           ids: [observableId],
           auth: { user: secOnly, space: null },
+          expectedHttpCode: 403,
+        });
+      });
+
+      it('should not allow bulk deleting observables with read-only access', async () => {
+        const supertestWithoutAuth = getService('supertestWithoutAuth');
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1');
+
+        await bulkDeleteObservables({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          ids: [observableId],
+          auth: { user: secOnlyRead, space: null },
           expectedHttpCode: 403,
         });
       });

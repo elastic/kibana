@@ -15,6 +15,7 @@ import type {
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
   ObservablesAddedEventPayload,
+  ObservablesDeletedEventPayload,
   AlertStatusChangedEventPayload,
 } from './types';
 import type { Case } from '../../common';
@@ -24,6 +25,7 @@ export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
 export const OBSERVABLES_ADDED_EVENT = 'observablesAdded';
+export const OBSERVABLES_DELETED_EVENT = 'observablesDeleted';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
 export const ALERT_STATUS_CHANGED_EVENT = 'alertStatusChanged';
 
@@ -69,6 +71,10 @@ export class CasesEventBus extends EventEmitter {
     this.emit(OBSERVABLES_ADDED_EVENT, { type: 'observablesAdded', payload, request });
   }
 
+  emitObservablesDeleted(request: KibanaRequest, payload: ObservablesDeletedEventPayload) {
+    this.emit(OBSERVABLES_DELETED_EVENT, { type: 'observablesDeleted', payload, request });
+  }
+
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>) {
     this.subscribeIsolated(CASE_CREATED_EVENT, listener);
   }
@@ -83,6 +89,10 @@ export class CasesEventBus extends EventEmitter {
 
   onObservablesAdded(listener: CasesEventBusListener<'observablesAdded'>) {
     this.subscribeIsolated(OBSERVABLES_ADDED_EVENT, listener);
+  }
+
+  onObservablesDeleted(listener: CasesEventBusListener<'observablesDeleted'>) {
+    this.subscribeIsolated(OBSERVABLES_DELETED_EVENT, listener);
   }
 
   emitAlertStatusChanged(request: KibanaRequest, payload: AlertStatusChangedEventPayload) {

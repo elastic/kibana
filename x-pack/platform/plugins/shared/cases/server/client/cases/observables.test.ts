@@ -702,6 +702,7 @@ describe('bulkDeleteObservables', () => {
     expect(result).toBeDefined();
     expect(mockCaseService.patchCase).toHaveBeenCalledWith(
       expect.objectContaining({
+        version: caseSOWithMultipleObservables.version,
         updatedAttributes: {
           observables: [mockObservable3],
           total_observables: 1,
@@ -710,13 +711,13 @@ describe('bulkDeleteObservables', () => {
     );
   });
 
-  it('should delete existing ids and ignore missing ids', async () => {
+  it('should remove only one entry when the same id is requested twice', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
     await bulkDeleteObservables(
       {
         caseId: caseSO.id,
-        observableIds: [mockObservable.id, 'missing-observable-id'],
+        observableIds: [mockObservable.id, mockObservable.id],
       },
       mockClientArgs
     );
@@ -731,6 +732,27 @@ describe('bulkDeleteObservables', () => {
     );
   });
 
+  it('should throw 404 when any of the requested ids does not exist', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    await expect(
+      bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: [mockObservable.id, 'missing-observable-id'],
+        },
+        mockClientArgs
+      )
+    ).rejects.toThrow(
+      Boom.notFound(
+        'Failed to bulk delete observables: observable ids not found: missing-observable-id'
+      )
+    );
+
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+  });
+
   it('should throw 404 when none of the requested ids exist', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
 
@@ -743,7 +765,9 @@ describe('bulkDeleteObservables', () => {
         mockClientArgs
       )
     ).rejects.toThrow(
-      Boom.notFound('Failed to bulk delete observables: none of the requested ids were found')
+      Boom.notFound(
+        'Failed to bulk delete observables: observable ids not found: missing-id-1, missing-id-2'
+      )
     );
 
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();

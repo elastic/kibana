@@ -36,7 +36,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
-import { emitObservablesAddedEvent } from './trigger_utils';
+import { emitObservablesAddedEvent, emitObservablesDeletedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -467,18 +467,27 @@ export const bulkDeleteObservables = async (
 
   const idsToDelete = new Set(paramArgs.observableIds);
   const currentObservables = retrievedCase.attributes.observables ?? [];
+  const currentIdSet = new Set(currentObservables.map((o) => o.id));
+
+  const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
+  if (missingIds.length > 0) {
+    throw Boom.notFound(
+      `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+    );
+  }
+
+  const removedObservables = currentObservables.filter((observable) =>
+    idsToDelete.has(observable.id)
+  );
   const updatedObservables = currentObservables.filter(
     (observable) => !idsToDelete.has(observable.id)
   );
-  const removedCount = currentObservables.length - updatedObservables.length;
-
-  if (removedCount === 0) {
-    throw Boom.notFound('Failed to bulk delete observables: none of the requested ids were found');
-  }
+  const removedCount = removedObservables.length;
 
   const updatedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
     originalCase: retrievedCase,
+    version: retrievedCase.version,
     updatedAttributes: {
       observables: updatedObservables,
       total_observables: updatedObservables.length,
@@ -506,5 +515,7 @@ export const bulkDeleteObservables = async (
     },
   });
 
-  return decodeOrThrow(CaseRt)(res);
+  const result = decodeOrThrow(CaseRt)(res);
+  emitObservablesDeletedEvent(clientArgs, retrievedCase, removedObservables);
+  return result;
 };

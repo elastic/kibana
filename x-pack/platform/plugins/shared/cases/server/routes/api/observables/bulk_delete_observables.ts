@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import {
   INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
+  MAX_CASE_ID_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../../common/constants';
@@ -21,10 +22,10 @@ export const bulkDeleteObservablesRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
-      case_id: schema.string(),
+      case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
     body: schema.object({
-      ids: schema.arrayOf(schema.string({ maxLength: OBSERVABLE_ID_MAX_LENGTH }), {
+      observableIds: schema.arrayOf(schema.string({ maxLength: OBSERVABLE_ID_MAX_LENGTH }), {
         minSize: 1,
         maxSize: MAX_OBSERVABLES_PER_CASE,
       }),
@@ -33,17 +34,18 @@ export const bulkDeleteObservablesRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
     summary: `Bulk delete case observables`,
+    description: `Removes up to ${MAX_OBSERVABLES_PER_CASE} observables from a case in a single write. All requested ids must exist on the case; returns 404 if any are missing.`,
   },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const { ids } = request.body;
+      const { observableIds } = request.body;
 
       const updatedCase = await casesClient.cases.bulkDeleteObservables({
         caseId,
-        observableIds: ids,
+        observableIds,
       });
 
       return response.ok({
