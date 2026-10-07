@@ -5,25 +5,85 @@
  * 2.0.
  */
 
+import type { KbnClient } from '@kbn/scout-security';
 import { globalSetupHook } from '@kbn/scout-security';
-import type { GetMitreEntitiesResponse } from '@kbn/security-mitre-attack-common';
+import type {
+  GetMitreEntitiesResponse,
+  MitreEntity,
+  MitreFramework,
+} from '@kbn/security-mitre-attack-common';
 import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
 import {
   buildSeedBulkOperations,
-  SEEDED_ENTITIES,
+  SEEDED_ATLAS_ENTITIES,
+  SEEDED_ATLAS_FRAMEWORK_VERSION,
+  SEEDED_ENTERPRISE_ENTITIES,
   SEEDED_MITRE_FRAMEWORK_VERSION,
   SEEDED_MITRE_INDEX,
 } from '../fixtures/mitre_fixtures';
 import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';
 
-// Seeds synthetic MITRE entities (version 99.0) into `.kibana_security_solution` once before
-// all workers start. Version 99.0 sorts above any real release so the managed API resolves
-// only the seeded set. Seeding is global because the saved-object type is space-agnostic.
+/**
+ * Calls the entities route for one framework and asserts it serves exactly the
+ * seeded ids for that framework: nothing missing, nothing extra. The route
+ * resolves the latest version per framework, and the seeded versions (enterprise
+ * 99.0, atlas 9999.0) each exceed their bundled artifact version, so each
+ * response must be exactly its fixture set.
+ */
+const verifyFrameworkServesSeededIds = async (
+  kbnClient: KbnClient,
+  framework: MitreFramework,
+  seededEntities: MitreEntity[]
+): Promise<void> => {
+  const { data } = await kbnClient.request<GetMitreEntitiesResponse>({
+    method: 'GET',
+    path: GET_MITRE_ENTITIES_URL,
+    query: { framework },
+    // Internal route requiring the versioned-API header.
+    headers: { 'elastic-api-version': '1' },
+  });
+
+  if (data.framework !== framework) {
+    throw new Error(
+      `[managed-mitre setup] Verification failed — requested framework '${framework}' but route answered for '${data.framework}'`
+    );
+  }
+
+  const returnedIds = new Set([
+    ...data.tactics.map((t) => t.id),
+    ...data.techniques.map((t) => t.id),
+    ...data.subtechniques.map((t) => t.id),
+  ]);
+  const seededIds = seededEntities.map((e) => e.id);
+  const missing = seededIds.filter((id) => !returnedIds.has(id));
+  const extra = [...returnedIds].filter((id) => !seededIds.includes(id));
+
+  if (missing.length > 0) {
+    throw new Error(
+      `[managed-mitre setup] Verification failed — route did not serve seeded ${framework} IDs: ${missing.join(
+        ', '
+      )}`
+    );
+  }
+
+  if (extra.length > 0) {
+    throw new Error(
+      `[managed-mitre setup] Verification failed — route returned unexpected ${framework} IDs not in the seeded set: ${extra.join(
+        ', '
+      )}. Version resolution may not have selected the seeded version for '${framework}' (enterprise ${SEEDED_MITRE_FRAMEWORK_VERSION}, atlas ${SEEDED_ATLAS_FRAMEWORK_VERSION}).`
+    );
+  }
+};
+
+// Seeds synthetic MITRE entities (enterprise 99.0, atlas 9999.0) into
+// `.kibana_security_solution` once before all workers start. Each version sorts above the
+// bundled release of its framework so the managed API resolves only the seeded set for each framework.
+// Seeding is global because the saved-object type is space-agnostic.
 globalSetupHook(
-  `Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
+  `Seed synthetic MITRE entities (versions ${SEEDED_MITRE_FRAMEWORK_VERSION}, ${SEEDED_ATLAS_FRAMEWORK_VERSION})`,
   async ({ esClient, kbnClient, config, log }) => {
     log.info(
-      `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} fixture entities into ${SEEDED_MITRE_INDEX}`
+      `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} (enterprise) and ${SEEDED_ATLAS_FRAMEWORK_VERSION} (atlas) fixture entities into ${SEEDED_MITRE_INDEX}`
     );
 
     const seederClient = await createSystemIndicesEsClient(esClient, config);
@@ -42,51 +102,23 @@ globalSetupHook(
         `[managed-mitre setup] Successfully indexed ${result.items.length} MITRE fixture documents`
       );
 
-      // Verify the seeded data is actually served by the route. This request
-      // exercises the same resolution path the UI uses: no framework_version
-      // param, so resolveLatestVersion runs and must return 99.0 (the highest
-      // version present). Confirms:
+      // Verify the seeded data is actually served by the route, once per
+      // framework. Each request exercises the same resolution path the UI uses:
+      // no framework_version param, so resolveLatestVersion runs for the given
+      // framework and must return the seeded version (the highest present for that framework). Confirms:
       //   1. xpack.mitreAttack.managedSourceEnabled is on and the route is registered.
-      //   2. Version resolution picks 99.0 (the highest indexed version).
-      //   3. All five seeded IDs round-trip through the saved-object transform.
-      //   4. No extra entities are returned — 99.0 is the only version indexed,
-      //      so the response must be exactly the five seeded documents.
+      //   2. Version resolution picks the seeded version for each framework independently.
+      //   3. All seeded IDs round-trip through the saved-object transform.
+      //   4. No extra entities are returned — the seeded version is the only one served per
+      //      framework, so each response must be exactly that framework's seeded documents
+      //      (five enterprise, three atlas) and never the other framework's.
       // Without this, seeding failures surface as cryptic UI locator timeouts
       // rather than a clear setup error.
-      const { data } = await kbnClient.request<GetMitreEntitiesResponse>({
-        method: 'GET',
-        path: GET_MITRE_ENTITIES_URL,
-        // Internal route requiring the versioned-API header.
-        headers: { 'elastic-api-version': '1' },
-      });
-
-      const returnedIds = new Set([
-        ...data.tactics.map((t) => t.id),
-        ...data.techniques.map((t) => t.id),
-        ...data.subtechniques.map((t) => t.id),
-      ]);
-      const seededIds = SEEDED_ENTITIES.map((e) => e.id);
-      const missing = seededIds.filter((id) => !returnedIds.has(id));
-      const extra = [...returnedIds].filter((id) => !seededIds.includes(id));
-
-      if (missing.length > 0) {
-        throw new Error(
-          `[managed-mitre setup] Verification failed — route did not serve seeded IDs: ${missing.join(
-            ', '
-          )}`
-        );
-      }
-
-      if (extra.length > 0) {
-        throw new Error(
-          `[managed-mitre setup] Verification failed — route returned unexpected IDs not in the seeded set: ${extra.join(
-            ', '
-          )}. Version resolution may not have selected 99.0.`
-        );
-      }
+      await verifyFrameworkServesSeededIds(kbnClient, 'enterprise', SEEDED_ENTERPRISE_ENTITIES);
+      await verifyFrameworkServesSeededIds(kbnClient, 'atlas', SEEDED_ATLAS_ENTITIES);
 
       log.info(
-        '[managed-mitre setup] Verification passed — route returned exactly the five seeded entities'
+        `[managed-mitre setup] Verification passed — route returned exactly the ${SEEDED_ENTERPRISE_ENTITIES.length} seeded enterprise and ${SEEDED_ATLAS_ENTITIES.length} seeded atlas entities`
       );
     } finally {
       await seederClient.close();

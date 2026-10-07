@@ -46,8 +46,9 @@ export const list = async ({
     }
   }
 
-  // Fetch all entities in a single page. Each MITRE enterprise dataset has less than 1000 entities
-  // (873 for ATT&CK enterprise 19.2). 10,000 is a generous ceiling for future versions and frameworks.
+  // Fetch all entities in a single page. A single framework version is well under 1000 entities
+  // (873 for ATT&CK enterprise 19.2, ~213 for ATLAS 2026.8), and the filter below scopes the query
+  // to one framework and version. 10,000 is a generous ceiling for future versions and frameworks.
   const findResponse = await savedObjectsRepository.find<MitreEntity>({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],

@@ -53,9 +53,7 @@ describe('MitreAttackDataService', () => {
 
     expect(result).toBe(true);
     expect(service.isInitialized).toBe(true);
-    expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('MITRE ATT&CK data populated')
-    );
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('MITRE data populated'));
   });
 
   it('population failure is caught, logged, and isInitialized stays false', async () => {
@@ -74,7 +72,7 @@ describe('MitreAttackDataService', () => {
     expect(result).toBe(false);
     expect(service.isInitialized).toBe(false);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to populate MITRE ATT&CK data')
+      expect.stringContaining('Failed to populate MITRE data')
     );
   });
 
@@ -215,7 +213,7 @@ describe('MitreAttackDataService', () => {
     expect(service.isInitialized).toBe(false);
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to populate MITRE ATT&CK data')
+      expect.stringContaining('Failed to populate MITRE data')
     );
   });
 });

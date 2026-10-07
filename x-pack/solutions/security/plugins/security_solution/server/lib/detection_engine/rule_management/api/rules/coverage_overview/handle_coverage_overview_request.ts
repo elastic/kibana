@@ -9,6 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   CoverageOverviewRequestBody,
@@ -25,8 +26,8 @@ import {
   findInvalidMitreIds,
   buildValidMitreIdsFromBuckets,
 } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
-import type { ValidMitreIdSets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
-import { resolveMitreBuckets } from '../../../../mitre/resolve_mitre_buckets';
+import type { ValidMitreIdSetsByFramework } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import { resolveMitreBucketsByFramework } from '../../../../mitre/resolve_mitre_buckets';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -54,19 +55,23 @@ export async function handleCoverageOverviewRequest({
     enabled: getIsEnabledFilter(activitySet),
   });
 
-  // Resolve MITRE buckets before the expensive rule fetch so a transient failure degrades
-  // gracefully: invalid-ID detection is skipped rather than failing the whole request.
-  // null means "buckets unavailable — skip invalid-ID detection".
-  let validIds: ValidMitreIdSets | null;
-  try {
-    validIds = buildValidMitreIdsFromBuckets(await resolveMitreBuckets(mitreDataClient));
-  } catch (err) {
-    logger?.debug(
-      `Failed to resolve MITRE buckets; invalid-ID detection will be skipped: ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
-    validIds = null;
+  // Resolve MITRE buckets before the expensive rule fetch. A framework whose buckets are
+  // unavailable is skipped (no invalid-ID detection for it) rather than failing the request.
+  const bucketsByFramework = await resolveMitreBucketsByFramework(
+    mitreDataClient,
+    MITRE_FRAMEWORKS,
+    logger
+  );
+  const validIdsByFramework: ValidMitreIdSetsByFramework = {};
+  for (const framework of MITRE_FRAMEWORKS) {
+    const buckets = bucketsByFramework[framework];
+    if (buckets) {
+      validIdsByFramework[framework] = buildValidMitreIdsFromBuckets(buckets);
+    } else {
+      logger?.debug(
+        `MITRE buckets unavailable for framework "${framework}"; invalid-ID detection will be skipped for it`
+      );
+    }
   }
 
   // rulesClient.find uses ES Search API to fetch the rules. It has some limitations when the number of rules exceeds
@@ -83,7 +88,7 @@ export async function handleCoverageOverviewRequest({
     sortOrder: undefined,
   });
 
-  return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIds), {
+  return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIdsByFramework), {
     coverage: {},
     unmapped_rule_ids: [],
     rules_data: {},
@@ -107,8 +112,8 @@ function getIsEnabledFilter(activitySet: Set<CoverageOverviewRuleActivity>): boo
 function appendRuleToResponse(
   response: CoverageOverviewResponse,
   rule: SanitizedRule<CoverageOverviewRuleParams>,
-  // null when bucket resolution failed; invalid-ID detection is skipped in that case
-  validIds: ValidMitreIdSets | null
+  // Frameworks absent from the map (bucket resolution failed) skip invalid-ID detection
+  validIdsByFramework: ValidMitreIdSetsByFramework
 ): CoverageOverviewResponse {
   const categories = extractRuleMitreCategories(rule);
 
@@ -124,11 +129,9 @@ function appendRuleToResponse(
     response.unmapped_rule_ids.push(rule.id);
   }
 
-  if (validIds !== null) {
-    const invalidMitreIds = findInvalidMitreIds(rule.params.threat, validIds);
-    if (invalidMitreIds.length > 0) {
-      response.invalid_mitre_ids[rule.id] = invalidMitreIds;
-    }
+  const invalidMitreIds = findInvalidMitreIds(rule.params.threat, validIdsByFramework);
+  if (invalidMitreIds.length > 0) {
+    response.invalid_mitre_ids[rule.id] = invalidMitreIds;
   }
 
   response.rules_data[rule.id] = {
@@ -142,8 +145,8 @@ function appendRuleToResponse(
 }
 
 /**
- * Extracts a deduplicated list of MITRE ATT&CK™ tactic, technique, and subtechnique IDs
- * referenced by the rule's threat mappings.
+ * Extracts a deduplicated list of MITRE (ATT&CK™ and ATLAS) tactic, technique, and
+ * subtechnique IDs referenced by the rule's threat mappings.
  */
 function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   // dedupe in case data isn't valid in ES

@@ -6,20 +6,29 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
+import {
+  THREAT_FRAMEWORK_NAME,
+  getMitreFrameworkByThreatName,
+} from '@kbn/security-mitre-attack-common';
 
-export const MITRE_ATTACK_FRAMEWORK = 'MITRE ATT&CK';
+export const MITRE_ATTACK_FRAMEWORK = THREAT_FRAMEWORK_NAME.enterprise;
+export const MITRE_ATLAS_FRAMEWORK = THREAT_FRAMEWORK_NAME.atlas;
 
 export type MitreThreatEntityType = 'tactic' | 'technique' | 'subtechnique';
 
 export interface MitreThreatEntity {
   type: MitreThreatEntityType;
   id: string;
+  framework: MitreFramework;
 }
 
 /**
  * Walks a rule's `threat` array and yields one `MitreThreatEntity` per
- * tactic, technique, and subtechnique entry found under the MITRE ATT&CK™
- * framework. Threat entries from other frameworks are skipped.
+ * tactic, technique, and subtechnique entry found under a managed MITRE
+ * framework (ATT&CK Enterprise or ATLAS). Each entity carries the resolved
+ * `framework` of its parent threat item. Threat entries whose `framework`
+ * string is not recognized are skipped.
  *
  * Order is depth-first within each threat item:
  *   tactic, technique[0], technique[0].subtechnique[0..n], technique[1], ...
@@ -35,14 +44,15 @@ export function* iterateMitreThreatEntities(
   }
 
   for (const threatItem of threats) {
-    if (threatItem.framework === MITRE_ATTACK_FRAMEWORK) {
-      yield { type: 'tactic', id: threatItem.tactic.id };
+    const framework = getMitreFrameworkByThreatName(threatItem.framework);
+    if (framework !== undefined) {
+      yield { type: 'tactic', id: threatItem.tactic.id, framework };
 
       for (const technique of threatItem.technique ?? []) {
-        yield { type: 'technique', id: technique.id };
+        yield { type: 'technique', id: technique.id, framework };
 
         for (const subtechnique of technique.subtechnique ?? []) {
-          yield { type: 'subtechnique', id: subtechnique.id };
+          yield { type: 'subtechnique', id: subtechnique.id, framework };
         }
       }
     }

@@ -331,8 +331,10 @@ describe('handleCoverageOverviewRequest', () => {
       deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
     });
 
-    // The managed client's list() must have been called to resolve MITRE IDs.
-    expect(mockList).toHaveBeenCalledTimes(1);
+    // The managed client's list() must have been called once per framework.
+    expect(mockList).toHaveBeenCalledTimes(2);
+    expect(mockList).toHaveBeenCalledWith({ framework: 'enterprise' });
+    expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
 
     // Bogus tactic not in the managed buckets → invalid.
     expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
@@ -341,6 +343,146 @@ describe('handleCoverageOverviewRequest', () => {
 
     // Valid IDs are in the managed buckets → not invalid.
     expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
+  });
+
+  describe('MITRE ATLAS', () => {
+    const ATLAS_TACTIC_ID = 'AML.TA0000';
+    const ATLAS_TECHNIQUE_ID = 'AML.T0044';
+    const ATLAS_SUBTECHNIQUE_ID = 'AML.T0024.002';
+
+    const makeAtlasThreat = (techniqueId = ATLAS_TECHNIQUE_ID) => ({
+      framework: 'MITRE ATLAS',
+      tactic: {
+        id: ATLAS_TACTIC_ID,
+        name: 'Reconnaissance',
+        reference: 'https://atlas.mitre.org/tactics/AML.TA0000',
+      },
+      technique: [
+        {
+          id: techniqueId,
+          name: 'Full ML Model Access',
+          reference: `https://atlas.mitre.org/techniques/${techniqueId}`,
+          subtechnique: [
+            {
+              id: ATLAS_SUBTECHNIQUE_ID,
+              name: 'Extract ML Model',
+              reference: `https://atlas.mitre.org/techniques/${ATLAS_SUBTECHNIQUE_ID}`,
+            },
+          ],
+        },
+      ],
+    });
+
+    const makeAttackThreat = () => ({
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        id: VALID_TACTIC_ID,
+        name: 'Defense Evasion',
+        reference: 'https://attack.mitre.org/tactics/TA0005/',
+      },
+      technique: [
+        {
+          id: VALID_TECHNIQUE_ID,
+          name: 'Abuse Elevation Control Mechanism',
+          reference: 'https://attack.mitre.org/techniques/T1548/',
+        },
+      ],
+    });
+
+    const makeRule = (id: string, threat: unknown[]): Rule =>
+      ({ id, name: id, enabled: true, params: { threat } } as unknown as Rule);
+
+    const enterpriseBuckets = {
+      framework: 'enterprise' as const,
+      tactics: [{ id: VALID_TACTIC_ID }],
+      techniques: [{ id: VALID_TECHNIQUE_ID }],
+      subtechniques: [],
+    };
+    const atlasBuckets = {
+      framework: 'atlas' as const,
+      tactics: [{ id: ATLAS_TACTIC_ID }],
+      techniques: [{ id: ATLAS_TECHNIQUE_ID }],
+      subtechniques: [{ id: ATLAS_SUBTECHNIQUE_ID }],
+    };
+
+    const makeClient = (atlasAvailable: boolean): MitreAttackDataClient => ({
+      list: jest.fn().mockImplementation(async ({ framework }: { framework?: string } = {}) => {
+        if (framework === 'atlas') {
+          if (!atlasAvailable) {
+            throw new Error('atlas unavailable');
+          }
+          return atlasBuckets;
+        }
+        return enterpriseBuckets;
+      }),
+      getById: jest.fn(),
+    });
+
+    const run = async (rules: Rule[], mitreDataClient: MitreAttackDataClient) => {
+      (findRules as jest.Mock).mockResolvedValueOnce({
+        total: rules.length,
+        page: 1,
+        perPage: 10000,
+        data: rules,
+      });
+      return handleCoverageOverviewRequest({
+        params: {},
+        deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+      });
+    };
+
+    it('maps an ATLAS-only rule under its ids and does not mark it unmapped', async () => {
+      const result = await run([makeRule('rule-atlas', [makeAtlasThreat()])], makeClient(true));
+
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-atlas']);
+      expect(result.unmapped_rule_ids).not.toContain('rule-atlas');
+    });
+
+    it('flags only ATLAS ids missing from the atlas buckets', async () => {
+      const result = await run(
+        [
+          makeRule('rule-valid', [makeAtlasThreat()]),
+          makeRule('rule-bogus', [makeAtlasThreat('AML.T9999')]),
+        ],
+        makeClient(true)
+      );
+
+      expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
+      expect(result.invalid_mitre_ids['rule-bogus']).toEqual(['AML.T9999']);
+    });
+
+    it('does not flag ATLAS ids when atlas buckets are unavailable but still flags bogus ATT&CK ids', async () => {
+      const bogusAttack = {
+        ...makeAttackThreat(),
+        technique: [{ ...makeAttackThreat().technique[0], id: BOGUS_TECHNIQUE_ID }],
+      };
+      const result = await run(
+        [
+          makeRule('rule-atlas', [makeAtlasThreat('AML.T9999')]),
+          makeRule('rule-attack', [bogusAttack]),
+        ],
+        makeClient(false)
+      );
+
+      expect(result.invalid_mitre_ids['rule-atlas']).toBeUndefined();
+      expect(result.invalid_mitre_ids['rule-attack']).toEqual([BOGUS_TECHNIQUE_ID]);
+    });
+
+    it('counts a rule with both frameworks under both sets of ids', async () => {
+      const result = await run(
+        [makeRule('rule-both', [makeAttackThreat(), makeAtlasThreat()])],
+        makeClient(true)
+      );
+
+      expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-both']);
+      expect(result.coverage[VALID_TECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(result.unmapped_rule_ids).toEqual([]);
+      expect(result.invalid_mitre_ids).toEqual({});
+    });
   });
 });
 

@@ -6,7 +6,11 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-security';
-import { SEEDED_MITRE_FRAMEWORK_VERSION, SEEDED_MITRE_INDEX } from '../fixtures/mitre_fixtures';
+import {
+  SEEDED_ATLAS_FRAMEWORK_VERSION,
+  SEEDED_MITRE_FRAMEWORK_VERSION,
+  SEEDED_MITRE_INDEX,
+} from '../fixtures/mitre_fixtures';
 import {
   createSystemIndicesEsClient,
   deleteSystemIndicesEsUser,
@@ -14,14 +18,15 @@ import {
 
 /**
  * Removes the synthetic MITRE fixture entities seeded by global.setup.ts.
- * Only deletes documents at framework_version 99.0 so real populated data
- * (from any bundled MITRE artifact) is untouched.
+ * Only deletes documents at the seeded framework versions (enterprise 99.0, atlas 9999.0) so real populated data
+ * (from any bundled MITRE artifact) is untouched. The query does not filter on
+ * framework, so both the enterprise and the atlas fixtures are removed.
  */
 globalTeardownHook(
-  `Remove synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
+  `Remove synthetic MITRE entities (versions ${SEEDED_MITRE_FRAMEWORK_VERSION}, ${SEEDED_ATLAS_FRAMEWORK_VERSION})`,
   async ({ esClient, config, log }) => {
     log.info(
-      `[managed-mitre teardown] Deleting framework_version ${SEEDED_MITRE_FRAMEWORK_VERSION} entities from ${SEEDED_MITRE_INDEX}`
+      `[managed-mitre teardown] Deleting framework_version ${SEEDED_MITRE_FRAMEWORK_VERSION} and ${SEEDED_ATLAS_FRAMEWORK_VERSION} entities from ${SEEDED_MITRE_INDEX}`
     );
 
     const seederClient = await createSystemIndicesEsClient(esClient, config);
@@ -34,8 +39,11 @@ globalTeardownHook(
             must: [
               { term: { type: 'mitre-attack-entity' } },
               {
-                term: {
-                  'mitre-attack-entity.framework_version': SEEDED_MITRE_FRAMEWORK_VERSION,
+                terms: {
+                  'mitre-attack-entity.framework_version': [
+                    SEEDED_MITRE_FRAMEWORK_VERSION,
+                    SEEDED_ATLAS_FRAMEWORK_VERSION,
+                  ],
                 },
               },
             ],

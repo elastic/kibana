@@ -43,7 +43,8 @@ export class MitreAttackDataService {
   }
 
   /**
-   * Loads all MITRE ATT&CK entities into the Saved Objects index.
+   * Loads all bundled MITRE entities (every framework and version in the artifact) into
+   * the Saved Objects index.
    * Returns true on success, false on failure. Never rejects.
    * Concurrent calls while a run is in progress return the same in-flight promise.
    */
@@ -116,22 +117,22 @@ export class MitreAttackDataService {
           .map(({ id, message }) => `${id}: ${message}`)
           .join('; ');
         this.logger.error(
-          `Failed to populate MITRE ATT&CK data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
+          `Failed to populate MITRE data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
         );
         this.state = { status: 'failed' };
         return false;
       }
 
       this.state = { status: 'ready' };
+      // Counts are reported per framework and version so a framework that mapped
+      // incorrectly is not hidden inside the combined total.
       this.logger.info(
-        `MITRE ATT&CK data populated: ${entities.length} entities. ${summarizeEntityCounts(
-          entities
-        )}`
+        `MITRE data populated: ${entities.length} entities (${summarizeEntityCounts(entities)})`
       );
       return true;
     } catch (err) {
       this.logger.error(
-        `Failed to populate MITRE ATT&CK data: ${err instanceof Error ? err.message : String(err)}`
+        `Failed to populate MITRE data: ${err instanceof Error ? err.message : String(err)}`
       );
       this.state = { status: 'failed' };
       return false;

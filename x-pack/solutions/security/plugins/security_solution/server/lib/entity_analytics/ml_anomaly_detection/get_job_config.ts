@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/cor
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { resolveMitreBuckets } from '../../detection_engine/mitre/resolve_mitre_buckets';
 
@@ -98,7 +99,8 @@ export const getJobConfig = async ({
     let tacticNameById = new Map<string, string>();
     let techniqueNameById = new Map<string, string>();
     try {
-      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+      // ML job custom settings carry ATT&CK ids only.
+      const mitreBuckets = await resolveMitreBuckets(mitreDataClient, DEFAULT_MITRE_FRAMEWORK);
       tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
       techniqueNameById = new Map(
         [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [
