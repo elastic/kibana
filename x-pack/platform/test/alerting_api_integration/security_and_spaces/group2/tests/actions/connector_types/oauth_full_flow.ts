@@ -283,5 +283,83 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
         expect(executeBody.data.receivedAuth).to.match(SIMULATOR_REFRESHED_ACCESS_TOKEN_AUTH);
       });
     }); // end Execution with Token Attachment
+
+    describe('OAuth credential handoff', () => {
+      const objectRemover = new ObjectRemover(supertest);
+      const space = Space1AllAtSpace1.space;
+      let connectorId: string;
+      let proxyServer: httpProxy | undefined;
+      let sessionCookie: string;
+      let apiUrl: string;
+
+      const credentialsPath = (id: string, spaceId = space.id) =>
+        `${getUrlPrefix(spaceId)}/api/alerts_fixture/${id}/_test_get_connector_credentials`;
+
+      before(async () => {
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {}
+        );
+
+        sessionCookie = await login(supertestWithoutAuth, Space1AllAtSpace1.user);
+
+        const simulatorBaseRaw = kibanaServer.resolveUrl(
+          getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+        );
+        const tokenUrl = `${simulatorBaseRaw}/oauth_token.do`;
+        apiUrl = `${stripUrlCredentials(simulatorBaseRaw)}/echo`;
+
+        const { body: connector } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'OAuth credential handoff v2 connector',
+            connector_type_id: 'test.single_file_connector',
+            config: { apiUrl },
+            secrets: {
+              authType: 'oauth_authorization_code',
+              clientId: 'test-client-id',
+              clientSecret: 'test-client-secret',
+              tokenUrl,
+              authorizationUrl: 'https://localhost:5601/oauth/authorize',
+            },
+          })
+          .expect(200);
+
+        connectorId = connector.id;
+        objectRemover.add(space.id, connectorId, 'connector', 'actions');
+
+        await performOAuthFlow(supertestWithoutAuth, {
+          spaceId: space.id,
+          connectorId,
+          sessionCookie,
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+        if (proxyServer) {
+          proxyServer.close();
+        }
+      });
+
+      it('returns the access-token header after PKCE', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId))
+          .set('Cookie', sessionCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
+
+        expect(body.connectorId).to.be(connectorId);
+        expect(body.actionTypeId).to.be('test.single_file_connector');
+        expect(body.config.apiUrl).to.be(apiUrl);
+        expect(body.headers.Authorization).to.match(SIMULATOR_INITIAL_ACCESS_TOKEN_AUTH);
+        expect(body).to.not.have.property('secrets');
+        expect(JSON.stringify(body)).to.not.contain('test-client-secret');
+        expect(JSON.stringify(body)).to.not.contain('sim-oauth-refresh-');
+      });
+    }); // end OAuth credential handoff
   }); // end OAuth Authorization Code
 }

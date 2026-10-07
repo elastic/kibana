@@ -383,11 +383,10 @@ describe('getConnectorCredentials()', () => {
         attributes: {
           ...connectorSavedObject.attributes,
           secrets: {
-            authType: 'oauth_authorization_code',
+            authType: 'oauth_client_credentials',
             clientId: 'client-id',
             clientSecret: 'client-secret',
             tokenUrl: 'https://example.com/token',
-            authorizationUrl: 'https://example.com/authorize',
           },
         },
       });
@@ -396,6 +395,64 @@ describe('getConnectorCredentials()', () => {
       await expect(
         actionsClient.getConnectorCredentials({ id: defaultConnectorId })
       ).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
+    });
+  });
+
+  describe('oauth authorization code', () => {
+    const oauthSecrets = {
+      authType: 'oauth_authorization_code',
+      clientId: 'client-id',
+      clientSecret: 'oauth-client-secret',
+      tokenUrl: 'https://example.com/token',
+      authorizationUrl: 'https://example.com/authorize',
+    };
+    const expiresAt = new Date(Date.now() + 3600_000).toISOString();
+    const oauthToken = {
+      id: 'token-1',
+      profileUid: 'profile-1',
+      connectorId: defaultConnectorId,
+      credentialType: 'oauth',
+      credentials: {
+        accessToken: 'Bearer oauth-access-token',
+        refreshToken: 'oauth-refresh-token',
+      },
+      expiresAt,
+      refreshTokenExpiresAt: new Date(Date.now() + 7 * 24 * 3600_000).toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const mockOAuthConnector = () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          authMode: 'per-user',
+          secrets: oauthSecrets,
+        },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: {
+          actionTypeId: defaultConnectorTypeId,
+          authMode: 'per-user',
+          config: { apiUrl: 'https://example.com' },
+        },
+      } as SavedObject);
+      getCurrentUserProfileId.mockResolvedValue('profile-1');
+      connectorTokenClient.get.mockResolvedValue({
+        hasErrors: false,
+        connectorToken: oauthToken,
+      });
+    };
+
+    it('returns the OAuth access-token header without client or refresh secrets', async () => {
+      mockOAuthConnector();
+
+      const result = await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+
+      expect(result.headers.Authorization).toBe('Bearer oauth-access-token');
+      expect(JSON.stringify(result)).not.toContain('oauth-client-secret');
+      expect(JSON.stringify(result)).not.toContain('oauth-refresh-token');
     });
   });
 });
