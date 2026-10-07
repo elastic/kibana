@@ -61,10 +61,12 @@ export function createRuleResponse(
   return {
     id: 'rule-1',
     kind: 'alert',
+    version: 1,
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    recovery_strategy: 'no_breach',
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    query: { base: 'FROM logs-* | LIMIT 10' },
+    recovery: { strategy: 'no_breach' },
+    no_data: { strategy: 'ignore' },
     grouping: { fields: [] },
     enabled: true,
     created_by: { profile_uid: 'elastic_profile_uid' },
@@ -72,7 +74,7 @@ export function createRuleResponse(
     updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
-    metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
+    metadata: { name: 'test-rule', ...metadata },
   };
 }
 
@@ -87,8 +89,9 @@ export function createRuleSoAttributes(
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    recovery_strategy: 'no_breach',
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    query: { base: 'FROM logs-* | LIMIT 10' },
+    recovery: { strategy: 'no_breach' },
+    no_data: { strategy: 'ignore' },
     grouping: { fields: [] },
     enabled: true,
     createdBy: { profile_uid: 'elastic_profile_uid' },

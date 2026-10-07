@@ -17,13 +17,13 @@ import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import type { ServiceAccountCredentialStore } from './credentials';
-import { EsServiceAccounts } from './es_service_accounts';
-import { licenseMock } from '../../common/licensing/index.mock';
 import {
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-} from '../../common/service_accounts';
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
+import { EsServiceAccounts } from './es_service_accounts';
+import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -71,7 +71,13 @@ const accountEntry = (overrides = {}) => ({
 });
 
 describe('EsServiceAccounts', () => {
-  const createParams = { name: 'nightshift-relay' };
+  const createParams = { name: 'nightshift-relay', roles: ['viewer', 'editor'] };
+
+  const createdAccount = {
+    id: 'kibana/nightshift-relay',
+    name: 'nightshift-relay',
+    roles: ['viewer', 'editor'],
+  };
 
   let serviceAccounts: EsServiceAccounts;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -117,6 +123,7 @@ describe('EsServiceAccounts', () => {
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
+      requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
@@ -129,20 +136,38 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('persists the description in Elasticsearch and returns it to callers', async () => {
+      mockHappyPath();
+      const description = 'Reads events for investigation workflows.';
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description })
+      ).resolves.toEqual({
+        ...createdAccount,
+        description,
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'PUT', body: { roles: createParams.roles, description } })
+      );
+    });
+
+    it('rejects an oversized description before creating an account', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })
+      ).rejects.toThrow();
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('creates the account, mints its token and stores the credential', async () => {
       mockHappyPath();
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
 
       const calls = esClient.asCurrentUser.transport.request.mock.calls;
       expect(calls[0][0]).toEqual(READ_ACCOUNT);
       expect(calls[1][0]).toEqual({
         method: 'PUT',
         path: ACCOUNT_PATH,
-        body: { roles: ['superuser'] },
+        body: { roles: ['viewer', 'editor'] },
         querystring: { refresh: 'wait_for' },
       });
       expect(calls[2][0]).toEqual({ method: 'POST', path: TOKEN_PATH });
@@ -171,93 +196,113 @@ describe('EsServiceAccounts', () => {
 
       const created = await serviceAccounts.create(request, createParams);
 
-      expect(Object.keys(created).sort()).toEqual(['id', 'name']);
+      expect(Object.keys(created).sort()).toEqual(['id', 'name', 'roles']);
       expect(JSON.stringify(created)).not.toContain('AAEAAW');
     });
 
-    it('assigns explicitly requested roles instead of the creator’s', async () => {
+    // The creator's own roles never reach the account: Elasticsearch reports none at all for an
+    // API key, and copying a user's would recreate the borrowed identity the feature replaces.
+    it("assigns the requested roles regardless of the creator's", async () => {
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          authentication_type: 'api_key',
+          roles: [],
+          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
+        })
+      );
       mockHappyPath();
 
-      await serviceAccounts.create(request, { ...createParams, roles: ['viewer', 'editor'] });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
+
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles: ['viewer', 'editor'] } })
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('drops duplicate roles, keeping first occurrences in order', async () => {
+      mockHappyPath();
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles: ['viewer', 'editor', 'viewer'] })
+      ).resolves.toEqual(createdAccount);
 
       expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
         expect.objectContaining({ body: { roles: ['viewer', 'editor'] } })
       );
     });
 
-    it('falls back to `superuser` and warns when roles cannot be derived', async () => {
-      request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'ApiKey a2V5LWlkOnNlY3JldA==' },
-      });
-      // Elasticsearch reports no roles at all for an API key, and the key's `limited_by` names
-      // its owner's roles regardless of the key's own restriction, so nothing can be inferred.
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          authentication_type: 'api_key',
-          roles: [],
-          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
-        })
-      );
+    // Elasticsearch role names are case-sensitive, so these are two different roles.
+    it('keeps roles that differ only in case', async () => {
       mockHappyPath();
+      const roles = ['Viewer', 'viewer'];
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
+      await expect(serviceAccounts.create(request, { ...createParams, roles })).resolves.toEqual({
+        ...createdAccount,
+        roles,
       });
 
       expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
-        expect.objectContaining({ body: { roles: ['superuser'] } })
+        expect.objectContaining({ body: { roles } })
       );
-      expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
-      // The widest possible grant must never be silent.
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was granted [superuser]'));
     });
 
-    it('does not warn when the roles came from the caller', async () => {
+    // The two backends cap roles differently, so UIAM's lower cap must not leak into this one.
+    it(`accepts more roles than UIAM allows, up to ${ES_SERVICE_ACCOUNT_MAX_ROLES}`, async () => {
       mockHappyPath();
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES }, (_, i) => `role-${i}`);
+      expect(roles.length).toBeGreaterThan(UIAM_SERVICE_ACCOUNT_MAX_ROLES);
 
-      await serviceAccounts.create(request, { ...createParams, roles: ['viewer'] });
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
 
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('does not warn when the roles were copied from the creator', async () => {
-      mockHappyPath();
-
-      await serviceAccounts.create(request, createParams);
-
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    // Elasticsearch caps no role count of its own, so a creator can hold more roles than Kibana
-    // is willing to read back. Copying them would create an account `readAccount` then refuses.
-    it('rejects a creator whose roles fall outside what an explicit `roles` may hold', async () => {
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          roles: new Array(SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer'),
-        })
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles } })
       );
+    });
 
-      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+    it(`rejects more than ${ES_SERVICE_ACCOUNT_MAX_ROLES} distinct roles with a 400 before writing anything`, async () => {
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: expect.stringContaining('Specify `roles` explicitly'),
+        message: expect.stringContaining('`roles`'),
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('accepts an API-key caller that names the roles explicitly', async () => {
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          authentication_type: 'api_key',
-          roles: [],
-          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
-        })
-      );
+    it(`accepts a role name of ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters, the most Elasticsearch allows`, async () => {
       mockHappyPath();
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)];
 
       await expect(
-        serviceAccounts.create(request, { ...createParams, roles: ['viewer'] })
-      ).resolves.toEqual({ id: 'kibana/nightshift-relay', name: 'nightshift-relay' });
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
+    });
+
+    it(`rejects a role name longer than ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters with a 400 before writing anything`, async () => {
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)];
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles.0`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it("rejects an omitted `roles` with a 400 rather than granting the creator's privileges", async () => {
+      await expect(
+        serviceAccounts.create(request, { name: 'nightshift-relay' } as never)
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('rejects with a 409 when the name is taken, without writing anything', async () => {
@@ -271,8 +316,45 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
-    // A third account type or a renamed field would otherwise read as "the name is free", and
-    // the PUT that follows is a full replacement.
+    // Accounts can be written to this namespace without Kibana, so an account as wide as
+    // Elasticsearch allows still has to read as "taken".
+    it.each([
+      [
+        'as many roles as Elasticsearch allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES).fill('viewer') },
+      ],
+      [
+        'as long a role name as Elasticsearch allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)] },
+      ],
+    ])('rejects with a 409 when the taken account holds %s', async (_, entry) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      [
+        'more roles than Elasticsearch itself allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer') },
+      ],
+      [
+        'a longer role name than Elasticsearch itself allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)] },
+      ],
+    ])('refuses an account with %s', async (_, entry) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    // A third account type, a renamed field, or a role list outside Elasticsearch's own limits
+    // would otherwise read as "the name is free", and the PUT that follows is a full replacement.
     it('refuses rather than overwriting an account it cannot read', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         'kibana/nightshift-relay': { type: 'user_managed', roles: 'superuser', enabled: true },
@@ -297,10 +379,7 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce({ created: true })
         .mockResolvedValueOnce({ created: true, token: { value: 'token' } });
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
     });
 
     it('rejects with a 403 when security features are disabled', async () => {
@@ -314,6 +393,7 @@ describe('EsServiceAccounts', () => {
 
     it('rejects with a 424 when saved object encryption is unavailable', async () => {
       serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
         logger,
         license,
         clusterClient,
@@ -341,35 +421,18 @@ describe('EsServiceAccounts', () => {
 
     it('rejects a name that could escape the Elasticsearch path', async () => {
       await expect(
-        serviceAccounts.create(request, { name: '../_cluster/settings' })
+        serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    // An explicit empty list means "no roles", which is not the same question as "work them out
-    // for me". Answering it with the widest possible grant would be the worst reading of it.
-    it('rejects an empty `roles` rather than falling back to `superuser`', async () => {
+    it('rejects an empty `roles` rather than writing an account with none', async () => {
       await expect(
         serviceAccounts.create(request, { ...createParams, roles: [] })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('refuses a token longer than Elasticsearch should ever report, and rolls back', async () => {
-      esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({
-          token: { value: 'a'.repeat(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1) },
-        });
-
-      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
-
-      expect(credentialStore.set).not.toHaveBeenCalled();
-      const calls = esClient.asCurrentUser.transport.request.mock.calls;
-      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {
@@ -491,10 +554,7 @@ describe('EsServiceAccounts', () => {
       );
       getCurrentUserProfileId.mockRejectedValue(new Error('profile index unavailable'));
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
 
       // Recorded without the profile id rather than not recorded at all.
       expect(credentialStore.set).toHaveBeenCalledWith(
@@ -654,6 +714,49 @@ describe('EsServiceAccounts', () => {
         expect.stringContaining('Could not determine whether the failed create')
       );
     });
+
+    it('sends the trimmed description with the account and reports it back', async () => {
+      mockHappyPath();
+
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          description: ' Relays the nightshift alerts. ',
+        })
+      ).resolves.toEqual({ ...createdAccount, description: 'Relays the nightshift alerts.' });
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[1][0]).toEqual({
+        method: 'PUT',
+        path: ACCOUNT_PATH,
+        body: { roles: ['viewer', 'editor'], description: 'Relays the nightshift alerts.' },
+        querystring: { refresh: 'wait_for' },
+      });
+    });
+
+    it('leaves a blank description out of the account write', async () => {
+      mockHappyPath();
+
+      const created = await serviceAccounts.create(request, {
+        ...createParams,
+        description: '   ',
+      });
+
+      expect(Object.keys(created).sort()).toEqual(['id', 'name', 'roles']);
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[1][0].body).toStrictEqual({ roles: ['viewer', 'editor'] });
+    });
+
+    it('refuses rather than overwriting an account whose description it cannot read', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 42 })
+      );
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#list', () => {
@@ -673,7 +776,7 @@ describe('EsServiceAccounts', () => {
         count: 2,
         service_accounts: [
           queried('acme/billing', { enabled: false, roles: ['billing_read'] }),
-          queried('kibana/nightshift-relay'),
+          queried('kibana/nightshift-relay', { description: 'Runs investigation workflows.' }),
         ],
       });
       credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
@@ -705,6 +808,7 @@ describe('EsServiceAccounts', () => {
           {
             id: 'kibana/nightshift-relay',
             name: 'nightshift-relay',
+            description: 'Runs investigation workflows.',
             roles: ['viewer'],
             enabled: true,
             assumable: true,
@@ -832,6 +936,36 @@ describe('EsServiceAccounts', () => {
 
       await expect(serviceAccounts.list(request)).rejects.toThrow('socket hang up');
     });
+
+    it('reports the description of each account that has one', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a', { description: 'Relays the nightshift alerts.' }),
+          queried('kibana/b'),
+        ],
+      });
+
+      const {
+        serviceAccounts: [described, undescribed],
+      } = await serviceAccounts.list(request);
+
+      expect(described.description).toBe('Relays the nightshift alerts.');
+      expect(undescribed).not.toHaveProperty('description');
+    });
+
+    it('omits an empty or null description', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a', { description: '' }),
+          queried('kibana/b', { description: null }),
+        ],
+      });
+
+      const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+      expect(entries[0]).not.toHaveProperty('description');
+      expect(entries[1]).not.toHaveProperty('description');
+    });
   });
 
   describe('#get', () => {
@@ -839,7 +973,9 @@ describe('EsServiceAccounts', () => {
 
     it('reads the user-managed account and confirms it is assumable', async () => {
       esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        .mockResolvedValueOnce(
+          accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
+        )
         // The account still holds Kibana's token, so the stored credential describes it.
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
       credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
@@ -849,6 +985,7 @@ describe('EsServiceAccounts', () => {
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
+        description: 'Runs investigation workflows.',
         roles: ['viewer'],
         enabled: true,
         assumable: true,
@@ -946,12 +1083,11 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    // Elasticsearch caps neither the role count nor the role name length, so an account created
-    // outside Kibana can sit outside the bounds Kibana puts on its own creates. Such an account
-    // lists fine, and must open fine too.
-    it('reads an account whose roles fall outside the bounds of a Kibana create', async () => {
-      const roles = Array.from({ length: SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
-      roles.push('a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1));
+    // An account created outside Kibana is still held to Elasticsearch's own limits, so one at
+    // those limits lists fine, and must open fine too.
+    it('reads an account with as many roles, and as long a role name, as Elasticsearch allows', async () => {
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES - 1 }, (_, i) => `role-${i}`);
+      roles.push('a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH));
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ roles }));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
@@ -987,26 +1123,382 @@ describe('EsServiceAccounts', () => {
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
-  });
 
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
+    it('reports the description Elasticsearch holds for the account', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 'Relays the nightshift alerts.' })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        description: 'Relays the nightshift alerts.',
       });
     });
-  });
 
-  describe('#reauthenticateFakeRequest', () => {
-    it('resolves to null so unrelated fake requests stay on the not-handled path', async () => {
-      await expect(serviceAccounts.reauthenticateFakeRequest()).resolves.toBeNull();
+    // Elasticsearch caps a description at 1,000 characters on write, so Kibana does not bound it
+    // again on read.
+    it('reports a description longer than Kibana accepts on create', async () => {
+      const description = 'a'.repeat(1001);
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ description }));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        description,
+      });
+    });
+
+    it('omits the description when Elasticsearch reports none', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
+    });
+
+    it('answers 502 for a description that is not a string', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 42 })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('omits an empty description', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: '' })
+      );
+
+      expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
     });
   });
 
-  describe('#releaseFakeRequest', () => {
-    it('is a no-op since this backend never mints requests', () => {
-      expect(() => serviceAccounts.releaseFakeRequest()).not.toThrow();
+  describe('#delete', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+    const DELETE_ACCOUNT = { method: 'DELETE', path: ACCOUNT_PATH };
+    const deleteToken = (tokenName: string) => ({
+      method: 'DELETE',
+      path: `${CREDENTIALS_PATH}/token/${tokenName}`,
+    });
+    const undeletedTokensWarning = (tokenNames: string) =>
+      `Service account [${ACCOUNT_ID}] was deleted, but its tokens [${tokenNames}] could not be. ` +
+      'They can no longer authenticate, but an account named [nightshift-relay] cannot be ' +
+      'created again until they are deleted.';
+
+    /**
+     * Answers the account read, the token read and the deletes from one table, so a test can make
+     * any one of them fail without caring about the order they arrive in.
+     */
+    const mockElasticsearch = ({
+      account = accountEntry() as object,
+      tokenNames = ['kibana-managed'],
+      failingPaths = [] as string[],
+    } = {}) => {
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        if (failingPaths.includes(path)) {
+          throw new Error(`${method} ${path} failed`);
+        }
+        if (method === 'GET' && path === ACCOUNT_PATH) return account;
+        if (method === 'GET' && path === CREDENTIALS_PATH) return accountCredentials(tokenNames);
+        return { found: true };
+      });
+    };
+
+    beforeEach(() => {
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 1,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+    });
+
+    it('deletes every token, then the credential, then the account without `force`', async () => {
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) return accountEntry();
+        if (method === 'GET') return accountCredentials(['kibana-managed', 'operator-token']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/kibana-managed`,
+        `DELETE ${CREDENTIALS_PATH}/token/operator-token`,
+        'credential',
+        `DELETE ${ACCOUNT_PATH}`,
+      ]);
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(DELETE_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('invalidates the access tokens the account was issued', async () => {
+      mockElasticsearch();
+
+      await serviceAccounts.delete(request, ACCOUNT_ID);
+
+      expect(esClient.asCurrentUser.security.invalidateToken).toHaveBeenCalledWith(
+        { username: ACCOUNT_ID, realm_name: '_service_account' },
+        { ignore: [404] }
+      );
+    });
+
+    it('warns when the access tokens cannot be invalidated', async () => {
+      mockElasticsearch();
+      esClient.asCurrentUser.security.invalidateToken.mockRejectedValue(new Error('unavailable'));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [
+          `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued could ` +
+            'not be invalidated.',
+        ],
+      });
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('forces the account delete past a token it could not delete, and warns about it', async () => {
+      mockElasticsearch({
+        tokenNames: ['kibana-managed', 'operator-token'],
+        failingPaths: [`${CREDENTIALS_PATH}/token/operator-token`],
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('operator-token')],
+      });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        { ...DELETE_ACCOUNT, querystring: { force: 'true' } },
+        { ignore: [404] }
+      );
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete token [operator-token]')
+      );
+    });
+
+    it('deletes the credential after the account when Kibana’s own token was left behind', async () => {
+      mockElasticsearch({ failingPaths: [`${CREDENTIALS_PATH}/token/kibana-managed`] });
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      const answer = esClient.asCurrentUser.transport.request.getMockImplementation()!;
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params, options) => {
+        const { method, path } = params as { method: string; path: string };
+        if (method === 'DELETE' && path === ACCOUNT_PATH) order.push('account');
+        return answer(params, options);
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('kibana-managed')],
+      });
+      expect(order).toEqual(['account', 'credential']);
+    });
+
+    it('still reports the leftover tokens when the late credential delete fails', async () => {
+      mockElasticsearch({ failingPaths: [`${CREDENTIALS_PATH}/token/kibana-managed`] });
+      credentialStore.delete.mockRejectedValue(new Error('saved objects unavailable'));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('kibana-managed')],
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('failed to delete its credential')
+      );
+    });
+
+    it('keeps the account when the credential delete fails, so a retry can finish', async () => {
+      mockElasticsearch();
+      const error = new Error('saved objects unavailable');
+      credentialStore.delete.mockRejectedValue(error);
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toBe(error);
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalledWith(
+        DELETE_ACCOUNT,
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to delete service account [${ACCOUNT_ID}]`)
+      );
+    });
+
+    it('surfaces an account delete that Elasticsearch refuses', async () => {
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        if (method === 'GET' && path === ACCOUNT_PATH) return accountEntry();
+        if (method === 'GET') return accountCredentials(['kibana-managed']);
+        if (path === ACCOUNT_PATH) throw new Error('cannot delete service account');
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toThrow(
+        'cannot delete service account'
+      );
+      expect(esClient.asCurrentUser.security.invalidateToken).not.toHaveBeenCalled();
+    });
+
+    it('deletes tokens left over from an account that is already gone', async () => {
+      mockElasticsearch({ account: {}, tokenNames: ['operator-token'] });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        deleteToken('operator-token'),
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalledWith(
+        DELETE_ACCOUNT,
+        expect.anything()
+      );
+      // A concurrent create may already have written a credential under this id.
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.security.invalidateToken).toHaveBeenCalledWith(
+        { username: ACCOUNT_ID, realm_name: '_service_account' },
+        { ignore: [404] }
+      );
+    });
+
+    it('reads the account again before deleting tokens left over from it', async () => {
+      const order: string[] = [];
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) return {};
+        if (method === 'GET') return accountCredentials(['operator-token']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/operator-token`,
+      ]);
+    });
+
+    it('deletes an account created again while its leftover tokens were read, as a whole', async () => {
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      let accountReads = 0;
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) {
+          accountReads++;
+          return accountReads === 1 ? {} : accountEntry();
+        }
+        if (method === 'GET') return accountCredentials(['kibana-managed']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/kibana-managed`,
+        'credential',
+        `DELETE ${ACCOUNT_PATH}`,
+      ]);
+    });
+
+    it('invalidates access tokens left over from an account that is already gone', async () => {
+      mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 2,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['with leftover tokens', ['operator-token']],
+      ['without leftover tokens', []],
+    ])(
+      'warns when an account that is already gone keeps its access tokens, %s',
+      async (_, tokenNames) => {
+        mockElasticsearch({ account: {}, tokenNames });
+        esClient.asCurrentUser.security.invalidateToken.mockRejectedValue(new Error('unavailable'));
+
+        await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+          warnings: [
+            `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued ` +
+              'could not be invalidated.',
+          ],
+        });
+      }
+    );
+
+    it('rejects with a 404 when the account is gone and left nothing behind', async () => {
+      mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 0,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for a built-in account without touching its tokens', async () => {
+      await expect(serviceAccounts.delete(request, 'elastic/fleet-server')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for an id that is not `{namespace}/{service}`', async () => {
+      await expect(serviceAccounts.delete(request, 'not-a-principal')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
     });
   });
 });

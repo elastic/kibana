@@ -559,11 +559,26 @@
                           }
                         }
                       },
+                      "extractObservables": {
+                        "type": "boolean",
+                        "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                        "example": true
+                      },
                       "owner": {
                         "$ref": "#/components/schemas/owner"
                       },
                       "templates": {
                         "$ref": "#/components/schemas/templates"
+                      },
+                      "workflowTags": {
+                        "type": "array",
+                        "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1024
+                        }
                       },
                       "updated_at": {
                         "type": "string",
@@ -819,11 +834,26 @@
                         }
                       }
                     },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                      "example": true
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -1083,11 +1113,26 @@
                         }
                       }
                     },
+                    "extractObservables": {
+                      "type": "boolean",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
+                      "example": true
+                    },
                     "owner": {
                       "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -4116,9 +4161,9 @@
             "example": true
           },
           "extractObservables": {
-            "description": "When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.\n",
+            "description": "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n",
             "type": "boolean",
-            "example": false
+            "example": true
           }
         }
       },
@@ -5557,11 +5602,25 @@
               }
             }
           },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
+          },
           "owner": {
             "$ref": "#/components/schemas/owner"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           }
         }
       },
@@ -5656,8 +5715,22 @@
               }
             }
           },
+          "extractObservables": {
+            "type": "boolean",
+            "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n"
+          },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
@@ -7674,6 +7747,10 @@
               }
             ],
             "observableTypes": [],
+            "extractObservables": true,
+            "workflowTags": [
+              "soc-triage"
+            ],
             "owner": "cases",
             "created_at": "2024-07-01T17:07:17.767Z",
             "created_by": {
@@ -7745,6 +7822,9 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -7829,6 +7909,10 @@
               ]
             }
           ],
+          "extractObservables": true,
+          "workflowTags": [
+            "soc-triage"
+          ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
@@ -7883,6 +7967,10 @@
             "fields": null
           },
           "closure_type": "close-by-user",
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
+          ],
           "customFields": [
             {
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
@@ -7918,6 +8006,11 @@
               "required": false,
               "type": "toggle"
             }
+          ],
+          "extractObservables": true,
+          "workflowTags": [
+            "soc-triage",
+            "enrichment"
           ],
           "owner": "cases",
           "created_at": "2024-07-01T17:07:17.767Z",

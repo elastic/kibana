@@ -6,8 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -27,6 +29,8 @@ import type {
   UserIdAndName,
   ChatEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import {
   ConversationParentRelation,
   ConversationRoundStatus,
@@ -41,6 +45,7 @@ import {
   ROUND_DERIVED_EVENT_ID_SUFFIXES,
   executionTerminatedEventId,
   resumeExecutionId,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
@@ -115,59 +120,85 @@ const emitPersistedTimelineThenLifecycle = ({
 };
 
 /**
- * Receipt-time input write.
+ * Writes a `user_message` event onto a conversation, creating the conversation first when the
+ * resolution said so. The single place user messages are persisted: the executing path passes a
+ * round-derived event id, a message appended on its own passes a uuid. Returns the written id so
+ * a later execution can name it as its `trigger_event_id`.
  */
-export const persistRoundInput = async ({
+export const persistUserMessage = async ({
   conversation,
   conversationClient,
-  roundId,
+  eventId,
   receivedAt,
   input,
   author,
   origin,
+  user,
+  additionalEvents = [],
+  attachments,
+  appendRefresh,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  roundId: string;
+  eventId: string;
   receivedAt: Date;
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
-}): Promise<void> => {
+  /** Actor fallback when the poster has no author, for a conversation they do not own. */
+  user?: UserIdAndName;
+  /** Attachment change events to store in the same write, after the message. */
+  additionalEvents?: TimelineEvent[];
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /**
+   * Refresh of the write onto an existing conversation. Creating one always refreshes: the
+   * origin lookup finds conversations by search.
+   */
+  appendRefresh?: Refresh;
+}): Promise<string> => {
   const event = userMessageEvent(
     {
-      id: roundId,
+      id: eventId,
+      createdAt: receivedAt.toISOString(),
       input: {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       },
-      started_at: receivedAt.toISOString(),
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
     },
-    conversation
+    { ...conversation, ...(user ? { user } : {}) }
   );
+
+  const events = [event, ...additionalEvents];
 
   if (conversation.operation === 'CREATE') {
     const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events: [event],
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
-      return;
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        { source: 'execution' }
+      );
+      return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
         throw error;
@@ -176,9 +207,15 @@ export const persistRoundInput = async ({
   }
 
   await conversationClient.appendEvents(
-    { id: conversation.id, events: [event] },
-    { access: 'converse' }
+    { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
+    {
+      access: 'converse',
+      source: 'execution',
+      ...(appendRefresh !== undefined ? { refresh: appendRefresh } : {}),
+    }
   );
+
+  return event.id;
 };
 
 export const appendRoundTerminated$ = ({
@@ -229,7 +266,7 @@ export const appendRoundTerminated$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, events, round };
@@ -355,7 +392,7 @@ export const appendResumeExecution$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, executionEvents, round, resumeIndex };
@@ -411,7 +448,8 @@ export interface PersistExecutionInterruptionParams {
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
  *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
- *   terminal + attachment events. `status: completed`, no `state`.
+ *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
+ *   produced by the run, the rest of it is left as stored.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
  *   events re-stamped with `exec_k`; the answered prompt is consumed: the round reads `completed`
  *   with an `interruption`.
@@ -480,6 +518,14 @@ export const persistExecutionInterruption = async (
       ? { attachments: { snapshot: conversation.attachments ?? [], produced: attachments } }
       : {};
     const workspaceUpdate = workspaceId ? { workspaceId } : {};
+    // A compaction that ran before the interruption must survive it: its summary covers context
+    // the next run would otherwise re-render verbatim. The rest of the state is left as stored.
+    const compactionSummary =
+      interrupted?.compaction_summary ?? completed?.conversation_state?.compaction_summary;
+    const stateUpdate =
+      compactionSummary && !isEqual(compactionSummary, conversation.state?.compaction_summary)
+        ? { state: { ...conversation.state, compaction_summary: compactionSummary } }
+        : {};
 
     /** `[]` when the client skipped the write because a terminal already existed. */
     const writtenTerminals = (
@@ -503,17 +549,17 @@ export const persistExecutionInterruption = async (
     };
 
     if (!isResume) {
-      // Rebuilt with the exact inputs `persistRoundInput` used, so id, actor and created_at match
+      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
       // the receipt-time event; only `data` is upgraded to the processed input when known.
       const receiptInput: RoundInput = {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       };
       const userMessage = userMessageEvent(
         {
-          id: roundId,
+          id: roundUserMessageEventId(roundId),
+          createdAt: receivedAt.toISOString(),
           input: processedInput ?? receiptInput,
-          started_at: receivedAt.toISOString(),
           ...(author ? { author } : {}),
           ...(origin ? { origin } : {}),
         },
@@ -538,8 +584,9 @@ export const persistExecutionInterruption = async (
           skipIfTerminalExistsFor: executionId,
           ...attachmentsUpdate,
           ...workspaceUpdate,
+          ...stateUpdate,
         },
-        { access: 'converse' }
+        { access: 'converse', source: 'execution' }
       );
       return writtenTerminals(persisted, executionEvents);
     }
@@ -582,8 +629,9 @@ export const persistExecutionInterruption = async (
         skipIfTerminalExistsFor: executionId,
         ...attachmentsUpdate,
         ...workspaceUpdate,
+        ...stateUpdate,
       },
-      { access: 'converse' }
+      { access: 'converse', source: 'execution' }
     );
     return writtenTerminals(persisted, executionEvents);
   } catch (writeError) {
@@ -595,8 +643,6 @@ export const persistExecutionInterruption = async (
     return [];
   }
 };
-
-export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 

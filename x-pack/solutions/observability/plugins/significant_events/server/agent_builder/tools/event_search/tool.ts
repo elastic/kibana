@@ -12,9 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
@@ -39,10 +40,10 @@ const searchEventsSchema = significantEventSchema
   })
   .partial({ stream_names: true })
   .extend({
-    status: significantEventSchema.shape.status.default('open').describe(
+    status: significantEventSchema.shape.status.default('active').describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
         defaultMessage:
-          'Event status to filter by. Defaults to "open". Use "closed" or "dismissed" only when intentionally reviewing events in that state.',
+          'Event status to filter by. Defaults to "active". Use "inactive" when intentionally reviewing resolved events.',
       })
     ),
     query: z
@@ -172,7 +173,7 @@ export function createSearchEventsTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof searchEventsSchema> {
@@ -187,12 +188,12 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use "compact" for broad searches and continuation matching. It includes the event summary and symptom hypothesis for correlation, plus signal counts, complete rule UUIDs, unresolved rule UUIDs, and topology. Use "full" only for one known event and request later signal pages when signals_has_more is true. Searches default to "open" events; specify a non-open status only when intentionally reviewing that state.',
+          'Use "compact" for broad searches and continuation matching. It includes the event summary and symptom hypothesis for correlation, plus signal counts, complete rule UUIDs, unresolved rule UUIDs, and topology. Use "full" only for one known event and request later signal pages when signals_has_more is true. Searches default to "active" events; specify "inactive" only when intentionally reviewing resolved events.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
         defaultMessage:
-          'Filters are optional for bounded broad searches: omitted values default to "open" events from "now-7d" to "now", "compact" view, page 1, and 20 events per page. Use rule, topology, event, stream, or query filters to narrow results. When has_more is true, increment page with all other compact-search parameters unchanged. For "full", use signals_page to continue only the known event’s signals.',
+          'Filters are optional for bounded broad searches: omitted values default to "active" events from "now-7d" to "now", "compact" view, page 1, and 20 events per page. Use rule, topology, event, stream, or query filters to narrow results. When has_more is true, increment page with all other compact-search parameters unchanged. For "full", use signals_page to continue only the known event’s signals.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
@@ -215,11 +216,12 @@ export function createSearchEventsTool({
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanReadSignificantEvents({ request, server });
 
         const data = await searchEventsToolHandler({
-          eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           params: { ...toolParams, query },
         });
 

@@ -81,9 +81,15 @@ export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:
 
 // Alerting settings
 export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
+export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
+  'alerting:v1:showV1ObservabilityAlertsTable';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
+export const CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID = 'contextEngine:memoryEnabled';
+
+// Data federation settings
+export const DATA_FEDERATION_ENABLED_SETTING_ID = 'dataFederation:enabled';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
@@ -143,6 +149,7 @@ export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
+export const OBSERVABILITY_APM_MAX_NUMBER_OF_SERVICES_ID = 'observability:apmMaxNumberOfServices';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =

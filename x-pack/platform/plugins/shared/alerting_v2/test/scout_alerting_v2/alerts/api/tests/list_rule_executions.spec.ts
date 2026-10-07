@@ -64,8 +64,8 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
         expect(Date.parse(item.started_at)).toBeGreaterThan(0);
         expect(Date.parse(item.ended_at)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
-        expect(Number.isInteger(item.timings.duration)).toBe(true);
-        expect(Number.isInteger(item.timings.scheduled_delay)).toBe(true);
+        expect(Number.isInteger(item.timings.duration_ms)).toBe(true);
+        expect(Number.isInteger(item.timings.scheduled_delay_ms)).toBe(true);
       }
 
       const successful = response.body.items.find(
@@ -124,20 +124,19 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: accepts perPage=0 with a count only read', async ({ apiClient }) => {
-    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 0 }), {
-      headers: readerHeaders,
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toStrictEqual([]);
-    expect(response.body.per_page).toBe(0);
-    expect(response.body.total).toBeDefined();
-  });
-
   apiTest('validation: rejects page=0', async ({ apiClient }) => {
     const response = await apiClient.get(listRuleExecutionsUrl({ page: 0 }), {
       headers: readerHeaders,
     });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 0 }), {
+      headers: readerHeaders,
+    });
+
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
@@ -151,7 +150,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects unknown outcome values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcome=cancelled`, {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcomes=cancelled`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);

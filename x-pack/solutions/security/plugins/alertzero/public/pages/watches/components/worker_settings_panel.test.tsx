@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -37,27 +41,56 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
-const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+
+const renderPanel = (
+  workflowId: string | null,
+  isAccordion: boolean,
+  {
+    enabled = true,
+    showManagedWorkflows = true,
+    canChangeAdvancedSettings = true,
+  }: {
+    enabled?: boolean;
+    showManagedWorkflows?: boolean;
+    canChangeAdvancedSettings?: boolean;
+  } = {}
+) => {
   const core = coreMock.createStart();
+  core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
-    (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+      options?.deepLinkId === 'model_settings'
+        ? FEATURE_SETTINGS_URL
+        : `/app/${appId}${options?.path ?? ''}`
   );
+  core.settings.client.get.mockReturnValue(showManagedWorkflows);
+  core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
+  };
 
   render(
-    <KibanaContextProvider services={core}>
-      <WorkerSettingsPanel
-        worker={createWorker(workflowId)}
-        isAccordion={isAccordion}
-        isExpanded
-        onToggle={jest.fn()}
-        enabled
-        settings={createWorker(workflowId).settings}
-        settingsLocked={false}
-        isSaving={false}
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={createWorker(workflowId)}
+          isAccordion={isAccordion}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled={enabled}
+          settings={createWorker(workflowId).settings}
+          warningReasons={[]}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 
   return core;
@@ -92,6 +125,35 @@ describe('WorkerSettingsPanel view executions link', () => {
   it.each([
     ['accordion', true],
     ['single-Worker', false],
+  ])(
+    'offers the managed workflows setting instead of the workflow when it is off (%s)',
+    (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { showManagedWorkflows: false });
+
+      const link = screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`);
+      expect(link).not.toHaveAttribute('href');
+
+      fireEvent.click(link);
+
+      expect(
+        screen.getByText(
+          'Execution history lives in Managed workflows, which is turned off for this space.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}-open-advanced-settings`)
+      ).toHaveAttribute(
+        'href',
+        `/app/management/kibana/settings?query=${encodeURIComponent(
+          WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+        )}`
+      );
+    }
+  );
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
   ])('omits the link when the per-space workflow is not installed (%s)', (_layout, isAccordion) => {
     renderPanel(null, isAccordion);
 
@@ -99,5 +161,76 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel models', () => {
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('points the Models row at Feature settings in a new tab (%s)', (_layout, isAccordion) => {
+    const core = renderPanel(WORKFLOW_ID, isAccordion);
+
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings'
+    );
+    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'model_settings',
+    });
+  });
+});
+
+describe('WorkerSettingsPanel service account', () => {
+  it('lets a worker without an account be turned on and shows no Run as control', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).not.toBeDisabled();
+    expect(screen.queryByTestId(`alertZeroServiceAccountRow-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel header band title', () => {
+  /*
+   * Style contract, not layout: jsdom has no flexbox engine, so these assertions pin the CSS that
+   * keeps the worker name on one line instead of stacking it (the accordion band hands width to the
+   * trailing actions before the title). Reverting any one of them re-creates that regression.
+   */
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('keeps the title on one line and lets the badge group wrap (%s)', (_layout, isAccordion) => {
+    renderPanel(WORKFLOW_ID, isAccordion);
+
+    const title = screen.getByText('Rule Tuning');
+    // `white-space: nowrap` is the whole one-line guarantee: EuiTitle pins
+    // `overflow-wrap: break-word !important`, so a `overflowWrap: normal` override here would be
+    // dead CSS - only the nowrap declaration stops EUI from stacking the name.
+    expect(title).toHaveStyleRule('white-space', 'nowrap');
+    expect(title).toHaveStyleRule('overflow', 'hidden');
+    expect(title).toHaveStyleRule('text-overflow', 'ellipsis');
+    // An ellipsized name stays recoverable on hover.
+    expect(title).toHaveAttribute('title', 'Rule Tuning');
+
+    // The 100% clamp is what makes an over-long name ellipsize instead of overflowing the band.
+    expect(title.closest('.euiFlexItem')).toHaveStyleRule('max-width', '100%');
+
+    // The badge group wraps to its own line before the title gives up any width.
+    expect(title.closest('.euiFlexGroup')).toHaveStyleRule('flex-wrap', 'wrap');
+  });
+
+  it('gives the accordion trigger min-width relief so the nowrap title cannot set its floor', () => {
+    // EuiAccordion's trigger is a flex item left at `min-width: auto`, so the nowrap title's
+    // min-content becomes its minimum size: without this relief the band cannot shrink and a long
+    // name pushes the header past its panel instead of clipping.
+    renderPanel(WORKFLOW_ID, true);
+
+    const accordionButton = screen
+      .getByTestId(`alertZeroWatchWorkerAccordion-${WORKER_ID}`)
+      .querySelector('.euiAccordion__button');
+
+    expect(accordionButton).toHaveStyleRule('min-width', '0');
   });
 });

@@ -6,7 +6,9 @@
  */
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 
 interface EsqlViewsPublicConfig {
@@ -19,7 +21,12 @@ interface SetupDependencies {
   management: ManagementSetup;
 }
 
-export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies> {
+export interface StartDependencies {
+  data: DataPublicPluginStart;
+  share: SharePluginStart;
+}
+
+export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly isManagementUiEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -27,7 +34,7 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies> {
     this.isManagementUiEnabled = managementUi.enabled;
   }
 
-  public setup(core: CoreSetup, { management }: SetupDependencies): void {
+  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     if (!this.isManagementUiEnabled) {
       return;
     }
@@ -38,12 +45,12 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies> {
       order: 2.1,
       keywords: ['esql', 'views'],
       async mount(params) {
-        const [{ mountManagementSection }, [coreStart]] = await Promise.all([
+        const [{ mountManagementSection }, [coreStart, startDependencies]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return mountManagementSection(coreStart, params);
+        return mountManagementSection(coreStart, startDependencies, params);
       },
     });
   }

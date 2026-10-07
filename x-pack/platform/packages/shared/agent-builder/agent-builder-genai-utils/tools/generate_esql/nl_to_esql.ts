@@ -20,6 +20,7 @@ import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
+import { withPromqlKeyword } from './promql_keyword';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -77,7 +78,7 @@ export interface GenerateEsqlOptions {
    */
   nlQuery: string;
   /**
-   * The resource (index/datastream/alias) to target
+   * The resource (index, datastream, alias, or ES|QL view) to target
    */
   index?: string;
   /**
@@ -126,6 +127,10 @@ export interface GenerateEsqlOptions {
    */
   includeDatasets?: boolean;
   /**
+   * If true, ES|QL views are considered when discovering and resolving the target.
+   */
+  includeViews?: boolean;
+  /**
    * If true, frozen tier indices are queried.
    */
   includeFrozen?: boolean;
@@ -148,6 +153,7 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  includeViews = false,
   includeFrozen = false,
   model: inputModel,
   modelProvider,
@@ -170,6 +176,7 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    includeViews,
     includeFrozen,
     sessionId,
   });
@@ -197,9 +204,19 @@ export const generateEsql = async ({
             name: 'request_documentation',
           });
           const docPromise = requestDocModel
-            .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
+            .invoke(
+              createRequestDocumentationPromptNoResource({
+                nlQuery,
+                documentation,
+                additionalContext,
+              })
+            )
             .then(({ commands = [], functions = [] }) => {
-              const requestedKeywords = [...commands, ...functions];
+              const requestedKeywords = withPromqlKeyword(
+                [...commands, ...functions],
+                nlQuery,
+                additionalContext
+              );
               return {
                 type: 'request_documentation' as const,
                 requestedKeywords,
@@ -218,6 +235,7 @@ export const generateEsql = async ({
               esClient,
               limit: 1,
               includeDatasets,
+              includeViews,
               includeFrozen,
               model,
               logger,

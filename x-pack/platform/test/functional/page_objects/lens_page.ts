@@ -38,6 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
+  const monacoEditor = getService('monacoEditor');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share, exports } =
     getPageObjects([
@@ -166,6 +167,39 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.try(
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -228,11 +262,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (
-          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
-            timeout: 1000,
-          }))
-        ) {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
           await testSubjects.click(opts.dimension);
         }
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
@@ -247,17 +277,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
         // Close too early discards the operation→field transition. Do not wait on the
         // combobox input: setElement types `field` as a filter before the option is
         // clicked. data-selected-field is the committed option display name and
         // updates only after insertOrReplaceColumn. Independent of aria-invalid
         // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        await retry.waitFor('field selection to commit', async () => {
-          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-          return committedLabel === field;
-        });
+        // Re-select on failure because EUI drops the option click under load, and the filter text
+        // setElement leaves behind makes both its own check and the input read back as `field`.
+        await retry.try(
+          async () => {
+            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
+              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+              return committedLabel === field;
+            });
+          },
+          {
+            description: `configureDimension - select field [${field}]`,
+            timeout: 60_000,
+            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
+          }
+        );
       }
 
       if (opts.formula) {
@@ -293,15 +334,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-subFunction-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-subFunction-selection-row > indexPattern-reference-function',
+          'data-selected-function',
           opts.operation
         );
       }
 
       if (opts.field) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-reference-field-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field',
+          'data-selected-field',
           opts.field
         );
       }
@@ -649,7 +692,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isDimensionEditorOpen() {
-      return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
+      return await testSubjects.exists('lns-indexPattern-dimensionContainerClose');
     },
 
     // closes the dimension editor flyout
@@ -843,20 +886,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Save the current Lens visualization.
      */
     async openSaveOptionsIfNeeded() {
-      if (await testSubjects.exists('lnsApp_saveButton')) {
-        return;
-      }
       const secondarySubjects = [
         'lnsApp_saveAndReturnButton-secondary-button',
         'lnsApp_replaceInDashboardButton-secondary-button',
         'lnsApp_replaceInCanvasButton-secondary-button',
       ];
-      for (const subject of secondarySubjects) {
-        if (await testSubjects.exists(subject)) {
-          await testSubjects.click(subject);
+      await retry.tryForTime(10000, async () => {
+        if (await testSubjects.exists('lnsApp_saveButton')) {
           return;
         }
-      }
+        for (const subject of secondarySubjects) {
+          if (await testSubjects.exists(subject)) {
+            await testSubjects.click(subject);
+            return;
+          }
+        }
+        throw new Error('Lens save controls have not rendered');
+      });
+      await testSubjects.existOrFail('lnsApp_saveButton', { timeout: 10000 });
     },
 
     async save(
@@ -902,9 +949,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // remounts when the column label commits (DebouncedInput key). Wait for it
       // to exist, then type+assert in one retry so a remount cannot leave the
       // wait looking at a detached node.
-      await retry.waitFor('name-input to exist', async () =>
-        testSubjects.exists('name-input', { timeout: 1000 })
-      );
+      await retry.waitFor('name-input to exist', async () => testSubjects.exists('name-input'));
       await retry.try(async () => {
         await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
         expect(
@@ -939,27 +984,42 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async openStyleSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 
       await find.clickByCssSelector('button[data-test-subj="style"]');
-      await retry.try(async () => {
-        await find.byCssSelector('#lnsDimensionContainerTitle');
-      });
+      await testSubjects.existOrFail('lnsStyleSettingsFlyout');
     },
 
     async openLegendSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 
       if (await this.hasLegendToolbarButton()) {
         const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
+        await testSubjects.existOrFail('lnsLegendSettingsFlyout');
       }
     },
+    /**
+     * Opens the layer settings flyout and waits for it to be present in the DOM.
+     */
+    async openLayerSettings() {
+      await testSubjects.click('lnsLayerSettings');
+      await testSubjects.existOrFail('lnsLayerSettingsFlyout');
+    },
+
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
@@ -1047,7 +1107,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openChartSwitchPopover(layerIndex = 0) {
       await this.ensureLayerTabIsActive(layerIndex);
 
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
@@ -1240,7 +1300,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`, { timeout: 1000 })) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerClone--${index}`);
@@ -1591,6 +1651,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
+    /**
+     * Number of columns the rendered metric grid is laid out with, which reflects the
+     * "Layout columns" (`maxCols`) setting once it has been committed to the Lens state.
+     */
+    async getMetricGridColumnCount() {
+      const grid = await findService.byCssSelector('[data-test-subj="mtrVis"] .echMetricContainer');
+      const columns = await grid.getComputedStyle('grid-template-columns');
+      return columns.trim().split(/\s+/).length;
+    },
+
     async getMetricElementIfExists(
       selector: string,
       container: WebElementWrapper,
@@ -1774,18 +1844,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
-      await retry.try(async () => {
+      // Callers may run this right after navigating to Lens; wait for the layer to render.
+      if (!(await find.existsByCssSelector('[data-test-subj^="lns-layerPanel-"]', 10000))) {
+        throw new Error('Lens layer panel has not rendered');
+      }
+      // Bounded below the default hook timeout so a blocked click reports its cause.
+      await retry.tryForTime(60000, async () => {
+        // The no-data popover can open late after navigation and cover the layer header.
+        await timePicker.ensureHiddenNoDataPopover();
         // Hover over the tab to make the layer actions button visible
         const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
-        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
-          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+        // Click without the inner click retry so an intercepted click fails this attempt fast and
+        // the next attempt can dismiss whatever covered the button.
+        if (await testSubjects.waitForExists(`lnsLayerSplitButton--${index}`)) {
+          await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerSplitButton--${index}`);
         }
-        await testSubjects.click(`lnsLayerRemove--${index}`);
-        if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsLayerRemove--${index}`);
+        if (await testSubjects.waitForExists('lnsLayerRemoveModal')) {
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
@@ -1823,12 +1901,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               // Determine scroll direction based on tab index
               // Lower indices are on the left, higher indices are on the right
               const scrollRightBtnExists = await testSubjects.exists(
-                'unifiedTabs_tabsBar_scrollRightBtn',
-                { timeout: 500 }
+                'unifiedTabs_tabsBar_scrollRightBtn'
               );
               const scrollLeftBtnExists = await testSubjects.exists(
-                'unifiedTabs_tabsBar_scrollLeftBtn',
-                { timeout: 500 }
+                'unifiedTabs_tabsBar_scrollLeftBtn'
               );
 
               // Try scrolling in the appropriate direction
@@ -1851,7 +1927,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
-          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
+          return await testSubjects.exists(`lns-layerPanel-${index}`);
         });
       }
     },
@@ -1873,7 +1949,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
           // Wait for the layer panel to render
           await retry.waitFor('layer panel to be visible', async () => {
-            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
+            return await testSubjects.exists(`lns-layerPanel-${i}`);
           });
           return;
         }
@@ -2016,7 +2092,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async goToListingPageViaBreadcrumbs() {
       await retry.try(async () => {
         await testSubjects.click('breadcrumb first');
-        if (await testSubjects.exists('appLeaveConfirmModal')) {
+        if (await testSubjects.waitForExists('appLeaveConfirmModal', { timeout: 2000 })) {
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
@@ -2028,13 +2104,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
-      await find.byCssSelector('.monaco-editor');
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(formula);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        '[data-test-subj="lnsFormulaEditor"]',
+        formula
+      );
       // Debounce time for formula
       await common.sleep(300);
+    },
+
+    /**
+     * Simulate typing text in the formula editor (triggers Monaco's type command).
+     */
+    async simulateTypingInFormula(text: string) {
+      await monacoEditor.simulateTyping('lnsFormulaEditor', text);
+      await common.sleep(100);
+    },
+
+    /**
+     * Simulate pressing a key in the formula editor.
+     */
+    async simulateKeyInFormula(key: string) {
+      await this.simulateTypingInFormula(key);
     },
 
     async expectFormulaText(formula: string) {

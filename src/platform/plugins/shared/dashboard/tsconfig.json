@@ -13,8 +13,10 @@
     "test/scout_oas_schema/**/*.json",
     "test/scout_anonymous_authc/**/*",
     "test/scout_search_sessions/**/*",
+    "test/scout_test_plugins/**/*",
   ],
   "kbn_references": [
+    "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/inspector-plugin",
     "@kbn/kibana-react-plugin",

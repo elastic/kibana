@@ -23,7 +23,7 @@ const createPolicyOption = (
   id: 'create-policy',
   iconType: 'workflow',
   title: 'Create policy',
-  description: 'Match alert episodes and send them to destinations.',
+  description: 'Match alerts and send them to destinations.',
   onClick: onCreatePolicy,
   'data-test-subj': 'createActionPolicyCard',
   ...overrides,

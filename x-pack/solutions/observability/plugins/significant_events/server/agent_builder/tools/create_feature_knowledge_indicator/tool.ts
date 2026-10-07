@@ -17,8 +17,9 @@ import { z } from '@kbn/zod/v4';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
@@ -43,7 +44,7 @@ export function createFeatureKnowledgeIndicatorTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof createFeatureKISchema> {
@@ -123,6 +124,7 @@ export function createFeatureKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanManageSignificantEvents({ request, server });
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 

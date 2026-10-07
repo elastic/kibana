@@ -14,11 +14,16 @@ import type {
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
+import { useIsSelfManaged } from './use_is_self_managed';
 
-/** Method used when nothing is persisted. Read and compared against in exactly one place each. */
+/**
+ * Method used when nothing is persisted, on cloud and serverless. Self-managed defaults to
+ * 'agent_based' instead — see `defaultDeploymentMethod` in the provider.
+ */
 const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
 
 /**
@@ -57,6 +62,31 @@ export interface DetectAndReviewStepState {
   onboardingDeploymentId?: string;
   /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  /**
+   * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
+   * been cleaned up. Populated by removeDeployInstance; consumed and cleared by handleDeploy.
+   * Kept separate from policyIdsByInstance so cleanup can see the pre-removal mapping after
+   * the instance is already gone from policyIdsByInstance.
+   */
+  pendingCleanupPolicyIds?: Record<string, string>;
+  /**
+   * True when service settings or auth credentials differ from the last-deployed SO state.
+   * Set at Deploy step mount after a drift check; cleared after a successful redeploy.
+   */
+  isDirty?: boolean;
+  /**
+   * True when the auth method or connector specifically differs from the last-deployed SO state.
+   * Subset of isDirty; used to gate overrideCloudConnector on MI policy updates so that a
+   * service-var-only redeploy does not silently re-attach the wizard's connector over one
+   * reassigned by an operator.
+   */
+  isAuthDirty?: boolean;
+  /**
+   * True when the selected agent policies differ from the last-deployed SO state. Subset of
+   * isDirty; gates overwriting package-policy `policy_ids` so a var-only redeploy does not
+   * detach agent policies attached outside the wizard.
+   */
+  isPolicySelectionDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -67,6 +97,10 @@ interface PersistedAuthenticateAndDeployStep {
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
+  // Deployment method the user had selected when they last continued from Step 2. Lives here (not
+  // in the service-settings session key) because this provider stays mounted: react-use's
+  // useSessionStorage persists in an effect, which is lost when Step 2 unmounts on navigation.
+  serviceSettingsMethod?: DeploymentMethod;
   // Agent-based deploy fields — persisted so Back/Next round trips preserve state.
   // Note: agentPolicyId presence doubles as the durable "deploy succeeded" flag (no separate bool).
   agentHostsMode?: 'new' | 'existing';
@@ -74,11 +108,7 @@ interface PersistedAuthenticateAndDeployStep {
   agentPolicyName?: string; // denormalised so step 4 needs no GET
   selectedAgentPolicyIds?: string[]; // for existing-policy mode
   // Agent-based credential method — persisted so switching steps preserves the selection.
-  agentCredentialMethod?:
-    | 'direct_access_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod?: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   // Non-secret credential fields for shared_credentials and assume_role methods.
   // secret_access_key / session_token are never persisted (memory only).
   sharedCredentialFile?: string;
@@ -105,6 +135,10 @@ interface PersistedDetectAndReviewStep {
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  pendingCleanupPolicyIds?: Record<string, string>;
+  isDirty?: boolean;
+  isAuthDirty?: boolean;
+  isPolicySelectionDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -114,11 +148,7 @@ export interface AgentBasedDeploymentState {
   agentPolicyId?: string;
   agentPolicyName?: string;
   selectedAgentPolicyIds: string[];
-  agentCredentialMethod:
-    | 'direct_access_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   sharedCredentialFile?: string;
   credentialProfileName?: string;
   roleArn?: string;
@@ -129,17 +159,25 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  /** Clear only the in-memory staged credentials without touching persisted authMethod or connectorId. */
+  clearStagedStaticKeys: () => void;
+  /** Update persisted authMethod in place without touching connectorId or staticKeys. */
+  setAuthMethod: (method: CloudOnboardingDeploymentAuthMethod) => void;
   setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
+  /** Method Step 2's settings were last confirmed under; undefined until Step 2 is continued. */
+  serviceSettingsMethod: DeploymentMethod | undefined;
+  setServiceSettingsMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
   setDataFormat: (format: DataFormat) => void;
   detectAndReviewStep: DetectAndReviewStepState;
   updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
+  removeDeployInstances: (instanceIds: string[]) => void;
   getLatestFailedInstances: () => string[];
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
@@ -199,6 +237,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authMethod: id ? ('identity_federation' as const) : undefined,
         accessKeyId: undefined,
       };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
+  const clearStagedStaticKeys = useCallback(() => {
+    setStaticKeysState(undefined);
+  }, []);
+
+  const setAuthMethod = useCallback(
+    (method: CloudOnboardingDeploymentAuthMethod) => {
+      const next = { ...persistedAuthStepRef.current, authMethod: method };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
     },
@@ -298,6 +349,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const persistedDetectAndReviewStepRef = useRef(persistedDetectAndReviewStep);
   persistedDetectAndReviewStepRef.current = persistedDetectAndReviewStep;
 
+  // Wrapper that advances the ref eagerly so that any same-tick reader of the ref
+  // (e.g. a second updateDetectAndReviewStep call after removeDeployInstances) sees
+  // the post-write snapshot rather than the pre-render stale value.
+  const setDetectAndReviewStep = useCallback(
+    (next: PersistedDetectAndReviewStep) => {
+      persistedDetectAndReviewStepRef.current = next;
+      setPersistedDetectAndReviewStep(next);
+    },
+    [setPersistedDetectAndReviewStep]
+  );
+
   const updateDetectAndReviewStep = useCallback(
     (update: Partial<DetectAndReviewStepState>) => {
       if (update.isDeploying !== undefined) {
@@ -306,7 +368,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       const { isDeploying: _, ...rest } = update;
       if (Object.keys(rest).length > 0) {
         const prev = persistedDetectAndReviewStepRef.current;
-        setPersistedDetectAndReviewStep({
+        setDetectAndReviewStep({
           serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
           policyIdsByInstance: {
             ...(prev?.policyIdsByInstance ?? {}),
@@ -317,10 +379,21 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
           onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
           ecfStacks: rest.ecfStacks ?? prev?.ecfStacks,
+          // Explicit undefined clears the map (post-cleanup); absent preserves it.
+          pendingCleanupPolicyIds:
+            rest.pendingCleanupPolicyIds !== undefined
+              ? rest.pendingCleanupPolicyIds
+              : prev?.pendingCleanupPolicyIds,
+          isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
+          isAuthDirty: rest.isAuthDirty !== undefined ? rest.isAuthDirty : prev?.isAuthDirty,
+          isPolicySelectionDirty:
+            rest.isPolicySelectionDirty !== undefined
+              ? rest.isPolicySelectionDirty
+              : prev?.isPolicySelectionDirty,
         });
       }
     },
-    [setPersistedDetectAndReviewStep]
+    [setDetectAndReviewStep]
   );
 
   const removeDeployInstance = useCallback(
@@ -329,8 +402,13 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
       delete nextStatuses[instanceId];
       const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
+      const removedPolicyId = nextPolicyIds[instanceId];
       delete nextPolicyIds[instanceId];
-      setPersistedDetectAndReviewStep({
+      // Record the removed instance's policy ID so handleDeploy can clean it up in Fleet.
+      // Kept separate from policyIdsByInstance so the cleanup diff survives the deletion here.
+      const nextPendingCleanup = { ...(prev?.pendingCleanupPolicyIds ?? {}) };
+      if (removedPolicyId) nextPendingCleanup[instanceId] = removedPolicyId;
+      setDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
         failedInstances: (prev?.failedInstances ?? []).filter((id) => id !== instanceId),
@@ -339,9 +417,52 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ),
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
+        pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
-    [setPersistedDetectAndReviewStep]
+    [setDetectAndReviewStep]
+  );
+
+  // Batch variant of removeDeployInstance — applies all removals in one state write so
+  // same-tick calls don't overwrite each other via the stale-ref snapshot.
+  const removeDeployInstances = useCallback(
+    (instanceIds: string[]) => {
+      if (instanceIds.length === 0) return;
+      if (instanceIds.length === 1) {
+        removeDeployInstance(instanceIds[0]);
+        return;
+      }
+      const prev = persistedDetectAndReviewStepRef.current;
+      const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
+      const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
+      const nextPendingCleanup = { ...(prev?.pendingCleanupPolicyIds ?? {}) };
+      let nextFailedInstances = prev?.failedInstances ?? [];
+      const nextDeployErrors = { ...(prev?.deployErrors ?? {}) };
+      for (const instanceId of instanceIds) {
+        delete nextStatuses[instanceId];
+        const removedPolicyId = nextPolicyIds[instanceId];
+        delete nextPolicyIds[instanceId];
+        if (removedPolicyId) nextPendingCleanup[instanceId] = removedPolicyId;
+        nextFailedInstances = nextFailedInstances.filter((id) => id !== instanceId);
+        delete nextDeployErrors[instanceId];
+      }
+      setDetectAndReviewStep({
+        serviceStatuses: nextStatuses,
+        policyIdsByInstance: nextPolicyIds,
+        failedInstances: nextFailedInstances,
+        deployErrors: nextDeployErrors,
+        onboardingDeploymentId: prev?.onboardingDeploymentId,
+        ecfStacks: prev?.ecfStacks,
+        pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
+      });
+    },
+    [removeDeployInstance, setDetectAndReviewStep]
   );
 
   const getLatestFailedInstances = useCallback(
@@ -350,10 +471,31 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const {
-    matrix: awsServiceMatrix,
+    matrix: rawAwsServiceMatrix,
     isError: awsServiceMatrixError,
     refetch: refetchAwsServiceMatrix,
   } = useAwsServiceMatrix();
+
+  // Self-managed has no agentless infrastructure, so agent-based is the only usable method there.
+  const isSelfManaged = useIsSelfManaged();
+  const defaultDeploymentMethod: DeploymentMethod = isSelfManaged
+    ? 'agent_based'
+    : DEFAULT_DEPLOYMENT_METHOD;
+
+  // On self-managed the persisted value is ignored rather than defaulted from: a session started
+  // before this restriction (or carried over from a cloud deployment) would otherwise resurrect
+  // 'managed_integration' and send Step 2 and the deploy builders down the agentless path.
+  const deploymentMethod: DeploymentMethod = isSelfManaged
+    ? 'agent_based'
+    : persistedAuthenticateAndDeployStep?.deploymentMethod ?? defaultDeploymentMethod;
+
+  // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
+  // agent-based needs the package's own vars. Every step reads the matrix through the context, so
+  // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
+  const awsServiceMatrix = useMemo(
+    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
+    [rawAwsServiceMatrix, deploymentMethod]
+  );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
     [awsServiceMatrix]
@@ -381,16 +523,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [selectedServiceIds, dataFormat]
   );
 
-  const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
-
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {
       const prev = persistedAuthStepRef.current;
-      // Compare against the same default the context exposes. An unset persisted field still
-      // reads as 'managed_integration' everywhere else, so comparing the raw undefined would
+      // Compare against the same value the context exposes. An unset persisted field still
+      // reads as the default everywhere else, so comparing the raw undefined would
       // treat the first select of the default method as a change and wipe an in-progress deploy.
-      const current = prev?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+      // On self-managed the context always reports 'agent_based' regardless of what is persisted,
+      // so mirror that here — otherwise a stale persisted 'managed_integration' would make the
+      // auto-force effect's setDeploymentMethod('agent_based') look like a real switch and reset
+      // the deploy state on every mount.
+      const current = isSelfManaged
+        ? 'agent_based'
+        : prev?.deploymentMethod ?? defaultDeploymentMethod;
       if (current === method) return;
 
       // Switching method invalidates every artifact of the previous one: an agent policy is
@@ -406,14 +551,32 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
-      setPersistedDetectAndReviewStep({
+      setDetectAndReviewStep({
         serviceStatuses: {},
+        // Clear policyIdsByInstance on method switch — policies from the old mechanism are not
+        // proof of deployment under the new one. Keeping them would cause isAlreadyDeployed to
+        // return true for the new path, silently skipping the deploy.
         policyIdsByInstance: {},
         failedInstances: [],
         deployErrors: {},
+        isDirty: false,
       });
     },
-    [setPersistedAuthenticateAndDeployStep, setPersistedDetectAndReviewStep]
+    [
+      setPersistedAuthenticateAndDeployStep,
+      setDetectAndReviewStep,
+      isSelfManaged,
+      defaultDeploymentMethod,
+    ]
+  );
+
+  const setServiceSettingsMethod = useCallback(
+    (method: DeploymentMethod) => {
+      const next = { ...persistedAuthStepRef.current, serviceSettingsMethod: method };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
@@ -431,7 +594,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     selectedAgentPolicyIds:
       persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
     agentCredentialMethod:
-      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'direct_access_keys',
+      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'static_keys',
     sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
     credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
     roleArn: persistedAuthenticateAndDeployStep?.roleArn,
@@ -449,17 +612,22 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        clearStagedStaticKeys,
+        setAuthMethod,
         setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,
         deploymentMethod,
         setDeploymentMethod,
+        serviceSettingsMethod: persistedAuthenticateAndDeployStep?.serviceSettingsMethod,
+        setServiceSettingsMethod,
         servicesStep,
         setSelectedServiceIds,
         setDataFormat,
         detectAndReviewStep,
         updateDetectAndReviewStep,
         removeDeployInstance,
+        removeDeployInstances,
         getLatestFailedInstances,
         awsServiceMatrix,
         awsServicesMap,

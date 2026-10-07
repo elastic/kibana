@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  nullUser,
+  postCaseReq,
+  postCommentUserReq,
+  postUnifiedCommentReq,
+} from '../../../../common/lib/mock';
 import {
   createCase,
   removeServerGeneratedPropertiesFromSavedObject,
@@ -33,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: [postCommentUserReq],
+        params: [postUnifiedCommentReq],
         auth: authSpace1,
       });
 
@@ -61,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkCreateAttachments({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: [postCommentUserReq],
+        params: [postUnifiedCommentReq],
         auth: getAuthWithSuperUser('space2'),
         expectedHttpCode: 404,
       });
