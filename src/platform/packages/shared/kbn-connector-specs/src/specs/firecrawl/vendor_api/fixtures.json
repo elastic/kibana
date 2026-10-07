@@ -25,11 +25,6 @@
       }
     ]
   },
-  "getCrawlStatus": {
-    "input": {
-      "id": "0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f"
-    }
-  },
   "map": {
     "queries": [
       {
