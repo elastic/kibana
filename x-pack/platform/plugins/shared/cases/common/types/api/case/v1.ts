@@ -26,6 +26,7 @@ import {
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
   MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
@@ -81,7 +82,7 @@ const TemplateVersionRt = new rt.Type<number, number, unknown>(
  * here. `version` must be a positive integer (≥ 1).
  */
 export const CaseUpdateRequestTemplateRt = rt.strict({
-  id: rt.string,
+  id: limitedStringSchema({ fieldName: 'template.id', min: 0, max: MAX_TEMPLATE_KEY_LENGTH }),
   version: TemplateVersionRt,
 });
 

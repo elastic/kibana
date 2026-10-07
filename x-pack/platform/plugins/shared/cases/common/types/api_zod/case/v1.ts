@@ -25,6 +25,7 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -88,7 +89,7 @@ export const CaseRequestCustomFieldsSchema = limitedArraySchema({
  * Unlike creation, `version` is required: the server does not resolve a latest version on update.
  */
 export const CaseUpdateRequestTemplateSchema = z.object({
-  id: z.string(),
+  id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
   version: z.number().int().min(1),
 });
 

@@ -94,7 +94,6 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_resolve: z.number().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
-  [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
 });
 
 export const CaseSchema = CaseAttributesSchema.extend({
@@ -104,6 +103,8 @@ export const CaseSchema = CaseAttributesSchema.extend({
   totalEvents: z.number().optional(),
   version: z.string(),
   comments: z.array(AttachmentSchemaV2).optional(),
+  // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
+  [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
 });
 
 export const CasesSchema = z.array(CaseSchema);
