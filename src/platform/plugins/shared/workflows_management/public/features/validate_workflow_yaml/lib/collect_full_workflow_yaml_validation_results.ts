@@ -42,6 +42,7 @@ export interface WorkflowYamlValidationContext {
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
   warnIgnoredKibanaFetcher?: boolean;
+  isManaged?: boolean;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {
@@ -117,7 +118,14 @@ export async function collectFullWorkflowYamlValidationResults({
   }
 
   if (workflowLookup && lineCounter) {
-    results.push(...validateWorkflowExecutionIdentity(workflowLookup, workflows, lineCounter));
+    results.push(
+      ...validateWorkflowExecutionIdentity(
+        workflowLookup,
+        workflows,
+        lineCounter,
+        context.isManaged
+      )
+    );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
 
     const esqlSignal = signal ?? new AbortController().signal;

@@ -107,7 +107,6 @@ describe('runWorkflow', () => {
               workloadId: 'root-parent',
               workflowId: 'parent',
               executionId: 'parent-run',
-              revision: 'a'.repeat(64),
             },
           }
         : undefined,

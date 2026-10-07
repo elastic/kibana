@@ -29,7 +29,6 @@ interface UseWorkflowJsonSchemaOptions {
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
   loose?: boolean;
-  isManaged?: boolean;
 }
 
 interface UseWorkflowJsonSchemaResult {
@@ -68,7 +67,6 @@ const hideChildIdentitySuggestions = (jsonSchema: z.core.JSONSchema.JSONSchema):
 
 export const useWorkflowJsonSchema = ({
   loose = false,
-  isManaged = false,
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
   const serviceAccountsEnabled = useKibana().services.security.serviceAccounts.isEnabled();
@@ -107,7 +105,7 @@ export const useWorkflowJsonSchema = ({
         }
       }
 
-      if (jsonSchema && (!isManaged || !serviceAccountsEnabled)) {
+      if (jsonSchema && !serviceAccountsEnabled) {
         hideChildIdentitySuggestions(jsonSchema);
       }
 
@@ -122,5 +120,5 @@ export const useWorkflowJsonSchema = ({
         uri: null,
       };
     }
-  }, [connectorsData, loose, serviceAccountsEnabled, isManaged]);
+  }, [connectorsData, loose, serviceAccountsEnabled]);
 };

@@ -1245,10 +1245,6 @@ export const WorkflowEffectiveIdentitySchema = z.object({
       workloadId: z.string().max(1024),
       workflowId: z.string().max(1024),
       executionId: z.string().max(1024),
-      revision: z
-        .string()
-        .length(64)
-        .regex(/^[a-f0-9]{64}$/),
     })
     .optional(),
 });

@@ -118,19 +118,14 @@ steps:
       jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     });
 
-    it.each([
-      [false, false],
-      [false, true],
-      [true, false],
-      [true, true],
-    ])('gates identity fields (managed=%s, SA=%s)', async (isManaged, enabled) => {
+    it.each([false, true])('gates identity fields (SA=%s)', async (enabled) => {
       services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
-      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged }));
+      const { result } = renderHook(() => useWorkflowJsonSchema());
       const completions = await complete(result.current.jsonSchema, `${yaml}      `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
       expect(labels).not.toContain('inheritRunAs');
-      if (isManaged && enabled) {
+      if (enabled) {
         expect(labels).toContain('run-as-mode');
       } else {
         expect(labels).not.toContain('run-as-mode');
@@ -139,7 +134,7 @@ steps:
 
     it('rejects the removed inheritRunAs YAML property', async () => {
       services.security.serviceAccounts.isEnabled.mockReturnValue(true);
-      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged: true }));
+      const { result } = renderHook(() => useWorkflowJsonSchema());
       const service = createLanguageService(result.current.jsonSchema);
       const document = TextDocument.create(
         'file:///removed-alias.yaml',
@@ -151,24 +146,9 @@ steps:
       expect(diagnostics.some(({ message }) => message.includes('inheritRunAs'))).toBe(true);
     });
 
-    it('defaults to hiding identity fields and updates when managed metadata changes', async () => {
-      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
-      const { result, rerender } = renderHook(
-        ({ isManaged }: { isManaged?: boolean }) => useWorkflowJsonSchema({ isManaged }),
-        { initialProps: {} }
-      );
-      for (const isManaged of [undefined, true, false]) {
-        rerender({ isManaged });
-        const completions = await complete(result.current.jsonSchema, `${yaml}      `);
-        expect(completions?.items.some(({ label }) => label === 'run-as-mode')).toBe(
-          isManaged === true
-        );
-      }
-    });
-
-    it.each([false, true])('gates nested step suggestions (managed=%s)', async (isManaged) => {
-      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
-      const { result } = renderHook(() => useWorkflowJsonSchema({ isManaged }));
+    it.each([false, true])('gates nested step suggestions (SA=%s)', async (enabled) => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
+      const { result } = renderHook(() => useWorkflowJsonSchema());
       const nestedYaml = yaml
         .replace(
           'steps:\n',
@@ -181,7 +161,7 @@ steps:
       const completions = await complete(result.current.jsonSchema, `${nestedYaml}          `);
       const labels = completions?.items.map(({ label }) => label);
       expect(labels).toContain('inputs');
-      expect(labels?.includes('run-as-mode')).toBe(isManaged);
+      expect(labels?.includes('run-as-mode')).toBe(enabled);
       expect(labels).not.toContain('inheritRunAs');
     });
 

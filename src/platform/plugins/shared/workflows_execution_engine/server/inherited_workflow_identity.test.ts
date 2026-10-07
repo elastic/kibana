@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'node:crypto';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type {
   EsWorkflowExecution,
@@ -36,7 +35,6 @@ const child = {
     steps: [],
   },
 } satisfies WorkflowExecutionEngineModel;
-const revision = createHash('sha256').update(child.yaml).digest('hex');
 const approval: WorkflowExecuteStep['with'] = {
   'workflow-id': child.id,
   'run-as-mode': 'inherit',
@@ -75,7 +73,6 @@ const identity: NonNullable<EsWorkflowExecution['effectiveIdentity']> = {
     workloadId: 'parent',
     workflowId: 'parent',
     executionId: 'parent-execution',
-    revision,
   },
 };
 
@@ -167,10 +164,9 @@ describe('inherited workflow execution identity', () => {
   it('uses the latest managed definition without revision approval', async () => {
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
       const yaml = `${child.yaml}description: Updated by owning plugin\n`;
-      expect(
-        resolveInheritedWorkflowIdentity(request, { ...child, yaml }, context)?.inheritedFrom
-          ?.revision
-      ).toBe(createHash('sha256').update(yaml).digest('hex'));
+      expect(resolveInheritedWorkflowIdentity(request, { ...child, yaml }, context)).toEqual(
+        identity
+      );
     });
   });
 
@@ -240,7 +236,6 @@ describe('inherited workflow execution identity', () => {
           workloadId: 'root',
           workflowId: 'parent',
           executionId: 'parent-execution',
-          revision,
         },
       },
     };
@@ -309,7 +304,6 @@ describe('inherited workflow execution identity', () => {
         workloadId: 'root',
         workflowId: 'parent',
         executionId: 'parent-execution',
-        revision,
       },
     };
     core.security.serviceAccounts.getWorkloadBinding.mockResolvedValue(binding);

@@ -22,7 +22,6 @@ const execution: Partial<EsWorkflowExecution> = {
       workloadId: 'root-parent',
       workflowId: 'parent',
       executionId: 'parent-execution',
-      revision: 'audit-only',
     },
   },
 };

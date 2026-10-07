@@ -53,7 +53,6 @@ describe('buildWorkflowExecutionDocument', () => {
           workloadId: 'parent',
           workflowId: 'parent',
           executionId: 'parent-execution',
-          revision: 'a'.repeat(64),
         },
       };
       const workflow = {

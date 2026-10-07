@@ -20,11 +20,20 @@ import type { WorkflowsResponse } from '../../../entities/workflows/model/types'
 
 const validateStepIdentity = (
   step: StepInfo,
-  workflows: WorkflowsResponse | null
+  workflows: WorkflowsResponse | null,
+  isManaged: boolean
 ): { property: StepPropInfo; message: string } | undefined => {
   const modeProperty = step.propInfos['with.run-as-mode'];
   const mode = modeProperty && getValueFromValueNode(modeProperty.valueNode);
   if (mode !== 'inherit' && mode !== 'override') return;
+  if (!isManaged) {
+    return {
+      property: modeProperty,
+      message: i18n.translate('workflows.validateExecutionIdentity.managedParentErrorMessage', {
+        defaultMessage: 'Service account inheritance is only available to managed workflows.',
+      }),
+    };
+  }
   const workflowIdProperty = step.propInfos['with.workflow-id'];
   if (!workflowIdProperty) return;
   const workflowId = getValueFromValueNode(workflowIdProperty.valueNode);
@@ -53,12 +62,13 @@ const validateStepIdentity = (
 export const validateWorkflowExecutionIdentity = (
   lookup: WorkflowLookup,
   workflows: WorkflowsResponse | null,
-  lineCounter: LineCounter
+  lineCounter: LineCounter,
+  isManaged = false
 ): YamlValidationResult[] =>
   Object.values(lookup.steps).flatMap((step) => {
     if (step.stepType !== 'workflow.execute' && step.stepType !== 'workflow.executeAsync')
       return [];
-    const issue = validateStepIdentity(step, workflows);
+    const issue = validateStepIdentity(step, workflows, isManaged);
     const range = issue?.property.valueNode?.range ?? issue?.property.keyNode?.range;
     if (!issue || !range) return [];
     const start = lineCounter.linePos(range[0]);

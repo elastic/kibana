@@ -18,13 +18,15 @@
 
 The child ID and identity mode must be literal values in the saved parent definition, including calls in workflow-level `settings.on-failure.fallback` steps. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
 
-The YAML editor suggests identity fields only for managed workflows with SAs enabled. Inheritance modes filter the child picker to managed workflows. Editor validation flags templated child IDs and known unmanaged targets before execution. Whether a child already has its own SA is checked at execution time.
+The YAML editor suggests identity fields only when SAs are enabled. Editor validation rejects inheritance on unmanaged parents and flags templated child IDs and known unmanaged targets. Managed definitions remain read-only in the editor and are configured by their publisher. Whether a child already has its own SA is checked at execution time.
 
 ## Authorization and lifetime
 
 The identity resolver requires a managed parent at every delegated hop. Every inherited hop requires a managed child stored in the execution space or globally (`spaceId: "*"`), and a live parent SA request. Global definitions execute in the parent's space using the root parent's binding; the child needs no global binding. Definitions stored in another concrete space remain ineligible. The final live admission check requires the child to still exist, be managed, enabled, valid, and not deleted; it does not compare YAML or definition revisions. The original caller must still have execution access to the child. Admission also checks that the root parent's workload binding still matches the inherited SA. Further inherited calls retain that root binding.
 
-The child execution stores its effective identity, immediate parent workflow/execution, root workload ID, and a hash of the executed YAML for audit. The hash is internal metadata, not a user-maintained revision. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
+The child execution stores its effective identity, immediate parent workflow/execution, root workload ID, and executed YAML and definition snapshot. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
+
+Force-deleting a global managed definition checks active executions across all spaces after disabling the definition. Deletion is rejected while any execution is active.
 
 ## Trust assumption
 

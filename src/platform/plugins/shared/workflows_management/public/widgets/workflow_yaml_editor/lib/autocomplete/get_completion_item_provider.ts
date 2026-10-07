@@ -172,10 +172,10 @@ export function getCompletionItemProvider(
         };
       }
 
-      const { focusedStepInfo, focusedYamlPair, isCurrentWorkflowManaged } = autocompleteContext;
+      const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
       const identityField = focusedYamlPair?.path;
       if (
-        (!isCurrentWorkflowManaged || !areServiceAccountsEnabled()) &&
+        !areServiceAccountsEnabled() &&
         (focusedStepInfo?.stepType === 'workflow.execute' ||
           focusedStepInfo?.stepType === 'workflow.executeAsync') &&
         identityField?.length === 2 &&

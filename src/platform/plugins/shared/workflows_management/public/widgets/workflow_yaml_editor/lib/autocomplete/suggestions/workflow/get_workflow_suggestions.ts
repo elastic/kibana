@@ -9,7 +9,6 @@
 
 import { monaco } from '@kbn/monaco';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { getValueFromValueNode } from '@kbn/workflows-yaml';
 import {
   buildInsertTextAndEdits,
   checkExistingInputs,
@@ -30,7 +29,6 @@ function getWorkflowsFromStore(
   workflows: WorkflowsResponse,
   currentWorkflowId: string | null,
   isCurrentWorkflowManaged: boolean,
-  inheritsIdentity: boolean,
   searchPrefix?: string
 ): Array<{ id: string; name: string; inputsSchema?: JsonModelSchemaType }> {
   if (!workflows.workflows) {
@@ -45,9 +43,6 @@ function getWorkflowsFromStore(
       return false;
     }
     if (workflow.managed === true && !isCurrentWorkflowManaged) {
-      return false;
-    }
-    if (inheritsIdentity && workflow.managed !== true) {
       return false;
     }
     if (!lowerSearchPrefix) {
@@ -116,16 +111,12 @@ export async function getWorkflowSuggestions(
     return [];
   }
 
-  const identityMode = focusedStepInfo?.propInfos['with.run-as-mode'];
-  const mode = identityMode && getValueFromValueNode(identityMode.valueNode);
-  const inheritsIdentity = mode === 'inherit' || mode === 'override';
   const searchPrefix = lineParseResult.fullKey ?? '';
 
   const workflowSuggestions = getWorkflowsFromStore(
     workflows,
     currentWorkflowId,
     isCurrentWorkflowManaged,
-    inheritsIdentity,
     searchPrefix
   );
 

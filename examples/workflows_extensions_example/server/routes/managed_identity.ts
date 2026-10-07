@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
@@ -80,6 +81,9 @@ export const registerManagedIdentityRoutes = (
           },
         });
       } catch (error) {
+        if (error instanceof WorkflowConflictError) {
+          return response.conflict({ body: { message: error.message } });
+        }
         if (Boom.isBoom(error)) {
           return response.customError({
             statusCode: error.output.statusCode,
@@ -110,6 +114,9 @@ export const registerManagedIdentityRoutes = (
         );
         return response.ok({ body: { workflowExecutionId } });
       } catch (error) {
+        if (error instanceof WorkflowConflictError) {
+          return response.conflict({ body: { message: error.message } });
+        }
         if (Boom.isBoom(error)) {
           return response.customError({
             statusCode: error.output.statusCode,
@@ -140,6 +147,9 @@ export const registerManagedIdentityRoutes = (
         );
         return response.noContent();
       } catch (error) {
+        if (error instanceof WorkflowConflictError) {
+          return response.conflict({ body: { message: error.message } });
+        }
         if (Boom.isBoom(error)) {
           return response.customError({
             statusCode: error.output.statusCode,

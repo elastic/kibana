@@ -272,6 +272,49 @@ apiTest.describe(
       );
     }
 
+    for (const global of [false, true]) {
+      apiTest(
+        `blocks uninstall while an inherited child is active (global=${global})`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(150_000);
+          const { readOnlyAccountId, wait } = getContext();
+          const child = await install(apiClient, { global, waitForInput: true });
+          const parent = await install(apiClient, {
+            serviceAccountId: readOnlyAccountId,
+            childWorkflowId: workflowId(child),
+            runAsMode: 'inherit',
+            asynchronous: true,
+          });
+          const parentRun = await wait(
+            apiClient,
+            await run(apiClient, parent),
+            'completed',
+            headers
+          );
+          const childRun = await childExecution(apiClient, parentRun);
+          const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
+          try {
+            const deleted = await apiClient.delete(`${path(child)}?global=${global}`, {
+              headers: getContext().headers,
+              responseType: 'json',
+            });
+            expect(deleted).toHaveStatusCode(409);
+            expect(deleted.body.message).toContain('running executions');
+          } finally {
+            await resume(apiClient, paused);
+            const completed = await wait(apiClient, childRun.id, 'completed', headers);
+            expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
+          }
+          const deleted = await apiClient.delete(`${path(child)}?global=${global}`, {
+            headers: getContext().headers,
+            responseType: 'json',
+          });
+          expect(deleted).toHaveStatusCode(204);
+          installed.delete(child);
+        }
+      );
+    }
+
     apiTest(
       'uses the latest installed child without a revision approval',
       async ({ apiClient }) => {

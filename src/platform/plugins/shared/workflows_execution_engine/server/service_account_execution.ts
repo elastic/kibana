@@ -8,7 +8,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { createHash } from 'node:crypto';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { visitNestedSteps, WorkflowExecuteStepInputSchema } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -96,7 +95,6 @@ export const resolveInheritedWorkflowIdentity = (
   if (mode === 'inherit' && workflow.definition?.settings?.run_as) {
     throw Boom.badRequest('Use run-as-mode: override to replace the child service account.');
   }
-  const revision = createHash('sha256').update(workflow.yaml).digest('hex');
   return {
     type: 'service_account',
     id: accountId,
@@ -104,7 +102,6 @@ export const resolveInheritedWorkflowIdentity = (
       workloadId: parent.effectiveIdentity?.inheritedFrom?.workloadId ?? parent.workflowId,
       workflowId: parent.workflowId,
       executionId: parent.id,
-      revision,
     },
   };
 };

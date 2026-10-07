@@ -23,7 +23,11 @@ const workflows: WorkflowsResponse = {
 describe.each(['workflow.execute', 'workflow.executeAsync'])(
   '%s identity validation',
   (stepType) => {
-    const validate = (fields: string[], children: WorkflowsResponse | null = workflows) => {
+    const validate = (
+      fields: string[],
+      children: WorkflowsResponse | null = workflows,
+      isManaged = true
+    ) => {
       const yaml = [
         'name: parent',
         'steps:',
@@ -41,9 +45,28 @@ describe.each(['workflow.execute', 'workflow.executeAsync'])(
       return validateWorkflowExecutionIdentity(
         buildWorkflowLookup(document, lineCounter),
         children,
-        lineCounter
+        lineCounter,
+        isManaged
       );
     };
+
+    it.each(['inherit', 'override'])(
+      'rejects an unmanaged parent using %s, even before children load',
+      (mode) => {
+        const results = validate(['workflow-id: managed', `run-as-mode: ${mode}`], null, false);
+        expect(results).toHaveLength(1);
+        expect(results[0]).toMatchObject({
+          message: 'Service account inheritance is only available to managed workflows.',
+          startLineNumber: 11,
+        });
+      }
+    );
+
+    it('allows default execution for unmanaged parents', () => {
+      expect(validate(['workflow-id: ordinary', 'run-as-mode: default'], workflows, false)).toEqual(
+        []
+      );
+    });
 
     it.each(['run-as-mode: inherit', 'run-as-mode: override'])(
       'rejects an unmanaged target with %s',

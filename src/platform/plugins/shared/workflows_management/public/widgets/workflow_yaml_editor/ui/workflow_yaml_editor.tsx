@@ -307,7 +307,7 @@ export const WorkflowYAMLEditor = ({
 
   // Validation
   const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =
-    useWorkflowJsonSchema({ loose: false, isManaged: workflow?.managed === true });
+    useWorkflowJsonSchema({ loose: false });
   const schemas: SchemasSettings[] = useMemo(() => {
     if (!workflowSchemaUriStrict || !workflowJsonSchemaStrict) {
       return [];
