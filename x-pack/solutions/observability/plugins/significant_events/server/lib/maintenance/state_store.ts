@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
 import {
@@ -32,11 +33,18 @@ import {
  */
 export type LoadedMaintenanceState = Omit<
   SignificantEventsMaintenanceStateAttributes,
-  'disabledWorkflows' | 'pausedSettings'
+  'disabledWorkflows' | 'disabledRules' | 'pausedSettings'
 > & {
   disabledWorkflows: MaintenanceWorkflowTarget[];
+  disabledRules: MaintenanceRuleTarget[];
   pausedSettings?: PausedFeatureSettings;
 };
+
+/** A rule and the space containing its alerting saved object. */
+export interface MaintenanceRuleTarget {
+  id: string;
+  spaceId: SpaceId;
+}
 
 /** Loaded state plus the SO version used for optimistic-concurrency writes. */
 export interface VersionedMaintenanceState {
@@ -129,6 +137,10 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
         attributes: {
           ...so.attributes,
           disabledWorkflows: brandDisabledWorkflows(so.attributes.disabledWorkflows),
+          disabledRules: (so.attributes.disabledRules ?? []).map(({ id, spaceId }) => ({
+            id,
+            spaceId: brandSpaceId(spaceId),
+          })),
           pausedSettings: normalizePausedSettings(so.attributes.pausedSettings),
         },
         version: so.version,
@@ -158,7 +170,7 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
   }): Promise<LoadedMaintenanceState | undefined> => {
     const claimed: LoadedMaintenanceState = {
       disabledWorkflows: [],
-      disabledRuleIds: [],
+      disabledRules: [],
       ...current?.attributes,
       state: 'paused',
       updatedAt: new Date().toISOString(),

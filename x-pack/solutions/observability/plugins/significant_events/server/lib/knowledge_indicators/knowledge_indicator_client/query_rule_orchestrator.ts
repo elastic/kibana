@@ -445,10 +445,12 @@ export class QueryRuleOrchestrator {
     queryIds,
     minSeverityScore,
     sourceIds,
+    promote = (sourceId, ids) => this.promoteQueries(sourceId, ids),
   }: {
     queryIds?: string[];
     minSeverityScore?: number;
     sourceIds: string[];
+    promote?: (sourceId: string, ids: string[]) => Promise<PromoteQueriesResult>;
   }): Promise<PromoteQueriesResult> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
@@ -479,7 +481,7 @@ export class QueryRuleOrchestrator {
         this.logger.warn(`Skipping promotion for source ${sourceId}: missing or disabled`);
         continue;
       }
-      const result = await this.promoteQueries(sourceId, ids);
+      const result = await promote(sourceId, ids);
       totals.promoted += result.promoted;
       totals.skipped_stats += result.skipped_stats;
       totals.skipped_ineligible += result.skipped_ineligible;
@@ -552,14 +554,7 @@ export class QueryRuleOrchestrator {
 
     const orphans = ownedRuleIds.filter((id) => !keepSet.has(id));
     let orphanRulesDeleted = 0;
-    // Pre-migration documents have no `kibana.space_ids`, so an empty read cannot
-    // tell an orphan rule from one that still backs those documents.
-    if (orphans.length > 0 && hits.length === 0 && links.length === 0) {
-      this.logger.warn(
-        `reconcileSource("${sourceId}"): leaving ${orphans.length} owned rule(s) in place. ` +
-          `No knowledge indicators are visible in this space.`
-      );
-    } else if (orphans.length > 0) {
+    if (orphans.length > 0) {
       await uninstallRuleIds(this.rulesManagementClient, orphans);
       orphanRulesDeleted = orphans.length;
     }

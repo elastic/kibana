@@ -34,6 +34,10 @@ triggers:
         type: string
         required: true
         description: "Target source id to identify KI features for."
+      - name: sourceRevision
+        type: string
+        required: true
+        description: "Source query revision used by this onboarding run."
       - name: sourceSlug
         type: string
         required: true
@@ -109,6 +113,7 @@ steps:
           path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/inferred/prepare"
           headers:
             x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
           body:
             start: "${{ inputs.start }}"
             end: "${{ inputs.end }}"
@@ -135,6 +140,7 @@ steps:
           path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/inferred"
           headers:
             x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
           body:
             connectorId: "${{ inputs.connectorId }}"
             runId: "${{ execution.id }}"
@@ -221,6 +227,7 @@ steps:
       path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/computed"
       headers:
         x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         start: "${{ inputs.start }}"
         end: "${{ inputs.end }}"

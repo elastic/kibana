@@ -143,7 +143,7 @@ export function createQueryKnowledgeIndicatorTool({
         assertSourceEnabled(source);
         sourceId = source.id;
 
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           source,

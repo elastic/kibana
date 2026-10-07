@@ -405,6 +405,7 @@ const reconcileQueriesRoute = createServerRoute({
           const sourceId = result.value.source.id;
           let reconciledQueries = 0;
           try {
+            assertSourceEnabled(result.value.source);
             await kiClient.replaceSourceQueries(sourceId, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);

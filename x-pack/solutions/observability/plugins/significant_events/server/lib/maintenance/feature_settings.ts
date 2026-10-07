@@ -92,7 +92,8 @@ export const shouldRestoreSettingsBackedWorkflow = (
   return true;
 };
 
-const requestForSpace = (request: KibanaRequest, spaceId: SpaceId): KibanaRequest => {
+/** Scopes a maintenance operation to a space while preserving the caller credentials. */
+export const requestForSpace = (request: KibanaRequest, spaceId: SpaceId): KibanaRequest => {
   const fakeRawRequest: FakeRawRequest = {
     headers: request.headers,
     path: '/',

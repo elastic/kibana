@@ -33,6 +33,10 @@ triggers:
         type: string
         required: true
         description: "The id of the source to generate queries for."
+      - name: sourceRevision
+        type: string
+        required: true
+        description: "Source query revision used by this onboarding run."
       - name: sourceSlug
         type: string
         required: true
@@ -54,6 +58,7 @@ steps:
       path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate"
       headers:
         x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         connectorId: "${{ inputs.connectorId }}"
         runId: "${{ execution.id }}"
@@ -78,6 +83,7 @@ steps:
       path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_persist"
       headers:
         x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         queries: "${{ steps.generate_queries.output.queries }}"
   # -----------------------------------------------------------------------

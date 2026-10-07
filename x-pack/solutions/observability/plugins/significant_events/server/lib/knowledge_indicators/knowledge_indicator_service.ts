@@ -24,6 +24,7 @@ import {
 } from './data_stream';
 import {
   KnowledgeIndicatorClient,
+  type KnowledgeIndicatorClientDeps,
   type KnowledgeIndicatorDataStreamClient,
 } from './knowledge_indicator_client';
 import type { SignificantEventsAlertingContext } from '../significant_events/alerting/significant_events_alerting_context';
@@ -39,12 +40,14 @@ export class KnowledgeIndicatorService {
     soClient,
     space,
     context,
+    withSourceWrite,
     config = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     space: string;
     context: SignificantEventsAlertingContext;
+    withSourceWrite?: KnowledgeIndicatorClientDeps['withSourceWrite'];
     config?: Pick<
       SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
@@ -68,6 +71,7 @@ export class KnowledgeIndicatorService {
         soClient,
         logger: this.logger.get('knowledge_indicators'),
         space,
+        withSourceWrite,
       },
       significantEventsAvailable,
       context,

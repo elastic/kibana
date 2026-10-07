@@ -16,6 +16,7 @@ import {
 describe('buildKIQueryGenerationEvalUserMessage', () => {
   it('adds intent metadata instructions only in the eval harness', () => {
     const message = buildKIQueryGenerationEvalUserMessage({
+      sourceSlug: 'logs',
       target: {
         id: 'logs.test',
         name: 'logs.test',
@@ -26,7 +27,8 @@ describe('buildKIQueryGenerationEvalUserMessage', () => {
       groundingContext: 'Use repository test/repo.',
     });
 
-    expect(message).toContain('`slug`: logs.test');
+    expect(message).toContain('`slug`: logs');
+    expect(message).not.toContain('`slug`: logs.test');
     expect(message).toContain('include `expects_matches` on every candidate query');
     expect(message).toContain('Use repository test/repo.');
   });

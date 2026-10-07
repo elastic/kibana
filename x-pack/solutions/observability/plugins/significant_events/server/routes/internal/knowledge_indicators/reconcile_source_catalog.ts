@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
@@ -14,7 +14,8 @@ import type { SignificantEventsMaintenanceService } from '../../../lib/maintenan
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
 import { parseSourceSlugFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
 import { listAllSources } from '../../utils/list_all_sources';
-import type { GetScopedClients } from '../../types';
+import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
+import { StatusError } from '../../../lib/errors/status_error';
 
 interface OnboardingClient {
   cancelBySourceSlug: (args: { sourceSlug: string; request: KibanaRequest }) => Promise<unknown>;
@@ -90,9 +91,11 @@ export async function resetSourceKnowledge({
   kiClient,
   onboardingClient,
   request,
+  sourceKnowledgeState,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug'>;
   kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
+  sourceKnowledgeState?: SourceKnowledgeStateClient;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
   request: KibanaRequest;
 }): Promise<void> {
@@ -100,7 +103,62 @@ export async function resetSourceKnowledge({
     onboardingClient,
     sourceSlug: source.slug,
     request,
-    cleanup: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+    cleanup: () =>
+      sourceKnowledgeState
+        ? sourceKnowledgeState.runExclusive({
+            sourceId: source.id,
+            run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+          })
+        : retireSourceKnowledge({ sourceId: source.id, kiClient }),
+  });
+}
+
+/** Invalidates an unapplied query revision before scheduling its replacement onboarding. */
+export async function reconcileSourceRevision({
+  source,
+  sourcesClient,
+  kiClient,
+  onboardingClient,
+  sourceKnowledgeState,
+  scheduleSourceOnboarding,
+  request,
+}: {
+  source: NightshiftSource;
+  sourcesClient: SourcesClient;
+  kiClient: CatalogKiClient;
+  onboardingClient?: OnboardingClient;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
+  request: KibanaRequest;
+}): Promise<void> {
+  await sourceKnowledgeState.runExclusive({
+    sourceId: source.id,
+    run: async (state, checkpoint) => {
+      // Another edit may have committed while this event was waiting for a write to finish.
+      const { source: current } = await sourcesClient.get(source.id);
+      const isRevisionChanged = state.revision !== current.esql_updated_at;
+      if (isRevisionChanged) {
+        // Every writer establishes the checkpoint before persisting knowledge, so an absent
+        // checkpoint means there is no previous revision to clean up.
+        if (state.revision !== undefined) {
+          await resetSourceKnowledge({ source: current, kiClient, onboardingClient, request });
+        }
+        await checkpoint({ revision: current.esql_updated_at, onboardingScheduled: false });
+      }
+      if (
+        current.enabled &&
+        (isRevisionChanged || !state.onboardingScheduled) &&
+        scheduleSourceOnboarding
+      ) {
+        const runningSlugs = await loadRunningSourceSlugs(onboardingClient, request);
+        if (runningSlugs.has(current.slug)) {
+          throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
+        }
+        if (await scheduleSourceOnboarding(current)) {
+          await checkpoint({ onboardingScheduled: true });
+        }
+      }
+    },
   });
 }
 
@@ -109,7 +167,7 @@ export async function resetSourceKnowledge({
  * its run cancelled, then its rules disabled even when the cancel fails; an enabled one gets its
  * rules back unless maintenance is paused.
  */
-async function applySourceEnabled({
+export async function applySourceEnabled({
   source,
   kiClient,
   onboardingClient,
@@ -117,6 +175,7 @@ async function applySourceEnabled({
   request,
   skipCancel = false,
   skipRuleToggle = false,
+  sourceKnowledgeState,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
@@ -128,7 +187,23 @@ async function applySourceEnabled({
   skipCancel?: boolean;
   /** The reconcile knows which sources own rules and skips the toggle; the listener does not, so it toggles. */
   skipRuleToggle?: boolean;
+  sourceKnowledgeState?: SourceKnowledgeStateClient;
 }): Promise<void> {
+  if (sourceKnowledgeState) {
+    return sourceKnowledgeState.runExclusive({
+      sourceId: source.id,
+      run: () =>
+        applySourceEnabled({
+          source,
+          kiClient,
+          onboardingClient,
+          getMaintenanceState,
+          request,
+          skipCancel,
+          skipRuleToggle,
+        }),
+    });
+  }
   if (!source.enabled) {
     await cancelOnboardingThen({
       onboardingClient: skipCancel ? undefined : onboardingClient,
@@ -149,60 +224,43 @@ async function applySourceEnabled({
   }
 }
 
-/**
- * Applies a source change as soon as it is committed, in the space of the request that made it,
- * instead of waiting for the next catalog reconcile. A deleted source, or one whose query changed,
- * loses its knowledge; a disabled or re-enabled one has its onboarding and owned rules aligned.
- * Title, description and tag edits change nothing here.
- */
+/** Queues source changes and enables periodic recovery independently so either can survive a failure. */
 export const createSourceChangeListener =
   ({
-    getScopedClients,
-    onboardingClient,
-    maintenanceService,
-    logger,
+    enqueueReconciliation,
+    ensurePeriodicReconciliation,
   }: {
-    getScopedClients: GetScopedClients;
-    onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
-    maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
-    logger?: Pick<Logger, 'warn'>;
+    enqueueReconciliation: (args: {
+      sourceId: string;
+      sourceSlug: string;
+      request: KibanaRequest;
+    }) => Promise<void>;
+    ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
-    const isDeleted = event.type === 'deleted';
-    // `esql_updated_at` only moves when the normalized query changes. Knowledge built on the old
-    // query describes other data, and its rules would read the new data as a sudden shift.
-    const isQueryChanged =
-      event.type === 'updated' && event.previous.esql_updated_at !== event.source.esql_updated_at;
-    const isEnabledToggled =
-      event.type === 'updated' && event.previous.enabled !== event.source.enabled;
-    if (!isDeleted && !isQueryChanged && !isEnabledToggled) {
+    if (
+      event.type === 'updated' &&
+      event.previous.esql_updated_at === event.source.esql_updated_at &&
+      event.previous.enabled === event.source.enabled
+    ) {
       return;
     }
-
-    const { getKnowledgeIndicatorClient } = await getScopedClients({ request: event.request });
-    const kiClient = await getKnowledgeIndicatorClient();
-    if (isDeleted || isQueryChanged) {
-      if (isQueryChanged) {
-        // Nothing re-onboards the source, so detection coverage stays empty until the next run.
-        logger?.warn(
-          `Query of source "${event.source.id}" changed: its rules, queries and knowledge indicators were removed until it is onboarded again`
-        );
-      }
-      await resetSourceKnowledge({
-        source: event.source,
-        kiClient,
-        onboardingClient,
+    const results = await Promise.allSettled([
+      enqueueReconciliation({
+        sourceId: event.source.id,
+        sourceSlug: event.source.slug,
         request: event.request,
-      });
-      return;
+      }),
+      ensurePeriodicReconciliation(event.request),
+    ]);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length > 0) {
+      throw failures.length === 1
+        ? failures[0]
+        : new AggregateError(failures, 'Failed to schedule source reconciliation');
     }
-    await applySourceEnabled({
-      source: event.source,
-      kiClient,
-      onboardingClient,
-      getMaintenanceState: () => maintenanceService.getState({ request: event.request }),
-      request: event.request,
-    });
   };
 
 /**
@@ -222,10 +280,14 @@ export async function reconcileSourceCatalog({
   onboardingClient,
   maintenanceService,
   request,
+  sourceKnowledgeState,
+  scheduleSourceOnboarding,
 }: {
   sourcesClient: SourcesClient;
   kiClient: CatalogKiClient;
   onboardingClient?: OnboardingClient;
+  sourceKnowledgeState?: SourceKnowledgeStateClient;
+  scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
@@ -244,12 +306,24 @@ export async function reconcileSourceCatalog({
   const failures: unknown[] = [];
   for (const source of sources) {
     try {
+      if (sourceKnowledgeState) {
+        await reconcileSourceRevision({
+          source,
+          sourcesClient,
+          kiClient,
+          onboardingClient,
+          sourceKnowledgeState,
+          scheduleSourceOnboarding,
+          request,
+        });
+      }
       await applySourceEnabled({
         source,
         kiClient,
         onboardingClient,
         getMaintenanceState: () => Promise.resolve(maintenanceState),
         request,
+        sourceKnowledgeState,
         skipCancel: !runningSourceSlugs.has(source.slug),
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
@@ -282,7 +356,14 @@ export async function reconcileSourceCatalog({
       continue;
     }
     try {
-      await retireSourceKnowledge({ sourceId, kiClient });
+      if (sourceKnowledgeState) {
+        await sourceKnowledgeState.runExclusive({
+          sourceId,
+          run: () => retireSourceKnowledge({ sourceId, kiClient }),
+        });
+      } else {
+        await retireSourceKnowledge({ sourceId, kiClient });
+      }
     } catch (error) {
       failures.push(error);
     }

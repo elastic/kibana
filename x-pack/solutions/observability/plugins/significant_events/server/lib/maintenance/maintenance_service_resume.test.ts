@@ -263,10 +263,10 @@ describe('SignificantEventsMaintenanceService', () => {
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         state: string;
         disabledWorkflows: Array<{ id: string }>;
-        disabledRuleIds: string[];
+        disabledRules: string[];
       };
       expect(lastWrite.state).toBe('enabled');
-      expect(lastWrite.disabledRuleIds).toEqual([]);
+      expect(lastWrite.disabledRules).toEqual([]);
       expect(lastWrite.disabledWorkflows).toEqual([
         expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
       ]);
@@ -299,7 +299,10 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.rulesDisabled).toBe(1);
       const lastWrite = soClient.create.mock.calls.at(-1);
       expect(lastWrite?.[1]).toEqual(
-        expect.objectContaining({ state: 'enabled', disabledRuleIds: ['rule-1'] })
+        expect.objectContaining({
+          state: 'enabled',
+          disabledRules: [{ id: 'rule-1', spaceId: 'default' }],
+        })
       );
     });
 
@@ -351,10 +354,10 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBe(true);
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         disabledWorkflows: unknown[];
-        disabledRuleIds: unknown[];
+        disabledRules: unknown[];
       };
       expect(lastWrite.disabledWorkflows).toEqual([]);
-      expect(lastWrite.disabledRuleIds).toEqual([]);
+      expect(lastWrite.disabledRules).toEqual([]);
     });
 
     it('flips to enabled with warnings when settings restore fails (no workflow rollback)', async () => {

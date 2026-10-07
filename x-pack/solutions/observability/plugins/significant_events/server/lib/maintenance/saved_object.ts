@@ -90,9 +90,39 @@ const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),
 });
 
+const maintenanceStateAttributesV3 = schema.object({
+  state: schema.string(),
+  updatedAt: schema.maybe(schema.string()),
+  updatedBy: schema.maybe(schema.string()),
+  disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
+  disabledRules: schema.arrayOf(disabledWorkflowSchemaV1, {
+    maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
+  }),
+  lastSummary: schema.maybe(maintenanceSummarySchemaV2),
+  pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV1),
+});
+
 export type SignificantEventsMaintenanceStateAttributes = TypeOf<
-  typeof maintenanceStateAttributesV2
+  typeof maintenanceStateAttributesV3
 >;
+
+/**
+ * Rules recorded before version 3 had no space, and the stored ids can't recover it. The old
+ * sweep used the triggering request's space, so default is a best guess: a pause started from
+ * another space resumes against the wrong space and leaves those rules disabled.
+ */
+export const backfillDisabledRules = (
+  attributes: Partial<TypeOf<typeof maintenanceStateAttributesV1>> &
+    Partial<SignificantEventsMaintenanceStateAttributes>
+): { attributes: Pick<SignificantEventsMaintenanceStateAttributes, 'disabledRules'> } => ({
+  attributes: {
+    disabledRules:
+      attributes.disabledRules ??
+      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: 'default' })),
+  },
+});
 
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
   name: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -120,6 +150,18 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
       schemas: {
         forwardCompatibility: maintenanceStateAttributesV2.extends({}, { unknowns: 'ignore' }),
         create: maintenanceStateAttributesV2,
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: ({ attributes }) => backfillDisabledRules(attributes),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: maintenanceStateAttributesV3.extends({}, { unknowns: 'ignore' }),
+        create: maintenanceStateAttributesV3,
       },
     },
   },

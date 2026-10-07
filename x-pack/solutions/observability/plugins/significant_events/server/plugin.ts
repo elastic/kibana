@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type {
   CoreSetup,
   CoreStart,
@@ -32,6 +34,13 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import {
+  createSourceKnowledgeStateClient,
+  sourceKnowledgeStateSavedObjectType,
+  SOURCE_KNOWLEDGE_STATE_TYPE,
+} from './lib/knowledge_indicators/source_knowledge_state';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -116,6 +125,7 @@ import { createSignificantEventsAvailability } from './agent_builder/tools/signi
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
@@ -163,6 +173,7 @@ export class SignificantEventsPlugin
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    core.savedObjects.registerType(sourceKnowledgeStateSavedObjectType);
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
@@ -250,17 +261,43 @@ export class SignificantEventsPlugin
           cpsEnabled,
         });
 
-      const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
+      const sourceKnowledgeState = createSourceKnowledgeStateClient({
+        repository: coreStart.savedObjects.createInternalRepository([SOURCE_KNOWLEDGE_STATE_TYPE]),
+        space,
+        sourcesClient,
+      });
+      const createKnowledgeIndicatorClient = (
+        context: SignificantEventsAlertingContext,
+        source?: NightshiftSource
+      ) =>
         knowledgeIndicatorService.getClient({
           esClient: scopedClusterClient.asInternalUser,
           soClient,
           space,
           context,
           config: tuningConfig,
+          withSourceWrite: (sourceId, run) =>
+            sourceKnowledgeState.write({
+              sourceId,
+              expectedRevision:
+                typeof request.headers['x-nightshift-source-revision'] === 'string' &&
+                request.headers['x-nightshift-source-revision']
+                  ? request.headers['x-nightshift-source-revision']
+                  : source?.esql_updated_at,
+              run,
+            }),
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = () => {
+      const getKnowledgeIndicatorClient = async (
+        source?: NightshiftSource
+      ): Promise<KnowledgeIndicatorClient> => {
+        if (source) {
+          return createKnowledgeIndicatorClient(
+            await resolveSignificantEventsAlertingContext(),
+            source
+          );
+        }
         kiClientPromise ??= (async () =>
           createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
         return kiClientPromise;
@@ -276,6 +313,37 @@ export class SignificantEventsPlugin
         space,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        sourceKnowledgeState,
+        scheduleSourceOnboarding: async (source: NightshiftSource): Promise<boolean> => {
+          if (
+            !streamsKIsOnboardingClient ||
+            !source.enabled ||
+            !(await uiSettingsClient.get<boolean>(
+              OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
+            )) ||
+            (await this.maintenanceService?.getState({ request })) === 'paused'
+          ) {
+            return false;
+          }
+          const now = Date.now();
+          await streamsKIsOnboardingClient.run({
+            request,
+            inputs: {
+              sourceId: source.id,
+              sourceSlug: source.slug,
+              sourceRevision: source.esql_updated_at,
+              rootTriggeredBy: 'scheduled',
+              features: {
+                skip: false,
+                start: now - 24 * 60 * 60_000,
+                end: now,
+                recencyThresholdHours: 0,
+              },
+              queries: { skip: false },
+            },
+          });
+          return true;
+        },
         getAlertEventsClient,
         ...significantEventsClients,
         inferenceClient,
@@ -430,14 +498,31 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
-    // Without this a deleted or disabled source's rules keep firing until the next catalog
-    // reconcile, which only runs with continuous onboarding or sync.
+    const sourceReconciliation = plugins.workflowsManagement?.management
+      ? new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
+          managementApi: plugins.workflowsManagement.management,
+          workflowId: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
+          workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        })
+      : undefined;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
-        getScopedClients: this.getScopedClients,
-        onboardingClient: streamsKIsOnboardingClient,
-        maintenanceService: this.maintenanceService,
-        logger: this.logger,
+        enqueueReconciliation: async ({ sourceId, sourceSlug, request }) => {
+          if (!sourceReconciliation) {
+            throw new Error('Workflows management is required to reconcile source knowledge');
+          }
+          await sourceReconciliation.execute({
+            executionSpaceId: request.spaceId,
+            inputs: { sourceId, sourceSlug },
+            request,
+          });
+        },
+        ensurePeriodicReconciliation: async (request) => {
+          // Keep periodic repair available even when continuous onboarding is switched off.
+          if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
+            await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
+          }
+        },
       })
     );
 

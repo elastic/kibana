@@ -27,6 +27,10 @@ triggers:
         type: string
         required: true
         description: "Target source id."
+      - name: sourceRevision
+        type: string
+        required: true
+        description: "Source query revision used by this onboarding run."
       - name: sourceSlug
         type: string
         required: true
@@ -102,6 +106,7 @@ steps:
         group: 'ki_extraction'
       headers:
         x-elastic-internal-origin: 'kibana'
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
     timeout: '10s'
     on-failure:
       continue: true
@@ -158,6 +163,7 @@ steps:
           path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
           headers:
             x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       - name: skip_if_recent
         type: if
         condition: "${{ steps.should_identify.output.shouldIdentify == false }}"
@@ -181,6 +187,7 @@ steps:
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"
+            sourceRevision: "${{ inputs.sourceRevision }}"
             connectorId: "${{ inputs.featuresConnectorId }}"
             start: "${{ inputs.featuresStart }}"
             end: "${{ inputs.featuresEnd }}"
@@ -227,6 +234,7 @@ steps:
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"
+            sourceRevision: "${{ inputs.sourceRevision }}"
             connectorId: "${{ inputs.queriesConnectorId }}"
             maxExistingQueriesForContext: "${{ inputs.queriesMaxExistingForContext }}"
       - name: save_queries_output
@@ -249,6 +257,7 @@ steps:
       path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/knowledge_indicators/_keep_alive"
       headers:
         x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
 

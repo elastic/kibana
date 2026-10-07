@@ -14,6 +14,7 @@ import {
   enableStreams,
   putStream,
 } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
@@ -141,8 +142,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: resetStream,
         ...emptyAssets,
       });
+      const createdSourceIds: string[] = [];
       try {
-        await upsertFeature(apiClient, RESET_STREAM_NAME, {
+        const resetSource = await createTestSource(
+          roleScopedSupertest,
+          'Maintenance reset',
+          `FROM ${RESET_STREAM_NAME},${RESET_STREAM_NAME}.*`
+        );
+        createdSourceIds.push(resetSource.id);
+        const orphanSource = await createTestSource(
+          roleScopedSupertest,
+          'Maintenance reset orphan',
+          `FROM ${ORPHAN_RULE_STREAM_NAME},${ORPHAN_RULE_STREAM_NAME}.*`
+        );
+        createdSourceIds.push(orphanSource.id);
+        await upsertFeature(apiClient, resetSource.id, {
           id: 'reset-feature',
           type: 'entity',
           subtype: 'service',
@@ -153,16 +167,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           evidence: ['service.name=reset-service'],
           tags: ['reset'],
         });
-        await upsertQuery(apiClient, RESET_STREAM_NAME, 'reset-linked-query', {
+        await upsertQuery(apiClient, resetSource.id, 'reset-linked-query', {
           title: 'Maintenance reset linked rule',
           esql: {
-            query: `FROM ${RESET_STREAM_NAME},${RESET_STREAM_NAME}.* | WHERE KQL("message:'linked'")`,
+            query: `FROM ${resetSource.viewName} | WHERE KQL("message:'linked'")`,
           },
         });
-        await upsertQuery(apiClient, ORPHAN_RULE_STREAM_NAME, 'reset-orphan-query', {
+        await upsertQuery(apiClient, orphanSource.id, 'reset-orphan-query', {
           title: 'Maintenance reset orphan rule',
           esql: {
-            query: `FROM ${ORPHAN_RULE_STREAM_NAME},${ORPHAN_RULE_STREAM_NAME}.* | WHERE KQL("message:'orphan'")`,
+            query: `FROM ${orphanSource.viewName} | WHERE KQL("message:'orphan'")`,
           },
         });
 
@@ -175,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               filter: [
                 { term: { id: 'reset-orphan-query' } },
                 { term: { type: 'query' } },
-                { term: { 'source.id': ORPHAN_RULE_STREAM_NAME } },
+                { term: { 'source.id': orphanSource.id } },
               ],
             },
           },
@@ -196,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             detection_id: 'maintenance-reset-detection',
             rule_uuid: 'maintenance-reset-rule',
             rule_name: 'Maintenance reset rule',
-            source_id: RESET_STREAM_NAME,
+            source_id: resetSource.id,
             change_point_type: 'spike',
             p_value: 0.01,
             'kibana.space_ids': ['default'],
@@ -247,8 +261,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
         expect(await dataStreamExists(esClient, DISCOVERIES_DATA_STREAM)).to.be(false);
 
-        expect((await listFeatures(apiClient, RESET_STREAM_NAME)).features).to.eql([]);
-        expect((await getQueries(apiClient, RESET_STREAM_NAME)).queries).to.eql([]);
+        expect((await listFeatures(apiClient, resetSource.id)).features).to.eql([]);
+        expect((await getQueries(apiClient, resetSource.id)).queries).to.eql([]);
         const events = await apiClient
           .fetch('GET /internal/significant_events/events', { params: { query: {} } })
           .expect(200);
@@ -282,6 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: DISCOVERIES_TEST_TEMPLATE },
           { ignore: [404] }
         );
+        await Promise.all(createdSourceIds.map((id) => deleteTestSource(roleScopedSupertest, id)));
         await deleteStream(apiClient, RESET_STREAM_NAME);
         await deleteStream(apiClient, ORPHAN_RULE_STREAM_NAME);
       }

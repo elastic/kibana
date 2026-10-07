@@ -13,10 +13,12 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { SourceKnowledgeStateClient } from '../lib/knowledge_indicators/source_knowledge_state';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -48,7 +50,9 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   /** Request space (`request.spaceId`); knowledge indicators and their rules are scoped to it. */
   space: string;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
-  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
+  getKnowledgeIndicatorClient: (source?: NightshiftSource) => Promise<KnowledgeIndicatorClient>;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  scheduleSourceOnboarding: (source: NightshiftSource) => Promise<boolean>;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;

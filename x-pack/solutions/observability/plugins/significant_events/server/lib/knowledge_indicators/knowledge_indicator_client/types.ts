@@ -48,4 +48,6 @@ export interface KnowledgeIndicatorClientDeps {
   logger: Logger;
   /** Kibana space every read is filtered by and every write is stamped with. */
   space: string;
+  /** Serializes final source writes with query invalidation. */
+  withSourceWrite?: <T>(sourceId: string, run: () => Promise<T>) => Promise<T>;
 }

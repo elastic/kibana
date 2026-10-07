@@ -665,7 +665,7 @@ describe('QueryRuleOrchestrator', () => {
       expect(summary.tombstoned).toBe(1);
     });
 
-    it('leaves owned rules in place when no knowledge indicators are visible', async () => {
+    it('deletes orphan rules when no knowledge indicators were persisted', async () => {
       const rulesClient = makeReconcileRulesClient();
       const logger = loggerMock.create();
       rulesClient.findOwnedRuleIds.mockResolvedValue(['orphan-rule']);
@@ -674,16 +674,14 @@ describe('QueryRuleOrchestrator', () => {
 
       const summary = await orchestrator.reconcileSource(SOURCE);
 
-      expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
-      expect(summary.orphanRulesDeleted).toBe(0);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('leaving 1 owned rule'));
+      expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['orphan-rule']);
+      expect(summary.orphanRulesDeleted).toBe(1);
     });
 
     it('chunks orphan rule deletion at the Alerting bulk limit', async () => {
       const rulesClient = makeReconcileRulesClient();
       const orphanIds = Array.from({ length: 201 }, (_, index) => `orphan-rule-${index}`);
       rulesClient.findOwnedRuleIds.mockResolvedValue(orphanIds);
-      // A visible feature means the empty-KI guard does not apply; these rules are real orphans.
       const reader = makeReconcileReader({ links: [], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
 
