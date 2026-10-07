@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client.ts';
-export * from './on_complete.ts';
-export * from './on_metrics_viable.ts';
-export * from './on_start.ts';
-export * from './pick_test_group_run_order/index.ts';
+export interface ScoutLog {
+  info(message: string): void;
+  warning(message: string): void;
+}

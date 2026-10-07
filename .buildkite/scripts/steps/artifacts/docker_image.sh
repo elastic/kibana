@@ -96,7 +96,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
   echo "--- Validate CDN assets"
-  ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
 fi
