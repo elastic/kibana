@@ -634,10 +634,10 @@ describe('detection rule workflows', () => {
 
       // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, so a rule
       // disabled after alerting keeps harvesting until its FPs age out of the window.
-      // The sweep reads live status and revision for the harvested candidates only
-      // and filters the fan-out source (a parallel branch body cannot carry a
-      // step-level `if`). Disabled rules are absent from the lookup, so their rows drop.
-      it('looks up the harvested candidates and drops rules that are no longer enabled', () => {
+      // The sweep checks live enabled status for the harvested candidates only and
+      // drops disabled rules from the fan-out source (a parallel branch body cannot
+      // carry a step-level `if`).
+      it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
@@ -655,16 +655,19 @@ describe('detection rule workflows', () => {
         expect(lookup['on-failure']).toEqual({ continue: true });
 
         const rowsExpr = String(rows.with?.rows);
+        expect(rowsExpr).toContain(
+          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
+        );
         // No `default` after where_exp: an empty filtered array is legitimate and a
-        // default would resurrect every filtered-out candidate.
+        // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
         // where_exp argument. This direct reference keeps the keys resident.
         expect(String(rows.with?.rule_revision_keys)).toContain(
           '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
         );
-        // Slice after the filter: the pool overscans the launch cap so dropped
-        // candidates cannot starve rules ranked below them.
+        // Slice after the enabled filter: the pool overscans the launch cap so
+        // disabled candidates cannot starve enabled rules ranked below them.
         expect(rowsExpr).toContain('| slice: 0, steps.collect_candidates.output.fanout_limit');
         expect(String(collect.with?.fanout_limit)).toContain(
           'inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep'
@@ -673,100 +676,6 @@ describe('detection rule workflows', () => {
         expect(String((fanOut as NestedStep & { foreach?: string }).foreach)).toContain(
           'steps.resolve_fanout_rows.output.rows'
         );
-      });
-
-      // A rule edited within the analysis period (analysis_window_days) still has FPs
-      // from its older revision in that period. Diagnosing the current rule with them
-      // proposes a fix for logic that no longer runs, so every count, the FP rate and
-      // the alert ids come from the live revision only.
-      describe('current rule revision', () => {
-        const resolveRevisions = tuningSteps.find(
-          ({ name }) => name === 'resolve_current_revisions'
-        )!;
-        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
-        const keepColumns = harvestQuery
-          .split('\n')
-          .find((line) => line.trimStart().startsWith('| KEEP'))!
-          .replace('| KEEP', '')
-          .split(',')
-          .map((column) => column.trim().replace(/`/g, ''));
-        const keyIndex = keepColumns.indexOf('rule_revision_key');
-
-        const renderRevisionKeys = (data: unknown): string =>
-          createWorkflowLiquidEngine().parseAndRenderSync(
-            String(resolveRevisions.with?.rule_revision_keys),
-            { steps: { list_enabled_candidates: { output: { data } } } }
-          );
-
-        const fanOutRows = (harvestRows: unknown[][], ruleRevisionKeys: unknown): unknown =>
-          resolveExpression(rows.with?.rows, {
-            consts: tuning.consts,
-            steps: {
-              harvest_fp_alerts_by_rule: { output: { values: harvestRows } },
-              resolve_current_revisions: { output: { rule_revision_keys: ruleRevisionKeys } },
-              collect_candidates: { output: { fanout_limit: 10 } },
-            },
-          });
-
-        // Fake harvest row for one rule revision. The key is built the same way as
-        // rule_revision_key in the harvest query, so keep the two in sync.
-        const harvestRow = (uuid: string, revision: number): unknown[] => {
-          const row: unknown[] = [uuid, 12, '2026-10-01T00:00:00.000Z', ['a', 'b'], 20, 12];
-          row[keyIndex] = `,${uuid}@${revision},`;
-          return row;
-        };
-
-        it('groups every count and the alert ids by rule revision', () => {
-          const groupClauses = harvestQuery
-            .split('\n')
-            .filter((line) => line.trimStart().startsWith('BY '))
-            .map((line) => line.trim());
-
-          // The reviewed watermark is still computed per rule, so a review of any
-          // version of the rule counts. The counts and alert ids are split by revision.
-          expect(groupClauses).toEqual([
-            'BY `kibana.alert.rule.uuid`',
-            'BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`',
-            'BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`',
-          ]);
-          expect(harvestQuery).toContain(
-            'rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")'
-          );
-          // The new column goes last, so the columns the review reads by position
-          // (uuid, alert ids, counts) keep their places.
-          expect(keyIndex).toBe(keepColumns.length - 1);
-          expect(String(rows.with?.rows)).toContain(`contains row[${keyIndex}]`);
-        });
-
-        it('reviews a rule only on false positives from its current version', () => {
-          const keys = renderRevisionKeys([
-            { id: 'rule-1', revision: 31 },
-            { id: 'rule-2', revision: 4 },
-          ]);
-          const result = fanOutRows(
-            [
-              // Older revision of rule-1: its noise predates the edit.
-              harvestRow('rule-1', 30),
-              // Revision 3 must not match revision 31 as a substring.
-              harvestRow('rule-1', 3),
-              harvestRow('rule-2', 4),
-              // Disabled rule: absent from the lookup.
-              harvestRow('rule-3', 1),
-            ],
-            keys
-          );
-
-          expect(result).toEqual([harvestRow('rule-2', 4)]);
-        });
-
-        // Without the lookup we don't know the rules' current versions, so the sweep
-        // starts no reviews rather than risk diagnosing alerts from an older version.
-        it('starts no reviews when the rule lookup fails', () => {
-          const harvested = [harvestRow('rule-1', 3)];
-
-          expect(fanOutRows(harvested, renderRevisionKeys(undefined))).toEqual([]);
-          expect(fanOutRows(harvested, null)).toEqual([]);
-        });
       });
 
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
