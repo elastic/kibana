@@ -59,6 +59,8 @@ export const impactAttachment = defineInvestigationAttachment<
 >({
   type: IMPACT_ATTACHMENT_TYPE,
   storageSettings: impactStorageSettings,
+  // Impact documents were stored before the factory, under ids without the type.
+  legacyUntypedDocumentIds: true,
   schema: impactSchema,
   // The investigation overview shows impact; the chat does not.
   hiddenInConversation: true,

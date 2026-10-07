@@ -15,11 +15,12 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import { test as baseTest, spaceTest as baseSpaceTest } from '@kbn/scout';
-import { DataViewEditorFlyoutPage, DataViewDetailPage } from './page_objects';
+import { DataViewEditorFlyoutPage, DataViewDetailPage, ScriptedFieldForm } from './page_objects';
 
 export interface DataViewManagementPageObjects extends PageObjects {
   dataViewEditorFlyout: DataViewEditorFlyoutPage;
   dataViewDetail: DataViewDetailPage;
+  scriptedFieldForm: ScriptedFieldForm;
 }
 
 export interface DataViewManagementTestFixtures extends ScoutTestFixtures {
@@ -35,6 +36,7 @@ export const test = baseTest.extend<DataViewManagementTestFixtures, ScoutWorkerF
       ...pageObjects,
       dataViewEditorFlyout: new DataViewEditorFlyoutPage(page),
       dataViewDetail: new DataViewDetailPage(page),
+      scriptedFieldForm: new ScriptedFieldForm(page),
     });
   },
 });
@@ -43,6 +45,7 @@ interface DataViewManagementParallelTestFixtures extends ScoutParallelTestFixtur
   pageObjects: PageObjects & {
     dataViewEditorFlyout: DataViewEditorFlyoutPage;
     dataViewDetail: DataViewDetailPage;
+    scriptedFieldForm: ScriptedFieldForm;
   };
 }
 
@@ -64,6 +67,7 @@ export const spaceTest = baseSpaceTest.extend<
       ...pageObjects,
       dataViewEditorFlyout: new DataViewEditorFlyoutPage(page),
       dataViewDetail: new DataViewDetailPage(page),
+      scriptedFieldForm: new ScriptedFieldForm(page),
     });
   },
 });

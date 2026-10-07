@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -24,6 +24,12 @@ export interface InvestigationAttachmentTypeOptions<
   /** Full stored document, including documents written by earlier schema versions. */
   schema: z.ZodType<InvestigationAttachmentDocument<TStored>>;
   getService: () => InvestigationAttachmentDocService<TStored>;
+  /**
+   * Throws when the caller may not read the entity. `resolve` and `isStale` read the index as the
+   * internal user by an origin the caller supplies (the public attachment route accepts an
+   * origin without data), so they check it before reading.
+   */
+  assertCanRead: (request: KibanaRequest) => Promise<void>;
   logger: Logger;
   /** Text the LLM sees for this attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
@@ -59,6 +65,7 @@ export const createInvestigationAttachmentType = <
   type,
   schema,
   getService,
+  assertCanRead,
   logger,
   format,
   agentDescription,
@@ -80,6 +87,7 @@ export const createInvestigationAttachmentType = <
   },
   resolve: async (origin, context) => {
     try {
+      await assertCanRead(context.request);
       return await getService().get(origin, context.spaceId);
     } catch (error) {
       logger.warn(`Failed to resolve ${type} for origin "${origin}": ${error}`);
@@ -92,6 +100,7 @@ export const createInvestigationAttachmentType = <
       if (!latest) {
         return false;
       }
+      await assertCanRead(context.request);
       const current = await getService().get(attachment.origin, context.spaceId);
       if (!current) {
         return false;
