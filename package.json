@@ -175,7 +175,7 @@
     "@elastic/search-ui": "1.24.2",
     "@elastic/search-ui-app-search-connector": "1.24.1",
     "@elastic/search-ui-engines-connector": "1.24.2",
-    "@elastic/statistics": "link:<project-root>/elastic/statistics",
+    "@elastic/statistics": "0.0.3",
     "@emotion/cache": "11.14.0",
     "@emotion/css": "11.13.5",
     "@emotion/react": "11.14.0",

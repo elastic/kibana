@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { pairedTable } from '@elastic/statistics';
+import { mean, pairedTable } from '@elastic/statistics';
 import type {
   ComparisonResult,
   HypothesisTest,
 } from '../schemas/experiments/compare_experiments_route.gen';
-import { mean, resolveDirection } from './pairing';
+import { resolveDirection } from './pairing';
 import type { PairedScore } from './pairing';
 import { runPairedTest } from './run_test';
 import { selectTest } from './select_test';
