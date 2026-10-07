@@ -7,10 +7,12 @@
 
 import React from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
@@ -21,12 +23,12 @@ import { RiskScoreSaveBar } from './risk_score_save_bar';
 import { RiskScoreGeneralSection } from './risk_score_general_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import * as i18n from '../../translations';
+import { RISK_SCORE_SETTINGS_ERROR_TEST_ID } from '../../test_ids';
 import type { RiskScoreConfiguration, UIAlertFilter } from './common';
 
 interface RiskScoreTabProps {
   hasReadPermissions: boolean;
   isPrivilegesLoading: boolean;
-  savedRiskEngineSettings?: RiskScoreConfiguration;
   selectedRiskEngineSettings?: RiskScoreConfiguration;
   selectedSettingsMatchSavedSettings: boolean;
   resetSelectedSettings: () => void;
@@ -35,6 +37,7 @@ interface RiskScoreTabProps {
   setSelectedDateSetting: (range: { start: string; end: string }) => void;
   toggleSelectedClosedAlertsSetting: () => void;
   isLoadingRiskEngineSettings: boolean;
+  isErrorLoadingRiskEngineSettings: boolean;
   toggleScoreRetainment: () => void;
   setAlertFilters: (filters: UIAlertFilter[]) => void;
   getUIAlertFilters: () => UIAlertFilter[];
@@ -43,7 +46,6 @@ interface RiskScoreTabProps {
 export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
   hasReadPermissions,
   isPrivilegesLoading,
-  savedRiskEngineSettings,
   selectedRiskEngineSettings,
   selectedSettingsMatchSavedSettings,
   resetSelectedSettings,
@@ -52,6 +54,7 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
   setSelectedDateSetting,
   toggleSelectedClosedAlertsSetting,
   isLoadingRiskEngineSettings,
+  isErrorLoadingRiskEngineSettings,
   toggleScoreRetainment,
   setAlertFilters,
   getUIAlertFilters,
@@ -62,6 +65,22 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
 
   return (
     <>
+      {isErrorLoadingRiskEngineSettings && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.ERROR_LOADING_RISK_ENGINE_SETTINGS_TITLE}
+            color="danger"
+            iconType="error"
+            data-test-subj={RISK_SCORE_SETTINGS_ERROR_TEST_ID}
+          >
+            <EuiText size="s">
+              <p>{i18n.ERROR_LOADING_RISK_ENGINE_SETTINGS_DESCRIPTION}</p>
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         {!selectedRiskEngineSettings && (
           <EuiFlexItem>
@@ -103,11 +122,7 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
           </>
         )}
       </EuiFlexGroup>
-      {((savedRiskEngineSettings && !selectedSettingsMatchSavedSettings) ||
-        (!savedRiskEngineSettings &&
-          selectedRiskEngineSettings &&
-          selectedRiskEngineSettings.filters &&
-          selectedRiskEngineSettings.filters.length > 0)) && (
+      {selectedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
           saveSelectedSettings={() => {
