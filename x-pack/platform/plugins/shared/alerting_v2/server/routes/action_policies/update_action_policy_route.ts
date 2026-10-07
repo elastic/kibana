@@ -27,8 +27,8 @@ import {
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
 import {
+  ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
   INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-  PATCH_SEMANTICS_DESCRIPTION,
 } from '../route_descriptions';
 import { actionPolicyIdParamsSchema } from './route_schemas';
 
@@ -47,7 +47,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     access: 'public' as const,
     summary: 'Partially update an action policy.',
-    description: PATCH_SEMANTICS_DESCRIPTION,
+    description: ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateActionPolicyOasExamples,
   } as const;
   static schemas = {

@@ -22,6 +22,7 @@ import {
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
+  POLICY_MATCHER_PATCH_DESCRIPTION,
   policyMatcherPatchSchema,
   policyMatcherSchema,
 } from './policy_matcher_schema';
@@ -270,7 +271,10 @@ export const updateActionPolicyDataSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherPatchSchema.nullable().optional().describe(POLICY_MATCHER_DESCRIPTION),
+    matcher: policyMatcherPatchSchema
+      .nullable()
+      .optional()
+      .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)

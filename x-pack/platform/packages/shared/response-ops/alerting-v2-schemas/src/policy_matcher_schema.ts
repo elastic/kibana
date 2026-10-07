@@ -17,14 +17,29 @@ export const POLICY_MATCHER_TAGS_MAX = 50;
  */
 export const POLICY_MATCHER_TAG_MAX_LENGTH = MAX_TAG_LENGTH;
 
-export const POLICY_MATCHER_TAGS_DESCRIPTION =
-  'Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone; an empty array is not accepted.';
+// Only a PATCH accepts `null` on a matcher or its leaves, so each description comes in two
+// flavours over a shared lead: following the PATCH wording on a create or replace is a 400.
 
-export const POLICY_MATCHER_EXPRESSION_DESCRIPTION =
-  "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone.";
+const TAGS_LEAD =
+  'Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted.';
 
-export const POLICY_MATCHER_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.';
+export const POLICY_MATCHER_TAGS_DESCRIPTION = `${TAGS_LEAD} Omit \`matcher.tags\` to match on \`matcher.expression\` alone.`;
+
+export const POLICY_MATCHER_TAGS_PATCH_DESCRIPTION = `${TAGS_LEAD} Omit \`matcher.tags\` to keep the stored tags, or set it to \`null\` to clear them and match on \`matcher.expression\` alone.`;
+
+const EXPRESSION_LEAD =
+  "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work.";
+
+export const POLICY_MATCHER_EXPRESSION_DESCRIPTION = `${EXPRESSION_LEAD} Omit \`matcher.expression\` to match on \`tags\` alone.`;
+
+export const POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION = `${EXPRESSION_LEAD} Omit \`matcher.expression\` to keep the stored expression, or set it to \`null\` to clear it and match on \`tags\` alone.`;
+
+const MATCHER_LEAD =
+  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply.';
+
+export const POLICY_MATCHER_DESCRIPTION = `${MATCHER_LEAD} When both \`tags\` and \`expression\` are omitted, the policy applies to all alerts.`;
+
+export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` to clear it. When \`matcher\` is \`null\`, or when the merged \`tags\` and \`expression\` are both absent, the policy applies to all alerts.`;
 
 const matcherTagsSchema = z
   .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
@@ -44,10 +59,10 @@ export type PolicyMatcher = z.infer<typeof policyMatcherSchema>;
 
 export const policyMatcherPatchSchema = z
   .object({
-    tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
+    tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_PATCH_DESCRIPTION),
     expression: matcherExpressionSchema
       .nullable()
       .optional()
-      .describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
+      .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
   })
   .strict();
