@@ -178,6 +178,8 @@ The public plugin registers the conversation template UI for `investigation` and
 
 The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.
 
+To see the template UI without an agent run, `scripts/seed_investigations.ts` seeds synthetic investigations (a completed alert investigation with impact, hypotheses, and proposed actions, a completed question, and an untitled one that was just started) and prints a link to each conversation in Agent Builder. Run it with `node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/seed_investigations.ts` (`--help` for the connection flags, `--clean` to remove the seeds). Proposed actions need `xpack.proposals.enabled: true`.
+
 ## Index naming
 
 `.kibana-investigation-impact`, `.kibana-investigation-subject`, `.kibana-investigation-claim`, and `.kibana-investigation-hypotheses` are permanent. `.kibana*` is already granted to the `kibana_system` role, so these indexes need no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-impact` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field. No index name may be another's name followed by `-`: the storage adapter's index template matches `<name>-*`, so `.kibana-investigation-subject` would also match a `.kibana-investigation-subject-claim` index, and Elasticsearch refuses two same-priority templates with overlapping patterns. `server/index_names.test.ts` checks this.
