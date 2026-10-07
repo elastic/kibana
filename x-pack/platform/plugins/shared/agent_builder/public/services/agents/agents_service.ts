@@ -18,6 +18,7 @@ import type {
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
   GetAgentAiIndicesResponse,
+  GetAgentModelResponse,
   GetAgentResponse,
   ListAgentAiIndicesResponse,
   ListAgentResponse,
@@ -30,6 +31,7 @@ import { internalApiPath, publicApiPath } from '../../../common/constants';
 /** Static, so it does not read as a dynamic http path. */
 const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
 const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
+const AGENT_MODEL_BY_ID_PATH = `${internalApiPath}/agents/{id}/_model`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -67,6 +69,13 @@ export class AgentService {
     return await this.http.get<GetAgentAiIndicesResponse>(
       buildPath(AGENT_AI_INDICES_BY_ID_PATH, { id })
     );
+  }
+
+  /**
+   * Returns the model the agent runs on when no connector is passed, resolved server-side.
+   */
+  async getAgentModel(id: string): Promise<GetAgentModelResponse> {
+    return await this.http.get<GetAgentModelResponse>(buildPath(AGENT_MODEL_BY_ID_PATH, { id }));
   }
 
   /**

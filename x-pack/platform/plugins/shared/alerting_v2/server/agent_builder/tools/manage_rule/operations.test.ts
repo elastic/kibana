@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   executeRuleOperations as executeRuleOperationsImpl,
@@ -696,6 +697,22 @@ describe('executeRuleOperations', () => {
       expect(result.data).not.toHaveProperty('state_transition');
     });
 
+    it('clears routing tags when an existing alert becomes a signal', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        metadata: { name: 'Existing Rule', tags: ['prod'], routing_tags: ['sre'] },
+        query: { base: 'FROM metrics-*' },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient());
+
+      expect(result.data.metadata).not.toHaveProperty('routing_tags');
+      expect(result.data.metadata?.tags).toEqual(['prod', AGENT_BUILDER_TAG]);
+    });
+
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
 
@@ -921,6 +938,17 @@ describe('executeRuleOperations', () => {
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'Signal rules cannot set recovery or no_data'
+      );
+    });
+
+    it('throws when a signal rule sets routing tags', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        { operation: 'set_metadata', name: 'Signal Rule', routing_tags: ['sre'] },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        ROUTING_TAGS_SIGNAL_RULE_MESSAGE
       );
     });
   });
@@ -1169,6 +1197,20 @@ describe('executeRuleOperations', () => {
         name: 'Test Rule',
         description: 'A test',
         tags: ['test', AGENT_BUILDER_TAG],
+      });
+    });
+
+    it('applies routing tags from set_metadata without the provenance tag', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test Rule', routing_tags: ['sre'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.metadata).toEqual({
+        name: 'Test Rule',
+        routing_tags: ['sre'],
+        tags: [AGENT_BUILDER_TAG],
       });
     });
 

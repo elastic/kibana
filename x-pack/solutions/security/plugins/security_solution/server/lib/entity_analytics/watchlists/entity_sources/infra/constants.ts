@@ -15,6 +15,18 @@ export const integrationsSourceIndex = (namespace: string, integrationName: stri
 export const INTEGRATION_TYPES = ['entityanalytics_okta', 'entityanalytics_ad'] as const;
 export type IntegrationType = (typeof INTEGRATION_TYPES)[number];
 
+// The entity source types that can be created, updated, or removed as a rule-based data source.
+// Excludes `entity_analytics_integration`, which is only ever managed by an integration and never settable directly.
+export const RuleBasedSourceType = {
+  store: 'store',
+  index: 'index',
+} as const;
+export type RuleBasedSourceType = (typeof RuleBasedSourceType)[keyof typeof RuleBasedSourceType];
+export const RULE_BASED_SOURCE_TYPES = Object.values(RuleBasedSourceType) as [
+  RuleBasedSourceType,
+  ...RuleBasedSourceType[]
+];
+
 export const STREAM_INDEX_PATTERNS: Record<IntegrationType, (namespace: string) => string> = {
   entityanalytics_okta: (namespace) => `logs-entityanalytics_okta.user-${namespace}`,
   entityanalytics_ad: (namespace) => `logs-entityanalytics_ad.user-${namespace}`,

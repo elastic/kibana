@@ -11,6 +11,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
+import { useAgentModel } from './agents/use_agent_model';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 
 /**
@@ -33,7 +34,11 @@ export const useConversationStream = () => {
   const agentId = useAgentId();
   const { conversation } = useConversation();
   const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
-  const { selectedConnector: connectorId } = useConnectorSelection();
+  const { selectedConnector } = useConnectorSelection();
+  const { isLocked: isModelSetByAgent } = useAgentModel(agentId);
+
+  // An explicit connector overrides the agent's own model server-side.
+  const connectorId = isModelSetByAgent ? undefined : selectedConnector;
 
   const { activeStreams, mutateSendMessage, mutateResumeRound, cancelStream } =
     useStreamingContext();
