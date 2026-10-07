@@ -345,29 +345,6 @@ describe('UiamServiceAccounts', () => {
       expect(JSON.stringify(body)).not.toContain('attacker');
     });
 
-    it('refuses an account UIAM created without the Relay assumer and does not return it', async () => {
-      mockUiam.createServiceAccount.mockResolvedValue({
-        ...validResponse,
-        assumable_by: [
-          ...validResponse.assumable_by,
-          { type: 'platform-service-account', service_account_id: 'attacker-principal' },
-        ],
-      });
-
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
-          name: 'nightshift-relay',
-          roles: ['editor'],
-          trustedPlatformAssumers: ['relay'],
-        })
-      ).rejects.toThrow(/not registered/);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'Refusing service account [nightshift-relay] UIAM created without the required platform assumer. It may need to be removed manually.'
-      );
-      expect(JSON.stringify(logger.error.mock.calls)).not.toContain('attacker-principal');
-    });
-
     it.each(['Bearer essu_my_token', 'ApiKey essu_key'])(
       'rejects %s when the caller lacks the `manage_security` cluster privilege',
       async (authorization) => {

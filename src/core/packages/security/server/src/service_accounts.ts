@@ -39,6 +39,15 @@ export interface CreateServiceAccountServerParams extends CreateServiceAccountPa
   trustedPlatformAssumers?: readonly TrustedPlatformServiceAccountName[];
 }
 
+/** @public */
+export interface DeleteServiceAccountOptions {
+  /**
+   * Deletes the account even when workloads are still bound to it. Those workloads then fail at
+   * their next token exchange until someone unbinds them.
+   */
+  force: boolean;
+}
+
 /**
  * Core's service accounts service.
  *
@@ -66,9 +75,10 @@ export interface CoreServiceAccountsService {
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
 
   /**
-   * Revokes a service account. Requires `manage_security`.
+   * Revokes a service account. Requires `manage_security`. Rejects when workloads are still bound
+   * to the account, unless `options.force` is set.
    */
-  delete(request: KibanaRequest, id: string): Promise<void>;
+  delete(request: KibanaRequest, id: string, params: DeleteServiceAccountOptions): Promise<void>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is

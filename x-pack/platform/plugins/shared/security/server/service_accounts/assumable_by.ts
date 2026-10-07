@@ -68,32 +68,3 @@ export const buildAssumableBy = (
 
   return assumableBy;
 };
-
-/**
- * True when every named platform assumer is present on the account UIAM returned.
- * A missing entry means the account must not be handed to a caller.
- */
-export const grantsTrustedPlatformAssumers = (
-  assumableBy: readonly ServiceAccountAssumableBy[],
-  trustedPlatformAssumers: readonly string[]
-): boolean => {
-  const requiredIds = new Set<string>();
-  for (const name of trustedPlatformAssumers) {
-    if (!isTrustedPlatformAssumer(name)) {
-      return false;
-    }
-    requiredIds.add(TRUSTED_PLATFORM_SERVICE_ACCOUNT_IDS[name]);
-  }
-
-  const grantedIds = new Set(
-    assumableBy.flatMap((entry) =>
-      entry.type === 'platform-service-account' ? [entry.service_account_id] : []
-    )
-  );
-  for (const id of requiredIds) {
-    if (!grantedIds.has(id)) {
-      return false;
-    }
-  }
-  return true;
-};

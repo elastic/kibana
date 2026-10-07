@@ -385,7 +385,7 @@ describe('SlackAppService', () => {
       await new SlackAppService(server).connect(request);
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-leftover');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-leftover', { force: true });
       expect(deleteServiceAccount.mock.invocationCallOrder[0]).toBeGreaterThan(
         startInstall.mock.invocationCallOrder[0]
       );
@@ -476,7 +476,7 @@ describe('SlackAppService', () => {
         expect.objectContaining({ uiam_service_account_id: 'sa-new' })
       );
       expect(deleteServiceAccount).toHaveBeenCalledTimes(1);
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-existing');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-existing', { force: true });
       expect(deleteServiceAccount.mock.invocationCallOrder[0]).toBeGreaterThan(
         startInstall.mock.invocationCallOrder[0]
       );
@@ -558,7 +558,7 @@ describe('SlackAppService', () => {
 
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
       expect(soClient.create).not.toHaveBeenCalled();
       expect(JSON.stringify((logger.error as jest.Mock).mock.calls)).not.toContain(
         'essu_raw-token-must-not-leak'
@@ -620,7 +620,7 @@ describe('SlackAppService', () => {
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(deleteServiceAccount).toHaveBeenCalledTimes(1);
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-new');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-new', { force: true });
       expect(soClient.create).not.toHaveBeenCalled();
     });
   });
@@ -756,7 +756,7 @@ describe('SlackAppService', () => {
 
       const result = await new SlackAppService(server).getStatus(request);
 
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
@@ -998,7 +998,7 @@ describe('SlackAppService', () => {
       });
 
       expect(unbind).toHaveBeenCalledWith('tenant-A');
-      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-kept');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-kept', { force: true });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.delete).not.toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(

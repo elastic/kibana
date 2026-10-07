@@ -17,6 +17,7 @@ export type { CoreAuditService } from './src/audit';
 export type {
   CoreServiceAccountsService,
   CreateServiceAccountServerParams,
+  DeleteServiceAccountOptions,
   TrustedPlatformServiceAccountName,
 } from './src/service_accounts';
 export { TRUSTED_PLATFORM_SERVICE_ACCOUNTS } from './src/service_accounts';

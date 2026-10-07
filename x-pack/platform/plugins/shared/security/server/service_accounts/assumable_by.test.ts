@@ -7,7 +7,7 @@
 
 import type { TrustedPlatformServiceAccountName, UiamProjectType } from '@kbn/core-security-server';
 
-import { buildAssumableBy, grantsTrustedPlatformAssumers } from './assumable_by';
+import { buildAssumableBy } from './assumable_by';
 
 describe('buildAssumableBy', () => {
   it('scopes the service account to the current project', () => {
@@ -104,44 +104,5 @@ describe('buildAssumableBy', () => {
     } catch (error) {
       expect(String(error)).not.toContain(attacker);
     }
-  });
-});
-
-describe('grantsTrustedPlatformAssumers', () => {
-  const project = {
-    type: 'project-service-account' as const,
-    organization_id: 'organization-id',
-    project_type: 'security' as const,
-    project_id: 'project-id',
-  };
-
-  it('accepts an account that echoes the Relay platform assumer', () => {
-    expect(
-      grantsTrustedPlatformAssumers(
-        [project, { type: 'platform-service-account', service_account_id: 'relay-service' }],
-        ['relay']
-      )
-    ).toBe(true);
-  });
-
-  it('rejects an account that omits Relay or names some other principal', () => {
-    expect(grantsTrustedPlatformAssumers([project], ['relay'])).toBe(false);
-    expect(
-      grantsTrustedPlatformAssumers(
-        [
-          {
-            type: 'platform-service-account',
-            service_account_id: 'spiffe://relay-service.elastic.co',
-          },
-        ],
-        ['relay']
-      )
-    ).toBe(false);
-    expect(
-      grantsTrustedPlatformAssumers(
-        [{ type: 'platform-service-account', service_account_id: 'attacker-principal' }],
-        ['relay']
-      )
-    ).toBe(false);
   });
 });

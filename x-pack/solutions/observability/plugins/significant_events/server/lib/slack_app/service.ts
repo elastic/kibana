@@ -239,7 +239,9 @@ export class SlackAppService {
     context: string
   ): Promise<void> {
     await this.server.core.security.serviceAccounts
-      .delete(request, serviceAccountId)
+      .delete(request, serviceAccountId, {
+        force: true,
+      })
       .catch((error) => {
         this.logger.warn(
           `Failed to revoke service account ${serviceAccountId} ${context}: ${error.message}`
@@ -426,14 +428,14 @@ export class SlackAppService {
 
     const username = this.server.security.authc.getCurrentUser(request)?.username;
 
-    // Falls back to 'basic' in the (practically unreachable) case where no
-    // license doc exists on the cluster at all, so the required field always
-    // has a valid LicenseType value.
-    const license = await this.server.licensing.getLicense();
-    const agentId = await credential.resolveAgentId();
-
     let installResponse;
     try {
+      // Falls back to 'basic' in the (practically unreachable) case where no
+      // license doc exists on the cluster at all, so the required field always
+      // has a valid LicenseType value.
+      const license = await this.server.licensing.getLicense();
+      const agentId = await credential.resolveAgentId();
+
       installResponse = await relayClient.startInstall({
         ...credential.installAuth,
         kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
