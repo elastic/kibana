@@ -62,7 +62,7 @@ const setup = ({
 };
 
 describe('buildConnectorEnv', () => {
-  it('maps config and auth headers to prefixed, upper-cased env vars', () => {
+  it('maps config and resolved credentials to the original env names', () => {
     const { env, secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.github',
@@ -77,13 +77,13 @@ describe('buildConnectorEnv', () => {
       CONNECTOR_CONFIG_NESTED_OPT: '{"a":1}',
       CONNECTOR_CONFIG_PORT: '443',
       CONNECTOR_CONFIG_TLS: 'true',
-      CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
-      CONNECTOR_HEADER_X_API_KEY: 'abc',
+      CONNECTOR_SECRET_TOKEN: 'ghp_topsecrettokenvalue',
+      CONNECTOR_SECRET_APIKEY: 'abc',
     });
-    expect(secretValues).toEqual([BEARER_AUTHORIZATION]);
+    expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
-  it('redacts basic-auth header values without exposing the password separately', () => {
+  it('keeps the original username and password env names for basic auth', () => {
     const { env, secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.http',
@@ -91,9 +91,23 @@ describe('buildConnectorEnv', () => {
       headers: { Authorization: BASIC_AUTHORIZATION },
     });
 
-    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(BASIC_AUTHORIZATION);
-    expect(env.CONNECTOR_SECRET_PASSWORD).toBeUndefined();
+    expect(env.CONNECTOR_SECRET_USERNAME).toBe('user');
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBe('pass');
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBeUndefined();
     expect(secretValues).toEqual([BASIC_AUTHORIZATION]);
+  });
+
+  it('keeps the Elasticsearch API key in CONNECTOR_SECRET_PASSWORD', () => {
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: 'elasticsearch-telemetry',
+      actionTypeId: '.http',
+      config: { url: 'https://es.example.com' },
+      headers: { Authorization: 'ApiKey encoded-key-value' },
+    });
+
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBe('encoded-key-value');
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBeUndefined();
+    expect(secretValues).toEqual(['ApiKey encoded-key-value', 'encoded-key-value']);
   });
 });
 
@@ -123,9 +137,9 @@ describe('createConnectorCredentialResolver', () => {
         CONNECTOR_TYPE: '.github',
         CONNECTOR_CONFIG_APIURL: 'https://api.github.com',
         CONNECTOR_CONFIG_OWNER: 'elastic',
-        CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+        CONNECTOR_SECRET_TOKEN: 'ghp_topsecrettokenvalue',
       },
-      secretValues: [BEARER_AUTHORIZATION],
+      secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
     });
     expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
