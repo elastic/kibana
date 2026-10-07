@@ -1779,9 +1779,7 @@ describe('WorkersService', () => {
       const threatIntelSupply = makeThreatIntelSupply();
       const service = makeHuntService(harness, threatIntelSupply);
 
-      expect(
-        await service.update(HUNT, { enabled: true }, SPACE, request)
-      ).toEqual({
+      expect(await service.update(HUNT, { enabled: true }, SPACE, request)).toEqual({
         outcome: 'rejected',
         what: 'a worker that is enabled without a service account',
       });

@@ -21,7 +21,7 @@ import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyHuntDisabledError,
   ThreatIntelSupplyNotInstalledError,
-} from './index';
+} from '.';
 
 const SPACE_A = 'space-a';
 const SPACE_B = 'space-b';
