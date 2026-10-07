@@ -151951,7 +151951,7 @@ components:
           description: The actor who created the action policy.
           nullable: true
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Omitted when the policy has none.
           type: string
         destinations:
           description: The list of destinations.
@@ -151974,7 +151974,7 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
@@ -152024,7 +152024,9 @@ components:
                   enum:
                     - every_time
                   type: string
-              description: The throttle strategy. Omitted when none is set.
+              description: The throttle strategy.
+          required:
+            - strategy
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
@@ -152038,7 +152040,6 @@ components:
       required:
         - id
         - name
-        - description
         - enabled
         - destinations
         - created_by
@@ -152050,9 +152051,8 @@ components:
       type: object
       properties:
         interval:
-          description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          description: The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.
           maxLength: 32
-          nullable: true
           type: string
         strategy:
           anyOf:
@@ -152072,13 +152072,15 @@ components:
               enum:
                 - every_time
               type: string
-          description: The throttle strategy.
+          description: 'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.'
+      required:
+        - strategy
     Kibana_HTTP_APIs_alerting_action_policy_throttle_patch:
       additionalProperties: false
       type: object
       properties:
         interval:
-          description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          description: The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.
           maxLength: 32
           nullable: true
           type: string
@@ -152100,8 +152102,7 @@ components:
               enum:
                 - every_time
               type: string
-          description: The throttle strategy that controls how often notifications are sent.
-          nullable: true
+          description: 'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.'
     Kibana_HTTP_APIs_alerting_actor:
       additionalProperties: false
       description: Identity that performed the write.
@@ -152557,7 +152558,7 @@ components:
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
           type: string
         destinations:
@@ -152568,19 +152569,20 @@ components:
           minItems: 1
           type: array
         group_by:
-          description: The fields used to group alerts.
+          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
           items:
             maxLength: 256
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           type: array
         grouping_mode:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
@@ -152604,10 +152606,9 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications.
+          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
       required:
         - name
-        - description
         - destinations
     Kibana_HTTP_APIs_alerting_new_activate_alert_action:
       additionalProperties: false
@@ -152857,7 +152858,7 @@ components:
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
           type: string
         destinations:
@@ -152867,23 +152868,21 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        enabled:
-          description: Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
-          type: boolean
         group_by:
-          description: The fields used to group alerts.
+          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
           items:
             maxLength: 256
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           type: array
         grouping_mode:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
@@ -152907,10 +152906,9 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications.
+          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
       required:
         - name
-        - description
         - destinations
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
@@ -153596,8 +153594,9 @@ components:
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          nullable: true
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -153607,22 +153606,23 @@ components:
           minItems: 1
           type: array
         group_by:
-          description: The fields used to group alerts.
+          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
           items:
             maxLength: 256
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           nullable: true
           type: array
         grouping_mode:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
           nullable: true
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` to clear it. When `matcher` is `null`, or when the merged `tags` and `expression` are both absent, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` for a catch-all policy that applies to all alerts. An empty `matcher` is rejected; clearing the last of `tags` and `expression` clears the matcher itself, which is also a catch-all.
           nullable: true
           type: object
           properties:
@@ -153650,7 +153650,7 @@ components:
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_patch'
-          description: The throttle configuration for notifications.
+          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
           nullable: true
     Kibana_HTTP_APIs_alerting_update_rule:
       additionalProperties: false
