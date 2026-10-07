@@ -71,6 +71,9 @@ describe('getServicesAlerts', () => {
 
     const filters = getFilters(client);
 
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: false, size: 0 })
+    );
     expect(filters).toEqual(
       expect.arrayContaining([{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }])
     );
