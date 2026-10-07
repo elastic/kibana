@@ -5,21 +5,30 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture } from '@kbn/scout';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { INTERNAL_API_HEADERS } from './constants';
 
-/** Fleet packages required for ML data stream modules (apache_data_stream, nginx_data_stream). */
-export const ML_DATA_STREAM_FLEET_PACKAGES = [
-  { name: 'apache', version: '3.0.2' },
-  { name: 'nginx', version: '3.2.2' },
-] as const;
+interface MlFleetPackage {
+  name: string;
+  version: string;
+  moduleId: string;
+}
+
+/** Fleet packages required for ML data stream modules, with the ML module each one registers. */
+export const ML_DATA_STREAM_FLEET_PACKAGES: readonly MlFleetPackage[] = [
+  { name: 'apache', version: '3.0.2', moduleId: 'apache_data_stream' },
+  { name: 'nginx', version: '3.2.2', moduleId: 'nginx_data_stream' },
+];
 
 /**
- * Sets up Fleet and installs packages so ML data stream modules are registered.
- * Mirrors FTR `ml.testResources.setupFleet` + `installFleetPackage`.
+ * Sets up Fleet, installs packages, and waits until their ML modules are discoverable.
+ * Mirrors FTR `ml.testResources.setupFleet` + `installFleetPackage` + `assertModuleExists`.
  */
 export async function setupFleetPackages(
   apiServices: Pick<ApiServicesFixture, 'fleet'>,
-  packages: readonly { name: string; version: string }[] = ML_DATA_STREAM_FLEET_PACKAGES
+  kbnClient: KbnClient,
+  packages: readonly MlFleetPackage[] = ML_DATA_STREAM_FLEET_PACKAGES
 ): Promise<void> {
   await apiServices.fleet.internal.setup();
 
@@ -27,6 +36,27 @@ export async function setupFleetPackages(
     await apiServices.fleet.integration.installPackage(pkg.name, pkg.version, {
       force: true,
     });
+  }
+
+  // Package ML modules are stored as saved objects and may not be searchable as soon as install returns
+  for (const { moduleId } of packages) {
+    await expect
+      .poll(
+        async () => {
+          const { status } = await kbnClient.request({
+            method: 'GET',
+            path: `/internal/ml/modules/get_module/${moduleId}`,
+            headers: INTERNAL_API_HEADERS,
+            ignoreErrors: [404],
+          });
+          return status;
+        },
+        {
+          message: `ML module '${moduleId}' was not available after Fleet install`,
+          timeout: 30000,
+        }
+      )
+      .toBe(200);
   }
 }
 
@@ -36,7 +66,7 @@ export async function setupFleetPackages(
  */
 export async function removeFleetPackages(
   apiServices: Pick<ApiServicesFixture, 'fleet'>,
-  packages: readonly { name: string; version: string }[] = ML_DATA_STREAM_FLEET_PACKAGES
+  packages: readonly MlFleetPackage[] = ML_DATA_STREAM_FLEET_PACKAGES
 ): Promise<void> {
   for (const pkg of packages) {
     await apiServices.fleet.integration.delete(pkg.name);

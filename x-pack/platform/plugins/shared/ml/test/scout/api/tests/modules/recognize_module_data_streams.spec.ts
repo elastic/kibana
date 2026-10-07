@@ -13,8 +13,8 @@ apiTest.describe(
   'recognize_module: data stream datasets (requires Fleet packages)',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
-      await setupFleetPackages(apiServices);
+    apiTest.beforeAll(async ({ esArchiver, apiServices, kbnClient }) => {
+      await setupFleetPackages(apiServices, kbnClient);
 
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_apache_data_stream'

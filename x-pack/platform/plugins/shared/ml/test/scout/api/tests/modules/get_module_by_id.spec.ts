@@ -12,8 +12,8 @@ import { ALL_MODULE_IDS } from '../../fixtures/setup_module_helpers';
 
 apiTest.describe('get_module: load each module by ID', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry
-  apiTest.beforeAll(async ({ apiServices }) => {
-    await setupFleetPackages(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient }) => {
+    await setupFleetPackages(apiServices, kbnClient);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
