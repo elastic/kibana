@@ -83,6 +83,8 @@ export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:
 export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
   'alerting:v1:showV1ObservabilityAlertsTable';
+export const ALERTING_V1_ALERT_STATUS_WORKFLOW_TRIGGER_ENABLED_SETTING_ID =
+  'alerting:v1:alertStatusWorkflowTrigger:enabled';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
