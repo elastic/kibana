@@ -15,6 +15,20 @@ export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 /** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
 
+/**
+ * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
+ * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); uncapped,
+ * 50 hosts x 2 actions overflowed it and failed the note's input validation.
+ */
+export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
+
+/**
+ * Character budget for the bullets, as well as the count cap above: titles (256) and host names
+ * (schema allows far more than a DNS name) are variable-length, so a count alone does not bound
+ * the note. Sits well under the 8,000 limit to leave room for the rest of the conclusion.
+ */
+export const MAX_SUMMARY_BULLETS_CHARS = 5000;
+
 const boundedId = z.string().trim().min(1).max(256);
 
 export const packageReportInputSchema = z.object({
@@ -103,6 +117,16 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
       skipped: z.array(coverageSkippedSchema),
     }),
     proposals: z.array(packageReportMintPayloadSchema),
+    /**
+     * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
+     * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
+     * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
+     */
+    proposalBullets: z
+      .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
+      .max(MAX_SUMMARY_PROPOSAL_BULLETS),
+    /** Proposals past the bullet cap that the prose states as a count instead of listing. */
+    omittedProposalCount: z.number().int().min(0),
     dismiss: z.boolean(),
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),
