@@ -1556,6 +1556,44 @@ describe('conversations utils', () => {
       expect(call.attachments).toEqual({ snapshot: [], produced: [{ id: 'a1' }] });
     });
 
+    it('resume, success write failed: the prompt_response gets the follow-up input, never the folded round refs', async () => {
+      const conversationClient = createConversationClientMock();
+      echoWrite(conversationClient);
+      const foldedRound = {
+        ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+        started_at: T0,
+        steps: [step],
+        input: {
+          message: 'hi',
+          attachment_refs: [ref],
+          attachment_context: '<attachments>legacy</attachments>',
+        },
+      };
+      const followUpRound = {
+        ...createRound({ id: 'runner-round-id', status: ConversationRoundStatus.completed }),
+        started_at: T0,
+        input: { message: 'resume msg' },
+      };
+
+      await persistExecutionInterruption({
+        ...baseParams(conversationClient),
+        conversation: pausedConversation(),
+        roundId: 'runner-round-id',
+        input: { message: 'resume msg', prompts: {} },
+        error: new Error('write failed'),
+        completed: {
+          round: foldedRound,
+          resume_execution: { follow_up_round: followUpRound },
+        },
+      });
+
+      const [call] = conversationClient.appendEvents.mock.calls[0];
+      expect(call.events[0].id).toBe('r1::prompt_response::1');
+      expect(call.events[0].data).toEqual(
+        expect.objectContaining({ input: { message: 'resume msg' } })
+      );
+    });
+
     it('fresh round, aborted: persists the abort reason carried by the error as aborted_by', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);

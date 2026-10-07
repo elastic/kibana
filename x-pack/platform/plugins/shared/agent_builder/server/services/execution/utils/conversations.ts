@@ -506,7 +506,8 @@ export const persistExecutionInterruption = async (
               : {}),
           }
         : { time_to_last_token: Math.max(0, Date.now() - new Date(startedAt).getTime()) });
-    const processedInput = interrupted?.input ?? completed?.round.input;
+    // On a resume, `completed.round` is the folded round, whose input can still hold legacy refs.
+    const processedInput = interrupted?.input ?? completed?.resume_execution?.follow_up_round.input;
     const attachments = interrupted?.attachments ?? completed?.attachments;
     const attachmentEvents = interrupted?.attachment_events ?? completed?.attachment_events ?? [];
     const workspaceId = interrupted?.workspace_id ?? completed?.workspace_id;
