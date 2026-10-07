@@ -8,12 +8,23 @@
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { attachmentEventFixture, pausedRoundTimeline } from '../../../test_utils/timeline';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  T1,
+  attachmentEventFixture,
+  eventsNativeConversation,
+  pauseState,
+  pausedRoundTimeline,
+  promptResponseEvent,
+  terminatedExecutionEvents,
+} from '../../../test_utils/timeline';
 import {
   RunAttachmentEvents,
   inheritedAttachmentEvents,
   runTriggerEventId,
 } from './run_attachment_events';
+import { getPendingTurn } from './utils/conversation_turn';
+import { pausedItems } from './utils/attachment_placement';
 
 const getTypeDefinition = (type: string) =>
   ({
@@ -116,5 +127,38 @@ describe('runTriggerEventId', () => {
     expect(
       runTriggerEventId({ conversation: { events: [] }, pendingTurnId: 'r0', roundId: 'r1' })
     ).toBe('r0::prompt_response::1');
+  });
+
+  describe('pause, resume, pause again', () => {
+    const timeline = [
+      ...pausedRoundTimeline('r0', ['c1']),
+      promptResponseEvent('r0', 1, 'r0::execution_terminated'),
+      ...terminatedExecutionEvents({
+        roundId: 'r0',
+        index: 1,
+        createdAt: T1,
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [
+            { id: 'tools.my_tool.confirmation.c2', type: AgentPromptType.confirmation } as never,
+          ],
+        },
+        state: pauseState(['c2']),
+      }),
+    ];
+
+    it('gives the second resume the next prompt_response id', () => {
+      expect(
+        runTriggerEventId({ conversation: { events: timeline }, pendingTurnId: 'r0', roundId: 'x' })
+      ).toBe('r0::prompt_response::2');
+    });
+
+    it('anchors the second resume on the second pause', () => {
+      const pendingTurn = getPendingTurn(eventsNativeConversation(timeline));
+      expect(pendingTurn?.terminated?.id).toBe('r0::execution::1::execution_terminated');
+      expect(pendingTurn?.terminated && pausedItems(pendingTurn.terminated)).toEqual([
+        { type: 'tool_call', tool_call_id: 'c2' },
+      ]);
+    });
   });
 });

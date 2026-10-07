@@ -476,6 +476,61 @@ describe('attachment events', () => {
     expect(String(later[answerIndex + 1].content)).toContain('att-3');
   });
 
+  it('renders resume input after the paused call, identically during the resume and on the next turn', async () => {
+    const resumeInput = attachmentEventFixture({
+      id: 'resume-in',
+      source: 'chat_input',
+      triggerEventId: 'r::prompt_response::1',
+      executionId: 'r::execution::1',
+      attachmentId: 'att-9',
+    });
+    const resumeAnchors = new Map([
+      ['r::prompt_response::1', [{ type: 'tool_call' as const, tool_call_id: 'c1' }]],
+    ]);
+
+    const during = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([]),
+          nextInput: { message: 'Q', attachments: [] },
+          resumeAnchors,
+        },
+        run: {
+          ...run([call('c1'), call('c2')], { renderState: renderStateOf(['c1', 'c2']) }),
+          attachmentEvents: [resumeInput],
+        },
+        phase: 'research',
+      },
+      deps()
+    );
+    const later = await renderVisibleContext(
+      {
+        conversation: {
+          ...conversation([
+            ...timelineFromRounds([
+              {
+                id: 'r',
+                input: { message: 'Q', attachments: [] },
+                steps: [call('c1'), call('c2')],
+                response: { message: 'A' },
+              },
+            ]),
+            { ...resumeInput, execution_id: 'r::execution' },
+          ]),
+          resumeAnchors,
+        },
+        run: run([]),
+        phase: 'research',
+      },
+      deps()
+    );
+
+    expect(text(later.slice(0, during.length))).toEqual(text(during));
+    const noticeIndex = during.findIndex((m) => String(m.content).includes('att-9'));
+    expect(during[noticeIndex - 1].getType()).toBe('tool');
+    expect(during[noticeIndex + 1].getType()).toBe('ai');
+  });
+
   it('renders a cycle notice in its round_cycle unit, so the summarizer and estimates see it', async () => {
     const history = conversation([
       ...timelineFromRounds([

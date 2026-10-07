@@ -57,6 +57,7 @@ import { legacyEligibleRoundIds } from './utils/compaction_coverage';
 import { historyView, translateLegacySummary } from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
+import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
 import { sourceEvents } from '../../conversation/client/source_events';
 import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
@@ -157,6 +158,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
 
   const roundId = providedRoundId ?? uuidv4();
+  const triggerEventId = runTriggerEventId({
+    conversation,
+    pendingTurnId: pendingTurn?.id,
+    roundId,
+  });
+  const resumeAnchors = conversation
+    ? buildResumeAnchors(sourceEvents(conversation))
+    : new Map<string, PausedItem[]>();
+  if (pendingTurn?.terminated) {
+    resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
+  }
   const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
 
   // Create background execution service from conversation state
@@ -216,12 +228,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
+    resumeAnchors,
   });
   const pendingRound = pendingTurn?.compatRound;
   const runAttachmentEvents = new RunAttachmentEvents({
     attachmentStateManager: context.attachmentStateManager,
     roundId: pendingTurn?.id ?? roundId,
-    triggerEventId: runTriggerEventId({ conversation, pendingTurnId: pendingTurn?.id, roundId }),
+    triggerEventId,
     inputActor: userMessageActor(
       conversation,
       pendingRound

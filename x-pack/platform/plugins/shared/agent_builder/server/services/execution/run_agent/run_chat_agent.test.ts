@@ -827,6 +827,13 @@ describe('runDefaultAgentMode', () => {
         ],
       });
       expect(createPreExecutionStepsMock).not.toHaveBeenCalled();
+      expect(prepareConversationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resumeAnchors: new Map([
+            ['round-1::prompt_response::1', [{ type: 'tool_call', tool_call_id: 'call-1' }]],
+          ]),
+        })
+      );
       expect(context.hooks.run).toHaveBeenCalledWith(
         HookLifecycle.beforeAgent,
         expect.objectContaining({ roundExecutionIndex: 1 })
