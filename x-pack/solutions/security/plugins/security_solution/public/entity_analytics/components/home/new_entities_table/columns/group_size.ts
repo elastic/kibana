@@ -26,7 +26,7 @@ import {
 } from '../common';
 import type {
   QueryArgs,
-  RunContext,
+  PageEnricher,
   Row,
   ColumnDescriptor,
   PageCursor,
@@ -307,28 +307,22 @@ const buildGroupSizeEnrichQuery = (
   ].join('\n');
 };
 
-const enrichGroupSize = async (
-  pageRows: Row[],
-  args: QueryArgs,
-  skip: Set<string>,
-  { runQuery }: RunContext
-): Promise<void> => {
-  if (skip.has(GROUP_SIZE_FIELD)) return;
+const groupSizeEnricher: PageEnricher = {
+  fields: [GROUP_SIZE_FIELD],
+  read: async (pageRows, args, { runQuery }) => {
+    const entityIds = [...new Set(entityIdsOf(pageRows))];
+    if (!entityIds.length) return new Map();
 
-  const entityIds = [...new Set(entityIdsOf(pageRows))];
-  if (!entityIds.length) return;
+    const rows = await nullOnFailure(runQuery(buildGroupSizeEnrichQuery(args, entityIds)));
+    if (!rows) return null;
 
-  const rows = await nullOnFailure(runQuery(buildGroupSizeEnrichQuery(args, entityIds)));
-  if (!rows) return;
-
-  const byGroupKey = new Map(
-    rows.map((r) => [getString(r, 'group_key'), getNumber(r, GROUP_SIZE_FIELD)])
-  );
-  for (const row of pageRows) {
+    const byGroupKey = new Map(
+      rows.map((r) => [getString(r, 'group_key'), getNumber(r, GROUP_SIZE_FIELD)])
+    );
     // A target row matches its group key and gets the member count. An alias row is
     // never a group key, so it gets 1: it is a single record.
-    row[GROUP_SIZE_FIELD] = byGroupKey.get(getEntityId(row)) ?? 1;
-  }
+    return new Map(entityIds.map((id) => [id, { [GROUP_SIZE_FIELD]: byGroupKey.get(id) ?? 1 }]));
+  },
 };
 
 // ── column descriptor ─────────────────────────────────────────────────────────
@@ -343,5 +337,5 @@ export const groupSizeColumn = {
   buildSortQuery: buildGroupSizeSortQuery,
   buildCountQuery: buildGroupSizeCountQuery,
   runSortPage: runGroupSizeSortPage,
-  enrichPage: enrichGroupSize,
+  enricher: groupSizeEnricher,
 } as const satisfies ColumnDescriptor;

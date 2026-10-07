@@ -6,8 +6,9 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
-import { ENRICH_FNS, SORTABLE_COLUMNS } from './registry';
+import { enrichEntityRows } from '../common';
+import type { PageCursor, PageEnricher, QueryArgs, Row, RunContext } from '../common';
+import { ALL_COLUMNS_LIST, SORTABLE_COLUMNS } from './registry';
 import { alertCountColumn } from './alerts';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
@@ -67,6 +68,10 @@ const PAGE_ROWS: readonly Row[] = [
     'service.name': 'payments',
   },
 ];
+
+const ENRICHED_COLUMNS = ALL_COLUMNS_LIST.flatMap(({ id, enricher }) =>
+  enricher ? [[id, enricher] as [string, PageEnricher]] : []
+);
 
 const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   const http = httpServiceMock.createSetupContract();
@@ -173,34 +178,26 @@ describe('entities grid query builders', () => {
   });
 
   describe('enrich queries', () => {
-    it.each(ENRICH_FNS.map((enrich) => [enrich.name, enrich] as const))(
-      '%s builds its query from the page rows',
-      async (_name, enrich) => {
-        const runQuery = jest.fn(async (_query: string) => []);
+    it.each(ENRICHED_COLUMNS)('%s builds its query from the page rows', async (_id, { read }) => {
+      const runQuery = jest.fn(async (_query: string) => []);
 
-        await enrich(
-          PAGE_ROWS.map((row) => ({ ...row })),
-          BASE_ARGS,
-          new Set(),
-          createRunContext(runQuery)
-        );
+      await read(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
 
-        expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
-      }
-    );
+      expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
+    });
 
     it('does not query for a page without entity ids', async () => {
       const runQuery = jest.fn(async (_query: string) => []);
 
       await Promise.all(
-        ENRICH_FNS.map((enrich) => enrich([{}], BASE_ARGS, new Set(), createRunContext(runQuery)))
+        ENRICHED_COLUMNS.map(([, { read }]) => read([{}], BASE_ARGS, createRunContext(runQuery)))
       );
 
       expect(runQuery).not.toHaveBeenCalled();
     });
 
-    it('copies the alert counts per entity onto the page rows', async () => {
-      const rows = PAGE_ROWS.slice(0, 2).map((row) => ({ ...row }));
+    it('copies the alert counts per entity onto copies of the page rows', async () => {
+      const rows = PAGE_ROWS.slice(0, 2);
       const runQuery = jest.fn(async (_query: string) => [
         {
           'entity.id': 'host:h-1',
@@ -213,9 +210,11 @@ describe('entities grid query builders', () => {
         },
       ]);
 
-      await alertCountColumn.enrichPage(rows, BASE_ARGS, new Set(), createRunContext(runQuery));
+      const enriched = await enrichEntityRows(rows, BASE_ARGS, createRunContext(runQuery), [
+        alertCountColumn.enricher,
+      ]);
 
-      expect(rows.map(({ 'entity.id': id, ...rest }) => [id, rest])).toEqual([
+      expect(enriched.map(({ 'entity.id': id, ...rest }) => [id, rest])).toEqual([
         [
           'host:h-1',
           expect.objectContaining({
@@ -239,22 +238,38 @@ describe('entities grid query builders', () => {
           }),
         ],
       ]);
+      expect(rows[0]).not.toHaveProperty('alert_count');
     });
 
-    it.each(['alert_count', 'last_seen_alert'])(
-      'skips the alerts query when the page is sorted by %s',
-      async (sortField) => {
-        const runQuery = jest.fn(async (_query: string) => []);
+    it('skips an enricher whose fields the sort query already read', async () => {
+      const runQuery = jest.fn(async (_query: string) => []);
+      const sortedRows = PAGE_ROWS.map((row) => ({
+        ...row,
+        last_seen_alert: null,
+        alert_count: 0,
+        alert_critical: 0,
+        alert_high: 0,
+        alert_medium: 0,
+        alert_low: 0,
+      }));
 
-        await alertCountColumn.enrichPage(
-          PAGE_ROWS.map((row) => ({ ...row })),
-          BASE_ARGS,
-          new Set([sortField]),
-          createRunContext(runQuery)
-        );
+      await enrichEntityRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [
+        alertCountColumn.enricher,
+      ]);
 
-        expect(runQuery).not.toHaveBeenCalled();
-      }
-    );
+      expect(runQuery).not.toHaveBeenCalled();
+    });
+
+    it('leaves the fields of a failed enricher unset', async () => {
+      const runQuery = jest.fn(async (_query: string): Promise<Row[]> => {
+        throw new Error('boom');
+      });
+
+      const enriched = await enrichEntityRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [
+        alertCountColumn.enricher,
+      ]);
+
+      expect(enriched).toEqual(PAGE_ROWS);
+    });
   });
 });

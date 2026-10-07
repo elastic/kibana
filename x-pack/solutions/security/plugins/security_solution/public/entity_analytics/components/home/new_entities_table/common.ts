@@ -119,16 +119,18 @@ export interface RunContext {
   signal?: AbortSignal;
 }
 
-export type EnrichFn = (
-  rows: Row[],
-  args: QueryArgs,
-  skip: Set<string>,
-  ctx: RunContext
-) => Promise<void>;
+/** Fields an enricher read, per entity id; `null` when its query failed. */
+export type EnrichedFields = ReadonlyMap<string, Row> | null;
+
+/** Reads computed fields of the page rows after the sort query. */
+export interface PageEnricher {
+  /** Row fields it reads. */
+  fields: readonly string[];
+  read: (rows: readonly Row[], args: QueryArgs, ctx: RunContext) => Promise<EnrichedFields>;
+}
 
 interface ColumnBase extends EuiDataGridColumn {
-  /** Fills computed columns of the page rows after the sort query. */
-  enrichPage?: EnrichFn;
+  enricher?: PageEnricher;
 }
 
 export interface SortPageContext {
@@ -597,15 +599,30 @@ export interface EntityGridResponse {
   total: number | null;
 }
 
-/** Runs all page enrichers on a shallow copy of `rows` (enrichers mutate in place). */
+/** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
+const lacksFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
+  fields.some((field) => rows.some((row) => !(field in row)));
+
+/**
+ * Copies of `rows` with the fields of every enricher they lack. A failed enricher leaves its
+ * fields unset.
+ */
 export const enrichEntityRows = async (
-  rows: Row[],
+  rows: readonly Row[],
   args: QueryArgs,
-  skip: Set<string>,
   ctx: RunContext,
-  enrichFns: EnrichFn[]
+  enrichers: readonly PageEnricher[]
 ): Promise<Row[]> => {
-  const copy = rows.map((row) => ({ ...row }));
-  await Promise.all(enrichFns.map((fn) => fn(copy, args, skip, ctx)));
-  return copy;
+  const results = await Promise.all(
+    enrichers
+      .filter((enricher) => lacksFields(rows, enricher))
+      .map(({ read }) => read(rows, args, ctx))
+  );
+  return rows.map((row) => {
+    const id = getEntityId(row);
+    return results.reduce<Row>(
+      (merged, fields) => ({ ...merged, ...(id != null ? fields?.get(id) : undefined) }),
+      { ...row }
+    );
+  });
 };

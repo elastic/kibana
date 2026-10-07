@@ -24,7 +24,7 @@ import {
   nullOnFailure,
   toList,
 } from '../common';
-import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import type { QueryArgs, PageEnricher, Row, ColumnDescriptor } from '../common';
 import {
   MAX_VALUE_ROWS,
   buildValueCursorClause,
@@ -110,7 +110,7 @@ export const anomalySplitSortPlan: SplitSortPlan = {
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: Row[]): string =>
+const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: readonly Row[]): string =>
   [
     SET_UNMAPPED_NULLIFY,
     ...buildAnomalyEntityRows(args, buildIdentityPrefilter(pageRows)),
@@ -118,23 +118,18 @@ const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: Row[]): string 
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
-const enrichAnomalyCount = async (
-  pageRows: Row[],
-  args: QueryArgs,
-  skip: Set<string>,
-  { runQuery }: RunContext
-): Promise<void> => {
-  if (skip.has(ANOMALY_COUNT_FIELD)) return;
+const anomalyCountEnricher: PageEnricher = {
+  fields: [ANOMALY_COUNT_FIELD],
+  read: async (pageRows, args, { runQuery }) => {
+    const entityIds = entityIdsOf(pageRows);
+    if (!entityIds.length) return new Map();
 
-  if (!entityIdsOf(pageRows).length) return;
+    const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, pageRows)));
+    if (!rows) return null;
 
-  const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, pageRows)));
-  if (!rows) return;
-
-  const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
-  for (const row of pageRows) {
-    row[ANOMALY_COUNT_FIELD] = byId.get(getEntityId(row)) ?? 0;
-  }
+    const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
+    return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? 0 }]));
+  },
 };
 
 // ── column descriptor ─────────────────────────────────────────────────────────
@@ -149,5 +144,5 @@ export const anomalyCountColumn = {
   buildSortQuery: buildAnomalyCountSortQuery,
   buildCountQuery: buildEntitiesInViewCountQuery,
   runSortPage: (args, ctx) => runSplitSortPage(anomalySplitSortPlan, args, ctx),
-  enrichPage: enrichAnomalyCount,
+  enricher: anomalyCountEnricher,
 } as const satisfies ColumnDescriptor;

@@ -22,7 +22,7 @@ import {
   lastSeenColumn,
 } from './native';
 import { isSortableColumn } from '../common';
-import type { ColumnDescriptor, EnrichFn, SortableColumn } from '../common';
+import type { ColumnDescriptor, PageEnricher, RowsMode, SortableColumn } from '../common';
 
 /*
  * How the entities grid loads a page:
@@ -103,6 +103,12 @@ export const CHILD_ROWS_COLUMNS = ALL_COLUMNS.filter(
   (c) => c.id !== 'group_size' && c.id !== 'entity.relationships.resolution.resolved_to'
 );
 
-export const ENRICH_FNS: EnrichFn[] = [
-  ...new Set(ALL_COLUMNS_LIST.map((c) => c.enrichPage).filter((f): f is EnrichFn => f != null)),
-];
+const enrichersOf = (columns: readonly ColumnDescriptor[]): readonly PageEnricher[] =>
+  columns.flatMap(({ enricher }) => enricher ?? []);
+
+/** Enrichers of the columns each kind of row shows. */
+export const PAGE_ENRICHERS: Readonly<Record<RowsMode | 'child', readonly PageEnricher[]>> = {
+  resolved: enrichersOf(RESOLVED_ROWS_COLUMNS),
+  individual: enrichersOf(INDIVIDUAL_ROWS_COLUMNS),
+  child: enrichersOf(CHILD_ROWS_COLUMNS),
+};

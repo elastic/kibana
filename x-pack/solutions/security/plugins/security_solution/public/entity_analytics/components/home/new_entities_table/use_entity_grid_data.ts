@@ -26,13 +26,12 @@ import {
   getEntityId,
   getNumber,
   ANOMALY_COUNT_FIELD,
-  GROUP_SIZE_FIELD,
   enrichEntityRows,
   createEsqlRunner,
   nullOnFailure,
   toSortValue,
 } from './common';
-import { ENRICH_FNS, findSortableColumn } from './columns/registry';
+import { PAGE_ENRICHERS, findSortableColumn } from './columns/registry';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -304,15 +303,11 @@ export const useEntityGridData = ({
     async ({ signal }): Promise<Row[]> => {
       if (!concreteEntityIndexName || !shellRows) return [];
 
-      const skip = new Set<string>([sortField]);
-      if (rowsMode === 'individual') skip.add(GROUP_SIZE_FIELD);
-
       return enrichEntityRows(
         shellRows,
         buildArgs(concreteEntityIndexName, cursor),
-        skip,
         { runQuery: createEsqlRunner(searchService, signal), http, signal },
-        ENRICH_FNS
+        PAGE_ENRICHERS[rowsMode]
       );
     },
     {

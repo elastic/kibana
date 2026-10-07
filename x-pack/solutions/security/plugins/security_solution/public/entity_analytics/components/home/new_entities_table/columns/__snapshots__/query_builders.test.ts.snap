@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`entities grid query builders enrich queries enrichAlerts builds its query from the page rows 1`] = `
+exports[`entities grid query builders enrich queries alert_count builds its query from the page rows 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
@@ -103,7 +103,7 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders enrich queries enrichAnomalyCount builds its query from the page rows 1`] = `
+exports[`entities grid query builders enrich queries anomaly_count builds its query from the page rows 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
@@ -192,9 +192,9 @@ FROM .ml-anomalies-shared*
 ]
 `;
 
-exports[`entities grid query builders enrich queries enrichCaseCounts builds its query from the page rows 1`] = `Array []`;
+exports[`entities grid query builders enrich queries case_count builds its query from the page rows 1`] = `Array []`;
 
-exports[`entities grid query builders enrich queries enrichGroupSize builds its query from the page rows 1`] = `
+exports[`entities grid query builders enrich queries group_size builds its query from the page rows 1`] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -205,7 +205,7 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders enrich queries enrichRiskScoreChange builds its query from the page rows 1`] = `
+exports[`entities grid query builders enrich queries risk_score_change builds its query from the page rows 1`] = `
 Array [
   "FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day

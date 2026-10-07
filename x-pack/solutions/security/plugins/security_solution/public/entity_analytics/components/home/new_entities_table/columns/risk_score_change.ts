@@ -25,8 +25,7 @@ import {
 } from '../common';
 import type {
   QueryArgs,
-  RunContext,
-  Row,
+  PageEnricher,
   ColumnDescriptor,
   MergedForeignRowsOptions,
 } from '../common';
@@ -164,29 +163,30 @@ const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): 
   ].join('\n');
 };
 
-const enrichRiskScoreChange = async (
-  pageRows: Row[],
-  args: QueryArgs,
-  skip: Set<string>,
-  { runQuery }: RunContext
-): Promise<void> => {
-  if (skip.has(RISK_SCORE_CHANGE_FIELD)) return;
+const riskScoreChangeEnricher: PageEnricher = {
+  fields: [RISK_SCORE_CHANGE_FIELD],
+  read: async (pageRows, args, { runQuery }) => {
+    const entityIds = entityIdsOf(pageRows);
+    if (!entityIds.length) return new Map();
 
-  const entityIds = entityIdsOf(pageRows);
-  if (!entityIds.length) return;
+    const rows = await nullOnFailure(runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds)));
+    if (!rows) return null;
 
-  const rows = await nullOnFailure(runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds)));
-  if (!rows) return;
-
-  const byId = new Map(
-    rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])
-  );
-  for (const row of pageRows) {
-    const currentScore = getNumber(row, RISK_SCORE_NORM_FIELD) ?? null;
-    const referenceScore = byId.get(getEntityId(row)) ?? null;
-    row[RISK_SCORE_CHANGE_FIELD] =
-      currentScore != null && referenceScore != null ? currentScore - referenceScore : null;
-  }
+    const byId = new Map(
+      rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])
+    );
+    return new Map(
+      pageRows.flatMap((row) => {
+        const id = getEntityId(row);
+        if (id == null) return [];
+        const currentScore = getNumber(row, RISK_SCORE_NORM_FIELD) ?? null;
+        const referenceScore = byId.get(id) ?? null;
+        const change =
+          currentScore != null && referenceScore != null ? currentScore - referenceScore : null;
+        return [[id, { [RISK_SCORE_CHANGE_FIELD]: change }]];
+      })
+    );
+  },
 };
 
 // ── column descriptor ─────────────────────────────────────────────────────────
@@ -201,5 +201,5 @@ export const riskScoreChangeColumn = {
   buildSortQuery: buildRiskScoreChangeSortQuery,
   buildCountQuery: buildEntitiesInViewCountQuery,
   runSortPage: (args, ctx) => runSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
-  enrichPage: enrichRiskScoreChange,
+  enricher: riskScoreChangeEnricher,
 } as const satisfies ColumnDescriptor;

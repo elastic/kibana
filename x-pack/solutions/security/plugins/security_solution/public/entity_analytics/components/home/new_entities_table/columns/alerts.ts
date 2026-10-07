@@ -27,7 +27,7 @@ import {
   nullOnFailure,
   toList,
 } from '../common';
-import type { QueryArgs, Row, RunContext, ColumnDescriptor } from '../common';
+import type { QueryArgs, Row, PageEnricher, ColumnDescriptor } from '../common';
 import {
   MAX_VALUE_ROWS,
   buildValueCursorClause,
@@ -88,7 +88,9 @@ interface UnstampedIdentityFilters {
  * clauses and its pushable prefilter. Rows without a clause are left out, so the
  * filter never widens to all unstamped alerts.
  */
-const buildUnstampedIdentityFilters = (pageRows: Row[]): UnstampedIdentityFilters | undefined => {
+const buildUnstampedIdentityFilters = (
+  pageRows: readonly Row[]
+): UnstampedIdentityFilters | undefined => {
   const clauses = new Set<string>();
   const matchedRows: Row[] = [];
   for (const row of pageRows) {
@@ -214,33 +216,33 @@ const buildAlertsEnrichQuery = (
   ].join('\n');
 };
 
-/** Fills the alert count, last alert, and per-severity counts of the page rows. */
-const enrichAlerts = async (
-  pageRows: Row[],
-  args: QueryArgs,
-  skip: Set<string>,
-  { runQuery }: RunContext
-): Promise<void> => {
-  // An alert sort query already computed every alert column of the page rows.
-  if (skip.has(ALERT_COUNT_FIELD) || skip.has(LAST_SEEN_ALERT_FIELD)) return;
+/** Reads the alert count, last alert, and per-severity counts of the page rows. */
+const alertsEnricher: PageEnricher = {
+  fields: ALERT_FIELDS,
+  read: async (pageRows, args, { runQuery }) => {
+    const entityIds = entityIdsOf(pageRows);
+    if (!entityIds.length) return new Map();
 
-  const entityIds = entityIdsOf(pageRows);
-  if (!entityIds.length) return;
+    const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
+    const rows = await nullOnFailure(
+      runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity))
+    );
+    if (!rows) return null;
 
-  const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
-  const rows = await nullOnFailure(
-    runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity))
-  );
-  if (!rows) return;
-
-  const byId = new Map(rows.map((r) => [getEntityId(r), r]));
-  for (const row of pageRows) {
-    const alerts = byId.get(getEntityId(row));
-    row[LAST_SEEN_ALERT_FIELD] = alerts?.[LAST_SEEN_ALERT_FIELD] ?? null;
-    for (const field of ALERT_COUNT_FIELDS) {
-      row[field] = alerts?.[field] ?? 0;
-    }
-  }
+    const byId = new Map(rows.map((r) => [getEntityId(r), r]));
+    return new Map(
+      entityIds.map((id) => {
+        const alerts = byId.get(id);
+        return [
+          id,
+          {
+            [LAST_SEEN_ALERT_FIELD]: alerts?.[LAST_SEEN_ALERT_FIELD] ?? null,
+            ...Object.fromEntries(ALERT_COUNT_FIELDS.map((field) => [field, alerts?.[field] ?? 0])),
+          },
+        ];
+      })
+    );
+  },
 };
 
 // ── column descriptors ────────────────────────────────────────────────────────
@@ -256,7 +258,7 @@ export const alertCountColumn = {
   buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
   buildCountQuery: buildEntitiesInViewCountQuery,
   runSortPage: (args, ctx) => runSplitSortPage(alertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
-  enrichPage: enrichAlerts,
+  enricher: alertsEnricher,
 } as const satisfies ColumnDescriptor;
 
 export const lastSeenAlertColumn = {
@@ -270,6 +272,5 @@ export const lastSeenAlertColumn = {
   buildCountQuery: buildEntitiesInViewCountQuery,
   runSortPage: (args, ctx) =>
     runSplitSortPage(alertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
-  // No enrichPage: enrichAlerts on alertCountColumn also fills this field.
-  // The registry runs each enrichPage function once.
+  // No enricher: the alerts enricher of alertCountColumn reads this field too.
 } as const satisfies ColumnDescriptor;

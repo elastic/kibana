@@ -27,7 +27,7 @@ import {
   esc,
 } from './common';
 import type { QueryArgs, Row } from './common';
-import { ENRICH_FNS } from './columns/registry';
+import { PAGE_ENRICHERS } from './columns/registry';
 
 /** `[entityId, shell dataUpdatedAt, enrich dataUpdatedAt]` of one expanded entity. */
 type ChildDataVersion = [string, number, number];
@@ -127,13 +127,7 @@ const enrichEntityChildren = async (
     anomalyJobIds,
   };
 
-  return enrichEntityRows(
-    rows,
-    args,
-    new Set<string>([GROUP_SIZE_FIELD]),
-    { runQuery, http, signal },
-    ENRICH_FNS
-  );
+  return enrichEntityRows(rows, args, { runQuery, http, signal }, PAGE_ENRICHERS.child);
 };
 
 export interface UseEntityChildrenOptions {
