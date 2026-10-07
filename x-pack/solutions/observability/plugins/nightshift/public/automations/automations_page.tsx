@@ -177,6 +177,7 @@ export const AutomationsPage = (): React.ReactElement => {
             onRangeChange={(nextRange, label) => {
               setRange(nextRange);
               setRangeLabel(label);
+              setRefreshedAt(Date.now());
             }}
             onRefresh={() => {
               setRefreshedAt(Date.now());

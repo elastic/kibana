@@ -265,6 +265,24 @@ describe('automation request', () => {
       expect(toAutomationUpdateBody(values, automation).trigger).toEqual({ rows: [row] });
     });
 
+    it('keeps the saved daily limit for a custom cron automation', () => {
+      const automation = buildAutomation({
+        trigger: {
+          rows: [{ kind: 'schedule', schedulePreset: 'custom', cronExpression: '0 9 * * *' }],
+        },
+        runtime: { dailyDispatchLimit: 15 },
+      });
+      const values = {
+        ...createAutomationFormValues(),
+        name: 'Renamed',
+        trigger: toAutomationFormValues(automation).trigger,
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
+        dailyDispatchLimit: 15,
+      });
+    });
+
     it('keeps a completion action that is not a Slack post', () => {
       const automation = buildAutomation({ completion: { action: 'create_investigation' } });
 

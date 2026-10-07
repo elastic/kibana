@@ -25,6 +25,37 @@ describe('automation form values', () => {
     });
   });
 
+  it('expands weekday ranges from a weekly cron', () => {
+    const automation = {
+      id: 'automation-1',
+      name: 'Weekly',
+      automationType: 'custom',
+      isEnabled: true,
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'weekly',
+            cronExpression: '30 9 * * 1-3,5',
+            timezone: 'UTC',
+          },
+        ],
+      },
+      execution: {},
+      completion: {},
+      runtime: {},
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+      author: 'elastic',
+    } as Automation;
+
+    expect(toAutomationFormValues(automation).trigger).toMatchObject({
+      kind: 'every',
+      unit: 'week',
+      daysOfWeek: [1, 2, 3, 5],
+    });
+  });
+
   it('maps an automation back to its edit form values', () => {
     const automation: Automation = {
       id: 'automation-1',

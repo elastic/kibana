@@ -148,11 +148,12 @@ export const toAutomationUpdateBody = (
   automation: Automation
 ): UpdateAutomationBody & { name: string } => {
   const request = toAutomationRequestBody(values);
+  const originalValues = toAutomationFormValues(automation);
   return {
     name: request.name,
     description: request.description ?? null,
     tags: request.tags ?? [],
-    trigger: isEqual(toAutomationFormValues(automation).trigger, values.trigger)
+    trigger: isEqual(originalValues.trigger, values.trigger)
       ? automation.trigger
       : toUpdatedTrigger(request.trigger.rows[0], automation.trigger.rows),
     execution: {
@@ -165,7 +166,9 @@ export const toAutomationUpdateBody = (
       ...automation.runtime,
       ...(hasDailyLimit(values.trigger)
         ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
-        : { dailyDispatchLimit: null }),
+        : hasDailyLimit(originalValues.trigger)
+        ? { dailyDispatchLimit: null }
+        : {}),
     },
   };
 };

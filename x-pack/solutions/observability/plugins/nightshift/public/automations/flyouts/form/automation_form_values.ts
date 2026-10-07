@@ -104,6 +104,12 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   isEnabled: false,
 });
 
+const parseDaysOfWeek = (field: string): number[] =>
+  field.split(',').flatMap((part) => {
+    const [from, to = from] = part.split('-').map(Number);
+    return Array.from({ length: Math.max(to - from + 1, 0) }, (_, index) => from + index);
+  });
+
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
   const schedule = row?.kind === 'schedule' ? row : undefined;
@@ -134,7 +140,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
               2,
               '0'
             )}`,
-            daysOfWeek: (cronFields[4] ?? '1,2,3,4,5').split(',').map(Number),
+            daysOfWeek: parseDaysOfWeek(cronFields[4] ?? '1,2,3,4,5'),
             betweenHours: isHourly && cronFields[1] !== '*',
             startTime: `${(cronFields[1]?.split('-')[0] ?? '9').padStart(2, '0')}:00`,
             endTime: `${(cronFields[1]?.split('-')[1] ?? '17').padStart(2, '0')}:00`,

@@ -149,6 +149,8 @@ export const AutomationDetailFlyout = ({
   const initialRunFilter = STATUSES.find((status) => status === statusParam);
   const [isEditing, setIsEditing] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
+  const [blockedPath, setBlockedPath] = useState<string>();
+  const [exit, setExit] = useState<{ path?: string }>();
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
@@ -205,13 +207,29 @@ export const AutomationDetailFlyout = ({
   });
 
   const navigate = (path: string) => history.push(path);
+  const hasUnsavedChanges = isEditing && isDirty;
   const requestClose = () => {
-    if (isEditing && isDirty) {
+    if (hasUnsavedChanges) {
+      setBlockedPath(undefined);
       setIsDiscardOpen(true);
       return;
     }
     onClose();
   };
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    return history.block(({ pathname: path, search: query, hash }) => {
+      setBlockedPath(`${path}${query}${hash}`);
+      setIsDiscardOpen(true);
+      return false;
+    });
+  }, [hasUnsavedChanges, history]);
+  useEffect(() => {
+    if (!exit || isEditing) return;
+    setExit(undefined);
+    if (exit.path) history.push(exit.path);
+    else onClose();
+  }, [exit, isEditing, history, onClose]);
   const selectAutomation = (selected: Automation) =>
     navigate(`/automations/${selected.id}${isRunsTab ? '/runs' : ''}`);
   useEffect(() => {
@@ -652,7 +670,7 @@ export const AutomationDetailFlyout = ({
             setIsDiscardOpen(false);
             setIsEditing(false);
             setValues(originalValues);
-            onClose();
+            setExit({ path: blockedPath });
           }}
           cancelButtonText={labels.keepEditing}
           confirmButtonText={labels.discard}

@@ -20,7 +20,9 @@ import {
 import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { buildNightshiftInvestigationFlyoutShareUrl } from '../../common/url_params';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getNightshiftInvestigationPath } from '../../common/url_params';
+import { useKibana } from '../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { RunStatusIndicator, type Run } from './run_history';
 
@@ -65,6 +67,21 @@ const formatDate = (value: string) =>
   });
 
 const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).fromNow()})`;
+
+const OpenInvestigationButton = ({ investigationId }: { investigationId: string }) => {
+  const { application } = useKibana().services;
+  return (
+    <EuiButton
+      size="s"
+      data-test-subj="automationRunOpenInvestigation"
+      href={application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+        path: getNightshiftInvestigationPath(investigationId),
+      })}
+    >
+      {labels.investigation}
+    </EuiButton>
+  );
+};
 
 export const RunDetail = ({
   run,
@@ -151,13 +168,7 @@ export const RunDetail = ({
             {run.investigationId && (
               <>
                 <EuiHorizontalRule margin="m" />
-                <EuiButton
-                  size="s"
-                  data-test-subj="automationRunOpenInvestigation"
-                  href={buildNightshiftInvestigationFlyoutShareUrl(run.investigationId)}
-                >
-                  {labels.investigation}
-                </EuiButton>
+                <OpenInvestigationButton investigationId={run.investigationId} />
               </>
             )}
           </>
