@@ -158,7 +158,7 @@ class TagModal extends FtrService {
    * Return true if the modal is currently opened.
    */
   async isOpened() {
-    return await this.testSubjects.exists('tagModalForm');
+    return await this.testSubjects.waitForExists('tagModalForm');
   }
 
   /**

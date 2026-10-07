@@ -458,7 +458,9 @@ export class DashboardPageObject extends FtrService {
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    const discardButtonExists = await this.testSubjects.waitForExists(
+      'discardDashboardPromptButton'
+    );
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
@@ -558,32 +560,29 @@ export class DashboardPageObject extends FtrService {
   ) {
     await this.openSettingsFlyout();
 
-    await this.retry.try(async () => {
-      this.log.debug('entering new title');
-      await this.testSubjects.setValue('dashboardTitleInput', dashboard);
+    this.log.debug('entering new title');
+    await this.testSubjects.setValue('dashboardTitleInput', dashboard);
 
-      if (saveOptions.storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+    if (saveOptions.storeTimeWithDashboard !== undefined) {
+      await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+    }
+
+    if (saveOptions.tags) {
+      const tagsComboBox = await this.testSubjects.find('comboBoxInput');
+      for (const tagName of saveOptions.tags) {
+        await this.comboBox.setElement(tagsComboBox, tagName);
       }
+    }
 
-      if (saveOptions.tags) {
-        const tagsComboBox = await this.testSubjects.find('comboBoxInput');
-        for (const tagName of saveOptions.tags) {
-          await this.comboBox.setElement(tagsComboBox, tagName);
-        }
-      }
+    this.log.debug('DashboardPage.applyCustomization');
+    await this.testSubjects.click('applyCustomizeDashboardButton');
 
-      this.log.debug('DashboardPage.applyCustomization');
+    if (saveOptions.needsConfirm) {
+      await this.ensureDuplicateTitleCallout();
       await this.testSubjects.click('applyCustomizeDashboardButton');
+    }
 
-      if (saveOptions.needsConfirm) {
-        await this.ensureDuplicateTitleCallout();
-        await this.testSubjects.click('applyCustomizeDashboardButton');
-      }
-
-      this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
-      return await this.expectUnsavedChangesNotificationExists(1500);
-    });
+    await this.testSubjects.missingOrFail('dashboardSettingsFlyout', { timeout: 5000 });
   }
 
   /**
