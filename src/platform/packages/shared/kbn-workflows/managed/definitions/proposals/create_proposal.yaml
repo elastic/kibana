@@ -428,8 +428,12 @@ steps:
               decidedBy: '{{ variables.decided_by }}'
               status: executing
 
-          - name: execute_action
+          # Split by approval mode so each path runs under the right identity.
+          # Human-approved: default mode, so it runs as the approver (the
+          # original caller after resume).
+          - name: execute_as_approver
             type: workflow.execute
+            if: '${{ variables.needs_gate == true }}'
             on-failure:
               # Keeps the failure inside the loop so the clone branch below can
               # re-offer it; without this the workflow-level handler settles
@@ -450,9 +454,51 @@ steps:
                 # would execute parameters the analyst never approved.
                 actionInput: '${{ variables.action_input }}'
 
+          # Each outcome is recorded by a `data.set` guarded like the step that
+          # produced it: a step that did not run this pass still returns its
+          # previous value, so after a failed auto-approved attempt the skipped
+          # step's stale error would otherwise fail the human-approved retry.
+          - name: adopt_approver_result
+            type: data.set
+            if: '${{ variables.needs_gate == true }}'
+            with:
+              action_failed: '${{ steps.execute_as_approver.error != blank }}'
+              action_error_message: '{{ steps.execute_as_approver.error.message }}'
+
+          # Auto-approved: run as the worker's service account.
+          - name: execute_as_worker
+            type: workflow.execute
+            if: '${{ variables.needs_gate != true }}'
+            on-failure:
+              # Same reason as `execute_as_approver`.
+              continue: true
+            with:
+              workflow-id: '{{ variables.action_workflow_id }}'
+              run-as-mode: inherit
+              # The only actions that may run as the worker's service account: those that
+              # can be auto-approved (`approvalPolicy: autonomy-dependent`). Must be literal.
+              # Any other id fails this step without starting the action, so the failure
+              # is recorded and the clone below parks for a human.
+              allowed-workflow-ids:
+                - system-alertzero-action-close-alerts-fp
+                - system-alertzero-action-isolate-host
+                - system-alertzero-action-kill-process
+                - system-alertzero-action-suspend-process
+                - system-alertzero-action-handoff-to-forensics
+              inputs:
+                # Same as `execute_as_approver`.
+                actionInput: '${{ variables.action_input }}'
+
+          - name: adopt_worker_result
+            type: data.set
+            if: '${{ variables.needs_gate != true }}'
+            with:
+              action_failed: '${{ steps.execute_as_worker.error != blank }}'
+              action_error_message: '{{ steps.execute_as_worker.error.message }}'
+
           - name: handle_action_success
             type: if
-            condition: '${{ steps.execute_action.error == blank }}'
+            condition: '${{ variables.action_failed != true }}'
             steps:
               - name: record_success
                 type: proposals.updateProposal
@@ -470,14 +516,14 @@ steps:
 
           - name: handle_action_failure
             type: if
-            condition: '${{ steps.execute_action.error != blank }}'
+            condition: '${{ variables.action_failed == true }}'
             steps:
               - name: record_action_failure
                 type: proposals.updateProposal
                 with:
                   proposalId: '{{ variables.current_proposal_id }}'
                   status: failed
-                  executionError: '{{ steps.execute_action.error.message }}'
+                  executionError: '{{ variables.action_error_message }}'
 
               # The failed proposal has settled, so the retry is a new record
               # against the same still-parked gate execution. It inherits the
