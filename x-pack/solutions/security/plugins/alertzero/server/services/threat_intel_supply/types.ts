@@ -58,3 +58,12 @@ export class ThreatIntelSupplyHardGateError extends Error {
     this.reasonCodes = reasonCodes;
   }
 }
+
+export class ThreatIntelSupplyHuntDisabledError extends Error {
+  public readonly code = 'hunt_not_enabled' as const;
+
+  constructor() {
+    super('Threat intel supply Restore requires Continuous Threat Hunt to be enabled');
+    this.name = 'ThreatIntelSupplyHuntDisabledError';
+  }
+}

@@ -18,6 +18,7 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 import { evaluateHuntSupplyHardGate } from './hard_gate';
 import {
   ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyHuntDisabledError,
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyHardGate,
   type ThreatIntelSupplyStatus,
@@ -109,6 +110,19 @@ export class ThreatIntelSupplyService {
       false,
       request
     );
+  }
+
+  /**
+   * Re-ensures TI workflows while Hunt is already on. Rejects when hard-gate
+   * fails or Hunt is off in this space (Restore is not a substitute for enable).
+   */
+  async restoreSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<ThreatIntelSupplyStatus> {
+    await this.assertHardGate(request);
+    if (!(await this.isHuntEnabledInSpace(spaceId))) {
+      throw new ThreatIntelSupplyHuntDisabledError();
+    }
+    await this.ensureSupplyForSpace(spaceId, request);
+    return this.getSupplyStatus(spaceId, request);
   }
 
   async getSupplyStatus(spaceId: string, request: KibanaRequest): Promise<ThreatIntelSupplyStatus> {

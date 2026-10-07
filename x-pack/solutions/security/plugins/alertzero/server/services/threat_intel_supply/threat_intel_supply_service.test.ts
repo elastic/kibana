@@ -19,6 +19,7 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 import { ThreatIntelSupplyService } from './threat_intel_supply_service';
 import {
   ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyHuntDisabledError,
   ThreatIntelSupplyNotInstalledError,
 } from './types';
 
@@ -223,6 +224,27 @@ describe('ThreatIntelSupplyService', () => {
     (esClient.inference.get as jest.Mock).mockRejectedValue(new Error('missing'));
     await expect(createService().assertHardGate(request)).rejects.toBeInstanceOf(
       ThreatIntelSupplyHardGateError
+    );
+  });
+
+  it('throws hunt_not_enabled when Restore is called with Hunt off', async () => {
+    seedAllTiWorkflows(false);
+    huntEnabledBySpace.set(SPACE_A, false);
+    await expect(createService().restoreSupplyForSpace(SPACE_A, request)).rejects.toBeInstanceOf(
+      ThreatIntelSupplyHuntDisabledError
+    );
+  });
+
+  it('re-enables drifted ingest when Restore runs with Hunt on', async () => {
+    seedAllTiWorkflows(true);
+    workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
+    huntEnabledBySpace.set(SPACE_A, true);
+    await createService().restoreSupplyForSpace(SPACE_A, request);
+    expect(updateWorkflow).toHaveBeenCalledWith(
+      THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+      { enabled: true },
+      GLOBAL_WORKFLOW_SPACE_ID,
+      request
     );
   });
 });

@@ -99,6 +99,7 @@ export class AlertZeroPlugin
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
   private scanFailuresService?: ScanFailuresService;
+  private threatIntelSupplyService?: ThreatIntelSupplyService;
 
   /**
    * Set by whichever optional consumer's `start()` calls `registerAlertTriageAttachmentServiceProvider`
@@ -241,6 +242,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
+      getThreatIntelSupplyService: () => this.threatIntelSupplyService,
     });
 
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
@@ -305,7 +307,7 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
-    const threatIntelSupply =
+    this.threatIntelSupplyService =
       management != null
         ? new ThreatIntelSupplyService({
             management,
@@ -349,7 +351,7 @@ export class AlertZeroPlugin
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
       },
-      threatIntelSupply
+      this.threatIntelSupplyService
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
