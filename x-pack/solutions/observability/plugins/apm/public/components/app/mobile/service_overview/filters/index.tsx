@@ -77,9 +77,8 @@ export function MobileFilters() {
   // `mobileErrorTabId` only exists on the errors-and-crashes route, so it can't
   // be destructured from the union above. Read it separately (undefined on the
   // other tabs) to scope filters to crash documents only on the crashes tab.
-  const mobileErrorTabId = useMaybeApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes'
-  )?.query.mobileErrorTabId;
+  const mobileErrorTabId = useMaybeApmParams('/mobile-services/{serviceName}/errors-and-crashes')
+    ?.query.mobileErrorTabId;
 
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
