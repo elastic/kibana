@@ -8,15 +8,14 @@
 import * as isomerSlack from '@elastic/isomer-sdk/slack';
 import {
   ChatEventType,
-  ConversationOriginType,
   ConversationRoundStatus,
   type ConversationRound,
-  type MessageCompleteEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
-import { addSlackProjection, type AddSlackProjectionOptions } from './add_slack_projection';
+import type { ProjectionContext } from '../projections/types';
+import { addSlackProjection } from './add_slack_projection';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
@@ -59,10 +58,7 @@ const createRoundCompleteEvent = (
   data: { round: createRound(message), attachments },
 });
 
-const createOptions = (
-  overrides: Partial<AddSlackProjectionOptions> = {}
-): AddSlackProjectionOptions => ({
-  originType: ConversationOriginType.Slack,
+const createOptions = (overrides: Partial<ProjectionContext> = {}): ProjectionContext => ({
   getMapping: () => undefined,
   getConversationUrl: () => conversationUrl,
   logger: loggerMock.create(),
@@ -116,15 +112,14 @@ describe('addSlackProjection', () => {
     expect(JSON.stringify(slack)).not.toContain('render_attachment');
   });
 
-  it('returns nothing when rendering fails', () => {
+  it('returns the event unchanged when rendering fails', () => {
     jest.mocked(isomerSlack.renderSlackEnvelope).mockImplementationOnce(() => {
       throw new Error('boom');
     });
     const logger = loggerMock.create();
+    const event = createRoundCompleteEvent('Hello');
 
-    expect(
-      addSlackProjection(createRoundCompleteEvent('Hello'), createOptions({ logger }))
-    ).toBeUndefined();
+    expect(addSlackProjection(event, createOptions({ logger }))).toBe(event);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
@@ -136,22 +131,9 @@ describe('addSlackProjection', () => {
     expect(event).not.toHaveProperty('projection');
   });
 
-  it('returns nothing for rounds without a Slack origin', () => {
-    const event = createRoundCompleteEvent('Hello');
+  it('returns the event unchanged when the reply is empty', () => {
+    const event = createRoundCompleteEvent('');
 
-    expect(addSlackProjection(event, createOptions({ originType: undefined }))).toBeUndefined();
-  });
-
-  it('returns nothing when the reply is empty', () => {
-    expect(addSlackProjection(createRoundCompleteEvent(''), createOptions())).toBeUndefined();
-  });
-
-  it('returns nothing for events other than round_complete', () => {
-    const event: MessageCompleteEvent = {
-      type: ChatEventType.messageComplete,
-      data: { message_id: 'message-1', message_content: 'Hello' },
-    };
-
-    expect(addSlackProjection(event, createOptions())).toBeUndefined();
+    expect(addSlackProjection(event, createOptions())).toBe(event);
   });
 });

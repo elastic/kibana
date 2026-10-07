@@ -6,29 +6,15 @@
  */
 
 import { renderSlackEnvelope } from '@elastic/isomer-sdk/slack';
-import {
-  ConversationOriginType,
-  isRoundCompleteEvent,
-  type ChatEvent,
-  type RoundCompleteEvent,
-  type SlackPayload,
-} from '@kbn/agent-builder-common';
-import type { Logger } from '@kbn/logging';
+import type { RoundCompleteEvent, SlackPayload } from '@kbn/agent-builder-common';
+import type { AddProjection, ProjectionContext } from '../projections/types';
 import { specDispatcher } from '../spec/pack';
 import { replyToSpec } from '../spec/reply_to_spec';
-import { resolveSpec, type AttachmentSpecMapping } from '../spec/resolve_spec';
-
-export interface AddSlackProjectionOptions {
-  /** Type of the round's origin; only Slack rounds get a projection. */
-  originType?: ConversationOriginType;
-  getMapping: (type: string) => AttachmentSpecMapping | undefined;
-  getConversationUrl: () => string;
-  logger: Logger;
-}
+import { resolveSpec } from '../spec/resolve_spec';
 
 const renderSlackPayload = (
   { data: { round, attachments = [] } }: RoundCompleteEvent,
-  { getMapping, getConversationUrl, logger }: AddSlackProjectionOptions
+  { getMapping, getConversationUrl, logger }: ProjectionContext
 ): SlackPayload | undefined => {
   const { message } = round.response;
 
@@ -56,21 +42,13 @@ const renderSlackPayload = (
 };
 
 /**
- * Adds the reply, rendered as Block Kit through Isomer, as the Slack payload of `round_complete`
- * events of Slack rounds. Returns `undefined` when the event is left unchanged, including when
- * rendering fails.
+ * Adds the reply, rendered as Block Kit through Isomer, as the Slack payload of the event.
+ * Returns the event unchanged for empty replies, or when rendering fails.
  */
-export const addSlackProjection = <TEvent extends ChatEvent>(
-  event: TEvent,
-  options: AddSlackProjectionOptions
-): TEvent | undefined => {
-  if (options.originType !== ConversationOriginType.Slack || !isRoundCompleteEvent(event)) {
-    return;
-  }
-
-  const slack = renderSlackPayload(event, options);
+export const addSlackProjection: AddProjection = (event, context) => {
+  const slack = renderSlackPayload(event, context);
   if (!slack) {
-    return;
+    return event;
   }
 
   return { ...event, projection: { ...event.projection, slack } };

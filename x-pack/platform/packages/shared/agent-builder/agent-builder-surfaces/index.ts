@@ -14,5 +14,5 @@ export type {
   AttachmentSpecMapping,
   ResolveSpecOptions,
 } from './spec/resolve_spec';
-export { addSlackProjection } from './slack/add_slack_projection';
-export type { AddSlackProjectionOptions } from './slack/add_slack_projection';
+export { addIsomerProjections } from './projections/add_isomer_projections';
+export type { AddProjection, ProjectionContext } from './projections/types';

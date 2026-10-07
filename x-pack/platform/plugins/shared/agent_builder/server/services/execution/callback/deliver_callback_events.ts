@@ -23,31 +23,34 @@ import {
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
+  type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { addSlackProjection } from '@kbn/agent-builder-surfaces';
+import { addIsomerProjections } from '@kbn/agent-builder-surfaces';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { AGENTBUILDER_PATH } from '../../../../common/features';
 import type { AttachmentServiceStart } from '../../attachments';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
-interface ProjectionDeps {
-  execution: AgentExecution;
-  attachmentsService: AttachmentServiceStart;
-  /** Base URL of Kibana, without a space. */
-  getKibanaUrl: () => string;
-  logger: Logger;
-}
-
 /**
  * Adds the output for the round's origin, such as `projection.slack` for Slack rounds, to the
  * round_complete event. Returns the event unchanged when there's nothing to add.
  */
 const addProjections = (
-  event: ChatEvent,
-  { execution, attachmentsService, getKibanaUrl, logger }: ProjectionDeps
-): ChatEvent => {
+  event: RoundCompleteEvent,
+  {
+    execution,
+    attachmentsService,
+    getKibanaUrl,
+    logger,
+  }: {
+    execution: AgentExecution;
+    attachmentsService: AttachmentServiceStart;
+    getKibanaUrl: () => string;
+    logger: Logger;
+  }
+): RoundCompleteEvent => {
   if (execution.executionMode !== AgentExecutionMode.conversation) {
     return event;
   }
@@ -55,14 +58,12 @@ const addProjections = (
   const { agentId, spaceId, agentParams } = execution;
   const conversationPath = `${AGENTBUILDER_PATH}/agents/${agentId}/conversations/${agentParams.conversationId}`;
 
-  const projected = addSlackProjection(event, {
+  return addIsomerProjections(event, {
     originType: agentParams.origin?.type,
     getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
     getConversationUrl: () => `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
     logger,
   });
-
-  return projected ?? event;
 };
 
 /**
@@ -81,9 +82,13 @@ export const deliverCallbackEvents = ({
   attachmentsService,
   getKibanaUrl,
   logger,
-}: ProjectionDeps & {
+}: {
+  execution: AgentExecution;
   events$: Observable<ChatEvent>;
   callbackDeliveryService: CallbackDeliveryService;
+  attachmentsService: AttachmentServiceStart;
+  getKibanaUrl: () => string;
+  logger: Logger;
 }): Promise<void> => {
   const callbackUrl = callbackDeliveryService.getCallbackUrl(execution);
 
@@ -127,7 +132,7 @@ export const deliverCallbackEvents = ({
   };
 
   return new Promise<void>((resolve) => {
-    let roundCompleteEvent: ChatEvent | undefined;
+    let roundCompleteEvent: RoundCompleteEvent | undefined;
 
     events$
       .pipe(
@@ -153,18 +158,20 @@ export const deliverCallbackEvents = ({
         // Deliver the buffered round_complete last, only on successful completion. On a stream
         // error concatWith propagates it to catchError below, skipping this delivery.
         concatWith(
-          defer(() =>
-            roundCompleteEvent
-              ? deliverEvent(
-                  addProjections(roundCompleteEvent, {
-                    execution,
-                    attachmentsService,
-                    getKibanaUrl,
-                    logger,
-                  })
-                )
-              : EMPTY
-          )
+          defer(() => {
+            if (!roundCompleteEvent) {
+              return EMPTY;
+            }
+
+            const projectedEvent = addProjections(roundCompleteEvent, {
+              execution,
+              attachmentsService,
+              getKibanaUrl,
+              logger,
+            });
+
+            return deliverEvent(projectedEvent);
+          })
         ),
         catchError((error) => {
           const failureDelivery = callbackDeliveryService.makeCallbackRequest({

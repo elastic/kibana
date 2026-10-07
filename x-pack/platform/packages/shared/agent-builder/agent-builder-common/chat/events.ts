@@ -18,7 +18,7 @@ import { TimelineEventType } from './timeline_events';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
-import type { OriginProjection } from './projection';
+import type { OriginIsomerProjection } from './projection';
 import type {
   CompactionSummary,
   ConversationInternalState,
@@ -71,9 +71,7 @@ export enum ChatEventType {
 export type ChatEventBase<
   TEventType extends ChatEventType,
   TData extends Record<string, any>
-> = AgentBuilderEvent<TEventType, TData> & {
-  projection?: OriginProjection;
-};
+> = AgentBuilderEvent<TEventType, TData>;
 
 // Tool call
 
@@ -366,7 +364,12 @@ export interface RoundCompleteEventData {
   workspace_id?: string;
 }
 
-export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
+export type RoundCompleteEvent = ChatEventBase<
+  ChatEventType.roundComplete,
+  RoundCompleteEventData
+> & {
+  projection?: OriginIsomerProjection;
+};
 
 export const isRoundCompleteEvent = (
   event: AgentBuilderEvent<string, any>

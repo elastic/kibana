@@ -325,7 +325,7 @@ export {
   type RoundInterruptedEventData,
   type RoundInterruptedEvent,
   type SlackPayload,
-  type OriginProjection,
+  type OriginIsomerProjection,
   type ToolCallProgress,
   isToolCallEvent,
   isBrowserToolCallEvent,

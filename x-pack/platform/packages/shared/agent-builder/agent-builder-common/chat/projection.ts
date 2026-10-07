@@ -20,6 +20,6 @@ export interface SlackPayload {
  * Output for external surfaces, keyed by round origin type. Added to `round_complete` events at
  * callback delivery, never stored.
  */
-export interface OriginProjection {
+export interface OriginIsomerProjection {
   slack?: SlackPayload;
 }
