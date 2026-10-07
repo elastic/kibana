@@ -117,25 +117,26 @@ export const createValidateQueriesTool = ({
       'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
     handler: async ({ target_id: targetId, queries }, context) => {
-      if (queries.length === 0) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                target_id: targetId,
-                queries: [],
-                finalized: true,
-                finalized_queries: [],
-              },
-            },
-          ],
-        };
-      }
-
       try {
-        const scopedClients = await getScopedClients({ request: context.request });
         await assertCanReadSignificantEvents({ request: context.request, server });
+
+        if (queries.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  target_id: targetId,
+                  queries: [],
+                  finalized: true,
+                  finalized_queries: [],
+                },
+              },
+            ],
+          };
+        }
+
+        const scopedClients = await getScopedClients({ request: context.request });
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

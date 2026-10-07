@@ -200,8 +200,8 @@ describe('ki_feature_similarity_search tool', () => {
       createSignificantEventsServer({ featurePrivilege: 'none' })
     );
 
-    await invokeHandler(
-      tool as never,
+    const result = await invokeHandler(
+      tool,
       {
         stream_name: 'logs.test',
         candidates: [
@@ -217,5 +217,6 @@ describe('ki_feature_similarity_search tool', () => {
     );
 
     expect(findFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

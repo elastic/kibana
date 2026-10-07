@@ -279,11 +279,10 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       tool,
-      { target_id: 'logs.test', queries: [candidate] },
+      { target_id: 'logs.test', queries: [] },
       createMockToolContext()
     );
 
-    expect(validateKIQueriesMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });
