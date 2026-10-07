@@ -134,21 +134,24 @@ apiTest.describe(
         deleteWorkflow(apiClient, editorHeaders, createRuleWorkflowId),
       ]);
 
-      if (createdRuleIds.length > 0) {
-        const response = await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
-          headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
+      try {
+        if (createdRuleIds.length > 0) {
+          const response = await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
+            headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
+            responseType: 'json',
+            body: { action: 'delete', ids: createdRuleIds },
+          });
+          // A partial failure answers 500, so a rule left behind fails the suite instead of leaking.
+          expect(response).toHaveStatusCode(200);
+        }
+      } finally {
+        // Reset the setting even when cleanup fails, so it does not stay on for later suites.
+        await apiClient.post(SETTINGS_URL, {
+          headers: adminHeaders,
           responseType: 'json',
-          body: { action: 'delete', ids: createdRuleIds },
+          body: { changes: { [ALERTZERO_ENABLED_SETTING]: null } },
         });
-        // A partial failure answers 500, so a rule left behind fails the suite instead of leaking.
-        expect(response).toHaveStatusCode(200);
       }
-
-      await apiClient.post(SETTINGS_URL, {
-        headers: adminHeaders,
-        responseType: 'json',
-        body: { changes: { [ALERTZERO_ENABLED_SETTING]: null } },
-      });
     });
 
     apiTest(
