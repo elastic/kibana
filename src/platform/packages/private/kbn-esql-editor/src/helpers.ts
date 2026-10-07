@@ -8,7 +8,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco, type MonacoMessage } from '@kbn/code-editor';
@@ -280,6 +279,11 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor {
+      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
+      --vscode-shadow-lg: ${theme.euiTheme.shadows.l.down};
+    }
+
     .monaco-editor .suggest-details .scrollbar {
       display: none !important;
     }
@@ -346,8 +350,6 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
     .suggest-widget,
     .suggest-details-container {
-      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
-      --vscode-shadow-lg: ${euiShadow(theme, 'l').replace('box-shadow:', '')};
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
