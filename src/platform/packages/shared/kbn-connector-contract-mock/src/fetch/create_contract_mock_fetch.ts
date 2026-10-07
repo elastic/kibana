@@ -125,9 +125,12 @@ const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): 
   ...(source === undefined ? {} : { source }),
 });
 
+// HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
+const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
+
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {
   const payload =
-    body === undefined || body === null
+    body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
       ? null
       : typeof body === 'string'
       ? body
