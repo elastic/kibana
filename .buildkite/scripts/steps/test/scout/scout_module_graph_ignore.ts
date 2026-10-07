@@ -16,6 +16,8 @@
  * Doc patterns mirror SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
  */
 export const SCOUT_MODULE_GRAPH_IGNORE: readonly string[] = [
-  '**/README*', '**/*.md', '**/CHANGELOG*', // documentation noise
+  '**/README*',
+  '**/*.md',
+  '**/CHANGELOG*', // documentation noise
   '**/*.test.ts', // Jest tests — only Jest needs to run, not Playwright
 ];

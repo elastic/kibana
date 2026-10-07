@@ -34,13 +34,17 @@ describe('SCOUT_MODULE_GRAPH_IGNORE', () => {
   describe('Jest test files', () => {
     it('excludes *.test.ts files inside critical packages', () => {
       expect(
-        matches('src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts')
+        matches(
+          'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts'
+        )
       ).toBe(true);
+      expect(matches('.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts')).toBe(
+        true
+      );
       expect(
-        matches('.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts')
-      ).toBe(true);
-      expect(
-        matches('.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_testing.test.ts')
+        matches(
+          '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_testing.test.ts'
+        )
       ).toBe(true);
     });
   });
@@ -53,7 +57,9 @@ describe('SCOUT_MODULE_GRAPH_IGNORE', () => {
 
     it('keeps Playwright spec files (handled by the tests-only path, not this filter)', () => {
       expect(
-        matches('src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts')
+        matches(
+          'src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts'
+        )
       ).toBe(false);
     });
   });
