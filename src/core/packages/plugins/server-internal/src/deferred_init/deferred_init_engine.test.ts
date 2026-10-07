@@ -8,7 +8,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
+import { isPluginInitializationError } from '@kbn/core-deferred-init-common';
 import { DeferredInitEngine, type DeferredInitRunner } from './deferred_init_engine';
 import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
@@ -170,7 +170,7 @@ describe('DeferredInitEngine', () => {
       await jest.advanceTimersByTimeAsync(DEFERRED_START_TIMEOUT_MS);
       const error = await wait;
 
-      expect(isDeferredInitializationError(error)).toBe(true);
+      expect(isPluginInitializationError(error)).toBe(true);
       expect(engine.getFailureDetails(PLUGIN_ID)).toEqual({
         message: expect.stringMatching(/wasn't completed in 10sec/),
         attempts: 1,
@@ -193,11 +193,11 @@ describe('DeferredInitEngine', () => {
       expect(runner.start).toHaveBeenCalledTimes(1);
     });
 
-    it('throws a non-retriable DeferredInitializationError if no runner is attached', async () => {
+    it('throws a non-retriable PluginInitializationError if no runner is attached', async () => {
       engine.register(PLUGIN_ID);
 
       const error = await engine.waitUntilAvailable(PLUGIN_ID).catch((e) => e);
-      expect(isDeferredInitializationError(error)).toBe(true);
+      expect(isPluginInitializationError(error)).toBe(true);
       expect(error.pluginId).toBe(PLUGIN_ID);
       // A misconfiguration, not a transient failure: retrying can't make a runner appear.
       expect(error.retriable).toBe(false);
@@ -214,7 +214,7 @@ describe('DeferredInitEngine', () => {
       expect(engine.getState(PLUGIN_ID)).toBe('available');
     });
 
-    it('rejects with a DeferredInitializationError (cause = last error) on failure', async () => {
+    it('rejects with a PluginInitializationError (cause = last error) on failure', async () => {
       const runError = new Error('boom');
       const runner = createRunner();
       runner.lazyInitialize.mockRejectedValue(runError);
@@ -222,7 +222,7 @@ describe('DeferredInitEngine', () => {
       engine.setRunner(PLUGIN_ID, runner);
 
       const error = await engine.waitUntilAvailable(PLUGIN_ID).catch((e) => e);
-      expect(isDeferredInitializationError(error)).toBe(true);
+      expect(isPluginInitializationError(error)).toBe(true);
       expect(error.pluginId).toBe(PLUGIN_ID);
       expect(error.cause).toBe(runError);
       // A transient failure of the plugin itself: worth retrying later.

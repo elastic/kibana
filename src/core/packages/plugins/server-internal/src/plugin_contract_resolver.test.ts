@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 import type { DeferredInitEngine } from './deferred_init';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
@@ -473,7 +473,7 @@ describe('RuntimePluginContractResolver', () => {
     });
   });
 
-  const createEngineMock = (state$ = new BehaviorSubject<InitState>('idle')) =>
+  const createEngineMock = (state$ = new BehaviorSubject<PluginInitState>('idle')) =>
     ({
       isRegistered: jest.fn(),
       waitUntilAvailable: jest.fn(),
@@ -571,11 +571,11 @@ describe('RuntimePluginContractResolver', () => {
   });
 
   describe('lazyInit contract', () => {
-    let state$: BehaviorSubject<InitState>;
+    let state$: BehaviorSubject<PluginInitState>;
     let engine: jest.Mocked<DeferredInitEngine>;
 
     beforeEach(() => {
-      state$ = new BehaviorSubject<InitState>('idle');
+      state$ = new BehaviorSubject<PluginInitState>('idle');
       engine = createEngineMock(state$);
       resolver.setDeferredInitEngine(engine);
       // `pluginA` is a lazy dependency of the source plugin; the source plugin is lazy itself.
@@ -631,7 +631,7 @@ describe('RuntimePluginContractResolver', () => {
 
     describe('lazyInitStatus$', () => {
       it('replays the current state and follows transitions', () => {
-        const seen: InitState[] = [];
+        const seen: PluginInitState[] = [];
         resolver.lazyInitStatus$(SOURCE_PLUGIN, 'pluginA').subscribe((state) => seen.push(state));
         state$.next('initializing');
         state$.next('available');

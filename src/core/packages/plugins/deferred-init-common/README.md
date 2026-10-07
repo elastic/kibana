@@ -1,10 +1,16 @@
 # @kbn/core-deferred-init-common
 
-Zero-dependency leaf package holding `DeferredInitializationError` and its `isDeferredInitializationError`
-type guard. It is thrown by `@kbn/core-plugins-server-internal` when a lazy plugin's wrapped `start()`
-contract function is called before deferred initialization has succeeded, caught centrally by
-`@kbn/core-http-router-server-internal` (which converts it to a `503` + `Retry-After` response), and
-re-exported through `@kbn/core-plugins-server` → `@kbn/core/server` for consumer plugins.
+Zero-dependency leaf package holding what the server and browser sides of plugin initialization share:
+
+- `PluginInitState` and `PluginInitStatus`: where a plugin's `initialize()` stands on one Kibana instance.
+- `PluginInitializationError` and its `isPluginInitializationError` type guard. Core rejects with it when
+  a plugin's `initialize()` attempt fails, and `@kbn/core-http-router-server-internal` converts it to a
+  `503` + `Retry-After` response when it escapes a route handler.
+- `DEFERRED_INIT_STATUS_ROUTE` and its response bodies, shared by the server status route and the browser
+  status client.
+
+The public types and the error are re-exported through `@kbn/core-plugins-server` → `@kbn/core/server`
+for consumer plugins.
 
 It lives in its own leaf package (rather than `@kbn/core-plugins-server`) to avoid a dependency cycle:
 `@kbn/core-plugins-server` depends on `@kbn/core-elasticsearch-server-internal`, which depends on

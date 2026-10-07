@@ -19,9 +19,11 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
   DynamicConfigDescriptor,
-  InitState,
+  PluginInitialization,
+  PluginInitState,
+  PluginInitStatus,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';
 
-export { DeferredInitializationError, isDeferredInitializationError } from './src';
+export { PluginInitializationError, isPluginInitializationError } from './src';

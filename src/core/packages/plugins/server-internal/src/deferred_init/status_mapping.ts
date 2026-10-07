@@ -8,10 +8,10 @@
  */
 
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 
 /**
- * Map a plugin's deferred-init {@link InitState} onto a core {@link ServiceStatus} for the
+ * Map a plugin's deferred-init {@link PluginInitState} onto a core {@link ServiceStatus} for the
  * plugin's `/status` entry.
  *
  * Deferring work is a healthy, expected state, so `idle` and `initializing` report `available`:
@@ -29,7 +29,7 @@ import type { InitState } from '@kbn/core-plugins-server';
  *
  * @internal
  */
-export const toServiceStatus = (pluginId: string, state: InitState): ServiceStatus => {
+export const toServiceStatus = (pluginId: string, state: PluginInitState): ServiceStatus => {
   switch (state) {
     case 'available':
       return { level: ServiceStatusLevels.available, summary: `${pluginId} is available` };

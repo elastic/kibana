@@ -8,7 +8,7 @@
  */
 
 import { ServiceStatusLevels } from '@kbn/core-status-common';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 import { toServiceStatus } from './status_mapping';
 
 describe('toServiceStatus', () => {
@@ -22,7 +22,7 @@ describe('toServiceStatus', () => {
   // `idle`/`initializing` are healthy, expected states for a lazy plugin: they must NOT pin
   // Kibana's overall status (the worst plugin status) below `available`, which would break the
   // FTR/Scout "wait until ready" check.
-  it.each<InitState>(['idle', 'initializing'])(
+  it.each<PluginInitState>(['idle', 'initializing'])(
     'reports `available` (with a descriptive summary) while %s',
     (state) => {
       const status = toServiceStatus('myPlugin', state);

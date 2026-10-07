@@ -16,7 +16,7 @@ import type {
   PluginContractMap,
   PluginContractResolverResponseItem,
 } from '@kbn/core-plugins-contracts-server';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 import type { DeferredInitEngine } from './deferred_init';
 
 export type IRuntimePluginContractResolver = PublicMethodsOf<RuntimePluginContractResolver>;
@@ -183,7 +183,7 @@ export class RuntimePluginContractResolver {
    * once its `start()` has returned. For a lazy dependency this is the triggering accessor: it
    * kicks the dependency's `lazyInitialize()` and deferred `start()` on this instance if nothing
    * has yet, waits for them, and only then reads the contract they produced. Rejects with
-   * `DeferredInitializationError` if that attempt fails.
+   * `PluginInitializationError` if that attempt fails.
    */
   loadPluginContract = async <T>(
     pluginName: PluginName,
@@ -230,12 +230,12 @@ export class RuntimePluginContractResolver {
   };
 
   /** Backs `core.plugins.lazyInit.getStatus()`: synchronous, never triggers. */
-  getLazyInitStatus = (pluginName: PluginName, target: PluginName): InitState => {
+  getLazyInitStatus = (pluginName: PluginName, target: PluginName): PluginInitState => {
     return this.assertLazyTarget('getStatus', pluginName, target).getState(target);
   };
 
   /** Backs `core.plugins.lazyInit.status$()`: replays the current state, never triggers. */
-  lazyInitStatus$ = (pluginName: PluginName, target: PluginName): Observable<InitState> => {
+  lazyInitStatus$ = (pluginName: PluginName, target: PluginName): Observable<PluginInitState> => {
     return this.assertLazyTarget('status$', pluginName, target).state$(target);
   };
 

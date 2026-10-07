@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import type { PluginsService } from '@kbn/core-plugins-server-internal';
@@ -38,20 +39,13 @@ const createServiceMock = (): PluginsServiceMock =>
     stop: jest.fn(),
   });
 
-const createLazyInitMock = () =>
-  lazyObject({
-    trigger: jest.fn(),
-    getStatus: jest.fn(),
-    status$: jest.fn(),
-    onLazyStartService: jest.fn(),
-  });
-
 const createSetupContractMock = () => {
   const contract: jest.Mocked<PluginsServiceSetup> = lazyObject({
     onSetup: jest.fn(),
     onStart: jest.fn(),
-    loadPluginContract: jest.fn(),
-    lazyInit: createLazyInitMock(),
+    initializePlugin: jest.fn().mockResolvedValue(undefined),
+    pluginInitStatus$: jest.fn().mockReturnValue(of({ state: 'available', attempts: 0 })),
+    getPluginInitStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
   });
 
   return contract;
@@ -60,8 +54,9 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const contract: jest.Mocked<PluginsServiceStart> = lazyObject({
     onStart: jest.fn(),
-    loadPluginContract: jest.fn(),
-    lazyInit: createLazyInitMock(),
+    initializePlugin: jest.fn().mockResolvedValue(undefined),
+    pluginInitStatus$: jest.fn().mockReturnValue(of({ state: 'available', attempts: 0 })),
+    getPluginInitStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
   });
   return contract;
 };

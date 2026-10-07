@@ -8,13 +8,12 @@
  */
 
 export {
-  DeferredInitializationError,
-  isDeferredInitializationError,
-} from './src/deferred_initialization_error';
+  PluginInitializationError,
+  isPluginInitializationError,
+} from './src/plugin_initialization_error';
+export type { PluginInitState, PluginInitStatus } from './src/plugin_init_status';
 export { DEFERRED_INIT_STATUS_ROUTE } from './src/deferred_init_status_route';
 export type {
-  DeferredInitPhase,
-  DeferredInitState,
   DeferredInitStatusResponse,
   DeferredInitUnavailableBody,
 } from './src/deferred_init_status_route';

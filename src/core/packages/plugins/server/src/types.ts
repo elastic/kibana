@@ -24,6 +24,7 @@ import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-int
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
+import type { PluginInitialization } from './plugin_initialization';
 type Maybe<T> = T | undefined;
 
 /**
@@ -313,44 +314,31 @@ export interface Plugin<
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
   /**
-   * Always invoked once `setup()` has run, including for a lazy plugin whose deferred `start()`
-   * never ran on this instance, so `setup()`-time resources can be torn down. A lazy plugin's
-   * `stop()` must therefore not assume start-time state exists: guard each start-time resource
-   * (for example `this.subscription?.unsubscribe()`).
-   */
-  stop?(): MaybePromise<void>;
-
-  /**
-   * The plugin's costly, Elasticsearch-backed initialization. Only invoked by core when the
-   * plugin's manifest sets `hasInitialization: true` (see {@link PluginManifest}). For such a
-   * plugin the lifecycle is `setup()` at boot, then on this instance's first trigger
-   * `lazyInitialize()` followed by `start()`. Nothing else in the plugin runs before that, so
-   * `start()` can build its contract over initialized state without readiness checks, and
-   * `core.getStartServices()` resolves only once both phases have completed here.
+   * Expensive, Elasticsearch-bound initialization work, kept out of `setup()` and `start()`.
    *
-   * Receives the same arguments as `start()`: every non-lazy dependency has started by the time
-   * this runs, so their contracts are injected as usual.
+   * Core calls it with the same arguments as `start()` and decides when: today right after
+   * `start()` returns during boot (while `plugins.initializeOnBoot` is `true`), later on
+   * first use for plugins core chooses to initialize lazily. Plugin code is identical in
+   * both cases. `start()` is never awaited on it; a contract function that needs
+   * initialized state awaits `this.initialization.initialize()` itself
+   * (see {@link PluginInitializerContext.initialization}).
    *
-   * @remarks
-   * Runs once per Kibana instance, not once per deployment: core tracks the state in memory, the
-   * same way it tracks any plugin's `/status` entry, so every instance behind a load balancer
-   * runs this on its own first trigger. That is what lets it set up instance-local preconditions
-   * (downloading a binary, warming an in-process cache), but it also means the implementation
-   * must tolerate several instances running it concurrently against the same cluster: make the
-   * Elasticsearch work idempotent (create-if-missing rather than blind create).
+   * While it has not succeeded on this Kibana instance, routes registered through the
+   * plugin's router answer 503 and the plugin's browser apps show a loading screen.
+   * A thrown error never fails boot: core retries with a jittered exponential backoff,
+   * and any later `initialize()` call or request starts a fresh attempt. Success is
+   * sticky for the lifetime of the process.
    *
-   * A throw is retried on a jittered exponential backoff, and once background retries are spent,
-   * on the next trigger. Success is sticky: if the deferred `start()` that follows throws, only
-   * `start()` is re-run on the next attempt.
-   *
-   * Do not do this work from `setup()` (for example behind `getStartServices().then(...)`), and do
-   * not make setup-registered callbacks that run on other plugins' traffic (task runners,
-   * capabilities switchers, usage collectors) await this plugin's own start. They must check
-   * `core.plugins.lazyInit.getStatus()` and no-op instead, or explicitly `trigger()`.
+   * @remarks Runs on every Kibana instance against the same cluster, concurrently and
+   * without coordination, so the work must be safe to run more than once. Only plugins
+   * whose manifest sets `hasInitialization: true` may implement it; core throws at boot
+   * when the flag and the method disagree.
    *
    * @public
    */
-  lazyInitialize?(core: CoreStart, plugins: TPluginsStart): Promise<void>;
+  initialize?(core: CoreStart, plugins: TPluginsStart): Promise<void>;
+
+  stop?(): MaybePromise<void>;
 }
 
 /**
@@ -495,6 +483,33 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      */
     get: <T = ConfigSchema>() => T;
   };
+  /**
+   * Status of this plugin's own {@link Plugin.initialize} work, and the way to wait for it.
+   *
+   * Keep it on the instance and await `initialize()` from the contract functions and
+   * route handlers that need initialized state:
+   *
+   * @example
+   * ```ts
+   * constructor(ctx: PluginInitializerContext) {
+   *   this.initialization = ctx.initialization;
+   * }
+   * start() {
+   *   return {
+   *     search: async () => {
+   *       await this.initialization.initialize();
+   *       // work that needs the indices
+   *     },
+   *     getLabel: () => 'no init needed',
+   *   };
+   * }
+   * ```
+   *
+   * Plugins without `initialize()` report `available` once their `start()` has returned,
+   * so the object is safe to use from any plugin. Preboot plugins have no initialization
+   * and report `idle`.
+   */
+  initialization: PluginInitialization;
 }
 
 /**

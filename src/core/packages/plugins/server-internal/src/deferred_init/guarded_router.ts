@@ -21,7 +21,7 @@ import type {
   VersionedRouteRegistrar,
   VersionedRouter,
 } from '@kbn/core-http-server';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 import type { DeferredInitUnavailableBody } from '@kbn/core-deferred-init-common';
 import type { DeferredInitEngine } from './deferred_init_engine';
 
@@ -31,10 +31,10 @@ const GATED_METHODS: ReadonlySet<string> = new Set(['get', 'post', 'put', 'patch
 const initializingResponse = (
   response: KibanaResponseFactory,
   pluginId: string,
-  status: InitState
+  status: PluginInitState
 ): IKibanaResponse => {
   // Both 503 trigger paths (here and the central handler for an escaped
-  // DeferredInitializationError) send this same `{ pluginId, status }` body so clients read one
+  // PluginInitializationError) send this same `{ pluginId, status }` body so clients read one
   // stable shape. Not the default error envelope. The UI's real status channel is the un-gated
   // core state endpoint.
   const body: DeferredInitUnavailableBody = { pluginId, status };

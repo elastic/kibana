@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
@@ -50,13 +51,9 @@ export function createCoreStartMock() {
     injection: injectionServiceMock.createStartContract(),
     plugins: lazyObject({
       onStart: jest.fn(),
-      loadPluginContract: jest.fn(),
-      lazyInit: lazyObject({
-        trigger: jest.fn(),
-        getStatus: jest.fn(),
-        status$: jest.fn(),
-        onLazyStartService: jest.fn(),
-      }),
+      initializePlugin: jest.fn().mockResolvedValue(undefined),
+      pluginInitStatus$: jest.fn().mockReturnValue(of({ state: 'available', attempts: 0 })),
+      getPluginInitStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
     }),
     pricing: pricingServiceMock.createStartContract(),
     dataStreams: dataStreamServiceMock.createStartContract(),

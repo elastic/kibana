@@ -10,9 +10,9 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import { withTimeout } from '@kbn/std';
 import type { Logger } from '@kbn/logging';
-import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
+import { PluginInitializationError } from '@kbn/core-deferred-init-common';
 import type { DeferredInitPhase } from '@kbn/core-deferred-init-common';
-import type { InitState } from '@kbn/core-plugins-server';
+import type { PluginInitState } from '@kbn/core-plugins-server';
 import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
   DEFERRED_INIT_BACKOFF_FACTOR,
@@ -45,7 +45,7 @@ export interface DeferredInitFailureDetails {
 }
 
 interface DeferredInitRecord {
-  readonly state$: BehaviorSubject<InitState>;
+  readonly state$: BehaviorSubject<PluginInitState>;
   runner?: DeferredInitRunner;
   inFlight?: Promise<void>;
   /**
@@ -145,7 +145,7 @@ export class DeferredInitEngine {
   }
 
   /** Current state for a plugin id (`idle` if unknown). Does not trigger anything. */
-  public getState(pluginId: string): InitState {
+  public getState(pluginId: string): PluginInitState {
     return this.records.get(pluginId)?.state$.value ?? 'idle';
   }
 
@@ -168,7 +168,7 @@ export class DeferredInitEngine {
   }
 
   /** Observable of a plugin id's state. Registers the id if not yet known. Never triggers. */
-  public state$(pluginId: string): Observable<InitState> {
+  public state$(pluginId: string): Observable<PluginInitState> {
     return this.ensureRecord(pluginId).state$.asObservable();
   }
 
@@ -190,7 +190,7 @@ export class DeferredInitEngine {
    * next incoming gated request, so any API hit or UI poll can trigger a fresh attempt without
    * requiring a Kibana restart.
    */
-  public ensureInitialized(pluginId: string): InitState {
+  public ensureInitialized(pluginId: string): PluginInitState {
     const record = this.records.get(pluginId);
     if (!record) {
       return 'idle';
@@ -207,7 +207,7 @@ export class DeferredInitEngine {
 
   /**
    * Wait until a plugin is `available`, kicking (or re-kicking) its deferred phases as needed.
-   * Rejects with a `DeferredInitializationError` if the attempt fails. This is the one path that
+   * Rejects with a `PluginInitializationError` if the attempt fails. This is the one path that
    * both triggers and waits; it backs `loadPluginContract` for dependents and `lazyInit.trigger()`
    * for the plugin itself. Everything else (`getStartServices`, `status$`, `onLazyStartService`)
    * only waits.
@@ -236,7 +236,7 @@ export class DeferredInitEngine {
       // A misconfiguration (the boot loop never attached a runner), not a transient failure of
       // the plugin itself. Retrying won't make a runner appear, so callers shouldn't spend their
       // retry budget on it.
-      throw new DeferredInitializationError(pluginId, {
+      throw new PluginInitializationError(pluginId, {
         message: `Lazy plugin "${pluginId}" has no runner attached.`,
         retriable: false,
         status: state,
@@ -257,11 +257,11 @@ export class DeferredInitEngine {
 
     // Annotated rather than inferred: TypeScript would otherwise carry the pre-`await` narrowing
     // of `state` through to here, even though the attempt we just awaited is what changed it.
-    const settled: InitState = record.state$.value;
+    const settled: PluginInitState = record.state$.value;
     if (settled === 'available') {
       return;
     }
-    throw new DeferredInitializationError(pluginId, {
+    throw new PluginInitializationError(pluginId, {
       cause: record.lastError,
       status: settled,
     });
@@ -387,7 +387,7 @@ export class DeferredInitEngine {
     let record = this.records.get(pluginId);
     if (!record) {
       record = {
-        state$: new BehaviorSubject<InitState>('idle'),
+        state$: new BehaviorSubject<PluginInitState>('idle'),
         initialized: false,
         failedAttempts: 0,
       };
