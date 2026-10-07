@@ -47,6 +47,40 @@ describe('Cypress result routing', () => {
       expect(infraFailedSpecFilePaths).toEqual(result === assertion ? [] : ['a']);
     }
   );
+  it('clears every seeded occurrence of a spec after a successful infra retry', () => {
+    // The per-spec loop seeds the spec on the initial pass and again on the
+    // retry pass, so the array holds it twice; removing only one occurrence
+    // left a stale duplicate and failed the job despite the green retry.
+    const failedSpecFilePaths: string[] = ['a.cy.ts'];
+    const infraFailedSpecFilePaths: string[] = [];
+    const completedSpecFilePaths: string[] = [];
+
+    expect(
+      routeRunResult({
+        result: runnerFailure,
+        spec: 'a.cy.ts',
+        failedSpecFilePaths,
+        infraFailedSpecFilePaths,
+        completedSpecFilePaths,
+      })
+    ).toBe(false);
+
+    failedSpecFilePaths.push('a.cy.ts');
+    expect(failedSpecFilePaths).toEqual(['a.cy.ts', 'a.cy.ts']);
+
+    expect(
+      routeRunResult({
+        result: success,
+        spec: 'a.cy.ts',
+        failedSpecFilePaths,
+        infraFailedSpecFilePaths,
+        completedSpecFilePaths,
+      })
+    ).toBe(true);
+
+    expect(failedSpecFilePaths).toEqual([]);
+    expect(hasUnresolvedFailures(failedSpecFilePaths, false)).toBe(false);
+  });
   it('does not accept an absent totalFailed as success', () => {
     expect(isSuccessfulRun({ runs: [] } as unknown as RunResult)).toBe(false);
   });

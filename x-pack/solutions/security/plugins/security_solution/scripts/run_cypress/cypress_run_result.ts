@@ -98,6 +98,9 @@ export const routeRunResult = ({
   completedSpecFilePaths: string[];
 }): boolean => {
   if (isSuccessfulRun(result)) {
+    // Remove every occurrence: the per-spec loop seeds the spec on each pass,
+    // so a successful infra retry finds it seeded twice and removing only the
+    // first occurrence would leave the job red.
     let index = failedSpecFilePaths.indexOf(spec);
     while (index !== -1) {
       failedSpecFilePaths.splice(index, 1);
