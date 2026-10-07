@@ -109,6 +109,69 @@ describe('securityLabsSearchTool', () => {
   });
 
   describe('handler', () => {
+    it.each(['default', 'security-space'])(
+      'returns a terminal unavailable contract in space %s',
+      async (spaceId) => {
+        retrieveDocumentationAvailable.mockResolvedValue(false);
+        const coreStart = coreMock.createStart();
+        coreStart.http.basePath.serverBasePath = '/kibana';
+        mockCore.getStartServices.mockResolvedValue([
+          coreStart,
+          {
+            llmTasks: { retrieveDocumentation, retrieveDocumentationAvailable },
+          } as unknown as SecuritySolutionPluginStartDependencies,
+          {} as unknown as SecuritySolutionPluginStart,
+        ]);
+
+        const result = (await tool.handler(
+          { query: 'Chrysalis detection research' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId })
+        )) as ToolHandlerStandardReturn;
+        const settingsUrl =
+          spaceId === 'default'
+            ? '/kibana/app/management/ai/genAiSettings'
+            : '/kibana/s/security-space/app/management/ai/genAiSettings';
+
+        expect(result.results).toHaveLength(1);
+        expect(result.results[0]).toMatchObject({
+          type: ToolResultType.error,
+          data: {
+            metadata: { status: 'unavailable', nextAction: 'stop', settingsUrl },
+          },
+        });
+        const errorResult = result.results[0] as ErrorResult;
+        expect(errorResult.data.message).toContain('Security Labs research is unavailable');
+        expect(errorResult.data.message).toContain(`[GenAI Settings](${settingsUrl})`);
+        expect(errorResult.data.message).toContain('make no further tool calls');
+        expect(errorResult.data.message).toContain('Do not continue from attachments');
+        expect(retrieveDocumentation).not.toHaveBeenCalled();
+      }
+    );
+
+    it('returns the terminal contract when the llmTasks plugin is missing', async () => {
+      mockCore.getStartServices.mockResolvedValue([
+        coreMock.createStart(),
+        {} as SecuritySolutionPluginStartDependencies,
+        {} as unknown as SecuritySolutionPluginStart,
+      ]);
+      const result = (await tool.handler(
+        { query: 'test query' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0]).toMatchObject({
+        type: ToolResultType.error,
+        data: {
+          metadata: {
+            status: 'unavailable',
+            nextAction: 'stop',
+            settingsUrl: '/mock-server-basepath/app/management/ai/genAiSettings',
+          },
+        },
+      });
+      expect(retrieveDocumentation).not.toHaveBeenCalled();
+    });
+
     it('calls retrieveDocumentation with Security Labs resource type and inference id', async () => {
       retrieveDocumentationAvailable.mockResolvedValue(true);
       const mockDocs = [
@@ -246,6 +309,8 @@ describe('securityLabsSearchTool', () => {
       expect(errorResult.data.message).toContain('not installed');
       // Must include server.basePath so Agent Builder treats the link as internal.
       expect(errorResult.data.metadata).toEqual({
+        status: 'unavailable',
+        nextAction: 'stop',
         settingsUrl: '/mock-server-basepath/app/management/ai/genAiSettings',
       });
       expect(errorResult.data.message).toContain(
@@ -270,6 +335,8 @@ describe('securityLabsSearchTool', () => {
 
       const errorResult = result.results[0] as ErrorResult;
       expect(errorResult.data.metadata).toEqual({
+        status: 'unavailable',
+        nextAction: 'stop',
         settingsUrl: '/mock-server-basepath/s/security/app/management/ai/genAiSettings',
       });
     });
