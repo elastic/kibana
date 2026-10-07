@@ -40,6 +40,7 @@ import path from 'node:path';
 import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 import type { ScoutLog } from './scout_log.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
+import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
@@ -48,13 +49,6 @@ const log: ScoutLog = {
   info: writeLog,
   warning: (message) => writeLog(`WARN ${message}`),
 };
-
-// Files that cannot affect Scout Playwright test execution and should not inflate
-// the module graph. Doc patterns mirror SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
-const SCOUT_MODULE_GRAPH_IGNORE = [
-  '**/README*', '**/*.md', '**/CHANGELOG*', // documentation noise
-  '**/*.test.ts', // Jest tests — only Jest needs to run, not Playwright
-];
 
 const [mergeBase, outPath] = process.argv.slice(2);
 
