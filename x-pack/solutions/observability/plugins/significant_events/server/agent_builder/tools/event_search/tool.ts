@@ -15,6 +15,7 @@ import dedent from 'dedent';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
@@ -217,6 +218,7 @@ export function createSearchEventsTool({
       try {
         const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanReadSignificantEvents({ request, server });
 
         const data = await searchEventsToolHandler({
           eventSearchClient: await getEventSearchClient(),
