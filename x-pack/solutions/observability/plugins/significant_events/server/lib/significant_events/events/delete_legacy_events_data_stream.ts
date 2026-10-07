@@ -15,6 +15,7 @@ const isNotFound = (error: unknown): boolean =>
 
 /**
  * Deletes the retired data stream and template without backfilling its history into `.rule-events`.
+ * TODO: Remove this once envs are up to date (https://github.com/elastic/kibana/issues/294271).
  */
 export const deleteLegacyEventsDataStream = async ({
   esClient,
