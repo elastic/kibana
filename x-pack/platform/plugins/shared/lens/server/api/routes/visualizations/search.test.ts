@@ -61,7 +61,6 @@ describe('Lens API - Visualizations Search Route', () => {
 
     // Setup request and response mocks using core testing utilities
     const mockCtx = {
-      loadPluginContract: jest.fn(),
       resolve: jest.fn().mockResolvedValue({
         core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
       }),
@@ -150,7 +149,6 @@ describe('Lens API - Visualizations Search Route', () => {
     const routeHandler = mockRoute.addVersion.mock.calls[0][1];
 
     const mockCtx = {
-      loadPluginContract: jest.fn(),
       resolve: jest.fn().mockResolvedValue({
         core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
       }),

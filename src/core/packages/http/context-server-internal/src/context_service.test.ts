@@ -21,9 +21,7 @@ describe('ContextService', () => {
       const service = new ContextService({ coreId } as CoreContext);
       const preboot = service.preboot({ pluginDependencies });
       expect(preboot.createContextContainer()).toBeDefined();
-      // No plugin start contract exists during preboot, so no loader is passed and the
-      // container's rejecting default stands in for `context.loadPluginContract()`.
-      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId, undefined);
+      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
     });
   });
 
@@ -36,21 +34,7 @@ describe('ContextService', () => {
 
       const setup = service.setup({ pluginDependencies });
       expect(setup.createContextContainer()).toBeDefined();
-      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId, undefined);
-    });
-
-    test('forwards the plugin contract loader to the container', () => {
-      const coreId = Symbol();
-      const service = new ContextService({ coreId } as CoreContext);
-      const loadPluginContract = jest.fn();
-
-      const setup = service.setup({ pluginDependencies, loadPluginContract });
-      expect(setup.createContextContainer()).toBeDefined();
-      expect(MockContextConstructor).toHaveBeenCalledWith(
-        pluginDependencies,
-        coreId,
-        loadPluginContract
-      );
+      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
     });
   });
 });

@@ -13,7 +13,6 @@ import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
-import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { PluginWrapper } from './plugin';
@@ -41,7 +40,6 @@ export class PluginsSystem<T extends PluginType> {
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
-  private pluginNamesByOpaqueId?: Map<PluginOpaqueId, PluginName>;
   private nodeRoles?: NodeRoles;
 
   constructor(
@@ -70,41 +68,12 @@ export class PluginsSystem<T extends PluginType> {
 
     this.plugins.set(plugin.name, plugin);
 
-    // clear derived plugin caches on addition
+    // clear sorted plugin name cache on addition
     this.sortedPluginNames = undefined;
-    this.pluginNamesByOpaqueId = undefined;
   }
 
   public getPlugins() {
     return [...this.plugins.values()];
-  }
-
-  /**
-   * Resolves a start contract on behalf of the plugin identified by `source`, backing
-   * `context.loadPluginContract()` in that plugin's route handlers. Opaque ids are what the
-   * request handler context knows about the route's owner; the runtime resolver works in plugin
-   * names and needs one to enforce that the dependency is declared in the caller's manifest.
-   *
-   * Returns `undefined` for an unknown opaque id (core's own routes, or a plugin belonging to the
-   * other plugin system) so the caller can reject with its own message.
-   */
-  public loadPluginContractFor(
-    source: PluginOpaqueId,
-    dependencyName: PluginName
-  ): Promise<unknown> | undefined {
-    const pluginName = this.getPluginNameByOpaqueId(source);
-    return pluginName === undefined
-      ? undefined
-      : this.runtimeResolver.loadPluginContract(pluginName, dependencyName);
-  }
-
-  private getPluginNameByOpaqueId(source: PluginOpaqueId): PluginName | undefined {
-    if (!this.pluginNamesByOpaqueId) {
-      this.pluginNamesByOpaqueId = new Map(
-        [...this.plugins.values()].map((plugin) => [plugin.opaqueId, plugin.name])
-      );
-    }
-    return this.pluginNamesByOpaqueId.get(source);
   }
 
   /**

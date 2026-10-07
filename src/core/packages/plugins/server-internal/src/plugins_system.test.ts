@@ -941,39 +941,6 @@ describe('deferred-init engine wiring', () => {
   });
 });
 
-describe('loadPluginContractFor', () => {
-  it('resolves via the runtime resolver, scoped to the plugin owning the opaque id', () => {
-    const plugin = createPlugin('somePlugin', { runtime: ['lazyPlugin'] });
-    pluginsSystem.addPlugin(plugin);
-
-    pluginsSystem.loadPluginContractFor(plugin.opaqueId, 'lazyPlugin');
-
-    expect(runtimeResolverMock.loadPluginContract).toHaveBeenCalledWith('somePlugin', 'lazyPlugin');
-  });
-
-  it('returns undefined for an opaque id that belongs to no plugin in this system', () => {
-    pluginsSystem.addPlugin(createPlugin('somePlugin'));
-
-    expect(pluginsSystem.loadPluginContractFor(Symbol('core'), 'lazyPlugin')).toBeUndefined();
-    expect(runtimeResolverMock.loadPluginContract).not.toHaveBeenCalled();
-  });
-
-  it('sees plugins added after a previous lookup cached the opaque-id map', () => {
-    const first = createPlugin('firstPlugin');
-    pluginsSystem.addPlugin(first);
-    pluginsSystem.loadPluginContractFor(first.opaqueId, 'lazyPlugin');
-
-    const late = createPlugin('latePlugin');
-    pluginsSystem.addPlugin(late);
-
-    pluginsSystem.loadPluginContractFor(late.opaqueId, 'lazyPlugin');
-    expect(runtimeResolverMock.loadPluginContract).toHaveBeenLastCalledWith(
-      'latePlugin',
-      'lazyPlugin'
-    );
-  });
-});
-
 describe('setup - lazy plugins cannot be injected dependencies', () => {
   const createSystemWithEngine = () =>
     new PluginsSystem(coreContext, PluginType.standard, new DeferredInitEngine(logger.get()));

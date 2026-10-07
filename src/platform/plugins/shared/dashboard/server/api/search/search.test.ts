@@ -31,7 +31,6 @@ const findWithTagFilterMock = findWithTagFilter as jest.MockedFunction<typeof fi
 
 const createRequestCtx = (): RequestHandlerContext =>
   ({
-    loadPluginContract: jest.fn(),
     resolve: jest.fn().mockResolvedValue({
       core: { savedObjects: { client: {} } },
     }),

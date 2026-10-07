@@ -20,7 +20,6 @@ describe('createDiscoverSession', () => {
     const core = coreMock.createRequestHandlerContext();
     const context = jest.mocked<RequestHandlerContext>({
       core: Promise.resolve(core),
-      loadPluginContract: jest.fn(),
       resolve: jest.fn().mockResolvedValue({ core }),
     });
     core.savedObjects.client.create.mockImplementation(async (type, attributes, options) => ({

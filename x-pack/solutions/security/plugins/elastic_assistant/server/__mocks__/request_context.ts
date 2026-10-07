@@ -95,7 +95,6 @@ const createRequestContextMock = (
     core: clients.core,
     elasticAssistant: createElasticAssistantRequestContextMock(clients),
     licensing: licensingMock.createRequestHandlerContext({ license }),
-    loadPluginContract: jest.fn(),
     resolve: jest.fn(),
   };
 };

@@ -35,7 +35,6 @@ const mockSecuritySolutionContext = {
 };
 
 const mockContext = {
-  loadPluginContract: jest.fn(),
   resolve: jest.fn().mockResolvedValue(mockSecuritySolutionContext),
 } as unknown as SecuritySolutionRequestHandlerContext;
 

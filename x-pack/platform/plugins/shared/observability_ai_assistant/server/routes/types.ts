@@ -36,7 +36,7 @@ type ObservabilityAIAssistantRequestHandlerContextBase = CustomRequestHandlerCon
 // with the context that's available when executing as an action
 export type ObservabilityAIAssistantRequestHandlerContext = Omit<
   ObservabilityAIAssistantRequestHandlerContextBase,
-  'core' | 'resolve' | 'loadPluginContract'
+  'core' | 'resolve'
 > & {
   core: Promise<{
     elasticsearch: {

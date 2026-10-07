@@ -10,17 +10,12 @@
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { IContextContainer } from '@kbn/core-http-server';
-import { ContextContainer, type PluginContractLoader } from './context_container';
+import { ContextContainer } from './context_container';
 
 type PrebootDeps = SetupDeps;
 
 export interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
-  /**
-   * Backs `context.loadPluginContract()`. Omitted for preboot, where no plugin start contract
-   * exists yet, leaving the container's rejecting default in place.
-   */
-  loadPluginContract?: PluginContractLoader;
 }
 
 /** @internal */
@@ -31,17 +26,16 @@ export class ContextService {
     return this.getContextContainerFactory(pluginDependencies);
   }
 
-  public setup({ pluginDependencies, loadPluginContract }: SetupDeps): InternalContextSetup {
-    return this.getContextContainerFactory(pluginDependencies, loadPluginContract);
+  public setup({ pluginDependencies }: SetupDeps): InternalContextSetup {
+    return this.getContextContainerFactory(pluginDependencies);
   }
 
   private getContextContainerFactory(
-    pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
-    loadPluginContract?: PluginContractLoader
+    pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>
   ) {
     return {
       createContextContainer: () => {
-        return new ContextContainer(pluginDependencies, this.core.coreId, loadPluginContract);
+        return new ContextContainer(pluginDependencies, this.core.coreId);
       },
     };
   }

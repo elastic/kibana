@@ -46,7 +46,6 @@ describe('upsertDiscoverSession', () => {
     coreContext = coreMock.createRequestHandlerContext();
     requestContext = jest.mocked<RequestHandlerContext>({
       core: Promise.resolve(coreContext),
-      loadPluginContract: jest.fn(),
       resolve: jest.fn().mockResolvedValue({ core: coreContext }),
     });
   });

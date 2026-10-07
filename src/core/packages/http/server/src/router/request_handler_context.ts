@@ -24,32 +24,7 @@ export interface RequestHandlerContextBase {
    * const pluginAService = resolved.pluginA.someService;
    * ```
    */
-  resolve: <T extends keyof Omit<this, 'resolve' | 'loadPluginContract'>>(
+  resolve: <T extends keyof Omit<this, 'resolve'>>(
     parts: T[]
   ) => Promise<AwaitedProperties<Pick<this, T>>>;
-
-  /**
-   * Load a declared dependency's start contract, waiting for it to become safe to use: the
-   * dependency's `start()` must have returned, and if it opted into deferred (lazy)
-   * initialization, that initialization must have completed. The route handler is post-boot, so
-   * this is the natural place to reach a lazy plugin.
-   *
-   * This is the request-handler equivalent of `core.plugins.loadPluginContract()`, scoped to the
-   * plugin that registered the route: the dependency must be declared in that plugin's manifest
-   * (as a required, optional, or `runtimePluginDependencies` entry), otherwise this rejects.
-   *
-   * Rejects with a `DeferredInitializationError` if the dependency's deferred initialization
-   * ultimately fails; letting that escape the handler yields a `503`.
-   *
-   * @example
-   * ```ts
-   * router.get({ path, validate }, async (context, request, response) => {
-   *   const fleet = await context.loadPluginContract<FleetStartContract>('fleet');
-   *   return response.ok({ body: await fleet.getSomething() });
-   * });
-   * ```
-   *
-   * @experimental
-   */
-  loadPluginContract: <T>(dependencyName: string) => Promise<T>;
 }

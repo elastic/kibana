@@ -48,9 +48,7 @@ jest.mock('../../services/secrets', () => ({
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
-  let context: AwaitedProperties<
-    Omit<FleetRequestHandlerContext, 'resolve' | 'loadPluginContract'>
-  >;
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
@@ -152,9 +150,7 @@ describe('FleetSetupHandler', () => {
 });
 
 describe('FleetStatusHandler', () => {
-  let context: AwaitedProperties<
-    Omit<FleetRequestHandlerContext, 'resolve' | 'loadPluginContract'>
-  >;
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
