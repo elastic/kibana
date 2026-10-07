@@ -64,10 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Error should be visible
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
-
-      await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
       // Setup a successful response for the retry
@@ -115,6 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Error should be visible
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
@@ -184,6 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Error should be visible in the current conversation
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
@@ -247,6 +248,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Error should be visible
+      await testSubjects.find('agentBuilderRoundError');
       const isErrorVisible = await agentBuilder.isErrorVisible();
       expect(isErrorVisible).to.be(true);
 
