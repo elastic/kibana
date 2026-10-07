@@ -87,7 +87,8 @@ const paginationSchema = z.discriminatedUnion('style', [
   z
     .object({
       style: z.literal('next_url'),
-      request: nextUrlRequestSchema,
+      /** Omitted for opaque URLs that name no page parameter, such as Azure's `nextLink`. */
+      request: nextUrlRequestSchema.optional(),
       response: z.object({ itemsPath, nextPath: z.string().min(1) }).strict(),
       end: z.enum(['null', 'missing']).optional(),
       ...defaultSize,
