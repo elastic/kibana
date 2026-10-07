@@ -37,9 +37,13 @@ const pillLabels = () =>
     .getAllByRole('button')
     .map((button) => button.getAttribute('aria-label'));
 
+/** Width jsdom reports for the Impact row; three 100px pills per line at the 320px default. */
+let containerWidth = 320;
+
 /**
  * jsdom has no layout, so give the measured elements fixed widths: 100px pills,
- * a 40px `+n` pill and a 320px row. With the 8px gap that is three pills per row.
+ * a 40px `+n` pill and `containerWidth` for the row. With the 8px gap the
+ * default is three pills per row.
  */
 const mockPillWidths = () =>
   jest
@@ -51,9 +55,33 @@ const mockPillWidths = () =>
           ? 100
           : testSubj === IMPACT_OVERFLOW_TEST_SUBJ
           ? 40
-          : 320;
+          : containerWidth;
       return { width, height: 0, top: 0, left: 0, right: width, bottom: 0, x: 0, y: 0 } as DOMRect;
     });
+
+/**
+ * EUI's test build of `useResizeObserver` measures once on mount, so stand in
+ * for it to report a later resize the way the browser would.
+ */
+const mockObservedWidth = { width: 0, height: 0 };
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    useResizeObserver: jest.fn(() => mockObservedWidth),
+  };
+});
+
+/** Reports a new row width and re-renders a fresh element, as the observer would. */
+const resizeRowTo = (
+  width: number,
+  rerender: (ui: React.ReactElement) => void,
+  makeUi: () => React.ReactElement
+) => {
+  containerWidth = width;
+  mockObservedWidth.width = width;
+  rerender(makeUi());
+};
 
 const sevenHosts = Array.from({ length: 7 }, (_, index) =>
   investigation({ id: `inv-${index}`, entityIds: [`host-${index}`] })
@@ -115,11 +143,30 @@ describe('Impact', () => {
     let widthSpy: jest.SpyInstance;
 
     beforeEach(() => {
+      containerWidth = 320;
+      mockObservedWidth.width = 320;
       widthSpy = mockPillWidths();
     });
 
     afterEach(() => {
       widthSpy.mockRestore();
+    });
+
+    it('re-cuts the row when the container resizes', () => {
+      const makeUi = () => (
+        <Impact items={sevenHosts} entityFilter={null} onEntityFilterChange={jest.fn()} />
+      );
+      const { rerender } = renderWithKibanaRenderContext(makeUi());
+      expect(visibleRow().getAllByTestId(IMPACT_PILL_TEST_SUBJ)).toHaveLength(5);
+
+      // Two pills per row: one row of pills, then two pills and "+4".
+      resizeRowTo(212, rerender, makeUi);
+      expect(pillLabels()).toEqual(['host-0', 'host-1', 'host-2', 'Show 4 more']);
+
+      // Wide enough for everything: the "+n" pill goes away.
+      resizeRowTo(1000, rerender, makeUi);
+      expect(visibleRow().getAllByTestId(IMPACT_PILL_TEST_SUBJ)).toHaveLength(7);
+      expect(visibleRow().queryByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).not.toBeInTheDocument();
     });
 
     it('hides pills past two rows behind a +n pill that counts the hidden ones', () => {
