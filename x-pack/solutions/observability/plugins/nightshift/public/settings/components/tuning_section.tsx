@@ -15,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -69,9 +68,17 @@ export const TuningSection = ({
         title={i18n.translate('xpack.nightshift.settings.tuningTitle', {
           defaultMessage: 'Significant events tuning',
         })}
+        description={
+          <p>
+            {i18n.translate('xpack.nightshift.settings.tuningInfo', {
+              defaultMessage:
+                'Controls how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
+            })}
+          </p>
+        }
         data-test-subj="nightshiftSettingsTuningPanel"
       >
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
@@ -85,16 +92,6 @@ export const TuningSection = ({
                 defaultMessage: 'Edit tuning document',
               })}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('xpack.nightshift.settings.tuningInfo', {
-                  defaultMessage:
-                    'These settings control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
-                })}
-              </p>
-            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </SettingsSectionRow>

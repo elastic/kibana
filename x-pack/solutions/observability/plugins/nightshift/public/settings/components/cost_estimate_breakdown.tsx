@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiText,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,6 +30,13 @@ import {
 
 const PRICING_URL =
   'https://cloud.elastic.co/cloud-pricing-table?productType=serverless&solution=elasticsearch';
+
+type CostBreakdownRow = {
+  group: CostBudgetGroup;
+  groupLabel: string;
+  todayGroup: BudgetGroupCost;
+  monthGroup: BudgetGroupCost;
+};
 
 const GROUP_LABELS: Record<CostBudgetGroup, string> = {
   discovery: i18n.translate('xpack.nightshift.settings.costEstimate.discoveryRowTitle', {
@@ -119,46 +129,137 @@ export const CostData = ({
     values: { today: todayText, month: monthText },
   });
 
+  const tableItems = useMemo(
+    (): CostBreakdownRow[] =>
+      COST_BUDGET_GROUPS.flatMap((groupName) => {
+        const todayGroup = data.today.groups.find((group) => group.group === groupName);
+        const monthGroup = data.month.groups.find((group) => group.group === groupName);
+        if (!todayGroup || !monthGroup) {
+          return [];
+        }
+        return [
+          {
+            group: groupName,
+            groupLabel: GROUP_LABELS[groupName],
+            todayGroup,
+            monthGroup,
+          },
+        ];
+      }),
+    [data.month.groups, data.today.groups]
+  );
+
+  const tableColumns = useMemo(
+    (): Array<EuiBasicTableColumn<CostBreakdownRow>> => [
+      {
+        field: 'groupLabel',
+        name: i18n.translate('xpack.nightshift.settings.costEstimate.groupColumnTitle', {
+          defaultMessage: 'Group',
+        }),
+        textOnly: true,
+        render: (groupLabel: CostBreakdownRow['groupLabel']) => (
+          <EuiText size="xs">{groupLabel}</EuiText>
+        ),
+      },
+      {
+        field: 'todayGroup',
+        name: i18n.translate('xpack.nightshift.settings.costEstimate.todayColumnTitle', {
+          defaultMessage: 'Today',
+        }),
+        textOnly: true,
+        render: (todayGroup: BudgetGroupCost, item: CostBreakdownRow) => (
+          <CostValue
+            period={data.today}
+            group={todayGroup}
+            testSubj={`nightshiftCostGroupToday-${item.group}`}
+          />
+        ),
+      },
+      {
+        field: 'monthGroup',
+        name: i18n.translate('xpack.nightshift.settings.costEstimate.thisMonthColumnTitle', {
+          defaultMessage: 'This month',
+        }),
+        textOnly: true,
+        render: (monthGroup: BudgetGroupCost, item: CostBreakdownRow) => (
+          <CostValue
+            period={data.month}
+            group={monthGroup}
+            testSubj={`nightshiftCostGroupMonth-${item.group}`}
+          />
+        ),
+      },
+    ],
+    [data.month, data.today]
+  );
+
   return (
     <>
-      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText size="s">
-            <p data-test-subj="nightshiftCostHeadline">
-              {headline}
-              {hasPartialNumericTotal ? (
-                <>
-                  {' '}
-                  <EuiBadge color="warning" data-test-subj="nightshiftCostTotalPartialBadge">
-                    {PARTIAL_FLOOR_LABEL}
-                  </EuiBadge>
-                </>
-              ) : null}
-            </p>
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            <p data-test-subj="nightshiftCostAsOf">
-              <FormattedMessage
-                id="xpack.nightshift.settings.costEstimate.asOfLabel"
-                defaultMessage="as of {asOf} at <pricingLink>current list prices</pricingLink>"
-                values={{
-                  asOf: asOfTime,
-                  pricingLink: (chunks) => (
-                    <EuiLink
-                      href={PRICING_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      external
-                      data-test-subj="nightshiftCostPricingLink"
-                    >
-                      {chunks}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
+      <EuiText size="s">
+        <p data-test-subj="nightshiftCostHeadline">
+          {headline}
+          {hasPartialNumericTotal ? (
+            <>
+              {' '}
+              <EuiBadge color="warning" data-test-subj="nightshiftCostTotalPartialBadge">
+                {PARTIAL_FLOOR_LABEL}
+              </EuiBadge>
+            </>
+          ) : null}
+        </p>
+      </EuiText>
+      <EuiText size="xs" color="subdued">
+        <p data-test-subj="nightshiftCostAsOf">
+          <FormattedMessage
+            id="xpack.nightshift.settings.costEstimate.asOfLabel"
+            defaultMessage="as of {asOf} at <pricingLink>current list prices</pricingLink>"
+            values={{
+              asOf: asOfTime,
+              pricingLink: (chunks) => (
+                <EuiLink
+                  href={PRICING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  external
+                  data-test-subj="nightshiftCostPricingLink"
+                >
+                  {chunks}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+
+      <EuiSpacer />
+
+      <EuiBasicTable
+        compressed
+        css={css`
+          width: 100%;
+
+          .euiTableRow:hover {
+            background-color: transparent;
+            cursor: default;
+          }
+        `}
+        itemId="group"
+        items={tableItems}
+        columns={tableColumns}
+        responsiveBreakpoint={false}
+        rowHeader="firstColumn"
+        rowProps={(item) => ({
+          'data-test-subj': `nightshiftCostGroup-${item.group}`,
+        })}
+        tableCaption={i18n.translate('xpack.nightshift.settings.costEstimate.breakdownTableCaption', {
+          defaultMessage: 'Inference cost by group for today and this month',
+        })}
+        tableLayout="fixed"
+      />
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup justifyContent="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
@@ -174,70 +275,6 @@ export const CostData = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.groupColumnTitle', {
-                defaultMessage: 'Group',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.todayColumnTitle', {
-                defaultMessage: 'Today',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('xpack.nightshift.settings.costEstimate.thisMonthColumnTitle', {
-                defaultMessage: 'This month',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {COST_BUDGET_GROUPS.map((groupName) => {
-        const todayGroup = data.today.groups.find((group) => group.group === groupName);
-        const monthGroup = data.month.groups.find((group) => group.group === groupName);
-        if (!todayGroup || !monthGroup) {
-          return null;
-        }
-        return (
-          <EuiFlexGroup
-            key={groupName}
-            alignItems="center"
-            data-test-subj={`nightshiftCostGroup-${groupName}`}
-          >
-            <EuiFlexItem>
-              <EuiText size="s">{GROUP_LABELS[groupName]}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CostValue
-                period={data.today}
-                group={todayGroup}
-                testSubj={`nightshiftCostGroupToday-${groupName}`}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CostValue
-                period={data.month}
-                group={monthGroup}
-                testSubj={`nightshiftCostGroupMonth-${groupName}`}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      })}
     </>
   );
 };

@@ -24,15 +24,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  MAINTENANCE_FEATURE_FLAG_ACTOR,
-  type SignificantEventsMaintenanceStatus,
-} from '@kbn/significant-events-plugin/common';
+import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
 } from '../hooks/use_significant_events_maintenance';
 import { SettingsSectionRow } from './settings_section';
+import { useMaintenanceActivityCounts } from './use_maintenance_activity_counts';
 
 const SECTION_TITLE = i18n.translate('xpack.nightshift.settings.maintenance.title', {
   defaultMessage: 'Detection engine activity',
@@ -43,106 +41,90 @@ const SECTION_DESCRIPTION = i18n.translate('xpack.nightshift.settings.maintenanc
     'Controls detection activity across all spaces, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Existing data always persists.',
 });
 
-function PausedSummary({ status }: { status: SignificantEventsMaintenanceStatus }) {
-  const { updatedBy, lastSummary } = status;
-  const pausedByFeatureFlag = updatedBy === MAINTENANCE_FEATURE_FLAG_ACTOR;
-  const workflowsDisabled = lastSummary?.workflowsDisabled ?? 0;
-  const rulesDisabled = lastSummary?.rulesDisabled ?? 0;
-  const failureCount = lastSummary?.partialFailures.length ?? 0;
-  const hasCounts = workflowsDisabled > 0 || rulesDisabled > 0;
+function MaintenanceActivityCountsSummary({
+  status,
+  automationCount,
+  ruleCount,
+}: {
+  status: SignificantEventsMaintenanceStatus;
+  automationCount: number;
+  ruleCount: number;
+}) {
+  const isPaused = status.state === 'paused';
+  const failureCount = status.lastSummary?.partialFailures.length ?? 0;
+  const iconType = isPaused ? 'clock' : 'check';
+  const iconColor = isPaused ? 'subdued' : 'success';
 
   return (
     <EuiFlexGroup
       direction="column"
       gutterSize="xs"
-      data-test-subj="streams-settings-maintenance-paused-status"
+      data-test-subj="streams-settings-maintenance-paused-counts"
     >
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="pause" color="warning" size="s" aria-hidden={true} />
+            <EuiIcon type={iconType} color={iconColor} size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('xpack.nightshift.settings.maintenance.pausedTitle', {
-                  defaultMessage: 'Detection engine is paused',
-                })}
-              </strong>
-            </EuiText>
+            {isPaused ? (
+              <EuiText color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.nightshift.settings.maintenance.disabledAutomationsSummary',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# automation disabled} other {# automations disabled}}',
+                      values: { count: automationCount },
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ) : (
+              <EuiText>
+                <p>
+                  {i18n.translate(
+                    'xpack.nightshift.settings.maintenance.enabledAutomationsSummary',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# automation enabled} other {# automations enabled}}',
+                      values: { count: automationCount },
+                    }
+                  )}
+                </p>
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-
-      {updatedBy && !pausedByFeatureFlag && (
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.nightshift.settings.maintenance.pausedBy"
-                defaultMessage="Paused by {pausedBy}."
-                values={{ pausedBy: <strong>{updatedBy}</strong> }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-
-      {hasCounts && (
-        <>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>
-                    {i18n.translate(
-                      'xpack.nightshift.settings.maintenance.pausedAutomationsSummary',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {# automation paused} other {# automations paused}}',
-                        values: { count: workflowsDisabled },
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={iconType} color={iconColor} size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>
-                    {i18n.translate('xpack.nightshift.settings.maintenance.pausedRulesSummary', {
-                      defaultMessage: '{count, plural, one {# rule paused} other {# rules paused}}',
-                      values: { count: rulesDisabled },
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {isPaused ? (
+              <EuiText color="subdued">
+                <p>
+                  {i18n.translate('xpack.nightshift.settings.maintenance.disabledRulesSummary', {
+                    defaultMessage: '{count, plural, one {# rule disabled} other {# rules disabled}}',
+                    values: { count: ruleCount },
+                  })}
+                </p>
+              </EuiText>
+            ) : (
+              <EuiText>
+                <p>
+                  {i18n.translate('xpack.nightshift.settings.maintenance.enabledRulesSummary', {
+                    defaultMessage: '{count, plural, one {# rule enabled} other {# rules enabled}}',
+                    values: { count: ruleCount },
+                  })}
+                </p>
+              </EuiText>
+            )}
           </EuiFlexItem>
-        </>
-      )}
-
-      {pausedByFeatureFlag && (
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.nightshift.settings.maintenance.pausedByFeatureFlag"
-                defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it. The alerting rules backing knowledge indicator queries were left running."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       {failureCount > 0 && (
         <EuiFlexItem>
@@ -177,6 +159,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const paused = status?.state === 'paused';
   const isMutating = isPausing || isResuming;
   const statusReady = !isLoading && !isError && status !== undefined;
+  const { automationCount, ruleCount } = useMaintenanceActivityCounts(status);
 
   const onConfirm = () => {
     setIsModalOpen(false);
@@ -298,10 +281,14 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {paused && status && (
+        {statusReady && status && (
           <>
-            <EuiSpacer size="s" />
-            <PausedSummary status={status} />
+            <EuiSpacer size="m" />
+            <MaintenanceActivityCountsSummary
+              status={status}
+              automationCount={automationCount}
+              ruleCount={ruleCount}
+            />
           </>
         )}
       </SettingsSectionRow>

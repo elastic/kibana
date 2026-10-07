@@ -14,8 +14,11 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
   EuiToolTip,
+  logicalCSS,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -34,6 +37,160 @@ const clampNumber = (value: string, min: number, max: number) => {
   }
   return Math.min(max, Math.max(min, parsed));
 };
+
+const AdvancedScheduleSettingsFields = ({
+  scheduledDiscovery,
+  isActivityConfigDisabled,
+}: {
+  scheduledDiscovery: DetectionSettingsForm['scheduledDiscovery'];
+  isActivityConfigDisabled: DetectionSettingsForm['isActivityConfigDisabled'];
+}) => (
+  <>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.nightshift.settings.detectionIntervalLabel', {
+        defaultMessage: 'Detection interval (minutes)',
+      })}
+      helpText={i18n.translate('xpack.nightshift.settings.detectionIntervalHelp', {
+        defaultMessage: 'How often scheduled detection runs.',
+      })}
+    >
+      <EuiFieldNumber
+        fullWidth
+        compressed
+        data-test-subj="streams-settings-scheduled-detection-interval"
+        value={scheduledDiscovery.draft.detectionIntervalMinutes}
+        onChange={(event) =>
+          scheduledDiscovery.setDraft((previous) => ({
+            ...previous,
+            detectionIntervalMinutes: clampNumber(
+              event.target.value,
+              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+              Number.MAX_SAFE_INTEGER
+            ),
+          }))
+        }
+        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.nightshift.settings.targetCoverageLabel', {
+        defaultMessage: 'Target coverage (minutes)',
+      })}
+      helpText={i18n.translate('xpack.nightshift.settings.targetCoverageHelp', {
+        defaultMessage:
+          'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
+      })}
+    >
+      <EuiFieldNumber
+        fullWidth
+        compressed
+        data-test-subj="streams-settings-scheduled-target-coverage"
+        value={scheduledDiscovery.draft.targetCoverageMinutes}
+        onChange={(event) =>
+          scheduledDiscovery.setDraft((previous) => ({
+            ...previous,
+            targetCoverageMinutes: clampNumber(
+              event.target.value,
+              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+              Number.MAX_SAFE_INTEGER
+            ),
+          }))
+        }
+        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.nightshift.settings.reviewIntervalLabel', {
+        defaultMessage: 'Review interval (minutes)',
+      })}
+      helpText={i18n.translate('xpack.nightshift.settings.reviewIntervalHelp', {
+        defaultMessage: 'How often scheduled discovery review runs.',
+      })}
+    >
+      <EuiFieldNumber
+        fullWidth
+        compressed
+        data-test-subj="streams-settings-scheduled-review-interval"
+        value={scheduledDiscovery.draft.reviewIntervalMinutes}
+        onChange={(event) =>
+          scheduledDiscovery.setDraft((previous) => ({
+            ...previous,
+            reviewIntervalMinutes: clampNumber(
+              event.target.value,
+              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+              Number.MAX_SAFE_INTEGER
+            ),
+          }))
+        }
+        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.nightshift.settings.discoveryBatchSizeLabel', {
+        defaultMessage: 'Discovery batch size',
+      })}
+      helpText={i18n.translate('xpack.nightshift.settings.discoveryBatchSizeHelp', {
+        defaultMessage: 'Maximum detections sent to each scheduled discovery pass.',
+      })}
+    >
+      <EuiFieldNumber
+        fullWidth
+        compressed
+        data-test-subj="streams-settings-scheduled-discovery-batch-size"
+        value={scheduledDiscovery.draft.discoveryBatchSize}
+        onChange={(event) =>
+          scheduledDiscovery.setDraft((previous) => ({
+            ...previous,
+            discoveryBatchSize: clampNumber(
+              event.target.value,
+              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
+            ),
+          }))
+        }
+        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.nightshift.settings.maxReviewPassesLabel', {
+        defaultMessage: 'Review passes',
+      })}
+      helpText={i18n.translate('xpack.nightshift.settings.maxReviewPassesHelp', {
+        defaultMessage: 'Maximum discovery passes per scheduled review run.',
+      })}
+    >
+      <EuiFieldNumber
+        fullWidth
+        compressed
+        data-test-subj="streams-settings-scheduled-max-review-passes"
+        value={scheduledDiscovery.draft.maxReviewPasses}
+        onChange={(event) =>
+          scheduledDiscovery.setDraft((previous) => ({
+            ...previous,
+            maxReviewPasses: clampNumber(
+              event.target.value,
+              MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+              MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
+            ),
+          }))
+        }
+        min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+        max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+      />
+    </EuiFormRow>
+  </>
+);
 
 export const ScheduledDiscoverySection = ({
   scheduledDiscovery,
@@ -88,165 +245,42 @@ export const ScheduledDiscoverySection = ({
       </EuiFormRow>
       {scheduledDiscovery.draft.enabled && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiAccordion
             id="nightshiftScheduledDiscoveryAdvancedSettings"
-            buttonContent={i18n.translate(
-              'xpack.nightshift.settings.scheduledDiscoveryAdvancedSettings',
-              {
-                defaultMessage: 'Advanced schedule settings',
-              }
-            )}
+            buttonContent={
+              <EuiTitle size="xxs" className="euiDescribedFormGroup__title">
+                <h4>
+                  {i18n.translate(
+                    'xpack.nightshift.settings.scheduledDiscoveryAdvancedSettingsExpand',
+                    {
+                      defaultMessage: 'Interval, coverage, and batch options',
+                    }
+                  )}
+                </h4>
+              </EuiTitle>
+            }
             buttonProps={{
               'data-test-subj': 'streams-settings-scheduled-discovery-advanced-settings',
+              css: css`
+                &:hover,
+                &:focus {
+                  text-decoration: none;
+                }
+              `,
             }}
             paddingSize="m"
+            css={css`
+              .euiAccordion__children {
+                ${logicalCSS('padding-left', 0)};
+                ${logicalCSS('padding-right', 0)};
+              }
+            `}
           >
-            <>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.nightshift.settings.detectionIntervalLabel', {
-                  defaultMessage: 'Detection interval (minutes)',
-                })}
-                helpText={i18n.translate('xpack.nightshift.settings.detectionIntervalHelp', {
-                  defaultMessage: 'How often scheduled detection runs.',
-                })}
-              >
-                <EuiFieldNumber
-                  fullWidth
-                  compressed
-                  data-test-subj="streams-settings-scheduled-detection-interval"
-                  value={scheduledDiscovery.draft.detectionIntervalMinutes}
-                  onChange={(event) =>
-                    scheduledDiscovery.setDraft((previous) => ({
-                      ...previous,
-                      detectionIntervalMinutes: clampNumber(
-                        event.target.value,
-                        MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                        Number.MAX_SAFE_INTEGER
-                      ),
-                    }))
-                  }
-                  min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                  disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.nightshift.settings.targetCoverageLabel', {
-                  defaultMessage: 'Target coverage (minutes)',
-                })}
-                helpText={i18n.translate('xpack.nightshift.settings.targetCoverageHelp', {
-                  defaultMessage:
-                    'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
-                })}
-              >
-                <EuiFieldNumber
-                  fullWidth
-                  compressed
-                  data-test-subj="streams-settings-scheduled-target-coverage"
-                  value={scheduledDiscovery.draft.targetCoverageMinutes}
-                  onChange={(event) =>
-                    scheduledDiscovery.setDraft((previous) => ({
-                      ...previous,
-                      targetCoverageMinutes: clampNumber(
-                        event.target.value,
-                        MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                        Number.MAX_SAFE_INTEGER
-                      ),
-                    }))
-                  }
-                  min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                  disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.nightshift.settings.reviewIntervalLabel', {
-                  defaultMessage: 'Review interval (minutes)',
-                })}
-                helpText={i18n.translate('xpack.nightshift.settings.reviewIntervalHelp', {
-                  defaultMessage: 'How often scheduled discovery review runs.',
-                })}
-              >
-                <EuiFieldNumber
-                  fullWidth
-                  compressed
-                  data-test-subj="streams-settings-scheduled-review-interval"
-                  value={scheduledDiscovery.draft.reviewIntervalMinutes}
-                  onChange={(event) =>
-                    scheduledDiscovery.setDraft((previous) => ({
-                      ...previous,
-                      reviewIntervalMinutes: clampNumber(
-                        event.target.value,
-                        MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                        Number.MAX_SAFE_INTEGER
-                      ),
-                    }))
-                  }
-                  min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                  disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.nightshift.settings.discoveryBatchSizeLabel', {
-                  defaultMessage: 'Discovery batch size',
-                })}
-                helpText={i18n.translate('xpack.nightshift.settings.discoveryBatchSizeHelp', {
-                  defaultMessage: 'Maximum detections sent to each scheduled discovery pass.',
-                })}
-              >
-                <EuiFieldNumber
-                  fullWidth
-                  compressed
-                  data-test-subj="streams-settings-scheduled-discovery-batch-size"
-                  value={scheduledDiscovery.draft.discoveryBatchSize}
-                  onChange={(event) =>
-                    scheduledDiscovery.setDraft((previous) => ({
-                      ...previous,
-                      discoveryBatchSize: clampNumber(
-                        event.target.value,
-                        MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                        MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                      ),
-                    }))
-                  }
-                  min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                  max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                  disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate('xpack.nightshift.settings.maxReviewPassesLabel', {
-                  defaultMessage: 'Review passes',
-                })}
-                helpText={i18n.translate('xpack.nightshift.settings.maxReviewPassesHelp', {
-                  defaultMessage: 'Maximum discovery passes per scheduled review run.',
-                })}
-              >
-                <EuiFieldNumber
-                  fullWidth
-                  compressed
-                  data-test-subj="streams-settings-scheduled-max-review-passes"
-                  value={scheduledDiscovery.draft.maxReviewPasses}
-                  onChange={(event) =>
-                    scheduledDiscovery.setDraft((previous) => ({
-                      ...previous,
-                      maxReviewPasses: clampNumber(
-                        event.target.value,
-                        MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-                        MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
-                      ),
-                    }))
-                  }
-                  min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                  max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                  disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                />
-              </EuiFormRow>
-            </>
+            <AdvancedScheduleSettingsFields
+              scheduledDiscovery={scheduledDiscovery}
+              isActivityConfigDisabled={isActivityConfigDisabled}
+            />
           </EuiAccordion>
         </>
       )}

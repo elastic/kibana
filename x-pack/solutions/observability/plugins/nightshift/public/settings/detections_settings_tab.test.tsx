@@ -29,6 +29,12 @@ jest.mock('./hooks/use_significant_events_maintenance', () => ({
     status: undefined,
     activityBlockTooltip: undefined,
   }),
+  useMaintenanceStatus: () => ({
+    data: { state: 'enabled' },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
 }));
 jest.mock('./components/use_continuous_extraction_settings', () => ({
   useContinuousExtractionSettings: () => ({

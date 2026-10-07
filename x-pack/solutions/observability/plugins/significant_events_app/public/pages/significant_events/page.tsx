@@ -43,6 +43,7 @@ import { useDecisionTreesEnabled } from './components/decision_trees/use_decisio
 import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
+import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
 
 const significantEventsTabs = [
@@ -333,51 +334,11 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {isBlocked && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                color="warning"
-                iconType="pause"
-                data-test-subj="significantEventsPausedBanner"
-                title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
-                  defaultMessage: 'Significant Events activity is paused',
-                })}
-              >
-                <p>
-                  {canManageAndConfigure
-                    ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
-                        defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                      })
-                    : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
-                        defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
-                      })}
-                </p>
-                {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
-                  <p>
-                    {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
-                      defaultMessage:
-                        'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-                    })}
-                  </p>
-                )}
-                {canManageAndConfigure && (
-                  <EuiButton
-                    href={detectionSettingsHref}
-                    color="warning"
-                    size="s"
-                    data-test-subj="significantEventsPausedBannerSettingsLink"
-                  >
-                    {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
-                      defaultMessage: 'Go to Settings',
-                    })}
-                  </EuiButton>
-                )}
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
+          {isBlocked && maintenanceStatus && (
+            <PausedActivityCallout
+              status={maintenanceStatus}
+              settingsHref={detectionSettingsHref}
+            />
           )}
           <RunLimitsBanner />
           {canShow && (
