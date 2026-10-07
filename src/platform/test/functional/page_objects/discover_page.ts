@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getUrl } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -1338,7 +1339,13 @@ export class DiscoverPageObject extends FtrService {
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
    * flag), so `defaultMode` defaults to `'esql'` to match the enabled default.
    */
-  public setQueryMode(currentMode: string, defaultMode: string = 'esql') {
+  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
+    const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {
+      await this.browser.get(kibanaUrl);
+    }
+
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
       JSON.stringify({ currentMode, defaultMode })
