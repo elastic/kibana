@@ -8,7 +8,7 @@
  */
 
 export { DeferredInitEngine } from './deferred_init_engine';
-export type { DeferredInitRunner, DeferredInitFailureDetails } from './deferred_init_engine';
+export type { PluginInitRunner, PluginLifecyclePhase } from './deferred_init_engine';
 export { createGuardedRouter } from './guarded_router';
 export { registerDeferredInitStatusRoute } from './register_status_route';
 export { toServiceStatus } from './status_mapping';
@@ -17,5 +17,5 @@ export {
   DEFERRED_INIT_BACKOFF_FACTOR,
   DEFERRED_INIT_BACKOFF_MAX_MS,
   DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS,
-  DEFERRED_START_TIMEOUT_MS,
+  DEFERRED_INIT_SLOW_ATTEMPT_WARNING_MS,
 } from './backoff';

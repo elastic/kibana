@@ -8,9 +8,9 @@
  */
 
 /**
- * Backoff scale for {@link DeferredInitEngine}'s cooldown between failed attempts at a lazy
- * plugin's deferred phases (`lazyInitialize`, then `start`). Applied with full jitter, so the
- * values below bound the delay rather than fixing it.
+ * Backoff scale for {@link DeferredInitEngine}'s cooldown between failed attempts at a plugin's
+ * `initialize()`. Applied with full jitter, so the values below bound the delay rather than
+ * fixing it.
  *
  * The base and ceiling are intentionally modelled on Fleet's battle-tested Serverless retry
  * profile (`retrySetupOnBoot`), which was tuned for slow-starting Elasticsearch clusters that can
@@ -41,9 +41,10 @@ export const DEFERRED_INIT_BACKOFF_FACTOR = 2;
 
 /**
  * Maximum number of automatic background retries before the cooldown timer stops firing.
- * After this many consecutive failures the engine stays `failed` and waits for an explicit
- * on-demand kick (an incoming gated request or a {@link DeferredInitEngine.waitUntilAvailable}
- * call) rather than scheduling further unsolicited retries.
+ * After this many consecutive failures the engine stays `failed` and waits for an on-demand kick
+ * (a request to one of the plugin's routes, or an `initialize()` /
+ * {@link DeferredInitEngine.waitUntilAvailable} call) rather than scheduling further unsolicited
+ * retries.
  *
  * Matches Fleet's historic `retrySetupOnBoot` attempt cap, which was the most battle-tested
  * value for Serverless Elasticsearch cold-start scenarios (see kibana#167246).
@@ -51,9 +52,9 @@ export const DEFERRED_INIT_BACKOFF_FACTOR = 2;
 export const DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS = 25;
 
 /**
- * Timeout applied to a lazy plugin's deferred `start()`. It runs off the boot path, so the boot
- * loop's own 10 s watchdog no longer covers it; this keeps the same budget so a hung `start()`
- * surfaces as a `failed` attempt instead of pinning the plugin at `initializing` forever.
- * `lazyInitialize()` deliberately gets no timeout: it is the phase that is allowed to be slow.
+ * How long a single `initialize()` attempt may run before the engine warns that it is still in
+ * flight. Attempts are never timed out, since `initialize()` is the work that is allowed to be
+ * slow; the warning only makes a hung or unusually slow attempt visible in the logs while the
+ * plugin's routes and apps stay unavailable.
  */
-export const DEFERRED_START_TIMEOUT_MS = 10_000;
+export const DEFERRED_INIT_SLOW_ATTEMPT_WARNING_MS = 10_000;
