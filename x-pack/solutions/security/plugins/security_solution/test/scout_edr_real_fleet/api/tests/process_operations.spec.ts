@@ -13,7 +13,7 @@ import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/commo
 import { startLongRunningSleep } from '../../ui/fixtures/host_sleep';
 import { captureHostVmAgentDiagnostics } from '../fixtures/agent_diagnostics';
 import { killProcess, listRunningProcesses, suspendProcess } from '../fixtures/process_actions';
-import { apiTest } from '../fixtures';
+import { apiTest, tags } from '../fixtures';
 
 // Command the processes action reports for the installed Elastic Defend binary.
 const ENDPOINT_COMMAND = '/opt/Elastic/Endpoint/elastic-endpoint';
@@ -105,7 +105,12 @@ const waitForNewSleepPid = async (
 
 apiTest.describe(
   'Real agent process response actions',
-  { tag: ['@local-stateful-classic'] },
+  {
+    // Cypress tags were @ess, @serverless, and @skipInServerlessMKI.
+    // stateful.classic is ESS, local and Cloud. Serverless is local Security
+    // complete only, so Cloud serverless (MKI) stays out.
+    tag: [...tags.stateful.classic, '@local-serverless-security_complete'],
+  },
   () => {
     apiTest.setTimeout(TEST_TIMEOUT_MS);
 
