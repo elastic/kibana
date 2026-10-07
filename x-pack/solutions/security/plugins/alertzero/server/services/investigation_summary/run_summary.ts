@@ -77,7 +77,7 @@ const readOutput = (value: unknown): { description: string; summary: string } | 
   return { description, summary };
 };
 
-const promptFor = (templateId: string, story: string): string =>
+const promptFor = (story: string): string =>
   [
     'Read this AlertZero investigation timeline and write the card text.',
     'The timeline is the story: journal notes posted as user messages, comments, and attachments that were added.',
@@ -85,8 +85,6 @@ const promptFor = (templateId: string, story: string): string =>
     'description is one line for the investigation card.',
     'summary is the longer reading of the same story, a few sentences.',
     'Do not write conversation metadata yourself.',
-    '',
-    `Template: ${templateId}`,
     '',
     story,
   ].join('\n');
@@ -129,7 +127,7 @@ export const runInvestigationSummary = async ({
       ...(connectorId ? { connectorId } : {}),
       structuredOutput: true,
       outputSchema: OUTPUT_SCHEMA,
-      nextInput: { message: promptFor(templateId, story) },
+      nextInput: { message: promptFor(story) },
     },
   });
 

@@ -605,8 +605,14 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
-    execution.agentParams;
+  const {
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
+    projectRouting,
+    structuredOutput,
+    outputSchema,
+  } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -621,6 +627,8 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
+    structuredOutput,
+    outputSchema,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
