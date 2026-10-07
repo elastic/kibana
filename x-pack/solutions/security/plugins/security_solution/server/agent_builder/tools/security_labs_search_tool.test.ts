@@ -114,7 +114,6 @@ describe('securityLabsSearchTool', () => {
       async (spaceId) => {
         retrieveDocumentationAvailable.mockResolvedValue(false);
         const coreStart = coreMock.createStart();
-        coreStart.http.basePath.serverBasePath = '/kibana';
         mockCore.getStartServices.mockResolvedValue([
           coreStart,
           {
@@ -129,8 +128,8 @@ describe('securityLabsSearchTool', () => {
         )) as ToolHandlerStandardReturn;
         const settingsUrl =
           spaceId === 'default'
-            ? '/kibana/app/management/ai/genAiSettings'
-            : '/kibana/s/security-space/app/management/ai/genAiSettings';
+            ? '/mock-server-basepath/app/management/ai/genAiSettings'
+            : '/mock-server-basepath/s/security-space/app/management/ai/genAiSettings';
 
         expect(result.results).toHaveLength(1);
         expect(result.results[0]).toMatchObject({
