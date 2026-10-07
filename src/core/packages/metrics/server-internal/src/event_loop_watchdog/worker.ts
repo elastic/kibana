@@ -13,9 +13,7 @@
  * profiles the main thread keeps. All logs are posted to the main thread's logger.
  */
 
-import Fs from 'node:fs/promises';
 import Os from 'node:os';
-import Path from 'node:path';
 import { promisify } from 'node:util';
 import Zlib from 'node:zlib';
 import type { MessagePort } from 'node:worker_threads';
@@ -23,6 +21,7 @@ import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { Profile } from 'pprof-format';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { WriteAdmission, type AdmissionLimits } from './admission';
+import { writeFileAtomically } from './atomic_write';
 import {
   formatSummary,
   summarizeProfile,
@@ -165,8 +164,11 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
       if (admitted.write) {
         // Without samples in blocks, the whole window is the only evidence: keep it.
         if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
-        const file = Path.join(diagnosticDir, fileName(phase, maxBlockedMs, new Date()));
-        await Fs.writeFile(file, await gzip(profile.encode()));
+        const file = await writeFileAtomically(
+          diagnosticDir,
+          fileName(phase, maxBlockedMs, new Date()),
+          await gzip(profile.encode())
+        );
         outcome = { file };
       } else {
         outcome = { notWritten: admitted.reason };
