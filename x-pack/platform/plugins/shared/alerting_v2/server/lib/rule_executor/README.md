@@ -146,7 +146,9 @@ Recovery and no-data live in sibling objects that each own the ES\|QL they run. 
 
 `ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max`, further capped by the active format's `maxRows` when it declares one — `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
-`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The cap applies to all grouped rule types (`kind: 'alert'` and `kind: 'signal'`) and bounds distinct groups, not event volume: every row of an admitted group still becomes an event, up to the row limit. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
+A rule's `grouping.fields` decide how rows map to series. When they are set, `buildGroupHash` derives one `group_hash` per distinct field-value tuple. When `grouping.fields` is **absent or empty**, the rule is a single-series rule: every row the query returns shares one fixed `group_hash` (`UNGROUPED_GROUP_HASH`), i.e. one series. Within a run all those rows map to the same episode (`alert.id`); because the hash is independent of the run and of row content, that series — and its open episode — stay correlated run over run instead of being re-created every run (a `STATS` with no `BY` behaves as one long-running series). The breach, recovery-query, and data-presence paths all go through `buildGroupHash`, so they agree on this hash. A user who wants per-key series opts in by supplying `grouping.fields`.
+
+`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The cap applies to grouped rules of all kinds (`kind: 'alert'` and `kind: 'signal'`) and bounds distinct groups, not event volume: every row of an admitted group still becomes an event, up to the row limit. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run. Ungrouped rules are a single group, so the cap never applies and is skipped for them (their row volume is already bounded upstream by `alerts.max`).
 
 For `kind: 'alert'` rules, `FetchActiveGroupsStep` fetches the rule's active groups up front and threads them onto `state.activeGroups`; as already-active groups are encountered in the batch, their hashes are added to the set. This means the capacity for **new** groups is `maxGroupsPerExecution − active_groups_encountered`, not the full cap. `ClassifyAbsentGroupsStep` reuses the same pre-fetched result instead of re-querying.
 
@@ -515,3 +517,11 @@ Useful coverage points:
 - Prefer `requireState(...)` and explicit halts over assuming a field exists.
 - Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
 - If you change stored event shape, verify the resources schema and downstream readers together.
+
+## Migration from v1
+
+### `minimumScheduleInterval.enforce` removed
+
+Alerting v1 exposed `xpack.alerting.rules.minimumScheduleInterval.enforce` (defaulted to `false`). With `enforce: false`, rules with intervals shorter than `minimumScheduleInterval` produced a warning but were allowed to run. Alerting v2 always enforces the minimum — the `enforce` field does not exist and rules with shorter intervals are rejected at create/update/enable time.
+
+Deployments migrating from a v1 configuration that relied on `enforce: false` (or never set the field, picking up the lenient default) will encounter stricter validation. Rules with short intervals must be updated to a compliant schedule before enabling alerting v2.
