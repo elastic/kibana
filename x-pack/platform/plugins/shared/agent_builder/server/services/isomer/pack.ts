@@ -6,7 +6,7 @@
  */
 
 import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
-import type { MarkdownNode } from '@kbn/agent-builder-server/attachments';
+import type { IsomerMarkdownNode } from '@kbn/agent-builder-server/attachments';
 import {
   composePacks,
   createPrimitiveDispatcher,
@@ -17,7 +17,7 @@ import {
 } from '@elastic/isomer-sdk';
 
 /**
- * A `<render_attachment>` tag of the reply. `version` is absent when the tag has none.
+ * A `<render_attachment>` tag of the response message. `version` is absent when the tag has none.
  */
 export interface AttachmentNode extends PrimitiveNode {
   type: 'attachment';
@@ -25,12 +25,12 @@ export interface AttachmentNode extends PrimitiveNode {
   version?: number;
 }
 
-export type SpecNode = MarkdownNode | AttachmentNode;
+export type SpecNode = IsomerMarkdownNode | AttachmentNode;
 
-/** A reply as an Isomer composition. */
+/** A response message as an Isomer composition. */
 export type Spec = Composition<SpecNode>;
 
-const markdown = definePrimitive<MarkdownNode>({
+const markdown = definePrimitive<IsomerMarkdownNode>({
   type: 'markdown',
   schema: z.object({
     type: z.literal('markdown'),
@@ -39,7 +39,7 @@ const markdown = definePrimitive<MarkdownNode>({
   catalog: {
     type: 'markdown',
     purpose: 'A block of prose in GitHub-flavored markdown.',
-    useWhen: ['The reply is text: paragraphs, lists, links, code or tables.'],
+    useWhen: ['The message is text: paragraphs, lists, links, code or tables.'],
     avoidWhen: [],
     example: { type: 'markdown', text: 'There are **3** open alerts.' },
   },
@@ -67,7 +67,7 @@ const attachment = definePrimitive<AttachmentNode>({
   catalog: {
     type: 'attachment',
     purpose: 'A conversation attachment, rendered through its type.',
-    useWhen: ['The reply shows an attachment.'],
+    useWhen: ['The message shows an attachment.'],
     avoidWhen: [],
     example: { type: 'attachment', attachmentId: 'attachment-1', version: 1 },
   },

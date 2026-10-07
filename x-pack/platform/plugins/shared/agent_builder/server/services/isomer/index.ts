@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { renderIsomerProjection } from './render_isomer_projection';
+export { renderIsomerProjection } from './render_projection';

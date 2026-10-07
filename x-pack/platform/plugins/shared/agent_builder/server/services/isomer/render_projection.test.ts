@@ -16,7 +16,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ProjectionContext } from './types';
-import { renderIsomerProjection } from './render_isomer_projection';
+import { renderIsomerProjection } from './render_projection';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
@@ -117,11 +117,11 @@ describe('renderIsomerProjection', () => {
     ).toBeUndefined();
   });
 
-  it('renders nothing when the reply is empty', () => {
+  it('renders nothing when the message is empty', () => {
     expect(renderIsomerProjection(createRoundCompleteEvent(''), createContext())).toBeUndefined();
   });
 
-  it('renders nothing when none of the reply can be rendered', () => {
+  it('renders nothing when none of the message can be rendered', () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
     expect(renderIsomerProjection(event, createContext())).toBeUndefined();

@@ -423,7 +423,7 @@ skill that owns the relevant task. See [Inline rendering guidance in skills](#in
 
 #### `toSpec` — rendering outside Kibana
 
-Replies to rounds from external systems, such as Slack, are rendered in code from the reply: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSpec`, which maps the data of one attachment version to an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSpec`, which maps the data of one attachment version to an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes. Without it, the attachment is left out there.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {

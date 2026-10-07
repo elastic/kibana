@@ -23,6 +23,6 @@ export interface IsomerProjectionDefinition<
 > {
   /** Origin type whose rounds get this projection. */
   id: TOrigin;
-  /** Renders the reply's spec, with its attachments resolved, for the surface. */
+  /** Renders the message's spec, with its attachments resolved, for the surface. */
   render: (spec: Spec) => NonNullable<OriginIsomerProjection[TOrigin]>;
 }

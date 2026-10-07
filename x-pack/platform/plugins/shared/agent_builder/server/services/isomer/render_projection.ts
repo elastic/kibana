@@ -18,9 +18,9 @@ import type { ProjectionContext, IsomerProjectionDefinition } from './types';
 const projectionDefinitions: IsomerProjectionDefinition[] = [slackProjection];
 
 /**
- * Renders the projection of the round's origin through Isomer: the reply becomes a spec, and the
- * origin's definition renders it. Returns nothing when the origin has no projection, nothing in
- * the reply can be rendered, or rendering fails.
+ * Renders the projection of the round's origin through Isomer: the response message becomes a
+ * spec, and the origin's definition renders it. Returns nothing when the origin has no
+ * projection, nothing in the message can be rendered, or rendering fails.
  */
 export const renderIsomerProjection = (
   { data: { round, attachments = [] } }: RoundCompleteEvent,
@@ -47,7 +47,7 @@ export const renderIsomerProjection = (
 
     if (spec.body.length === 0) {
       logger.warn(
-        `Leaving out the ${definition.id} projection: none of the reply could be rendered`
+        `Leaving out the ${definition.id} projection: none of the message could be rendered`
       );
       return undefined;
     }

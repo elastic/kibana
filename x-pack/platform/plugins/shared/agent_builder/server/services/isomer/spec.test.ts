@@ -6,7 +6,7 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentSpecMapping } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentIsomerSpecMapping } from '@kbn/agent-builder-server/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildSpec, type BuildSpecOptions } from './spec';
@@ -24,13 +24,13 @@ const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAt
   ...parts,
 });
 
-const toText: AttachmentSpecMapping = (data, { version }) => ({
+const toText: AttachmentIsomerSpecMapping = (data, { version }) => ({
   type: 'view',
   title: `Text v${version}`,
   body: [{ type: 'markdown', text: (data as { content: string }).content }],
 });
 
-const createAttachmentsService = (toSpec: AttachmentSpecMapping | undefined = toText) =>
+const createAttachmentsService = (toSpec: AttachmentIsomerSpecMapping | undefined = toText) =>
   ({
     getTypeDefinition: (type: string) => (type === 'text' ? { toSpec } : undefined),
   } as unknown as AttachmentServiceStart);
@@ -122,7 +122,7 @@ describe('buildSpec', () => {
     expect(buildSpec(createOptions({ attachmentsService })).body).toEqual(textOnly);
   });
 
-  it('returns an empty spec for an empty reply', () => {
+  it('returns an empty spec for an empty message', () => {
     expect(buildSpec(createOptions({ message: ' \n<render_attachment />\n ' })).body).toEqual([]);
   });
 });

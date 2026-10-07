@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { AttachmentSpecMapping } from './spec';
+import type { AttachmentIsomerSpecMapping } from './isomer_spec';
 import type { AttachmentBoundedTool } from './tools';
 
 /**
@@ -94,7 +94,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Maps the attachment's data to an Isomer composition, so it renders on surfaces other than
    * Kibana, such as Slack. Without it, those surfaces leave it out.
    */
-  toSpec?: AttachmentSpecMapping<TContent>;
+  toSpec?: AttachmentIsomerSpecMapping<TContent>;
 }
 
 /**

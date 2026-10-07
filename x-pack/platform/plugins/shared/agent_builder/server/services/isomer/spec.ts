@@ -11,7 +11,10 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
-import type { AttachmentSpec, MarkdownNode } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentIsomerSpec,
+  IsomerMarkdownNode,
+} from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import type { AttachmentNode, Spec, SpecNode } from './pack';
@@ -40,7 +43,7 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
 };
 
 /**
- * Splits a reply into nodes: its markdown becomes `markdown` nodes, and each
+ * Splits a message into nodes: its markdown becomes `markdown` nodes, and each
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
  */
@@ -72,7 +75,7 @@ const toSpecNodes = (message: string): SpecNode[] => {
 };
 
 export interface BuildSpecOptions {
-  /** The reply, with its `<render_attachment>` tags. */
+  /** The response message, with its `<render_attachment>` tags. */
   message: string;
   /** The conversation's attachments, as carried by `round_complete`. */
   attachments: VersionedAttachment[];
@@ -95,7 +98,7 @@ const resolveVersion = (
   attachmentRefs.find((ref) => ref.attachment_id === attachmentId)?.version ??
   attachment.versions.at(-1)?.version;
 
-const toHeadingNode = ({ title, subtitle }: AttachmentSpec): MarkdownNode[] => {
+const toHeadingNode = ({ title, subtitle }: AttachmentIsomerSpec): IsomerMarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
 };
@@ -103,7 +106,7 @@ const toHeadingNode = ({ title, subtitle }: AttachmentSpec): MarkdownNode[] => {
 const resolveAttachmentNode = (
   node: AttachmentNode,
   { attachments, attachmentRefs, attachmentsService, logger }: BuildSpecOptions
-): MarkdownNode[] => {
+): IsomerMarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
   if (!attachment) {
     logger.warn(`Leaving out attachment "${node.attachmentId}": it is not in the conversation`);
@@ -138,7 +141,7 @@ const resolveAttachmentNode = (
 };
 
 /**
- * Builds the spec of a reply: its markdown becomes `markdown` nodes, and each
+ * Builds the spec of a response message: its markdown becomes `markdown` nodes, and each
  * `<render_attachment>` tag is replaced, in place, by what its type's `toSpec` returns.
  * Attachments that are missing, have no `toSpec`, or fail to map are left out.
  */
