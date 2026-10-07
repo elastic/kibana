@@ -115,8 +115,10 @@ describe('useEnhanceDashboardAction', () => {
     });
   });
 
-  it('is enabled when the action is not disabled', async () => {
-    mockGetDisplayNameTooltip.mockReturnValue('');
+  it('is enabled with the action tooltip when the action is not disabled', async () => {
+    mockGetDisplayNameTooltip.mockReturnValue(
+      'Improve the content and style of your dashboard using AI'
+    );
     const dashboardApi = createDashboardApi();
 
     const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
@@ -125,7 +127,9 @@ describe('useEnhanceDashboardAction', () => {
       expect(result.current).not.toBeNull();
     });
     expect(result.current?.isDisabled).toBe(false);
-    expect(result.current?.tooltip).toBe('');
+    expect(result.current?.tooltip).toBe(
+      'Improve the content and style of your dashboard using AI'
+    );
   });
 
   it('is disabled with the action tooltip when the action is disabled', async () => {

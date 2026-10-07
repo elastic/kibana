@@ -393,11 +393,7 @@ export function InternalDashboardTopNav({
               void enhanceAction.execute();
             },
             isDisabled: enhanceAction.isDisabled,
-            tooltip:
-              enhanceAction.tooltip ||
-              i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
-                defaultMessage: 'Improve the content and style of your dashboard using AI',
-              }),
+            tooltip: enhanceAction.tooltip,
           }
         : undefined,
     [viewMode, enhanceAction]

@@ -168,14 +168,16 @@ describe('createEnhanceDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
-  it('is enabled without a tooltip when a child uses ES|QL', () => {
+  it('is enabled with the enhance tooltip when a child uses ES|QL', () => {
     const { action } = createAction();
     const dashboardApi = createDashboardApi({
       children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]), c: child([]) },
     });
 
     expect(action.isDisabled!({ dashboardApi })).toBe(false);
-    expect(action.getDisplayNameTooltip!({ dashboardApi })).toBe('');
+    expect(action.getDisplayNameTooltip!({ dashboardApi })).toBe(
+      'Improve the content and style of your dashboard using AI'
+    );
   });
 
   it.each([

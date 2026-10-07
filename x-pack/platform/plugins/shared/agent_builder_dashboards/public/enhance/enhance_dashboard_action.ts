@@ -35,6 +35,10 @@ export interface EnhanceDashboardActionDeps {
   draftAttachmentId: IdGenerator;
 }
 
+const ENHANCE_TOOLTIP = i18n.translate('xpack.agentBuilderDashboards.enhanceDashboard.tooltip', {
+  defaultMessage: 'Improve the content and style of your dashboard using AI',
+});
+
 const REQUIRES_ESQL_TOOLTIP = i18n.translate(
   'xpack.agentBuilderDashboards.enhanceDashboard.requiresEsqlTooltip',
   { defaultMessage: 'Enhance requires at least one ES|QL visualization' }
@@ -74,7 +78,7 @@ export const createEnhanceDashboardAction = ({
       }),
     getIconType: () => 'sparkles',
     getDisplayNameTooltip: ({ dashboardApi }) =>
-      hasEsqlPanel(dashboardApi) ? '' : REQUIRES_ESQL_TOOLTIP,
+      hasEsqlPanel(dashboardApi) ? ENHANCE_TOOLTIP : REQUIRES_ESQL_TOOLTIP,
     isCompatible: async ({ dashboardApi }) =>
       canEnhance(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
     getCompatibilityChangesSubject: ({ dashboardApi }): Observable<undefined> =>
