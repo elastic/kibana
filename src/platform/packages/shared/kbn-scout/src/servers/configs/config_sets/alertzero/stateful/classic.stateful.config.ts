@@ -10,15 +10,26 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-// The agenticInvestigations plugin is disabled by default (xpack.agenticInvestigations.enabled),
-// so its API tests run against a config set that turns it on.
+/**
+ * Scout server config for tests that need `alertzero` and the plugins it depends on.
+ *
+ * `alertzero` gates threat-intel supply. `agenticInvestigations` and `proposals` are required
+ * by alertzero and default off; without them Kibana cascade-disables alertzero and the TI
+ * routes never register. The API tests of all three live under `test/scout_alertzero`
+ * (security_solution, agentic_investigations, proposals).
+ *
+ * Usage:
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
+ */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
     ],
   },
 };

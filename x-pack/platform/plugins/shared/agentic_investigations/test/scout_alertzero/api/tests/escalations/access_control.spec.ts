@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -59,6 +60,19 @@ async function resolveProfileUid(
   return { uid, probeConversationId: response.body.id };
 }
 
+/**
+ * A collaborator with Agentic Investigations access but no Escalations sub-feature and no
+ * AlertZero. The built-in `editor` role has every feature, and on the shared `alertzero`
+ * server that includes AlertZero All, which grants `manage_escalations`. This role keeps the
+ * 403 expectation true wherever the suite runs.
+ */
+const COLLABORATOR_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    { base: [], feature: { agenticInvestigations: ['all'], agentBuilder: ['all'] }, spaces: ['*'] },
+  ],
+};
+
 apiTest.describe(
   'Escalation access control — private escalations and assignees',
   { tag: [...tags.stateful.classic] },
@@ -74,7 +88,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
+      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser(COLLABORATOR_ROLE));
       ({ cookieHeader: unrelatedCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
       // Resolve the editor's profile uid by creating a probe conversation as them.
@@ -152,8 +166,8 @@ apiTest.describe(
     apiTest(
       'POST _link from a collaborator returns 403 — collaborator lacks manage_escalations',
       async ({ apiClient }) => {
-        // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
-        // gate fires before the ownership check and returns 403.
+        // The collaborator role has no escalations_all (includeIn: 'none') and no AlertZero, so
+        // the privilege gate fires before the ownership check and returns 403.
         const response = await apiClient.post(ESCALATION_LINK_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
           body: { linked_investigations: [investigationId] },
