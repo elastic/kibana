@@ -77,6 +77,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,

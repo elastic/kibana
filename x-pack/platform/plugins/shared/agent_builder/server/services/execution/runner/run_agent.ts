@@ -82,7 +82,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     manager,
     experimentalFeatures,
     workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
-    persistWorkspace: manager.deps.storeConversation,
+    persistWorkspace: manager.deps.conversationAccess === 'readWrite',
     spaceId,
   });
 
@@ -141,8 +141,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     executionMode: manager.deps.executionMode,
     interactivity: manager.deps.interactivity,
     parentExecutionId: manager.deps.parentExecutionId,
-    storeConversation: manager.deps.storeConversation,
-    readOnlyConversation: manager.deps.readOnlyConversation,
+    conversationAccess: manager.deps.conversationAccess,
     subAgentExecutor: manager.deps.subAgentExecutor,
     agentRegistry,
     conversationClient,

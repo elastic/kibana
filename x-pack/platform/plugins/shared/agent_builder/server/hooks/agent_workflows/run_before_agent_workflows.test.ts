@@ -12,6 +12,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { ConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -39,15 +40,13 @@ describe('runBeforeAgentWorkflows', () => {
       conversationId?: string;
       agentId?: string;
       roundExecutionIndex?: number;
-      storeConversation?: boolean;
-      readOnlyConversation?: boolean;
+      conversationAccess?: ConversationAccess;
     } = {}
   ) => ({
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
-    storeConversation: true,
-    readOnlyConversation: false,
+    conversationAccess: 'readWrite' as const,
     ...overrides,
   });
 
@@ -270,8 +269,7 @@ describe('runBeforeAgentWorkflows', () => {
   it('still runs pre-execution workflows for an ephemeral run', async () => {
     const context = createContext({
       conversationId: 'conv-1',
-      storeConversation: false,
-      readOnlyConversation: true,
+      conversationAccess: 'readOnly',
     });
     const { workflowApi, getInternalServices } = createDeps();
     executeWorkflowMock.mockResolvedValue({

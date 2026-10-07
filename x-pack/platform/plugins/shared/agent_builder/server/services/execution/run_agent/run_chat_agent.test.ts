@@ -715,8 +715,7 @@ describe('runDefaultAgentMode', () => {
 
     it('runs a fresh round on top of a paused conversation when it does not store it', async () => {
       const { context, streamEvents } = setup();
-      context.storeConversation = false;
-      context.readOnlyConversation = true;
+      context.conversationAccess = 'readOnly';
       getPendingTurnMock.mockImplementation(realGetPendingTurn);
 
       await runDefaultAgentMode(
@@ -758,8 +757,7 @@ describe('runDefaultAgentMode', () => {
 
     it('starts without the stored sub-agent state and offers no metadata writes when not storing', async () => {
       const { context } = setup();
-      context.storeConversation = false;
-      context.readOnlyConversation = true;
+      context.conversationAccess = 'readOnly';
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         template_id: 'investigation',
@@ -795,8 +793,7 @@ describe('runDefaultAgentMode', () => {
 
     it('passes the storage flags to both agent hooks', async () => {
       const { context } = setup();
-      context.storeConversation = false;
-      context.readOnlyConversation = true;
+      context.conversationAccess = 'readOnly';
 
       await runDefaultAgentMode(
         { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
@@ -806,7 +803,7 @@ describe('runDefaultAgentMode', () => {
       for (const lifecycle of [HookLifecycle.beforeAgent, HookLifecycle.afterExecution]) {
         expect(context.hooks.run).toHaveBeenCalledWith(
           lifecycle,
-          expect.objectContaining({ storeConversation: false, readOnlyConversation: true })
+          expect.objectContaining({ conversationAccess: 'readOnly' })
         );
       }
     });

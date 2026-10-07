@@ -529,8 +529,7 @@ describe('handleAgentExecution', () => {
       expect(executeAgentMock).toHaveBeenCalledWith(
         expect.objectContaining({
           conversation: expect.objectContaining({ id: 'conversation-1', operation: 'UPDATE' }),
-          storeConversation: false,
-          readOnlyConversation: true,
+          conversationAccess: 'readOnly',
         })
       );
     });
@@ -594,7 +593,7 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(executeAgentMock).toHaveBeenCalledWith(
-        expect.objectContaining({ storeConversation: false, readOnlyConversation: false })
+        expect.objectContaining({ conversationAccess: 'none' })
       );
     });
 
@@ -617,7 +616,7 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(executeAgentMock).toHaveBeenCalledWith(
-        expect.objectContaining({ storeConversation: true, readOnlyConversation: false })
+        expect.objectContaining({ conversationAccess: 'readWrite' })
       );
     });
   });

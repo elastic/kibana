@@ -16,6 +16,7 @@ import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
+import type { ConversationAccess } from '../agents/provider';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -39,15 +40,10 @@ export interface BeforeAgentHookContext extends AgentHookContextBase {
    */
   conversationId?: string;
   /**
-   * False when the run persists nothing that belongs to its conversation (one-shot and ephemeral
-   * runs).
+   * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
+   * conversation that will not receive this round.
    */
-  storeConversation: boolean;
-  /**
-   * True for a run that loaded an existing conversation but stores nothing to it: `conversationId`
-   * names a real conversation that will not receive this round.
-   */
-  readOnlyConversation: boolean;
+  conversationAccess: ConversationAccess;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -67,15 +63,10 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
   round: ConversationRound;
   conversationId?: string;
   /**
-   * False when the run persists nothing that belongs to its conversation (one-shot and ephemeral
-   * runs).
+   * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
+   * conversation that will not receive this round.
    */
-  storeConversation: boolean;
-  /**
-   * True for a run that loaded an existing conversation but stores nothing to it: `conversationId`
-   * names a real conversation that will not receive this round.
-   */
-  readOnlyConversation: boolean;
+  conversationAccess: ConversationAccess;
   /** Connector used by this execution, which may differ from a folded pending round's connector. */
   connectorId?: string;
   agentConfiguration: AgentConfiguration;

@@ -28,7 +28,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -232,7 +233,7 @@ const handleConversationExecution = async ({
             : undefined,
           subagentCreation,
         });
-  const readOnlyConversation = !storeConversation && conversationOperation === 'UPDATE';
+  const conversationAccess = toConversationAccess({ storeConversation, conversationOperation });
 
   // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
   // same created_at rather than moving to when this run picked the record up.
@@ -278,8 +279,7 @@ const handleConversationExecution = async ({
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
       roundId,
-      storeConversation,
-      readOnlyConversation,
+      conversationAccess,
     });
 
     // Generate title when creating a new conversation
@@ -664,4 +664,17 @@ const handleStandaloneExecution = async ({
       });
     })
   );
+};
+
+const toConversationAccess = ({
+  storeConversation,
+  conversationOperation,
+}: {
+  storeConversation: boolean;
+  conversationOperation: ConversationOperation;
+}): ConversationAccess => {
+  if (storeConversation) {
+    return 'readWrite';
+  }
+  return conversationOperation === 'UPDATE' ? 'readOnly' : 'none';
 };

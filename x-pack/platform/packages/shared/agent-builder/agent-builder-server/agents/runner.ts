@@ -15,7 +15,7 @@ import type {
   AgentExecutionMode,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
-import type { AgentParams, AgentResponse } from './provider';
+import type { AgentParams, AgentResponse, ConversationAccess } from './provider';
 
 export interface RunAgentReturn {
   /** return from the agent */
@@ -39,14 +39,10 @@ export interface RunAgentParams {
    */
   parentExecutionId?: string;
   /**
-   * Whether this run persists anything that belongs to its conversation. Defaults to true.
+   * How this run relates to its conversation, see {@link ConversationAccess}. Defaults to
+   * `readWrite`.
    */
-  storeConversation?: boolean;
-  /**
-   * True when the run loaded an existing conversation but stores nothing to it. Defaults to true
-   * when `storeConversation` is false and `agentParams.conversation` is set, false otherwise.
-   */
-  readOnlyConversation?: boolean;
+  conversationAccess?: ConversationAccess;
   /**
    * ID of the agent to call.
    */

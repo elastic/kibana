@@ -43,6 +43,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -142,10 +143,8 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
-  /** Whether this run persists anything that belongs to its conversation. */
-  storeConversation: boolean;
-  /** True when the run loaded an existing conversation but stores nothing to it. */
-  readOnlyConversation: boolean;
+  /** How this run relates to its conversation. */
+  conversationAccess: ConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -183,8 +182,7 @@ export type CreateRunnerDeps = Omit<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
-  | 'storeConversation'
-  | 'readOnlyConversation'
+  | 'conversationAccess'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -284,8 +282,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
-    storeConversation = true,
-    readOnlyConversation = false,
+    conversationAccess = 'readWrite',
   }: {
     request: KibanaRequest;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
@@ -302,8 +299,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
-    storeConversation?: boolean;
-    readOnlyConversation?: boolean;
+    conversationAccess?: ConversationAccess;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -386,8 +382,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       executionMode,
       interactivity,
       parentExecutionId,
-      storeConversation,
-      readOnlyConversation,
+      conversationAccess,
       subAgentExecutor,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
@@ -436,14 +431,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
-        storeConversation,
-        readOnlyConversation: readOnlyConversationParam,
+        conversationAccess = 'readWrite',
         ...otherParams
       } = params;
       const { agentId } = params;
       const { nextInput, conversation } = params.agentParams;
-      const readOnlyConversation =
-        readOnlyConversationParam ?? (storeConversation === false && conversation !== undefined);
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -459,12 +451,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
-        storeConversation,
-        readOnlyConversation,
+        conversationAccess,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
-          allowResume: storeConversation !== false,
+          allowResume: conversationAccess === 'readWrite',
         }),
       });
       return runner.runAgent(otherParams);

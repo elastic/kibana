@@ -137,18 +137,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
     renderers,
     conversationClient,
-    storeConversation,
-    readOnlyConversation,
+    conversationAccess,
   } = context;
+  const storesConversation = conversationAccess === 'readWrite';
 
   // The context is built from the normalized event timeline (legacy conversations serialized
   // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
   // A run that stores nothing cannot close a paused round, so it runs a fresh round on top of it.
-  ensureValidInput({ input: nextInput, timeline, allowResume: storeConversation });
+  ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
-  const pendingTurn = conversation && storeConversation ? getPendingTurn(conversation) : undefined;
+  const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
@@ -163,11 +163,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Sub-agents of the stored conversation are not this run's: it can't deliver to or address them.
   const backgroundExecutionService = new BackgroundExecutionService({
     subAgentExecutor: context.subAgentExecutor,
-    initialState: storeConversation ? conversation?.state?.background_executions : undefined,
+    initialState: storesConversation ? conversation?.state?.background_executions : undefined,
   });
 
   const subagentTracker = new SubagentTracker(
-    storeConversation ? conversation?.state?.subagents : undefined
+    storesConversation ? conversation?.state?.subagents : undefined
   );
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
@@ -231,8 +231,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
-    storeConversation,
-    readOnlyConversation,
+    conversationAccess,
     // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
     // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
     roundExecutionIndex: pendingTurn
@@ -299,7 +298,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const conversationId = conversation?.id;
   const updateConversationMetadata =
-    storeConversation && conversationId && conversation?.template_id
+    storesConversation && conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
           conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
       : undefined;
@@ -566,8 +565,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
-      storeConversation,
-      readOnlyConversation,
+      conversationAccess,
       connectorId: model.connector.connectorId,
       agentConfiguration,
     });

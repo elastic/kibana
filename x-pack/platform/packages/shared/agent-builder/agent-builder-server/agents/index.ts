@@ -19,6 +19,7 @@ export type {
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
+  ConversationAccess,
 } from './provider';
 export type {
   RunAgentFn,

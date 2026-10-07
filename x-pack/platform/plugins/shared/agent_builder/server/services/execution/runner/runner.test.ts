@@ -323,50 +323,32 @@ describe('AgentBuilder runner', () => {
       });
     });
 
-    describe('storage flags', () => {
+    describe('conversation access', () => {
       const runWith = async (params: Partial<RunAgentParams>) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
         await createRunner(runnerDeps).runAgent({
           agentId: 'test-tool',
-          agentParams: { nextInput: { message: 'dolly' }, ...params.agentParams },
+          agentParams: {
+            nextInput: { message: 'dolly' },
+            conversation: createEmptyConversation({ id: 'conversation-1' }),
+          },
           request: scopedRunnerDeps.request,
           ...params,
         } as RunAgentParams);
-        const { storeConversation, readOnlyConversation } = agentHandler.mock
-          .calls[0][1] as AgentHandlerContext;
-        return { storeConversation, readOnlyConversation };
+        return (agentHandler.mock.calls[0][1] as AgentHandlerContext).conversationAccess;
       };
-      const conversation = createEmptyConversation({ id: 'conversation-1' });
 
-      it('treats a run that stores nothing on a given conversation as read-only by default', async () => {
-        const context = await runWith({
-          storeConversation: false,
-          agentParams: { nextInput: { message: 'dolly' }, conversation },
-        });
-        expect(context).toEqual({ storeConversation: false, readOnlyConversation: true });
+      it('defaults to readWrite', async () => {
+        expect(await runWith({})).toBe('readWrite');
       });
 
-      it('does not treat a run without a conversation as read-only', async () => {
-        const context = await runWith({ storeConversation: false });
-        expect(context).toEqual({ storeConversation: false, readOnlyConversation: false });
-      });
-
-      it('keeps an explicit readOnlyConversation', async () => {
-        const context = await runWith({
-          storeConversation: false,
-          readOnlyConversation: false,
-          agentParams: { nextInput: { message: 'dolly' }, conversation },
-        });
-        expect(context.readOnlyConversation).toBe(false);
-      });
-
-      it('defaults to a storing, non read-only run', async () => {
-        const context = await runWith({
-          agentParams: { nextInput: { message: 'dolly' }, conversation },
-        });
-        expect(context).toEqual({ storeConversation: true, readOnlyConversation: false });
-      });
+      it.each(['readWrite', 'readOnly', 'none'] as const)(
+        'passes %s to the agent handler',
+        async (conversationAccess) => {
+          expect(await runWith({ conversationAccess })).toBe(conversationAccess);
+        }
+      );
     });
 
     it.each([

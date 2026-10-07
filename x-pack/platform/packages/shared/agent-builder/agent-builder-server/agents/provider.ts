@@ -206,6 +206,17 @@ export interface DeploymentContext {
   };
 }
 
+/**
+ * How a run relates to its conversation:
+ * - `readWrite`: the run persists what belongs to its conversation (round, metadata, workspace,
+ *   child conversations).
+ * - `readOnly`: the run loaded an existing conversation as context and stores nothing to it
+ *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
+ * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
+ *   persisted (one-shot run).
+ */
+export type ConversationAccess = 'readWrite' | 'readOnly' | 'none';
+
 export interface AgentHandlerContext {
   /**
    * The request that was provided when initiating that tool execution.
@@ -354,15 +365,9 @@ export interface AgentHandlerContext {
    */
   parentExecutionId?: string;
   /**
-   * Whether this run persists anything that belongs to its conversation: round, metadata,
-   * workspace, child conversations. False for one-shot runs and ephemeral runs.
+   * How this run relates to its conversation, see {@link ConversationAccess}.
    */
-  storeConversation: boolean;
-  /**
-   * True when the run loaded an existing conversation but stores nothing to it (an ephemeral run).
-   * Unrelated to the presentational `read_only` conversation flag.
-   */
-  readOnlyConversation: boolean;
+  conversationAccess: ConversationAccess;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

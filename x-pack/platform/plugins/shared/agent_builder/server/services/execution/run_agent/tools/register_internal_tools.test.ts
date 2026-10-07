@@ -69,7 +69,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     todoStateManager: {},
     selfClient: {},
     parentExecutionId: undefined,
-    storeConversation: true,
+    conversationAccess: 'readWrite',
     ...overrides,
   } as unknown as AgentHandlerContext;
   return { context, toolManager };
@@ -137,7 +137,7 @@ describe('registerInternalTools - subagents', () => {
   });
 
   it('registers only a transient-only run_subagent when the run stores nothing', async () => {
-    const { context, toolManager } = createContext({ storeConversation: false });
+    const { context, toolManager } = createContext({ conversationAccess: 'none' });
 
     await register(context);
 

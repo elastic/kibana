@@ -75,7 +75,7 @@ export const runAfterExecutionWorkflows = async ({
   }
 
   // The conversation and round ids would name a conversation that never gets this round.
-  if (context.readOnlyConversation) {
+  if (context.conversationAccess === 'readOnly') {
     return;
   }
 
