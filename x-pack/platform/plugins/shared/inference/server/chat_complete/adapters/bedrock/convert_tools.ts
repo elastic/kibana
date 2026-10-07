@@ -95,15 +95,6 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
   return rest as unknown as T;
 }
 
-/**
- * Claude is prone to ignoring the "array" part of an array type,
- * so this function patches it to add a message on each
- * array property to explicitly state that the value should
- * be returned as a json array.
- *
- * Also strips JSON Schema keywords unsupported by Bedrock
- * (e.g. `propertyNames`, `additionalProperties`).
- */
 const SCHEMA_OBJECT_MAP_KEYS = new Set([
   'properties',
   'patternProperties',
@@ -300,6 +291,15 @@ const expandOpenApiNullable = (node: Record<string, unknown>): Record<string, un
 const expandJsonSchemaTypeArraysToAnyOf = <T>(schema: T): T =>
   expandJsonSchemaTypeArraysToAnyOfNode(schema) as T;
 
+/**
+ * Claude is prone to ignoring the "array" part of an array type,
+ * so this function patches it to add a message on each
+ * array property to explicitly state that the value should
+ * be returned as a json array.
+ *
+ * Also strips JSON Schema keywords unsupported by Bedrock
+ * (e.g. `propertyNames`, `additionalProperties`).
+ */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
   return fixSchemaArrayPropertiesPart(
     expandJsonSchemaTypeArraysToAnyOf(inlineRootJsonSchemaRef(schemaPart)) as T
