@@ -215,9 +215,9 @@ export const findPanelRenderer = (embeddableType: string): PanelRenderer | undef
   RENDERER_BY_EMBEDDABLE_TYPE.get(embeddableType);
 
 /**
- * Contract for inline panel content resolution. The generate core consumes this
+ * Contract for inline panel content resolution. Dashboard authoring consumes this
  * to turn a panel resolution request into panel content. The host implements it
  * by routing each request to the resolver for its `renderer`; it is injected so
- * the core stays host-agnostic and tests can supply a fake.
+ * authoring stays host-agnostic and tests can supply a fake.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;

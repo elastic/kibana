@@ -16,7 +16,7 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
-import type { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';

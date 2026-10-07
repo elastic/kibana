@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
@@ -18,8 +18,8 @@ import type {
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
 /**
- * Turns a visualization attachment id into panel content. Injected like the other resolvers so the
- * generate core stays free of store access. Synchronous because the attachment state is in memory.
+ * Turns a visualization attachment id into panel content. Injected like the other resolvers so
+ * dashboard authoring stays free of store access. Synchronous because the attachment state is in memory.
  */
 export type ResolveAttachmentPanel = (
   attachmentId: string,

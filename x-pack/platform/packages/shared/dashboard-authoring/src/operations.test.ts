@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { Logger } from '@kbn/logging';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
@@ -2625,7 +2625,7 @@ describe('add_controls / remove_controls operations', () => {
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as import('@kbn/core/server').Logger;
+  } as unknown as Logger;
 
   const emptyDashboard: DashboardAttachmentData = { title: 'Test', panels: [] };
 

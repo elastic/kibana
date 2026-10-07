@@ -30,7 +30,7 @@ const toControlFieldCapability = ([
 
 /**
  * Loads the capabilities of the requested fields in one `_field_caps` request. Injected like the
- * other resolvers so the generate core never talks to Elasticsearch directly.
+ * other resolvers so dashboard authoring never talks to Elasticsearch directly.
  */
 export const createControlFieldCapabilitiesResolver = ({
   esClient,

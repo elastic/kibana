@@ -16,9 +16,12 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { createPanelFailureResult, type PanelContentAttempt } from '@kbn/dashboard-authoring';
-import { getErrorMessage } from '@kbn/dashboard-authoring';
-import type { VisPanelResolutionRequest } from '@kbn/dashboard-authoring';
+import {
+  createPanelFailureResult,
+  getErrorMessage,
+  type PanelContentAttempt,
+  type VisPanelResolutionRequest,
+} from '@kbn/dashboard-authoring';
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {
@@ -35,14 +38,14 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
 };
 
 /**
- * Resolves Lens and Vega panel requests for the generate core's
+ * Resolves Lens and Vega panel requests for dashboard authoring's
  * `ResolvePanelContent` seam (see `panel_resolver.ts`).
  *
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
  * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
  * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
- * (`buildVegaConfig`), and returns it to the core through the type-agnostic
+ * (`buildVegaConfig`), and returns it to dashboard authoring through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
  * It trusts the request's `renderer` (Lens when omitted). On edits,

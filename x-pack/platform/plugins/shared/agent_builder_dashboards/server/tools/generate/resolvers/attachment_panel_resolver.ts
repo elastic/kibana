@@ -16,11 +16,11 @@ import {
 import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
   createPanelFailureResult,
+  EMBEDDABLE_TYPE_BY_RENDERER,
   type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
 } from '@kbn/dashboard-authoring';
-import { EMBEDDABLE_TYPE_BY_RENDERER } from '@kbn/dashboard-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
