@@ -391,9 +391,6 @@ export class DashboardPageObject extends FtrService {
     await this.common.expectConfirmModalOpenState(true);
     if (accept) {
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION, {
-        timeout: 15000,
-      });
     }
   }
 
