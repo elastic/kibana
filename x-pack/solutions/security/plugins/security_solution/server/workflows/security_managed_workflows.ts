@@ -140,9 +140,12 @@ export const installThreatIntelManagedWorkflowsForSpaces = async ({
       logger,
     });
   } catch (error) {
-    logger.warn('Failed to install threat intelligence managed workflows after bootstrap recovery', {
-      error,
-    });
+    logger.warn(
+      'Failed to install threat intelligence managed workflows after bootstrap recovery',
+      {
+        error,
+      }
+    );
   }
 };
 
