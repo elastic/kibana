@@ -106,6 +106,18 @@ describe('createAgentBuilderClient', () => {
     });
   });
 
+  it('uses the latest trace when a resumed round reports one trace per execution', async () => {
+    http.fetch.mockResolvedValue({ trace_id: ['trace-opening', 'trace-resume'] });
+
+    const result = await client.converse({
+      agentId: 'my-agent',
+      conversationId: 'conv-1',
+      promptResponses: { 'prompt-1': { answers: [] } },
+    });
+
+    expect(result.traceId).toBe('trace-resume');
+  });
+
   it('falls back to an empty message and steps when the API omits them', async () => {
     http.fetch.mockResolvedValue({});
 
@@ -134,6 +146,22 @@ describe('createAgentBuilderClient', () => {
     const body = lastRequestBody();
     expect(body.prompts).toEqual({ 'ask-1': { answers: [{ custom: 'answer' }] } });
     expect(body.input).toBeUndefined();
+  });
+
+  it('forwards attachments with the opening turn only when provided', async () => {
+    http.fetch.mockResolvedValue({});
+
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'Enhance this dashboard',
+      attachments: [{ id: 'seeded', type: 'dashboard', data: { title: 'Seed', panels: [] } }],
+    });
+    expect(lastRequestBody().attachments).toEqual([
+      { id: 'seeded', type: 'dashboard', data: { title: 'Seed', panels: [] } },
+    ]);
+
+    await client.converse({ agentId: 'my-agent', input: 'question' });
+    expect(lastRequestBody()).not.toHaveProperty('attachments');
   });
 
   it('returns prompts from the API response', async () => {

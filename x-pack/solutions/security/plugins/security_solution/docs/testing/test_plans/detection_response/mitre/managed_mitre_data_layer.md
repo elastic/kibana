@@ -43,6 +43,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Revoked entities include `superseded_by_id` when a successor exists**](#scenario-revoked-entities-include-superseded_by_id-when-a-successor-exists)
     - [**Scenario: A multi-tactic technique appears once in the techniques bucket with all its tactic IDs**](#scenario-a-multi-tactic-technique-appears-once-in-the-techniques-bucket-with-all-its-tactic-ids)
     - [**Scenario: A technique present in both versions is returned with version-specific data**](#scenario-a-technique-present-in-both-versions-is-returned-with-version-specific-data)
+    - [**Scenario: Buckets are returned in a guaranteed order**](#scenario-buckets-are-returned-in-a-guaranteed-order)
   - [Entities API: input validation](#entities-api-input-validation)
     - [**Scenario: Invalid query parameters return 400**](#scenario-invalid-query-parameters-return-400)
   - [Server-side data client](#server-side-data-client)
@@ -89,6 +90,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - Reads must return empty results gracefully (no error) when population has not yet completed.
 - Routes must not be registered when the feature flag is off.
 - All API query parameters must be bounded: `framework_version` max 32 characters, `types` array max 3 elements.
+- Bucket order is part of the API contract: tactics ascending by position, techniques and subtechniques ascending by name. UI consumers must not re-sort.
 
 ### Product requirements
 
@@ -286,6 +288,18 @@ Given the same technique ID exists in both an older and a newer framework versio
 When the entities API is called once for the older version and once for the newer version
 Then each response should contain that technique with the metadata for the respective version
 And the two entities should share the same id but differ in their version-specific fields
+```
+
+#### **Scenario: Buckets are returned in a guaranteed order**
+
+**Automation**: 1 integration test per bucket type, 1 unit test.
+
+```Gherkin
+Given the index contains tactics whose alphabetical order differs from their position order
+And techniques and subtechniques with names out of alphabetical order
+When the entities API is called
+Then the tactics bucket should be ordered ascending by position
+And the techniques and subtechniques buckets should be ordered ascending by name
 ```
 
 ### Entities API: input validation
