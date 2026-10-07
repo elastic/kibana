@@ -181943,6 +181943,7 @@ components:
           type: string
         time_field:
           description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
           type: string
         type:
           enum:
