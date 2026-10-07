@@ -100,6 +100,8 @@ export interface ServiceSetupDeps {
   cloud?: CloudSetup;
   usageApi?: UsageApiSetup;
   actions: ActionsPluginSetup;
+  /** Base URL of Kibana, without a space. */
+  getKibanaUrl: () => string;
 }
 
 export interface ServicesStartDeps {

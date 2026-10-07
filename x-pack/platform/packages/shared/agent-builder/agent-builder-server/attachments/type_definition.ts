@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { AttachmentSpecMapping } from '@kbn/agent-builder-surfaces';
 import type { AttachmentBoundedTool } from './tools';
 
 /**
@@ -89,6 +90,11 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
    */
   maxContentLength?: number;
+  /**
+   * Maps the attachment's data to an Isomer composition, so it renders on surfaces other than
+   * Kibana, such as Slack. Without it, those surfaces show its description and a link to Kibana.
+   */
+  toSpec?: AttachmentSpecMapping<TContent>;
 }
 
 /**

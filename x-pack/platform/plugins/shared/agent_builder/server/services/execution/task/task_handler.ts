@@ -20,11 +20,15 @@ import {
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
+import type { AttachmentServiceStart } from '../../attachments';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  attachmentsService: AttachmentServiceStart;
+  /** Base URL of Kibana, without a space. */
+  getKibanaUrl: () => string;
 }
 
 /**
@@ -104,6 +108,8 @@ class TaskHandlerImpl implements TaskHandler {
       execution,
       events$,
       callbackDeliveryService: this.deps.callbackDeliveryService,
+      attachmentsService: this.deps.attachmentsService,
+      getKibanaUrl: this.deps.getKibanaUrl,
       logger: this.logger,
     });
 

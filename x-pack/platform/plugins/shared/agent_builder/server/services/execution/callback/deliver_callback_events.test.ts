@@ -11,24 +11,49 @@ import {
   AgentBuilderErrorCode,
   AgentExecutionMode,
   ChatEventType,
+  ConversationOriginType,
   createRequestAbortedError,
   TimelineEventType,
   type ChatEvent,
+  type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { AttachmentServiceStart } from '../../attachments';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 import { deliverCallbackEvents } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
+const getTypeDefinition = jest.fn();
+const projectionDeps = {
+  attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
+  getKibanaUrl: () => 'http://localhost:5601',
+};
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({
     executionId: 'execution-1',
     executionMode: AgentExecutionMode.conversation,
+    agentId: 'agent-1',
+    spaceId: 'default',
     agentParams: {
+      conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
   } as unknown as AgentExecution);
+const createSlackExecution = (): AgentExecution => {
+  const execution = createConversationExecution();
+
+  return {
+    ...execution,
+    agentParams: {
+      ...execution.agentParams,
+      origin: {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'team:T1/channel:C1/thread:1',
+      },
+    },
+  } as AgentExecution;
+};
 const createStandaloneExecution = (): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -50,10 +75,13 @@ const createMessageChunkEvent = (text: string): ChatEvent =>
     data: { text_chunk: text, message_id: 'message-1' },
   } as ChatEvent);
 
-const createRoundCompleteEvent = (): ChatEvent =>
+const createRoundCompleteEvent = (message = 'Hello', attachments: unknown[] = []): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
-    data: { round: { id: 'round-1' } },
+    data: {
+      round: { id: 'round-1', input: { message: 'hello' }, response: { message } },
+      attachments,
+    },
   } as unknown as ChatEvent);
 
 const createExecutionStartedEvent = (): ChatEvent =>
@@ -128,6 +156,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(null),
       events$,
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -142,6 +171,7 @@ describe('deliverCallbackEvents', () => {
       execution: createStandaloneExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -159,6 +189,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger,
     });
 
@@ -180,6 +211,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -218,6 +250,7 @@ describe('deliverCallbackEvents', () => {
         roundCompleteEvent
       ),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -244,6 +277,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(progressEvent, roundCompleteEvent),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -276,6 +310,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(roundCompleteEvent, laterEvent),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -284,6 +319,101 @@ describe('deliverCallbackEvents', () => {
     );
 
     expect(deliveredEvents).toEqual([laterEvent, roundCompleteEvent]);
+  });
+
+  it('adds the Slack projection to round_complete for Slack rounds', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoningEvent = createReasoningEvent('thinking');
+    const roundCompleteEvent = createRoundCompleteEvent('There are **3** alerts.');
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(reasoningEvent, roundCompleteEvent),
+      callbackDeliveryService: service,
+      ...projectionDeps,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).toEqual([
+      reasoningEvent,
+      {
+        ...roundCompleteEvent,
+        projection: {
+          slack: {
+            text: expect.any(String),
+            blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'There are *3* alerts.' } }],
+          },
+        },
+      },
+    ]);
+    expect(roundCompleteEvent).not.toHaveProperty('projection');
+  });
+
+  it('renders attachments through their type mapping, linking the others to the conversation', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const textAttachment = {
+      id: 'a1',
+      type: 'text',
+      current_version: 1,
+      versions: [
+        { version: 1, data: { content: 'Attached note' }, created_at: '', content_hash: '' },
+      ],
+    };
+    getTypeDefinition.mockImplementation((type: string) =>
+      type === 'text'
+        ? {
+            toSpec: ({ content }: { content: string }) => ({
+              type: 'view',
+              body: [{ type: 'markdown', text: content }],
+            }),
+          }
+        : undefined
+    );
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(
+        createRoundCompleteEvent(
+          'Note: <render_attachment id="a1" /> Missing: <render_attachment id="a2" />',
+          [textAttachment]
+        )
+      ),
+      callbackDeliveryService: service,
+      ...projectionDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
+    const slack = JSON.stringify(
+      (payload as { event: RoundCompleteEvent }).event.projection?.slack
+    );
+
+    expect(slack).toContain('Attached note');
+    expect(slack).toContain(
+      'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conversation-1'
+    );
+    expect(slack).not.toContain('render_attachment');
+  });
+
+  it('does not add projections to rounds without an origin', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(roundCompleteEvent),
+      callbackDeliveryService: service,
+      ...projectionDeps,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: expect.objectContaining({ event: roundCompleteEvent }) })
+    );
   });
 
   it('does not deliver round_complete when the stream errors after it, sending a failure instead', async () => {
@@ -297,6 +427,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('persistence boom'))
       ),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -334,6 +465,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('one'), createReasoningEvent('two')),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -352,6 +484,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger,
     });
 
@@ -371,6 +504,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -400,6 +534,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -424,6 +559,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => createRequestAbortedError('request aborted'))
       ),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -444,6 +580,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: throwError(() => createRequestAbortedError('request aborted')),
       callbackDeliveryService: service,
+      ...projectionDeps,
       logger: loggerMock.create(),
     });
 
@@ -472,6 +609,7 @@ describe('deliverCallbackEvents', () => {
         execution: createConversationExecution(),
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
+        ...projectionDeps,
         logger,
       })
     ).resolves.toBeUndefined();

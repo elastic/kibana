@@ -421,6 +421,25 @@ const myAttachmentType: AttachmentTypeDefinition = {
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
+#### `toSpec` — rendering outside Kibana
+
+Replies to rounds from external systems, such as Slack, are rendered in code from the reply: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSpec`, which maps the data of one attachment version to an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes. Without it, the attachment shows as its description and a link to the conversation in Kibana.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
+  id: 'my_type',
+  validate: ...,
+  format: ...,
+  toSpec: (data) => ({
+    type: 'view',
+    title: data.name,
+    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+  }),
+};
+```
+
+GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws degrades to the description and link. See the `text` type for an example.
+
 #### Real example: the built-in image attachment
 
 Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
