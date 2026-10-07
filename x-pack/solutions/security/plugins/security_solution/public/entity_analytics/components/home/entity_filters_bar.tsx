@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
 import { WatchlistFilter } from './watchlist_filter';
 import type { RiskSeverity } from '../../../../common/search_strategy';
@@ -92,8 +93,8 @@ const ItemWithCount = ({ count, children }: { count: number; children: React.Rea
         flex-shrink: 0;
       `}
     >
-      <EuiText size="s" color="subdued">
-        {count}
+      <EuiText size="s" color="subdued" title={count.toLocaleString()}>
+        <FormattedCount count={count} />
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
