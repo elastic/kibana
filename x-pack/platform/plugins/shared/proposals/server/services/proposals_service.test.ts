@@ -785,6 +785,22 @@ describe('ProposalsService', () => {
       ...overrides,
     });
 
+    // The conflict path waits for a winner to become searchable, so its tests run
+    // on fake timers. `setImmediate` stays real: the in-memory storage fake uses
+    // it to force two concurrent calls apart.
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick'] });
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /** Lets `promise` get through every retry wait, then returns it. */
+    const settled = <T>(promise: Promise<T>): Promise<T> => {
+      promise.catch(() => undefined);
+      return jest.advanceTimersByTimeAsync(10_000).then(() => promise);
+    };
+
     it('creates the proposal under the supplied id, rooted at itself', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
@@ -891,10 +907,12 @@ describe('ProposalsService', () => {
       const { service: serviceA, attachmentsClient: attachmentsA } = createService(storage);
       const { service: serviceB, attachmentsClient: attachmentsB } = createService(storage);
 
-      const [resultA, resultB] = await Promise.all([
-        serviceA.create(idParams(), { spaceId: SPACE_ID, request }),
-        serviceB.create(idParams(), { spaceId: SPACE_ID, request }),
-      ]);
+      const [resultA, resultB] = await settled(
+        Promise.all([
+          serviceA.create(idParams(), { spaceId: SPACE_ID, request }),
+          serviceB.create(idParams(), { spaceId: SPACE_ID, request }),
+        ])
+      );
 
       expect(resultA.id).toBe(ID);
       expect(resultB.id).toBe(ID);
@@ -988,7 +1006,7 @@ describe('ProposalsService', () => {
         });
         const { service, attachmentsClient } = createService(memory.storage);
 
-        const attempt = service.create(idParams(), { spaceId: SPACE_ID, request });
+        const attempt = settled(service.create(idParams(), { spaceId: SPACE_ID, request }));
 
         await expect(attempt).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
         await expect(attempt).rejects.not.toThrow(/other-space|Secret/);
@@ -1005,6 +1023,144 @@ describe('ProposalsService', () => {
         await expect(
           service.create(idParams(), { spaceId: SPACE_ID, request })
         ).rejects.toBeInstanceOf(ProposalConflictError);
+      });
+    });
+
+    describe('when the winner of a conflict is not searchable yet', () => {
+      /**
+       * Every read is a search, and a document only becomes searchable at the next
+       * refresh, though it already exists when the conflict is raised. So for up to
+       * a refresh interval the very proposal that conflicted looks absent.
+       */
+      const storageWhereWinnerAppearsAfter = (invisibleReads: number) => {
+        const winner = baseDocument({ comment: 'The winner', rootProposalId: ID });
+        const storage = createStorage();
+        storage.index.mockRejectedValue(
+          Object.assign(new Error('version conflict'), { statusCode: 409 })
+        );
+        let reads = 0;
+        storage.search.mockImplementation(
+          async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+            const byId = query.bool.filter.some((clause) => 'ids' in clause);
+            if (byId && (reads += 1) <= invisibleReads) {
+              return { hits: { hits: [], total: { value: 0 } } };
+            }
+            return { hits: { hits: [searchHit(winner, ID)], total: { value: 1 } } };
+          }
+        );
+        return { storage, reads: () => reads };
+      };
+
+      it('should wait for it and reuse it, rather than failing the loser', async () => {
+        const { storage, reads } = storageWhereWinnerAppearsAfter(2);
+        const { service } = createService(storage);
+
+        const result = await settled(service.create(idParams(), { spaceId: SPACE_ID, request }));
+
+        expect(result.reused).toBe(true);
+        expect(result.comment).toBe('The winner');
+        expect(reads()).toBe(3);
+      });
+
+      it('should not wait at all when the winner is already searchable', async () => {
+        const { storage, reads } = storageWhereWinnerAppearsAfter(0);
+        const { service } = createService(storage);
+
+        // No timers advanced: a retry here would never resolve.
+        const result = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+        expect(result.reused).toBe(true);
+        expect(reads()).toBe(1);
+      });
+
+      it('should give up after a bounded number of looks', async () => {
+        const { storage, reads } = storageWhereWinnerAppearsAfter(Number.POSITIVE_INFINITY);
+        const { service } = createService(storage);
+
+        await expect(
+          settled(service.create(idParams(), { spaceId: SPACE_ID, request }))
+        ).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
+
+        expect(reads()).toBe(5);
+      });
+    });
+
+    describe('when this call carries an actionInput the action would refuse', () => {
+      const ACTION_ID = 'system-alertzero-action-create-rule';
+      const workflowsRequiringName = () => {
+        const workflowsApi = createWorkflowsApi();
+        workflowsApi.getWorkflow.mockResolvedValue({
+          definition: {
+            consts: { actionMetadata: { name: 'Create rule', category: 'tune' } },
+            triggers: [
+              {
+                type: 'manual',
+                inputs: {
+                  properties: {
+                    actionInput: {
+                      type: 'object',
+                      properties: { name: { type: 'string' } },
+                      required: ['name'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+        return workflowsApi;
+      };
+      const badInput = () => idParams({ actionWorkflowId: ACTION_ID, actionInput: {} });
+
+      it('should still converge on a live proposal: a reuse ignores this call’s params', async () => {
+        const live = baseDocument({ comment: 'Already raised', rootProposalId: ID });
+        const memory = createInMemoryStorage({ [ID]: live });
+        const { service, attachmentsClient } = createService(
+          memory.storage,
+          workflowsRequiringName()
+        );
+
+        const result = await settled(service.create(badInput(), { spaceId: SPACE_ID, request }));
+
+        expect(result.reused).toBe(true);
+        expect(result.comment).toBe('Already raised');
+        expect(memory.documents.size).toBe(1);
+        expect(attachmentsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('should report the validation error when nothing live is there, without waiting', async () => {
+        const memory = createInMemoryStorage();
+        const { service } = createService(memory.storage, workflowsRequiringName());
+
+        // No timers advanced: a wait for a winner that is not coming would hang.
+        await expect(
+          service.create(badInput(), { spaceId: SPACE_ID, request })
+        ).rejects.toBeInstanceOf(ProposalInvalidActionInputError);
+
+        expect(memory.storage.index).not.toHaveBeenCalled();
+      });
+
+      it('should report the validation error, not a collision, when the id belongs to a settled proposal', async () => {
+        const memory = createInMemoryStorage({
+          [ID]: baseDocument({ status: 'succeeded', rootProposalId: ID }),
+        });
+        const { service } = createService(memory.storage, workflowsRequiringName());
+
+        await expect(
+          service.create(badInput(), { spaceId: SPACE_ID, request })
+        ).rejects.toBeInstanceOf(ProposalInvalidActionInputError);
+      });
+
+      it('should still validate when no id was supplied', async () => {
+        const memory = createInMemoryStorage();
+        const { service } = createService(memory.storage, workflowsRequiringName());
+
+        await expect(
+          service.create(idParams({ ...badInput(), id: undefined }), {
+            spaceId: SPACE_ID,
+            request,
+          })
+        ).rejects.toBeInstanceOf(ProposalInvalidActionInputError);
       });
     });
 

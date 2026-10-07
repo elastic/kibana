@@ -279,8 +279,10 @@ export const createProposalRequestSchema = z.object({
    *
    * Whether a settled proposal should be followed by a new one is therefore the
    * caller's decision: it reads what exists and derives the next id. Include the
-   * space and the producer in whatever the id is derived from, since the index is
-   * shared. Omitting `id` mints a random one, exactly as before.
+   * space and the producer in whatever the id is derived from: the index is shared
+   * and the service does not scope the id itself, so this is the caller's rule to
+   * keep. A clash with another space is refused, never returned. Omitting `id`
+   * mints a random one, exactly as before.
    */
   id: z.uuid().optional(),
 });

@@ -189,14 +189,32 @@ The head, not the root, is what comes back: after a `revise()` the root is a
 superseded row. A proposal that was approved stays live until its action finishes,
 so a duplicate that arrives in that window still converges on it.
 
+A reuse ignores everything else this call carries. In particular an `actionInput`
+the action would refuse does not stop a duplicate converging on a live proposal;
+it is only reported when there is nothing live to converge on.
+
+When two callers race, the loser is told it lost as soon as the winner's document
+exists, but every read in this service is a search and a document only becomes
+searchable at the next refresh. `create()` therefore looks for the winner a few
+times, a quarter-second apart, before concluding the id is not ours.
+
 The service deliberately does not decide that a settled proposal should be
 followed by a new one. That is lifecycle policy and belongs to the caller: read
-what exists, and if it has settled, derive the next id and create that. The same
-rule is why a caller must put the space and its own producer into whatever the id
-is derived from. The index is shared, so a bare id from one space would collide
-with the same id from another. `ProposalAlreadyExistsError` extends
-`ProposalConflictError`, so it is already a 409 on the routes and a
-`ConflictError` in a workflow.
+what exists, and if it has settled, derive the next id and create that.
+
+**The service does not scope the id by space or producer, and nothing in it
+enforces that the caller does.** The index is shared, so a bare id used from two
+spaces is the same id. A caller must therefore put the space and its own producer
+into whatever the id is derived from; for Hunt Watch that is the id helper in
+elastic/security-team#19822, which is the only place that rule is enforced. The
+same-space check on a collision is the backstop, not the mechanism: a clash is
+refused and never returned, so a missing space in an id costs the caller a failed
+create, not another space's data. Creation is only reachable from server-side
+workflow steps, never over HTTP, so choosing an id needs the ability to author
+a workflow. The id is deliberately not namespaced by the service: the stored id
+would then differ from the one the caller passed, and a caller reads proposals back
+by id. `ProposalAlreadyExistsError` extends `ProposalConflictError`, so it is
+already a 409 on the routes and a `ConflictError` in a workflow.
 
 A reused proposal belongs to whichever execution created it, and only that
 execution is parked on it. `proposals.createProposal` therefore takes the id as
