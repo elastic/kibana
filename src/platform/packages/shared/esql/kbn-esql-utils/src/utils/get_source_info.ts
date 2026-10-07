@@ -32,10 +32,12 @@ interface SourceInfoRequest {
   settled: boolean;
 }
 
-// Expires like the ES|QL editor's fields cache, so mapping changes show up without a reload.
+/** How long a source's schema is cached, like the ES|QL editor's fields cache: new fields show up without a reload. */
+export const ESQL_SOURCE_INFO_CACHE_TTL = 10 * 60 * 1000;
+
 const sourceInfoCache = new LRUCache<string, SourceInfoRequest>({
   max: 100,
-  ttl: 10 * 60 * 1000,
+  ttl: ESQL_SOURCE_INFO_CACHE_TTL,
 });
 
 /**

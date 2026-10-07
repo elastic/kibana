@@ -127,6 +127,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
     ) {
       const connector = await this.resolveExecutionConnector({
+        agentId,
         connectorId: params.connectorId,
         request,
       });
@@ -710,17 +711,38 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   private async resolveExecutionConnector({
+    agentId,
     connectorId,
     request,
   }: {
+    agentId: string;
     connectorId?: string;
     request: KibanaRequest;
   }): Promise<InferenceConnector | undefined> {
-    const { inference, searchInferenceEndpoints } = this.deps;
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
     return (
-      resolveExecutionConnectorId({ connectorId, request, searchInferenceEndpoints })
-        .then((resolvedConnectorId) =>
-          resolvedConnectorId ? inference.getConnectorById(resolvedConnectorId, request) : undefined
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
         )
         // Leaves resolution failures to the runner, which records them against the execution
         .catch(() => undefined)

@@ -1023,6 +1023,20 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker({ log, options });
   log.info(`[runServerlessCluster] Docker environment ready (${elapsed()})`);
 
+  try {
+    return await startServerlessContainers(log, options, elapsed);
+  } catch (error) {
+    // Without this, containers started before the failure keep holding their ports and volumes.
+    teardownServerlessClusterSync(log, options);
+    throw error;
+  }
+}
+
+async function startServerlessContainers(
+  log: ToolingLog,
+  options: ServerlessOptions,
+  elapsed: () => string
+) {
   const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
   log.info(`[runServerlessCluster] Pulling Docker image(s) for: ${esServerlessImage}...`);
   await Promise.all([
