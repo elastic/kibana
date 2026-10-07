@@ -467,14 +467,14 @@ export class TagManagementPageObject extends FtrService {
    * select tags to make the action menu button appear.
    */
   async isBulkActionPresent(actionId: string) {
-    if (!(await this.isActionMenuButtonDisplayed())) {
+    if (!(await this.testSubjects.waitForExists('actionBar-contextMenuButton'))) {
       return false;
     }
     if (!(await this.isActionMenuOpened())) {
       await this.openActionMenu();
     }
 
-    return await this.testSubjects.exists(`actionBar-button-${actionId}`);
+    return await this.testSubjects.waitForExists(`actionBar-button-${actionId}`);
   }
 
   /**
