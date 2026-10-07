@@ -703,7 +703,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicy: { ...enrichedPackagePolicy, inputs },
         packageInfo: pkgInfo,
         esClient,
-        soClient,
       });
 
       enrichedPackagePolicy = secretsRes.packagePolicy;
@@ -1093,7 +1092,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             packagePolicy: { ...pkgPolicyWithoutId, inputs },
             packageInfo: pkgInfo,
             esClient,
-            soClient,
           });
 
           pkgPolicyWithoutId = secretsRes.packagePolicy;

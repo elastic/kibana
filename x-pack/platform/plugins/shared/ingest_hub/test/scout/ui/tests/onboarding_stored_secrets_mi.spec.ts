@@ -286,9 +286,15 @@ test.describe(
 
       await page.testSubj.locator('awsStaticKeysForm-cancelReplace').click();
 
+      // Nothing is changed any more, so the deployment is done again and its section collapses.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+      await expect(page.testSubj.locator('awsStaticKeysForm-cancelReplace')).toBeHidden();
+      await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId')).toBeHidden();
+
+      // Opened again, the stored secrets are back as placeholders, with nothing typed.
+      await page.testSubj.locator('managedIntegrationsSection-headerButton').click();
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
   }
 );

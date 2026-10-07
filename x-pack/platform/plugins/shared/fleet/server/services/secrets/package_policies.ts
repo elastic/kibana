@@ -49,10 +49,8 @@ export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
-  /** Used to check that the secret refs the request carries may be reused by the caller. */
-  soClient: SavedObjectsClientContract;
 }): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: SecretReference[] }> {
-  const { packagePolicy, packageInfo, esClient, soClient } = opts;
+  const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
   const cloudConnectorsSecretReferences =
     packagePolicy.supports_cloud_connector && packagePolicy.cloud_connector_id
@@ -82,8 +80,6 @@ export async function extractAndWriteSecrets(opts: {
   if (hasCloudConnectorSecretReferences) {
     return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
   }
-
-  await assertSecretRefsReusable(soClient, providedSecretRefs);
 
   const secrets = await createSecrets({
     esClient,
@@ -115,18 +111,12 @@ export async function extractAndWriteSecrets(opts: {
 }
 
 /**
- * A create request may carry refs to existing secrets (to reuse the credentials of a sibling
- * policy). Secret ids are not credentials of their own, so a ref is only accepted when a package
- * policy the caller can see already references that secret: this stops a request from pointing a
- * new policy at an arbitrary secret id.
+ * A request may carry refs to existing secrets (to reuse the credentials of a sibling policy).
+ * Secret ids are not credentials of their own, so a ref is only accepted when a package policy the
+ * caller can see already references that secret: this stops a request from pointing a policy at
+ * an arbitrary secret id.
  */
-async function assertSecretRefsReusable(
-  soClient: SavedObjectsClientContract,
-  providedSecretRefs: SecretPath[]
-) {
-  const ids = providedSecretRefs.flatMap((secretPath) =>
-    secretPath.value.value.ids ? secretPath.value.value.ids : [secretPath.value.value.id]
-  );
+export async function assertSecretIdsReusable(soClient: SavedObjectsClientContract, ids: string[]) {
   if (ids.length === 0) return;
 
   const referenced = new Set(

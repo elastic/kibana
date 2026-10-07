@@ -14,7 +14,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
-import { deleteSecretsIfNotReferenced } from '../secrets';
+import { assertSecretIdsReusable, deleteSecretsIfNotReferenced } from '../secrets';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
@@ -28,6 +28,7 @@ jest.mock('../agent_policy');
 jest.mock('../secrets', () => ({
   ...jest.requireActual('../secrets'),
   deleteSecretsIfNotReferenced: jest.fn(),
+  assertSecretIdsReusable: jest.fn(),
 }));
 
 const buildAgentlessPackagePolicy = (overrides: Record<string, any> = {}): any => ({
@@ -345,6 +346,59 @@ describe('AgentlessPoliciesService', () => {
             ],
           } as any)
       );
+    });
+
+    describe('secret refs in the request', () => {
+      it('checks refs the policy does not hold yet, wherever they are in the request', async () => {
+        packagePolicyService.get.mockResolvedValue(
+          buildAgentlessPackagePolicy({ secret_references: [{ id: 'own-secret' }] })
+        );
+
+        // Stop right after the check: this test only looks at what it was asked.
+        jest.mocked(assertSecretIdsReusable).mockRejectedValueOnce(new Error('stop here'));
+
+        await expect(
+          createService().updateAgentlessPolicy(
+            'agentless-policy-id',
+            buildUpdateRequest({
+              vars: {
+                access_key_id: { isSecretRef: true, id: 'own-secret' },
+                secret_access_key: { isSecretRef: true, id: 'sibling-secret' },
+              },
+              inputs: {
+                'a-input': { vars: { token: { isSecretRef: true, ids: ['multi-1', 'multi-2'] } } },
+              },
+            })
+          )
+        ).rejects.toThrow('stop here');
+
+        // The policy's own secret is not asked about; the others must be in use by a visible policy.
+        expect(jest.mocked(assertSecretIdsReusable).mock.calls[0][1].sort()).toEqual([
+          'multi-1',
+          'multi-2',
+          'sibling-secret',
+        ]);
+      });
+
+      it('does not touch the policy when a ref is not reusable', async () => {
+        jest
+          .mocked(assertSecretIdsReusable)
+          .mockRejectedValueOnce(new Error('Cannot reuse secret reference(s) [x]'));
+
+        await expect(
+          createService().updateAgentlessPolicy(
+            'agentless-policy-id',
+            buildUpdateRequest({ vars: { secret_access_key: { isSecretRef: true, id: 'x' } } })
+          )
+        ).rejects.toThrow(/Cannot reuse secret/);
+        expect(packagePolicyService.update).not.toHaveBeenCalled();
+        expect(jest.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
+      });
+
+      it('asks nothing when the request carries no refs', async () => {
+        await createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+        expect(assertSecretIdsReusable).toHaveBeenCalledWith(expect.anything(), []);
+      });
     });
 
     describe('replaced secrets', () => {
