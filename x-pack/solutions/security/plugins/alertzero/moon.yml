@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-ui'
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'

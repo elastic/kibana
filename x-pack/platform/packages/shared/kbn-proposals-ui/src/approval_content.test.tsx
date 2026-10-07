@@ -195,16 +195,18 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
   });
 
-  it('colors the Approve button by the proposal tone: danger for high/critical impact', () => {
-    // `baseProposal` is `critical` impact, so the default render already covers this.
+  it('keeps the Approve button primary even for high/critical impact', () => {
+    // `baseProposal` is `critical` impact. The risk is conveyed by the caption and the Decline
+    // action; Approve itself stays the primary call to action rather than turning `danger`.
     renderContent();
-    expect(screen.getByTestId('approvalContent-confirm').className).toContain('danger');
+    const className = screen.getByTestId('approvalContent-confirm').className;
+    expect(className).toContain('primary');
+    expect(className).not.toContain('danger');
   });
 
   it('colors the Approve button primary for low/medium impact, not success', () => {
     // Regression check: the chat card's Approve button was once styled `success` here,
-    // independent of — and inconsistent with — the flyout modal's tone-derived `primary`. Both
-    // hosts now share this one derivation, so this covers both.
+    // independent of the flyout modal's `primary`. Both hosts share this one component.
     renderContent({ proposal: { ...baseProposal, impact: 'low' } });
     const className = screen.getByTestId('approvalContent-confirm').className;
     expect(className).toContain('primary');
