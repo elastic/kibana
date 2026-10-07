@@ -28,8 +28,12 @@ export const withSearchMemberMatch = (
   card: IntegrationCardItem,
   searchTerm?: string
 ): IntegrationCardItem => {
+  // Tiles that bundle services name them explicitly (AWS onboarding); collection tiles bundle
+  // their member integrations.
+  const members =
+    card.searchMembers ?? card.groupMembers?.map(({ name, title }) => ({ name, title }));
   const queryTokens = tokenize(searchTerm ?? '');
-  if (queryTokens.length === 0 || !card.searchMembers?.length) {
+  if (queryTokens.length === 0 || !members?.length) {
     return card;
   }
 
@@ -38,7 +42,7 @@ export const withSearchMemberMatch = (
     return card;
   }
 
-  const matches = card.searchMembers.filter(
+  const matches = members.filter(
     (member) =>
       matchesAllTokens(queryTokens, member.title) || matchesAllTokens(queryTokens, member.name)
   );

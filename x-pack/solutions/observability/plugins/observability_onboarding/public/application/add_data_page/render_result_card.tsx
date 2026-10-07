@@ -69,7 +69,7 @@ export const createRenderResultCard =
         tile={{
           id: item.id,
           title: item.title,
-          description: item.description,
+          description: getDescription(item),
           icon: (
             <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
           ),

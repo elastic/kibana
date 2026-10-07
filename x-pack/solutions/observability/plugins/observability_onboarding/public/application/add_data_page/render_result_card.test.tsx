@@ -150,6 +150,20 @@ describe('createRenderResultCard', () => {
     });
   });
 
+  it('explains which member the search matched on a collection card', () => {
+    renderCard({
+      ...collectionItem,
+      searchMemberMatch: { memberTitles: ['Nginx (OpenTelemetry)'], collectionTitle: 'Nginx' },
+    });
+
+    expect(screen.getByTestId('searchMemberMatchStub')).toHaveTextContent(
+      'Nginx (OpenTelemetry) in Nginx'
+    );
+    expect(
+      screen.queryByText('Choose from ECS-based or OTel-based collection.')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders a singleton collection as a plain card, mirroring Fleet degradation', () => {
     const singleton: CollectionCardItem = {
       ...collectionItem,
