@@ -771,6 +771,30 @@ describe('AttachmentService', () => {
       });
     });
 
+    it('throws a 404 when the attachment is in neither saved object type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+
+      await expect(
+        service.update({
+          savedObjectId: 'missing',
+          updatedAttributes: persistableStateAttachment,
+          options: { references: [] },
+        })
+      ).rejects.toMatchObject({
+        message: 'Attachment missing not found',
+        output: expect.objectContaining({ statusCode: 404 }),
+      });
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
