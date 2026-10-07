@@ -10149,7 +10149,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change `tags` while leaving `expression` alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears just the expression, while `{"matcher": null}` clears the whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change one leaf while leaving its siblings alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears a single leaf, while `{"matcher": null}` clears a whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15422,7 +15422,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change `tags` while leaving `expression` alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears just the expression, while `{"matcher": null}` clears the whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"metadata": {"name": "Disk pressure"}}` to change one leaf while leaving its siblings alone. Send `null` to clear a field, again at any level: `{"metadata": {"description": null}}` clears a single leaf, while `{"grouping": null}` clears a whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: patch-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -151974,16 +151974,16 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
               minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone; an empty array is not accepted.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -152242,10 +152242,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         enabled:
           default: true
@@ -152579,16 +152580,16 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
               minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone; an empty array is not accepted.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -152647,10 +152648,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -152881,16 +152883,16 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When both `tags` and `expression` are omitted, the policy applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
               minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone; an empty array is not accepted.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -153361,10 +153363,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         created_at:
           description: ISO timestamp when the rule was created.
@@ -153619,18 +153622,18 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` to clear it. When `matcher` is `null`, or when the merged `tags` and `expression` are both absent, the policy applies to all alerts.
           nullable: true
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to keep the stored expression, or set it to `null` to clear it and match on `tags` alone."
               maxLength: 4096
               minLength: 1
               nullable: true
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone; an empty array is not accepted.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to keep the stored tags, or set it to `null` to clear them and match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
@@ -153654,10 +153657,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           nullable: true
           type: array
         grouping:
