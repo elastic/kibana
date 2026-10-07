@@ -7,11 +7,38 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { EuiThemeProvider, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
+import { useKibana } from '../hooks/use_kibana';
+import { NEW_INDEX_DISMISSED_KEY } from '../constants';
+import type { NewIndexDetails } from '../../common/types';
 import {
   HomePageStatPanel,
   type HomePageStatPanelAction,
   type HomePageStatPanelMetric,
 } from './home_page_stat_panel';
+
+jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useIsWithinMinBreakpoint: jest.fn(),
+}));
+
+const mockUseKibana = useKibana as jest.Mock;
+const mockIsWithinMinBreakpoint = useIsWithinMinBreakpoint as jest.Mock;
+
+const navigateToIndexDetails = jest.fn();
+const navigateToDiscover = jest.fn();
+
+const newIndex: NewIndexDetails = {
+  indexName: 'my_vectors',
+  documentsCount: 12,
+  sizeInBytes: 1024,
+  createdAt: Date.now(),
+};
 
 const metric = (overrides: Partial<HomePageStatPanelMetric> = {}): HomePageStatPanelMetric => ({
   key: 'total',
@@ -33,14 +60,18 @@ const action = (overrides: Partial<HomePageStatPanelAction> = {}): HomePageStatP
 
 const renderPanel = (props: Partial<React.ComponentProps<typeof HomePageStatPanel>> = {}) =>
   render(
-    <HomePageStatPanel
-      iconType="productDashboard"
-      title="Dashboards"
-      testSubj="dashboardsCard"
-      metrics={[metric()]}
-      actions={[action()]}
-      {...props}
-    />
+    <I18nProvider>
+      <EuiThemeProvider>
+        <HomePageStatPanel
+          iconType="productDashboard"
+          title="Dashboards"
+          testSubj="dashboardsCard"
+          metrics={[metric()]}
+          actions={[action()]}
+          {...props}
+        />
+      </EuiThemeProvider>
+    </I18nProvider>
   );
 
 // EuiPopover positions itself asynchronously once opened, so let that settle before asserting.
@@ -50,9 +81,33 @@ const openActionsMenu = async () => {
   });
 };
 
+const openNewIndexMenu = async () => {
+  await act(async () => {
+    fireEvent.click(screen.getByTestId('homePageDataCardNewIndexActionsButton'));
+  });
+};
+
 describe('HomePageStatPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.localStorage.clear();
+    mockIsWithinMinBreakpoint.mockReturnValue(true);
+    mockUseKibana.mockReturnValue({
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: (id: string) => {
+                if (id === INDEX_MANAGEMENT_LOCATOR_ID) {
+                  return { navigate: navigateToIndexDetails };
+                }
+                return id === DISCOVER_APP_LOCATOR ? { navigate: navigateToDiscover } : undefined;
+              },
+            },
+          },
+        },
+      },
+    });
   });
 
   describe('metrics', () => {
@@ -137,6 +192,99 @@ describe('HomePageStatPanel', () => {
       fireEvent.click(item);
 
       await waitForElementToBeRemoved(item);
+    });
+  });
+
+  describe('the new index footer', () => {
+    it('appears when there is a new index', () => {
+      renderPanel({ newIndex });
+
+      expect(screen.getByTestId('homePageDataCardNewIndex')).toBeInTheDocument();
+    });
+
+    it('is left out when there is no new index', () => {
+      renderPanel({ newIndex: null });
+
+      expect(screen.queryByTestId('homePageDataCardNewIndex')).not.toBeInTheDocument();
+    });
+
+    it('stays hidden once that index has been dismissed', () => {
+      window.localStorage.setItem(
+        NEW_INDEX_DISMISSED_KEY,
+        JSON.stringify({ indexName: newIndex.indexName, createdAt: newIndex.createdAt })
+      );
+
+      renderPanel({ newIndex });
+
+      expect(screen.queryByTestId('homePageDataCardNewIndex')).not.toBeInTheDocument();
+    });
+
+    it('comes back for an index created after the dismissed one', () => {
+      window.localStorage.setItem(
+        NEW_INDEX_DISMISSED_KEY,
+        JSON.stringify({ indexName: 'older_vectors', createdAt: newIndex.createdAt - 1000 })
+      );
+
+      renderPanel({ newIndex });
+
+      expect(screen.getByTestId('homePageDataCardNewIndex')).toBeInTheDocument();
+    });
+
+    it('comes back for an index recreated under the same name', () => {
+      window.localStorage.setItem(
+        NEW_INDEX_DISMISSED_KEY,
+        JSON.stringify({ indexName: newIndex.indexName, createdAt: newIndex.createdAt - 1000 })
+      );
+
+      renderPanel({ newIndex });
+
+      expect(screen.getByTestId('homePageDataCardNewIndex')).toBeInTheDocument();
+    });
+
+    it('opens the index in index management', () => {
+      renderPanel({ newIndex });
+
+      fireEvent.click(screen.getByTestId('homePageDataCardNewIndexOpenBtn'));
+
+      expect(navigateToIndexDetails).toHaveBeenCalledWith({
+        page: 'index_details',
+        indexName: newIndex.indexName,
+      });
+    });
+
+    it('opens the index in Discover as an ad hoc data view', async () => {
+      renderPanel({ newIndex });
+
+      await openNewIndexMenu();
+      fireEvent.click(screen.getByTestId('homePageDataCardNewIndexDiscoverMenuItem'));
+
+      expect(navigateToDiscover).toHaveBeenCalledWith({
+        dataViewSpec: { title: newIndex.indexName },
+      });
+    });
+
+    it('moves the inline actions into the overflow menu on a narrow screen', async () => {
+      mockIsWithinMinBreakpoint.mockReturnValue(false);
+      renderPanel({ newIndex });
+
+      expect(screen.queryByTestId('homePageDataCardNewIndexOpenBtn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('homePageDataCardNewIndexDismissBtn')).not.toBeInTheDocument();
+
+      await openNewIndexMenu();
+
+      expect(screen.getByTestId('homePageDataCardNewIndexOpenMenuItem')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCardNewIndexDismissMenuItem')).toBeInTheDocument();
+    });
+
+    it('disappears when dismissed, recording which index that was', () => {
+      renderPanel({ newIndex });
+
+      fireEvent.click(screen.getByTestId('homePageDataCardNewIndexDismissBtn'));
+
+      expect(screen.queryByTestId('homePageDataCardNewIndex')).not.toBeInTheDocument();
+      expect(window.localStorage.getItem(NEW_INDEX_DISMISSED_KEY)).toBe(
+        JSON.stringify({ indexName: newIndex.indexName, createdAt: newIndex.createdAt })
+      );
     });
   });
 });

@@ -44,7 +44,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
       ).toBeHidden();
-      await page.click('[aria-label="Select agent policy"]');
+      await page.testSubj.click('syntheticsAgentPolicySelect');
       await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
@@ -73,7 +73,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
 
     await test.step('edit location label and verify disabled fields', async () => {
       await page.testSubj.click('action-edit');
-      await expect(page.locator('[aria-label="Select agent policy"]')).toBeDisabled();
+      await expect(page.testSubj.locator('syntheticsAgentPolicySelect')).toBeDisabled();
       await expect(page.locator('[aria-label="Tags"]')).toBeEnabled();
       await expect(page.locator('[aria-label="Spaces "]')).toBeDisabled();
       await page.testSubj.fill('syntheticsLocationFormFieldText', NEW_LOCATION_LABEL);
@@ -98,8 +98,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('location cannot be deleted with assigned monitor', async () => {
-      await page.testSubj.click('settings-page-link');
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
+      await pageObjects.syntheticsApp.navigateToPrivateLocations();
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
       const deleteLocationButton = page.testSubj.locator('action-delete');
       await expect(deleteLocationButton).toBeDisabled();
@@ -117,7 +116,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToSettings();
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
-      const createBtn = page.getByRole('button', { name: 'Create location' });
+      const createBtn = page.testSubj.locator('addPrivateLocationButton');
       await expect(createBtn).toBeDisabled();
       await createBtn.hover({ force: true });
       await expect(

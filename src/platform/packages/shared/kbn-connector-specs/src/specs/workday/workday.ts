@@ -26,7 +26,7 @@ const ABSENCE_API_VERSION = 'v5';
 const HOLIDAY_API_VERSION = 'v1';
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
 import {
@@ -125,36 +125,39 @@ export const Workday: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    tenantUrl: UISchemas.url('https://<tenant>.workday.com')
-      .describe(
-        'Base URL of your Workday tenant, e.g. https://mycompany.workday.com. ' +
-          'Used to construct API endpoint URLs in the form ' +
-          'https://<tenant>.workday.com/ccx/api/<module>/<version>/<tenantName>/...'
-      )
-      .meta({
-        label: 'Tenant URL',
-        validate: { allowedHosts: true },
-        placeholder: 'https://mycompany.workday.com',
-        helpText: 'Your Workday tenant base URL. Find it in the URL when you log in to Workday.',
-      }),
-    tenantName: z
-      .string()
-      .describe(
-        'Your Workday tenant name (the identifier that appears in the API path). ' +
-          'Example: if your tenant URL is https://mycompany.workday.com, your tenant name is "mycompany".'
-      )
-      .meta({
-        label: 'Tenant Name',
-        placeholder: 'mycompany',
-        helpText:
-          'The tenant identifier used in API paths. Usually matches your company name in the Workday URL.',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      tenantUrl: UISchemas.url('https://<tenant>.workday.com')
+        .describe(
+          'Base URL of your Workday tenant, e.g. https://mycompany.workday.com. ' +
+            'Used to construct API endpoint URLs in the form ' +
+            'https://<tenant>.workday.com/ccx/api/<module>/<version>/<tenantName>/...'
+        )
+        .meta({
+          label: 'Tenant URL',
+          validate: { allowedHosts: true },
+          placeholder: 'https://mycompany.workday.com',
+          helpText: 'Your Workday tenant base URL. Find it in the URL when you log in to Workday.',
+        }),
+      tenantName: z
+        .string()
+        .describe(
+          'Your Workday tenant name (the identifier that appears in the API path). ' +
+            'Example: if your tenant URL is https://mycompany.workday.com, your tenant name is "mycompany".'
+        )
+        .meta({
+          label: 'Tenant Name',
+          placeholder: 'mycompany',
+          helpText:
+            'The tenant identifier used in API paths. Usually matches your company name in the Workday URL.',
+        }),
+    })
+  ),
 
   actions: {
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         "Retrieve the authenticated user's own Workday worker profile. " +
         'Returns job title, department, work location, hire date, and manager. ' +
@@ -170,6 +173,7 @@ export const Workday: ConnectorSpec = {
 
     searchWorkers: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for workers (employees and contingent workers) in Workday by name. ' +
         'Returns a list of matching worker summaries including IDs, names, and titles. ' +
@@ -194,6 +198,7 @@ export const Workday: ConnectorSpec = {
 
     getWorker: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full professional profile of a single Workday worker by their WID. ' +
         'Returns job title, department, work location, hire date, work email, and manager name. ' +
@@ -213,6 +218,7 @@ export const Workday: ConnectorSpec = {
 
     getDirectReports: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the list of direct reports for a given worker or manager in Workday. ' +
         'Returns worker summaries (name, job title, WID) for everyone who reports directly to the specified worker. ' +
@@ -237,6 +243,7 @@ export const Workday: ConnectorSpec = {
 
     listOrganizations: {
       isTool: true,
+      scope: 'read',
       description:
         'List Workday organizational units such as supervisory orgs (departments/teams), ' +
         'companies, cost centers, and regions. ' +
@@ -261,6 +268,7 @@ export const Workday: ConnectorSpec = {
 
     getOrganization: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve full details of a single Workday organization by its WID. ' +
         'Returns the organization name, type, hierarchy level, manager, and member count. ' +
@@ -279,6 +287,7 @@ export const Workday: ConnectorSpec = {
 
     listJobPostings: {
       isTool: true,
+      scope: 'read',
       description:
         'List active or closed job postings in Workday. ' +
         'Returns job posting summaries including title, requisition ID, location, ' +
@@ -303,6 +312,7 @@ export const Workday: ConnectorSpec = {
 
     getJobPosting: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full details of a single Workday job posting by its WID. ' +
         'Returns the job title, full description, requirements, location, hiring manager, and requisition ID. ' +
@@ -321,6 +331,7 @@ export const Workday: ConnectorSpec = {
 
     getTimeOffBalance: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve absence plan balances for a worker (days available and accrued per plan). ' +
         'Returns current balances across all absence plans (vacation, sick, personal, etc.). ' +
@@ -346,6 +357,7 @@ export const Workday: ConnectorSpec = {
 
     listTimeOffEntries: {
       isTool: true,
+      scope: 'read',
       description:
         'List time off entries (approved, submitted, or pending requests) for a worker. ' +
         'Returns individual time off bookings with dates, hours, and status. ' +
@@ -372,6 +384,7 @@ export const Workday: ConnectorSpec = {
 
     listAbsenceTypes: {
       isTool: true,
+      scope: 'read',
       description:
         'List eligible absence plan types for a worker (vacation, sick leave, personal, etc.). ' +
         'Returns plan names and types the worker is eligible to use. ' +
@@ -396,6 +409,7 @@ export const Workday: ConnectorSpec = {
 
     listInboxTasks: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve Workday inbox tasks and pending action items for a worker. ' +
         'Returns task summaries including title, subject, business process, and status. ' +
@@ -423,6 +437,7 @@ export const Workday: ConnectorSpec = {
 
     listCandidates: {
       isTool: true,
+      scope: 'read',
       description:
         'List candidates in Workday from the Recruiting API. ' +
         'Returns candidate name, stage, and application date. ' +
@@ -454,6 +469,7 @@ export const Workday: ConnectorSpec = {
 
     listHolidays: {
       isTool: true,
+      scope: 'read',
       description:
         'List holiday events for one or more workers in Workday. ' +
         'Returns holiday name, date, and calendar for each event. ' +

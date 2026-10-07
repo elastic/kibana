@@ -47,10 +47,24 @@ export class ServerlessVectordbPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { serverless, agentBuilder, cloud }: SetupDependencies
+    { serverless, agentBuilder, cloud, features }: SetupDependencies
   ) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
     registerSearchSkills({ agentBuilder, cloud, logger: this.logger });
+
+    // Exposes the vector count privilege as a UI capability so the home page can render that tile
+    // before the stats request resolves. Declared as an Elasticsearch feature, which resolves it
+    // within the privilege call Security already makes. The stats route authorizes the count.
+    features.registerElasticsearchFeature({
+      id: 'vectordbIndexStats',
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: { '*': ['monitor'] },
+          ui: ['canMonitorAllIndices'],
+        },
+      ],
+    });
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);

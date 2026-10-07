@@ -143,6 +143,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
@@ -298,6 +299,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {

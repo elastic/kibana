@@ -47,6 +47,21 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
+ * Event: observables added
+ *
+ * Observable values are deliberately excluded so that users without Cases read
+ * access cannot observe case data through workflow triggers or through the
+ * trigger-events data stream (which persists every payload).
+ */
+export interface ObservablesAddedEventPayload extends BaseCaseEventPayload {
+  readonly caseId: string;
+  /** IDs of the newly-persisted observables, in insertion order. */
+  readonly observableIds: string[];
+  /** Type keys for the newly-persisted observables, index-aligned with observableIds (observableTypeKeys[i] is the type of observableIds[i]). A type key may repeat when multiple observables of the same type are added in one request. */
+  readonly observableTypeKeys: string[];
+}
+
+/**
  * Event: alert status changed (emitted by Cases when it updates alert workflow statuses)
  */
 export interface AlertStatusChangedEventPayload {
@@ -67,6 +82,7 @@ interface CasesDomainEventPayloadByType {
   readonly caseUpdated: CaseUpdatedEventPayload;
   readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
+  readonly observablesAdded: ObservablesAddedEventPayload;
   readonly alertStatusChanged: AlertStatusChangedEventPayload;
 }
 

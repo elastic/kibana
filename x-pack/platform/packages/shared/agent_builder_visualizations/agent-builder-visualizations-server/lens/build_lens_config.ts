@@ -11,8 +11,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
-import { createVisualizationGraph } from './graph_lens';
-import { getSchemaForChartType } from './schemas';
+import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
 const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
@@ -30,13 +29,23 @@ const getExistingChartType = (
     : undefined;
 };
 
-export interface BuildLensConfigParams {
+interface BuildLensConfigParams {
   nlQuery: string;
   index?: string;
   chartType?: SupportedChartType;
   esql?: string;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
+  /**
+   * Keep the existing ES|QL query and column bindings of
+   * `parsedExistingConfig` instead of regenerating the query.
+   */
+  preserveESQL?: boolean;
+  /**
+   * Reauthor the presentation of `parsedExistingConfig` from the chart rules,
+   * replacing custom styling. Otherwise only the requested changes are applied.
+   */
+  applyChartRules?: boolean;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -57,6 +66,8 @@ export const buildLensConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
+  preserveESQL = false,
+  applyChartRules = false,
   modelProvider,
   logger,
   events,
@@ -69,7 +80,6 @@ export const buildLensConfig = async ({
     );
   }
 
-  const schema = getSchemaForChartType(selectedChartType);
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
   // If the user provides ES|QL, use it only when validation says it is safe.
@@ -93,14 +103,25 @@ export const buildLensConfig = async ({
     }
   }
 
+  // Preserving ES|QL reuses the existing query, which also routes the
+  // graph straight to config generation. The graph re-pins every layer's own
+  // data_source, so the first query only seeds the prompt.
+  const [existingEsql] = preserveESQL ? getExistingEsqlQueries(parsedExistingConfig) : [];
+  if (preserveESQL && !existingEsql) {
+    throw new Error(
+      'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration.'
+    );
+  }
+
   const finalState = await graph.invoke({
     nlQuery,
     index,
     chartType: selectedChartType,
-    schema,
     existingConfig,
     parsedExistingConfig,
-    esqlQuery: providedEsql || '',
+    preserveESQL,
+    applyChartRules,
+    esqlQuery: providedEsql || existingEsql || '',
     currentAttempt: 0,
     actions: [],
     validatedConfig: null,

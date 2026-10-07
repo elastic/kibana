@@ -68,6 +68,7 @@ describe('fromEs', () => {
             tool_ids: ['id_1', 'id_2'],
           },
         ],
+        subagent_ids: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -102,6 +103,7 @@ describe('fromEs', () => {
             tool_ids: ['legacy_id_1', 'legacy_id_2'],
           },
         ],
+        subagent_ids: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -508,7 +510,7 @@ describe('createRequestToEs', () => {
       description: 'description',
       access_control: {
         access_mode: AgentAccessControlMode.Private,
-        entries: [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }],
+        entries: [{ type: 'user' as const, id: 'u_alice', role: AgentAccessControlRole.Editor }],
       },
       configuration: {
         instructions: 'instructions',

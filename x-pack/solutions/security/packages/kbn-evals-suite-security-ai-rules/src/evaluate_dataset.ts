@@ -12,7 +12,7 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
+import { calculateSetMetrics, createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
@@ -25,7 +25,6 @@ import {
   validateInterval,
   parseDateMathSeconds,
   extractMitreTechniques,
-  calculateSetMetrics,
   hasRequiredFields,
 } from './helpers';
 

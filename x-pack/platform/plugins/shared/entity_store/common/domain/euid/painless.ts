@@ -15,7 +15,8 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField } from './commons';
+import type { EuidGateOptions } from './commons';
+import { isEuidField, waiveForAlerts } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -74,11 +75,14 @@ function buildPreAggEvaluatedVarOverridesPreamble(
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
-export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
+export function getEuidPainlessRuntimeMapping(
+  entityType: EntityType,
+  options?: EuidGateOptions
+): {
   type: 'keyword';
   script: { source: string };
 } {
-  const returnScript = getEuidPainlessEvaluation(entityType);
+  const returnScript = getEuidPainlessEvaluation(entityType, options);
   const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
   return {
     type: 'keyword',
@@ -88,6 +92,9 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
 
 /**
  * Constructs a Painless evaluation for the provided entity type to generate the entity id.
+ *
+ * Applies the creation gate: a document that may not put an entity in the store yields `null`.
+ * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
  *
  * Example usage:
  * ```ts
@@ -101,7 +108,11 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A Painless evaluation string that computes the entity id.
  */
-export function getEuidPainlessEvaluation(entityType: EntityType): string {
+export function getEuidPainlessEvaluation(
+  entityType: EntityType,
+  options?: EuidGateOptions
+): string {
+  const { applyPostAggFilter = true } = options ?? {};
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
@@ -138,9 +149,10 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
   const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
   const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
+  const gateConditions = applyPostAggFilter
+    ? [identityField.documentsFilter, waiveForAlerts(entityDefinition.postAggFilter)]
+    : [identityField.documentsFilter];
+  for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
     filterChecks.push(
       `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
     );
@@ -200,6 +212,20 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
   return preamble + filterPreamble + branchLogic + trailingReturn;
+}
+
+/**
+ * Like {@link getEuidPainlessEvaluation} without the creation gate, so IdP and shared-account
+ * documents still resolve to an entity that already exists.
+ *
+ * For risk scoring and enrichment. The caller checks store membership; this only answers which
+ * entity a document refers to.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @returns A Painless evaluation string that computes the entity id.
+ */
+export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
+  return getEuidPainlessEvaluation(entityType, { applyPostAggFilter: false });
 }
 
 function painlessFieldNonEmpty(field: string): string {

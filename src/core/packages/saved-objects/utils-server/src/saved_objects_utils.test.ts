@@ -32,7 +32,7 @@ describe('SavedObjectsUtils', () => {
     });
 
     it('throws an error when a namespace ID is an empty string', () => {
-      expect(() => namespaceIdToString('')).toThrowError('namespace cannot be an empty string');
+      expect(() => namespaceIdToString('')).toThrow('namespace cannot be an empty string');
     });
   });
 
@@ -47,7 +47,7 @@ describe('SavedObjectsUtils', () => {
 
     it('throws an error when a namespace string is falsy', () => {
       const test = (arg: any) =>
-        expect(() => namespaceStringToId(arg)).toThrowError('namespace must be a non-empty string');
+        expect(() => namespaceStringToId(arg)).toThrow('namespace must be a non-empty string');
 
       test(undefined);
       test(null);

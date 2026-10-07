@@ -204,6 +204,32 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
   );
 
   apiTest(
+    'tags: should exclude templates carrying excluded tags',
+    async ({ apiClient, apiServices }) => {
+      const templates = [
+        { name: 'production-template', tags: ['production'] },
+        { name: 'deprecated-production-template', tags: ['production', 'deprecated'] },
+        { name: 'development-template', tags: ['development'] },
+      ];
+
+      for (const { name, tags: templateTags } of templates) {
+        await apiServices.alertingV2.ruleTemplates.create({
+          id: name,
+          attributes: buildRuleTemplateData({ metadata: { name, tags: templateTags } }),
+        });
+      }
+
+      const response = await apiClient.get(
+        getFindRuleTemplatesUrl({ tags: 'production', excluded_tags: 'deprecated' }),
+        { headers: adminHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(getTemplateNames(response.body.items)).toStrictEqual(['production-template']);
+    }
+  );
+
+  apiTest(
     'pagination: should slice results and report the total across pages',
     async ({ apiClient, apiServices }) => {
       for (let i = 0; i < 5; i++) {

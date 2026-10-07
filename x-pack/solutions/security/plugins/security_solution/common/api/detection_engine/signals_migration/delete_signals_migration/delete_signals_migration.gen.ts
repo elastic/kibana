@@ -39,7 +39,7 @@ export const AlertsMigrationCleanupRequestBody = lazySchema(() =>
     /**
      * Array of `migration_id`s to cleanup.
      */
-    migration_ids: z.array(z.string()).min(1),
+    migration_ids: z.array(z.string()).min(1).describe('Array of `migration_id`s to cleanup.'),
   })
 );
 export type AlertsMigrationCleanupRequestBody = z.infer<typeof AlertsMigrationCleanupRequestBody>;

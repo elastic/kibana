@@ -24,6 +24,9 @@ const stepExecutionsFor = (fixture: WorkflowRunFixture, stepId: string) =>
     (se) => se.stepId === stepId
   );
 
+const stepOutput = <T>(fixture: WorkflowRunFixture, stepId: string): T =>
+  stepExecutionsFor(fixture, stepId)[0]?.output as T;
+
 /**
  * Re-ticks a parked parallel workflow until it leaves WAITING (or the guard trips).
  * Parallel branches with timers/waits park in WAITING and resume across ticks, so
@@ -35,6 +38,31 @@ const driveToTerminal = async (fixture: WorkflowRunFixture, maxGuard = 10): Prom
     await fixture.resumeWorkflow();
     guard += 1;
   }
+};
+
+/** A poll step that never completes on its own; only `branch-timeout` ends it. */
+const neverCompletingPoll = createPollServerStepDefinition({
+  id: 'integration.parallelNeverPoll',
+  category: StepCategory.Kibana,
+  label: 'Never-completing poll branch (integration)',
+  description: 'Always asks to poll again',
+  inputSchema: z.object({}),
+  outputSchema: z.object({}),
+  poll: async ({ state }) => {
+    const count = (state as { count?: number } | undefined)?.count ?? 0;
+    return { state: { count: count + 1 } };
+  },
+  policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  ceilings: { maxAttempts: 100, maxWaitMs: 600_000 },
+});
+
+const registerNeverCompletingPoll = (fixture: WorkflowRunFixture): void => {
+  (fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => (id === 'integration.parallelNeverPoll' ? neverCompletingPoll : undefined)
+  );
+  (fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => id === 'integration.parallelNeverPoll'
+  );
 };
 
 describe('workflow with parallel (dynamic fan-out) step', () => {
@@ -329,6 +357,208 @@ steps:
     });
   });
 
+  // Regression (kibana#290309, security-team#19670): a branch step reading an
+  // earlier step of its own branch via `steps.<name>.output` used to resolve to
+  // whichever concurrent branch wrote that step last.
+  describe.each([
+    { concurrency: 3, label: 'all branches in one window' },
+    { concurrency: 2, label: 'branches spread across windows' },
+  ])('branch step reads its own branch sibling output ($label)', ({ concurrency }) => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: fanOut
+    type: parallel
+    foreach: '{{ consts.items }}'
+    mode: settled
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: mark
+        type: data.set
+        with:
+          value: 'mark-for-{{ foreach.item }}'
+      - name: readBack
+        type: data.set
+        with:
+          myId: '{{ foreach.item }}'
+          markValue: '{{ steps.mark.output.value }}'
+  - name: afterJoin
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'last={{ steps.mark.output.value }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('resolves steps.mark.output to the same branch execution', () => {
+      const readBacks = stepExecutionsFor(workflowRunFixture, 'readBack').map(
+        (execution) => execution.output as { myId: string; markValue: string }
+      );
+      expect(readBacks).toHaveLength(items.length);
+      readBacks.forEach(({ myId, markValue }) => {
+        expect(markValue).toBe(`mark-for-${myId}`);
+      });
+      expect(readBacks.map(({ myId }) => myId).sort()).toEqual(items);
+    });
+
+    it('still exposes a branch step output to steps after the join', () => {
+      const [call] = workflowRunFixture.unsecuredActionsClientMock.execute.mock.calls;
+      expect(call[0]).toEqual(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: { message: expect.stringMatching(/^last=mark-for-[ABC]$/) },
+        })
+      );
+    });
+  });
+
+  describe('branch step reads a step from an earlier, already-joined parallel', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: fanOutA
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: mark
+        type: data.set
+        with:
+          value: 'mark-for-{{ foreach.item }}'
+  - name: fanOutB
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: readPrevious
+        type: data.set
+        with:
+          got: '{{ steps.mark.output.value }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('keeps the earlier fan-out output visible inside the later fan-out branches', () => {
+      const reads = stepExecutionsFor(workflowRunFixture, 'readPrevious').map(
+        (execution) => (execution.output as { got: string }).got
+      );
+      expect(reads).toHaveLength(items.length);
+      reads.forEach((got) => {
+        expect(got).toMatch(/^mark-for-[ABC]$/);
+      });
+    });
+  });
+
+  // A branch reading `{{ variables.* }}` used to see a concurrent sibling
+  // branch's `data.set` of the same key.
+  describe.each([
+    { concurrency: 3, pause: false, label: 'all branches in one window' },
+    { concurrency: 2, pause: false, label: 'branches spread across windows' },
+    { concurrency: 3, pause: true, label: 'read after resume' },
+  ])('branch variables are scoped to the branch ($label)', ({ concurrency, pause }) => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const pauseStep = `
+      - name: pause
+        type: wait
+        with:
+          duration: 20m`;
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: setRoot
+    type: data.set
+    with:
+      who: root
+      rootOnly: kept
+  - name: fanOutA
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: setWho
+        type: data.set
+        with:
+          who: '{{ foreach.item }}'${pause ? pauseStep : ''}
+      - name: readBack
+        type: data.set
+        with:
+          myId: '{{ foreach.item }}'
+          who: '{{ variables.who }}'
+          rootOnly: '{{ variables.rootOnly }}'
+  - name: fanOutB
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: readPrevious
+        type: data.set
+        with:
+          got: '{{ variables.who }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      for (let guard = 0; guard < 10; guard++) {
+        if (getExecution(workflowRunFixture)?.status !== ExecutionStatus.WAITING) break;
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
+      }
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('resolves variables to the branch own data.set and keeps root variables visible', () => {
+      const readBacks = stepExecutionsFor(workflowRunFixture, 'readBack').map(
+        (execution) => execution.output as { myId: string; who: string; rootOnly: string }
+      );
+      expect(readBacks).toHaveLength(items.length);
+      readBacks.forEach(({ myId, who, rootOnly }) => {
+        expect(who).toBe(myId);
+        expect(rootOnly).toBe('kept');
+      });
+    });
+
+    it('keeps an earlier fan-out branch variable visible inside a later fan-out', () => {
+      const reads = stepExecutionsFor(workflowRunFixture, 'readPrevious').map(
+        (execution) => (execution.output as { got: string }).got
+      );
+      expect(reads).toHaveLength(items.length);
+      reads.forEach((got) => {
+        expect(got).toMatch(/^[ABC]$/);
+      });
+    });
+  });
+
   describe('suspendable (poll) branches resume across ticks', () => {
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];
@@ -414,32 +644,9 @@ steps:
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];
 
-    // A poll step that never completes on its own; only `branch-timeout` ends it.
-    const neverCompletingPoll = createPollServerStepDefinition({
-      id: 'integration.parallelNeverPoll',
-      category: StepCategory.Kibana,
-      label: 'Never-completing poll branch (integration)',
-      description: 'Always asks to poll again',
-      inputSchema: z.object({}),
-      outputSchema: z.object({}),
-      poll: async ({ state }) => {
-        const count = (state as { count?: number } | undefined)?.count ?? 0;
-        return { state: { count: count + 1 } };
-      },
-      policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-      ceilings: { maxAttempts: 100, maxWaitMs: 600_000 },
-    });
-
     beforeAll(async () => {
       workflowRunFixture = new WorkflowRunFixture();
-      (
-        workflowRunFixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock
-      ).mockImplementation((id: string) =>
-        id === 'integration.parallelNeverPoll' ? neverCompletingPoll : undefined
-      );
-      (
-        workflowRunFixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock
-      ).mockImplementation((id: string) => id === 'integration.parallelNeverPoll');
+      registerNeverCompletingPoll(workflowRunFixture);
 
       const yaml = `
 consts:
@@ -865,6 +1072,52 @@ steps:
     });
   });
 
+  describe('branches nested in a foreach keep the outer foreach context', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+steps:
+  - name: outer
+    type: foreach
+    foreach: '["x","y"]'
+    steps:
+      - name: enrich
+        type: parallel
+        branches:
+          - name: left
+            steps:
+              - name: readLeft
+                type: data.set
+                with:
+                  got: '{{ foreach.item }}'
+          - name: right
+            steps:
+              - name: readRight
+                type: data.set
+                with:
+                  got: '{{ foreach.item }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('renders {{ foreach.item }} from the enclosing foreach in every branch', () => {
+      for (const stepId of ['readLeft', 'readRight']) {
+        const reads = stepExecutionsFor(workflowRunFixture, stepId).map(
+          (execution) => (execution.output as { got: string }).got
+        );
+        expect(reads).toEqual(['x', 'y']);
+      }
+    });
+  });
+
   describe('failure modes', () => {
     // A parallel step over N items where EVERY branch fails (uses the
     // always-throwing fake connector), serialized with concurrency.max=1 so the
@@ -969,6 +1222,166 @@ steps:
         expect(output.status).toBe('failed');
         expect(output.results.every((r) => r.status === 'failed')).toBe(true);
       });
+    });
+  });
+
+  // A settled parallel must survive one bad branch in a fan-out where the branches are
+  // the writers of a before-agent hook (nightshift's `sandbox_materialize_workspace`):
+  // every sibling still reaches a terminal state, the step after the parallel still runs
+  // and reads the survivors' outputs, and the execution COMPLETES rather than failing —
+  // `runBeforeAgentWorkflows` turns a failed pre-execution workflow into a thrown error
+  // that aborts the agent round.
+  const settledWriterWorkflow = (memoryStep: string, branchTimeout = '') => `
+steps:
+  - name: materialize_workspaces
+    type: parallel
+    mode: settled${branchTimeout}
+    branches:
+      - name: cortex
+        steps:
+          - name: hydrate_cortex
+            type: data.set
+            with:
+              notification: 'cortex-fragment'
+      - name: memory
+        steps:
+          - name: hydrate_memory
+${memoryStep}
+      - name: decision_trees
+        steps:
+          - name: hydrate_decision_trees
+            type: data.set
+            with:
+              notification: 'trees-fragment'
+  - name: compose_prompt
+    type: data.set
+    with:
+      cortex: '{{ steps.hydrate_cortex.output.notification }}'
+      memory: '{{ steps.hydrate_memory.output.notification }}'
+      decisionTrees: '{{ steps.hydrate_decision_trees.output.notification }}'
+`;
+
+  interface SettledComposeOutput {
+    cortex?: string;
+    memory?: string;
+    decisionTrees?: string;
+  }
+
+  interface SettledAggregateOutput {
+    total: number;
+    succeeded: number;
+    failed: number;
+    status: string;
+    branches?: Record<string, { status: string; output?: unknown; error?: unknown }>;
+  }
+
+  describe('one branch failing under mode: settled', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: settledWriterWorkflow(`            type: slack
+            connector-id: ${FakeConnectors.constantlyFailing.name}
+            with:
+              message: 'materialize memory'`),
+      });
+    });
+
+    it('completes the workflow (a before-agent hook must not fail)', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('completes the parallel step while reporting the failed branch', () => {
+      const [parallel] = stepExecutionsFor(workflowRunFixture, 'materialize_workspaces');
+      expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+      expect(parallel.output as unknown as SettledAggregateOutput).toMatchObject({
+        total: 3,
+        succeeded: 2,
+        failed: 1,
+        status: 'failed',
+      });
+    });
+
+    it('runs every branch to a terminal state (no sibling starved)', () => {
+      for (const stepId of ['hydrate_cortex', 'hydrate_memory', 'hydrate_decision_trees']) {
+        expect(stepExecutionsFor(workflowRunFixture, stepId)).toHaveLength(1);
+      }
+    });
+
+    it('projects the failed branch as failed and the others as completed', () => {
+      const aggregate = stepOutput<SettledAggregateOutput>(
+        workflowRunFixture,
+        'materialize_workspaces'
+      );
+      expect(aggregate.branches?.memory.status).toBe('failed');
+      expect(aggregate.branches?.memory.error).toBeDefined();
+      expect(aggregate.branches?.cortex.status).toBe('completed');
+      expect(aggregate.branches?.decision_trees.status).toBe('completed');
+    });
+
+    it('runs the step after the parallel and reads the successful branches only', () => {
+      const compose = stepOutput<SettledComposeOutput>(workflowRunFixture, 'compose_prompt');
+      expect(compose.cortex).toBe('cortex-fragment');
+      expect(compose.decisionTrees).toBe('trees-fragment');
+      expect(compose.memory).toBeFalsy();
+    });
+  });
+
+  describe('one branch killed by branch-timeout under mode: settled', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      registerNeverCompletingPoll(workflowRunFixture);
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: settledWriterWorkflow(
+          `            type: integration.parallelNeverPoll
+            with: {}`,
+          "\n    branch-timeout: '100ms'"
+        ),
+      });
+      // The poll branch parks the execution in WAITING with a resume scheduled a
+      // full poll interval out. Advancing the clock to that deadline also carries it
+      // past the branch's `branch-timeout`, which is what ends the branch.
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
+      await driveToTerminal(workflowRunFixture, 20);
+    });
+
+    it('completes the workflow (a timed-out branch must not fail it either)', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('completes the parallel step while reporting the timed-out branch', () => {
+      const [parallel] = stepExecutionsFor(workflowRunFixture, 'materialize_workspaces');
+      expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+      expect(parallel.output as unknown as SettledAggregateOutput).toMatchObject({
+        total: 3,
+        succeeded: 2,
+        failed: 1,
+        status: 'failed',
+      });
+      const aggregate = parallel.output as unknown as SettledAggregateOutput;
+      expect(aggregate.branches?.memory.status).toBe('timed_out');
+      expect(aggregate.branches?.cortex.status).toBe('completed');
+      expect(aggregate.branches?.decision_trees.status).toBe('completed');
+    });
+
+    it('records the timed-out branch step as TIMED_OUT, not left RUNNING/WAITING', () => {
+      const branchExecutions = stepExecutionsFor(workflowRunFixture, 'hydrate_memory');
+      expect(branchExecutions.length).toBeGreaterThan(0);
+      expect(branchExecutions.every((se) => se.status === ExecutionStatus.TIMED_OUT)).toBe(true);
+    });
+
+    it('runs the step after the parallel with the timed-out branch reading empty', () => {
+      // The timed-out branch never wrote an output at all, so the downstream read is
+      // empty — the case a compose step has to cover for itself.
+      const compose = stepOutput<SettledComposeOutput>(workflowRunFixture, 'compose_prompt');
+      expect(compose.cortex).toBe('cortex-fragment');
+      expect(compose.decisionTrees).toBe('trees-fragment');
+      expect(compose.memory).toBeFalsy();
     });
   });
 });

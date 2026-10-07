@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  ConversationTemplateServiceStartContract,
+  ConversationTemplateUIContext,
+} from '@kbn/agent-builder-browser';
 import type { ConversationTemplatesService } from './conversation_templates_service';
 
 export const createPublicConversationTemplatesContract = ({
   conversationTemplatesService,
+  context,
 }: {
   conversationTemplatesService: ConversationTemplatesService;
+  context: ConversationTemplateUIContext;
 }): ConversationTemplateServiceStartContract => {
   return {
-    registerTab: (tabId, definition) => {
-      return conversationTemplatesService.registerTab(tabId, definition);
+    registerTab: (tabId, createDefinition) => {
+      return conversationTemplatesService.registerTab(tabId, createDefinition(context));
     },
     getTab: (tabId) => {
       return conversationTemplatesService.getTab(tabId);
     },
-    registerTemplateUIDefinition: (templateId, definition) => {
-      return conversationTemplatesService.registerTemplateUIDefinition(templateId, definition);
+    registerTemplateUIDefinition: (templateId, createDefinition) => {
+      return conversationTemplatesService.registerTemplateUIDefinition(
+        templateId,
+        createDefinition(context)
+      );
     },
     getTemplateUIDefinition: (templateId) => {
       return conversationTemplatesService.getTemplateUIDefinition(templateId);

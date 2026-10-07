@@ -134,6 +134,7 @@ describe('XY categorical formatting', () => {
     onClickMultiValue: jest.fn(),
     layerCellValueActions: [],
     onSelectRange: jest.fn(),
+    onAnnotationClick: jest.fn(),
     syncColors: false,
     syncTooltips: false,
     syncCursor: true,

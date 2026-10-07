@@ -21,6 +21,7 @@ export {
   getNetworkApiService,
   getHostApiService,
   getUserApiService,
+  getEndpointArtifactsApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -35,4 +36,5 @@ export type {
   NetworkApiService,
   HostApiService,
   UserApiService,
+  EndpointArtifactsApiService,
 } from './apis';

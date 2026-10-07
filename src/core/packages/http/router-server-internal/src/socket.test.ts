@@ -29,8 +29,8 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
-      expect(spy).toBeCalledTimes(1);
-      expect(spy).toBeCalledWith(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(true);
       expect(result).toBe(cert);
     });
 
@@ -65,7 +65,7 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
       const result = socket.getProtocol();
 
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
       expect(result).toBe(protocol);
     });
 
@@ -97,7 +97,7 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(tlsSocket);
 
       await expect(socket.renegotiate({})).rejects.toBe(result);
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('throws error if tls.Socket renegotiate returns error', async () => {

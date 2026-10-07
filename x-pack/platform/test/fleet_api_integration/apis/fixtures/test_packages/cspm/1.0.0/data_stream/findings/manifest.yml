@@ -1,0 +1,29 @@
+title: CIS AWS Findings
+type: logs
+dataset: cspm.findings
+streams:
+  - input: cloudbeat/cis_aws
+    title: CIS AWS Findings Stream
+    description: Collect CIS AWS compliance findings
+    vars:
+      - name: role_arn
+        type: text
+        title: Role ARN
+        multi: false
+        required: false
+      - name: external_id
+        type: password
+        title: External ID
+        multi: false
+        required: false
+        secret: true
+      - name: paths
+        type: text
+        title: Paths
+        multi: true
+        required: false
+      - name: data_stream.dataset
+        type: text
+        title: Dataset
+        multi: false
+        required: false

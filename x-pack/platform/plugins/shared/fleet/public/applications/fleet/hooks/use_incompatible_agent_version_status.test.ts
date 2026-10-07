@@ -98,4 +98,40 @@ describe('getIncompatibleAgentVersionStatus', () => {
     ]);
     expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
   });
+
+  describe('pre-release version coercion', () => {
+    it('treats a pre-release version as its base version when it satisfies the condition', () => {
+      const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=9.0.0'), [
+        createAgentPolicy([{ version: '9.6.0-SNAPSHOT', count: 1 }]),
+      ]);
+      expect(result).toEqual({ status: 'NONE' });
+    });
+
+    it('treats a pre-release version as its base version when it does not satisfy the condition', () => {
+      const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
+        createAgentPolicy([{ version: '7.17.0-SNAPSHOT', count: 1 }]),
+      ]);
+      expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
+    });
+
+    it('returns SOME when pre-release agents satisfy the condition but others do not', () => {
+      const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
+        createAgentPolicy([
+          { version: '9.0.0-SNAPSHOT', count: 2 },
+          { version: '7.17.0', count: 3 },
+        ]),
+      ]);
+      expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
+    });
+
+    it('returns NONE when all agents are pre-release versions that satisfy the condition', () => {
+      const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
+        createAgentPolicy([
+          { version: '8.1.0-SNAPSHOT', count: 2 },
+          { version: '9.0.0-SNAPSHOT', count: 3 },
+        ]),
+      ]);
+      expect(result).toEqual({ status: 'NONE' });
+    });
+  });
 });

@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
@@ -145,17 +146,20 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
           pageTitle={
             <>
               {showCreateBackLink && returnParams ? (
-                <span css={{ display: 'block' }}>
-                  <EuiButtonEmpty
-                    iconType="chevronSingleLeft"
-                    size="xs"
-                    flush="left"
-                    onClick={handleCreateBackLink}
-                    data-test-subj="automaticImportCreateBackLink"
-                  >
-                    {getCreateBackLinkLabel()}
-                  </EuiButtonEmpty>
-                </span>
+                <>
+                  <SuppressChromeBackButton />
+                  <span css={{ display: 'block' }}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleLeft"
+                      size="xs"
+                      flush="left"
+                      onClick={handleCreateBackLink}
+                      data-test-subj="automaticImportCreateBackLink"
+                    >
+                      {getCreateBackLinkLabel()}
+                    </EuiButtonEmpty>
+                  </span>
+                </>
               ) : null}
               {pageTitle}
             </>

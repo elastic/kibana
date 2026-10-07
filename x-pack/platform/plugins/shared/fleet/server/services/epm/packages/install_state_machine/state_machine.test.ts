@@ -357,7 +357,7 @@ describe('handleState', () => {
       context,
     });
     const promise = handleState('state1', testDefinition, testDefinition.context);
-    await expect(promise).rejects.toThrowError('Installation failed');
+    await expect(promise).rejects.toThrow('Installation failed');
 
     expect(mockOnTransition1).toHaveBeenCalledTimes(1);
     expect(mockOnTransition2).toHaveBeenCalledTimes(0);
@@ -429,9 +429,9 @@ describe('handleState', () => {
       context,
     });
 
-    await expect(
-      handleState('state1', testDefinition, testDefinition.context)
-    ).rejects.toThrowError('Precondition failed');
+    await expect(handleState('state1', testDefinition, testDefinition.context)).rejects.toThrow(
+      'Precondition failed'
+    );
 
     expect(mockPreTransition).toHaveBeenCalled();
     expect(mockOnTransition1).not.toHaveBeenCalled();
@@ -510,7 +510,7 @@ describe('handleState', () => {
       mockPostTransition,
     });
     const promise = handleState('state1', testDefinition, testDefinition.context);
-    await expect(promise).rejects.toThrowError('Installation failed');
+    await expect(promise).rejects.toThrow('Installation failed');
 
     expect(mockOnTransition1).toHaveBeenCalledTimes(1);
     expect(mockPostTransition).toHaveBeenCalledWith(

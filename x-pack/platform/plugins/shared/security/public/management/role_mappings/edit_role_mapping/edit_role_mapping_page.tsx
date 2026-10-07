@@ -13,13 +13,12 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiIconTip,
-  EuiLink,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import { AppHeader } from '@kbn/app-header';
 import type { DocLinksStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +42,33 @@ import {
   SectionLoading,
 } from '../components';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
+
+const roleMappingsListTitle = i18n.translate(
+  'xpack.security.management.roleMappings.roleMappingTitle',
+  { defaultMessage: 'Role Mappings' }
+);
+
+const viewingRoleMappingTitle = i18n.translate(
+  'xpack.security.management.editRoleMapping.readOnlyRoleMappingTitle',
+  { defaultMessage: 'Viewing role mapping' }
+);
+
+const editRoleMappingTitle = i18n.translate(
+  'xpack.security.management.editRoleMapping.editRoleMappingTitle',
+  { defaultMessage: 'Edit role mapping' }
+);
+
+const createRoleMappingTitle = i18n.translate(
+  'xpack.security.management.editRoleMapping.createRoleMappingTitle',
+  { defaultMessage: 'Create role mapping' }
+);
+
+const editRoleMappingDescription = i18n.translate(
+  'xpack.security.management.editRoleMapping.roleMappingDescription',
+  {
+    defaultMessage: 'Use role mappings to control which roles are assigned to your users.',
+  }
+);
 
 interface State {
   loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';
@@ -108,7 +134,34 @@ export class EditRoleMappingPage extends Component<Props, State> {
       return <PermissionDenied />;
     }
 
-    if (loadState === 'loading') {
+    return (
+      <>
+        {this.renderHeader()}
+        <EuiSpacer size="l" />
+        {this.renderBody()}
+      </>
+    );
+  }
+
+  private renderHeader() {
+    return (
+      <AppHeader
+        title={this.getFormTitle()}
+        description={{
+          text: editRoleMappingDescription,
+          learnMoreUrl: this.props.docLinks.links.security.mappingRoles,
+        }}
+        back={{
+          href: this.props.history.createHref({ pathname: '/' }),
+          label: roleMappingsListTitle,
+        }}
+        spacing="bleed"
+      />
+    );
+  }
+
+  private renderBody() {
+    if (this.state.loadState === 'loading') {
       return (
         <EuiPageSection alignment="center" color="subdued">
           <SectionLoading />
@@ -117,42 +170,31 @@ export class EditRoleMappingPage extends Component<Props, State> {
     }
 
     return (
-      <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={this.getFormTitle()}
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.roleMappingDescription"
-                defaultMessage="Use role mappings to control which roles are assigned to your users. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink
-                      href={this.props.docLinks.links.security.mappingRoles}
-                      external={true}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.security.management.editRoleMapping.learnMoreLinkText"
-                        defaultMessage="Learn more about role mappings."
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-              {!this.state.hasCompatibleRealms && (
-                <>
-                  <EuiSpacer size="s" />
-                  <NoCompatibleRealms />
-                </>
-              )}
-            </>
-          }
-        />
-
-        <EuiSpacer size="l" />
-
+      <div>
+        {this.isReadOnlyRoleMapping() && (
+          <>
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.readOnlyRoleMappingBadge.readOnlyRoleMappingCanNotBeModifiedTooltip"
+                  defaultMessage="Read only role mappings are built-in and cannot be removed or modified."
+                />
+              }
+              data-test-subj="readOnlyRoleMappingTooltip"
+              iconProps={{
+                style: { verticalAlign: 'super' },
+              }}
+              type="lock"
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {!this.state.hasCompatibleRealms && (
+          <>
+            <NoCompatibleRealms />
+            <EuiSpacer />
+          </>
+        )}
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
           <MappingInfoPanel
             data-test-subj="roleMappingInfoPanel"
@@ -187,7 +229,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <EuiSpacer />
           {this.getFormButtons()}
         </EuiForm>
-      </>
+      </div>
     );
   }
 
@@ -196,46 +238,16 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getFormTitle = () => {
+    if (this.state.loadState === 'loading') {
+      return this.editingExistingRoleMapping() ? editRoleMappingTitle : createRoleMappingTitle;
+    }
     if (this.isReadOnly()) {
-      return (
-        <>
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.readOnlyRoleMappingTitle"
-            defaultMessage="Viewing role mapping"
-          />
-          &nbsp;
-          {this.isReadOnlyRoleMapping() && (
-            <EuiIconTip
-              content={
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.readOnlyRoleMappingBadge.readOnlyRoleMappingCanNotBeModifiedTooltip"
-                  defaultMessage="Read only role mappings are built-in and cannot be removed or modified."
-                />
-              }
-              data-test-subj="readOnlyRoleMappingTooltip"
-              iconProps={{
-                style: { verticalAlign: 'super' },
-              }}
-              type="lock"
-            />
-          )}
-        </>
-      );
+      return viewingRoleMappingTitle;
     }
     if (this.editingExistingRoleMapping()) {
-      return (
-        <FormattedMessage
-          id="xpack.security.management.editRoleMapping.editRoleMappingTitle"
-          defaultMessage="Edit role mapping"
-        />
-      );
+      return editRoleMappingTitle;
     }
-    return (
-      <FormattedMessage
-        id="xpack.security.management.editRoleMapping.createRoleMappingTitle"
-        defaultMessage="Create role mapping"
-      />
-    );
+    return createRoleMappingTitle;
   };
 
   private isObject = (record?: any): record is object => {
@@ -300,7 +312,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
   private getFormButtons = () => {
     if (this.isReadOnly() === true) {
-      return this.getReturnToRoleMappingListButton();
+      return null;
     }
 
     return (
@@ -310,22 +322,6 @@ export class EditRoleMappingPage extends Component<Props, State> {
         <EuiFlexItem grow={true} />
         {this.getDeleteButton()}
       </EuiFlexGroup>
-    );
-  };
-
-  private getReturnToRoleMappingListButton = () => {
-    return (
-      <EuiButton
-        // {...reactRouterNavigate(this.props.history, '')}
-        onClick={this.backToRoleMappingsList}
-        iconType="chevronSingleLeft"
-        data-test-subj="roleMappingFormReturnButton"
-      >
-        <FormattedMessage
-          id="xpack.security.management.editRoleMapping.returnToRoleMappingListButton"
-          defaultMessage="Back to role mappings"
-        />
-      </EuiButton>
     );
   };
 
