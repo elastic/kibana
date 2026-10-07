@@ -687,7 +687,21 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
-export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
+export const SimilarCasesSearchRequestRt = rt.intersection([
+  paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+  rt.exact(
+    rt.partial({
+      /**
+       * The field to sort similar cases by.
+       */
+      sortField: CasesFindRequestSortFieldsRt,
+      /**
+       * The order to sort by.
+       */
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    })
+  ),
+]);
 
 export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
   rt.type({
