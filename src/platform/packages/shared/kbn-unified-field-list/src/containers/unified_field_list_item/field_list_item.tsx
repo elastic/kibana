@@ -120,17 +120,8 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
 );
 
 export interface UnifiedFieldListItemReorderGroup {
-  /**
-   * Items of the group in their visual order
-   */
-  items: Array<{ id: string }>;
-  /**
-   * Label of the group, used for screen reader announcements
-   */
-  label: string;
-  /**
-   * Called when a dragged item of the group gets dropped onto another item of the group
-   */
+  items: Array<{ id: string }>; // in their visual order
+  label: string; // for screen reader announcements
   onReorder: (sourceFieldName: string, targetFieldName: string) => void;
 }
 
@@ -140,18 +131,16 @@ interface ReorderableFieldDropTargetProps {
   value: DragDropIdentifier;
   order: number[];
   reorderGroup: UnifiedFieldListItemReorderGroup;
-  dataTestSubj: string;
   onDragStart: () => void;
   children: JSX.Element;
 }
 
 /**
- * Turns a field item into a drop target for reordering while another item of its group is being dragged.
- * It's the only part of a field item which subscribes to the drag and drop context,
- * so the frequent context updates during a drag don't re-render the whole item.
+ * Makes a field item a drop target while another item of its group is dragged. It's the only part of the item
+ * subscribed to the drag and drop context, so the context updates during a drag don't re-render the whole item.
  */
 const ReorderableFieldDropTarget: React.FC<ReorderableFieldDropTargetProps> = memo(
-  ({ value, order, reorderGroup, dataTestSubj, onDragStart, children }) => {
+  ({ value, order, reorderGroup, onDragStart, children }) => {
     const [{ dragging }] = useDragDropContext();
     const { items, onReorder } = reorderGroup;
     const isDragged = dragging?.id === value.id;
@@ -159,6 +148,7 @@ const ReorderableFieldDropTarget: React.FC<ReorderableFieldDropTargetProps> = me
       dragging && !isDragged && items.some((item) => item.id === dragging.id)
     );
 
+    // `Draggable` ignores `onDragStart` of reorderable items
     useEffect(() => {
       if (isDragged) {
         onDragStart();
@@ -178,9 +168,7 @@ const ReorderableFieldDropTarget: React.FC<ReorderableFieldDropTargetProps> = me
         dropTypes={REORDER_DROP_TYPES}
         reorderableGroup={items}
         onDrop={onDrop}
-        dataTestSubj={dataTestSubj}
       >
-        {/* the wrapper receives the drop handlers and classes of the drop target */}
         <div>{children}</div>
       </Droppable>
     );
@@ -438,9 +426,6 @@ function UnifiedFieldListItemComponent({
 
   const isDragDisabled =
     alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop;
-  const activeReorderGroup =
-    reorderGroup && reorderGroup.items.length > 1 && !isDragDisabled ? reorderGroup : undefined;
-  const reorderGroupLabel = activeReorderGroup?.label;
 
   const value = useMemo(
     () => ({
@@ -448,10 +433,10 @@ function UnifiedFieldListItemComponent({
       humanData: {
         label: field.displayName,
         position: itemIndex + 1,
-        ...(reorderGroupLabel && { groupLabel: reorderGroupLabel }),
+        groupLabel: reorderGroup?.label,
       },
     }),
-    [field, itemIndex, reorderGroupLabel]
+    [field, itemIndex, reorderGroup?.label]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
   const dndDataTestSubjPrefix =
@@ -482,21 +467,20 @@ function UnifiedFieldListItemComponent({
       isOpen={infoIsOpen}
       button={
         <Draggable
-          dragType={activeReorderGroup ? 'move' : 'copy'}
+          dragType={reorderGroup ? 'move' : 'copy'}
           dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
           onDragStart={closePopover}
           isDisabled={isDragDisabled}
-          reorderableGroup={activeReorderGroup?.items}
+          reorderableGroup={reorderGroup?.items}
           dataTestSubj={`${dndDataTestSubjPrefix}-${field.name}`}
         >
-          {activeReorderGroup ? (
+          {reorderGroup ? (
             <ReorderableFieldDropTarget
               order={order}
               value={value}
-              reorderGroup={activeReorderGroup}
-              dataTestSubj={`${dndDataTestSubjPrefix}-reorderTarget-${field.name}`}
+              reorderGroup={reorderGroup}
               onDragStart={closePopover}
             >
               {fieldItemButton}

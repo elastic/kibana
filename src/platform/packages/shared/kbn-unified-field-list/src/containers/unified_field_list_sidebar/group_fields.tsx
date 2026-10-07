@@ -47,23 +47,14 @@ export interface SelectedFieldsResult {
 }
 
 export interface ReorderSelectedFieldsResult {
-  /**
-   * Index of the target field in the current (pre-move) order. Applying it with a
-   * "remove the source, then insert it at this index" move action (like `onMoveColumn`
-   * of the unified data table) places the source field into the visual slot of the target field.
-   */
   targetIndex: number;
-  /**
-   * Selected field names in the resulting order
-   */
   reorderedFieldNames: string[];
 }
 
 /**
- * Resolves the result of moving `sourceFieldName` to the position of `targetFieldName` when
- * reordering the selected fields via drag and drop. The source field takes over the visual slot
- * of the target field: right after it when moving down, right before it when moving up, which
- * matches the drop preview of `@kbn/dom-drag-drop`. Returns `undefined` if nothing can be moved.
+ * Resolves a drop of `sourceFieldName` onto `targetFieldName`: the source takes over the slot of the target.
+ * `targetIndex` refers to the current order and is meant for "remove, then insert at index" move actions
+ * like `onMoveColumn` of the unified data table. Returns `undefined` if nothing can be moved.
  */
 export function reorderSelectedFields({
   selectedFieldNames,

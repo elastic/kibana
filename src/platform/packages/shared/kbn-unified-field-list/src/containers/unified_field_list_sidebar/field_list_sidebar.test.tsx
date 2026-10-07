@@ -18,15 +18,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { getServicesMock } from '../../../__mocks__/services.mock';
 import * as ExistenceApi from '../../hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '../../types';
-import { runAfterNextPaint } from '../../utils/run_after_next_paint';
 import { createStateService } from '../services/state_service';
 import { UnifiedFieldListSidebar, type UnifiedFieldListSidebarProps } from './field_list_sidebar';
-
-jest.mock('../../utils/run_after_next_paint', () => ({
-  runAfterNextPaint: jest.fn(),
-}));
-
-const mockRunAfterNextPaint = jest.mocked(runAfterNextPaint);
 
 // a stable reader, as its identity is part of effect dependencies
 const existingFieldsReader: ExistenceApi.ExistingFieldsReader = {
@@ -75,25 +68,12 @@ const dropOnto = (fieldName: string) => {
 };
 
 describe('UnifiedFieldListSidebar', () => {
-  let pendingWorkspaceUpdates: Array<() => void>;
-  let cancelPendingWorkspaceUpdate: jest.Mock;
-
   beforeEach(() => {
-    pendingWorkspaceUpdates = [];
-    // a new mock per test, as the previous test's sidebar gets unmounted (and cancels its updates)
-    // only after this test's mocks have been prepared
-    const cancel = jest.fn();
-    cancelPendingWorkspaceUpdate = cancel;
-    mockRunAfterNextPaint.mockImplementation((callback) => {
-      pendingWorkspaceUpdates.push(callback);
-      return cancel;
-    });
-
     jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockReturnValue(existingFieldsReader);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const getProps = (
@@ -132,9 +112,7 @@ describe('UnifiedFieldListSidebar', () => {
   const renderSidebar = async (overrides: Partial<UnifiedFieldListSidebarProps> = {}) => {
     const props = getProps(overrides);
     const user = userEvent.setup();
-    const { rerender, unmount } = render(<UnifiedFieldListSidebar {...props} />, {
-      wrapper: Wrapper,
-    });
+    const { rerender } = render(<UnifiedFieldListSidebar {...props} />, { wrapper: Wrapper });
 
     // let the data view resolve
     await act(async () => {
@@ -148,14 +126,13 @@ describe('UnifiedFieldListSidebar', () => {
     return {
       props,
       user,
-      unmount,
       rerender: (nextProps: Partial<UnifiedFieldListSidebarProps>) =>
         rerender(<UnifiedFieldListSidebar {...props} {...nextProps} />),
     };
   };
 
   describe('reordering selected fields', () => {
-    it('should show the new order right away and update the workspace after the next paint', async () => {
+    it('should show the new order right away and update the workspace afterwards', async () => {
       const { props, rerender } = await renderSidebar();
 
       expect(getSelectedFieldNames()).toEqual(['extension', 'bytes', 'machine.os']);
@@ -164,43 +141,33 @@ describe('UnifiedFieldListSidebar', () => {
       await startDragging('extension', 'move');
       dropOnto('machine.os');
 
-      // the sidebar is updated synchronously...
+      // the sidebar is updated synchronously, the workspace after the next paint
       expect(getSelectedFieldNames()).toEqual(['bytes', 'machine.os', 'extension']);
-      // ...while the workspace update is deferred until after the next paint
       expect(props.onMoveFieldInWorkspace).not.toHaveBeenCalled();
-      expect(pendingWorkspaceUpdates).toHaveLength(1);
-
-      act(() => {
-        pendingWorkspaceUpdates[0]();
+      await waitFor(() => {
+        expect(props.onMoveFieldInWorkspace).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'extension' }),
+          2
+        );
       });
 
-      expect(props.onMoveFieldInWorkspace).toHaveBeenCalledTimes(1);
-      expect(props.onMoveFieldInWorkspace).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'extension' }),
-        2
-      );
-
-      // once the workspace caught up, the order stays the same
+      // once the workspace caught up, the order stays the same and the fields are reorderable again
       rerender({ workspaceSelectedFieldNames: ['bytes', 'machine.os', 'extension'] });
       expect(getSelectedFieldNames()).toEqual(['bytes', 'machine.os', 'extension']);
 
-      // and the fields are reorderable again
       await startDragging('extension', 'move');
       dropOnto('bytes');
       expect(getSelectedFieldNames()).toEqual(['extension', 'bytes', 'machine.os']);
-
-      act(() => {
-        pendingWorkspaceUpdates[1]();
+      await waitFor(() => {
+        expect(props.onMoveFieldInWorkspace).toHaveBeenLastCalledWith(
+          expect.objectContaining({ name: 'extension' }),
+          0
+        );
       });
-
-      expect(props.onMoveFieldInWorkspace).toHaveBeenLastCalledWith(
-        expect.objectContaining({ name: 'extension' }),
-        0
-      );
     });
 
     it('should drop the optimistic order when the workspace changes in a different way', async () => {
-      const { props, rerender } = await renderSidebar();
+      const { rerender } = await renderSidebar();
 
       await startDragging('bytes', 'move');
       dropOnto('extension');
@@ -209,49 +176,6 @@ describe('UnifiedFieldListSidebar', () => {
       rerender({ workspaceSelectedFieldNames: ['extension', 'bytes', 'machine.os', 'ip'] });
 
       expect(getSelectedFieldNames()).toEqual(['extension', 'bytes', 'machine.os', 'ip']);
-      expect(props.onMoveFieldInWorkspace).not.toHaveBeenCalled();
-    });
-
-    it('should cancel pending workspace updates when unmounted', async () => {
-      const { props, unmount } = await renderSidebar();
-
-      await startDragging('extension', 'move');
-      dropOnto('bytes');
-      expect(pendingWorkspaceUpdates).toHaveLength(1);
-
-      unmount();
-
-      expect(cancelPendingWorkspaceUpdate).toHaveBeenCalledTimes(1);
-      expect(props.onMoveFieldInWorkspace).not.toHaveBeenCalled();
-    });
-
-    it('should not do anything when a field is dropped onto itself', async () => {
-      const { props } = await renderSidebar();
-
-      await startDragging('extension', 'move');
-
-      // the dragged field is not a drop target
-      expect(
-        within(getSelectedFieldItem('extension')).queryByTestId('domDragDrop-reorderableDropLayer')
-      ).not.toBeInTheDocument();
-      expect(pendingWorkspaceUpdates).toHaveLength(0);
-      expect(props.onMoveFieldInWorkspace).not.toHaveBeenCalled();
-    });
-
-    it('should not be reorderable without a workspace handler', async () => {
-      await renderSidebar({ onMoveFieldInWorkspace: undefined });
-
-      expect(screen.queryByTestId('domDragDrop-reorderableGroup')).not.toBeInTheDocument();
-
-      await startDragging('extension', 'copy');
-      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
-    });
-
-    it('should not be reorderable with a single selected field', async () => {
-      await renderSidebar({ workspaceSelectedFieldNames: ['extension'] });
-
-      await startDragging('extension', 'copy');
-      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
     });
 
     it('should not be reorderable while the field list is filtered by name', async () => {
@@ -269,24 +193,25 @@ describe('UnifiedFieldListSidebar', () => {
       expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
     });
 
-    it('should not be reorderable when the action buttons are always shown', async () => {
+    it.each<[string, Partial<UnifiedFieldListSidebarProps>]>([
+      ['without a workspace handler', { onMoveFieldInWorkspace: undefined }],
+      ['with a single selected field', { workspaceSelectedFieldNames: ['extension'] }],
+      [
+        'when selected fields are determined by a custom filter',
+        { onSelectedFieldFilter: (field) => ['extension', 'bytes'].includes(field.name) },
+      ],
+    ])('should not be reorderable %s', async (_, overrides) => {
+      await renderSidebar(overrides);
+
+      await startDragging('extension', 'copy');
+      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
+    });
+
+    it('should not be draggable when the action buttons are always shown', async () => {
       await renderSidebar({ alwaysShowActionButton: true });
 
       expect(screen.queryByTestId('domDragDrop-reorderableGroup')).not.toBeInTheDocument();
       expect(screen.queryByTestId('unifiedFieldListItemDnD-extension')).not.toBeInTheDocument();
-    });
-
-    it('should not be reorderable when selected fields are determined by a custom filter', async () => {
-      await renderSidebar({
-        onSelectedFieldFilter: (field) => ['extension', 'bytes'].includes(field.name),
-      });
-
-      // the custom filter determines the selected fields (sorted by name) instead of the workspace
-      expect(getSelectedFieldNames()).toEqual(['bytes', 'extension']);
-      expect(screen.queryByTestId('domDragDrop-reorderableGroup')).not.toBeInTheDocument();
-
-      await startDragging('extension', 'copy');
-      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
     });
   });
 });

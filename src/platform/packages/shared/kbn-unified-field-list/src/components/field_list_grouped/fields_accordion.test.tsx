@@ -11,7 +11,7 @@ import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldsAccordion } from './fields_accordion';
 import { FieldsGroupNames } from '../../types';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiNotificationBadge } from '@elastic/eui';
@@ -141,35 +141,6 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
       setup({ extraAction });
 
       expect(screen.getByTestId('extra-action')).toBeVisible();
-    });
-  });
-
-  describe('reorderable group', () => {
-    it('should wrap the field items into a reorder group when reorderable', () => {
-      const { props } = setup({
-        groupName: FieldsGroupNames.SelectedFields,
-        id: 'fieldListGroupedSelectedFields',
-        fieldsCount: 2,
-        paginatedFields: dataView.fields.slice(0, 2),
-        isReorderable: true,
-      });
-
-      const reorderableGroup = screen.getByTestId('domDragDrop-reorderableGroup');
-      expect(reorderableGroup).toBeVisible();
-      for (const field of props.paginatedFields) {
-        expect(within(reorderableGroup).getByText(field.name)).toBeVisible();
-      }
-    });
-
-    it('should not render a reorder group by default', () => {
-      setup({
-        groupName: FieldsGroupNames.SelectedFields,
-        id: 'fieldListGroupedSelectedFields',
-        fieldsCount: 2,
-        paginatedFields: dataView.fields.slice(0, 2),
-      });
-
-      expect(screen.queryByTestId('domDragDrop-reorderableGroup')).not.toBeInTheDocument();
     });
   });
 

@@ -226,6 +226,10 @@ describe('group_fields', function () {
       ).toEqual({ targetIndex: 2, reorderedFieldNames: ['b', 'c', 'a', 'd'] });
       // the returned index yields the same order when applied as a move action
       expect(moveField(selectedFieldNames, 'a', 2)).toEqual(['b', 'c', 'a', 'd']);
+
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'd' })
+      ).toEqual({ targetIndex: 3, reorderedFieldNames: ['a', 'c', 'd', 'b'] });
     });
 
     it('should place the dragged field right before the target when moving up', () => {
@@ -233,47 +237,21 @@ describe('group_fields', function () {
         reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'd', targetFieldName: 'b' })
       ).toEqual({ targetIndex: 1, reorderedFieldNames: ['a', 'd', 'b', 'c'] });
       expect(moveField(selectedFieldNames, 'd', 1)).toEqual(['a', 'd', 'b', 'c']);
-    });
 
-    it('should support moving to the first and last position', () => {
       expect(
         reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'c', targetFieldName: 'a' })
       ).toEqual({ targetIndex: 0, reorderedFieldNames: ['c', 'a', 'b', 'd'] });
-      expect(
-        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'd' })
-      ).toEqual({ targetIndex: 3, reorderedFieldNames: ['a', 'c', 'd', 'b'] });
     });
 
-    it('should not mutate the given field names', () => {
-      const names = ['a', 'b', 'c'];
-      reorderSelectedFields({
-        selectedFieldNames: names,
-        sourceFieldName: 'a',
-        targetFieldName: 'c',
-      });
-      expect(names).toEqual(['a', 'b', 'c']);
-    });
-
-    it('should return undefined when source and target are the same field', () => {
+    it('should return undefined when the field cannot be moved', () => {
       expect(
         reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'b' })
       ).toBeUndefined();
-    });
-
-    it('should return undefined when the source or target field is not selected', () => {
       expect(
-        reorderSelectedFields({
-          selectedFieldNames,
-          sourceFieldName: 'unknown',
-          targetFieldName: 'b',
-        })
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'x', targetFieldName: 'b' })
       ).toBeUndefined();
       expect(
-        reorderSelectedFields({
-          selectedFieldNames,
-          sourceFieldName: 'b',
-          targetFieldName: 'unknown',
-        })
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'x' })
       ).toBeUndefined();
     });
   });

@@ -124,11 +124,8 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onChangeDataView: (id: string) => void;
   /**
-   * Callback to move a field column to a new position within the table.
-   * `targetIndex` refers to the position in `columns` and is applied as remove-then-insert.
-   * When omitted, reordering of selected fields in the sidebar is disabled.
-   * @param fieldName
-   * @param targetIndex
+   * Callback to move a field column to `targetIndex` within `columns` (remove, then insert).
+   * When omitted, the selected fields can't be reordered in the sidebar.
    */
   onMoveField?: (fieldName: string, targetIndex: number) => void;
   /**

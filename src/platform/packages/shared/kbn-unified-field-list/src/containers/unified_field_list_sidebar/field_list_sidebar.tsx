@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -33,7 +33,6 @@ import { FieldsGroupNames } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import type { GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 import { useGroupedFields } from '../../hooks/use_grouped_fields';
-import { runAfterNextPaint } from '../../utils/run_after_next_paint';
 import {
   UnifiedFieldListItem,
   type UnifiedFieldListItemProps,
@@ -46,19 +45,6 @@ import {
   shouldShowField,
   type SelectedFieldsResult,
 } from './group_fields';
-
-const REORDERABLE_FIELD_GROUP_NAMES = [FieldsGroupNames.SelectedFields];
-
-interface OptimisticSelectedFieldNames {
-  /**
-   * The workspace state the optimistic order was derived from
-   */
-  workspaceSelectedFieldNames: string[] | undefined;
-  /**
-   * The selected field names in their new order
-   */
-  fieldNames: string[];
-}
 
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,
@@ -106,10 +92,8 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    */
   onRemoveFieldsFromWorkspace?: (fields: DataViewField[]) => void;
   /**
-   * Move a selected field to another position in the workspace (e.g. table columns).
-   * When provided, the "Selected fields" section becomes reorderable via drag and drop.
-   * `targetIndex` refers to the position within `workspaceSelectedFieldNames` and is meant
-   * to be applied as "remove the field, then insert it at `targetIndex`".
+   * Move a selected field to `targetIndex` within `workspaceSelectedFieldNames` (remove, then insert).
+   * When provided, the selected fields can be reordered via drag and drop.
    */
   onMoveFieldInWorkspace?: (field: DataViewField, targetIndex: number) => void;
 };
@@ -215,13 +199,11 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   >(undefined);
   const [isFieldNameSearchFocused, setIsFieldNameSearchFocused] = useState(false);
 
-  // Reordering the selected fields via drag and drop applies the new order to this state right away,
-  // so it's visible in the same frame as the drop, while the workspace (which can be expensive to
-  // re-render) is updated after the next paint. The optimistic order is discarded as soon as the
-  // workspace state changes, which normally means that it caught up with the new order.
-  const [optimisticSelectedFieldNames, setOptimisticSelectedFieldNames] =
-    useState<OptimisticSelectedFieldNames | null>(null);
-  const pendingWorkspaceUpdatesRef = useRef(new Set<() => void>());
+  // The new order of reordered selected fields is shown right away, until the workspace catches up
+  const [optimisticSelectedFieldNames, setOptimisticSelectedFieldNames] = useState<{
+    workspaceSelectedFieldNames: string[] | undefined;
+    fieldNames: string[];
+  } | null>(null);
 
   const currentWorkspaceSelectedFieldNames =
     optimisticSelectedFieldNames &&
@@ -236,14 +218,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         : prevState
     );
   }, [workspaceSelectedFieldNames]);
-
-  useEffect(() => {
-    const pendingWorkspaceUpdates = pendingWorkspaceUpdatesRef.current;
-    return () => {
-      pendingWorkspaceUpdates.forEach((cancel) => cancel());
-      pendingWorkspaceUpdates.clear();
-    };
-  }, []);
 
   const selectedFieldsState = useMemo(
     () =>
@@ -303,9 +277,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       !alwaysShowActionButton &&
       !stateService.creationOptions.disableFieldListItemDragAndDrop
   );
-  // Reordering is only possible while all selected fields are visible, i.e. the list is not narrowed
-  // down by a field name search or a type filter. Otherwise, the visible position of a field
-  // would not match its position in the workspace.
+  // Only when all selected fields are visible (no name search or type filter), their positions match the workspace
   const canReorderSelectedFields =
     isSelectedFieldsReorderingEnabled &&
     !!selectedFieldsGroup &&
@@ -326,19 +298,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         return;
       }
 
-      // show the new order right away...
       setOptimisticSelectedFieldNames({
         workspaceSelectedFieldNames,
         fieldNames: result.reorderedFieldNames,
       });
 
-      // ...and update the workspace once the sidebar has been painted
-      const pendingWorkspaceUpdates = pendingWorkspaceUpdatesRef.current;
-      const cancel = runAfterNextPaint(() => {
-        pendingWorkspaceUpdates.delete(cancel);
-        onMoveFieldInWorkspace(sourceField, result.targetIndex);
+      // update the workspace (which can be expensive to re-render) only after the new order has been painted
+      requestAnimationFrame(() => {
+        setTimeout(() => onMoveFieldInWorkspace(sourceField, result.targetIndex));
       });
-      pendingWorkspaceUpdates.add(cancel);
     },
     [onMoveFieldInWorkspace, selectedFieldsState, workspaceSelectedFieldNames]
   );
@@ -565,9 +533,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 onDeselectSelectedFields={
                   canDeselectSelectedFields ? onDeselectSelectedFields : undefined
                 }
-                reorderableGroupNames={
-                  isSelectedFieldsReorderingEnabled ? REORDERABLE_FIELD_GROUP_NAMES : undefined
-                }
+                isSelectedFieldsReorderable={isSelectedFieldsReorderingEnabled}
               />
             ) : (
               <EuiFlexItem grow />

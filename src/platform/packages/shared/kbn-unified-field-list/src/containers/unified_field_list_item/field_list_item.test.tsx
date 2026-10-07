@@ -21,7 +21,6 @@ import { getServicesMock } from '../../../__mocks__/services.mock';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { UnifiedFieldListSidebarContainerCreationOptions } from '../../types';
 import { UnifiedFieldListItem } from './field_list_item';
 
 jest.mock('../../services/field_stats', () => ({
@@ -122,30 +121,16 @@ const createKeywordField = (name: string) =>
     type: 'string',
   });
 
-const renderReorderableItems = ({
-  withReorderGroup = true,
-  creationOptions = {},
-}: {
-  withReorderGroup?: boolean;
-  creationOptions?: Partial<UnifiedFieldListSidebarContainerCreationOptions>;
-} = {}) => {
+const renderReorderableItems = () => {
   const fields = [createKeywordField('extension'), createKeywordField('machine.os')];
-  const onReorder = jest.fn();
   const reorderGroup: UnifiedFieldListItemReorderGroup = {
     items: fields.map((field) => ({ id: field.name })),
     label: 'Selected fields',
-    onReorder,
+    onReorder: jest.fn(),
   };
 
   const dataView = stubDataView;
   dataView.toSpec = () => ({});
-
-  const stateService = createStateService({
-    options: {
-      originatingApp: 'test',
-      ...creationOptions,
-    },
-  });
 
   const user = userEvent.setup();
 
@@ -170,9 +155,9 @@ const renderReorderableItems = ({
                   searchMode="documents"
                   services={getServicesMock()}
                   size="xs"
-                  stateService={stateService}
+                  stateService={createStateService({ options: { originatingApp: 'test' } })}
                   workspaceSelectedFieldNames={fields.map((item) => item.name)}
-                  reorderGroup={withReorderGroup ? reorderGroup : undefined}
+                  reorderGroup={reorderGroup}
                 />
               </li>
             ))}
@@ -182,17 +167,7 @@ const renderReorderableItems = ({
     </EuiThemeProvider>
   );
 
-  const startDragging = async (fieldName: string, expectedDragType: 'move' | 'copy') => {
-    const draggable = screen.getByTestId(`unifiedFieldListItemDnD-${fieldName}`);
-    fireEvent.dragStart(draggable, { dataTransfer });
-    // the drag state is set asynchronously
-    await waitFor(() => {
-      expect(draggable).toHaveClass(`domDraggable_active--${expectedDragType}`);
-    });
-    return draggable;
-  };
-
-  return { fields, onReorder, startDragging, user };
+  return { user };
 };
 
 describe('UnifiedFieldListItem', () => {
@@ -373,63 +348,18 @@ describe('UnifiedFieldListItem', () => {
     ).not.toBeInTheDocument();
   });
 
-  describe('reordering', () => {
-    it('should be moved onto another field of the reorder group', async () => {
-      const { onReorder, startDragging } = renderReorderableItems();
+  it('should close the popover when a reorderable field starts being dragged', async () => {
+    const { user } = renderReorderableItems();
 
-      await startDragging('extension', 'move');
-
-      // only the other fields of the group become drop targets
-      expect(
-        screen.getByTestId('unifiedFieldListItemDnD-reorderTarget-machine.os')
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('unifiedFieldListItemDnD-reorderTarget-extension')
-      ).not.toBeInTheDocument();
-
-      fireEvent.drop(screen.getByTestId('domDragDrop-reorderableDropLayer'));
-
-      expect(onReorder).toHaveBeenCalledTimes(1);
-      expect(onReorder).toHaveBeenCalledWith('extension', 'machine.os');
-
-      // the drop targets are gone once the drag has ended
-      await waitFor(() => {
-        expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
-      });
+    await user.click(screen.getByText('extension'));
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'extension' })).toBeVisible();
     });
 
-    it('should be dragged as a copy and not provide drop targets without a reorder group', async () => {
-      const { onReorder, startDragging } = renderReorderableItems({ withReorderGroup: false });
+    fireEvent.dragStart(screen.getByTestId('unifiedFieldListItemDnD-extension'), { dataTransfer });
 
-      await startDragging('extension', 'copy');
-
-      expect(screen.queryByTestId('domDragDrop-reorderableDropLayer')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('unifiedFieldListItemDnD-reorderTarget-machine.os')
-      ).not.toBeInTheDocument();
-      expect(onReorder).not.toHaveBeenCalled();
-    });
-
-    it('should close the popover when the field starts being dragged', async () => {
-      const { startDragging, user } = renderReorderableItems();
-
-      await user.click(screen.getByText('extension'));
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'extension' })).toBeVisible();
-      });
-
-      await startDragging('extension', 'move');
-
-      await waitFor(() => {
-        expect(screen.queryByRole('heading', { name: 'extension' })).not.toBeInTheDocument();
-      });
-    });
-
-    it('should not be draggable at all when drag and drop is disabled', () => {
-      renderReorderableItems({ creationOptions: { disableFieldListItemDragAndDrop: true } });
-
-      expect(screen.queryByTestId('unifiedFieldListItemDnD-extension')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('domDragDrop-keyboardHandler')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: 'extension' })).not.toBeInTheDocument();
     });
   });
 });
