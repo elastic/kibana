@@ -278,7 +278,6 @@ export default ({ getService }: FtrProviderContext) => {
       const opts = {
         eventTypes: params.eventTypes,
         withTimeoutMs: 1000,
-        fromTimestamp: new Date().toISOString(),
       };
 
       // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
@@ -289,9 +288,9 @@ export default ({ getService }: FtrProviderContext) => {
         kibanaServer,
         logger,
         `${params.eventTypes.join(', ')} to be published`,
-        async () => {
+        async (since) => {
           events = await ebtServer
-            .getEvents(Number.MAX_SAFE_INTEGER, opts)
+            .getEvents(Number.MAX_SAFE_INTEGER, { ...opts, fromTimestamp: since })
             .then((result) => result.map((ev) => ev.properties.items))
             .then((result) => result.flat())
             .then((result) =>

@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
         };
 
         await launchTaskAndWaitFor(
@@ -53,8 +52,11 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaServer,
           logger,
           `${INGEST_PIPELINES_STATS_EBT} to be published`,
-          async () => {
-            const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, opts);
+          async (since) => {
+            const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, {
+              ...opts,
+              fromTimestamp: since,
+            });
 
             return events.length >= 1;
           }
@@ -65,7 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
         };
 
         await launchTaskAndWaitFor(
@@ -73,9 +74,9 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaServer,
           logger,
           `${INGEST_PIPELINES_STATS_EBT} to be published for pipeline ${pipeline}`,
-          async () => {
+          async (since) => {
             const events = await ebtServer
-              .getEvents(Number.MAX_SAFE_INTEGER, opts)
+              .getEvents(Number.MAX_SAFE_INTEGER, { ...opts, fromTimestamp: since })
               .then((result) => result.map((ev) => ev.properties.pipelines))
               .then((result) => result.flat())
               .then((result) => result.filter((ev) => (ev as any).name === pipeline));
