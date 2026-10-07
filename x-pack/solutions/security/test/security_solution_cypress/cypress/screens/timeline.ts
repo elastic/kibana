@@ -90,8 +90,6 @@ export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
-export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
-
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const EQL_EVENT_COUNT = '[data-test-subj="eql-events-count"]';

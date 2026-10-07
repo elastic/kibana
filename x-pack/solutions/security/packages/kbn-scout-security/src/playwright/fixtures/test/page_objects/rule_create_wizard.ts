@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { expect } from '../../../../../ui';
 
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
@@ -19,6 +20,19 @@ export class RuleCreateWizardPage {
   readonly aboutContinue: Locator;
   readonly scheduleContinue: Locator;
   readonly createWithoutEnabling: Locator;
+  readonly createAndEnable: Locator;
+  readonly aboutSeveritySelect: Locator;
+  readonly aboutRiskScoreInput: Locator;
+  readonly aboutTagsInput: Locator;
+  readonly aboutReferenceUrls: Locator;
+  readonly aboutAddReferenceUrlButton: Locator;
+  readonly aboutFalsePositives: Locator;
+  readonly aboutAddFalsePositiveButton: Locator;
+  readonly aboutInvestigationNote: Locator;
+  readonly scheduleIntervalAmount: Locator;
+  readonly scheduleIntervalUnit: Locator;
+  readonly scheduleLookbackAmount: Locator;
+  readonly scheduleLookbackUnit: Locator;
   readonly queryInput: Locator;
   readonly advancedSettingsToggle: Locator;
   readonly mitreLoadingSpinner: Locator;
@@ -42,6 +56,32 @@ export class RuleCreateWizardPage {
     this.aboutContinue = this.page.testSubj.locator('about-continue');
     this.scheduleContinue = this.page.testSubj.locator('schedule-continue');
     this.createWithoutEnabling = this.page.testSubj.locator('create-enabled-false');
+    this.createAndEnable = this.page.testSubj.locator('create-enable');
+    this.aboutSeveritySelect = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleSeverity')
+      .locator('[data-test-subj="select"]');
+    // The test subject is shared by the range slider and its number input
+    this.aboutRiskScoreInput = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleRiskScore-defaultRiskRange')
+      .and(this.page.locator('[type="number"]'));
+    this.aboutTagsInput = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleTags')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    const referenceUrls = this.page.testSubj.locator('detectionEngineStepAboutRuleReferenceUrls');
+    this.aboutReferenceUrls = referenceUrls.locator('input');
+    this.aboutAddReferenceUrlButton = referenceUrls.getByRole('button', { name: /add/i });
+    const falsePositives = this.page.testSubj.locator('detectionEngineStepAboutRuleFalsePositives');
+    this.aboutFalsePositives = falsePositives.locator('input');
+    this.aboutAddFalsePositiveButton = falsePositives.getByRole('button', { name: /add/i });
+    this.aboutInvestigationNote = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleNote')
+      .locator('textarea');
+    const scheduleInterval = this.page.testSubj.locator('detectionEngineStepScheduleRuleInterval');
+    const scheduleLookback = this.page.testSubj.locator('detectionEngineStepScheduleRuleFrom');
+    this.scheduleIntervalAmount = scheduleInterval.locator('[data-test-subj="interval"]');
+    this.scheduleIntervalUnit = scheduleInterval.locator('[data-test-subj="timeType"]');
+    this.scheduleLookbackAmount = scheduleLookback.locator('[data-test-subj="interval"]');
+    this.scheduleLookbackUnit = scheduleLookback.locator('[data-test-subj="timeType"]');
     this.queryInput = this.page.testSubj
       .locator('defineRuleFormStepQueryEditor')
       .locator('[data-test-subj="queryInput"]')
@@ -175,5 +215,66 @@ export class RuleCreateWizardPage {
     await this.page.components
       .superSelect('mitreAttackSubtechnique')
       .selectOptionByValue(subtechniqueId);
+  }
+
+  /** Picks a severity, e.g. `Critical`, in the About step. */
+  async selectSeverity(severity: string): Promise<void> {
+    await this.aboutSeveritySelect.click();
+    await this.page.getByRole('option', { name: severity }).click();
+  }
+
+  async addTags(tagNames: readonly string[]): Promise<void> {
+    for (const tag of tagNames) {
+      await this.aboutTagsInput.fill(tag);
+      await this.aboutTagsInput.press('Enter');
+    }
+  }
+
+  /** Types each URL into the reference URLs list, adding a row for every one but the last. */
+  async addReferenceUrls(urls: readonly string[]): Promise<void> {
+    await this.fillRepeatableInput(this.aboutReferenceUrls, this.aboutAddReferenceUrlButton, urls);
+  }
+
+  /** Types each example into the false positives list, adding a row for every one but the last. */
+  async addFalsePositives(examples: readonly string[]): Promise<void> {
+    await this.fillRepeatableInput(
+      this.aboutFalsePositives,
+      this.aboutAddFalsePositiveButton,
+      examples
+    );
+  }
+
+  private async fillRepeatableInput(
+    inputs: Locator,
+    addButton: Locator,
+    values: readonly string[]
+  ): Promise<void> {
+    for (const [index, value] of values.entries()) {
+      const rows = await inputs.all();
+      await rows[index].fill(value);
+      if (index < values.length - 1) {
+        await addButton.click();
+        await expect.poll(() => inputs.count()).toBeGreaterThan(index + 1);
+      }
+    }
+  }
+
+  async setSchedule(params: {
+    interval: { amount: string; unit: string };
+    lookback: { amount: string; unit: string };
+  }): Promise<void> {
+    const { interval, lookback } = params;
+    await this.scheduleIntervalAmount.fill(interval.amount);
+    await this.scheduleIntervalUnit.selectOption(interval.unit);
+    await this.scheduleLookbackAmount.fill(lookback.amount);
+    await this.scheduleLookbackUnit.selectOption(lookback.unit);
+  }
+
+  /** Clicks "Create and enable rule" and waits for the app to open the created rule. */
+  async createAndEnableRule(): Promise<void> {
+    await this.createAndEnable.click();
+    // The page title also exists on the create page, so the URL is the reliable signal
+    await this.page.waitForURL(/\/rules\/id\//, { timeout: DATA_LOAD_TIMEOUT_MS });
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 }

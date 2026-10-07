@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-security';
+import { globalSetupHook, SECURITY_ARCHIVES } from '@kbn/scout-security';
 import type { GetMitreEntitiesResponse } from '@kbn/security-mitre-attack-common';
 import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
 import {
@@ -93,3 +93,9 @@ globalSetupHook(
     }
   }
 );
+
+globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
+  log.debug('[setup] loading indicator match archives (only if indexes do not exist)...');
+  await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.THREAT_INDICATOR);
+  await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.SUSPICIOUS_SOURCE_EVENT);
+});
