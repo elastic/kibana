@@ -44,7 +44,7 @@ import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
-import { resolveTimeFieldForQuery } from './resolve_time_field';
+import { getDateFieldsForQuery, resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
@@ -478,9 +478,25 @@ export const executeRuleOperations = async (
         break;
       }
 
-      case 'set_time_field':
+      case 'set_time_field': {
+        // Without a query there is no index to check; `set_query` re-checks it later.
+        if (esClient && next.query) {
+          const dateFields = await getDateFieldsForQuery(esClient, getRootEsqlQuery(next.query));
+          // Only reject when the index reports date fields and this isn't one of them;
+          // lookups that fail or return nothing (federated sources, views) can't be verified.
+          if (dateFields && dateFields.length > 0 && !dateFields.includes(op.time_field)) {
+            throw new RuleOperationValidationError(
+              `The field "${op.time_field}" is not a \`date\` or \`date_nanos\` field on the ` +
+                `query's source index. Available date fields: ${dateFields
+                  .sort()
+                  .map((field) => `"${field}"`)
+                  .join(', ')}.`
+            );
+          }
+        }
         next = { ...next, time_field: op.time_field };
         break;
+      }
       case 'set_no_data':
         next = { ...next, no_data: op.no_data };
         break;

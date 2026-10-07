@@ -709,10 +709,7 @@ describe('executeRuleOperations', () => {
         { operation: 'set_time_field', time_field: 'event_time' },
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM external-source | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM external-source | STATS COUNT(*)' },
         },
       ];
 
@@ -735,10 +732,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM no-date-index | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM no-date-index | STATS COUNT(*)' },
         },
       ];
 
@@ -748,6 +742,80 @@ describe('executeRuleOperations', () => {
       expect(result.warnings).toEqual(
         expect.arrayContaining([expect.stringContaining('event.ingested')])
       );
+    });
+
+    describe('validation against the existing query', () => {
+      const existingWithQuery: Partial<RuleAttachmentData> = {
+        query: { base: 'FROM tf-multi-date | STATS COUNT(*)' },
+      } as never;
+
+      it('accepts a field that is a date field on the source index', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+          fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event.ingested' }];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event.ingested');
+      });
+
+      it('throws and lists the available date fields when the field is not one of them', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+          fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'host.name' }];
+
+        await expect(executeRuleOperations(existingWithQuery, ops, esClient)).rejects.toThrow(
+          /"host\.name" is not a `date` or `date_nanos` field.*"@timestamp", "event\.ingested"/
+        );
+      });
+
+      it('does not validate when fieldCaps fails (federated sources)', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockRejectedValueOnce(new Error('not an ES index'));
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event_time' }];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event_time');
+      });
+
+      it('does not validate when the source index reports no date fields', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} } as never);
+
+        const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event_time' }];
+        const result = await executeRuleOperations(existingWithQuery, ops, esClient);
+
+        expect(result.data.time_field).toBe('event_time');
+      });
+
+      it('validates against a query set earlier in the same batch', async () => {
+        const esClient = createMockEsClient();
+        esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+          columns: [{ name: 'cpu', type: 'double' }],
+          values: [],
+        } as never);
+        esClient.asCurrentUser.fieldCaps.mockResolvedValue({
+          fields: { '@timestamp': { date: {} } },
+        } as never);
+
+        const ops: RuleOperation[] = [
+          {
+            operation: 'set_query',
+            query: { base: 'FROM tf-multi-date | STATS COUNT(*)' },
+          },
+          { operation: 'set_time_field', time_field: 'cpu' },
+        ];
+
+        await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+          /"cpu" is not a `date` or `date_nanos` field/
+        );
+      });
     });
 
     it('survives a subsequent set_query where field-caps returns no date fields', async () => {
@@ -764,10 +832,7 @@ describe('executeRuleOperations', () => {
         { operation: 'set_time_field', time_field: 'ingest_timestamp' },
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM no-date-index | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM no-date-index | STATS COUNT(*)' },
         },
       ];
 
