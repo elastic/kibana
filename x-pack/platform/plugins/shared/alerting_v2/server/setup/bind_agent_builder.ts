@@ -141,6 +141,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       logger: agentBuilderLogger,
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
+      validateWorkflow: (yaml, sid, req) => workflowsManagementApi.validateWorkflow(yaml, sid, req),
     });
   });
 }

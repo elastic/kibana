@@ -95,7 +95,7 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 
 **Dashboard trigger** — when the user's prompt contains any of: **entity analytics dashboard**, **EA dashboard**, **entity analytics home/overview/landing**, or **show / open / view / display / bring up Entity Analytics** (the product page, not a generic Kibana dashboard): gather entity data with \`security.search_entities\`, then call \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\`, and render both the entities table tag and the dashboard tag in the same turn. This rule takes precedence over list/ranking-only framing — if the product-page phrase is present, emit the dashboard. Does NOT apply when the user asks only for the riskiest / top-N entities without naming the Entity Analytics page.
 
-**Watchlist members** — resolve the name with \`security.get_watchlist_id\`, then list members with \`security.search_entities\` (\`watchlists: [<id>]\`). To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill. Do NOT use \`get_watchlist_id\` to learn which watchlists a specific entity belongs to — that is on the entity profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
+**Watchlist members** — resolve the name with \`security.get_watchlist_id\`, then list members with \`security.search_entities\` (\`watchlists: [<id>]\`). To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill. Do NOT use \`get_watchlist_id\` to learn which watchlists a specific entity belongs to — that is on the entity profile from \`security.get_entity\` as \`entity.attributes.watchlists\`. Do NOT use this flow for "what are the **data sources** / **entity sources**" of a watchlist, "what's keeping this watchlist in sync", "how/why are we tracking X in this watchlist", or "why is this entity on this watchlist" — those ask about the *mechanism* adding/syncing entities, not the entities themselves, and belong to the \`manage-watchlists\` skill (\`security.list_watchlist_data_sources\`). The entity store only records watchlist *membership* (on the entity profile), not the reason a given entity was added — do not guess at a reason from risk score or alerts; hand off to \`manage-watchlists\` instead. Note that tool only lists the watchlist's candidate sources, not a definitive per-entity lookup — when more than one source exists, present them as possible explanations rather than asserting which one added a specific entity.
 
 **Don't answer resolution questions from \`resolutionRiskStats\`** — it's a risk-score summary for the resolution group, not its membership list, and it cannot tell you who is linked to whom. For "who is this resolved with", "what aliases does X have", "which entities are linked to X", "what does X resolve to", "merge/link/unlink entities", or "what resolution rules do we have", use the \`entity-resolution\` skill's tools instead of \`security.get_entity\`.
 
@@ -139,6 +139,7 @@ Check \`riskScoreGrounding.status\` in the tool's \`other\` result:
 ### 5. Recommend next steps
 - User entities → external activities and lateral movement.
 - Host / service entities → vulnerabilities and exposures.
+- When the conversation surfaces one or more risky entities (high risk score, \`extreme_impact\`/\`high_impact\` criticality, or the user is clearly tracking/monitoring them), suggest putting them on a watchlist so they stay visible over time — e.g. *"Want me to add these to a watchlist so you can keep an eye on them?"* Only suggest this once per risky-entity finding, not on every turn. If the user agrees, or asks to create/manage a watchlist directly, hand off to the \`manage-watchlists\` skill — it owns creating watchlists, adding/removing members (one-time or standing/rule-based), and listing data sources. Do not attempt to add entities to a watchlist from this skill.
 
 ## Vendor source lookup
 
@@ -186,6 +187,8 @@ When the dashboard trigger fires:
 ## Related Skills
 
 When investigating anomalous behavior, use \`~/skills/security/ml/find-security-ml-jobs\` to find the ML jobs that answer the user's question. That skill returns EUIDs of entities with anomalous behavior — pass those to \`security.get_entity\`.
+
+When the user wants to create a watchlist, add/remove members (one-time or standing/rule-based), or manage its data sources, hand off to the \`manage-watchlists\` skill (\`~/skills/security/watchlists\`) — do not attempt those actions here.
 
 ## Examples
 

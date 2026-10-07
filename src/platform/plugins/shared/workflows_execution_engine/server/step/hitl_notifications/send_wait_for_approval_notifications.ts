@@ -9,7 +9,11 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
-import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
+import {
+  assertConnectorSucceeded,
+  buildSlack2SendMessageInput,
+  slackApiChannelTarget,
+} from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
@@ -172,6 +176,22 @@ export async function sendWaitForApprovalNotifications({
         connectorType: 'slack_api',
         connectorNameOrId: slackApiConnectorId,
         input: buildSlackApiBlockkitInput(linkParams, slackApiChannelTarget(channel)),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
+  }
+
+  const slack2Config = channels.slack2;
+  const slack2ConnectorId = slack2Config?.['connector-id'];
+  const slack2Channels = slack2Config?.channels;
+  if (slack2ConnectorId && slack2Channels?.length) {
+    const text = buildSlackMessage(linkParams);
+    for (const channel of slack2Channels) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack2',
+        connectorNameOrId: slack2ConnectorId,
+        input: buildSlack2SendMessageInput(channel, text),
         abortController,
       });
       assertConnectorSucceeded(result);

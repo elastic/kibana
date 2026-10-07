@@ -31,6 +31,8 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 /**
  * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
  * Task Manager owns this document throughout the run; callers must never replace it.
+ * While the execution is not terminal the runner stays parked between resumes, so every
+ * wake-up reuses the API key granted when it was first scheduled.
  */
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
@@ -40,6 +42,12 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
   `workflow-wake-${executionId}`;
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
+
+/**
+ * Parked runners only run when woken via `runSoon`; the far-future runAt keeps Task Manager
+ * from claiming them on its own.
+ */
+export const WORKFLOW_PARKED_RUNNER_DELAY_MS = 365 * 24 * 60 * 60 * 1000;
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
@@ -269,6 +277,19 @@ export class WorkflowTaskManager {
         : undefined
     );
     return { taskId };
+  }
+
+  /** Removes a parked immediate runner once its execution is terminal, never an active claim. */
+  async removeParkedImmediateResume(executionId: string): Promise<void> {
+    const taskId = getWorkflowImmediateResumeTaskId(executionId);
+    try {
+      const task = await this.taskManager.get(taskId);
+      if (task.status !== TaskStatus.Idle) return;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) return;
+      throw error;
+    }
+    await this.taskManager.removeIfExists(taskId);
   }
 
   /** Returns false when a wake-up must be retried after the current runner releases its claim. */

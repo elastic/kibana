@@ -54,6 +54,7 @@ jest.mock('../src/report/format_failure', () => ({
   formatFailure: jest.fn(),
 }));
 
+import { isFailError } from '@kbn/dev-cli-errors';
 import { execSync } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';
 import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
@@ -411,6 +412,110 @@ describe('check_contracts', () => {
 
       expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
     });
+
+    describe('allowlisted changes in the report', () => {
+      const reportFlags = { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' };
+      const readReport = () => {
+        const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+          String(path).endsWith('stack-impact.json')
+        );
+        return reportCall ? JSON.parse(reportCall[1] as string) : undefined;
+      };
+      const reportOnlyChange: BreakingChange = {
+        ...anotherChange,
+        oasdiffId: 'response-body-one-of-added',
+        reportOnly: true,
+        policyReason: 'Additive response variant.',
+      };
+
+      it('writes an allowlisted stable change to the report when everything is allowlisted', async () => {
+        mockFormatFailure.mockReturnValue('FORMATTED REPORT');
+        mockParseOasdiff.mockReturnValue([stableChange]);
+        mockApplyAllowlist.mockReturnValue({
+          breakingChanges: [],
+          allowlistedChanges: [stableChange],
+        });
+
+        await runCallback({ flags: reportFlags, log: mockLog });
+
+        expect(readReport()).toEqual({
+          distribution: 'stack',
+          entries: [
+            {
+              path: '/api/spaces/space',
+              reason: 'Endpoint removed',
+              tier: 'stable',
+              allowlisted: true,
+            },
+          ],
+        });
+        expect(mockFormatFailure).toHaveBeenCalledWith([
+          expect.objectContaining({ path: '/api/spaces/space', allowlisted: true }),
+        ]);
+        expect(mockLog.info).toHaveBeenCalledWith('FORMATTED REPORT');
+        expect(mockLog.success).toHaveBeenCalledWith('All breaking changes are allowlisted');
+      });
+
+      it('keeps an allowlisted stable change next to a remaining report-only change', async () => {
+        mockParseOasdiff.mockReturnValue([stableChange, reportOnlyChange]);
+        mockApplyAllowlist.mockReturnValue({
+          breakingChanges: [reportOnlyChange],
+          allowlistedChanges: [stableChange],
+        });
+
+        await runCallback({ flags: reportFlags, log: mockLog });
+
+        expect(readReport().entries).toEqual([
+          expect.objectContaining({ path: '/api/fleet/agents', reportOnly: true }),
+          expect.objectContaining({ path: '/api/spaces/space', allowlisted: true }),
+        ]);
+        expect(mockFormatFailure).toHaveBeenCalledWith([
+          expect.objectContaining({ reportOnly: true }),
+          expect.objectContaining({ allowlisted: true }),
+        ]);
+        expect(mockLog.error).not.toHaveBeenCalled();
+      });
+
+      it('does not count an allowlisted change toward the gating total', async () => {
+        mockParseOasdiff.mockReturnValue([stableChange, anotherChange]);
+        mockApplyAllowlist.mockReturnValue({
+          breakingChanges: [anotherChange],
+          allowlistedChanges: [stableChange],
+        });
+
+        await expect(runCallback({ flags: reportFlags, log: mockLog })).rejects.toThrow(
+          'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
+        );
+        expect(readReport().entries).toHaveLength(2);
+      });
+
+      it.each([
+        [
+          'experimental',
+          { '/api/spaces/space': { get: { 'x-state': 'Experimental' } } },
+          { ...stableChange, method: 'GET' },
+        ],
+        ['report-only', {}, { ...stableChange, reportOnly: true, policyReason: 'Additive.' }],
+      ])(
+        'leaves an allowlisted %s change out of the report',
+        async (_kind, basePaths, change: BreakingChange) => {
+          mockLoadOas.mockResolvedValue({
+            openapi: '3.0.0',
+            info: { title: 't', version: '1' },
+            paths: basePaths,
+            components: { schemas: {} },
+          });
+          mockParseOasdiff.mockReturnValue([change]);
+          mockApplyAllowlist.mockReturnValue({ breakingChanges: [], allowlistedChanges: [change] });
+
+          await runCallback({ flags: reportFlags, log: mockLog });
+
+          expect(readReport()).toBeUndefined();
+          expect(mockFormatFailure).not.toHaveBeenCalled();
+          expect(mockLog.success).toHaveBeenCalledWith('All breaking changes are allowlisted');
+        }
+      );
+    });
   });
 
   describe('tier classification (whole surface)', () => {
@@ -468,6 +573,14 @@ describe('check_contracts', () => {
       expect(mockLog.error).toHaveBeenCalledWith('FAILURE REPORT');
     });
 
+    it('fails with a FailError so the runner prints no stack trace', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      const error = await runCallback({ flags: defaultFlags, log: mockLog }).catch((e) => e);
+      expect(isFailError(error)).toBe(true);
+    });
+
     it('catches a tech_preview breaking change and throws', async () => {
       mockParseOasdiff.mockReturnValue([techPreviewChange]);
       primeLoadOas(baseSpec({ '/api/tp': { post: { 'x-state': 'Technical Preview' } } }));
@@ -509,6 +622,7 @@ describe('check_contracts', () => {
       );
       expect(reportCall).toBeDefined();
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/exp',
@@ -548,6 +662,7 @@ describe('check_contracts', () => {
         String(path).endsWith('stack-impact.json')
       );
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/x',
@@ -634,6 +749,28 @@ describe('check_contracts', () => {
       );
     });
 
+    it('records the serverless distribution in the report of a serverless run', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await expect(
+        runCallback({
+          flags: {
+            ...defaultFlags,
+            distribution: 'serverless',
+            reportPath: 'target/reports/serverless-impact.json',
+          },
+          log: mockLog,
+        })
+      ).rejects.toThrow();
+
+      const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+        String(path).endsWith('serverless-impact.json')
+      );
+      expect(reportCall).toBeDefined();
+      expect(JSON.parse(reportCall![1] as string)).toMatchObject({ distribution: 'serverless' });
+    });
+
     it('writes a tier-classified report when reportPath is set', async () => {
       mockParseOasdiff.mockReturnValue([stableChange]);
       primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
@@ -650,6 +787,7 @@ describe('check_contracts', () => {
       );
       expect(reportCall).toBeDefined();
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/x',

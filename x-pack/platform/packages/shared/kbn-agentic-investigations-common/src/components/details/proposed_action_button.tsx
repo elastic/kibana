@@ -75,7 +75,6 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const decision = getProposalDecision(proposal);
 
@@ -112,16 +111,19 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       )
     ) : decision ? (
       badge.label
-    ) : Boolean(pendingCaption) ? (
+    ) : pendingCaption ? (
       pendingCaption
     ) : (
       getEmptyValue()
     );
 
+    const { euiTheme } = useEuiTheme();
+    const borderStyle = `1px solid ${euiTheme.colors.backgroundLightText}`;
     return (
       <>
         <EuiPanel
-          hasBorder
+          hasBorder={false}
+          hasShadow={false}
           paddingSize="m"
           role="button"
           tabIndex={0}
@@ -131,7 +133,26 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           })}
           data-test-subj={dataTestSubj}
           css={css({
-            borderRadius: euiTheme.border.radius.medium,
+            borderRadius: 0,
+            '&:first-child': {
+              borderRadius: `${euiTheme.size.m} ${euiTheme.size.m} 0 0`,
+              border: borderStyle,
+            },
+            '&:not(:first-child):not(:last-child)': {
+              borderLeft: borderStyle,
+              borderRight: borderStyle,
+              borderBottom: borderStyle,
+            },
+            '&:last-child': {
+              border: borderStyle,
+              borderTop: 'none',
+              borderRadius: `0 0 ${euiTheme.size.m} ${euiTheme.size.m}`,
+            },
+            // Must come after first/last so a lone item gets a full border and radius
+            '&:only-child': {
+              border: borderStyle,
+              borderRadius: euiTheme.size.m,
+            },
             cursor: isInteractive ? 'pointer' : 'default',
             ...(isInteractive
               ? { '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued } }
