@@ -127,6 +127,10 @@ export const createWorkerSettingsRegistration = (
   withMissingDefaults: (raw) =>
     applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), raw),
   applyPatch: (raw, patch) => {
+    const declaration = getWorkerSettingsDeclaration(workerId);
+    if (declaration.scheduleInterval?.readOnly && patch.scheduleInterval !== undefined) {
+      return { invalid: 'scheduleInterval: is read-only for this worker' };
+    }
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);
     if (!result.success) {

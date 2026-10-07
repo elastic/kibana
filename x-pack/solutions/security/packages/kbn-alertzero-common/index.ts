@@ -208,6 +208,7 @@ export {
   diffWorkerSettings,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
   projectStoredAutonomyLevel,

@@ -330,6 +330,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
       settings: {
         workerId: HUNT_WORKER_ID,
         autonomy: 'manual',
+        scheduleInterval: '4h',
         serviceAccountId: 'sa-1',
       },
     };
@@ -380,5 +381,16 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
     await waitFor(() => {
       expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
     });
+  });
+
+  it('shows fixed Manual autonomy rather than a multi-level control', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroAutonomyCard-assisted')).not.toBeInTheDocument();
+  });
+
+  it('disables the 4h schedule control because the interval is read-only', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId(`alertZeroTriggerAmount-${HUNT_WORKER_ID}`)).toBeDisabled();
   });
 });

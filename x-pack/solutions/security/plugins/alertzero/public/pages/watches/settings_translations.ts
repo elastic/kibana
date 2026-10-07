@@ -330,6 +330,14 @@ export const TRIGGER_HELP_TEXT = i18n.translate(
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
 );
 
+export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
+  {
+    defaultMessage:
+      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
+  }
+);
+
 export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
   defaultMessage: 'Trigger',
 });

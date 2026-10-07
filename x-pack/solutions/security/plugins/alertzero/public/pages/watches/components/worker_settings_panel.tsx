@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
   type WorkerSettings,
@@ -363,13 +364,17 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       {settings.scheduleInterval != null ? (
         <SettingRow
           label={settingsI18n.TRIGGER_LABEL}
-          labelHelp={settingsI18n.TRIGGER_HELP_TEXT}
+          labelHelp={
+            isWorkerScheduleIntervalReadOnly(worker.id)
+              ? settingsI18n.TRIGGER_HELP_READ_ONLY_4H
+              : settingsI18n.TRIGGER_HELP_TEXT
+          }
           data-test-subj={`alertZeroTriggerRow-${worker.id}`}
         >
           <ScheduleIntervalField
             workerId={worker.id}
             current={settings.scheduleInterval}
-            isDisabled={controlsDisabled}
+            isDisabled={controlsDisabled || isWorkerScheduleIntervalReadOnly(worker.id)}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
             onValidityChange={onTriggerValidityChange}
             resetKey={draftResetKey}
