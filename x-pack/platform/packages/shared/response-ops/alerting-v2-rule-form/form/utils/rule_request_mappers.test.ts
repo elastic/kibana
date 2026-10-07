@@ -49,6 +49,15 @@ describe('rule_request_mappers', () => {
       });
     });
 
+    it('maps routing tags when present', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+      });
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
+    });
+
     it('keeps the breach block when the segment is non-empty', () => {
       const result = mapFormValuesToRuleRequest({
         ...baseFormValues,
@@ -938,6 +947,15 @@ describe('rule_request_mappers', () => {
         base: 'FROM logs-* | STATS count() BY host',
       },
     } as RuleResponse;
+
+    it('loads routing tags from the rule', () => {
+      const result = mapRuleResponseToFormValues({
+        ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+      });
+
+      expect(result.metadata?.routingTags).toEqual(['sre']);
+    });
 
     it('maps basic required fields', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);

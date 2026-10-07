@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { concat, of, shareReplay } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -126,6 +127,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
     ) {
       const connector = await this.resolveExecutionConnector({
+        agentId,
         connectorId: params.connectorId,
         request,
       });
@@ -233,6 +235,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          // The run reads the conversation by id (real-time). The conversation is already listed,
+          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
+          appendRefresh: false,
         });
       } catch (err) {
         try {
@@ -706,17 +711,38 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   private async resolveExecutionConnector({
+    agentId,
     connectorId,
     request,
   }: {
+    agentId: string;
     connectorId?: string;
     request: KibanaRequest;
   }): Promise<InferenceConnector | undefined> {
-    const { inference, searchInferenceEndpoints } = this.deps;
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
     return (
-      resolveExecutionConnectorId({ connectorId, request, searchInferenceEndpoints })
-        .then((resolvedConnectorId) =>
-          resolvedConnectorId ? inference.getConnectorById(resolvedConnectorId, request) : undefined
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
         )
         // Leaves resolution failures to the runner, which records them against the execution
         .catch(() => undefined)
@@ -763,6 +789,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    appendRefresh,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -771,6 +798,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    appendRefresh?: Refresh;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author);
@@ -781,6 +809,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       eventId,
       author,
+      appendRefresh,
       ...(origin ? { origin } : {}),
     };
 
