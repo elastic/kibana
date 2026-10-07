@@ -31,9 +31,15 @@ export async function cancelWorkflowIfRequested(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger,
   workflowExecutionCursor: WorkflowExecutionCursorApi,
-  monitorAbortController?: AbortController
+  monitorAbortController?: AbortController,
+  inMemoryOnly: boolean = false
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
+    // When only the in-memory flag is wanted, do not block on an Elasticsearch read;
+    // the background monitor refreshes the flag.
+    if (inMemoryOnly) {
+      return;
+    }
     try {
       const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionState.getWorkflowExecution().id,

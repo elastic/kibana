@@ -66,6 +66,25 @@ describe('runStackMonitor', () => {
     expect(abortableTimeout).toHaveBeenCalledWith(500, monitorAbortController.signal);
   });
 
+  it('skips the remote cancel read on the first tick only', async () => {
+    const monitorAbortController = new AbortController();
+    const params = {} as any;
+    const monitoredRuntime = {} as any;
+
+    (processNodeStackMonitoring as jest.Mock).mockResolvedValue(undefined);
+    let timeoutCalls = 0;
+    (abortableTimeout as jest.Mock).mockImplementation(async () => {
+      timeoutCalls++;
+      if (timeoutCalls >= 2) {
+        throw new TimeoutAbortedError();
+      }
+    });
+
+    await runStackMonitor(params, monitoredRuntime, monitorAbortController);
+    expect(processNodeStackMonitoring).toHaveBeenNthCalledWith(1, params, monitoredRuntime, true);
+    expect(processNodeStackMonitoring).toHaveBeenNthCalledWith(2, params, monitoredRuntime, false);
+  });
+
   it('propagates non-abort errors from abortableTimeout', async () => {
     const monitorAbortController = new AbortController();
     const params = {} as any;

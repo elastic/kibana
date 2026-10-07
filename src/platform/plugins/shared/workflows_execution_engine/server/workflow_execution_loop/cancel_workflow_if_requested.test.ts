@@ -253,5 +253,21 @@ describe('cancelWorkflowIfRequested', () => {
       expect(monitorAbortController.signal.aborted).toBe(true);
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalled();
     });
+
+    it('should not call ES when inMemoryOnly is true and cancelRequested is not set', async () => {
+      await cancelWorkflowIfRequested(
+        workflowExecutionRepository,
+        workflowExecutionState,
+        monitoredStepExecutionRuntime,
+        workflowLogger,
+        workflowExecutionCursor,
+        monitorAbortController,
+        true
+      );
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(monitorAbortController.signal.aborted).toBe(false);
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
   });
 });

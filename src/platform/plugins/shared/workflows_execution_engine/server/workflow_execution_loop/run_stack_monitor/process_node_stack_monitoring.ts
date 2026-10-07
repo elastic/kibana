@@ -23,11 +23,15 @@ import type { WorkflowExecutionLoopParams } from '../types';
  * @param params - Workflow execution loop parameters containing factories and state
  * @param monitoredStepExecutionRuntime - The runtime context for the step being monitored
  *
+ * @param inMemoryCancelCheckOnly - When true, cancellation is read only from in-memory state
+ *   (no Elasticsearch read); the background monitor loop refreshes it
+ *
  * @returns Promise that resolves when all nodes in the stack have been processed
  */
 export async function processNodeStackMonitoring(
   params: WorkflowExecutionLoopParams,
-  monitoredStepExecutionRuntime: StepExecutionRuntime
+  monitoredStepExecutionRuntime: StepExecutionRuntime,
+  inMemoryCancelCheckOnly: boolean = false
 ): Promise<void> {
   const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
   let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
@@ -56,6 +60,7 @@ export async function processNodeStackMonitoring(
     monitoredStepExecutionRuntime,
     params.workflowLogger,
     params.workflowExecutionCursor,
-    monitoredStepExecutionRuntime.abortController
+    monitoredStepExecutionRuntime.abortController,
+    inMemoryCancelCheckOnly
   );
 }

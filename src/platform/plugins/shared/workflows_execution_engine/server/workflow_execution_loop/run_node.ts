@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
+import { refreshCancelRequestedInBackground } from './refresh_cancel_requested';
 import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
@@ -145,7 +146,11 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     monitorAbortController = new AbortController();
 
     // Run stack monitoring once before the race so timeouts/cancel win over step.run().
-    await processNodeStackMonitoring(params, stepExecutionRuntime);
+    // Only the in-memory cancel flag is checked here; a throttled background read refreshes it
+    // (covering runs of steps shorter than the monitor interval) so starting a node never
+    // waits on an Elasticsearch read.
+    refreshCancelRequestedInBackground(params);
+    await processNodeStackMonitoring(params, stepExecutionRuntime, true);
 
     /**
      * Run monitoring in parallel with step execution to handle:

@@ -67,9 +67,12 @@ export async function runStackMonitor(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController: AbortController
 ): Promise<void> {
+  // runNode already checked in-memory state right before starting this loop, so the first
+  // tick skips the Elasticsearch read; reads then follow the 500ms cadence.
+  let isFirstTick = true;
   while (!monitorAbortController.signal.aborted) {
-    // Check cancellation immediately before waiting - ensures fast cancellation detection
-    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime);
+    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime, isFirstTick);
+    isFirstTick = false;
 
     // If monitoring was aborted during the check, exit early
     if (monitorAbortController.signal.aborted) {
