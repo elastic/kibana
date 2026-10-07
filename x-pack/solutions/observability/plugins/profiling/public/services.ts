@@ -43,6 +43,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
+    schema?: ProfilingSchema;
   }) => Promise<TopNResponse>;
   fetchTopNFunctions: (params: {
     http: AutoAbortedHttpService;
@@ -104,11 +105,12 @@ export function getServices(): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
+    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        schema,
       };
       return (await http.get(buildPath('/internal/profiling/topn/{type}', { type }), {
         query,

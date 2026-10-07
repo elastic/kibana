@@ -28,6 +28,7 @@ test.describe('Profiling schema selector', { tag: tags.stateful.classic }, () =>
     pageObjects: {
       flamegraphPage,
       functionsPage,
+      profilingHomePage,
       profilingSettingsPage,
       profilingSchemaSelector,
       profilingSideNav,
@@ -72,6 +73,25 @@ test.describe('Profiling schema selector', { tag: tags.stateful.classic }, () =>
 
       expect(getSchemaQueryParam(page)).toBe(ProfilingSchema.ECS);
       expect(await profilingSchemaSelector.getSelectedSchema()).toBe(ProfilingSchema.ECS);
+    });
+
+    await test.step('group the Universal Profiling stacktraces by host', async () => {
+      await profilingHomePage.clickTab('Hosts');
+      await expect.poll(() => getPathname(page)).toContain('/stacktraces/hosts');
+
+      await expect(await profilingHomePage.getStackTracesCharts()).not.toHaveCount(0);
+      await expect(
+        await profilingHomePage.getStackTracesChart(testData.PROFILING_OTEL_TEST_HOST_ID)
+      ).toBeHidden();
+    });
+
+    await test.step('select OpenTelemetry', async () => {
+      await profilingSchemaSelector.selectSchema(ProfilingSchema.OTEL);
+
+      await expect.poll(() => getSchemaQueryParam(page)).toBe(ProfilingSchema.OTEL);
+      await expect(
+        await profilingHomePage.getStackTracesChart(testData.PROFILING_OTEL_TEST_HOST_ID)
+      ).toBeVisible();
     });
   });
 

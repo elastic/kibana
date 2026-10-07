@@ -50,6 +50,14 @@ export class ProfilingHomePage {
     await this.page.getByText('Top 1').waitFor({ state: 'visible' });
   }
 
+  async getStackTracesCharts() {
+    return this.page.getByTestId('profilingSubChartLink');
+  }
+
+  async getStackTracesChart(label: string) {
+    return (await this.getStackTracesCharts()).filter({ hasText: label });
+  }
+
   // URL verification methods
   async expectUrlToInclude(path: string) {
     await this.page.waitForURL(`**${path}**`);
@@ -57,6 +65,6 @@ export class ProfilingHomePage {
 
   // Error state methods
   async getErrorState() {
-    return this.page.testSubj.locator('profilingErrorState');
+    return this.page.getByTestId('profilingErrorState');
   }
 }
