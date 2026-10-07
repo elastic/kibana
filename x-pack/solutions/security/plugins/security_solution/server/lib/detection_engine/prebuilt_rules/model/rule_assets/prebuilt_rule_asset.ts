@@ -6,6 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   RuleSignatureId,
   RuleVersion,
@@ -39,8 +40,8 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
 ]);
 
 export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
-export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
-  BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
+export const PrebuiltAssetBaseProps = lazySchema(() =>
+  BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
 );
 
 /**
@@ -58,13 +59,15 @@ export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
  *  - version is a required field
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
-export const PrebuiltRuleAssetIdentityFields = z.object({
-  rule_id: RuleSignatureId,
-  version: RuleVersion,
-});
+export const PrebuiltRuleAssetIdentityFields = lazySchema(() =>
+  z.object({
+    rule_id: RuleSignatureId,
+    version: RuleVersion,
+  })
+);
 export type PrebuiltRuleAssetIdentityFields = z.infer<typeof PrebuiltRuleAssetIdentityFields>;
 
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(
-  PrebuiltRuleAssetIdentityFields
+export const PrebuiltRuleAsset = lazySchema(() =>
+  PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(PrebuiltRuleAssetIdentityFields)
 );

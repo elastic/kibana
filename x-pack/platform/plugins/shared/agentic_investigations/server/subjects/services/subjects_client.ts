@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type {
+  InvestigationSubject,
+  InvestigationSubjectInput,
+  InvestigationSubjectKey,
+} from '../../../common/subjects/subject';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
+import type { ResolveUser } from '../../services/resolve_user';
+import type { ClaimSubjectsParams, ClaimSubjectsResult } from './subject_claims_service';
+import type { SubjectsService } from './subjects_service';
+
+/**
+ * In-process subject reads and writes for the solution that starts investigations. The space,
+ * the principal, and the acting user all come from the request. Reads only return subjects of
+ * conversations the caller can read; the subject index itself is read as the internal user.
+ */
+export interface SubjectsClient {
+  /** Records subjects on an investigation the caller owns and attaches them by reference. */
+  upsertSubjects: (
+    conversationId: string,
+    subjects: InvestigationSubjectInput[]
+  ) => Promise<InvestigationSubject[]>;
+  /** Investigations the caller can read that hold any of the subjects, open or closed. */
+  findConversationIdsBySubjects: (subjects: InvestigationSubjectKey[]) => Promise<string[]>;
+  listByConversationIds: (conversationIds: string[]) => Promise<InvestigationSubject[]>;
+  /** Claims every subject for a new investigation, or returns the investigation holding one. */
+  claimSubjects: (params: Omit<ClaimSubjectsParams, 'spaceId'>) => Promise<ClaimSubjectsResult>;
+}
+
+export interface SubjectsClientDeps {
+  getSubjectsService: () => SubjectsService;
+  getSpaceId: (request: KibanaRequest) => string;
+  /** Writes need the investigations manage privilege; reads accept read or manage. */
+  privileges: InvestigationsPrivilegesChecker;
+  resolveUser: ResolveUser;
+  getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+}
+
+/** Builds a request-scoped subjects client. Every call checks the privilege first. */
+export const createSubjectsClient =
+  ({
+    getSubjectsService,
+    getSpaceId,
+    privileges,
+    resolveUser,
+    getConversationClient,
+    getAttachmentClient,
+  }: SubjectsClientDeps) =>
+  (request: KibanaRequest): SubjectsClient => ({
+    upsertSubjects: async (conversationId, subjects) => {
+      await privileges.assertCanManage(request);
+      const [conversations, attachments, user] = await Promise.all([
+        getConversationClient(request),
+        getAttachmentClient(request),
+        resolveUser(request),
+      ]);
+      return getSubjectsService().upsertSubjects({
+        conversationId,
+        subjects,
+        spaceId: getSpaceId(request),
+        user,
+        conversations,
+        attachments,
+      });
+    },
+    findConversationIdsBySubjects: async (subjects) => {
+      await privileges.assertCanRead(request);
+      const ids = await getSubjectsService().findConversationIdsBySubjects(
+        subjects,
+        getSpaceId(request)
+      );
+      return filterReadableConversationIds(await getConversationClient(request), ids);
+    },
+    listByConversationIds: async (conversationIds) => {
+      await privileges.assertCanRead(request);
+      const readableIds = await filterReadableConversationIds(
+        await getConversationClient(request),
+        conversationIds
+      );
+      if (readableIds.length === 0) {
+        return [];
+      }
+      return getSubjectsService().listByConversationIds(readableIds, getSpaceId(request));
+    },
+    claimSubjects: async (params) => {
+      await privileges.assertCanManage(request);
+      return getSubjectsService().claimSubjects({ ...params, spaceId: getSpaceId(request) });
+    },
+  });
