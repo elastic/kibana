@@ -18,8 +18,9 @@ export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collec
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 'data.json');
 
-// OTel profiling data, adapted from the Elasticsearch profiling OTel integration tests. Its events
-// are all within `PROFILING_OTEL_TEST_DATES`, which no Universal Profiling data overlaps.
+// OTel profiling data, adapted from the Elasticsearch profiling OTel integration tests. All but one of
+// its events are within `PROFILING_OTEL_TEST_DATES`, which no Universal Profiling data overlaps, and
+// have container, pod and executable names added so every Stacktraces grouping has data.
 export const otelEsArchiverPath = Path.join(
   __dirname,
   'es_archiver',
@@ -47,6 +48,7 @@ export const internalApiHeaders = {
 export const profilingApiEndpoints = {
   topNContainers: 'internal/profiling/topn/containers',
   topNDeployments: 'internal/profiling/topn/deployments',
+  topNExecutables: 'internal/profiling/topn/executables',
   topNHosts: 'internal/profiling/topn/hosts',
   topNTraces: 'internal/profiling/topn/traces',
   topNThreads: 'internal/profiling/topn/threads',
