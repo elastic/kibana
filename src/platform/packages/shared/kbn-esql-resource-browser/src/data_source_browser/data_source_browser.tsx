@@ -23,6 +23,7 @@ import {
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import { ESQL_VIEWS_CAPABILITIES, ESQL_VIEWS_FEATURE_ID } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kbn/esql-utils';
@@ -87,6 +88,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
 
+  const canReadViews =
+    application.capabilities[ESQL_VIEWS_FEATURE_ID]?.[ESQL_VIEWS_CAPABILITIES.read] === true;
+
   const getViewsCallback = useCallback(async () => {
     // Refreshes the cache entry the editor reads, rather than reading it.
     const result = await getViews.call({ forceRefresh: true }, http);
@@ -109,7 +113,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
     getDatasets: getDatasetsCallback,
-    getViews: getViewsCallback,
+    getViews: canReadViews ? getViewsCallback : undefined,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();
