@@ -257,7 +257,7 @@ export class DirectorService {
         message: 'Episode status transition',
         labels: {
           group_hash: currentAlertEvent.group_hash,
-          episode_id: episodeId,
+          alert_id: episodeId,
           resource: `${currentStatus ?? 'unknown'}->${result.status}`,
         },
       });
