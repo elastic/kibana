@@ -27,6 +27,7 @@ import type {
   CollectTelemetryDataParams,
   Buckets,
   ReferencesAggregation,
+  WorkflowOriginTypeCounts,
   WorkflowsSolutionTelemetry,
 } from '../types';
 import { sanitizeTypeKey } from './attachments_by_type';
@@ -42,15 +43,6 @@ const SO = CASE_USER_ACTION_SAVED_OBJECT;
 
 /** Origin bucket for runs that carry no origin (cases-list bulk runs). */
 const UNATTRIBUTED_ORIGIN = 'unattributed';
-
-/** Origin types reported even when zero, so the known surfaces are always present. */
-const KNOWN_ORIGIN_TYPES = [
-  CASE_WORKFLOW_ORIGIN_TYPE,
-  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
-] as const;
 
 /**
  * Cap on the origin and attachment type `terms` aggregations. Both values are validated before a
@@ -120,16 +112,23 @@ const getRunAggregations = () => ({
   ),
 });
 
-const toOriginKey = (originType: string): string =>
-  sanitizeTypeKey(originType.replace(/^cases\./, ''));
+// Only the fixed origin keys are reported, so a stored value outside the API's origin types can
+// never surface as an unmapped telemetry key.
+const getOriginTypeCounts = (
+  buckets: Buckets<string>['buckets'] = []
+): WorkflowOriginTypeCounts => {
+  const getCount = (originType: string): number =>
+    buckets.find(({ key }) => key === originType)?.doc_count ?? 0;
 
-const getOriginTypeCounts = (buckets: Buckets<string>['buckets'] = []): Record<string, number> =>
-  buckets.reduce<Record<string, number>>(
-    (counts, { key, doc_count: docCount }) => ({ ...counts, [toOriginKey(key)]: docCount }),
-    Object.fromEntries(
-      [...KNOWN_ORIGIN_TYPES.map(toOriginKey), UNATTRIBUTED_ORIGIN].map((key) => [key, 0])
-    )
-  );
+  return {
+    case: getCount(CASE_WORKFLOW_ORIGIN_TYPE),
+    observable: getCount(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+    observables: getCount(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+    attachment: getCount(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+    attachments: getCount(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
+    unattributed: getCount(UNATTRIBUTED_ORIGIN),
+  };
+};
 
 const getAttachmentTypeCounts = (
   buckets: Buckets<string>['buckets'] = []

@@ -346,10 +346,6 @@ const workflowsSolutionTelemetrySchema: WorkflowsSolutionTelemetrySchema = {
     },
   },
   byOriginType: {
-    DYNAMIC_KEY: {
-      type: 'long',
-      _meta: { description: 'Runs triggered from this origin type, without its `cases.` prefix' },
-    },
     case: {
       type: 'long',
       _meta: { description: 'Runs triggered from the case detail page' },
