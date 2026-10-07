@@ -94,7 +94,7 @@ const getPricingUrl = ({
   if (solution) params.set('solution', solution);
   if (csp) params.set('provider', csp);
   if (region) params.set('region', region);
-  return `${baseUrl}/cloud-pricing-table?${params}`;
+  return `${baseUrl.replace(/\/$/, '')}/cloud-pricing-table?${params}`;
 };
 
 const getBillingUrl = async (cloud: ServerlessCloud): Promise<string | undefined> => {

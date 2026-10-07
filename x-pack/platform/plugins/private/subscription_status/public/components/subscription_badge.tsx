@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPopover,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -59,7 +60,8 @@ const SubscriptionPopover = ({
           color={euiTheme.colors.primary}
           onClick={toggle}
           onClickAriaLabel={i18n.translate('xpack.subscriptionStatus.badge.toggleAriaLabel', {
-            defaultMessage: 'Show subscription details',
+            defaultMessage: '{label}, show subscription details',
+            values: { label },
           })}
           iconType="chevronSingleDown"
           iconSide="right"
@@ -75,7 +77,7 @@ const SubscriptionPopover = ({
       aria-label={i18n.translate('xpack.subscriptionStatus.badge.popoverAriaLabel', {
         defaultMessage: 'Subscription details',
       })}
-      data-test-subj="subscriptionStatusPopover"
+      panelProps={{ 'data-test-subj': 'subscriptionStatusPopover' }}
     >
       <div css={popoverContentStyles}>
         <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
@@ -134,13 +136,19 @@ export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadg
       return <SubscriptionPopover status={status} onOpen={onOpen} onAction={onAction} />;
     case 'tooltip':
       return (
-        <EuiToolTip content={status.tooltip}>
+        // The tooltip is only linked to the badge while visible, so the message is also rendered as
+        // hidden text for screen readers in browse mode.
+        <EuiToolTip content={status.tooltip} disableScreenReaderOutput>
           <EuiBadge
             color={euiTheme.colors.primary}
             tabIndex={0}
+            title={status.label}
             data-test-subj="subscriptionStatusBadge"
           >
             {status.label}
+            <EuiScreenReaderOnly>
+              <span>{status.tooltip}</span>
+            </EuiScreenReaderOnly>
           </EuiBadge>
         </EuiToolTip>
       );

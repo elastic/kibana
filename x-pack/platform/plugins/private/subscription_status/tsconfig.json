@@ -5,13 +5,15 @@
   },
   "include": [
     "public/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/cloud-plugin",
     "@kbn/i18n",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

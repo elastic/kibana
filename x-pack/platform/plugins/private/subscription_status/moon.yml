@@ -21,14 +21,19 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/i18n'
   - '@kbn/storybook'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - public/**/*
     - .storybook/**/*
+    - test/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

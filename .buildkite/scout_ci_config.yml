@@ -101,6 +101,7 @@ plugins:
     - stack_connectors
     - streams
     - streams_app
+    - subscription_status
     - synthetics
     - task_manager
     - transform

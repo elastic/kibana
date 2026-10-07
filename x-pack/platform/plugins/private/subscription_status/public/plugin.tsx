@@ -38,7 +38,7 @@ export class SubscriptionStatusPlugin
   }
 
   public start(core: CoreStart, { cloud }: SubscriptionStatusStartDeps) {
-    if (!cloud || core.http.anonymousPaths.isAnonymous(window.location.pathname)) return;
+    if (!cloud) return;
     void this.showBadge(core, cloud);
   }
 

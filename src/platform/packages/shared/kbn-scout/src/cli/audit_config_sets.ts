@@ -51,6 +51,8 @@ export const MUST_STAY_SEPARATE: Readonly<Record<string, string>> = {
     'tests run on every serverless project type and service_accounts only has configs for two of them',
   ai_value_report:
     'tests also run on serverless security_ease and security_attacks_alignment has no config for it',
+  cloud_trial:
+    'the organization trial flag is read at boot and would show trial UI in unrelated suites',
 };
 
 /** Config keys core lets tests change at runtime through `/internal/core/_settings`. */

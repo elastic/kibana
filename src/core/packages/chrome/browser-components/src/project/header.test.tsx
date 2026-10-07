@@ -37,6 +37,28 @@ describe('ChromeHeader', () => {
     );
   });
 
+  it('renders the subscription badge only once it is set', () => {
+    const chrome = chromeServiceMock.createStartContract();
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(
+      screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)
+    ).not.toBeInTheDocument();
+
+    act(() => {
+      chrome.controls.subscriptionBadge.set(<span>Trial</span>);
+    });
+
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
+      'Trial'
+    );
+  });
+
   it('renders the help menu button', async () => {
     renderWithI18n(
       <TestChromeProviders>
