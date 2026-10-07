@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { concat, of, shareReplay } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -234,6 +235,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          // The run reads the conversation by id (real-time). The conversation is already listed,
+          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
+          appendRefresh: false,
         });
       } catch (err) {
         try {
@@ -785,6 +789,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    appendRefresh,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -793,6 +798,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    appendRefresh?: Refresh;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author);
@@ -803,6 +809,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       eventId,
       author,
+      appendRefresh,
       ...(origin ? { origin } : {}),
     };
 
