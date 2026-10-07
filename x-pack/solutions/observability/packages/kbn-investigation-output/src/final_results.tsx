@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -27,18 +26,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
-  InvestigationBlindSpot,
   InvestigationRecommendation,
   InvestigationState,
 } from '@kbn/significant-events-schema';
 
 const hasVisibleText = (text?: string): text is string => Boolean(text?.trim());
 
-const AgentText: React.FC<{ text: string; bold?: boolean; subdued?: boolean }> = ({
-  text,
-  bold = false,
-  subdued = false,
-}) => {
+const AgentText: React.FC<{ text: string; bold?: boolean }> = ({ text, bold = false }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -51,9 +45,7 @@ const AgentText: React.FC<{ text: string; bold?: boolean; subdued?: boolean }> =
         `
       }
     >
-      <EuiMarkdownFormat textSize="s" color={subdued ? 'subdued' : undefined}>
-        {text}
-      </EuiMarkdownFormat>
+      <EuiMarkdownFormat textSize="s">{text}</EuiMarkdownFormat>
     </EuiText>
   );
 };
@@ -93,6 +85,17 @@ const RecommendationRow: React.FC<{
     text-align: left;
     width: 100%;
   `;
+  // A row is part of one shared panel, so hovering tints it rather than lifting it with the
+  // clickable panel's own shadow, which would draw a square frame inside the rounded panel.
+  const clickableRowCss = css`
+    ${rowCss}
+    &:hover,
+    &:focus {
+      box-shadow: none;
+      transform: none;
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    }
+  `;
   const content = (
     <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem component="span">
@@ -112,7 +115,7 @@ const RecommendationRow: React.FC<{
 
   if (!onClick) {
     return (
-      <EuiPanel hasShadow={false} paddingSize="m" css={rowCss}>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" css={rowCss}>
         {content}
       </EuiPanel>
     );
@@ -122,82 +125,35 @@ const RecommendationRow: React.FC<{
     <EuiPanel
       element="button"
       type="button"
+      hasBorder={false}
       hasShadow={false}
       paddingSize="m"
       onClick={onClick}
-      css={rowCss}
+      css={clickableRowCss}
     >
       {content}
     </EuiPanel>
   );
 };
 
-const BlindSpotRow: React.FC<{
-  blindSpot: InvestigationBlindSpot;
-  isMostImpactful: boolean;
-  isLast: boolean;
-}> = ({ blindSpot: { title, description }, isMostImpactful, isLast }) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'investigationBlindSpot' });
-  const { euiTheme } = useEuiTheme();
-  const hasDescription = hasVisibleText(description) && description !== title;
-  const badge = isMostImpactful ? (
-    <EuiBadge color="primary">
-      {i18n.translate('xpack.investigationOutput.mostImpactfulLabel', {
-        defaultMessage: 'Most impactful',
-      })}
-    </EuiBadge>
-  ) : undefined;
-
-  const rowCss = css`
-    border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-  `;
-
-  if (!hasDescription) {
-    return (
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        data-test-subj="investigationOutputBlindSpot"
-        css={rowCss}
-      >
-        <EuiFlexItem>
-          <TitleText text={title} />
-        </EuiFlexItem>
-        {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
-      </EuiFlexGroup>
-    );
-  }
-
-  return (
-    <EuiAccordion
-      id={accordionId}
-      data-test-subj="investigationOutputBlindSpot"
-      paddingSize="none"
-      buttonContent={<TitleText text={title} />}
-      extraAction={badge}
-      css={rowCss}
-    >
-      <AgentText text={description} subdued />
-    </EuiAccordion>
-  );
-};
-
 /**
- * The agent's own prose `conclusion`, followed by its `recommendations` and `blind_spots` as
- * sections. Renders `null` when the investigation reported none of the three. The caller decides
+ * The agent's own prose `conclusion`, followed by its `recommendations` as a section. Renders
+ * `null` when the investigation reported neither. The caller decides
  * when to show it — a mid-run conclusion is still a draft.
  */
-export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state }) => {
-  const { conclusion, recommendations, blind_spots: blindSpots } = state;
+export const FinalResults: React.FC<{
+  state: InvestigationState;
+  /** Put a "Conclusion" heading above the conclusion, for layouts where every section is titled. */
+  showConclusionTitle?: boolean;
+}> = ({ state, showConclusionTitle = false }) => {
+  const { conclusion, recommendations } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
   const recommendationModalTitleId = useGeneratedHtmlId({ prefix: 'investigationRecommendation' });
   const selectedDescription = selectedRecommendation?.description;
   const selectedCode = selectedRecommendation?.code;
 
-  if (!hasVisibleText(conclusion) && !recommendations?.length && !blindSpots?.length) {
+  if (!hasVisibleText(conclusion) && !recommendations?.length) {
     return null;
   }
 
@@ -208,7 +164,17 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
       data-test-subj="investigationOutputFinalResults"
     >
       {hasVisibleText(conclusion) && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="investigationOutputConclusion">
+          {showConclusionTitle && (
+            <>
+              <SectionTitle>
+                {i18n.translate('xpack.investigationOutput.conclusionTitle', {
+                  defaultMessage: 'Conclusion',
+                })}
+              </SectionTitle>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
         </EuiFlexItem>
       )}
@@ -225,6 +191,9 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
             hasBorder
             hasShadow={false}
             paddingSize="none"
+            css={css`
+              overflow: hidden;
+            `}
             data-test-subj="investigationOutputRecommendations"
           >
             <EuiFlexGroup direction="column" gutterSize="none">
@@ -243,38 +212,6 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
                 />
               ))}
             </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
-
-      {blindSpots && blindSpots.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <SectionTitle>
-            {i18n.translate('xpack.investigationOutput.blindSpotsTitle', {
-              defaultMessage: 'Blind spots',
-            })}
-          </SectionTitle>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.investigationOutput.blindSpotsCountDescription', {
-              defaultMessage: '{count} identified',
-              values: { count: blindSpots.length },
-            })}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiPanel
-            hasBorder
-            hasShadow={false}
-            paddingSize="none"
-            data-test-subj="investigationOutputBlindSpots"
-          >
-            {blindSpots.map((blindSpot, index) => (
-              <BlindSpotRow
-                key={`${blindSpot.title}-${index}`}
-                blindSpot={blindSpot}
-                isMostImpactful={index === 0}
-                isLast={index === blindSpots.length - 1}
-              />
-            ))}
           </EuiPanel>
         </EuiFlexItem>
       )}

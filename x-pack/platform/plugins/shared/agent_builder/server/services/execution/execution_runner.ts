@@ -73,6 +73,7 @@ import {
   trackExecutionInterruption,
   type ConversationWithOperation,
 } from './utils';
+import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -276,13 +277,28 @@ const handleConversationExecution = async ({
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
     const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
+      [
+        needsTitle
+          ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
+          : undefined,
+        modelProvider.getDefaultModel(),
+        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        loadTracingPrivacySettings({
+          uiSettingsClient: deps.uiSettings.asScopedToClient(
+            deps.savedObjects.getScopedClient(request)
+          ),
+          logger,
+          spaceId,
+        }),
+      ]
+    );
+    const connectorProvider = getConnectorProvider(chatModel.getConnector());
+
     const title$ = (
-      needsTitle
-        ? generateTitle({
-            chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
-            conversation,
-            nextInput,
-          })
+      titleChatModel
+        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput })
         : of(conversation.title)
     ).pipe(shareReplay(1));
 
@@ -302,12 +318,6 @@ const handleConversationExecution = async ({
       ? executionStartedEvents$({ conversation, agentEvents$ })
       : EMPTY;
 
-    const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-    const connectorProvider = getConnectorProvider(chatModel.getConnector());
-
-    const agentRegistry = await agentService.getRegistry({ request });
-    const { name: agentName } = await agentRegistry.get(agentId);
-
     const { headers } = request;
     const opikTraceId = headers.opik_trace_id as string | undefined;
     const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -315,15 +325,6 @@ const handleConversationExecution = async ({
       opikTraceId && opikParentSpanId
         ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
         : undefined;
-
-    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-    const privacySettings = await loadTracingPrivacySettings({
-      uiSettingsClient: deps.uiSettings.asScopedToClient(
-        deps.savedObjects.getScopedClient(request)
-      ),
-      logger,
-      spaceId,
-    });
 
     return withConverseSpan(
       {
@@ -378,49 +379,25 @@ const handleConversationExecution = async ({
             : identity,
           // `round_started` / `round_interrupted` are internal plumbing for the persistence layer.
           filter((event) => !isRoundStartedEvent(event) && !isRoundInterruptedEvent(event)),
-          // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
-          // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
-          map(stripResumeExecution),
           tap((event) => {
-            try {
-              if (isRoundCompleteEvent(event)) {
-                const isReplacingRound = event.data?.resumed === true;
-                const currentRoundCount = isReplacingRound
-                  ? conversation.rounds.length
-                  : (conversation.rounds?.length ?? 0) + 1;
-
-                // metering
-                meteringService
-                  .reportExecution({
-                    conversationId: conversation.id,
-                    executionId: execution.executionId,
-                    roundCount: currentRoundCount,
-                    agentId,
-                    round: event.data.round,
-                    modelProvider: connectorProvider,
-                  })
-                  .catch((err) => {
-                    logger.warn(`Failed to report execution metering: ${err}`);
-                  });
-
-                // snapshot telemetry tracking
-                trackingService?.trackConversationRound(conversation.id, currentRoundCount);
-
-                // EBT tracking
-                analyticsService?.reportRoundComplete({
-                  conversationId: conversation.id,
-                  executionId: execution.executionId,
-                  roundCount: currentRoundCount,
-                  agentId,
-                  round: event.data.round,
-                  modelProvider: connectorProvider,
-                  conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
-                });
-              }
-            } catch (error) {
-              logger.error(`Failed to report round complete telemetry: ${error}`);
+            if (isRoundCompleteEvent(event)) {
+              reportRoundTelemetry({
+                event,
+                conversation,
+                nextInput,
+                agentId,
+                executionId: execution.executionId,
+                modelProvider: connectorProvider,
+                meteringService,
+                trackingService,
+                analyticsService,
+                logger,
+              });
             }
           }),
+          // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
+          // round that telemetry needs, and is only stripped so it doesn't reach the client.
+          map(stripResumeExecution),
           convertErrors({
             agentId,
             logger,
@@ -494,16 +471,22 @@ export const collectAndWriteEvents = ({
       await executionClient.appendEvents(execution.executionId, batch);
     };
 
+    let lastFlushAt = 0;
+
+    // Leading edge: the first event after an idle period is written on the next tick, while
+    // flushes still start at most once per batch interval.
     const scheduleFlush = () => {
       if (flushTimer === undefined) {
+        const delay = Math.max(0, lastFlushAt + EVENT_BATCH_INTERVAL_MS - Date.now());
         flushTimer = setTimeout(() => {
           flushTimer = undefined;
+          lastFlushAt = Date.now();
           flushInProgress = flush().catch((err) => {
             logger.error(
               `Failed to flush events for execution ${execution.executionId}: ${err.message}`
             );
           });
-        }, EVENT_BATCH_INTERVAL_MS);
+        }, delay);
       }
     };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -42,31 +42,33 @@ const SORT_FIELDS = [
 // (the route validates arrays; the API model's `ArrayFromString` string-split preprocess is
 // dropped — a deliberate divergence called out in the plan). Sort fields are narrowed to the
 // server's allow-list so an invalid value cannot cause a silent fallback.
-const schema = GetRuleMigrationRulesRequestQuery.extend({
-  migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
-  page: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .default(0)
-    .describe('Zero-based page number (0 = first page).'),
-  per_page: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(200)
-    .default(50)
-    .describe('Number of rules per page (1-200).'),
-  search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).min(1).max(200).optional(),
-  sort_field: z
-    .enum(SORT_FIELDS)
-    .optional()
-    .describe(
-      `Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
-        'Defaults to translation_result (desc) when not supplied — matching the Kibana UI.'
-    ),
-});
+const schema = lazySchema(() =>
+  GetRuleMigrationRulesRequestQuery.extend({
+    migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
+    page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .default(0)
+      .describe('Zero-based page number (0 = first page).'),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .default(50)
+      .describe('Number of rules per page (1-200).'),
+    search_term: z.string().max(500).optional(),
+    ids: z.array(NonEmptyString).min(1).max(200).optional(),
+    sort_field: z
+      .enum(SORT_FIELDS)
+      .optional()
+      .describe(
+        `Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
+          'Defaults to translation_result (desc) when not supplied — matching the Kibana UI.'
+      ),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RULES_PATH.replace('{migration_id}', encodeURIComponent(migrationId));

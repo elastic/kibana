@@ -10,18 +10,18 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 export interface ToSignificantEventSeedParams {
   /** A discovery the investigator produced in a prior cycle. */
   discovery: Partial<SignificantEvent>;
-  /** Unique event_uuid to stamp on the seed document. */
-  eventUuid: string;
+  /** Fallback event ID when the discovery does not provide one. */
+  eventId: string;
 }
 
 /**
  * Map a produced discovery into a `SignificantEvent` document suitable for indexing into
- * `.significant_events-events` between continuation cycles. The seeded doc has `status: "open"`
- * so the next cycle's `event_search state: "open"` call picks it up for continuation routing.
+ * `.significant_events-events` between continuation cycles. The seeded doc has `status: "active"`
+ * so the next cycle's `event_search state: "active"` call picks it up for continuation routing.
  */
 export function canonicalSignificantEventFromGroundTruth({
   discovery,
-  eventUuid,
+  eventId,
 }: ToSignificantEventSeedParams): SignificantEvent {
   const signals = discovery.signals ?? [];
   const streamNames = [
@@ -31,10 +31,9 @@ export function canonicalSignificantEventFromGroundTruth({
   const now = new Date().toISOString();
   return {
     '@timestamp': now,
-    event_uuid: eventUuid,
-    event_id: discovery.event_id ?? eventUuid,
-    status: 'open',
-    severity: discovery.severity ?? '40-medium',
+    event_id: discovery.event_id ?? eventId,
+    status: 'active',
+    severity: discovery.severity ?? 'medium',
     stream_names: streamNames.length > 0 ? streamNames : ['unknown'],
     title: discovery.title ?? 'eval-seeded-event',
     symptom_hypothesis: discovery.symptom_hypothesis,

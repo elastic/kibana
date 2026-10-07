@@ -875,6 +875,8 @@ describe('SlackAppService', () => {
         actionTypeId: '.slack2',
         config: { authType: 'relay' },
         secrets: { authType: 'relay', tenantKey },
+        isPreconfigured: true,
+        isInboundEventsEnabled: true,
       });
 
     it('registers the connector when the Relay claim completes', async () => {

@@ -14,10 +14,10 @@ import {
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
+  title: 'Tune the Okta rule',
   comment: 'Tune the noisy rule',
   impact: 'low',
   status: 'pending',
-  expired: false,
   ...overrides,
 });
 
@@ -118,7 +118,7 @@ describe('getProposalCaption', () => {
         proposal({
           category: 'configure',
           impact: 'high',
-          expired: true,
+          status: 'expired',
           expiresAt: '2024-01-05T17:00:00.000Z',
         }),
         { includeRiskDetails: true }
@@ -209,12 +209,8 @@ describe('getProposalDecision', () => {
 });
 
 describe('isProposalExpired', () => {
-  it('is true once the computed deadline flag is set', () => {
-    expect(isProposalExpired(proposal({ expired: true }))).toBe(true);
-  });
-
-  it('is true for an expiry the workflow settled before the deadline', () => {
-    expect(isProposalExpired(proposal({ expired: false, status: 'expired' }))).toBe(true);
+  it('is true once the workflow settles the status as expired', () => {
+    expect(isProposalExpired(proposal({ status: 'expired' }))).toBe(true);
   });
 
   it('is false for a proposal still awaiting a decision', () => {

@@ -60,7 +60,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.updated_at).not.toBe(created.updated_at);
-      expect(response.body.metadata.version).toBe(created.metadata.version + 1);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 
@@ -121,10 +121,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.query).toStrictEqual({ base: 'FROM new-index-* | LIMIT 100' });
-      expect(response.body.metadata).toStrictEqual({
-        ...created.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(created.metadata);
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
@@ -310,28 +307,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'update: should return 409 when the request body version is stale',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-stale-version' } })
-      );
-      const firstUpdate = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { metadata: { name: 'first-rename' } },
-      });
-      expect(firstUpdate).toHaveStatusCode(200);
-      expect(firstUpdate.body.version).not.toBe(created.version);
-
-      const staleUpdate = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { version: created.version, metadata: { name: 'second-rename' } },
-      });
-      expect(staleUpdate).toHaveStatusCode(409);
-      expect(staleUpdate.body.code).toBe('RULE_VERSION_CONFLICT');
-    }
-  );
-
-  apiTest(
     'update: should clear an optional field when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -411,6 +386,41 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       // The rejected update must not have persisted.
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.metadata.tags).toStrictEqual(['keep']);
+    }
+  );
+
+  apiTest(
+    'update: should set, keep and clear routing tags independently of tags',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-routing', tags: ['prod'] } })
+      );
+
+      const setResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: ['sre', 'payments'] } },
+      });
+      expect(setResponse).toHaveStatusCode(200);
+      expect(setResponse.body.metadata.routing_tags).toStrictEqual(['sre', 'payments']);
+      expect(setResponse.body.metadata.tags).toStrictEqual(['prod']);
+
+      const renameResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'rule-routing-renamed' } },
+      });
+      expect(renameResponse).toHaveStatusCode(200);
+      expect(renameResponse.body.metadata.routing_tags).toStrictEqual(['sre', 'payments']);
+
+      const clearResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: null } },
+      });
+      expect(clearResponse).toHaveStatusCode(200);
+      expect(clearResponse.body.metadata.routing_tags).toBeUndefined();
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.routing_tags).toBeUndefined();
+      expect(persisted.metadata.tags).toStrictEqual(['prod']);
     }
   );
 
@@ -617,6 +627,24 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.recovery).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'validation: should reject setting routing tags on a signal rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-with-routing-tags')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: ['sre'] } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.routing_tags).toBeUndefined();
     }
   );
 

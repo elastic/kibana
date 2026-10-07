@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiFieldNumber } from '@elastic/eui';
+
+const FIELD_WIDTH_PX = 200;
+
+const fieldWidth = css`
+  width: ${FIELD_WIDTH_PX}px;
+`;
 
 interface BoundedNumberFieldProps {
   value: number;
@@ -34,7 +41,7 @@ const parseBoundedNumber = (text: string, min: number, max: number): number | un
 
 /**
  * Whole-number setting within fixed bounds, for the Watch page's Save/Discard draft. Renders the
- * bare input; the caller supplies the label, either through a SettingRow or an EuiFormRow.
+ * input at its fixed width. The caller supplies the label, either through a SettingRow or an EuiFormRow.
  *
  * The edit is buffered for the whole focus session and published once, on blur or Enter, and
  * only if it is valid. Publishing per keystroke would leak valid prefixes: typing "31" over a
@@ -78,21 +85,23 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   };
 
   return (
-    <EuiFieldNumber
-      id={id}
-      fullWidth
-      min={min}
-      max={max}
-      step={1}
-      value={draft}
-      append={append}
-      disabled={isDisabled}
-      onChange={(event) => setDraft(event.target.value)}
-      onBlur={commitDraft}
-      onKeyDown={onKeyDown}
-      aria-label={ariaLabel}
-      aria-describedby={ariaDescribedBy}
-      data-test-subj={testSubj}
-    />
+    <div css={fieldWidth}>
+      <EuiFieldNumber
+        id={id}
+        fullWidth
+        min={min}
+        max={max}
+        step={1}
+        value={draft}
+        append={append}
+        disabled={isDisabled}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commitDraft}
+        onKeyDown={onKeyDown}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
+        data-test-subj={testSubj}
+      />
+    </div>
   );
 };

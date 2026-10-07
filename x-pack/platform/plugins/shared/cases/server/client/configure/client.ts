@@ -331,10 +331,15 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    const updatedTemplates = transformTemplateCustomFields({
-      templates,
-      customFields: request.customFields,
-    });
+    // Templates are only rewritten when the patch touches them or the custom fields they mirror;
+    // otherwise unrelated patches (e.g. workflow tags only) would wipe the stored templates.
+    const updatedTemplates =
+      templates === undefined && request.customFields === undefined
+        ? undefined
+        : transformTemplateCustomFields({
+            templates: templates ?? configuration.attributes.templates,
+            customFields: request.customFields,
+          });
 
     await validateTemplates({
       templates: updatedTemplates,
@@ -580,6 +585,7 @@ export async function create(
           OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables
             .autoExtractDefault ??
           false,
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [],
       },
       id: savedObjectID,
     });

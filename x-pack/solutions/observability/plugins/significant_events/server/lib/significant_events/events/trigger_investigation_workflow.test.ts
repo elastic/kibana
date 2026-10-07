@@ -13,13 +13,12 @@ import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'checkout-latency-breach',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.checkout', 'metrics.checkout'],
   title: 'Checkout latency breach',
   summary: 'P99 latency climbed above 2s.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   ...overrides,
 });
@@ -94,8 +93,8 @@ describe('triggerInvestigationWorkflow', () => {
     expect(request.concurrency_key).toBe('my-slug');
   });
 
-  it('sets subject.id to event_id and includes event_uuid in the context', async () => {
-    const event = createEvent({ event_uuid: 'event-42', event_id: 'my-stable-id' });
+  it('sets subject.id and context.event_id to event_id', async () => {
+    const event = createEvent({ event_id: 'my-stable-id' });
     const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
@@ -113,7 +112,7 @@ describe('triggerInvestigationWorkflow', () => {
     });
     expect(request.title).toBe('Checkout latency breach');
     expect(request.trigger_type).toBe('manual');
-    expect(request.context.event_uuid).toBe('event-42');
+    expect(request.context.event_id).toBe('my-stable-id');
   });
 
   it('passes the event stream_names through', async () => {
