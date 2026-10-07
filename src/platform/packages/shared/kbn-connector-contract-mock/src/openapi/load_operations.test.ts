@@ -112,6 +112,133 @@ describe('loadOperations', () => {
     expect(loadOperations(document)[0].spec.dialect).toBe('openapi-3.0');
   });
 
+  it('keeps lowercase x- header and server variable names, which are not extensions', () => {
+    const [operation] = loadOperations({
+      openapi: '3.0.3',
+      servers: [
+        { url: 'https://{x-region}.example.com', variables: { 'x-region': { default: 'us' } } },
+      ],
+      paths: {
+        '/a': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                headers: { 'x-rate-limit': { schema: { type: 'integer' } } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(operation.servers[0].variables).toEqual({ 'x-region': { default: 'us' } });
+    expect(operation.responses[0].headers).toMatchObject([{ name: 'x-rate-limit' }]);
+  });
+
+  it('keeps boolean schemas', () => {
+    const [operation] = loadOperations({
+      openapi: '3.1.0',
+      paths: {
+        '/a': { get: { responses: { '204': { content: { 'text/plain': { schema: false } } } } } },
+      },
+    });
+
+    expect(operation.responses[0].contents[0].schema).toEqual({
+      pointer: '/paths/~1a/get/responses/204/content/text~1plain/schema',
+      schema: false,
+    });
+  });
+
+  it('keeps the content of parameters described by content instead of a schema', () => {
+    const [operation] = loadOperations({
+      openapi: '3.2.0',
+      paths: {
+        '/a': {
+          get: {
+            parameters: [
+              { name: 'filter', in: 'query', content: { 'application/json': { schema: itemRef } } },
+              {
+                name: 'search',
+                in: 'querystring',
+                content: { 'application/x-www-form-urlencoded': { schema: { type: 'object' } } },
+              },
+            ],
+            responses: {},
+          },
+        },
+      },
+    });
+
+    expect(operation.parameters).toMatchObject([
+      {
+        name: 'filter',
+        in: 'query',
+        schema: undefined,
+        content: {
+          mediaType: 'application/json',
+          schema: { pointer: '/paths/~1a/get/parameters/0/content/application~1json/schema' },
+        },
+      },
+      {
+        name: 'search',
+        in: 'querystring',
+        content: { mediaType: 'application/x-www-form-urlencoded' },
+      },
+    ]);
+  });
+
+  it('indexes OpenAPI 3.2 query and additional operations', () => {
+    const operations = loadOperations({
+      openapi: '3.2.0',
+      paths: {
+        '/a': {
+          query: { operationId: 'queryA', responses: {} },
+          additionalOperations: { LINK: { operationId: 'linkA', responses: {} } },
+        },
+      },
+    });
+
+    expect(operations.map(({ id, method }) => ({ id, method }))).toEqual([
+      { id: 'queryA', method: 'query' },
+      { id: 'linkA', method: 'link' },
+    ]);
+  });
+
+  it('merges a path item $ref with its sibling fields, which take precedence', () => {
+    const operations = loadOperations({
+      openapi: '3.1.0',
+      paths: {
+        '/a': {
+          $ref: '#/components/pathItems/A',
+          servers: [{ url: 'https://local.example.com' }],
+          post: { operationId: 'localPost', responses: {} },
+        },
+      },
+      components: {
+        pathItems: {
+          A: {
+            parameters: [{ name: 'id', in: 'query', schema: { type: 'string' } }],
+            servers: [{ url: 'https://shared.example.com' }],
+            get: { operationId: 'sharedGet', responses: {} },
+            post: { operationId: 'sharedPost', responses: {} },
+          },
+        },
+      },
+    });
+
+    expect(operations).toMatchObject([
+      {
+        id: 'sharedGet',
+        servers: [{ url: 'https://local.example.com' }],
+        parameters: [
+          { name: 'id', schema: { pointer: '/components/pathItems/A/parameters/0/schema' } },
+        ],
+      },
+      { id: 'localPost' },
+    ]);
+  });
+
   it('rejects unsupported versions and external refs', () => {
     expect(() => loadOperations({ swagger: '1.2', paths: {} })).toThrow(
       'Unsupported spec version unknown; expected Swagger 2.0 or OpenAPI 3.x'
