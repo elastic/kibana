@@ -38,16 +38,12 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
-const isRequestRejectedError = (error: unknown): boolean => {
-  if (!isHttpFetchError(error)) {
-    return false;
-  }
-  const status = error.response?.status;
-  return status !== undefined && status >= 400 && status < 500;
-};
+const isRequestRejectedError = (error: unknown): boolean =>
+  isHttpFetchError(error) && !isDisconnectError(error);
 
 export interface SendMessageVars {
   message: string;

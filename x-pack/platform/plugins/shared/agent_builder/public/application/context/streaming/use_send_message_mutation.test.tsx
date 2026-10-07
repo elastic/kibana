@@ -275,4 +275,48 @@ describe('useSendMessageMutation', () => {
     });
     expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId);
   });
+
+  it.each([400, 403, 404, 500])(
+    'shows the server message when the request fails with %s',
+    async (status) => {
+      const { source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const rejected = Object.assign(new Error('Rejected'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+        body: { statusCode: status, message: 'Something the user can act on' },
+      });
+
+      act(() => result.current.mutate(vars));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(rejected));
+
+      await waitFor(() =>
+        expect(mockAddDanger).toHaveBeenCalledWith({ title: 'Something the user can act on' })
+      );
+    }
+  );
+
+  it.each([502, 503, 504])(
+    'does not show a toast for a %s gateway error, which is left to the reattach logic',
+    async (status) => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const gatewayError = Object.assign(new Error('Bad Gateway'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+      });
+
+      act(() => result.current.mutate(vars));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(gatewayError));
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    }
+  );
 });
