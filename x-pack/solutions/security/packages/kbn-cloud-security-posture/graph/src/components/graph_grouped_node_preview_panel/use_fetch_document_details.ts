@@ -80,8 +80,8 @@ export const buildDocumentsRequest = (
     bool: {
       filter: [
         {
-          terms: {
-            'event.id': ids,
+          ids: {
+            values: ids,
           },
         },
       ],
