@@ -50,6 +50,9 @@ jest.mock('../../../../features/ai_integration', () => ({
     dispose: jest.fn(),
     getDiffHunks: jest.fn().mockReturnValue([]),
     hasPendingProposals: jest.fn().mockReturnValue(false),
+    suspend: jest.fn(),
+    resume: jest.fn(),
+    hasSuspendedProposals: jest.fn().mockReturnValue(false),
   })),
   setActiveProposalManager: jest.fn(),
   setLastCreateSessionId: jest.fn(),
@@ -74,9 +77,11 @@ const {
   consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   hasPersistedConversation: jest.MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
-const { AttachmentBridge: mockAttachmentBridge } = jest.requireMock(
-  '../../../../features/ai_integration'
-) as { AttachmentBridge: jest.Mock };
+const { AttachmentBridge: mockAttachmentBridge, ProposalManager: mockProposalManager } =
+  jest.requireMock('../../../../features/ai_integration') as {
+    AttachmentBridge: jest.Mock;
+    ProposalManager: jest.Mock;
+  };
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
     onAllResolved: jest.fn().mockReturnValue(jest.fn()),
@@ -1497,7 +1502,35 @@ describe('useAgentBuilderIntegration', () => {
       act(() => {
         mockModel.simulateContentChange('name: workflow');
       });
+      // Not inside the editor's value write, where `onChange` is muted.
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
       expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
+    });
+
+    it('suspends pending proposals while it cannot apply them and resumes them after', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const baseProps = { editorRef, isEditorMounted: true, workflowId: 'workflow-a' };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: { ...baseProps, canApplyProposals: true },
+      });
+      await flushChatAccessCheck();
+      const manager = mockProposalManager.mock.results.at(-1)?.value;
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      bridge.hasDeferred.mockReturnValue(false);
+
+      rerender({ ...baseProps, canApplyProposals: false });
+      expect(manager.suspend).toHaveBeenCalledTimes(1);
+
+      manager.hasSuspendedProposals.mockReturnValue(true);
+      rerender({ ...baseProps, canApplyProposals: true });
+      expect(manager.resume).toHaveBeenCalledTimes(1);
     });
   });
 });

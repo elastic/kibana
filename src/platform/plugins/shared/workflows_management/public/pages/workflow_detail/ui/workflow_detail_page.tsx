@@ -264,6 +264,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     clearSelectedExecution({ replace: false });
   }, [clearSelectedExecution]);
 
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
+
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
   }, [application, location.state]);
@@ -330,7 +336,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         ) : (
           <>
             <WorkflowEditorLayout
-              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
+                />
+              }
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />

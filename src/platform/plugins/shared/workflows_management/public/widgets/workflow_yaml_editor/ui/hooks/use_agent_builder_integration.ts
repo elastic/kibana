@@ -438,23 +438,40 @@ export const useAgentBuilderIntegration = ({
     dispatch,
   ]);
 
+  // Proposals are diffed against the editor content, so they pause while the
+  // editor shows a past execution and come back with the Workflow tab YAML.
   useEffect(() => {
     const bridge = attachmentBridgeRef.current;
+    const manager = proposalManagerRef.current;
     const model = editorRef.current?.getModel();
-    if (!canApplyProposals || !bridge?.hasDeferred() || !model) return;
+    if (!bridge || !manager || !model) return;
 
-    // A proposal shown before the model holds the workflow YAML would be
-    // diffed against the execution YAML, then lost when the model updates.
-    if (workflowTabYaml === undefined || model.getValue() === workflowTabYaml) {
-      bridge.applyDeferred();
+    if (!canApplyProposals) {
+      manager.suspend();
       return;
     }
+    if (!bridge.hasDeferred() && !manager.hasSuspendedProposals()) return;
+
+    const showProposals = () => {
+      manager.resume();
+      bridge.applyDeferred();
+    };
+    if (workflowTabYaml === undefined || model.getValue() === workflowTabYaml) {
+      showProposals();
+      return;
+    }
+    let showTimer: ReturnType<typeof setTimeout> | undefined;
     const listener = model.onDidChangeContent(() => {
       if (model.getValue() !== workflowTabYaml) return;
       listener.dispose();
-      bridge.applyDeferred();
+      // Editing the model inside its own change event is a nested edit, and the
+      // code editor mutes `onChange` during its value write. Apply after the event.
+      showTimer = setTimeout(showProposals);
     });
-    return () => listener.dispose();
+    return () => {
+      listener.dispose();
+      clearTimeout(showTimer);
+    };
   }, [canApplyProposals, workflowTabYaml, editorRef]);
 
   const openAgentChat = useCallback(
