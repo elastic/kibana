@@ -13042,6 +13042,8 @@ paths:
                           tags:
                             - production
                             - infra
+                          template:
+                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13229,6 +13231,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -13445,6 +13449,8 @@ paths:
                           tags:
                             - production
                             - infra
+                          template:
+                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13483,6 +13489,8 @@ paths:
                           tags:
                             - production
                             - infra
+                          template:
+                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -14000,6 +14008,8 @@ paths:
                           tags:
                             - production
                             - infra
+                          template:
+                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -14891,6 +14901,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15073,6 +15085,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15293,6 +15307,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15341,6 +15357,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15509,6 +15527,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15695,6 +15715,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -145273,7 +145295,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -145317,6 +145339,61 @@ components:
         - created_at
         - updated_by
         - updated_at
+    Kibana_HTTP_APIs_alerting_rule_response_metadata:
+      additionalProperties: false
+      description: Rule metadata.
+      type: object
+      properties:
+        builder:
+          additionalProperties: false
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              type: string
+          required:
+            - type
+        description:
+          description: Human-readable description of the rule.
+          maxLength: 1024
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+        template:
+          additionalProperties: false
+          description: The rule template this rule was created from.
+          type: object
+          properties:
+            id:
+              description: Id of the rule template.
+              type: string
+          required:
+            - id
+      required:
+        - name
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
