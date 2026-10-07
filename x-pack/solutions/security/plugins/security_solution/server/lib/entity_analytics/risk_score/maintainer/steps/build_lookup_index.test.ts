@@ -23,6 +23,18 @@ const buildLogger = (): ScopedLogger =>
     error: jest.fn(),
   } as unknown as ScopedLogger);
 
+// Doc values results are returned in hit.fields: flat keys, array values.
+const docValuesPage = (
+  rows: Array<{ id: string; resolvedTo?: string }>
+): { entities: never[]; fields: Array<Record<string, string[]>>; nextSearchAfter: undefined } => ({
+  entities: [],
+  fields: rows.map(({ id, resolvedTo }) => ({
+    'entity.id': [id],
+    ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': [resolvedTo] } : {}),
+  })),
+  nextSearchAfter: undefined,
+});
+
 describe('build_lookup_index', () => {
   let esClient: ElasticsearchClient;
   let crudClient: EntityUpdateClient;
@@ -38,18 +50,10 @@ describe('build_lookup_index', () => {
     } as unknown as EntityUpdateClient;
   });
 
-  it('filters listEntities to only entities with resolved_to and writes alias rows', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [
-        {
-          entity: {
-            id: 'host:1',
-            relationships: { resolution: { resolved_to: 'host:target' } },
-          },
-        },
-      ],
-      nextSearchAfter: undefined,
-    });
+  it('requests doc values with _source disabled and writes alias rows', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce(
+      docValuesPage([{ id: 'host:1', resolvedTo: 'host:target' }])
+    );
 
     const result = await buildLookupIndex({
       esClient,
@@ -74,6 +78,8 @@ describe('build_lookup_index', () => {
           { terms: { 'entity.EngineMetadata.Type': [EntityType.host] } },
           { exists: { field: 'entity.relationships.resolution.resolved_to' } },
         ],
+        docValueFields: ['entity.id', 'entity.relationships.resolution.resolved_to'],
+        disableSource: true,
       })
     );
     expect(esClient.bulk).toHaveBeenCalledWith({
@@ -95,17 +101,9 @@ describe('build_lookup_index', () => {
     // Targets that aren't themselves iterated have no lookup row; Phase 2
     // ES|QL recovers their target_id via COALESCE(resolution_target_id,
     // entity_id) after the LOOKUP JOIN.
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [
-        {
-          entity: {
-            id: 'user:alias',
-            relationships: { resolution: { resolved_to: 'user:target' } },
-          },
-        },
-      ],
-      nextSearchAfter: undefined,
-    });
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce(
+      docValuesPage([{ id: 'user:alias', resolvedTo: 'user:target' }])
+    );
 
     await buildLookupIndex({
       esClient,
@@ -137,7 +135,7 @@ describe('build_lookup_index', () => {
     (crudClient.listEntities as jest.Mock).mockImplementationOnce(() => {
       abortController.abort();
       return Promise.resolve({
-        entities: [{ entity: { id: 'host:1' } }],
+        ...docValuesPage([{ id: 'host:1' }]),
         nextSearchAfter: ['cursor-1'],
       });
     });
@@ -164,10 +162,7 @@ describe('build_lookup_index', () => {
   });
 
   it('skips bulk and still refreshes once for an empty entity store', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [],
-      nextSearchAfter: undefined,
-    });
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce(docValuesPage([]));
 
     await buildLookupIndex({
       esClient,
@@ -186,13 +181,10 @@ describe('build_lookup_index', () => {
   it('accumulates mixed bulk failures across pages and throws once at the end', async () => {
     (crudClient.listEntities as jest.Mock)
       .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
+        ...docValuesPage([{ id: 'host:1' }, { id: 'host:2' }]),
         nextSearchAfter: ['cursor-1'],
       })
-      .mockResolvedValueOnce({
-        entities: [{ entity: { id: 'host:3' } }, { entity: { id: 'host:4' } }],
-        nextSearchAfter: undefined,
-      });
+      .mockResolvedValueOnce(docValuesPage([{ id: 'host:3' }, { id: 'host:4' }]));
     (esClient.bulk as jest.Mock)
       .mockResolvedValueOnce({
         errors: true,
@@ -229,10 +221,9 @@ describe('build_lookup_index', () => {
   // no `items`. We must charge the entire batch as failed under the catch-all
   // reason instead of silently treating the page as a no-op.
   it('charges all items as failed when bulk reports errors with no item details', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
-      nextSearchAfter: undefined,
-    });
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce(
+      docValuesPage([{ id: 'host:1' }, { id: 'host:2' }])
+    );
     (esClient.bulk as jest.Mock).mockResolvedValueOnce({ errors: true, items: [] });
 
     await expect(
