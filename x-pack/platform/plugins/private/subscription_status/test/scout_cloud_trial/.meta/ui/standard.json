@@ -1,0 +1,22 @@
+{
+  "sha1": "87e457ff1aafb9c3296cb0884df0dede0af33ed3",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6cb21ca8e3593d9-dae09b093b80946",
+      "title": "Subscription status badge for billing admins shows the trial popover with subscribe and pricing links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
+        "line": 16,
+        "column": 43
+      }
+    }
+  ]
+}
