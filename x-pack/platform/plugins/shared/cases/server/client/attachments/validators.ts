@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { z } from '@kbn/zod/v4';
+import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api_zod/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
@@ -53,5 +54,6 @@ export const validateUnifiedAttachments = ({
     throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
   }
 
+  parseUnifiedAttachmentWithSchema(UnifiedAttachmentBoundsSchema, query, query.type);
   parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
 };

@@ -7,6 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_IDS_PER_ATTACHMENT,
+  MAX_OWNER_LENGTH,
+} from '../../../common/constants';
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { validateUnifiedAttachments } from './validators';
@@ -86,6 +91,61 @@ describe('validateUnifiedAttachments', () => {
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/data\.content: Comment content must be a non-empty string/);
+    });
+  });
+
+  describe('type-agnostic bounds', () => {
+    const referenceType = 'test.reference';
+    const registry = () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: referenceType,
+        schema: z.object({}).loose(),
+      });
+      return unifiedAttachmentTypeRegistry;
+    };
+    const referencePayload = { type: referenceType, owner: 'cases', attachmentId: 'id-1' };
+
+    it('accepts a payload within bounds even if the registered schema is unbounded', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            attachmentId: Array.from({ length: MAX_IDS_PER_ATTACHMENT }, (_, i) => `id-${i}`),
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an owner over the max length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/owner:/);
+    });
+
+    it('rejects an attachmentId over the max length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, attachmentId: 'a'.repeat(MAX_ATTACHMENT_ID_LENGTH + 1) },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/attachmentId:/);
+    });
+
+    it('rejects an attachmentId array over the max size', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            attachmentId: Array.from({ length: MAX_IDS_PER_ATTACHMENT + 1 }, (_, i) => `id-${i}`),
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/attachmentId:/);
     });
   });
 
