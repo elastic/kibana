@@ -165,16 +165,28 @@ export const Graph = memo<GraphProps>(
       entity: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.entity, ...storedDisplayOptions?.entity },
       event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
     };
-    const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
 
-    // Per-node display overrides — keyed by node ID, only entity/event fields.
+    // Per-node display overrides — keyed by node ID, only entity fields.
     const [nodeOverridesMap, setNodeOverridesMap] = useState<Map<string, NodeDisplayOverrides>>(
       () => new Map()
     );
     const setNodeOverride = useCallback((nodeId: string, opts: NodeDisplayOverrides) => {
       setNodeOverridesMap((prev) => new Map(prev).set(nodeId, opts));
     }, []);
+    const setDisplayOptions = (opts: GraphDisplayOptions) => {
+      setStoredDisplayOptions(opts);
+      // Overrides only store differences from global, so drop any that now match it.
+      setNodeOverridesMap((prev) => {
+        const next = new Map<string, NodeDisplayOverrides>();
+        prev.forEach((override, nodeId) => {
+          next.set(nodeId, {
+            entity: omitMatching(override.entity, opts.entity),
+          });
+        });
+        return next;
+      });
+    };
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
@@ -499,3 +511,19 @@ const processGraph = (
 
 const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
   size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
+
+const omitMatching = <T extends Record<string, boolean>>(
+  override: Partial<T> | undefined,
+  global: T
+): Partial<T> => {
+  const result: Partial<T> = {};
+  if (!override) {
+    return result;
+  }
+  for (const key of Object.keys(override) as Array<keyof T>) {
+    if (override[key] !== global[key]) {
+      result[key] = override[key];
+    }
+  }
+  return result;
+};

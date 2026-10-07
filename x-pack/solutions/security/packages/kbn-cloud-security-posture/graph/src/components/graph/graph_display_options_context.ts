@@ -22,13 +22,14 @@ export interface GraphDisplayOptions {
 }
 
 /**
- * Per-node display overrides — each field is independently optional so that
- * only explicitly changed fields shadow the global setting; untouched fields
- * continue to inherit from the graph-level GraphDisplayOptions.
+ * Per-node display overrides — only entity fields are overridable per-node
+ * (the node Layers panel does not expose event metadata options).
+ * Each field is independently optional so that only explicitly changed fields
+ * shadow the global setting; untouched fields continue to inherit from the
+ * graph-level GraphDisplayOptions.
  */
 export interface NodeDisplayOverrides {
   entity?: Partial<GraphDisplayOptions['entity']>;
-  event?: Partial<GraphDisplayOptions['event']>;
 }
 
 /** All fields visible — used as the initial/default state. */

@@ -852,6 +852,11 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
           opacity: ${isHovered ? 1 : 0};
           pointer-events: ${isHovered ? 'auto' : 'none'};
           transition: opacity 150ms ease;
+          /* Show toolbar when any child receives keyboard focus */
+          &:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+          }
         `,
         extraCss,
       ]}
@@ -956,11 +961,12 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const globalOpts = useGraphDisplayOptions();
   const { overrides, setNodeOverride } = useNodeDisplayOverrides();
 
-  // Merge global options with per-node overrides (entity/event fields only).
+  // Merge global options with per-node entity overrides.
+  // Event fields are not overridable per-node (the node Layers panel hides them).
   const nodeOpts = overrides.get(props.id);
   const effectiveOpts: GraphDisplayOptions = {
     entity: { ...globalOpts.entity, ...nodeOpts?.entity },
-    event: { ...globalOpts.event, ...nodeOpts?.event },
+    event: globalOpts.event,
   };
   // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
@@ -1067,9 +1073,8 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                   ? {
                       displayOptions: effectiveOpts,
                       onChange: (updatedOpts) => {
-                        // Only persist fields that explicitly differ from the global setting.
-                        // Fields that match global are left out so future global changes
-                        // continue to be inherited by this node for those fields.
+                        // Only persist entity fields that differ from global so future
+                        // global changes are inherited for fields the user hasn't touched.
                         const entityDelta: Partial<GraphDisplayOptions['entity']> = {};
                         for (const k of Object.keys(updatedOpts.entity) as Array<
                           keyof GraphDisplayOptions['entity']
@@ -1078,18 +1083,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                             entityDelta[k] = updatedOpts.entity[k];
                           }
                         }
-                        const eventDelta: Partial<GraphDisplayOptions['event']> = {};
-                        for (const k of Object.keys(updatedOpts.event) as Array<
-                          keyof GraphDisplayOptions['event']
-                        >) {
-                          if (updatedOpts.event[k] !== globalOpts.event[k]) {
-                            eventDelta[k] = updatedOpts.event[k];
-                          }
-                        }
-                        setNodeOverride(props.id, {
-                          entity: entityDelta,
-                          event: eventDelta,
-                        });
+                        setNodeOverride(props.id, { entity: entityDelta });
                       },
                     }
                   : undefined
