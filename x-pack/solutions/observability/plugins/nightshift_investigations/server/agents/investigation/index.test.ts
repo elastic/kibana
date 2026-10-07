@@ -6,6 +6,8 @@
  */
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
@@ -189,5 +191,63 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).not.toContain('investigation_progress_report');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
+  });
+
+  describe('custom context', () => {
+    const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-a' };
+    const CUSTOM_CONTEXT =
+      '**USER CONTEXT**\n<user_provided_context>\nRule out release regressions.\n</user_provided_context>';
+
+    const resolveBase = async (
+      getCustomContextInstructions: jest.Mock,
+      logger = loggerMock.create()
+    ): Promise<AgentBaseConfiguration> => {
+      const type = getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        ...ALL_PLUGINS,
+        getCustomContextInstructions,
+        logger,
+      });
+      if (typeof type.baseConfiguration !== 'function') {
+        throw new Error('expected a dynamic base configuration');
+      }
+      return type.baseConfiguration(ctx);
+    };
+
+    const staticInstructions = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+    ).instructions;
+
+    it("appends the space's custom context to the instructions on every resolve", async () => {
+      const getCustomContextInstructions = jest.fn().mockResolvedValue(CUSTOM_CONTEXT);
+
+      const base = await resolveBase(getCustomContextInstructions);
+
+      expect(getCustomContextInstructions).toHaveBeenCalledWith(ctx);
+      expect(base.instructions).toBe(`${staticInstructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
+      expect(base.tools).toEqual(
+        staticBase(
+          getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+        ).tools
+      );
+    });
+
+    it('keeps the base instructions when the space has no custom context', async () => {
+      const base = await resolveBase(jest.fn().mockResolvedValue(''));
+
+      expect(base.instructions).toBe(staticInstructions);
+    });
+
+    it('keeps the base instructions and logs a warning when custom context cannot be read', async () => {
+      const logger = loggerMock.create();
+
+      const base = await resolveBase(jest.fn().mockRejectedValue(new Error('boom')), logger);
+
+      expect(base.instructions).toBe(staticInstructions);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to load custom context for space "space-a": boom'
+      );
+    });
   });
 });
