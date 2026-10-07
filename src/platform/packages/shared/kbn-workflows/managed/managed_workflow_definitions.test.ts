@@ -254,7 +254,7 @@ it.each([
   [
     ALERTZERO_ACTION_SET_ASSET_CRITICALITY_WORKFLOW_ID,
     ACTION_SET_ASSET_CRITICALITY_YAML,
-    '1:1a31b614',
+    '1:3cd8044e',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',

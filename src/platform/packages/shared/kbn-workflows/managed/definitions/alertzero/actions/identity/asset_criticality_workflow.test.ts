@@ -228,7 +228,10 @@ describe('AlertZero set asset criticality workflow', () => {
       'message',
     ]);
     expect(emit?.with?.previous_level).toBe('{{ variables.previous_level }}');
-    expect(emit?.with?.message).toContain('DELETE /api/asset_criticality');
+    // Space-scoped like every other request this workflow makes: an unscoped URL in a
+    // non-default space would point the approver at the wrong space's record.
+    expect(emit?.with?.message).toContain('DELETE /s/{{ workflow.spaceId }}/api/asset_criticality');
+    expect(emit?.with?.message).toContain('GET /s/{{ workflow.spaceId }}/api/asset_criticality');
     // Gated on previous_level_known: an unconfirmed read must not recommend DELETE,
     // which would destroy a record that may still exist rather than restore it.
     expect(emit?.with?.message).toContain('variables.previous_level_known');

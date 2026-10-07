@@ -192,6 +192,14 @@ export const canFillRespondAction = ({
   if (subject.kind === 'process') {
     return subject.processSelector.entityId !== undefined;
   }
+  if (subject.kind === 'user' || subject.kind === 'service') {
+    // Asset Criticality's Elasticsearch document _id is `${id_field}:${id_value}` verbatim
+    // (AssetCriticalityDataClient.createId), and Elasticsearch rejects an _id over 512 UTF-8
+    // bytes. `subject.value` is allowed up to 2048 *characters* (matching the SSE entity cap),
+    // so an overlong identity must fall back to the recommendation rather than mint an action
+    // that fails its write after an analyst has already approved it.
+    return Buffer.byteLength(`${subject.kind}.name:${subject.value}`, 'utf8') <= 512;
+  }
   return true;
 };
 

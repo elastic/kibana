@@ -711,6 +711,33 @@ describe('decidePackageReport', () => {
       expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
     });
 
+    it('never fills an identity action whose Elasticsearch document id would exceed 512 bytes', () => {
+      // AssetCriticalityDataClient's document _id is `${id_field}:${id_value}` verbatim, and
+      // Elasticsearch rejects an _id over 512 UTF-8 bytes. "user.name:" is 10 bytes, so a
+      // 503-byte value pushes the id to 513 and a 502-byte value keeps it at 512 (fillable).
+      const fittingUser: Subject = {
+        kind: 'user',
+        value: 'u'.repeat(502),
+        reachable: true,
+      };
+      const overlongUser: Subject = {
+        kind: 'user',
+        value: 'u'.repeat(503),
+        reachable: true,
+      };
+      expect(canFillRespondAction({ entry: setAssetCriticality, subject: fittingUser })).toBe(true);
+      expect(canFillRespondAction({ entry: setAssetCriticality, subject: overlongUser })).toBe(
+        false
+      );
+
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [], users: [overlongUser.value] }),
+        catalog: { ok: true, actions: [setAssetCriticality] },
+      });
+      expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
+    });
+
     it('tells the recommendation which identities got a proposal and which are unreached', () => {
       const result = decidePackageReport({
         conversationId,
