@@ -62,6 +62,7 @@ export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
   conversation,
   attachmentsService,
   proposedActionsContent,
+  proposedActionsCount,
 }) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
@@ -81,6 +82,7 @@ export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
       attachments={conversation.attachments}
       attachmentsService={attachmentsService}
       proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
       sections={sections}
     />
   );

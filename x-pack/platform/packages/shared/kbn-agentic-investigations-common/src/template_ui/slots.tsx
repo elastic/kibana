@@ -53,6 +53,8 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
   /** Replaces the tab body; see `RenderOverview`. */
   renderOverview?: RenderOverview;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
 export const OverviewSlot = ({
@@ -60,10 +62,21 @@ export const OverviewSlot = ({
   attachmentsService,
   renderProposedActions,
   renderOverview,
+  renderProposedActionsCount,
 }: OverviewSlotProps) => {
   const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
+  const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
   if (renderOverview) {
-    return <>{renderOverview({ conversation, attachmentsService, proposedActionsContent })}</>;
+    return (
+      <>
+        {renderOverview({
+          conversation,
+          attachmentsService,
+          proposedActionsContent,
+          proposedActionsCount,
+        })}
+      </>
+    );
   }
   return (
     <OverviewTab
@@ -71,6 +84,7 @@ export const OverviewSlot = ({
       attachments={conversation.attachments}
       attachmentsService={attachmentsService}
       proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
     />
   );
 };

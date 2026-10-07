@@ -18,7 +18,10 @@ import {
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
-import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
+import {
+  ProposedActionsBoundary,
+  ProposedActionsCountBoundary,
+} from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
 import { NEW_INVESTIGATION_TITLE } from './translations';
 import { copyLink } from '../../shared/copy_link';
@@ -111,6 +114,13 @@ export const investigationTemplate: TemplateDefinition = {
         '../../shared/proposed_actions/proposed_actions_slot'
       );
       return ProposedActionsSlot;
+    });
+
+    const LazyProposedActionsCount = makeLazyWithSharedClient(async () => {
+      const { ProposedActionsCount } = await import(
+        '../../shared/proposed_actions/proposed_actions_count'
+      );
+      return ProposedActionsCount;
     });
 
     const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
@@ -238,6 +248,14 @@ export const investigationTemplate: TemplateDefinition = {
               ProposedActionsBoundary,
               null,
               React.createElement(LazyProposedActionsSlot, props)
+            )
+        : undefined,
+      renderProposedActionsCount: proposals
+        ? (props) =>
+            React.createElement(
+              ProposedActionsCountBoundary,
+              null,
+              React.createElement(LazyProposedActionsCount, props)
             )
         : undefined,
     });
