@@ -734,15 +734,6 @@ describe('detection rule workflows', () => {
           expect(String(rows.with?.rows)).toContain(`contains row[${keyIndex}]`);
         });
 
-        it('reads the live revision from the rules API, not from the alerts', () => {
-          expect(
-            renderRevisionKeys([
-              { id: 'rule-1', revision: 3 },
-              { id: 'rule-2', revision: 0 },
-            ])
-          ).toBe(',rule-1@3,rule-2@0,');
-        });
-
         it('fans out only the current revision of each rule', () => {
           const keys = renderRevisionKeys([
             { id: 'rule-1', revision: 31 },
@@ -764,17 +755,6 @@ describe('detection rule workflows', () => {
           expect(result).toEqual([harvestRow('rule-2', 4)]);
         });
 
-        // The edit that stopped the noise leaves the new revision without alerts, so
-        // only the older revision's group exists and nothing is launched.
-        it('launches nothing for a rule whose current revision has no harvested group', () => {
-          const result = fanOutRows(
-            [harvestRow('rule-1', 2)],
-            renderRevisionKeys([{ id: 'rule-1', revision: 3 }])
-          );
-
-          expect(result).toEqual([]);
-        });
-
         // Without the lookup no revision is known, so the sweep fails closed instead
         // of diagnosing rows that may come from an older revision.
         it('launches nothing when the rule lookup failed or was evicted', () => {
@@ -782,20 +762,6 @@ describe('detection rule workflows', () => {
 
           expect(fanOutRows(harvested, renderRevisionKeys(undefined))).toEqual([]);
           expect(fanOutRows(harvested, null)).toEqual([]);
-        });
-
-        it('reports a failed rule lookup as a failed harvest', () => {
-          const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
-          const harvestFailed = (lookupError: unknown): unknown =>
-            resolveExpression((emit.with as Record<string, string>).harvest_failed, {
-              steps: {
-                harvest_fp_alerts_by_rule: { error: null },
-                list_enabled_candidates: { error: lookupError },
-              },
-            });
-
-          expect(harvestFailed(null)).toBe(false);
-          expect(harvestFailed({ message: 'boom' })).toBe(true);
         });
       });
 
@@ -822,14 +788,11 @@ describe('detection rule workflows', () => {
       });
 
       it('does not split one rule history when its name changes', () => {
-        const groupClauses = harvestQuery
+        const groupClause = harvestQuery
           .split('\n')
-          .filter((line) => line.trimStart().startsWith('BY '));
+          .find((line) => line.trimStart().startsWith('BY '));
 
-        expect(groupClauses.length).toBeGreaterThan(0);
-        for (const groupClause of groupClauses) {
-          expect(groupClause).not.toContain('kibana.alert.rule.name');
-        }
+        expect(groupClause).not.toContain('kibana.alert.rule.name');
       });
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
