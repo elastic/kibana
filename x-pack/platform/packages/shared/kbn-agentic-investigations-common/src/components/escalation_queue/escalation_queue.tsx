@@ -194,15 +194,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     })();
 
     return (
-      <EuiPanel
-        borderRadius="none"
-        css={{
-          borderRadius: euiTheme.size.s,
-        }}
-        paddingSize="none"
-        hasBorder
-        data-test-subj={`escalationQueue-${status}`}
-      >
+      <EuiPanel paddingSize="none" hasBorder data-test-subj={`escalationQueue-${status}`}>
         <StyledAccordion
           id={`escalation-queue-${status}`}
           buttonContent={buttonContent}

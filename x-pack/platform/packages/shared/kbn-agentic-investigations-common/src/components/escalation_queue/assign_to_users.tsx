@@ -91,7 +91,6 @@ export const AssignToUsers = memo<AssignToUsersProps>(
         <EuiButtonIcon
           iconType="plusCircle"
           aria-label={ESCALATION_QUEUE_LABELS.addAssignee}
-          color="primary"
           onClick={togglePopover}
           isDisabled={isProfilesLoading}
           data-test-subj={`assignToUsersAdd-${conversationId}`}

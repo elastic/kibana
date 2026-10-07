@@ -77,7 +77,9 @@ export const ConversationCard = memo<ConversationCardProps>(
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
-          padding: euiTheme.size.l,
+          // 16px on the right only: the 32px icon buttons carry 8px of their own inset,
+          // so their glyphs land at 24px from the edge like the text on the left.
+          padding: `${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           // The last row rounds to the queue panel's corners so the hover fill does not
@@ -127,7 +129,8 @@ export const ConversationCard = memo<ConversationCardProps>(
                 grow={false}
                 // The 32px icon buttons would otherwise set the row height and centre
                 // the 16px age text 8px below the padding line. Let them overhang the
-                // padding instead so the text (and the icon glyphs) sit at the 24px inset.
+                // padding instead so the text (and the icon glyphs) sit at the 24px inset
+                // while the actions render on one line (at and above breakpoint `m`).
                 css={{ marginBlock: `-${euiTheme.size.s}` }}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>

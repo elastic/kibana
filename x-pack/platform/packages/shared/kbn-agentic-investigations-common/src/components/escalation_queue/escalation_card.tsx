@@ -100,7 +100,9 @@ export const EscalationCard = memo<EscalationCardProps>(
         onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
         css={{
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+          borderRadius: hasBorder
+            ? 'none'
+            : `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
           boxSizing: 'border-box',
           boxShadow: 'none',
           cursor: isClickable ? 'pointer' : undefined,
