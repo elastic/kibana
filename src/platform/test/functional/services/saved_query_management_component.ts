@@ -110,8 +110,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-button`);
-      const exists = await this.testSubjects.exists('confirmModalTitleText');
-      return exists === true;
+      return await this.testSubjects.waitForExists('confirmModalTitleText', { timeout: 2000 });
     });
     await this.common.clickConfirmOnModal();
   }
@@ -193,10 +192,13 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
+    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel', {
+      timeout: 500,
+    });
     if (isOpenAlready) return;
 
     await this.testSubjects.click('showQueryBarMenu');
+    await this.testSubjects.existOrFail('queryBarMenuPanel');
   }
 
   async closeSavedQueryManagementComponent() {
