@@ -118,7 +118,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     );
 
     const { euiTheme } = useEuiTheme();
-    const borderStyle = `1px solid ${euiTheme.colors.lightShade}`;
+    const borderStyle = `1px solid ${euiTheme.colors.backgroundLightText}`;
     return (
       <>
         <EuiPanel
