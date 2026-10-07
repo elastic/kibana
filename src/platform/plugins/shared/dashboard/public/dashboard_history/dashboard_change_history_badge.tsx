@@ -40,24 +40,30 @@ const DashboardChangeHistoryBadge = ({
             })}
           </EuiBadge>
         </EuiFlexItem>
-        {/* {display.version != null ? (
+        {item.metadata?.version ? (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
-              {VERSION_BADGE(display.version)}
+              {i18n.translate('workflows.changeHistory.versionBadge', {
+                defaultMessage: 'v{version}',
+                values: { version: item.metadata!.version as number },
+              })}
             </EuiBadge>
           </EuiFlexItem>
-        ) : null} */}
+        ) : null}
       </EuiFlexGroup>
     );
   }
 
-  // if (display.kind === 'version' && display.version != null) {
-  //   return (
-  //     <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
-  //       {VERSION_BADGE(display.version)}
-  //     </EuiBadge>
-  //   );
-  // }
+  if (item.metadata!.version) {
+    return (
+      <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
+        {i18n.translate('workflows.changeHistory.versionBadge', {
+          defaultMessage: 'v{version}',
+          values: { version: item.metadata!.version as number },
+        })}
+      </EuiBadge>
+    );
+  }
 
   return null;
 };

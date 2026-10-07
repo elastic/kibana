@@ -130,8 +130,10 @@ export const registerHistoryListRoute = (
                 name: profile?.user.full_name || user.name,
                 id: user.id,
               },
-              version: item.object.sequence,
               ...(changes ? { changes: { count: changes.length } } : {}),
+              metadata: {
+                version: item.object.sequence,
+              },
             };
           }),
         },
