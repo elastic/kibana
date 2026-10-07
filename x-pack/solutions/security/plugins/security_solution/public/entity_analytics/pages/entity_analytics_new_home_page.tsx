@@ -47,7 +47,6 @@ import {
   buildEntityFiltersQuery,
   INDIVIDUAL_ROWS_COLUMNS,
   RESOLVED_ROWS_COLUMNS,
-  toList,
   joinAnd,
   getEntityId,
   getString,
@@ -82,13 +81,16 @@ import {
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
+  MAX_TILE_FILTER_ENTITY_IDS,
+  buildTileFilter,
+  buildTileWhereExpression,
+  capTileEntityIds,
+} from '../components/home/needs_attention_tiles/tile_entity_filter';
+import {
   EMPTY_ENTITY_IDS,
   type SignalCardData,
   type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
-
-/** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
-const MAX_TILE_FILTER_ENTITY_IDS = 1000;
 
 const GROUP_BY_SETTINGS = { hideCustomFieldOption: false };
 
@@ -179,23 +181,6 @@ const buildCombinedFilter = (
   return filterClauses.length || mustNotClauses.length
     ? { bool: { filter: filterClauses, must: [], must_not: mustNotClauses, should: [] } }
     : undefined;
-};
-
-/** DSL counterpart of the tile ES|QL clause (grouping buckets use this path). */
-const buildTileFilter = (ids: string[], rowsMode: RowsMode): QueryDslQueryContainer => {
-  if (!ids.length) return { match_none: {} };
-  if (rowsMode === 'individual') {
-    return {
-      bool: {
-        should: [
-          { terms: { 'entity.id': ids } },
-          { terms: { 'entity.relationships.resolution.resolved_to': ids } },
-        ],
-        minimum_should_match: 1,
-      },
-    };
-  }
-  return { terms: { 'entity.id': ids } };
 };
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
@@ -465,25 +450,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     newAlertingEntityIds,
   ]);
 
-  const cappedTileEntityIds = useMemo(() => {
-    if (!activeTile) return null;
-    return selectedEntityIds.length > MAX_TILE_FILTER_ENTITY_IDS
-      ? selectedEntityIds.slice(0, MAX_TILE_FILTER_ENTITY_IDS)
-      : selectedEntityIds;
-  }, [activeTile, selectedEntityIds]);
+  const cappedTileEntityIds = useMemo(
+    () => (activeTile ? capTileEntityIds(selectedEntityIds) : null),
+    [activeTile, selectedEntityIds]
+  );
 
-  const tileWhereExpression = useMemo(() => {
-    if (cappedTileEntityIds == null) return undefined;
-    // Always constrain when a tile is active — empty list matches nothing so the
-    // table stays consistent with a 0-count tile rather than falling back to all entities.
-    if (!cappedTileEntityIds.length) return 'false';
-    const list = toList(cappedTileEntityIds);
-    // Tiles emit resolved (effective) ids. Resolved rows: parent rows only.
-    // Individual rows: parent + members of those identities.
-    return rowsMode === 'individual'
-      ? `(entity.id IN (${list}) OR entity.relationships.resolution.resolved_to IN (${list}))`
-      : `entity.id IN (${list})`;
-  }, [cappedTileEntityIds, rowsMode]);
+  const tileWhereExpression = useMemo(
+    () =>
+      cappedTileEntityIds == null
+        ? undefined
+        : buildTileWhereExpression(cappedTileEntityIds, rowsMode),
+    [cappedTileEntityIds, rowsMode]
+  );
 
   const tileFilter = useMemo((): QueryDslQueryContainer | null => {
     if (cappedTileEntityIds == null) return null;

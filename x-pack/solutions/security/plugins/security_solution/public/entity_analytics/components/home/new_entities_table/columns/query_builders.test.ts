@@ -9,6 +9,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
 import { ENRICH_FNS, SORTABLE_COLUMNS } from './registry';
 import { alertCountColumn } from './alerts';
+import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const NOW = new Date('2026-10-04T12:00:00.000Z');
 
@@ -22,12 +23,19 @@ const BASE_ARGS: QueryArgs = {
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
 };
 
+const ENTITY_EXPRESSION = 'asset.criticality IN ("high_impact", "extreme_impact")';
+
 const FILTERED_ARGS: Partial<QueryArgs> = {
   rowsMode: 'individual',
   searchExpression: 'KQL("""entity.name: *gateway* or user.name: alice""")',
-  entityExpression: 'asset.criticality IN ("high_impact", "extreme_impact")',
+  entityExpression: ENTITY_EXPRESSION,
   keepFields: ['host.os.name'],
 };
+
+const LARGE_VIEW_SIZE = SPLIT_SORT_MIN_VIEW_SIZE;
+
+/** Sort value of the rows without a value, per sort page column; null when not listed. */
+const EMPTY_SORT_VALUES: Readonly<Record<string, number>> = { alert_count: 0, group_size: 1 };
 
 const PAGE_ROWS: readonly Row[] = [
   {
@@ -103,8 +111,65 @@ describe('entities grid query builders', () => {
         expect(buildSortQuery(args)).toMatchSnapshot('sort');
         expect(buildCountQuery(args)).toMatchSnapshot('count');
       });
+
+      it('builds the sort and count queries with entity filters and no search', () => {
+        const args: QueryArgs = {
+          ...BASE_ARGS,
+          entityExpression: ENTITY_EXPRESSION,
+          sort: { field: sortField, direction: 'desc' },
+        };
+
+        expect(buildSortQuery(args)).toMatchSnapshot('sort');
+        expect(buildCountQuery(args)).toMatchSnapshot('count');
+      });
+
+      it('builds the sort query with a cursor on an empty value', () => {
+        const args: QueryArgs = {
+          ...BASE_ARGS,
+          cursor: { ...cursorFor(sortField), sortValue: null },
+          sort: { field: sortField, direction: 'desc' },
+        };
+
+        expect(buildSortQuery(args)).toMatchSnapshot('sort');
+      });
     }
   );
+
+  describe.each(
+    SORTABLE_COLUMNS.flatMap(({ id, runSortPage }) =>
+      runSortPage ? [[id, runSortPage] as const] : []
+    )
+  )('sort page by %s on a large view', (sortField, runSortPage) => {
+    const emptyCursor: PageCursor = {
+      ...cursorFor(sortField),
+      sortValue: EMPTY_SORT_VALUES[sortField] ?? null,
+    };
+
+    it.each([
+      ['the first page descending', { sort: { field: sortField, direction: 'desc' } }],
+      ['the first page ascending', { sort: { field: sortField, direction: 'asc' } }],
+      [
+        'a page after a value with entity filters',
+        {
+          sort: { field: sortField, direction: 'desc' },
+          entityExpression: ENTITY_EXPRESSION,
+          cursor: cursorFor(sortField),
+        },
+      ],
+      [
+        'a page after an empty value',
+        { sort: { field: sortField, direction: 'desc' }, cursor: emptyCursor },
+      ],
+    ] as const)('runs the queries of %s', async (_name, overrides) => {
+      const runQuery = jest.fn(
+        async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]
+      );
+
+      await runSortPage({ ...BASE_ARGS, ...overrides }, { runQuery, viewSize: LARGE_VIEW_SIZE });
+
+      expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
+    });
+  });
 
   describe('enrich queries', () => {
     it.each(ENRICH_FNS.map((enrich) => [enrich.name, enrich] as const))(
