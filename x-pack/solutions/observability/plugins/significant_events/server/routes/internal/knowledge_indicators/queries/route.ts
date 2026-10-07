@@ -324,11 +324,11 @@ const bulkDeleteQueriesRoute = createServerRoute({
       try {
         const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
         await cleanupStaleEvents({
-          eventClient: await scopedClients.getEventClient(),
+          eventSearchClient: await scopedClients.getEventSearchClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
           alertEventsClient: await scopedClients.getAlertEventsClient(),
-          logger: sigEventsLogger,
+          emitTrigger: scopedClients.emitTrigger,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

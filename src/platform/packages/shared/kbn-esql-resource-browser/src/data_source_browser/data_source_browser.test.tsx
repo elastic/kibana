@@ -50,15 +50,19 @@ const mockViews = (result: EsqlViewsResult) => {
 
 const http = {};
 
+const canReadViewsCapabilities = { esqlViews: { read: true } };
+
 const renderBrowser = ({
   onSelect = jest.fn(),
   esql,
+  capabilities = canReadViewsCapabilities,
 }: {
   onSelect?: jest.Mock;
   esql?: { enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]> };
+  capabilities?: Record<string, Record<string, boolean>>;
 } = {}) => {
   render(
-    <KibanaContextProvider services={{ core: { http, application: { capabilities: {} } }, esql }}>
+    <KibanaContextProvider services={{ core: { http, application: { capabilities } }, esql }}>
       <DataSourceBrowser
         isOpen
         isTimeseries={false}
@@ -104,6 +108,26 @@ describe('DataSourceBrowser views', () => {
     ).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /latency_view/ })).toBeInTheDocument();
     expect(getResourceList().getByRole('option', { name: /logs-\*/ })).toBeInTheDocument();
+  });
+
+  it.each([
+    ['the read capability is denied', { esqlViews: { read: false } }],
+    ['the ES|QL views feature is not registered', {}],
+  ])('hides the View category and skips the request when %s', async (_, capabilities) => {
+    renderBrowser({ capabilities });
+
+    expect(await getResourceList().findByRole('option', { name: /logs-\*/ })).toBeInTheDocument();
+    expect(
+      getResourceList().queryByRole('option', { name: /errors_view/ })
+    ).not.toBeInTheDocument();
+    expect(getViewsMock).not.toHaveBeenCalled();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: DATA_SOURCE_BROWSER_I18N_KEYS.filterTitle })
+    );
+    expect(
+      screen.queryByRole('option', { name: (name: string) => name.startsWith('View') })
+    ).not.toBeInTheDocument();
   });
 
   it('refreshes the shared views cache the editor validates against', async () => {

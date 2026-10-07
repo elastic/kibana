@@ -70,6 +70,7 @@ export const evaluatorResultSchema = z.object({
       explanation: z.string().nullable().optional(),
       metadata: recordSchema.optional(),
       trace_id: z.string().nullable().optional(),
+      direction: Direction.optional(),
     })
   ),
 });
