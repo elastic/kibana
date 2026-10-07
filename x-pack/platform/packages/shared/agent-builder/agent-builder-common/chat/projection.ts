@@ -6,6 +6,7 @@
  */
 
 import type { SlackBlock } from '@elastic/isomer-sdk/slack';
+import type { ConversationOriginType } from './conversation';
 
 /**
  * Raw Slack message payload: `text` is the notification and fallback copy, `blocks` is what gets
@@ -21,5 +22,5 @@ export interface SlackPayload {
  * callback delivery, never stored.
  */
 export interface OriginIsomerProjection {
-  slack?: SlackPayload;
+  [ConversationOriginType.Slack]?: SlackPayload;
 }

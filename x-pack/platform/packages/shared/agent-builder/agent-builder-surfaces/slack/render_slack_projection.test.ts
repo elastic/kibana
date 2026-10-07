@@ -15,7 +15,7 @@ import {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ProjectionContext } from '../projections/types';
-import { addSlackProjection } from './add_slack_projection';
+import { renderSlackProjection } from './render_slack_projection';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
@@ -65,23 +65,18 @@ const createOptions = (overrides: Partial<ProjectionContext> = {}): ProjectionCo
   ...overrides,
 });
 
-describe('addSlackProjection', () => {
-  it('adds the reply as Block Kit', () => {
+describe('renderSlackProjection', () => {
+  it('renders the reply as Block Kit', () => {
     const event = createRoundCompleteEvent('There are **3** [alerts](https://example.com).');
 
-    expect(addSlackProjection(event, createOptions())).toEqual({
-      ...event,
-      projection: {
-        slack: {
-          text: expect.any(String),
-          blocks: [
-            {
-              type: 'section',
-              text: { type: 'mrkdwn', text: 'There are *3* <https://example.com|alerts>.' },
-            },
-          ],
+    expect(renderSlackProjection(event, createOptions())).toEqual({
+      text: expect.any(String),
+      blocks: [
+        {
+          type: 'section',
+          text: { type: 'mrkdwn', text: 'There are *3* <https://example.com|alerts>.' },
         },
-      },
+      ],
     });
   });
 
@@ -97,7 +92,7 @@ describe('addSlackProjection', () => {
       }),
     });
 
-    const slack = addSlackProjection(event, options)?.projection?.slack;
+    const slack = renderSlackProjection(event, options);
 
     expect(JSON.stringify(slack)).toContain('FROM logs | LIMIT 10');
     expect(JSON.stringify(slack)).not.toContain('render_attachment');
@@ -106,34 +101,26 @@ describe('addSlackProjection', () => {
   it('links unmapped attachments to Kibana', () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
-    const slack = addSlackProjection(event, createOptions())?.projection?.slack;
+    const slack = renderSlackProjection(event, createOptions());
 
     expect(JSON.stringify(slack)).toContain(`<${conversationUrl}|View in Kibana>`);
     expect(JSON.stringify(slack)).not.toContain('render_attachment');
   });
 
-  it('returns the event unchanged when rendering fails', () => {
+  it('renders nothing when rendering fails', () => {
     jest.mocked(isomerSlack.renderSlackEnvelope).mockImplementationOnce(() => {
       throw new Error('boom');
     });
     const logger = loggerMock.create();
     const event = createRoundCompleteEvent('Hello');
 
-    expect(addSlackProjection(event, createOptions({ logger }))).toBe(event);
+    expect(renderSlackProjection(event, createOptions({ logger }))).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
-  it('does not mutate the original event', () => {
-    const event = createRoundCompleteEvent('Hello');
-
-    addSlackProjection(event, createOptions());
-
-    expect(event).not.toHaveProperty('projection');
-  });
-
-  it('returns the event unchanged when the reply is empty', () => {
+  it('renders nothing when the reply is empty', () => {
     const event = createRoundCompleteEvent('');
 
-    expect(addSlackProjection(event, createOptions())).toBe(event);
+    expect(renderSlackProjection(event, createOptions())).toBeUndefined();
   });
 });

@@ -26,45 +26,12 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { addIsomerProjections } from '@kbn/agent-builder-surfaces';
+import { renderIsomerProjection } from '@kbn/agent-builder-surfaces';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { AGENTBUILDER_PATH } from '../../../../common/features';
 import type { AttachmentServiceStart } from '../../attachments';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
-
-/**
- * Adds the output for the round's origin, such as `projection.slack` for Slack rounds, to the
- * round_complete event. Returns the event unchanged when there's nothing to add.
- */
-const addProjections = (
-  event: RoundCompleteEvent,
-  {
-    execution,
-    attachmentsService,
-    getKibanaUrl,
-    logger,
-  }: {
-    execution: AgentExecution;
-    attachmentsService: AttachmentServiceStart;
-    getKibanaUrl: () => string;
-    logger: Logger;
-  }
-): RoundCompleteEvent => {
-  if (execution.executionMode !== AgentExecutionMode.conversation) {
-    return event;
-  }
-
-  const { agentId, spaceId, agentParams } = execution;
-  const conversationPath = `${AGENTBUILDER_PATH}/agents/${agentId}/conversations/${agentParams.conversationId}`;
-
-  return addIsomerProjections(event, {
-    originType: agentParams.origin?.type,
-    getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
-    getConversationUrl: () => `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
-    logger,
-  });
-};
 
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
@@ -163,14 +130,26 @@ export const deliverCallbackEvents = ({
               return EMPTY;
             }
 
-            const projectedEvent = addProjections(roundCompleteEvent, {
-              execution,
-              attachmentsService,
-              getKibanaUrl,
+            // Callbacks are only delivered for conversation executions, so this only narrows the type.
+            if (execution.executionMode !== AgentExecutionMode.conversation) {
+              return deliverEvent(roundCompleteEvent);
+            }
+
+            const { agentId, spaceId, agentParams } = execution;
+            const conversationPath = `${AGENTBUILDER_PATH}/agents/${agentId}/conversations/${agentParams.conversationId}`;
+
+            // Output for the round's origin, such as the Slack payload of Slack rounds.
+            const projection = renderIsomerProjection(roundCompleteEvent, {
+              originType: agentParams.origin?.type,
+              getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
+              getConversationUrl: () =>
+                `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
               logger,
             });
 
-            return deliverEvent(projectedEvent);
+            const event = { ...roundCompleteEvent, projection };
+
+            return deliverEvent(event);
           })
         ),
         catchError((error) => {

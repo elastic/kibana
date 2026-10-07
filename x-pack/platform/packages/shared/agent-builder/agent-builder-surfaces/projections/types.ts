@@ -17,8 +17,8 @@ export interface ProjectionContext {
   logger: Logger;
 }
 
-/** Adds one surface's projection to a `round_complete` event, returning it unchanged when it can't. */
-export type AddProjection = (
+/** Renders one surface's projection of a `round_complete` event, or nothing when it can't. */
+export type RenderProjection<TProjection> = (
   event: RoundCompleteEvent,
   context: ProjectionContext
-) => RoundCompleteEvent;
+) => TProjection | undefined;

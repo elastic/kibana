@@ -12,7 +12,7 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { addIsomerProjections } from './add_isomer_projections';
+import { renderIsomerProjection } from './render_isomer_projection';
 
 const event: RoundCompleteEvent = {
   type: ChatEventType.roundComplete,
@@ -37,17 +37,17 @@ const context = {
   logger: loggerMock.create(),
 };
 
-describe('addIsomerProjections', () => {
-  it('adds the projection of the round origin', () => {
-    const projected = addIsomerProjections(event, {
+describe('renderIsomerProjection', () => {
+  it('renders the projection of the round origin', () => {
+    const projection = renderIsomerProjection(event, {
       ...context,
       originType: ConversationOriginType.Slack,
     });
 
-    expect(projected.projection?.slack?.text).toBe('Hello');
+    expect(projection?.slack?.text).toBe('Hello');
   });
 
-  it('returns the event unchanged for rounds without an origin', () => {
-    expect(addIsomerProjections(event, context)).toBe(event);
+  it('renders nothing for rounds without an origin', () => {
+    expect(renderIsomerProjection(event, context)).toBeUndefined();
   });
 });

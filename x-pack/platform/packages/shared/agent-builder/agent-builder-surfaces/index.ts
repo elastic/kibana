@@ -14,5 +14,5 @@ export type {
   AttachmentSpecMapping,
   ResolveSpecOptions,
 } from './spec/resolve_spec';
-export { addIsomerProjections } from './projections/add_isomer_projections';
-export type { AddProjection, ProjectionContext } from './projections/types';
+export { renderIsomerProjection } from './projections/render_isomer_projection';
+export type { ProjectionContext, RenderProjection } from './projections/types';

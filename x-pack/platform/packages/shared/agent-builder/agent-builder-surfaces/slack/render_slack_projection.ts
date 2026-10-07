@@ -6,16 +6,20 @@
  */
 
 import { renderSlackEnvelope } from '@elastic/isomer-sdk/slack';
-import type { RoundCompleteEvent, SlackPayload } from '@kbn/agent-builder-common';
-import type { AddProjection, ProjectionContext } from '../projections/types';
+import type { SlackPayload } from '@kbn/agent-builder-common';
+import type { RenderProjection } from '../projections/types';
 import { specDispatcher } from '../spec/pack';
 import { replyToSpec } from '../spec/reply_to_spec';
 import { resolveSpec } from '../spec/resolve_spec';
 
-const renderSlackPayload = (
-  { data: { round, attachments = [] } }: RoundCompleteEvent,
-  { getMapping, getConversationUrl, logger }: ProjectionContext
-): SlackPayload | undefined => {
+/**
+ * Renders the reply as Block Kit through Isomer. Returns nothing for empty replies, or when
+ * rendering fails.
+ */
+export const renderSlackProjection: RenderProjection<SlackPayload> = (
+  { data: { round, attachments = [] } },
+  { getMapping, getConversationUrl, logger }
+) => {
   const { message } = round.response;
 
   try {
@@ -39,17 +43,4 @@ const renderSlackPayload = (
       `Failed to render the reply as Block Kit, leaving out its projection: ${error.message}`
     );
   }
-};
-
-/**
- * Adds the reply, rendered as Block Kit through Isomer, as the Slack payload of the event.
- * Returns the event unchanged for empty replies, or when rendering fails.
- */
-export const addSlackProjection: AddProjection = (event, context) => {
-  const slack = renderSlackPayload(event, context);
-  if (!slack) {
-    return event;
-  }
-
-  return { ...event, projection: { ...event.projection, slack } };
 };
