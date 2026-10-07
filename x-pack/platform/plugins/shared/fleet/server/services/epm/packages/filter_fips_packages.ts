@@ -12,6 +12,11 @@ import type { Installable } from '../../../types';
  * Temporary denylist of packages known to be non-FIPS-compatible but whose manifests
  * do not carry `fips_compatible: false`. Remove entries once the manifest flag is in place.
  *
+ * Entries are only hidden from the catalogue and are not blocked from being installed.
+ * `endpoint` is installed by the Security Solution setup, which would fail if the install
+ * was rejected. Remove it once Elastic Defend is FIPS compliant or Security Solution
+ * handles it.
+ *
  * Tracked in: https://github.com/elastic/ingest-dev/issues/9559
  */
 export const FIPS_INCOMPATIBLE_PACKAGES = new Set(['endpoint']);
