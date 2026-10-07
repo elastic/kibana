@@ -8,6 +8,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { definePrimitive, definePrimitivePack } from '@elastic/isomer-sdk';
+import { md } from '@elastic/isomer-sdk/markdown';
 import type { SlackBlock } from '@elastic/isomer-sdk/slack';
 import { z } from '@kbn/zod';
 import type { Composition } from '..';
@@ -31,7 +32,7 @@ const note = definePrimitive({
   renderers: {
     react: (node) => <p>{node.text}</p>,
     text: (node) => node.text,
-    markdown: (node) => `> ${node.text}`,
+    markdown: (node) => md.blockquote(md.paragraph(node.text)),
   },
 });
 
