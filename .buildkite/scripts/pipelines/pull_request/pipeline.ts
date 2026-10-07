@@ -15,8 +15,8 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
+import { runPreBuild } from './pre_build.ts';
+import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -33,6 +33,9 @@ import {
   prHasFIPSLabel,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
+
+const prConfigs =
+  loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;

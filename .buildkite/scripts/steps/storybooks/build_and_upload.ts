@@ -12,8 +12,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 import { getKibanaDir } from '#pipeline-utils';
+
+const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/aliases')>(
+  '@kbn/dev/storybook/aliases'
+);
 
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
