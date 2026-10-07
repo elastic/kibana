@@ -18,6 +18,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
@@ -301,8 +302,10 @@ if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
   ctx._source.${ALERT_END} = '${now.toISOString()}';
   ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
+  ctx._source.${ALERT_TRACKED} = false;
 } else {
   ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
   ctx._source['${ALERT_END}'] = '${now.toISOString()}';
   ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
+  ctx._source['${ALERT_TRACKED}'] = false;
 }`;

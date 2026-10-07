@@ -21,6 +21,12 @@ import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
  * encrypted values use `dangerouslyExposeValue: true`
  */
 export interface AttributeToEncrypt {
+  /**
+   * The name of a top-level attribute to encrypt. This is matched against the keys of the saved
+   * object's `attributes` with an exact string comparison; dotted paths are NOT resolved, so a
+   * name such as `auth.apiKey` would never reach a nested `apiKey` subfield. Registering a dotted
+   * key therefore throws, apart from a small grandfathered allowlist.
+   */
   readonly key: string;
   readonly dangerouslyExposeValue?: boolean;
 }
@@ -28,10 +34,29 @@ export interface AttributeToEncrypt {
 /**
  * Describes the registration entry for the saved object type that contain attributes that need to
  * be encrypted.
+ *
+ * Both `attributesToEncrypt` and `attributesToIncludeInAAD` accept top-level attribute names only.
+ * Registering a dotted key throws, apart from a small grandfathered allowlist. Registration does
+ * not otherwise validate that a name resolves to an existing attribute.
  */
 export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
+  /**
+   * The top-level attributes to encrypt. Names are matched against the keys of the saved object's
+   * `attributes` with an exact string comparison; dotted paths are NOT resolved, and registering a
+   * dotted key throws. A flat name that matches no attribute is silently skipped, which leaves the
+   * value in plaintext AND leaves it unstripped from the responses of the standard saved objects
+   * client APIs (`get`, `find`, ...).
+   */
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
+  /**
+   * The top-level attributes to include in AAD. Names are matched against the keys of the saved
+   * object's `attributes` with an exact string comparison; dotted paths are NOT resolved, and
+   * registering a dotted key throws. A flat name that matches no attribute is silently omitted
+   * from AAD, weakening the integrity binding of the encrypted attributes without failing
+   * encryption. Subfields need no separate entry: the entire value of an included attribute
+   * contributes to AAD.
+   */
   readonly attributesToIncludeInAAD?: ReadonlySet<string>;
   readonly enforceRandomId?: boolean;
 }

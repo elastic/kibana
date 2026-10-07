@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "bootstrap": "node ../../scripts/kbn bootstrap && pnpm install",
-    "build": "node ../../scripts/plugin_helpers build",
-    "dev": "node ../../scripts/plugin_helpers dev",
+    "bootstrap": "pnpm kbn bootstrap && pnpm install",
+    "build": "pnpm plugin-helpers build",
+    "dev": "pnpm plugin-helpers dev",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "kbn": "node ../../scripts/kbn"
   }

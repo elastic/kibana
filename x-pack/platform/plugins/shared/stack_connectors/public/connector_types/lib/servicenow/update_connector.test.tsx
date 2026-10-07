@@ -239,13 +239,15 @@ describe('UpdateConnector renders', () => {
     const usernameInput = getByTestId('connector-servicenow-username-form-input');
     const passwordInput = getByTestId('connector-servicenow-password-form-input');
 
-    await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-    await userEvent.type(usernameInput, 'user', { delay: 100 });
-    await userEvent.type(passwordInput, 'pass', { delay: 100 });
+    await userEvent.click(urlInput);
+    await userEvent.paste('https://example.com');
+    await userEvent.click(usernameInput);
+    await userEvent.paste('user');
+    await userEvent.click(passwordInput);
+    await userEvent.paste('pass');
     await userEvent.click(getByTestId('snUpdateInstallationSubmit'));
 
-    // Wait for click event to be processed
-    await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
+    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
 
     expect(onConfirm).toHaveBeenCalledWith({
       config: {
