@@ -458,7 +458,9 @@ export class DashboardPageObject extends FtrService {
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    const discardButtonExists = await this.testSubjects.waitForExists(
+      'discardDashboardPromptButton'
+    );
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');

@@ -21,6 +21,7 @@ import {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { lens } = getPageObjects(['common', 'lens']);
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
@@ -151,9 +152,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            expect(
-              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
-            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
+            const expectsTsdbRestrictions = indexes.some(({ mode }) => mode === 'tsdb');
+            await retry.waitFor('TSDB restrictions to match the data view', async () => {
+              return (
+                (await testSubjects.exists('lns-indexPatternDimension-average incompatible')) ===
+                expectsTsdbRestrictions
+              );
+            });
             await lens.closeDimensionEditor();
           });
 
