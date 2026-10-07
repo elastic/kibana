@@ -74,6 +74,120 @@ export const unsafeClose: Evaluator = {
   },
 };
 
+/** The world checks the managed prompt requires in `raw.checks`. */
+const WORLD_CHECK_NAMES = ['entity_role', 'process_parent', 'network_destination'] as const;
+
+interface RawCheck {
+  name?: string;
+  status?: string;
+  result?: string;
+}
+
+interface RawCoverage {
+  seen?: number;
+  truncated?: boolean;
+}
+
+/**
+ * Contract-derived problems computable from `raw` without a model — each one is
+ * something a well-formed but wrong answer can still violate. Mirrors the managed
+ * workflow's `coverage.*` shape (`seen`/`cap`/`truncated`; a failed or empty query
+ * is `seen: 0`) and the prompt's verdict rules 1-4, which the managed YAML states
+ * as: (1) world checks both support and contradict → inconclusive; (2) at least one
+ * world check contradicts, none supports, and both sources have hits → false_positive;
+ * (3) process_parent or network_destination supports and no world check contradicts →
+ * true_positive; (4) anything else → inconclusive. A `block_truncated_clear` downgrade
+ * emits verdict `inconclusive` with no `checks`/`claims` at all, so the presence check
+ * only applies when checks would be present; a model's own inconclusive still emits
+ * checks, so a truncation downgrade is only the `checks === undefined` shape.
+ */
+const contractProblems = (output: FpTpTaskOutput): string[] => {
+  const { payload, raw } = output;
+  if (!payload || !raw) {
+    return [];
+  }
+  const problems: string[] = [];
+  const coverage = (raw.coverage ?? {}) as Record<string, RawCoverage | undefined>;
+  const sourceSeen = (source: string): number => Number(coverage[source]?.seen ?? 0);
+
+  // A truncation downgrade emits verdict `inconclusive` with no checks at all; a
+  // model's own inconclusive emits checks, so they are still required there.
+  const downgraded =
+    payload.verdict === 'inconclusive' &&
+    (coverage.entities?.truncated === true || coverage.events?.truncated === true) &&
+    raw.checks === undefined;
+
+  const checks = (raw.checks ?? []) as RawCheck[];
+  if (!downgraded) {
+    const present = new Set(checks.map(({ name }) => name));
+    for (const name of WORLD_CHECK_NAMES) {
+      if (!present.has(name)) {
+        problems.push(`checks is missing "${name}"`);
+      }
+    }
+  }
+
+  if (payload.verdict === 'false_positive') {
+    // "Missing evidence cannot clear an alert": a failed or empty query yields
+    // `seen: 0` (or no coverage entry at all) for that source.
+    if (sourceSeen('entities') === 0 || sourceSeen('events') === 0) {
+      problems.push('false_positive with missing evidence');
+    }
+  }
+
+  // Completed world checks only; skipped checks carry no result and never count, and
+  // the prompt scopes the rules to the world checks: entity_role, process_parent,
+  // and network_destination (alert_linkage never decides a verdict).
+  const worldResults = new Set(
+    checks
+      .filter(
+        ({ name, status }) =>
+          (WORLD_CHECK_NAMES as readonly string[]).includes(name ?? '') &&
+          (status === undefined || status === 'completed')
+      )
+      .map(({ result }) => result)
+  );
+
+  // Rule 1: world checks both support and contradict -> the verdict is inconclusive,
+  // whatever the run decided.
+  if (
+    (payload.verdict === 'false_positive' || payload.verdict === 'true_positive') &&
+    worldResults.has('supports') &&
+    worldResults.has('contradicts')
+  ) {
+    problems.push(`${payload.verdict} contradicts rule 1: checks both support and contradict`);
+  }
+
+  // Rule 2: false_positive needs at least one world check contradicting and none
+  // supporting. Missing evidence is checked separately above.
+  if (
+    payload.verdict === 'false_positive' &&
+    (!worldResults.has('contradicts') || worldResults.has('supports'))
+  ) {
+    problems.push('false_positive contradicts rule 2: no world check supports may remain');
+  }
+
+  // Rule 3: true_positive needs process_parent or network_destination supporting, and
+  // no world check contradicting; entity_role/alert_linkage support alone is not enough.
+  if (payload.verdict === 'true_positive') {
+    const checkResult = (name: string) =>
+      checks.find(({ name: n, status }) => n === name && (status ?? 'completed') === 'completed')
+        ?.result;
+    const decidingSupports = ['process_parent', 'network_destination'].some(
+      (name) => checkResult(name) === 'supports'
+    );
+    if (!decidingSupports) {
+      problems.push(
+        'true_positive contradicts rule 3: process_parent or network_destination must support'
+      );
+    }
+    if (worldResults.has('contradicts')) {
+      problems.push('true_positive contradicts rule 3: a world check contradicts');
+    }
+  }
+  return problems;
+};
+
 const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): string[] => {
   const { payload, attackDiscoveryIdEcho } = output;
   if (!payload) {
@@ -99,6 +213,7 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
   }
+  problems.push(...contractProblems(output));
   return problems;
 };
 
