@@ -10,13 +10,11 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -55,15 +53,7 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
-
-const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.home.pageTitle', {
-  defaultMessage: 'Entity Analytics',
-});
-
-const MANAGEMENT_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.managementLink',
-  { defaultMessage: 'Management' }
-);
+import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 
 const combineFilters = (
   parts: Array<QueryDslQueryContainer | null | undefined>
@@ -96,7 +86,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: isDataViewLoading,
     error: isDataViewError,
   } = useEntityStoreDataView(spaceId);
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
@@ -464,20 +453,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'entityAnalyticsManagement',
-          label: MANAGEMENT_LABEL,
-          iconType: 'gear' as const,
-          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
-        },
-      ],
-    }),
-    [getSecuritySolutionUrl]
-  );
-
   const dataViewContextValue = useMemo(
     () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
     [dataView, isDataViewLoading]
@@ -491,7 +466,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <AppHeader title={PAGE_TITLE} menu={menu} spacing="flush" />
+      <EntityAnalyticsHomeHeader />
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           css={css`

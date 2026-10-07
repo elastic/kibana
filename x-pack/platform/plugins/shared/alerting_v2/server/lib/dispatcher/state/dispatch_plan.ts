@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { suppressionEpisodeKey } from '../steps/utils/suppression_key';
-import type { ActionGroup, AlertEpisode } from '../types';
+import { suppressionAlertKey } from '../steps/utils/suppression_key';
+import type { ActionGroup, Alert } from '../types';
 
 /**
  * The final delivery decision (ApplyThrottlingStep): action groups eligible to
- * dispatch now, groups held back by throttling, and the dispatchable episodes
+ * dispatch now, groups held back by throttling, and the dispatchable alerts
  * that landed in no group at all.
  */
 export class DispatchPlan {
@@ -19,8 +19,8 @@ export class DispatchPlan {
   private constructor(
     public readonly toDispatch: readonly ActionGroup[],
     public readonly throttled: readonly ActionGroup[],
-    /** Episodes that survived triage but matched no enabled action policy. */
-    public readonly unmatched: readonly AlertEpisode[]
+    /** Alerts that survived triage but matched no enabled action policy. */
+    public readonly unmatched: readonly Alert[]
   ) {}
 
   public static of({
@@ -30,8 +30,8 @@ export class DispatchPlan {
   }: {
     toDispatch: readonly ActionGroup[];
     throttled: readonly ActionGroup[];
-    /** Dispatchable episodes the plan was built from; those in no group become `unmatched`. */
-    dispatchable: readonly AlertEpisode[];
+    /** Dispatchable alerts the plan was built from; those in no group become `unmatched`. */
+    dispatchable: readonly Alert[];
   }): DispatchPlan {
     return new DispatchPlan(
       toDispatch,
@@ -52,19 +52,19 @@ export class DispatchPlan {
 function deriveUnmatched(
   toDispatch: readonly ActionGroup[],
   throttled: readonly ActionGroup[],
-  dispatchable: readonly AlertEpisode[]
-): readonly AlertEpisode[] {
+  dispatchable: readonly Alert[]
+): readonly Alert[] {
   if (toDispatch.length === 0 && throttled.length === 0) {
     return dispatchable;
   }
 
-  const handledEpisodeKeys = new Set<string>();
+  const handledAlertKeys = new Set<string>();
   for (const groups of [toDispatch, throttled]) {
     for (const group of groups) {
-      for (const episode of group.episodes) {
-        handledEpisodeKeys.add(suppressionEpisodeKey(episode));
+      for (const alert of group.alerts) {
+        handledAlertKeys.add(suppressionAlertKey(alert));
       }
     }
   }
-  return dispatchable.filter((episode) => !handledEpisodeKeys.has(suppressionEpisodeKey(episode)));
+  return dispatchable.filter((alert) => !handledAlertKeys.has(suppressionAlertKey(alert)));
 }
