@@ -175,13 +175,17 @@ export const ConversationQueue = memo<ConversationQueueProps>(
       </EuiFlexGroup>
     );
 
+    const hasFooter = loadingRows === 0 && isOpen && remaining > 0 && onShowMore !== undefined;
+
     const rowList = (
       <EuiFlexGroup direction="column" gutterSize="none">
         {rows.map((investigation, i) => {
           // Props shared by both card variants (closed compact + open full).
           const sharedProps = {
             investigation,
-            hasBorder: i < rows.length - 1,
+            // The last row only rounds its corners when it is the panel's bottom edge;
+            // with the footer below it, it keeps the divider instead.
+            hasBorder: i < rows.length - 1 || hasFooter,
             isSelected: selectedIds?.includes(investigation.id),
             onClickAction,
             onClickCard,
@@ -299,14 +303,14 @@ export const ConversationQueue = memo<ConversationQueueProps>(
 
           {/* Sits below the rows rather than replacing them, and EuiAccordion has no
               footer slot, so it is the last child. */}
-          {loadingRows === 0 && isOpen && remaining > 0 && onShowMore ? (
+          {hasFooter ? (
             <EuiFlexGroup
               direction="column"
               alignItems="center"
               responsive={false}
               gutterSize="none"
               css={{
-                borderTop: `1px solid ${euiTheme.colors.disabled}`,
+                // The row above draws the divider.
                 // Keeps the hover fill and focus ring off the row's borders.
                 padding: euiTheme.size.xs,
                 cursor: 'default',
