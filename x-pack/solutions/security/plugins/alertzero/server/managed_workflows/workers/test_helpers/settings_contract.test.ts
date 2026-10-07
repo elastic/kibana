@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { WorkerSettings } from '@kbn/alertzero-common';
 import {
   ACCEPT_BREAKING_CHANGE_COMMAND,
   ACCEPT_BREAKING_CHANGE_ENV,
@@ -23,6 +24,7 @@ import {
   parseAcceptedIssue,
   parseSettingsContractSnapshot,
   toInputJsonSchema,
+  workerStageOf,
   type AcceptedBreakingChange,
   type SettingsContract,
   type SettingsContractSnapshot,
@@ -479,6 +481,21 @@ describe('Worker settings contract', () => {
       );
     });
 
+    it('reports a typed key added to an open object as breaking, since any value used to pass', () => {
+      const stored = (extras: z.ZodType) =>
+        objectNode(z.object({ extras: extras.optional() }).strict(), 'WorkerSettings');
+      expect(
+        sharedChangeMessage(
+          { storedSettings: stored(z.object({}).catchall(z.unknown())) },
+          {
+            storedSettings: stored(z.object({ foo: z.number().optional() }).catchall(z.unknown())),
+          }
+        )
+      ).toContain(
+        '[breaking] constrained WorkerSettings.extras.foo, a key WorkerSettings.extras used to accept with any value'
+      );
+    });
+
     it('records the shared schemas once when a snapshot predates them', () => {
       expect(
         describeContractChanges(
@@ -515,6 +532,21 @@ describe('Worker settings contract', () => {
       expect(check).toThrow(/Cannot establish settings compatibility at x\.field/);
       expect(check).toThrow(reason);
       expect(check).toThrow(/This is not a breaking change and cannot be accepted/);
+    });
+
+    it('fails explicitly on a refinement attached to the complete piped schema', () => {
+      // Typed like the production builder in `contract.ts`, so the pipe into WorkerSettings compiles.
+      const shape: Record<string, z.ZodType> = { workerId: z.literal('x') };
+      const workerStage = z.object(shape).strict();
+      expect(workerStageOf('x', workerStage.pipe(WorkerSettings))).toBe(workerStage);
+      expect(() =>
+        workerStageOf(
+          'x',
+          workerStage.pipe(WorkerSettings).refine((value) => value.workerId !== 'y')
+        )
+      ).toThrow(
+        /Cannot establish settings compatibility at x: it uses a refinement \(\.refine, \.superRefine or \.check\) on the complete schema/
+      );
     });
 
     it('accepts the constraints the classifier compares', () => {

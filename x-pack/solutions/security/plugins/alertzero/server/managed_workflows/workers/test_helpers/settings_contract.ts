@@ -247,11 +247,17 @@ export const assertComparableValidation = (schema: unknown, path: string): void 
 };
 
 /** The Worker's own stage of its complete schema; the second stage must be the shared schema. */
-const workerStageOf = (workerId: string, complete: z.ZodType): z.ZodType => {
+export const workerStageOf = (workerId: string, complete: z.ZodType): z.ZodType => {
   const definition = zodDefinition(complete);
   if (definition.type !== 'pipe' || definition.out !== WorkerSettings) {
     throw cannotCompare(
       'a complete schema that is not its own object piped into WorkerSettings',
+      workerId
+    );
+  }
+  if ((definition.checks ?? []).length > 0) {
+    throw cannotCompare(
+      'a refinement (.refine, .superRefine or .check) on the complete schema',
       workerId
     );
   }
@@ -654,6 +660,15 @@ const diffNodes = (
     const required = next.required.includes(key);
     const filled = hasFilledDefault(nextDefaults, childPath);
     const previousChild = previous.fields[key];
+    if (previousChild === undefined && previous.additionalProperties) {
+      // The key was already accepted with any value, so giving it a schema can only narrow it.
+      changes.push({
+        kind: 'breaking',
+        text: `constrained ${childLabel}, a key ${label} used to accept with any value`,
+        field: { change: 'added', path: childPath.join('.') },
+      });
+      continue;
+    }
     if (previousChild === undefined) {
       changes.push(
         required && !filled
