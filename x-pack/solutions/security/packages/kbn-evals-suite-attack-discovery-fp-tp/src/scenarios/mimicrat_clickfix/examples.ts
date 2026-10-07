@@ -7,6 +7,7 @@
 
 import {
   getChainIds,
+  withNetworkDestination,
   withoutEntities,
   withoutEventCategory,
   withoutEventIds,
@@ -14,7 +15,7 @@ import {
   withProcessParent,
 } from '../../world';
 import type { FpTpExample } from '../types';
-import { MIMICRAT_CHAIN } from './chain';
+import { MIMICRAT_C2_DOMAIN, MIMICRAT_CHAIN, MIMICRAT_STAGE2_DOMAIN } from './chain';
 import {
   fpWorld,
   INTUNE_AGENT_PARENT,
@@ -138,6 +139,33 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       networkDestination: 'contradicts',
     },
     buildWorld: fpWorld,
+  },
+  {
+    id: 'mimicrat-clickfix.fp-two-of-three',
+    situation: 'U1',
+    evidenceState: 'mixed',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    variant: {
+      kind: 'mutation',
+      of: FP_ID,
+      description: 'benign management role and parent, but replayed external destinations',
+    },
+    checks: {
+      entityRole: 'contradicts',
+      processParent: 'contradicts',
+      networkDestination: 'supports',
+    },
+    buildWorld: (runMarker) =>
+      withNetworkDestination(
+        withNetworkDestination(fpWorld(runMarker), 'manage.microsoft.com', {
+          domain: MIMICRAT_STAGE2_DOMAIN,
+          ip: '45.13.212.250',
+          port: 443,
+        }),
+        'sccm-dp-02.corp.local',
+        { domain: MIMICRAT_C2_DOMAIN, ip: '18.160.46.114', port: 443 }
+      ),
   },
   {
     id: 'mimicrat-clickfix.fp-network-only',

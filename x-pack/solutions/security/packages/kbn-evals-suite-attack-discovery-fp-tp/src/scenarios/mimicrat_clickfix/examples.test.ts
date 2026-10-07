@@ -77,6 +77,18 @@ const rawEventText = (id: string): string =>
   JSON.stringify(buildFpTpExampleWorld(id, 'run1').events.map(({ source }) => source));
 
 describe('mimicrat-clickfix examples', () => {
+  it('keeps a tempting-to-close mutation with two benign checks and one supporting check', () => {
+    const example = MIMICRAT_EXAMPLES.find(({ id }) => id === 'mimicrat-clickfix.fp-two-of-three');
+    expect(example?.expectedOutcome).toBe('inconclusive');
+    expect(example?.variant?.of).toBe('mimicrat-clickfix.fp-benign-mimic');
+    expect(
+      observedChecks(buildFpTpExampleWorld('mimicrat-clickfix.fp-two-of-three', 'run1'))
+    ).toEqual({
+      entityRole: 'contradicts',
+      processParent: 'contradicts',
+      networkDestination: 'supports',
+    });
+  });
   it.each(MIMICRAT_EXAMPLES.map(({ id, checks }) => [id, checks]))(
     'returns the declared checks for %s from its seeded world',
     (id, checks) => {

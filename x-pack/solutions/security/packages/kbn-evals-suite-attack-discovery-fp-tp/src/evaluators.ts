@@ -74,7 +74,11 @@ export const unsafeClose: Evaluator = {
   },
 };
 
-const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): string[] => {
+const payloadProblems = (
+  output: FpTpTaskOutput,
+  attackDiscoveryId: string,
+  gold: FpTpOutcome | undefined
+): string[] => {
   const { payload, attackDiscoveryIdEcho } = output;
   if (!payload) {
     return ['no payload'];
@@ -86,6 +90,11 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (!FP_TP_VERDICTS.some((verdict) => verdict === payload.verdict)) {
     problems.push(`unsupported verdict "${payload.verdict}"`);
   }
+  if (gold !== undefined && payload.verdict !== gold) {
+    problems.push(
+      `verdict "${payload.verdict}" is not supported by the seeded world's gold "${gold}"`
+    );
+  }
   const summary = payload.summary_markdown ?? '';
   if (summary.trim() === '') {
     problems.push('empty summary_markdown');
@@ -95,6 +104,16 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   }
   if ((payload.rationale_markdown?.length ?? 0) > RATIONALE_MARKDOWN_MAX_LENGTH) {
     problems.push(`rationale_markdown longer than ${RATIONALE_MARKDOWN_MAX_LENGTH}`);
+  }
+  const narrative = `${summary}
+${payload.rationale_markdown ?? ''}`;
+  const evidenceIds = [
+    ...output.seededIds.alertIds,
+    ...output.seededIds.entityIds,
+    ...output.seededIds.eventIds,
+  ];
+  if (!evidenceIds.some((id) => id.length > 0 && narrative.includes(id))) {
+    problems.push('summary or rationale must cite a seeded alert, entity, or event id');
   }
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
@@ -123,7 +142,7 @@ export const payloadConformance: Evaluator = {
     const problems =
       expectedOutcome(expected) === 'failed'
         ? failureProblems(task)
-        : payloadProblems(task, task.seededIds.attackDiscoveryId);
+        : payloadProblems(task, task.seededIds.attackDiscoveryId, expectedOutcome(expected));
     return {
       score: problems.length === 0 ? 1 : 0,
       label: problems.length === 0 ? 'conforms' : 'violates',

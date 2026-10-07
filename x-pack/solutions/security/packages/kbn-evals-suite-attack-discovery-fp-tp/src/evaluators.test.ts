@@ -16,14 +16,16 @@ import {
 } from './evaluators';
 import type { FpTpOutcome } from './constants';
 import type { FpTpTaskOutput } from './workflow_task';
+import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from './scenarios';
+import { toSeededEvidence } from './world';
 
 const completed: FpTpTaskOutput = {
   executionId: 'exec-1',
   executionStatus: ExecutionStatus.COMPLETED,
   outcome: 'false_positive',
-  payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
+  payload: { verdict: 'false_positive', summary_markdown: 'Management activity on entity-1' },
   attackDiscoveryIdEcho: 'ad-1',
-  seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
+  seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: ['entity-1'], eventIds: [] },
   seededEvidence: { alerts: [], entities: [], events: [] },
   agentConversationIds: [],
   toolCallIds: [],
@@ -143,6 +145,89 @@ describe('PayloadConformance', () => {
     'returns 0 for a run that should fail but ended %s',
     async (executionStatus) => {
       expect(await score(payloadConformance, { ...failed, executionStatus }, 'failed')).toBe(0);
+    }
+  );
+});
+
+describe('seeded-world evaluator regressions', () => {
+  const example = FP_TP_EXAMPLES.find(({ id }) => id === 'mimicrat-clickfix.fp-two-of-three')!;
+  const world = buildFpTpExampleWorld(example.id, 'eval-regression');
+  const evidence = toSeededEvidence(world);
+  const output: FpTpTaskOutput = {
+    ...completed,
+    outcome: 'inconclusive',
+    attackDiscoveryIdEcho: 'ad-1',
+    seededIds: {
+      attackDiscoveryId: 'ad-1',
+      alertIds: evidence.alerts.map(({ id }) => id),
+      entityIds: evidence.entities.map(({ id }) => id),
+      eventIds: evidence.events.map(({ id }) => id),
+    },
+    seededEvidence: evidence,
+    payload: {
+      verdict: 'inconclusive',
+      summary_markdown: `Management activity on ${evidence.entities[0].id} conflicts with external traffic in ${evidence.events[0].id}.`,
+      rationale_markdown:
+        'entity_role and process_parent contradict, but network_destination supports; do not close.',
+    },
+  };
+
+  it('rejects an unsafe majority-vote closure of the two-of-three benign mimic', async () => {
+    const bad = {
+      ...output,
+      outcome: 'false_positive' as const,
+      payload: { ...output.payload, verdict: 'false_positive' },
+    };
+    expect(await score(unsafeClose, bad, example.expectedOutcome)).toBe(0);
+    expect(await score(payloadConformance, bad, example.expectedOutcome)).toBe(0);
+  });
+
+  it('accepts the evidence-supported inconclusive verdict', async () => {
+    expect(await score(unsafeClose, output, example.expectedOutcome)).toBe(1);
+    expect(await score(payloadConformance, output, example.expectedOutcome)).toBe(1);
+  });
+
+  it('rejects a well-formed narrative with no seeded evidence citation', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...output,
+          payload: { verdict: 'inconclusive', summary_markdown: 'Mixed evidence; do not close.' },
+        },
+        example.expectedOutcome
+      )
+    ).toBe(0);
+  });
+
+  it('does not count the echoed discovery id as an evidence citation', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...output,
+          payload: { verdict: 'inconclusive', summary_markdown: 'Mixed evidence for ad-1.' },
+        },
+        example.expectedOutcome
+      )
+    ).toBe(0);
+  });
+
+  it.each(['true_positive', 'false_positive', 'inconclusive'] as const)(
+    'rejects a well-formed %s verdict when the seeded gold is different',
+    async (verdict) => {
+      const gold = verdict === 'inconclusive' ? 'true_positive' : 'inconclusive';
+      expect(
+        await score(
+          payloadConformance,
+          {
+            ...output,
+            outcome: verdict,
+            payload: { ...output.payload, verdict },
+          },
+          gold
+        )
+      ).toBe(0);
     }
   );
 });

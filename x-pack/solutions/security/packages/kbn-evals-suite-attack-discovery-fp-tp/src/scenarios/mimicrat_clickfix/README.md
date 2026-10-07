@@ -17,6 +17,7 @@ Each example declares the result each world check should reach (`checks`). Its g
 | `drop-one-redundant` | U6 | The exfil POST is gone; the check-in still shows the C2 | supports / supports / supports | `true_positive` |
 | `drop-one-sole-evidence` | U3 | The AMSI-bypass event, its stage's only evidence, is gone | supports / supports / supports | `true_positive` (provisional) |
 | `fp-benign-mimic` | U1 | SCCM distribution point, `CcmExec.exe` running compliance scripts and a cached package, Microsoft management destinations | contradicts / contradicts / contradicts | `false_positive` |
+| `fp-two-of-three` | U1 | Benign mimic with replayed external destinations; two benign checks cannot outvote supporting traffic | contradicts / contradicts / supports | `inconclusive` |
 | `fp-network-only` | U4 | Benign activity with no entity role, no parents, management destinations | neutral / neutral / contradicts | `false_positive` |
 | `fp-entities-missing` | U1 | Benign mimic without entity records | skipped / contradicts / contradicts | `inconclusive` |
 | `fp-events-missing` | U1 | Benign mimic without raw events | contradicts / skipped / skipped | `inconclusive` |

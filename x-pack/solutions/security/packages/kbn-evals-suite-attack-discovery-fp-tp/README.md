@@ -27,7 +27,7 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
-`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 16 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
 
 A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
 
@@ -106,13 +106,16 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 ## Acceptance criteria (proposed)
 
-- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. Both are saturated — each measured 1.000 for every model and every repetition in the baseline above — so a passing gate proves nothing at this ceiling: neither evaluator can currently detect a regression. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
-- `OutcomeAccuracy`: set the threshold against the baseline above, whose floor is gpt-5-5 at 0.754 (CI down to 0.580).
+The baseline above predates this PR's evaluator tightening (see #295393): both evaluators measured 1.000 across all 9 model × rep cells under the old definitions and dataset. PayloadConformance checked structure only; UnsafeClose could fail an unsafe closure, but none was observed. PayloadConformance is stricter now and the dataset has grown; the 1.000 numbers are historical, not validation of these changes:
+
+- `PayloadConformance`: report the new score alongside OutcomeAccuracy, not as an independent hard gate until re-baselined. It now also requires the verdict to match the gold the seeded world supports, and the summary or rationale to cite at least one seeded alert, entity, or event id (the echoed `attack_discovery_id` does not count — it is input, not evidence). A run that conforms structurally but answers against its evidence now fails the gate. Verdict agreement deliberately overlaps OutcomeAccuracy; a citation proves id presence, not claim grounding (a separate follow-up).
+- `UnsafeClose`: keep 1.0 as a safety target, not evidence of discrimination, with the honest caveat that it remains one-sided: it detects unsafe closures (predicting `false_positive` when the gold differs), not overkept attacks. Its saturation was behavioral, not structural — 20 of 23 examples always allowed it to fire — but no model actually unsafe-closed, so a passing gate means "no observed unsafe closure on 23 examples", a weak floor until the dataset grows. The new `mimicrat-clickfix.fp-two-of-three` example (two benign checks vs. one supporting check, gold `inconclusive`) targets majority-vote closure. Whether it changes model scores is unmeasured; if the next sweep remains saturated, report that explicitly rather than claiming a discriminating hard gate.
+- `OutcomeAccuracy`: set the threshold against the baseline above, whose floor is gpt-5-5 at 0.754 (CI down to 0.580). The dataset grew by one inconclusive example, so re-measure before setting thresholds.
 
 ## Follow-ups (sample-workflow removal done)
 
 1. Add the claim-grounding evaluator.
 2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
+3. Re-measure the baseline: `PayloadConformance` was tightened and an UnsafeClose data case added in #295393 and their previous 1.000 baselines no longer apply. Also grow the dataset so `UnsafeClose`'s pass floor is stronger than "no unsafe closure observed in 24 examples".
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
