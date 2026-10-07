@@ -11,9 +11,10 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
-import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges, WorkflowRunAsModeSchema } from '@kbn/workflows';
 import { EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID } from '../managed_workflows';
 
 export const registerManagedServiceAccountRoutes = (
@@ -22,8 +23,10 @@ export const registerManagedServiceAccountRoutes = (
 ): void => {
   const path = '/internal/workflows_extensions_example/managed_service_account/{id}';
   const params = schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) });
-  const options = (request: KibanaRequest<{ id: string }>) => ({
-    spaceId: getSpaceId(request),
+  const query = schema.object({ global: schema.maybe(schema.boolean()) });
+  const [defaultMode, inheritMode, overrideMode] = WorkflowRunAsModeSchema.options;
+  const options = (request: KibanaRequest<{ id: string }>, global = false) => ({
+    spaceId: global ? GLOBAL_WORKFLOW_SPACE_ID : getSpaceId(request),
     workflowIdSuffix: request.params.id,
   });
 
@@ -41,7 +44,22 @@ export const registerManagedServiceAccountRoutes = (
       },
       validate: {
         params,
-        body: schema.object({ serviceAccountId: schema.string({ minLength: 1, maxLength: 256 }) }),
+        query,
+        body: schema.object({
+          serviceAccountId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+          childWorkflowId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          runAsMode: schema.maybe(
+            schema.oneOf([
+              schema.literal(defaultMode),
+              schema.literal(inheritMode),
+              schema.literal(overrideMode),
+            ])
+          ),
+          fallbackChild: schema.maybe(schema.boolean()),
+          asynchronous: schema.maybe(schema.boolean()),
+          waitForInput: schema.maybe(schema.boolean()),
+          message: schema.maybe(schema.string({ maxLength: 1024 })),
+        }),
       },
     },
     async (context, request, response) => {
@@ -51,12 +69,17 @@ export const registerManagedServiceAccountRoutes = (
           EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
           EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
           {
-            ...options(request),
-            values: { serviceAccountId: request.body.serviceAccountId },
+            ...options(request, request.query.global),
+            values: {
+              ...request.body,
+              message: request.body.message ?? 'Managed identity example completed',
+            },
           }
         );
         return response.ok({
-          body: { workflowId: `${EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID}-${request.params.id}` },
+          body: {
+            workflowId: `${EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID}-${request.params.id}`,
+          },
         });
       } catch (error) {
         if (error instanceof WorkflowConflictError) {
@@ -113,7 +136,7 @@ export const registerManagedServiceAccountRoutes = (
       security: {
         authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.delete] },
       },
-      validate: { params },
+      validate: { params, query },
     },
     async (context, request, response) => {
       try {
@@ -121,7 +144,7 @@ export const registerManagedServiceAccountRoutes = (
         await workflows.managedWorkflows.uninstall(
           EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
           EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
-          options(request)
+          options(request, request.query.global)
         );
         return response.noContent();
       } catch (error) {

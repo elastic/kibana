@@ -28,8 +28,8 @@ interface ManagedOptions {
 const authenticatedAs = (execution: WorkflowExecutionDto): string =>
   JSON.stringify(execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output);
 const path = (suffix: string): string =>
-  `internal/workflows_extensions_example/managed_identity/${suffix}`;
-const workflowId = (suffix: string): string => `system-example-inherited-service-account-${suffix}`;
+  `internal/workflows_extensions_example/managed_service_account/${suffix}`;
+const workflowId = (suffix: string): string => `system-example-service-account-${suffix}`;
 
 apiTest.describe(
   'Managed child service account inheritance',
@@ -56,23 +56,27 @@ apiTest.describe(
       editorHeaders = { ...common, ...editor.apiKeyHeader };
     });
 
+    const waitForNoRunningExecutions = async (apiClient: ApiClientFixture, suffix: string) => {
+      const query = new URLSearchParams();
+      NonTerminalExecutionStatuses.forEach((status) => query.append('statuses', status));
+      await expect
+        .poll(
+          async () => {
+            const active = await apiClient.get(
+              `api/workflows/workflow/${workflowId(suffix)}/executions?${query}`,
+              { headers, responseType: 'json' }
+            );
+            expect(active).toHaveStatusCode(200);
+            return active.body.results.length;
+          },
+          { timeout: 30_000 }
+        )
+        .toBe(0);
+    };
+
     apiTest.afterEach(async ({ apiClient }) => {
       for (const [suffix, global] of [...installed].reverse()) {
-        const query = new URLSearchParams();
-        NonTerminalExecutionStatuses.forEach((status) => query.append('statuses', status));
-        await expect
-          .poll(
-            async () => {
-              const active = await apiClient.get(
-                `api/workflows/workflow/${workflowId(suffix)}/executions?${query}`,
-                { headers, responseType: 'json' }
-              );
-              expect(active).toHaveStatusCode(200);
-              return active.body.results.length;
-            },
-            { timeout: 30_000 }
-          )
-          .toBe(0);
+        await waitForNoRunningExecutions(apiClient, suffix);
         const deleted = await apiClient.delete(`${path(suffix)}?global=${global}`, {
           headers: getContext().headers,
           responseType: 'json',
@@ -305,6 +309,8 @@ apiTest.describe(
             const completed = await wait(apiClient, childRun.id, 'completed', headers);
             expect(authenticatedAs(completed)).toContain(readOnlyAccountId);
           }
+          // Execution reads are realtime; deletion searches wait for the index refresh.
+          await waitForNoRunningExecutions(apiClient, child);
           const deleted = await apiClient.delete(`${path(child)}?global=${global}`, {
             headers: getContext().headers,
             responseType: 'json',

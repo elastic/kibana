@@ -6,7 +6,7 @@
 - name: child
   type: workflow.execute
   with:
-    workflow-id: system-example-inherited-service-account-child
+    workflow-id: system-example-service-account-child
     run-as-mode: inherit
 ```
 
@@ -34,10 +34,10 @@ This approach trusts managed-workflow publishers. Ordinary workflow APIs reject 
 
 ## Local examples
 
-Enable SAs and load `examples/developer_examples` and `examples/workflows_extensions_example`. The example-only `/internal/workflows_extensions_example/managed_identity/{suffix}` endpoint installs the registered managed template, accepting bounded options rather than arbitrary YAML.
+Enable SAs and load `examples/developer_examples` and `examples/workflows_extensions_example`. The example-only `/internal/workflows_extensions_example/managed_service_account/{suffix}` endpoint installs the registered managed template, accepting bounded options rather than arbitrary YAML.
 
 - `POST` with `{}` installs an unbound managed child. Add `?global=true` to install it globally through the managed-workflows API; use the same query on `DELETE` to uninstall it.
-- `POST` with `{"serviceAccountId":"<SA>","childWorkflowId":"system-example-inherited-service-account-child","runAsMode":"inherit"}` installs a managed parent.
+- `POST` with `{"serviceAccountId":"<SA>","childWorkflowId":"system-example-service-account-child","runAsMode":"inherit"}` installs a managed parent.
 - Set `fallbackChild: true` on the parent to exercise its child call from a workflow-level failure handler.
 - Set `asynchronous: true` for `workflow.executeAsync`, or `waitForInput: true` on the child to test durable resume.
 - Set the example option `runAsMode: override` to use the parent SA over a child's saved SA.

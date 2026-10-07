@@ -47,38 +47,6 @@ steps:
 export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID = 'system-example-service-account';
 
 export interface ServiceAccountWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
-  serviceAccountId: string;
-}
-
-export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
-  id: EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
-  pluginId: 'workflowsExtensionsExample',
-  version: 1,
-  billable: false,
-  yamlTemplate: ({ serviceAccountId }) => `name: Managed service account identity proof
-enabled: true
-settings:
-  run_as: ${JSON.stringify(serviceAccountId)}
-triggers:
-  - type: manual
-steps:
-  - name: authenticate
-    type: elasticsearch.request
-    with:
-      method: GET
-      path: /_security/_authenticate
-`,
-  management: {
-    lifecycle: 'dynamic',
-    versionStrategy: 'auto',
-    enablement: 'restorable',
-  },
-} as const satisfies ManagedWorkflowDefinition<ServiceAccountWorkflowTemplateValues>;
-
-export const EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID =
-  'system-example-inherited-service-account';
-
-export interface InheritedServiceAccountTemplateValues extends ManagedWorkflowTemplateValues {
   serviceAccountId?: string;
   childWorkflowId?: string;
   runAsMode?: WorkflowRunAsMode;
@@ -88,10 +56,10 @@ export interface InheritedServiceAccountTemplateValues extends ManagedWorkflowTe
   message?: string;
 }
 
-export const EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW = {
-  id: EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID,
+export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
+  id: EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   pluginId: 'workflowsExtensionsExample',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: (values) => {
     const childCall = values.childWorkflowId
@@ -157,4 +125,4 @@ ${
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-} as const satisfies ManagedWorkflowDefinition<InheritedServiceAccountTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ServiceAccountWorkflowTemplateValues>;
