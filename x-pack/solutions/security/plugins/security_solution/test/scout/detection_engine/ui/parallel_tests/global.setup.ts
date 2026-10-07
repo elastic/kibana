@@ -22,6 +22,12 @@ import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_clien
 globalSetupHook(
   `Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
   async ({ esClient, kbnClient, config, log }) => {
+    // Serverless does not allow writing to restricted indices, and only stateful specs need the seed.
+    if (config.serverless) {
+      log.info('[managed-mitre setup] Skipping on serverless');
+      return;
+    }
+
     log.info(
       `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} fixture entities into ${SEEDED_MITRE_INDEX}`
     );

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 /**
  * Detection rules management page (`/security/rules/management`): the rules table, its row
@@ -43,7 +44,7 @@ export class RulesManagementPage {
   async goto(params: { kbnUrl: KibanaUrl; spaceId: string }): Promise<void> {
     const { kbnUrl, spaceId } = params;
     await this.page.goto(kbnUrl.app('security/rules/management', { space: spaceId }));
-    await this.table.waitFor({ state: 'visible' });
+    await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /** The table row of the rule with the given name. */

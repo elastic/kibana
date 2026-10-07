@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 /**
  * Rule details page (`/security/rules/id/<id>`): the About, Definition and Schedule sections,
@@ -62,7 +63,7 @@ export class RuleDetailsPage {
     await this.page.goto(
       kbnUrl.app(`security/rules/id/${ruleId}${tab ? `/${tab}` : ''}`, { space: spaceId })
     );
-    await this.header.waitFor({ state: 'visible' });
+    await this.header.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /** The value shown next to a title of a details list, e.g. `Severity` or `Rule type`. */

@@ -164,8 +164,11 @@ spaceTest.describe(
         await spaceTest.step('the rule runs and generates an alert', async () => {
           await apiServices.detectionAlerts.waitForAlerts(RULE.name, 1, 180_000);
           await ruleDetailsPage.openAlertsTab();
-          await page.reload();
-          await expect(ruleDetailsPage.alertsCount).toHaveText('1 alert');
+          // The alerts table can take a while to show an alert that already exists
+          await expect(async () => {
+            await page.reload();
+            await expect(ruleDetailsPage.alertsCount).toHaveText('1 alert', { timeout: 15_000 });
+          }).toPass({ timeout: 120_000 });
           await expect(ruleDetailsPage.alertRuleNameCells).toHaveText([RULE.name]);
           await expect(ruleDetailsPage.alertSeverityCells).toHaveText(['critical']);
           await expect(ruleDetailsPage.alertRiskScoreCells).toHaveText([String(RULE.risk_score)]);

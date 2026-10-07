@@ -135,7 +135,9 @@ export class ThreatMatchRuleCreatePage {
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
     await this.waitForFormReady(this.customQueryInput);
     await this.page.testSubj.locator('threatMatchRuleType').click();
-    await this.page.testSubj.locator('ruleThreatMatchMappingField').waitFor({ state: 'visible' });
+    await this.page.testSubj
+      .locator('ruleThreatMatchMappingField')
+      .waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     // Selecting the rule type renders the Indicator match fields, which start out disabled too
     await this.waitForFormReady(this.customQueryInput, this.indicatorQueryInput);
   }
