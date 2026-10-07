@@ -25,6 +25,10 @@ export const MAX_KEPT_PROFILES = 100;
 
 /** Label holding each sample's epoch timestamp in microseconds, to locate blocks in a window. */
 export const TIMESTAMP_LABEL = 'timestamp_us';
+/** Label numbering the block (1-based, in logged order) a written sample was taken in. */
+export const BLOCK_LABEL = 'block';
+/** Samples within this margin of a block are written as context; the rest of the window is not. */
+export const CONTEXT_MARGIN_MS = 1_000;
 export const OUTER_CONTEXT_LABEL = 'context_outer';
 export const INNER_CONTEXT_LABEL = 'context_inner';
 

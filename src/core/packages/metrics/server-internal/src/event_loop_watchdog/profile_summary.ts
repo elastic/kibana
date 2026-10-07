@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Profile } from 'pprof-format';
+import { Label, type Profile } from 'pprof-format';
 import { sanitize } from './sanitize';
-import { INNER_CONTEXT_LABEL, OUTER_CONTEXT_LABEL, TIMESTAMP_LABEL } from './types';
+import { BLOCK_LABEL, INNER_CONTEXT_LABEL, OUTER_CONTEXT_LABEL, TIMESTAMP_LABEL } from './types';
 
 export interface FrameSummary {
   name: string;
@@ -149,6 +149,47 @@ export const summarizeProfile = (
       .slice(0, MAX_LABELS)
       .map((label) => ({ ...label, percent: percentOf(label.samples, total) })),
   };
+};
+
+/**
+ * Keeps only the samples within `marginUs` of `blocks`, labels those taken during a block with its
+ * 1-based number, drops locations and functions no longer referenced, and narrows the time span.
+ */
+export const trimToBlocks = (
+  profile: Profile,
+  blocks: readonly TimeRange[],
+  marginUs: number
+): void => {
+  const timestampKey = profile.stringTable.dedup(TIMESTAMP_LABEL);
+  const blockKey = profile.stringTable.dedup(BLOCK_LABEL);
+  let firstUs = Infinity;
+  let lastUs = -Infinity;
+  profile.sample = profile.sample.filter((sample) => {
+    const timestamp = Number(
+      sample.label.find(({ key }) => Number(key) === timestampKey)?.num ?? -1
+    );
+    const nearBlock = blocks.some(
+      ([start, end]) => timestamp >= start - marginUs && timestamp <= end + marginUs
+    );
+    if (!nearBlock) return false;
+    const index = blocks.findIndex(([start, end]) => timestamp >= start && timestamp <= end);
+    if (index !== -1) sample.label.push(new Label({ key: blockKey, num: index + 1 }));
+    firstUs = Math.min(firstUs, timestamp);
+    lastUs = Math.max(lastUs, timestamp);
+    return true;
+  });
+
+  const locationIds = new Set(profile.sample.flatMap(({ locationId }) => locationId.map(Number)));
+  profile.location = profile.location.filter(({ id }) => locationIds.has(Number(id)));
+  const functionIds = new Set(
+    profile.location.flatMap(({ line }) => line.map(({ functionId }) => Number(functionId)))
+  );
+  profile.function = profile.function.filter(({ id }) => functionIds.has(Number(id)));
+  if (profile.sample.length > 0) {
+    // Epoch nanoseconds exceed Number.MAX_SAFE_INTEGER.
+    profile.timeNanos = BigInt(firstUs) * 1000n;
+    profile.durationNanos = BigInt(lastUs - firstUs) * 1000n;
+  }
 };
 
 const describeLabel = ({ outer, inner }: LabelSummary) =>

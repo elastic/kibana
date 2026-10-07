@@ -22,9 +22,10 @@ import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { Profile } from 'pprof-format';
 import { BlockDetector, type DetectedBlock } from './block_detector';
-import { formatSummary, summarizeProfile } from './profile_summary';
+import { formatSummary, summarizeProfile, trimToBlocks, type TimeRange } from './profile_summary';
 import {
   BLOCK_THRESHOLD_MS,
+  CONTEXT_MARGIN_MS,
   POLL_INTERVAL_MS,
   Slot,
   monotonicUs,
@@ -116,15 +117,18 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     const windowBlocks = blocks.filter(
       ({ startUs, endUs }) => endUs >= windowStartUs && startUs <= windowEndUs
     );
-    const summary = summarizeProfile(
-      Profile.decode(bytes),
-      windowBlocks.map(({ startUs, endUs }) => [startUs + epochOffsetUs, endUs + epochOffsetUs]),
-      sanitizeRoot
+    const ranges = windowBlocks.map(
+      ({ startUs, endUs }): TimeRange => [startUs + epochOffsetUs, endUs + epochOffsetUs]
     );
+    const profile = Profile.decode(bytes);
+    // Summarise the whole window first: the summary reports how many of its samples were in blocks.
+    const summary = summarizeProfile(profile, ranges, sanitizeRoot);
     let file: string | undefined;
     if (diagnosticDir) {
+      // Without samples in blocks, the whole window is the only evidence: keep it.
+      if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
       file = Path.join(diagnosticDir, fileName(new Date()));
-      await Fs.writeFile(file, await gzip(bytes));
+      await Fs.writeFile(file, await gzip(profile.encode()));
     }
     const blockedMs = windowBlocks.map(({ blockedMs: ms }) => Math.round(ms));
     log('warn', formatSummary(summary, blockedMs, kept, file), {

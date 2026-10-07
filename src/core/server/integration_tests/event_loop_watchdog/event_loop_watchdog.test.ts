@@ -135,6 +135,12 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
 
       const decoded = Profile.decode(Zlib.gunzipSync(Fs.readFileSync(profile.file)));
       expect(decoded.sample.length).toBeGreaterThan(0);
+      // samples taken during the block are labelled with its number, so pprof can focus on them
+      const blockKey = decoded.stringTable.strings.indexOf('block');
+      const inBlock = decoded.sample.filter(({ label }) =>
+        label.some(({ key, num }) => Number(key) === blockKey && Number(num) === 1)
+      );
+      expect(inBlock.length).toBeGreaterThan(0);
       expect(Path.dirname(profile.file)).toBe(diagnosticDir);
       expect(logger.error).not.toHaveBeenCalled();
     }
