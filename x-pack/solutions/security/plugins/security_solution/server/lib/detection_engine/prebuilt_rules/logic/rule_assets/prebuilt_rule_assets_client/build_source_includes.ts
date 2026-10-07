@@ -15,7 +15,7 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
 
 const requiredKeysOf = (shape: z.ZodRawShape): string[] =>
   Object.entries(shape)
-    .filter(([, def]) => def._zod.optin === undefined)
+    .filter(([, def]) => def._zod.optin !== 'optional')
     .map(([key]) => key);
 
 /**
