@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@kbn/react-query';
-import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import React from 'react';
+import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
+import { renderHook as reactRenderHook, waitFor } from '@testing-library/react';
+import type { HttpSetup } from '@kbn/core/public';
+import { useHttp } from '../../../common/lib/kibana';
+import { getFakeHttpService } from '../test_utils';
 import { allFleetHttpMocks } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import type { UseFetchEndpointPolicyResponse } from './use_fetch_endpoint_policy';
 import { useFetchEndpointPolicy } from './use_fetch_endpoint_policy';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import {
@@ -19,7 +23,10 @@ import {
 import { set } from '@kbn/safer-lodash-set';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 
+jest.mock('../../../common/lib/kibana');
+
 const useQueryMock = _useQuery as jest.Mock;
+const useHttpMock = useHttp as jest.Mock;
 
 jest.mock('@kbn/react-query', () => {
   const actualReactQueryModule = jest.requireActual('@kbn/react-query');
@@ -30,29 +37,35 @@ jest.mock('@kbn/react-query', () => {
   };
 });
 
-describe('When using the `useGetFileInfo()` hook', () => {
-  type HookRenderer = ReactQueryHookRenderer<
-    Parameters<typeof useFetchEndpointPolicy>,
-    ReturnType<typeof useFetchEndpointPolicy>
-  >;
-
+describe('When using the `useFetchEndpointPolicy()` hook', () => {
   let policy: PolicyData;
   let queryOptions: NonNullable<Parameters<typeof useFetchEndpointPolicy>[1]>;
-  let http: AppContextTestRender['coreStart']['http'];
+  let http: jest.Mocked<HttpSetup>;
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
-  let renderHook: () => ReturnType<HookRenderer>;
+  let renderHook: () => Promise<UseFetchEndpointPolicyResponse>;
 
   beforeEach(() => {
-    const testContext = createAppRootMockRenderer();
-
     queryOptions = {};
-    http = testContext.coreStart.http;
+    http = getFakeHttpService();
+    useHttpMock.mockReturnValue(http);
     apiMocks = allFleetHttpMocks(http);
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
-    renderHook = () => {
-      return (testContext.renderReactQueryHook as HookRenderer)(() =>
-        useFetchEndpointPolicy(policy.id, queryOptions)
-      );
+
+    // A fresh client per test keeps the shared query key isolated between cases
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, cacheTime: Infinity } },
+    });
+    const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    renderHook = async () => {
+      const { result } = reactRenderHook(() => useFetchEndpointPolicy(policy.id, queryOptions), {
+        wrapper,
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true), { timeout: 1000 });
+
+      return result.current;
     };
   });
 
