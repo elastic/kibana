@@ -708,7 +708,8 @@ describe('detection rule workflows', () => {
             },
           });
 
-        // Mirrors the harvest's EVAL for one (rule, revision) group.
+        // Fake harvest row for one rule revision. The key is built the same way as
+        // rule_revision_key in the harvest query, so keep the two in sync.
         const harvestRow = (uuid: string, revision: number): unknown[] => {
           const row: unknown[] = [uuid, 12, '2026-10-01T00:00:00.000Z', ['a', 'b'], 20, 12];
           row[keyIndex] = `,${uuid}@${revision},`;
@@ -721,7 +722,8 @@ describe('detection rule workflows', () => {
             .filter((line) => line.trimStart().startsWith('BY '))
             .map((line) => line.trim());
 
-          // The watermark stays per rule. Both STATS passes split by revision.
+          // The reviewed watermark is still computed per rule, so a review of any
+          // version of the rule counts. The counts and alert ids are split by revision.
           expect(groupClauses).toEqual([
             'BY `kibana.alert.rule.uuid`',
             'BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`',
@@ -730,7 +732,8 @@ describe('detection rule workflows', () => {
           expect(harvestQuery).toContain(
             'rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")'
           );
-          // Appended after the review inputs so their KEEP positions do not move.
+          // The new column goes last, so the columns the review reads by position
+          // (uuid, alert ids, counts) keep their places.
           expect(keyIndex).toBe(keepColumns.length - 1);
           expect(String(rows.with?.rows)).toContain(`contains row[${keyIndex}]`);
         });
@@ -756,9 +759,9 @@ describe('detection rule workflows', () => {
           expect(result).toEqual([harvestRow('rule-2', 4)]);
         });
 
-        // Without the lookup no revision is known, so the sweep fails closed instead
-        // of diagnosing rows that may come from an older revision.
-        it('launches nothing when the rule lookup failed or was evicted', () => {
+        // Without the lookup we don't know the rules' current versions, so the sweep
+        // starts no reviews rather than risk diagnosing alerts from an older version.
+        it('starts no reviews when the rule lookup fails', () => {
           const harvested = [harvestRow('rule-1', 3)];
 
           expect(fanOutRows(harvested, renderRevisionKeys(undefined))).toEqual([]);
