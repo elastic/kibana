@@ -19,14 +19,15 @@ import {
   useListEscalations,
   useUserProfiles,
   useSuggestUserProfiles,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { EscalationsPage } from './escalations_page';
 
-jest.mock('../../hooks/use_agentic_investigations_capabilities');
-const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
+jest.mock('../../hooks/use_alertzero_investigations_capabilities');
+const mockUseCapabilities = useAlertZeroInvestigationsCapabilities as jest.Mock;
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
 jest.mock('../conversations/use_investigation_details', () => ({
@@ -42,6 +43,7 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useListEscalations: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
+  useOpenInChat: jest.fn(),
 }));
 
 // Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
@@ -86,15 +88,17 @@ const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
+const mockUseOpenInChat = useOpenInChat as jest.Mock;
 const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
-
-// Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
+const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
 let selectConversation: jest.Mock;
 let clearSelectedConversation: jest.Mock;
 
+let openChat: jest.Mock;
+
 const openEscalation = {
   id: 'esc-open-1',
+  agent_id: 'agent-1',
   title: 'Suspicious login',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-02T00:00:00Z',
@@ -103,6 +107,7 @@ const openEscalation = {
 
 const closedEscalation = {
   id: 'esc-closed-1',
+  agent_id: 'agent-1',
   title: 'Resolved threat',
   created_at: '2024-01-03T00:00:00Z',
   updated_at: '2024-01-04T00:00:00Z',
@@ -145,7 +150,14 @@ const renderPage = (
   return { core, rerender };
 };
 
+let getChatHref: jest.Mock;
+
 beforeEach(() => {
+  openChat = jest.fn();
+  getChatHref = jest.fn((id?: string, agentId?: string) =>
+    id ? `/mock-chat/${agentId}/${id}` : undefined
+  );
+  mockUseOpenInChat.mockReturnValue({ getChatHref, openChat });
   selectConversation = jest.fn();
   clearSelectedConversation = jest.fn();
   mockUseCapabilities.mockReturnValue({
@@ -363,30 +375,22 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
   });
 
-  it('opens the flyout when a row card is clicked', () => {
+  it('navigates to Agent Builder when a row card is clicked', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
     fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
 
-    expect(selectConversation).toHaveBeenCalledWith('esc-open-1');
+    expect(openChat).toHaveBeenCalledWith('esc-open-1', 'agent-1');
   });
 
-  it('clears the URL when the flyout closes', () => {
-    // Capture the onClose passed to the details hook so we can invoke it.
-    let capturedOnClose: (() => void) | undefined;
-    mockUseInvestigationDetails.mockImplementation(({ onClose }: { onClose: () => void }) => {
-      capturedOnClose = onClose;
-    });
-
+  it('renders card titles as links with hrefs from getChatHref', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
-    act(() => {
-      capturedOnClose?.();
-    });
-
-    expect(clearSelectedConversation).toHaveBeenCalled();
+    expect(getChatHref).toHaveBeenCalledWith('esc-open-1', 'agent-1');
+    const link = screen.getByTestId('escalationCardLink-esc-open-1');
+    expect(link).toHaveAttribute('href', '/mock-chat/agent-1/esc-open-1');
   });
 
   it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {
@@ -395,6 +399,7 @@ describe('EscalationsPage', () => {
     // The new page-keyed state replaces the entry instead, preventing duplication.
     const page2Item = {
       id: 'esc-p2',
+      agent_id: 'agent-1',
       title: 'Page 2 escalation',
       created_at: '2024-02-01T00:00:00Z',
       updated_at: '2024-02-02T00:00:00Z',
@@ -453,5 +458,39 @@ describe('EscalationsPage', () => {
     // Both items still present exactly once — page-keyed state replaces, not appends.
     expect(screen.getByText('Suspicious login')).toBeInTheDocument();
     expect(screen.getAllByText('Page 2 escalation')).toHaveLength(1);
+  });
+
+  describe('Impact filter', () => {
+    const impactOpen = { ...openEscalation, entity_ids: ['FIN-DC-01', 'Sales-NAS'] };
+    const impactClosed = { ...closedEscalation, entity_ids: ['FIN-DC-01'] };
+
+    it('renders one pill per entity with counts across open and closed rows', () => {
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      expect(screen.getByRole('button', { name: 'FIN-DC-01' })).toHaveTextContent('2');
+      expect(screen.getByRole('button', { name: 'Sales-NAS' })).toHaveTextContent('1');
+    });
+
+    it('renders no pills when no escalation has an impact', () => {
+      mockBothQueues([openEscalation], [closedEscalation]);
+      renderPage();
+
+      expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    });
+
+    it('filters both queues on click and restores them on a second click', () => {
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.queryByText('Resolved threat')).not.toBeInTheDocument();
+      expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.getByText('Resolved threat')).toBeInTheDocument();
+    });
   });
 });

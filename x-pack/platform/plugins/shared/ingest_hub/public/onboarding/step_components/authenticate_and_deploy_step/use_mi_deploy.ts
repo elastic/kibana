@@ -18,7 +18,10 @@ import { buildInstanceStatuses, collectDeployResults, deployGroup } from './depl
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
-import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
+import {
+  cleanupManagedIntegrationsPolicies,
+  updateManagedIntegrationsPolicy,
+} from './policy_cleanup_managed_integrations';
 import type { PolicyCleanupOps } from './policy_cleanup';
 import {
   buildLiveStalePolicyIds,
@@ -52,6 +55,9 @@ export interface UseMiDeployParams {
   onboardingDeploymentId: string | undefined;
   policyIdsByInstance: Record<string, string>;
   pendingCleanupPolicyIds: Record<string, string> | undefined;
+  isDirty: boolean;
+  /** True when auth method or connector specifically changed. Only pass overrideCloudConnector when true. */
+  isAuthDirty: boolean;
 }
 
 // ── Module-level planning helpers ────────────────────────────────────────────
@@ -136,9 +142,23 @@ export function planMiRetryRun(
   failedInstances: string[]
 ): MiRetryPlan {
   const retrySet = new Set(instanceIds);
-  const groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
-    ids.some((id) => retrySet.has(id))
-  );
+  // Only include members that are not already deployed — avoids creating duplicate policies when
+  // existing instance IDs appear in failedInstances (e.g. after a dirty-update failure where the
+  // underlying Fleet policies were already deployed and only the settings update failed).
+  const groupsToDeploy = deployGroups
+    .map((group) => {
+      const retryMembers = group.members.filter(
+        ({ instance }) =>
+          retrySet.has(instance.instanceId) && !(instance.instanceId in policyIdsByInstance)
+      );
+      if (retryMembers.length === 0) return null;
+      return {
+        ...group,
+        instanceIds: retryMembers.map(({ instance }) => instance.instanceId),
+        members: retryMembers,
+      };
+    })
+    .filter((g): g is DeployGroup => g !== null);
   // May be wider than retrySet when a bundled group is included.
   const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
   const remainingFailed = failedInstances.filter((id) => !deployedTargets.includes(id));
@@ -217,6 +237,8 @@ export function useMiDeploy({
   onboardingDeploymentId,
   policyIdsByInstance,
   pendingCleanupPolicyIds,
+  isDirty,
+  isAuthDirty,
 }: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
   return useCallback(
     async (instanceIds?: string[]) => {
@@ -228,10 +250,81 @@ export function useMiDeploy({
       // persisted policyIdsByInstance — filtering by deleted policyId alone misses toUpdate cases
       // where the policy survives with fewer inputs but the removed instance should not reappear.
       let cleanedInstanceIds = new Set<string>();
-      // Set when cleanup runs on the initial deploy path (targets.length > 0 branch). Written to
-      // state in the final shared update so succeeded entries are cleared after the deploy SO write.
-      // undefined means cleanup didn't run this invocation; the retry path writes mid-flight instead.
+      // undefined when cleanup didn't run; retry path writes mid-flight, initial path in final update.
       let remainingPending: Record<string, string> | undefined;
+      let dirtyUpdateApplied = false;
+
+      // Updates all already-deployed MI policies with the current session config.
+      // Returns whether any policy update failed and the full set of IDs to mark failed.
+      // additionalFailedIds: undeployed targets that should also surface as failed on error
+      // (plan.targets on initial run; plan.groupsToDeploy instanceIds on retry).
+      async function applyDirtyPolicyUpdates(
+        additionalFailedIds: string[]
+      ): Promise<{ hadFailures: boolean; allFailedIds: string[] }> {
+        const byPolicy = new Map<string, string[]>();
+        // Only include active instances (still in deployGroups). Removed instances whose
+        // policyIds linger in the SO are cleanup targets, not update targets; including them
+        // would cause resolveSurvivingMembers to reject on pruned synthetic instance IDs.
+        const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+        for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
+          if (!activeInstanceIds.has(instanceId)) continue;
+          if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
+          byPolicy.get(policyId)!.push(instanceId);
+        }
+        if (byPolicy.size === 0) {
+          // Distinguish two empty-byPolicy cases:
+          // (a) All policyIdsByInstance entries are deselected (cleanup targets) — not a failure.
+          //     activeInstanceIds has the new selection, so it's non-empty.
+          // (b) Resume via ?deploymentId skipped Step 2 — deployGroups is empty, so
+          //     activeInstanceIds is empty too. Fail closed to prevent clearing isDirty without
+          //     a Fleet PUT.
+          return activeInstanceIds.size === 0 && Object.keys(policyIdsByInstance).length > 0
+            ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
+            : { hadFailures: false, allFailedIds: [] };
+        }
+        const results = await Promise.allSettled(
+          [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+            updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
+              instances: serviceSettings?.instances ?? [],
+              storedServiceVars: serviceSettings?.serviceVars ?? {},
+              globalRegion: serviceSettings?.globalRegion ?? '',
+              namespace,
+              authenticateAndDeployStep,
+              servicesMap: servicesMap ?? new Map(),
+              // Override the connector when auth changed or when deploying with static keys.
+              // Static keys never use a cloud connector; any connector attached externally after
+              // the original deploy must be cleared on redeploy so credentials take effect.
+              // Without the static_keys guard, a key-replacement that doesn't set isAuthDirty
+              // (same authMethod/connectorId in the SO comparison) would silently preserve a
+              // connector that was attached by an operator after the initial deploy.
+              ...(isAuthDirty || authenticateAndDeployStep.authMethod === 'static_keys'
+                ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
+                : {}),
+            })
+          )
+        );
+        results.forEach((result) => {
+          if (result.status === 'rejected') {
+            // eslint-disable-next-line no-console
+            console.error(
+              'Failed to update managed-integration policy during dirty redeploy:',
+              result.reason
+            );
+          }
+        });
+        const hadFailures = results.some((r) => r.status === 'rejected');
+        return {
+          hadFailures,
+          allFailedIds: hadFailures
+            ? [
+                // Active instances only: deselected instances are cleanup targets and must not
+                // re-enter failedInstances once cleanup removes them from policyIdsByInstance.
+                ...Object.keys(policyIdsByInstance).filter((id) => activeInstanceIds.has(id)),
+                ...additionalFailedIds,
+              ]
+            : [],
+        };
+      }
 
       if (isInitialDeploy) {
         const plan = planMiInitialRun(
@@ -246,13 +339,67 @@ export function useMiDeploy({
         if (
           plan.targets.length === 0 &&
           Object.keys(plan.newNonAgentlessStatuses).length === 0 &&
-          !plan.hasPendingCleanup
+          !plan.hasPendingCleanup &&
+          !isDirty
         ) {
           onContinue();
           // Everything is already deployed: the only work left is a template-details write that
           // failed last time.
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
+        }
+
+        // Dirty update: update all already-deployed MI policies with the current session config.
+        // Runs when isDirty regardless of whether there are new targets, so existing policies
+        // are always brought up to date in the same run even when the user adds a service.
+        if (isDirty) {
+          // Lock the Deploy button before awaiting any Fleet calls so a double-click cannot
+          // start a second dirty-update run from the same undeployed-target snapshot.
+          setIsDeploying(true);
+          updateDetectAndReviewStep({ isDeploying: true });
+          // Include plan.targets so undeployed new services are also queued for retry — without
+          // this they are dropped from failedInstances and planMiRetryRun never deploys them.
+          const { hadFailures, allFailedIds } = await applyDirtyPolicyUpdates(plan.targets);
+          if (hadFailures) {
+            // At least one policy update failed — surface the existing instances as failed so
+            // hasFailed becomes true and the Retry button appears. Leave isDirty so Deploy stays
+            // visible for retry. Return cleanupFailed: true so the ECF-only gate blocks navigation.
+            setIsDeploying(false);
+            setFailedInstances(allFailedIds);
+            updateDetectAndReviewStep({
+              isDeploying: false,
+              failedInstances: allFailedIds,
+            });
+            return { cleanupFailed: true };
+          }
+
+          // Pure dirty-redeploy case: no new targets and no cleanup remaining.
+          if (plan.targets.length === 0 && !plan.hasPendingCleanup) {
+            if (onboardingDeploymentId) {
+              const soUpdated = await updateDeployment(onboardingDeploymentId, {
+                services: selectedServiceIds,
+                serviceVars: toSOServiceVars(
+                  serviceSettings?.serviceVars ?? {},
+                  servicesMap ?? new Map()
+                ) as Record<string, Record<string, unknown>>,
+                authMethod: authenticateAndDeployStep.authMethod ?? null,
+                connectorId: authenticateAndDeployStep.connectorId ?? null,
+              });
+              if (!soUpdated) {
+                // Toast already shown by updateDeployment. Keep isDirty so the user can retry.
+                // Return cleanupFailed: true so the ECF-only gate in handleNext blocks navigation.
+                setIsDeploying(false);
+                updateDetectAndReviewStep({ isDeploying: false });
+                return { cleanupFailed: true };
+              }
+            }
+            setIsDeploying(false);
+            updateDetectAndReviewStep({ isDeploying: false, isDirty: false, isAuthDirty: false });
+            await persistPendingIacTemplate();
+            return { cleanupFailed: false };
+          }
+          dirtyUpdateApplied = true;
+          // Falls through to the new-target deploy path below; isDirty cleared after that succeeds.
         }
 
         const initialStatuses = buildInstanceStatuses(plan.targets, []);
@@ -299,7 +446,7 @@ export function useMiDeploy({
           let soWriteSucceeded = true;
           if (
             onboardingDeploymentId &&
-            (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
+            (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0 || dirtyUpdateApplied)
           ) {
             const deletedIds = new Set(cleanupOps.toDelete);
             const survivingEntries = Object.entries(policyIdsByInstance).filter(
@@ -309,12 +456,27 @@ export function useMiDeploy({
               services: selectedServiceIds,
               packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
               policyIdsByInstance: Object.fromEntries(survivingEntries),
+              // When dirty update ran before cleanup, persist the new auth/serviceVars in the same
+              // write so the SO stays consistent even if a second write never happens.
+              ...(dirtyUpdateApplied
+                ? {
+                    serviceVars: toSOServiceVars(
+                      serviceSettings?.serviceVars ?? {},
+                      servicesMap ?? new Map()
+                    ) as Record<string, Record<string, unknown>>,
+                    authMethod: authenticateAndDeployStep.authMethod ?? null,
+                    connectorId: authenticateAndDeployStep.connectorId ?? null,
+                  }
+                : {}),
             });
           }
           setIsDeploying(false);
           updateDetectAndReviewStep({
             isDeploying: false,
             ...(soWriteSucceeded ? { pendingCleanupPolicyIds: {} } : {}),
+            ...(dirtyUpdateApplied && soWriteSucceeded
+              ? { isDirty: false, isAuthDirty: false }
+              : {}),
           });
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
@@ -333,6 +495,11 @@ export function useMiDeploy({
         setIsDeploying(true);
         updateDetectAndReviewStep({ isDeploying: true });
 
+        // Hoist cleanup result so it can be merged into a single updateDetectAndReviewStep call.
+        // React may batch synchronous state updates, meaning two sequential calls in the same
+        // tick both capture the same prev state — the second call would clobber the
+        // pendingCleanupPolicyIds written by the first.
+        let retryRemainingPending: Record<string, string> | undefined;
         if (Object.keys(plan.retryPending).length > 0) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
             pendingCleanupPolicyIds: plan.retryPending,
@@ -351,16 +518,53 @@ export function useMiDeploy({
             removeDeployInstances
           );
           cleanedInstanceIds = retryReconciliation.cleanedInstanceIds;
-          updateDetectAndReviewStep({
-            pendingCleanupPolicyIds: retryReconciliation.remainingPending,
-          });
+          retryRemainingPending = retryReconciliation.remainingPending;
         }
 
+        // Dirty-update failures (instance in policyIdsByInstance) whose settings have since been
+        // restored to match the SO (isDirty=false) are resolved: the unchanged policy is already
+        // correct and no PUT is needed. Retain only failures that still require action.
+        const cleanedByDriftRestore = isDirty
+          ? []
+          : instanceIds.filter((id) => id in (policyIdsByInstance ?? {}));
+        const effectiveRemainingFailed = plan.remainingFailed.filter(
+          (id) => !cleanedByDriftRestore.includes(id)
+        );
+
+        // Combine cleanup result with service-status update into one write so React batching
+        // cannot lose pendingCleanupPolicyIds.
         updateDetectAndReviewStep({
+          ...(retryRemainingPending !== undefined
+            ? { pendingCleanupPolicyIds: retryRemainingPending }
+            : {}),
           serviceStatuses: buildInstanceStatuses(plan.deployedTargets, []),
-          failedInstances: plan.remainingFailed,
+          failedInstances: effectiveRemainingFailed,
           deployErrors: {},
         });
+
+        // Dirty update on retry: bring all already-deployed policies up to date before
+        // re-deploying the failed ones, so a connector/serviceVar change is applied even if the
+        // user only clicks Retry (not a fresh Deploy).
+        if (isDirty) {
+          // Include undeployed retry targets so they remain queued for the next retry run.
+          const retryDeployTargets = plan.groupsToDeploy.flatMap((g) => g.instanceIds);
+          const { hadFailures, allFailedIds } = await applyDirtyPolicyUpdates(retryDeployTargets);
+          if (hadFailures) {
+            setIsDeploying(false);
+            setFailedInstances(allFailedIds);
+            updateDetectAndReviewStep({
+              isDeploying: false,
+              failedInstances: allFailedIds,
+              // Re-include cleanup result in case this write races with the combined write above;
+              // also prevents a batched call from losing the pendingCleanupPolicyIds update.
+              ...(retryRemainingPending !== undefined
+                ? { pendingCleanupPolicyIds: retryRemainingPending }
+                : {}),
+            });
+            return { cleanupFailed: true };
+          }
+          dirtyUpdateApplied = true;
+        }
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
@@ -412,8 +616,13 @@ export function useMiDeploy({
       const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
+      // When a dirty update was applied, exclude instances that were already deployed (in
+      // policyIdsByInstance) — they appear in failedInstances due to a dirty-update failure, but
+      // the settings update has now succeeded so they are no longer failed.
       const deployedSet = new Set(deployedTargets);
-      const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
+      const previouslyFailed = getLatestFailedInstances().filter(
+        (id) => !deployedSet.has(id) && !(dirtyUpdateApplied && id in policyIdsByInstance)
+      );
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       // Update SO with deploy outcome (best-effort).
@@ -436,6 +645,15 @@ export function useMiDeploy({
           packagePolicyIds: [...new Set(Object.values(mergedPolicyIdsByInstance))],
           policyIdsByInstance: mergedPolicyIdsByInstance,
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+          // Persist updated auth fields when a dirty update ran — authMethod/connectorId are not
+          // included in the initial createDeployment call body for existing-credential edits, so
+          // the SO would otherwise retain the old values after a combined dirty+new-target deploy.
+          ...(dirtyUpdateApplied
+            ? {
+                authMethod: authenticateAndDeployStep.authMethod ?? null,
+                connectorId: authenticateAndDeployStep.connectorId ?? null,
+              }
+            : {}),
         });
       }
 
@@ -456,6 +674,11 @@ export function useMiDeploy({
         // path. undefined leaves the retry path's mid-flight update intact.
         ...(remainingPending !== undefined && soWriteSucceeded
           ? { pendingCleanupPolicyIds: remainingPending }
+          : {}),
+        // Clear drift flag only when the SO write confirmed the new state — if the SO PUT failed
+        // the drift settings were not persisted, so isDirty must remain true to force a retry.
+        ...(dirtyUpdateApplied && mergedFailed.length === 0 && soWriteSucceeded
+          ? { isDirty: false, isAuthDirty: false }
           : {}),
       });
       return { cleanupFailed: false };
@@ -485,6 +708,8 @@ export function useMiDeploy({
       onboardingDeploymentId,
       policyIdsByInstance,
       pendingCleanupPolicyIds,
+      isDirty,
+      isAuthDirty,
     ]
   );
 }

@@ -6,13 +6,14 @@
  */
 
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
+import { ES_SERVICE_ACCOUNT_MAX_ROLES } from '../../common/service_accounts/constants';
 
 /**
  * How many roles Elasticsearch itself allows on a user-managed service account. Bounds both what
  * Kibana sends and what it is willing to read back, since an account written outside Kibana may
  * hold up to this many and must still read as "taken" rather than as unreadable.
  */
-export const ES_SERVICE_ACCOUNT_MAX_ROLES = 1000;
+export { ES_SERVICE_ACCOUNT_MAX_ROLES };
 
 /**
  * The longest role name Elasticsearch accepts on a user-managed service account, the

@@ -7,7 +7,7 @@
 
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-// eslint-disable-next-line @kbn/eslint/no_deprecated_imports
+// eslint-disable-next-line no-restricted-imports
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import type { JSX } from 'react';

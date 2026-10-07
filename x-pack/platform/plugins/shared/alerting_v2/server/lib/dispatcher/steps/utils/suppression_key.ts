@@ -22,7 +22,7 @@ export const suppressionEpisodeKey = (
  * Builds the series-scoped composite suppression key:
  * `${subject}:${group_hash}:*`
  *
- * Used to match series-level suppressions (null `episode_id`) against any
+ * Used to match series-level suppressions (null `alert_id`) against any
  * episode that belongs to the same series.
  */
 export const suppressionSeriesKey = (x: SubjectInput & { group_hash: string }): string =>

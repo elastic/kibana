@@ -6,7 +6,7 @@
  */
 
 import { ApiPrivileges } from '@kbn/core-security-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
@@ -29,18 +29,22 @@ import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalsByCategoryParams = z.object({
-  category: proposalCategorySchema,
-});
+const GetProposalsByCategoryParams = lazySchema(() =>
+  z.object({
+    category: proposalCategorySchema,
+  })
+);
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetProposalsByCategoryQuery = z
-  .object({
-    size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
-    from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
-  })
-  .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
+const GetProposalsByCategoryQuery = lazySchema(() =>
+  z
+    .object({
+      size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
+      from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+    })
+    .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` })
+);
 
 export const registerGetProposalsByCategoryRoute = ({
   router,
