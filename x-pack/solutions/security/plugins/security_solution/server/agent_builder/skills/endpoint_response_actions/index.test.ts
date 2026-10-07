@@ -31,7 +31,6 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.name).toBe('endpoint-response-actions');
       expect(skill.basePath).toBe('skills/security/endpoint');
       expect(skill.description).toContain('List enrolled Elastic Defend endpoints');
-      expect(skill.description).toContain('Do not use this skill');
       expect(skill.description).toContain('elastic-defend-configuration-troubleshooting');
       expect(skill.description).toContain('by hostname or agent ID');
       expect(skill.description).toContain('isolation state');
@@ -39,13 +38,11 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toContain('Endpoint Response Actions Skill');
     });
 
-    it('puts the diagnosis redirect before the status use cases', () => {
+    it('leads the description with the capability, not excluded intents', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const redirect = skill.description.toLowerCase().indexOf('why');
-      expect(redirect).toBeGreaterThanOrEqual(0);
-      expect(redirect).toBeLessThan(skill.description.indexOf('List enrolled'));
-      expect(skill.description).toContain('root cause');
-      expect(skill.description).toContain('failed');
+      const [firstSentence] = skill.description.split(/(?<=\.)\s/);
+      expect(firstSentence).toMatch(/status|List/);
+      expect(firstSentence).not.toMatch(/\bwhy\b|offline|missing|unhealthy/i);
       expect(skill.description).toContain('elastic-defend-configuration-troubleshooting');
       expect(skill.description.length).toBeLessThanOrEqual(1024);
     });
