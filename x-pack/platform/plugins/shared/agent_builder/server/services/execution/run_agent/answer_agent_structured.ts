@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { zodToolInputToJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -29,7 +28,10 @@ const structuredOutputZodSchema = z.object({
     .describe('Optional structured data to include in the response'),
 });
 
-const structuredOutputSchema = zodToolInputToJsonSchema(structuredOutputZodSchema);
+const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
+  io: 'input',
+  unrepresentable: 'any',
+}) as Record<string, unknown>;
 
 export { structuredOutputSchema };
 

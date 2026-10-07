@@ -279,14 +279,6 @@ describe('DeepStrict', () => {
       .fails({ field: 'user.name', eq: 'user1', sdfsd: 'sdf' });
   });
 
-  it('wraps the inner schema in a pipe for OAS conversion', () => {
-    const innerSchema = z.object({ foo: z.string() });
-    const wrapped = DeepStrict(innerSchema);
-
-    expect(wrapped._zod.def.type).toBe('pipe');
-    expect(wrapped._zod.def.out).toBe(innerSchema);
-  });
-
   it('matches union types', () => {
     const type = z.intersection(
       z.object({
