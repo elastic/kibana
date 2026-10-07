@@ -6,10 +6,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
-import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  DEPLOYMENTS_WITH_ALERTING_V2,
+} from '../../../common/constants';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -20,11 +22,6 @@ import {
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
-
-const DEPLOYMENTS_WITH_ALERTING_V2 = [
-  ...tags.stateful.all,
-  ...tags.serverless.observability.complete,
-];
 
 apiTest.describe('Get rule template tags API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;

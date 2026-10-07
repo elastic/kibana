@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { DEPLOYMENTS_WITH_ALERTING_V2 } from '../../../common/constants';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -19,11 +19,6 @@ import {
   RULE_TEMPLATE_TAGS_MAX_COUNT,
   testData,
 } from '../fixtures';
-
-const DEPLOYMENTS_WITH_ALERTING_V2 = [
-  ...tags.stateful.all,
-  ...tags.serverless.observability.complete,
-];
 
 const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>) =>
   items.map((template) => template.rule.metadata.name);
