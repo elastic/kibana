@@ -14,10 +14,8 @@ BIN_DIR="$(npm root)/.bin"
 cd -
 
 mkdir -p "$HOME/.kibana-buildkite/bin"
-ln -sf "$BIN_DIR/yarn" "$HOME/.kibana-buildkite/bin/yarn"
 ln -sf "$BIN_DIR/ts-node" "$HOME/.kibana-buildkite/bin/ts-node"
 
 export PATH="$HOME/.kibana-buildkite/bin:$PATH"
 
-echo "yarn: $(yarn --version)"
 echo "ts-node: $(ts-node --version)"

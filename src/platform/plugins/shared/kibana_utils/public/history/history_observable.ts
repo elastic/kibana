@@ -9,7 +9,7 @@
 
 import { Action, History, Location } from 'history';
 import { Observable } from 'rxjs';
-import { ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
 import deepEqual from 'fast-deep-equal';
 import { map } from 'rxjs';
 import { getQueryParams } from './get_query_params';

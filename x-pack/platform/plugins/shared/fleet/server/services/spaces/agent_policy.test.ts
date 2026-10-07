@@ -146,6 +146,77 @@ describe('updateAgentPolicySpaces', () => {
     );
   });
 
+  describe('with Synthetics package policies', () => {
+    beforeEach(() => {
+      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
+        {
+          id: 'synthetics-package-policy',
+          policy_ids: ['policy1'],
+          package: { name: 'synthetics' },
+        },
+      ] as any);
+    });
+
+    it('throws when moving the policy to a different space', async () => {
+      await expect(
+        updateAgentPolicySpaces({
+          agentPolicyId: 'policy1',
+          currentSpaceId: 'default',
+          newSpaceIds: ['test'],
+          authorizedSpaces: ['test', 'default'],
+        })
+      ).rejects.toThrow(
+        /Agent policies used by Synthetics private locations cannot be moved to a different space./
+      );
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).not.toHaveBeenCalled();
+    });
+
+    it('allows moving the policy with force', async () => {
+      await updateAgentPolicySpaces({
+        agentPolicyId: 'policy1',
+        currentSpaceId: 'default',
+        newSpaceIds: ['test'],
+        authorizedSpaces: ['test', 'default'],
+        options: { force: true },
+      });
+
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).toHaveBeenCalledWith(
+        [
+          { id: 'policy1', type: 'fleet-agent-policies' },
+          { id: 'synthetics-package-policy', type: 'fleet-package-policies' },
+        ],
+        ['test'],
+        ['default'],
+        { namespace: 'default', refresh: 'wait_for' }
+      );
+    });
+
+    it('allows adding a space without removing the existing one', async () => {
+      await updateAgentPolicySpaces({
+        agentPolicyId: 'policy1',
+        currentSpaceId: 'default',
+        newSpaceIds: ['default', 'test'],
+        authorizedSpaces: ['test', 'default'],
+      });
+
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).toHaveBeenCalledWith(
+        [
+          { id: 'policy1', type: 'fleet-agent-policies' },
+          { id: 'synthetics-package-policy', type: 'fleet-package-policies' },
+        ],
+        ['test'],
+        [],
+        { namespace: 'default', refresh: 'wait_for' }
+      );
+    });
+  });
+
   it('throw when trying to change a managed policies space', async () => {
     jest.mocked(agentPolicyService.get).mockResolvedValue({
       id: 'policy1',

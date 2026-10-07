@@ -212,7 +212,7 @@ describe('bulkUpdate()', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -225,7 +225,7 @@ describe('bulkUpdate()', () => {
           },
         });
         expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
-          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -409,7 +409,7 @@ describe('bulkUpdate()', () => {
 
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -422,7 +422,7 @@ describe('bulkUpdate()', () => {
           },
         });
         expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
-          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],

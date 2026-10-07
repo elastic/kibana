@@ -14,7 +14,7 @@ Remember that any time you need to make sure the monorepo is ready to be used ju
 
 [source,bash]
 ----
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ----
 
 [discrete]
@@ -24,7 +24,7 @@ Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ----
 
 [discrete]
@@ -34,7 +34,7 @@ Bazel packages are watched as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn watch
+pnpm kbn watch
 ----
 
 

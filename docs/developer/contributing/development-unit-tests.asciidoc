@@ -69,7 +69,7 @@ exported to be used.
 [[debugging-unit-tests]]
 === Debugging Unit Tests
 
-The standard `yarn test` task runs several sub tasks and can take
+The standard `pnpm test` task runs several sub tasks and can take
 several minutes to complete, making debugging failures pretty painful.
 In order to ease the pain specialized tasks provide alternate methods
 for running the tests.

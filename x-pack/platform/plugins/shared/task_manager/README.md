@@ -673,7 +673,7 @@ The task manager's public API is create / delete / list. Updates aren't directly
   Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
   ```
-  yarn test:jest x-pack/platform/plugins/shared/task_manager --watch
+  pnpm test:jest x-pack/platform/plugins/shared/task_manager --watch
   ```
 
 - Integration tests:

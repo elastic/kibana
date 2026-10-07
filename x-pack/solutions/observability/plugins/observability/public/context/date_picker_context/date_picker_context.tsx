@@ -8,7 +8,7 @@
 import React, { createContext, useState, useMemo, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '../..';
 import { getAbsoluteTime } from '../../utils/date';
@@ -77,7 +77,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
     rangeTo = sharedTimeRange.to ?? defaultTimeRange.to,
     refreshInterval = sharedRefreshInterval.value || defaultRefreshInterval.value || 10000, // we want to override a default of 0
     refreshPaused = sharedRefreshInterval.pause ?? defaultRefreshInterval.pause,
-  } = parse(location.search, {
+  } = queryString.parse(location.search, {
     sort: false,
   });
 
@@ -139,7 +139,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   );
 }
 
-function parseRefreshInterval(value: string | string[] | number | null): number {
+function parseRefreshInterval(value: string | Array<string | null> | number | null): number {
   switch (typeof value) {
     case 'number':
       return value;
@@ -150,7 +150,7 @@ function parseRefreshInterval(value: string | string[] | number | null): number 
   }
 }
 
-function parseRefreshPaused(value: string | string[] | boolean | null): boolean {
+function parseRefreshPaused(value: string | Array<string | null> | boolean | null): boolean {
   if (typeof value === 'boolean') {
     return value;
   }

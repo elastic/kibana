@@ -30,7 +30,7 @@ Since this is how tests are run on CI, this will likely be the configuration you
 
 ```shell
 # bootstrap kibana from the project root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
@@ -45,14 +45,14 @@ This is the preferred mode for developing new tests.
 
 ```shell
 # bootstrap kibana from the project root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/platform/plugins/shared/osquery
-yarn cypress:open-as-ci
+pnpm cypress:open-as-ci
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.

@@ -23,8 +23,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
-import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import {
   FIELD_TYPES,
@@ -46,6 +46,7 @@ import {
   convertStringToMoment,
   convertMomentToString,
 } from '@kbn/response-ops-recurring-schedule-form/converters/moment';
+import { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ResponsiveFormGroup } from './responsive_form_group';
 import { getReportParams } from '../report_params';
@@ -57,6 +58,7 @@ import { ReportTypeData, ScheduledReport } from '../../types';
 import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
 import { getStartDateValidator } from '../validators/start_date_validator';
+import { getParsedDateFormat } from '../utils';
 
 const { emptyField } = fieldValidators;
 
@@ -136,6 +138,8 @@ export const ScheduledReportFlyoutContent = ({
     http,
   });
   const { defaultTimezone } = useDefaultTimezone();
+  const rawDateFormat = useUiSetting<string>('dateFormat');
+  const dateFormat = useMemo(() => getParsedDateFormat(rawDateFormat), [rawDateFormat]);
   const schema = useMemo(
     () =>
       getScheduledReportFormSchema(
@@ -346,6 +350,7 @@ export const ScheduledReportFlyoutContent = ({
                     showTimeSelect: true,
                     minDate: now,
                     readOnly,
+                    dateFormat,
                   },
                 }}
               />

@@ -1364,13 +1364,21 @@ instanceStateValue: true
         });
 
         it('should filter alerts by hours', async () => {
-          const now = new Date();
-          now.setHours(now.getHours() + 1);
-          const hour = padStart(now.getUTCHours().toString(), 2, '0');
-          const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
+          const toUtcHoursMinutes = (date: Date) =>
+            `${padStart(date.getUTCHours().toString(), 2, '0')}:${padStart(
+              date.getUTCMinutes().toString(),
+              2,
+              '0'
+            )}`;
 
-          const start = `${hour}:${minutes}`;
-          const end = `${hour}:${minutes}`;
+          // A real future window that excludes "now"; a zero-width `start === end` is treated by the product as a 24h window and would match.
+          const startDate = new Date();
+          startDate.setHours(startDate.getHours() + 1);
+          const endDate = new Date(startDate);
+          endDate.setHours(endDate.getHours() + 1);
+
+          const start = toUtcHoursMinutes(startDate);
+          const end = toUtcHoursMinutes(endDate);
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
@@ -1527,6 +1535,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1572,6 +1581,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1633,6 +1643,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1678,6 +1689,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1787,6 +1799,7 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      tracked: true,
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),
@@ -1832,6 +1845,7 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      tracked: true,
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),

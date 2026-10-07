@@ -5,4 +5,4 @@ This example ui actions explorer app shows how to:
  - Add custom triggers
 
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

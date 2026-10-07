@@ -5,4 +5,4 @@ These ui actions examples shows how to:
  - Register custom triggers
  - Attach an action to a trigger
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.
