@@ -58,7 +58,7 @@ export const GetAgentPoliciesRequestSchema = {
         defaultValue: true,
         meta: {
           description:
-            'When false, exclude managed integration policies from the results. You can use the managed integrations APIs to manage these policies.',
+            'When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.',
         },
       }),
       noAgentCount: schema.maybe(
