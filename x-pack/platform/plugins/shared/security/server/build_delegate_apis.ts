@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
