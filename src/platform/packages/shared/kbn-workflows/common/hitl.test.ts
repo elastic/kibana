@@ -27,9 +27,9 @@ describe('getHitlChannelConnectorTypeFromPath', () => {
     expect(
       getHitlChannelConnectorTypeFromPath(['with', 'channels', 'slack2', 'connector-id'])
     ).toBe('slack2.sendMessage');
-    expect(
-      getHitlChannelConnectorTypeFromPath(['with', 'channels', 'teams', 'connector-id'])
-    ).toBe('microsoft-teams.sendChannelMessage');
+    expect(getHitlChannelConnectorTypeFromPath(['with', 'channels', 'teams', 'connector-id'])).toBe(
+      'microsoft-teams.sendChannelMessage'
+    );
   });
 
   it('returns null outside a HITL channel connector-id path', () => {

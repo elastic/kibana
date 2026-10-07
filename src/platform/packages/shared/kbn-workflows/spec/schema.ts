@@ -402,8 +402,7 @@ const hitlChannelDescriptions = {
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
-  teams:
-    'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
+  teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
