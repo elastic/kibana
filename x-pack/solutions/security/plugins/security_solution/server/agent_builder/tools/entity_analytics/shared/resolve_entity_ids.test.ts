@@ -6,7 +6,7 @@
  */
 
 import { resolveSingleEntity } from '../entity_resolution';
-import { resolveEntityIdsForResolution } from './resolve_entity_ids';
+import { resolveEntityIds } from './resolve_entity_ids';
 
 jest.mock('../entity_resolution', () => ({
   resolveSingleEntity: jest.fn(),
@@ -16,7 +16,7 @@ const mockResolveSingleEntity = resolveSingleEntity as jest.Mock;
 
 const baseParams = { esClient: {} as never, spaceId: 'default' };
 
-describe('resolveEntityIdsForResolution', () => {
+describe('resolveEntityIds', () => {
   beforeEach(() => {
     mockResolveSingleEntity.mockReset();
   });
@@ -32,7 +32,7 @@ describe('resolveEntityIdsForResolution', () => {
         identity: { identifierType: 'host', identifier: 'server1', entityStoreId: 'host:server1' },
       });
 
-    const result = await resolveEntityIdsForResolution({
+    const result = await resolveEntityIds({
       ...baseParams,
       entityIds: ['jsmith', 'server1'],
     });
@@ -55,7 +55,7 @@ describe('resolveEntityIdsForResolution', () => {
       },
     });
 
-    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['bob.temp'] });
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['bob.temp'] });
 
     expect(result.resolved).toEqual([{ euid: 'user:bob.temp', resolvedTo: 'user:bob.real' }]);
   });
@@ -66,7 +66,7 @@ describe('resolveEntityIdsForResolution', () => {
       identity: { identifierType: 'host', identifier: 'server1', entityStoreId: 'host:server1' },
     });
 
-    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['server1'] });
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['server1'] });
 
     expect(result.resolved).toEqual([{ euid: 'host:server1', resolvedTo: undefined }]);
   });
@@ -74,7 +74,7 @@ describe('resolveEntityIdsForResolution', () => {
   it('excludes the reference from resolved, reporting it as unresolved, when not_found', async () => {
     mockResolveSingleEntity.mockResolvedValueOnce({ status: 'not_found' });
 
-    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['ghost'] });
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['ghost'] });
 
     expect(result.resolved).toEqual([]);
     expect(result.unresolved).toEqual([{ entityId: 'ghost', status: 'not_found' }]);
@@ -87,7 +87,7 @@ describe('resolveEntityIdsForResolution', () => {
       candidateEntityIds: ['host:server1', 'host:server10'],
     });
 
-    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['server'] });
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['server'] });
 
     expect(result.resolved).toEqual([]);
     expect(result.unresolved).toEqual([
@@ -106,10 +106,10 @@ describe('resolveEntityIdsForResolution', () => {
       identity: { identifierType: 'host', identifier: 'server1' },
     });
 
-    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['server1'] });
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['server1'] });
 
     expect(result.resolved).toEqual([]);
-    expect(result.unresolved).toEqual([{ entityId: 'server1', status: 'resolved' }]);
+    expect(result.unresolved).toEqual([{ entityId: 'server1', status: 'no_identity' }]);
   });
 
   it('resolves each id independently, mixing resolved and unresolved outcomes', async () => {
@@ -120,7 +120,7 @@ describe('resolveEntityIdsForResolution', () => {
       })
       .mockResolvedValueOnce({ status: 'not_found' });
 
-    const result = await resolveEntityIdsForResolution({
+    const result = await resolveEntityIds({
       ...baseParams,
       entityIds: ['jsmith', 'ghost'],
     });
