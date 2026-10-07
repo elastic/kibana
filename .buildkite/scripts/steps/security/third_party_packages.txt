@@ -1,3 +1,4 @@
+@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -22,7 +23,6 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
-@ai-sdk/langchain
 ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
@@ -33,12 +33,12 @@ yaml-language-server
 @opentelemetry/api-logs
 @opentelemetry/exporter-logs-otlp-http
 @opentelemetry/sdk-logs
-simple-statistics
 monaco-promql
 json-stable-stringify
 apache-arrow
 oxlint
 react-element-to-jsx-string
+@babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
 tar-fs
@@ -72,3 +72,5 @@ graphql
 @cfworker/json-schema
 oxlint-tsgolint
 bump-cli
+@oxlint/plugins
+monaco-marker-data-provider

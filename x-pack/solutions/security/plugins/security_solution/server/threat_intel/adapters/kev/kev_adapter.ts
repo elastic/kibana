@@ -35,6 +35,15 @@ const isCompleteKevEntry = (vuln: KevVulnerability): boolean =>
       vuln.dueDate
   );
 
+/**
+ * KEV reports skip `enrich_threat_report` (`extraction_method: 'kev'`), so nothing ever
+ * writes their `extracted.relevance` or `rank_score`. The hunt candidates query sorts on
+ * `rank_score` desc with `missing: 0`, which parked every KEV entry behind every enriched
+ * report for good. Write the same neutral baseline the enrich workflow falls back to when
+ * its relevance step fails, so a KEV entry ranks like an unscored article, not below it.
+ */
+const KEV_RELEVANCE = 0.5;
+
 const KEV_FEED_URL =
   'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
 
@@ -162,6 +171,7 @@ const buildKevReport = (
       level: 'high',
       score: severityScore('high'),
     },
+    rank_score: severityScore('high') * KEV_RELEVANCE,
     lineage: {
       ingested_at: ingestedAt,
       extraction_method: 'kev',
@@ -170,6 +180,7 @@ const buildKevReport = (
     },
     extracted: {
       categories: ['vulnerability'],
+      relevance: KEV_RELEVANCE,
       vulnerability: {
         cve_id: vuln.cveID,
         vendor: vuln.vendorProject,

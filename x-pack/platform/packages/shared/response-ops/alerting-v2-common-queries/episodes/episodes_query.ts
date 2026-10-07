@@ -44,7 +44,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
-  'snooze_expiry',
+  'snoozed_until',
   'last_tags',
   'episode_data',
   'severity',
@@ -127,22 +127,22 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-                       snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
                        first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
           BY group_hash`;
 };
 
 const addEpisodeIdActionStats = (query: ComposerQuery) => {
-  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
-  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
+  // `.rule-events` documents carry the nested `alert.id`, while `.alert-actions`
+  // documents carry a flat `alert_id` — unify them so INLINE STATS groups both
   // sides under the same key.
   // prettier-ignore
   query
-    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
+    .pipe`EVAL alert_id = COALESCE(\`alert.id\`, alert_id)`
     .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
                        last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
                        last_tags            = LAST(tags,         @timestamp) WHERE action_type == "tag"
-          BY episode_id`;
+          BY alert_id`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {

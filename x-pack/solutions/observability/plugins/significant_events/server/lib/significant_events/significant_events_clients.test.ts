@@ -6,25 +6,19 @@
  */
 
 import { detectionsDataStream } from './detections';
-import { eventsDataStream } from './events';
+import { RuleEventsClient } from './events';
 import {
   createSignificantEventsClients,
   type SignificantEventsServices,
 } from './significant_events_clients';
 
 describe('createSignificantEventsClients', () => {
-  it('initializes each Core client only when requested', async () => {
+  it('initializes the detection Core client only when requested', async () => {
     const detectionClient = {};
-    const eventClient = {};
-    const detectionDataStreamClient = {};
-    const eventDataStreamClient = {};
     const services: SignificantEventsServices = {
       detection: { getClient: jest.fn().mockReturnValue(detectionClient) } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
     };
-    const initializeClient = jest.fn(async (name: string) =>
-      name === detectionsDataStream.name ? detectionDataStreamClient : eventDataStreamClient
-    );
+    const initializeClient = jest.fn(async () => ({}));
 
     const clients = createSignificantEventsClients({
       services,
@@ -35,8 +29,31 @@ describe('createSignificantEventsClients', () => {
 
     expect(initializeClient).not.toHaveBeenCalled();
     await expect(clients.getDetectionClient()).resolves.toBe(detectionClient);
-    await expect(clients.getEventClient()).resolves.toBe(eventClient);
-    expect(initializeClient).toHaveBeenNthCalledWith(1, detectionsDataStream.name);
-    expect(initializeClient).toHaveBeenNthCalledWith(2, eventsDataStream.name);
+    expect(initializeClient).toHaveBeenCalledTimes(1);
+    expect(initializeClient).toHaveBeenCalledWith(detectionsDataStream.name);
+  });
+
+  it('getEventSearchClient() always returns a RuleEventsClient', async () => {
+    const clients = createSignificantEventsClients({
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
+      esClient: {} as never,
+      space: 'default',
+    });
+
+    await expect(clients.getEventSearchClient()).resolves.toBeInstanceOf(RuleEventsClient);
+  });
+
+  it('exposes the provided trigger emitter', () => {
+    const triggerEmitter = jest.fn();
+    const clients = createSignificantEventsClients({
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
+      esClient: {} as never,
+      space: 'default',
+      triggerEmitter,
+    });
+
+    expect(clients.emitTrigger).toBe(triggerEmitter);
   });
 });

@@ -13,18 +13,26 @@ import {
 describe('matchActionPoliciesBodySchema', () => {
   it('accepts a valid rule payload', () => {
     const result = matchActionPoliciesBodySchema.parse({
-      rule: { tags: ['cpu'] },
+      rule: { routing_tags: ['cpu'] },
     });
 
     expect(result).toEqual({
-      rule: { tags: ['cpu'] },
+      rule: { routing_tags: ['cpu'] },
     });
+  });
+
+  it('rejects rule.tags, since policies match on routing tags', () => {
+    expect(() =>
+      matchActionPoliciesBodySchema.parse({
+        rule: { tags: ['cpu'] },
+      })
+    ).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       matchActionPoliciesBodySchema.parse({
-        rule: { tags: ['cpu'] },
+        rule: { routing_tags: ['cpu'] },
         unknownField: 'x',
       })
     ).toThrow();
@@ -33,7 +41,7 @@ describe('matchActionPoliciesBodySchema', () => {
   it('rejects rule id and name (strict, no longer supported)', () => {
     expect(() =>
       matchActionPoliciesBodySchema.parse({
-        rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+        rule: { id: 'rule-1', name: 'my-rule', routing_tags: ['cpu'] },
       })
     ).toThrow();
   });
@@ -48,30 +56,28 @@ describe('matchActionPoliciesBodySchema', () => {
 });
 
 describe('matchActionPoliciesResponseSchema', () => {
-  const emptyResponse = { items: [], total: 0, evaluated_count: 0, is_truncated: false };
+  const emptyResponse = { items: [], evaluated_count: 0, is_truncated: false };
 
   it.each([
     emptyResponse,
-    { items: [], total: 3, evaluated_count: 3, is_truncated: false },
-    { items: [], total: 250, evaluated_count: 100, is_truncated: true },
+    { items: [], evaluated_count: 3, is_truncated: false },
+    { items: [], evaluated_count: 100, is_truncated: true },
   ])('accepts a response with an empty list and evaluation metadata: %j', (response) => {
     expect(matchActionPoliciesResponseSchema.parse(response)).toEqual(response);
   });
 
-  it.each(['total', 'evaluated_count', 'is_truncated'])('requires %s', (field) => {
+  it.each(['evaluated_count', 'is_truncated'])('requires %s', (field) => {
     expect(() =>
       matchActionPoliciesResponseSchema.parse({ ...emptyResponse, [field]: undefined })
     ).toThrow();
   });
 
-  it.each([
-    { total: -1 },
-    { evaluated_count: -1 },
-    { evaluated_count: 1.5 },
-    { is_truncated: 'true' },
-  ])('rejects invalid evaluation metadata: %j', (invalidFields) => {
-    expect(() =>
-      matchActionPoliciesResponseSchema.parse({ ...emptyResponse, ...invalidFields })
-    ).toThrow();
-  });
+  it.each([{ evaluated_count: -1 }, { evaluated_count: 1.5 }, { is_truncated: 'true' }])(
+    'rejects invalid evaluation metadata: %j',
+    (invalidFields) => {
+      expect(() =>
+        matchActionPoliciesResponseSchema.parse({ ...emptyResponse, ...invalidFields })
+      ).toThrow();
+    }
+  );
 });

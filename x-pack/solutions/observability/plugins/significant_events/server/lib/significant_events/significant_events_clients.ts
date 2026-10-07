@@ -14,24 +14,24 @@ import {
   type detectionsMappings,
 } from './detections';
 import type { DetectionClient } from './detections';
-import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
-import type { EventClient } from './events';
+import { RuleEventsClient } from './events/rule_events_client';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
-  event: EventService;
 }
 
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
-  getEventClient: () => Promise<EventClient>;
+  /** Reads Significant Events from `.rule-events`. Writes go through `AlertEventsClient`. */
+  getEventSearchClient: () => Promise<RuleEventsClient>;
+  /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
+  emitTrigger: TriggerEmitter | undefined;
 }
 
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
     detection: new DetectionService(),
-    event: new EventService(),
   };
 }
 
@@ -48,6 +48,8 @@ export function createSignificantEventsClients({
   space: string;
   triggerEmitter?: TriggerEmitter;
 }): SignificantEventsClients {
+  const eventSearchClient = new RuleEventsClient({ esClient, space });
+
   return {
     getDetectionClient: async () =>
       services.detection.getClient({
@@ -58,14 +60,7 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    getEventClient: async () =>
-      services.event.getClient({
-        dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-          eventsDataStream.name
-        ),
-        esClient,
-        space,
-        triggerEmitter,
-      }),
+    getEventSearchClient: async () => eventSearchClient,
+    emitTrigger: triggerEmitter,
   };
 }

@@ -100,16 +100,17 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
 
     const allIndices = ['logs-*.otel-*', 'logs.otel', 'logs.otel.*', 'metrics-*.otel-*'];
 
-    const filters: estypes.QueryDslQueryContainer[] = [{ range: { '@timestamp': { gte: start } } }];
-    if (osType) {
-      filters.push({ term: { 'host.os.type': osType } });
-    }
+    // EDOT stores the OS as the `os.type` resource attribute (linux, darwin, windows).
+    // Elasticsearch doesn't map `host.os.type` for OTel data.
+    const osFilters: estypes.QueryDslQueryContainer[] = osType
+      ? [{ term: { 'os.type': osType } }]
+      : [];
     const query: estypes.QueryDslQueryContainer = {
-      bool: { filter: filters },
+      bool: { filter: [{ range: { '@timestamp': { gte: start } } }, ...osFilters] },
     };
 
     const [preExisting, [logsResult, metricsResult]] = await Promise.all([
-      checkPreExistingData(elasticsearch.client.asCurrentUser, allIndices, start),
+      checkPreExistingData(elasticsearch.client.asCurrentUser, allIndices, start, osFilters),
       Promise.allSettled([
         elasticsearch.client.asCurrentUser.search({
           index: ['logs-*.otel-*', 'logs.otel', 'logs.otel.*'],

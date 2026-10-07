@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/significant-events-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-sre-agent-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/significant-events-plugin'
   description: Moon project for @kbn/significant-events-plugin
   channel: ''
-  owner: '@elastic/nightshift-sre-agent-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/significant_events
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
@@ -59,7 +59,6 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/storage-adapter'
-  - '@kbn/search-inference-endpoints'
   - '@kbn/core-analytics-server'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
@@ -75,14 +74,14 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/scout-oblt'
-  - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/datemath'
   - '@kbn/core-http-server-utils'
+  - '@kbn/cps'
   - '@kbn/cps-server-utils'
-  - '@kbn/inference-prompt-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/core-elasticsearch-server-mocks'
 tags:
   - plugin
   - prod

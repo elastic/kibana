@@ -25,12 +25,16 @@ import {
   defaultExportProfile,
   envFromDatasetsProfile,
   envFromExportProfile,
+  loadVaultConfig,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
 } from './profiles';
+import { runScoutHook } from './scout_hook';
+import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
+import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -49,7 +53,8 @@ const shellQuote = (value: string): string => {
 export const formatEvalCliCommand = (args: string[]): string =>
   ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
 
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
+/** Finds a suite by id, refreshing discovery once before failing with the available ids. */
+export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
   const match = suites.find((suite) => suite.id === suiteId);
   if (match) return match;
@@ -199,10 +204,27 @@ export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined
   }
 };
 
+/** Reads `--concurrency`, failing on a bad flag or `EVAL_CONCURRENCY` before a stack boots. */
+export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefined => {
+  try {
+    const concurrency = parseConcurrency(flagsReader.string('concurrency'), '--concurrency');
+    if (concurrency !== undefined) {
+      return String(concurrency);
+    }
+    // Without the flag, EVAL_CONCURRENCY passes through untouched to the Playwright config.
+    getConcurrencyFromEnv();
+    return undefined;
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
 export interface ResolvedProfileEnv {
   datasetsProfile?: string;
   exportProfile?: string;
   profileEnvOverrides: Record<string, string>;
+  /** Output of the suite's `scoutHook`, for both Scout and the Playwright run. */
+  suiteScoutEnv: Record<string, string>;
 }
 
 export interface ResolveProfileEnvOverridesOptions {
@@ -210,13 +232,22 @@ export interface ResolveProfileEnvOverridesOptions {
   log: ToolingLog;
   flagsReader: FlagsReader;
   profile?: string;
+  suite?: EvalSuiteDefinition;
 }
+
+/**
+ * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
+ * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ */
+const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
+  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
   log,
   flagsReader,
   profile,
+  suite,
 }: ResolveProfileEnvOverridesOptions): Promise<ResolvedProfileEnv> => {
   const datasetsProfile = flagsReader.string('datasets-profile') ?? profile;
   const exportProfile =
@@ -246,7 +277,11 @@ export const resolveProfileEnvOverrides = async ({
     }
   }
 
-  return { datasetsProfile, exportProfile, profileEnvOverrides };
+  const suiteScoutEnv = suite?.scoutHook
+    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
+    : {};
+
+  return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
 };
 
 export const resolveEvaluationConnectorId = async (
@@ -274,6 +309,7 @@ export interface EvalRunContext {
   evaluationConnectorId: string;
   projects: string[];
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv: Record<string, string>;
   datasetsProfile?: string;
   exportProfile?: string;
   requiresEisCcm: boolean;
@@ -284,6 +320,7 @@ export interface ResolveEvalRunContextOptions {
   log: ToolingLog;
   flagsReader: FlagsReader;
   profile?: string;
+  suite?: EvalSuiteDefinition;
 }
 
 export const resolveEvalRunContext = async ({
@@ -291,6 +328,7 @@ export const resolveEvalRunContext = async ({
   log,
   flagsReader,
   profile,
+  suite,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
   const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
@@ -322,17 +360,20 @@ export const resolveEvalRunContext = async ({
     }
   }
 
-  const { datasetsProfile, exportProfile, profileEnvOverrides } = await resolveProfileEnvOverrides({
-    repoRoot,
-    log,
-    flagsReader,
-    profile,
-  });
+  const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
+    await resolveProfileEnvOverrides({
+      repoRoot,
+      log,
+      flagsReader,
+      profile,
+      suite,
+    });
 
   return {
     evaluationConnectorId,
     projects,
     profileEnvOverrides,
+    suiteScoutEnv,
     datasetsProfile,
     exportProfile,
     requiresEisCcm,
@@ -345,6 +386,7 @@ export const buildEvalRunEnv = ({
   skipServer,
   suite,
   profileEnvOverrides,
+  suiteScoutEnv,
   flagsReader,
   log,
 }: {
@@ -353,6 +395,7 @@ export const buildEvalRunEnv = ({
   skipServer: boolean;
   suite?: EvalSuiteDefinition;
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv: Record<string, string>;
   flagsReader: FlagsReader;
   log: ToolingLog;
 }): Record<string, string> => {
@@ -368,7 +411,7 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_SUITE_ID = suite.id;
   }
 
-  Object.assign(envOverrides, profileEnvOverrides);
+  Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
   if (envOverrides.TRACING_ES_URL) {
     log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
@@ -377,6 +420,11 @@ export const buildEvalRunEnv = ({
   const repetitions = flagsReader.string('repetitions');
   if (repetitions) {
     envOverrides.EVAL_REPETITIONS = repetitions;
+  }
+
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    envOverrides.EVAL_CONCURRENCY = concurrency;
   }
 
   const spaceIds = readSpaceIdsFlag(flagsReader);
@@ -451,9 +499,21 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    runArgs.push('--concurrency', concurrency);
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     runArgs.push('--space-ids', spaceIds.join(','));
+  }
+
+  for (const flag of ['scout-arch', 'scout-domain']) {
+    const value = flagsReader.string(flag);
+    if (value) {
+      runArgs.push(`--${flag}`, value);
+    }
   }
 
   if (skipServer) {
@@ -463,6 +523,16 @@ export const buildEvalRunArgs = ({
   return runArgs;
 };
 
+/** The Scout arch/domain for a run: `--scout-arch` / `--scout-domain`, else the suite's. */
+export const resolveEvalScoutTarget = (
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition
+): ScoutTarget =>
+  resolveScoutTarget(suite, {
+    arch: flagsReader.string('scout-arch'),
+    domain: flagsReader.string('scout-domain'),
+  });
+
 export const evalRunFlags: FlagOptions = {
   string: [
     'suite',
@@ -470,6 +540,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'concurrency',
     'space-ids',
     'grep',
     'profile',
@@ -477,6 +548,8 @@ export const evalRunFlags: FlagOptions = {
     'export-profile',
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
+    'scout-arch',
+    'scout-domain',
   ],
   boolean: ['skip-server', 'dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },

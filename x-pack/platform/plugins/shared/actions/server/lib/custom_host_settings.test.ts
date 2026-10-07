@@ -11,6 +11,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import type { ActionsConfig } from '../config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -92,6 +93,7 @@ describe('custom_host_settings', () => {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
+        ...defaultInboundEventsLimitConfigs,
       },
     };
 

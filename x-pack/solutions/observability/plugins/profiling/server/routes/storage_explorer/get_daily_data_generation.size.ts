@@ -6,7 +6,7 @@
  */
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 
 export function getEstimatedSizeForDocumentsInIndex({
   allIndicesStats,

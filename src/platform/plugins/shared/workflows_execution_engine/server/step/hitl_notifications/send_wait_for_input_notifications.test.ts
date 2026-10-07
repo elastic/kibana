@@ -35,4 +35,55 @@ describe('sendWaitForInputNotifications', () => {
       expect.objectContaining({ channelIds: ['C0123'] })
     );
   });
+
+  it('sends slack2 sendMessage with default Open form mrkdwn and optional message override', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        slack2: { 'connector-id': 'slack2-1', channels: ['C0123'] },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form?token=abc&x=1',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'slack2',
+        input: {
+          subAction: 'sendMessage',
+          subActionParams: {
+            channel: 'C0123',
+            text: 'Please provide input\n\n<https://kibana.example/form?token=abc&amp;x=1|Open form>',
+            unfurlLinks: false,
+            unfurlMedia: false,
+          },
+        },
+      })
+    );
+
+    execute.mockClear();
+    await sendWaitForInputNotifications({
+      channels: {
+        slack2: {
+          'connector-id': 'slack2-1',
+          channels: ['C0123'],
+          message: 'Custom: {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.text).toBe(
+      'Custom: https://kibana.example/form'
+    );
+  });
 });

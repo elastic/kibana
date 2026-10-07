@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, useGeneratedHtmlId } from '@elastic/eui';
 
 /** Fixed label-column width, ported from the Sep 14 prototype (notdaybreak_mvp WorkerSettingsForm). */
 const LABEL_COL_PX = 200;
@@ -25,6 +25,9 @@ interface SettingRowProps {
 /**
  * Label-left / control-right settings row: a two-column grid with a fixed-width label column so
  * every row aligns on the same label/control boundary regardless of control width.
+ *
+ * The control column is a labelled group, so a screen reader entering any control announces the
+ * row label and its help line; the controls themselves only need their own `aria-label`.
  */
 export const SettingRow: React.FC<SettingRowProps> = ({
   label,
@@ -32,25 +35,26 @@ export const SettingRow: React.FC<SettingRowProps> = ({
   children,
   'data-test-subj': dataTestSubj,
 }) => {
+  const labelId = useGeneratedHtmlId({ prefix: 'alertZeroSettingRowLabel' });
+  const helpId = useGeneratedHtmlId({ prefix: 'alertZeroSettingRowHelp' });
+
   return (
     <div
       data-test-subj={dataTestSubj}
       css={css`
         display: grid;
         grid-template-columns: ${LABEL_COL_PX}px minmax(0, 1fr);
+        @media (max-width: 960px) {
+          grid-template-columns: minmax(0, 1fr);
+        }
         column-gap: ${LABEL_CONTROL_GAP_PX}px;
         align-items: start;
         padding-block: ${ROW_PAD_BLOCK_PX}px;
       `}
     >
       <div>
-        <EuiText
-          size="s"
-          css={css`
-            white-space: nowrap;
-          `}
-        >
-          <strong>{label}</strong>
+        <EuiText size="s">
+          <strong id={labelId}>{label}</strong>
         </EuiText>
         {labelHelp ? (
           <EuiText
@@ -61,6 +65,7 @@ export const SettingRow: React.FC<SettingRowProps> = ({
             `}
           >
             <p
+              id={helpId}
               css={css`
                 margin: 0;
               `}
@@ -71,6 +76,9 @@ export const SettingRow: React.FC<SettingRowProps> = ({
         ) : null}
       </div>
       <div
+        role="group"
+        aria-labelledby={labelId}
+        aria-describedby={labelHelp ? helpId : undefined}
         css={css`
           min-width: 0;
         `}

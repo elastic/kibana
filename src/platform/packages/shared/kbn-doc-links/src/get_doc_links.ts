@@ -184,7 +184,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ingestionApis: `${ELASTIC_DOCS}solutions/search`,
       ingestPipelines: `${ELASTIC_DOCS}solutions/search/search-pipelines`,
       knnSearch: `${ELASTIC_DOCS}solutions/search/vector/knn`,
-      knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn#_combine_approximate_knn_with_other_features`,
+      knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn/approximate-knn-query-examples#combine_approximate_knn_with_other_features`,
       languageAnalyzers: `${ELASTIC_DOCS}reference/text-analysis/analysis-lang-analyzer`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
@@ -380,6 +380,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
       mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
+      mappingKeyword: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/keyword`,
+      mappingBoolean: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/boolean`,
+      mappingIp: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/ip`,
+      mappingDate: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/date`,
+      mappingUnsignedLong: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/unsigned-long`,
+      mappingNumber: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/number`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -523,6 +529,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         api: isServerless
           ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-entity-analytics-api`
           : `${KIBANA_APIS}group/endpoint-security-entity-analytics-api`,
+        explore: {
+          landing: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/explore`,
+          hostsPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/hosts-page`,
+          networkPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/network-page`,
+          usersPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/users-page`,
+        },
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,
@@ -578,7 +590,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       savedObjectsApiList: isServerless
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
         : `${KIBANA_APIS}group/endpoint-saved-objects`,
-      apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+      apiKeys: isServerless
+        ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
+        : `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
       queryActivity: `${ELASTIC_DOCS}deploy-manage/monitor/query-activity`,
     },
     ml: {
@@ -1122,6 +1136,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     contextEngine: {
       overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
+      aiIndices: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#ai-indices`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

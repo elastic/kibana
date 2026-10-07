@@ -86,15 +86,24 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     pollKey: workflowId,
   });
 
-  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const { selectedExecutionId, updateUrlState } = useWorkflowUrlState();
   const [lastViewedExecutionId, setLastViewedExecutionId] = useState<string | null>(null);
 
   const handleViewWorkflowExecution = useCallback(
     (executionId: string) => {
       setLastViewedExecutionId(executionId);
-      setSelectedExecution(executionId);
+      // replace: false so Back returns to the draft. updateUrlState replaces by default.
+      updateUrlState(
+        {
+          tab: 'executions',
+          executionId,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false }
+      );
     },
-    [setSelectedExecution]
+    [updateUrlState]
   );
 
   const onConfirmCancel = useCallback(async () => {

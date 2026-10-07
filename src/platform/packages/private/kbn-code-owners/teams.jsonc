@@ -497,6 +497,18 @@
     }
   },
   {
+    "id": "nightshift",
+    "name": "Nightshift",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift",
+      "label": "Team:nightshift"
+    },
+    "responsibilities": [
+      "Nightshift"
+    ]
+  },
+  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
@@ -650,6 +662,21 @@
       "Distributed tracing",
       "Service maps",
       "APM data access"
+    ]
+  },
+  {
+    "id": "obs-signals-ai-o11y",
+    "name": "Obs Signals AI O11y",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-ai-o11y",
+      "label": "Team:obs-signals-ai-o11y"
+    },
+    "responsibilities": [
+      "GenAI tab",
+      "AI observability"
     ]
   },
   {
@@ -1139,6 +1166,9 @@
   {
     "id": "security-investigations",
     "name": "Security Investigations",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-investigations",
       "label": "Team:Security Investigations"

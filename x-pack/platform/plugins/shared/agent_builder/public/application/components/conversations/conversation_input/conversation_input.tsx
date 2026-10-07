@@ -5,25 +5,41 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  euiCanAnimate,
+  euiShadow,
+  euiShadowHover,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  CONVERSATION_INPUT_SHELL_RADIUS,
+  ConversationInputShell,
+  formatAgentBuilderErrorMessage,
+} from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
+import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
   useAgentId,
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
+  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
@@ -37,23 +53,149 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
   defaultMessage: 'Message input form',
 });
 
-const flexGrowZeroStyles = css`
+const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
+  defaultMessage: 'Leaving a post to the team',
+});
+
+const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
+  width: 100%;
+  border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
+  ${euiCanAnimate} {
+    transition: background-color ${euiTheme.animation.fast} ease-out, box-shadow 250ms;
+  }
+`;
+
+// The shell's shadow would stop at the input and leave the post-to-team bar outside it.
+const composerShadowStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiShadow(euiThemeContext, 's')}
+  &:hover {
+    ${euiShadowHover(euiThemeContext, 's')}
+  }
+`;
+
+const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
+  &:focus-within {
+    ${euiShadow(euiThemeContext, 'xl')}
+    &:hover {
+      ${euiShadowHover(euiThemeContext, 'xl')}
+    }
+  }
+`;
+
+// In dark mode the wrapper's shadow draws a border overlay over the shell, hiding its focus border.
+const shellStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: relative;
+  z-index: ${Number(euiTheme.levels.content) + 1};
+`;
+
+const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
+  background-color: ${euiTheme.colors.backgroundBaseDisabled};
+`;
+
+// The header stays mounted so it can slide back behind the input on the way out;
+// visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
+// Animating the grid row lets the height follow the label, which can wrap when translated.
+const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  ${euiCanAnimate} {
+    transition: grid-template-rows ${euiTheme.animation.fast} ease-out,
+      visibility 0s linear ${euiTheme.animation.fast};
+  }
+`;
+
+const headerVisibleStyles = css`
+  grid-template-rows: 1fr;
+  visibility: visible;
+  ${euiCanAnimate} {
+    transition-delay: 0s;
+  }
+`;
+
+// Padding lives one level down: a padded grid item cannot collapse to a zero-height row.
+const headerClipStyles = css`
+  min-height: 0;
+  overflow: hidden;
+`;
+
+const headerContentStyles = ({ euiTheme }: UseEuiTheme) => css`
+  display: flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.base};
 `;
 
 const InputContainer: React.FC<
-  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
-> = ({ children, isDisabled, isCollapsed }) => (
-  <ConversationInputShell
-    isDisabled={isDisabled}
-    isCollapsed={isCollapsed}
-    css={flexGrowZeroStyles}
-    data-test-subj="agentBuilderConversationInputForm"
-    aria-label={containerAriaLabel}
-  >
-    {children}
-  </ConversationInputShell>
-);
+  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; triggerMode: ChatTriggerMode }>
+> = ({ children, isDisabled, isCollapsed, triggerMode }) => {
+  const showHeader = triggerMode === ChatTriggerMode.Never;
+
+  return (
+    <div
+      css={[
+        wrapperStyles,
+        composerShadowStyles,
+        !isDisabled && composerFocusShadowStyles,
+        showHeader && wrapperWithHeaderStyles,
+      ]}
+    >
+      <div
+        css={[headerStyles, showHeader && headerVisibleStyles]}
+        aria-hidden={!showHeader}
+        data-test-subj="agentBuilderConversationInputPostToTeamHeader"
+      >
+        <div css={headerClipStyles}>
+          <div css={headerContentStyles}>
+            <EuiIcon type="megaphone" size="s" aria-hidden={true} />
+            <EuiText size="xs">{postToTeamLabel}</EuiText>
+          </div>
+        </div>
+      </div>
+      <ConversationInputShell
+        isDisabled={isDisabled}
+        isCollapsed={isCollapsed}
+        suppressShadow
+        css={shellStyles}
+        data-test-subj="agentBuilderConversationInputForm"
+        aria-label={containerAriaLabel}
+      >
+        {children}
+      </ConversationInputShell>
+    </div>
+  );
+};
+
+/**
+ * The input stays mounted across conversations, so a trigger mode choice only applies to the
+ * conversation it was made in and is dropped once the selector stops being offered.
+ */
+const useTriggerMode = () => {
+  const conversationId = useConversationId();
+  const isSelectable = useIsSharedConversation();
+
+  const [choice, setChoice] = useState<{
+    conversationId?: string;
+    triggerMode: ChatTriggerMode;
+  }>();
+
+  if (!isSelectable && choice) {
+    setChoice(undefined);
+  }
+
+  const setTriggerMode = useCallback(
+    (triggerMode: ChatTriggerMode) => setChoice({ conversationId, triggerMode }),
+    [conversationId]
+  );
+
+  const triggerMode =
+    isSelectable && choice && choice.conversationId === conversationId
+      ? choice.triggerMode
+      : ChatTriggerMode.Always;
+
+  return { triggerMode, setTriggerMode, isSelectable };
+};
 
 interface ConversationInputProps {
   onSubmit?: () => void;
@@ -106,9 +248,53 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
+  const { currentUser } = useCurrentUser();
+  const username = currentUser?.user.username;
+  const spaceId = useActiveSpaceId();
+  const { sessionTag } = useConversationContext();
+
+  const { draft, saveDraft, clearDraft } = useInputDraft({
+    spaceId,
+    sessionTag,
+    username,
+    agentId,
+    conversationId,
+  });
+
+  const messageEditorControllerRef = useRef<
+    ReturnType<typeof useMessageEditor>['controller'] | null
+  >(null);
+  const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEditorContentRef = useRef('');
+  const handleContentChange = useCallback(() => {
+    try {
+      const content = messageEditorControllerRef.current?.getContent() ?? '';
+      lastEditorContentRef.current = content;
+      if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = setTimeout(() => {
+        saveDraft(lastEditorContentRef.current);
+      }, 300);
+    } catch (err) {
+      if (!(err instanceof CommandBadgeSerializationError)) throw err;
+    }
+  }, [saveDraft]);
+
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
+    onContentChange: handleContentChange,
   });
+  messageEditorControllerRef.current = messageEditorController;
+
+  useEffect(() => {
+    return () => {
+      if (saveDraftDebounceRef.current) {
+        clearTimeout(saveDraftDebounceRef.current);
+        saveDraftDebounceRef.current = null;
+        saveDraft(lastEditorContentRef.current);
+      }
+    };
+  }, [agentId, conversationId, saveDraft]);
+
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
@@ -122,8 +308,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
-  const isExperimentalEnabled = useExperimentalFeatures();
+  const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -134,6 +319,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled =
@@ -144,6 +330,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isSendingUserMessage ||
     isCreatingConversation ||
     !isAgentIdValid ||
+    isAgentModelLoading ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
@@ -175,6 +362,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     conversationTitle,
   });
 
+  const draftHydratedRef = useRef(false);
+  const isConvSwitchRef = useRef(false);
+  useEffect(() => {
+    if (isConvSwitchRef.current) {
+      messageEditorControllerRef.current?.clear();
+      lastEditorContentRef.current = '';
+    }
+    isConvSwitchRef.current = true;
+    draftHydratedRef.current = false;
+  }, [agentId, conversationId, spaceId, sessionTag]);
+
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
     if (isConversationReadOnly) return;
@@ -192,6 +390,30 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isConversationReadOnly,
     messageEditorController,
     resetInitialMessage,
+  ]);
+  useEffect(() => {
+    if (draftHydratedRef.current) return;
+    if (!username) return;
+    if (isConversationReadOnly || isConversationReadOnlyLoading) return;
+    if (initialMessage) {
+      draftHydratedRef.current = true;
+      return;
+    }
+    draftHydratedRef.current = true;
+    if (draft && !lastEditorContentRef.current) {
+      messageEditorController.setContent(draft);
+    }
+  }, [
+    draft,
+    username,
+    spaceId,
+    sessionTag,
+    agentId,
+    conversationId,
+    initialMessage,
+    isConversationReadOnly,
+    isConversationReadOnlyLoading,
+    messageEditorController,
   ]);
 
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
@@ -224,22 +446,32 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (saveDraftDebounceRef.current) {
+      clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = null;
+    }
+
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
+          lastEditorContentRef.current = '';
+          clearDraft();
           messageEditorController.clear();
           onSubmit?.();
         })
         .catch((sendError: unknown) => {
+          lastEditorContentRef.current = content;
           addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
         });
       return;
     }
+    lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
       submitMessage(content);
     }
+    clearDraft();
     messageEditorController.clear();
     onSubmit?.();
   };
@@ -249,7 +481,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   }
 
   return (
-    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+    <InputContainer
+      isDisabled={isInputDisabled}
+      isCollapsed={shouldCollapseInput}
+      triggerMode={triggerMode}
+    >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
@@ -280,7 +516,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           isSubmitting={isCreatingConversation || isSendingUserMessage}
-          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
         />

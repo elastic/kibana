@@ -9,10 +9,16 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  type NightshiftFeaturePrivilege,
+} from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
-  const setup = () => {
+  const setup = ({
+    featurePrivilege = 'read',
+  }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [
@@ -39,11 +45,12 @@ describe('createKiIdentificationStatusTool', () => {
       }),
     };
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
 
     const tool = createKiIdentificationStatusTool({
+      server: createSignificantEventsServer({ featurePrivilege }),
       streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
@@ -78,5 +85,14 @@ describe('createKiIdentificationStatusTool', () => {
       expect(data.message).toContain('Failed to get KI identification background task status');
       expect(data.operation).toBe('ki_identification_status');
     }
+  });
+
+  it('does not read onboarding status without the Nightshift read privilege', async () => {
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'none' });
+
+    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

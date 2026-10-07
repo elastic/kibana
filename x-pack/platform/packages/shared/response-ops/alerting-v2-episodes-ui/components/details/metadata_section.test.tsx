@@ -50,7 +50,7 @@ const mockServices = createMockServices({
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs' } },
+  query: { base: 'FROM logs' },
 } as unknown as RuleResponse;
 
 // Episode events ESQL query response template (used by useFetchEpisodeEventsQuery)
@@ -167,9 +167,7 @@ describe('AlertEpisodeMetadataSection', () => {
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeMetadataTabEmpty')).toBeInTheDocument()
     );
-    expect(
-      screen.getByText('No evaluation data is available for this episode.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('No evaluation data is available for this alert.')).toBeInTheDocument();
   });
 
   it('renders the metadata table with the doc-viewer registry render function', async () => {
