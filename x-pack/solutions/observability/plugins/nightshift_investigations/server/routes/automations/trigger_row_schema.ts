@@ -11,6 +11,7 @@ export const triggerRowSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('alert'),
     ruleNamePattern: z.string().max(1000).optional(),
+    ruleNames: z.array(z.string().max(1000)).max(100).optional(),
     ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
     alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
     tags: z.array(z.string().max(500)).optional(),

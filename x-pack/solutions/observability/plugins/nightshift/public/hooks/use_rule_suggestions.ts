@@ -9,31 +9,39 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
 const FIND_RULES_PATH = '/internal/alerting/rules/_find';
-const MAX_SUGGESTIONS = 20;
+const MAX_SUGGESTIONS = 50;
 
 const escapeSearchOperators = (text: string) => text.replace(/[+|"*()~\\-]/g, '\\$&');
+const escapeKqlValue = (text: string) => text.replace(/[\\"]/g, '\\$&');
 
-interface FindRulesResponse {
-  data: Array<{ name: string }>;
+export interface RuleSuggestion {
+  name: string;
+  tags: string[];
 }
 
-export const useRuleNameSuggestions = (search: string) => {
+interface FindRulesResponse {
+  data: RuleSuggestion[];
+  total: number;
+}
+
+export const useRuleSuggestions = (search: string, tag: string) => {
   const { http } = useKibana().services;
 
   return useQuery({
-    queryKey: ['nightshift.ruleNameSuggestions', search],
-    queryFn: async ({ signal }): Promise<string[]> => {
-      const { data } = await http.post<FindRulesResponse>(FIND_RULES_PATH, {
+    queryKey: ['nightshift.ruleSuggestions', search, tag],
+    queryFn: async ({ signal }): Promise<{ rules: RuleSuggestion[]; total: number }> => {
+      const { data, total } = await http.post<FindRulesResponse>(FIND_RULES_PATH, {
         body: JSON.stringify({
           search: search ? `${escapeSearchOperators(search)}*` : undefined,
-          search_fields: ['name'],
+          search_fields: ['name', 'tags'],
           default_search_operator: 'AND',
+          filter: tag ? `alert.attributes.tags: "${escapeKqlValue(tag)}"` : undefined,
           per_page: MAX_SUGGESTIONS,
-          fields: ['name'],
+          fields: ['name', 'tags'],
         }),
         signal,
       });
-      return [...new Set(data.map(({ name }) => name))];
+      return { rules: data.map(({ name, tags }) => ({ name, tags })), total };
     },
     keepPreviousData: true,
   });

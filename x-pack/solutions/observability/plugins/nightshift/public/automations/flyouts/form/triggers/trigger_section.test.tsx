@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
@@ -15,8 +15,16 @@ import { toEveryCron } from '../to_automation_request';
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: {}, notifications: { toasts: {} } } }),
 }));
-jest.mock('../../../../hooks/use_rule_name_suggestions', () => ({
-  useRuleNameSuggestions: () => ({ data: ['CPU usage high', 'Disk full'], isFetching: false }),
+jest.mock('../../../../hooks/use_rule_suggestions', () => ({
+  useRuleSuggestions: () => ({
+    data: {
+      rules: [
+        { name: 'CPU usage high', tags: ['infra', 'prod'] },
+        { name: 'Disk full', tags: ['storage'] },
+      ],
+      total: 2,
+    },
+  }),
 }));
 jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query', () => ({
   useGetRuleTagsQuery: () => ({ tags: ['prod', 'staging'], isLoading: false }),
@@ -106,13 +114,9 @@ describe('AutomationTriggerSection', () => {
     expect(screen.getByTestId('automationDailyLimit')).toHaveValue(20);
 
     fireEvent.click(screen.getByTestId('automationRulePicker'));
-    const ruleNameInput = within(await screen.findByTestId('automationRuleNamePattern')).getByRole(
-      'combobox'
-    );
-    fireEvent.change(ruleNameInput, { target: { value: 'cpu' } });
-    fireEvent.keyDown(ruleNameInput, { key: 'Enter', code: 'Enter' });
-    expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNamePattern: 'cpu' });
-    expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('cpu');
+    fireEvent.click(await screen.findByText('CPU usage high'));
+    expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
+    expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
 
     fireEvent.click(screen.getByTestId('automationStatusPicker'));
     fireEvent.click(await screen.findByText('Recovered'));
@@ -123,21 +127,20 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
   });
 
-  it('suggests rule names and tags', async () => {
+  it('selects rules and tags in the rule picker', async () => {
     render(<TriggerSection />);
     await selectTrigger('automationAddTrigger', 'Alert triggered');
     fireEvent.click(screen.getByTestId('automationRulePicker'));
 
-    fireEvent.click(
-      within(await screen.findByTestId('automationRuleNamePattern')).getByRole('combobox')
-    );
     fireEvent.click(await screen.findByText('Disk full'));
-    expect(lastTrigger()).toMatchObject({ ruleNamePattern: 'Disk full' });
+    expect(lastTrigger()).toMatchObject({ ruleNames: ['Disk full'] });
 
-    const tagsInput = screen.getAllByRole('combobox')[1];
-    fireEvent.click(tagsInput);
+    fireEvent.click(screen.getByTestId('automationRulePickerTab-tags'));
     fireEvent.click(await screen.findByText('staging'));
-    expect(lastTrigger()).toMatchObject({ ruleTags: ['staging'] });
+    expect(lastTrigger()).toMatchObject({ ruleNames: ['Disk full'], ruleTags: ['staging'] });
+
+    fireEvent.click(screen.getByTestId('automationRuleClear'));
+    expect(lastTrigger()).toMatchObject({ ruleNames: [], ruleTags: [] });
   });
 
   it('keeps the hourly window on whole hours', async () => {

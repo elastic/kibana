@@ -20,6 +20,7 @@ export type NightshiftTriggerRow =
   | {
       kind: 'alert';
       ruleNamePattern?: string;
+      ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       alertStatus?: AlertStatus;
       tags?: string[];

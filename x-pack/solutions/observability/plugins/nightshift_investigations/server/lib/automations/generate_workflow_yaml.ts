@@ -120,9 +120,12 @@ function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>
     // regex mode: KQL does not natively support regex — filter applied at investigation time.
   }
 
-  if (row.tags && row.tags.length > 0) {
-    const tagParts = row.tags.map((t) => `rule.tags: "${escapeKql(t)}"`);
-    parts.push(tagParts.length === 1 ? tagParts[0] : `(${tagParts.join(' OR ')})`);
+  const ruleMatchers = [
+    ...(row.ruleNames ?? []).map((name) => `rule.name: "${escapeKql(name)}"`),
+    ...(row.tags ?? []).map((tag) => `rule.tags: "${escapeKql(tag)}"`),
+  ];
+  if (ruleMatchers.length > 0) {
+    parts.push(ruleMatchers.length === 1 ? ruleMatchers[0] : `(${ruleMatchers.join(' OR ')})`);
   }
 
   return parts.join(' AND ');
