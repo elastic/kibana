@@ -10,7 +10,8 @@ import expect from '@kbn/expect';
 import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
 import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { secOnly, secOnlyRead } from '../../../../common/lib/authentication/users';
+import type { User } from '../../../../common/lib/authentication/types';
+import { secOnly, secOnlyRead, superUser } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -157,7 +158,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('bulk delete observables', () => {
-      const addIpv4Observable = async (caseId: string, value: string) => {
+      const addIpv4Observable = async (
+        caseId: string,
+        value: string,
+        auth: { user: User; space: string | null } = { user: superUser, space: null }
+      ) => {
         const updatedCase = await addObservable({
           supertest,
           caseId,
@@ -168,6 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
               description: '',
             },
           },
+          auth,
         });
 
         return updatedCase.observables[updatedCase.observables.length - 1].id as string;
@@ -292,14 +298,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not allow bulk deleting observables with read-only access', async () => {
         const supertestWithoutAuth = getService('supertestWithoutAuth');
-        const postedCase = await createCase(supertest, getPostCaseRequest());
-        const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1');
+        const spaceAuth = { user: superUser, space: 'space1' };
+        const postedCase = await createCase(supertest, getPostCaseRequest(), 200, spaceAuth);
+        const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1', spaceAuth);
 
         await bulkDeleteObservables({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           ids: [observableId],
-          auth: { user: secOnlyRead, space: null },
+          auth: { user: secOnlyRead, space: 'space1' },
           expectedHttpCode: 403,
         });
       });
