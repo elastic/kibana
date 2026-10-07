@@ -144475,6 +144475,7 @@ components:
         description:
           description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -144775,6 +144776,7 @@ components:
         description:
           description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -144981,6 +144983,7 @@ components:
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           type: array
       required:
         - fields
@@ -144996,6 +144999,7 @@ components:
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           type: array
     Kibana_HTTP_APIs_alerting_rule_list_response:
       additionalProperties: false
@@ -145511,6 +145515,7 @@ components:
         description:
           description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
           nullable: true
           type: string
         destinations:
