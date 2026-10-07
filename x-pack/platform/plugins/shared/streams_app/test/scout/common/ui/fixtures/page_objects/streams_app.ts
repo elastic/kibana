@@ -218,27 +218,18 @@ export class StreamsApp {
     });
   }
 
-  /** Opens the row actions menu of the destinations table row labelled `destinationName`. */
-  async openDestinationRowActions(destinationName: string) {
-    await this.streamsDestinationsTable
+  getDestinationShowOnCanvasButton(destinationName: string) {
+    return this.streamsDestinationsTable
       .getByRole('row')
       .filter({ hasText: destinationName })
-      .getByTestId('streamsDestinationRowActionsButton')
-      .click();
+      .getByTestId('streamsShowOnCanvasAction');
   }
 
-  /** Opens the row actions menu of the sources table row labelled `sourceName`. */
-  async openSourceRowActions(sourceName: string) {
-    await this.streamsSourcesTable
+  getSourceShowOnCanvasButton(sourceName: string) {
+    return this.streamsSourcesTable
       .getByRole('row')
       .filter({ hasText: sourceName })
-      .getByTestId('streamsSourceRowActionsButton')
-      .click();
-  }
-
-  /** "Show on canvas" item of the currently open row actions menu. */
-  getShowOnCanvasAction() {
-    return this.page.testSubj.locator('streamsShowOnCanvasAction');
+      .getByTestId('streamsShowOnCanvasAction');
   }
 
   // Canvas utility methods

@@ -25,7 +25,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { RowActionsMenu } from '../row_actions_menu';
+import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
 import type { SourceViewModel } from './types';
 import { SourceGridCell } from './source_grid_cell';
 
@@ -162,7 +162,7 @@ export const SourcesGrid = ({
     () => [
       {
         id: 'rowActions',
-        width: 40,
+        width: ROW_ACTIONS_COLUMN_WIDTH,
         headerCellRender: () => (
           <EuiScreenReaderOnly>
             <span>{SOURCE_ACTIONS_LABEL}</span>

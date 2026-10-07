@@ -25,7 +25,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { RowActionsMenu } from '../row_actions_menu';
+import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
 import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
@@ -98,7 +98,7 @@ export const DestinationsGrid = ({
     () => [
       {
         id: 'rowActions',
-        width: 40,
+        width: ROW_ACTIONS_COLUMN_WIDTH,
         headerCellRender: () => (
           <EuiScreenReaderOnly>
             <span>{DESTINATION_ACTIONS_LABEL}</span>

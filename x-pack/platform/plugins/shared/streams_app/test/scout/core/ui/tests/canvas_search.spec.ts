@@ -107,8 +107,7 @@ test.describe(
       await streams.gotoStreamsLayoutTab('destinations');
       await expect(streams.streamsDestinationsTable).toBeVisible();
 
-      await streams.openDestinationRowActions(DESTINATION_NAME);
-      await streams.getShowOnCanvasAction().click();
+      await streams.getDestinationShowOnCanvasButton(DESTINATION_NAME).click();
 
       await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
       await expect(streams.canvasSearch).toHaveValue(DESTINATION_NAME);
