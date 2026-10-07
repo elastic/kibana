@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { listPanelSizeGuidance } from '../panels';
 import type { LayoutRequest } from './types';
+
+const panelSizeRules = listPanelSizeGuidance()
+  .map(({ label, rule }) => `- ${label}: ${rule}`)
+  .join('\n');
 
 const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard. You receive one or more containers: the top level of the dashboard (\`section: null\`), which holds top-level panels and sections, and sections, which hold their own panels. Return every container you receive as rows, top to bottom. Each row lists its items left to right with a width \`w\`, and has one height \`h\` for its panels.
 
@@ -18,15 +23,7 @@ const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard. You 
 
 ## Panel sizes
 
-- Metric (\`chartType: metric\`): small, \`w\` 6, 8, or 12 and \`h\` 5–6. Put 4–8 metrics in one row. Never make metrics full width.
-- Gauge: \`w: 12, h: 8\`, up to 4 per row.
-- XY line, area, or bar: \`w: 24, h: 10\`. The primary time series may be full width.
-- Heatmap, tag cloud, treemap, waffle, mosaic: \`w: 24, h: 10\`.
-- Pie: \`w: 12, h: 10\`.
-- Data table: \`w: 24–48, h: 12–16\`, preferably full width.
-- Markdown: \`w: 24–48, h: 4–9\`, depending on the length of its content.
-- Custom content: \`w: 24–48\`. A single card or one short row of cards \`h: 6–8\`; a list or table \`h: 10–16\`; a multi-part layout or a drawn chart \`h: 16–20\`.
-- ML panels (anomaly charts, swim lanes, single metric viewer): \`w: 48, h: 12\`.
+${panelSizeRules}
 - \`size\` is the panel's current size. Panels with \`fixedSize: true\` keep their size: give them their current \`w\`, and put them in a row whose \`h\` matches their \`h\`.
 
 ## Order

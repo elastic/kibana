@@ -17,6 +17,7 @@ import {
   singleMetricViewerPanelKind,
 } from './ml_panels';
 import { attachmentPanelInputSchema } from './attachment_source';
+import type { PanelSizeGuidance } from './panel_kind';
 
 /**
  * Panel kind registry.
@@ -35,6 +36,7 @@ import { attachmentPanelInputSchema } from './attachment_source';
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';
 export type { VisPanelResolutionRequest } from './vis';
+export type { PanelKindGuidance, PanelSizeGuidance } from './panel_kind';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
@@ -189,6 +191,70 @@ export const getRendererEmbeddableType = (renderer: PanelRenderer): string => {
 /** Finds the renderer whose panels are stored as the given embeddable type, if any. */
 export const findPanelRenderer = (embeddableType: string): PanelRenderer | undefined =>
   REQUEST_PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.renderer;
+
+const PANEL_KINDS = [...REQUEST_PANEL_KINDS, ...CONFIG_PANEL_KINDS];
+
+/**
+ * Size guidance for a stored panel: the entry of its Lens chart type, else its kind default.
+ * Undefined for embeddable types no kind creates, such as legacy visualizations.
+ */
+export const getPanelSizeGuidance = (
+  embeddableType: string,
+  chartType: string | undefined
+): PanelSizeGuidance | undefined => {
+  const guidance = PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.guidance;
+  if (!guidance) {
+    return undefined;
+  }
+  const chartTypeLayout = chartType
+    ? guidance.chartTypeLayouts?.find(({ chartTypes }) => chartTypes.includes(chartType))
+    : undefined;
+  return chartTypeLayout ?? guidance.layout;
+};
+
+/** Every size guidance entry for the layout prompt, once each. */
+export const listPanelSizeGuidance = (): PanelSizeGuidance[] => [
+  ...new Set(
+    PANEL_KINDS.flatMap(({ guidance }) => [guidance.layout, ...(guidance.chartTypeLayouts ?? [])])
+  ),
+];
+
+const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
+const formatList = (items: string[]): string =>
+  items.length < 3
+    ? items.join(' and ')
+    : `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+
+const getDiscriminator = (kind: (typeof PANEL_KINDS)[number]): string => {
+  if (kind.source === 'config') {
+    return `\`source: "config"\`, \`type: "${kind.type}"\``;
+  }
+  const rendererField = kind.addInputSchema.shape.renderer;
+  const isDefault = z.safeParse(rendererField, undefined).success;
+  return `\`renderer: "${kind.renderer}"\`${isDefault ? ' or omitted' : ''}`;
+};
+
+/** The "choose the first panel type that fits" list, from each kind's selection guidance. */
+export const buildPanelTypeSelectionGuidance = (): string =>
+  PANEL_KINDS.flatMap((kind) => {
+    const { selection } = kind.guidance;
+    return selection ? [{ kind, selection }] : [];
+  })
+    .sort((left, right) => left.selection.priority - right.selection.priority)
+    .map(
+      ({ kind, selection }, index) =>
+        `${index + 1}. **${capitalize(kind.label)}** (${getDiscriminator(kind)}) — ${
+          selection.whenToUse
+        }`
+    )
+    .join('\n');
+
+/** Labels of the kinds of a source, as an English list, e.g. "Lens, Vega, and custom content". */
+export const formatPanelKindLabels = (source: 'request' | 'config'): string =>
+  formatList(
+    (source === 'request' ? REQUEST_PANEL_KINDS : CONFIG_PANEL_KINDS).map(({ label }) => label)
+  );
 
 /**
  * Contract for inline panel content resolution. The generate core consumes this

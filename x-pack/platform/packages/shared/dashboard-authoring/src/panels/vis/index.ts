@@ -10,6 +10,7 @@ import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
+import { GRID_COLUMNS } from '../../layout/types';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
@@ -147,6 +148,55 @@ export const lensPanelKind = defineRequestPanelKind({
   label: 'Lens',
   addInputSchema: lensPanelRequestSchema,
   editInputSchema: lensEditPanelRequestSchema,
+  guidance: {
+    selection: {
+      priority: 1,
+      whenToUse: 'metrics, time series, bar, line, pie, area, and data tables.',
+    },
+    layout: {
+      label: 'XY line, area, or bar',
+      defaultSize: { w: 24, h: 10 },
+      rule: '`w: 24, h: 10`. The primary time series may be full width.',
+    },
+    chartTypeLayouts: [
+      {
+        label: 'Metric (`chartType: metric`)',
+        chartTypes: [SupportedChartType.Metric, 'legacy_metric'],
+        defaultSize: { w: 12, h: 5 },
+        rule: 'small, `w` 6, 8, or 12 and `h` 5–6. Put 4–8 metrics in one row. Never make metrics full width.',
+      },
+      {
+        label: 'Gauge',
+        chartTypes: [SupportedChartType.Gauge],
+        defaultSize: { w: 12, h: 8 },
+        rule: '`w: 12, h: 8`, up to 4 per row.',
+      },
+      {
+        label: 'Heatmap, tag cloud, treemap, waffle, mosaic',
+        chartTypes: [
+          SupportedChartType.Heatmap,
+          SupportedChartType.Tagcloud,
+          SupportedChartType.Treemap,
+          SupportedChartType.Waffle,
+          SupportedChartType.Mosaic,
+        ],
+        defaultSize: { w: 24, h: 10 },
+        rule: '`w: 24, h: 10`.',
+      },
+      {
+        label: 'Pie',
+        chartTypes: [SupportedChartType.Pie, 'donut'],
+        defaultSize: { w: 12, h: 10 },
+        rule: '`w: 12, h: 10`.',
+      },
+      {
+        label: 'Data table',
+        chartTypes: [SupportedChartType.Datatable],
+        defaultSize: { w: GRID_COLUMNS, h: 12 },
+        rule: '`w: 24–48, h: 12–16`, preferably full width.',
+      },
+    ],
+  },
 });
 
 export const vegaPanelKind = defineRequestPanelKind({
@@ -155,4 +205,16 @@ export const vegaPanelKind = defineRequestPanelKind({
   label: 'Vega',
   addInputSchema: vegaPanelRequestSchema,
   editInputSchema: vegaEditPanelRequestSchema,
+  guidance: {
+    selection: {
+      priority: 2,
+      whenToUse:
+        'scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.',
+    },
+    layout: {
+      label: 'Vega',
+      defaultSize: { w: 24, h: 10 },
+      rule: '`w: 24–48, h: 10–16`. Faceted or layered charts may be full width.',
+    },
+  },
 });

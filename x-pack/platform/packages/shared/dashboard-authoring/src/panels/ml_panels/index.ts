@@ -16,7 +16,8 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
-import { defineConfigPanelKind } from '../panel_kind';
+import { GRID_COLUMNS } from '../../layout/types';
+import { defineConfigPanelKind, type PanelKindGuidance } from '../panel_kind';
 
 /**
  * ML anomaly detection panel logic.
@@ -35,6 +36,14 @@ import { defineConfigPanelKind } from '../panel_kind';
  */
 
 const panelIdSchema = z.string().max(256);
+
+const mlPanelGuidance: PanelKindGuidance = {
+  layout: {
+    label: 'ML panels (anomaly charts, swim lanes, single metric viewer)',
+    defaultSize: { w: GRID_COLUMNS, h: 12 },
+    rule: '`w: 48, h: 12`.',
+  },
+};
 
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
@@ -82,6 +91,7 @@ export const anomalyChartsPanelKind = defineConfigPanelKind({
   label: 'anomaly charts',
   addInputSchema: anomalyChartsPanelConfigInputSchema,
   editInputSchema: editAnomalyChartsPanelConfigInputSchema,
+  guidance: mlPanelGuidance,
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
     const normalizedThreshold =
@@ -127,6 +137,7 @@ export const anomalySwimlanePanelKind = defineConfigPanelKind({
   label: 'anomaly swim lane',
   addInputSchema: anomalySwimlaneConfigInputSchema,
   editInputSchema: editAnomalySwimlaneConfigInputSchema,
+  guidance: mlPanelGuidance,
 });
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
@@ -165,4 +176,5 @@ export const singleMetricViewerPanelKind = defineConfigPanelKind({
   label: 'single metric viewer',
   addInputSchema: singleMetricViewerConfigInputSchema,
   editInputSchema: editSingleMetricViewerConfigInputSchema,
+  guidance: mlPanelGuidance,
 });

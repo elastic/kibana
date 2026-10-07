@@ -13,7 +13,12 @@ export type { PanelAuthoringNote, PanelContent, PanelContentAttempt } from './sr
 
 export type { DashboardValidationIssue, ValidateDashboard } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType } from './src/panels';
+export {
+  buildPanelTypeSelectionGuidance,
+  formatPanelKindLabels,
+  getRendererEmbeddableType,
+} from './src/panels';
+export { buildControlsGuidance } from './src/controls';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,

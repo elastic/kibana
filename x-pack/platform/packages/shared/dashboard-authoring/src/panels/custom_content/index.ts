@@ -12,6 +12,7 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
+import { GRID_COLUMNS } from '../../layout/types';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
@@ -108,4 +109,16 @@ export const customContentPanelKind = defineRequestPanelKind({
   label: 'custom content',
   addInputSchema: customContentPanelRequestSchema,
   editInputSchema: customContentEditPanelRequestSchema,
+  guidance: {
+    selection: {
+      priority: 4,
+      whenToUse:
+        'a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.',
+    },
+    layout: {
+      label: 'Custom content',
+      defaultSize: { w: GRID_COLUMNS, h: 12 },
+      rule: '`w: 24–48`. A single card or one short row of cards `h: 6–8`; a list or table `h: 10–16`; a multi-part layout or a drawn chart `h: 16–20`.',
+    },
+  },
 });

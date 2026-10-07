@@ -88,6 +88,39 @@ export const controlInputSchema = z.discriminatedUnion('type', [
 
 export type ControlInput = z.infer<typeof controlInputSchema>;
 
+interface ControlKindGuidance {
+  /** What the control is, e.g. "a dropdown of a field's values". */
+  readonly description: string;
+  /** When to add it. */
+  readonly policy: string;
+}
+
+/** Guidance per control type. Keyed by every input type, so a new control type requires it. */
+const CONTROL_KIND_GUIDANCE: Readonly<Record<ControlInput['type'], ControlKindGuidance>> = {
+  [OPTIONS_LIST_CONTROL]: {
+    description: "a dropdown of a field's values",
+    policy:
+      'On a new dashboard built from scratch, proactively add 3–5 for the most useful categorical fields. Pick fields that appear in panel `BY` / `WHERE` clauses, prefer low-cardinality keyword fields (e.g. `service.name`, `host.name`, `env`, `region`, `kubernetes.namespace`, `http.response.status_code`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).',
+  },
+  [RANGE_SLIDER_CONTROL]: {
+    description: 'a numeric range filter',
+    policy: 'Add one only when filtering by a numeric threshold is useful across multiple panels.',
+  },
+  [TIME_SLIDER_CONTROL]: {
+    description: 'a slider over the dashboard time range',
+    policy: 'Add one only when the user asks for it.',
+  },
+};
+
+/** Controls guidance for the agent: shared rules, then the description and policy of each control type. */
+export const buildControlsGuidance = (): string => `## Controls
+
+Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.). Controls are optional: when no field fits, add fewer controls or none.
+
+${Object.entries(CONTROL_KIND_GUIDANCE)
+  .map(([type, { description, policy }]) => `- \`${type}\`: ${description}. ${policy}`)
+  .join('\n')}`;
+
 /**
  * Keep at most one time slider. Extra user-requested ones are reported as
  * failures; extra ones the agent added on its own are left out silently.
@@ -266,7 +299,9 @@ const resolveControlField = (
     if (statuses.includes('not_aggregatable')) {
       return { reason: `Is not aggregatable on index "${control.index}".` };
     }
-    return { reason: `Not mapped on index "${control.index}".` };
+    return {
+      reason: `Not mapped on index "${control.index}". Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.`,
+    };
   }
 
   if (control.type === RANGE_SLIDER_CONTROL && !SCALAR_NUMERIC_FIELD_TYPES.has(field.type)) {

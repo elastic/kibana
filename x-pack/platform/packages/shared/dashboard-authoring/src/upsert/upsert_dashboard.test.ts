@@ -2446,7 +2446,7 @@ describe('executeDashboardUpsert controls', () => {
       expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
     });
 
-    const notMapped = `Not mapped on index "${index}".`;
+    const notMapped = `Not mapped on index "${index}". Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back a control.`;
     const notAggregatable = `Is not aggregatable on index "${index}".`;
     const conflicting = `Has conflicting mappings on index "${index}".`;
     const optionsListType = `options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "${index}".`;

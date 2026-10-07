@@ -7,6 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import type { PanelSize } from '../layout/types';
 
 const PLACEMENT_KEYS: ReadonlySet<string> = new Set(['grid', 'panelId']);
 
@@ -63,6 +64,33 @@ const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape exten
   ) as z.ZodObject<UpsertContentShape<TAddShape, TEditShape>>;
 };
 
+/** Size and sizing rule of panels of a kind, or of some of its Lens chart types, in the layout step. */
+export interface PanelSizeGuidance {
+  /** Name in the layout prompt, e.g. "Pie". */
+  readonly label: string;
+  /** Size of a panel placed without one. */
+  readonly defaultSize: PanelSize;
+  /** Sizing rule for the layout model, e.g. "`w: 12, h: 10`." */
+  readonly rule: string;
+}
+
+/** Sizes of the Lens chart types that differ from the kind default. */
+export interface ChartTypeSizeGuidance extends PanelSizeGuidance {
+  readonly chartTypes: readonly string[];
+}
+
+/** Everything the agent and the layout step need to know about a panel kind. */
+export interface PanelKindGuidance {
+  /**
+   * When to choose this kind, ranked by `priority` in the panel type list. Omitted for kinds the
+   * agent never picks from that list, such as ML panels, which follow ML tool results.
+   */
+  readonly selection?: { readonly priority: number; readonly whenToUse: string };
+  /** Kind default size. Kinds that share the same object are listed once in the layout prompt. */
+  readonly layout: PanelSizeGuidance;
+  readonly chartTypeLayouts?: readonly ChartTypeSizeGuidance[];
+}
+
 interface PanelKindDefinition<TAddShape extends z.ZodRawShape, TEdit extends z.ZodObject> {
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;
@@ -72,6 +100,7 @@ interface PanelKindDefinition<TAddShape extends z.ZodRawShape, TEdit extends z.Z
   readonly addInputSchema: z.ZodObject<TAddShape>;
   /** Input that edits an existing panel of this kind by id. */
   readonly editInputSchema: TEdit;
+  readonly guidance: PanelKindGuidance;
 }
 
 /** A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`. */

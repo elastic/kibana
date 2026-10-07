@@ -7,6 +7,7 @@
 
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import { GRID_COLUMNS } from '../../layout/types';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -73,4 +74,12 @@ export const markdownPanelKind = defineConfigPanelKind({
   label: 'markdown',
   addInputSchema: markdownPanelConfigInputSchema,
   editInputSchema: editMarkdownPanelConfigInputSchema,
+  guidance: {
+    selection: { priority: 3, whenToUse: 'static text, links, or notes with no data.' },
+    layout: {
+      label: 'Markdown',
+      defaultSize: { w: GRID_COLUMNS, h: 6 },
+      rule: '`w: 24–48, h: 4–9`, depending on the length of its content.',
+    },
+  },
 });
