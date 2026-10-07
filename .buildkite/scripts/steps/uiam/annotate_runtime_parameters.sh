@@ -5,12 +5,14 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 KIBANA_GITHUB_URL="https://github.com/elastic/kibana"
+UIAM_REPO="docker.elastic.co/cloud-ci/uiam"
+UIAM_IMAGE_PATTERN="^docker\.elastic\.co/cloud-ci/uiam:[A-Za-z0-9_.-]+$"
 
 if [[ -z "${UIAM_IMAGE:-}" ]]; then
   echo "UIAM_IMAGE is not set"
   exit 1
-elif [[ "$UIAM_IMAGE" != *"docker.elastic.co"* ]]; then
-  echo "UIAM_IMAGE should be a docker.elastic.co image"
+elif [[ ! "$UIAM_IMAGE" =~ $UIAM_IMAGE_PATTERN ]]; then
+  echo "UIAM_IMAGE should be a tagged $UIAM_REPO image"
   exit 1
 fi
 

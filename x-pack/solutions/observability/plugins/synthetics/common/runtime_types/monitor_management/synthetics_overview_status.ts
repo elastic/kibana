@@ -6,8 +6,7 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
-  LinkedRemoteLocationCodec,
+import type {
   OverviewPingCodec,
   OverviewStatusMetaDataCodec,
   OverviewStatusFilterIdCodec,
@@ -15,18 +14,7 @@ import {
   PaginatedOverviewStatusCodec,
   OverviewStalePriorRunCodec,
   OverviewStaleStatusCodec,
-} from '../zod/synthetics_overview_status';
-
-export {
-  LinkedRemoteLocationCodec,
-  OverviewPingCodec,
-  OverviewStatusMetaDataCodec,
-  OverviewStatusFilterIdCodec,
-  OverviewStatusCodec,
-  PaginatedOverviewStatusCodec,
-  OverviewStalePriorRunCodec,
-  OverviewStaleStatusCodec,
-};
+} from '../schemas/synthetics_overview_status';
 
 export type OverviewPing = SchemaOutput<typeof OverviewPingCodec>;
 export type OverviewStatusFilterId = SchemaOutput<typeof OverviewStatusFilterIdCodec>;

@@ -9,6 +9,7 @@ export type AutomationType = 'custom' | 'managed';
 
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
+export type SlackTriggerEvent = 'message';
 export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
@@ -19,7 +20,7 @@ export type NightshiftTriggerRow =
   | {
       kind: 'significant_event';
       titlePattern?: string;
-      severities?: Array<'80-critical' | '60-high' | '40-medium' | '20-low'>;
+      severities?: Array<'critical' | 'high' | 'medium' | 'low'>;
       streamNames?: string[];
     }
   | {
@@ -35,6 +36,13 @@ export type NightshiftTriggerRow =
       cronExpression?: string;
       timezone?: string;
       scopeQuery?: string;
+    }
+  | {
+      kind: 'slack';
+      event: SlackTriggerEvent;
+      channels?: string[];
+      users?: string[];
+      messageFilter?: string;
     };
 
 export interface NightshiftAutomationTrigger {
@@ -64,6 +72,8 @@ export interface NightshiftAutomationRuntime {
 export interface NightshiftAutomationAttributes {
   name: string;
   description?: string;
+  tags?: string[];
+  author?: string;
   automationType: AutomationType;
   isEnabled: boolean;
   workflowId?: string;

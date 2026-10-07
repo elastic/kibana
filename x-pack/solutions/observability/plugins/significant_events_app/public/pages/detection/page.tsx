@@ -398,7 +398,7 @@ const DetectionWorkspace = (): React.ReactElement => {
     .filter(Boolean)
     .join(' · ');
   const servicePriority = (entity: DetectionEntity): number =>
-    entity.events.some((event) => event.status === 'open') ? 0 : hasRuleCoverage(entity) ? 1 : 2;
+    entity.events.some((event) => event.status === 'active') ? 0 : hasRuleCoverage(entity) ? 1 : 2;
   const alphabeticalOrder = new Intl.Collator(i18n.getLocale(), {
     sensitivity: 'base',
     numeric: true,
@@ -990,7 +990,7 @@ const DetectionWorkspace = (): React.ReactElement => {
                               : 'apps'
                           }
                           color={
-                            entity.events.some((event) => event.status === 'open')
+                            entity.events.some((event) => event.status === 'active')
                               ? 'danger'
                               : entity.queries.some((rule) => rule.rule_backed)
                               ? 'primary'

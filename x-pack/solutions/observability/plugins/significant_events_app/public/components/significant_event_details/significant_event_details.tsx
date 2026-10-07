@@ -223,7 +223,7 @@ export const SignificantEventDetails = ({
           paddingSize="m"
           css={css`
             border-left: 3px solid
-              ${event.status === 'open' ? euiTheme.colors.danger : euiTheme.colors.mediumShade};
+              ${event.status === 'active' ? euiTheme.colors.danger : euiTheme.colors.mediumShade};
           `}
         >
           <EuiText size="xs" color="subdued">

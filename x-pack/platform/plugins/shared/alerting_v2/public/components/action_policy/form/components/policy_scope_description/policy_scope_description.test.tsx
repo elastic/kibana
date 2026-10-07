@@ -29,7 +29,7 @@ describe('PolicyScopeDescription', () => {
     renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'] }} />);
 
     expect(
-      screen.getByText('Applies to all rules with one or more of the selected tags')
+      screen.getByText('Applies to all rules with one or more of the selected routing tags')
     ).toBeInTheDocument();
   });
 
@@ -37,7 +37,7 @@ describe('PolicyScopeDescription', () => {
     renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'], expression: null }} />);
 
     expect(
-      screen.getByText('Applies to all rules with one or more of the selected tags')
+      screen.getByText('Applies to all rules with one or more of the selected routing tags')
     ).toBeInTheDocument();
   });
 
@@ -48,7 +48,7 @@ describe('PolicyScopeDescription', () => {
 
     expect(
       screen.getByText(
-        'Applies to all rules with one or more of the selected tags, and matching the expression conditions'
+        'Applies to all rules with one or more of the selected routing tags, and matching the expression conditions'
       )
     ).toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe('PolicyScopeDescription', () => {
 
     expect(
       screen.getByText(
-        'Define which alert episodes this policy applies to. Select rule tags (joined with OR) and/or add a KQL match expression in advanced matching.'
+        'Define which alert episodes this policy applies to. Select routing tags (joined with OR) and/or add a KQL match expression in advanced matching.'
       )
     ).toBeInTheDocument();
   });

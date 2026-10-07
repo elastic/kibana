@@ -38,6 +38,19 @@ import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
+/** Rules client for system work with no user request; it only disables rules. */
+export interface InternalRulesClientApi {
+  /**
+   * Disables rules by id in whichever space each one lives in. Unlike a user disable,
+   * `updatedBy` is `null`, the change history has no author, and `alerting.ruleDisabled`
+   * workflow triggers do not fire. Accepts at most `MAX_BULK_ITEMS` ids. Ids not valid per
+   * `entityIdSchema` are reported as errors without being looked up, as the HTTP API cannot
+   * address them either. A space that fails to disable reports its rules' ids as errors
+   * without stopping the other spaces.
+   */
+  bulkDisableRules: RulesClientApi['bulkDisableRules'];
+}
+
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
@@ -57,6 +70,13 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: SpaceId
   ): Promise<RulesClientApi>;
+
+  /**
+   * Returns a rules client that acts as the internal Kibana user across every space,
+   * for system-initiated work with no user request. It bypasses user authorization,
+   * so callers own the decision of which rules to change.
+   */
+  getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(

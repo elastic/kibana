@@ -48,7 +48,7 @@ export const InvestigationControls = (): React.ReactElement => {
   const [creating, setCreating] = useState(params.has('automationRule'));
   const [name, setName] = useState(params.get('automationName') || journey.automationDefaultName);
   const [pattern, setPattern] = useState(params.get('automationRule') || '');
-  const [severity, setSeverity] = useState('80-critical');
+  const [severity, setSeverity] = useState('critical');
   const [prompt, setPrompt] = useState(journey.automationDefaultPrompt);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

@@ -9,13 +9,14 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
-const createPlugin = () =>
+const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
       sandbox: undefined,
       cortex: { enabled: false },
       decision_trees: { enabled: true },
+      memory: { enabled: memoryEnabled },
     })
   );
 

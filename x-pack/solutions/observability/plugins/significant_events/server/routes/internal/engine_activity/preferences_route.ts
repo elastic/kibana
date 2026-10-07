@@ -101,11 +101,12 @@ const calibrate = createServerRoute({
       remember: z.boolean(),
     }),
   }),
-  handler: async ({ request, params, server, getScopedClients, getSpaceId, logger }) => {
-    const { licensing, getEventClient, getAlertEventsClient } = await getScopedClients({ request });
+  handler: async ({ request, params, server, getScopedClients, getSpaceId }) => {
+    const { licensing, getEventSearchClient, getAlertEventsClient, emitTrigger } =
+      await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    const eventClient = await getEventClient();
-    const event = await eventClient.findLatestByEventId(params.path.id);
+    const eventSearchClient = await getEventSearchClient();
+    const event = await eventSearchClient.findLatestByEventId(params.path.id);
     if (!event) throw notFound('Event not found');
     const key = severityFeedbackKey(event);
     if (params.body.remember && !key)
@@ -135,13 +136,13 @@ const calibrate = createServerRoute({
         ].slice(-200),
       }));
     return updateSignificantEventStatus({
-      eventClient,
+      eventSearchClient,
       eventId: event.event_id,
       status: event.status,
       severity: params.body.severity,
       assessmentNote: `User severity correction: ${params.body.reason}`,
       alertEventsClient: await getAlertEventsClient(),
-      logger,
+      emitTrigger,
     });
   },
 });

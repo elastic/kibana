@@ -24,47 +24,17 @@ export const accordionPart = bodyAssembly.definePart<Record<string, never>, Reac
 
 /** Declarative `FlyoutTemplate.Body.Accordion`. */
 export const Accordion = accordionPart.createComponent<FlyoutBodyAccordionProps>({
-  resolve: ({
-    id,
-    title,
-    icon,
-    tooltip,
-    action,
-    initialIsOpen,
-    children,
-    'data-test-subj': dataTestSubj,
-  }) => {
+  resolve: ({ children, ...accordionProps }) => {
     const items = sectionAssembly.parseChildren(children, { supportsOtherChildren: true });
     const hasSubsections = items.some((i) => i.type === 'part' && i.part === SUBSECTION_PART_NAME);
 
     if (!hasSubsections) {
-      return (
-        <FlyoutAccordion
-          id={id}
-          title={title}
-          icon={icon}
-          tooltip={tooltip}
-          action={action}
-          initialIsOpen={initialIsOpen}
-          data-test-subj={dataTestSubj}
-        >
-          {children}
-        </FlyoutAccordion>
-      );
+      return <FlyoutAccordion {...accordionProps}>{children}</FlyoutAccordion>;
     }
 
     // Subsections present: border lands on each subsection; outer accordion must not also have one.
     return (
-      <FlyoutAccordion
-        id={id}
-        title={title}
-        icon={icon}
-        tooltip={tooltip}
-        action={action}
-        initialIsOpen={initialIsOpen}
-        hasBorder={false}
-        data-test-subj={dataTestSubj}
-      >
+      <FlyoutAccordion {...accordionProps} hasBorder={false}>
         {items.map((item, index) => {
           if (item.type === 'child') {
             return <Fragment key={`passthrough-${index}`}>{item.node}</Fragment>;

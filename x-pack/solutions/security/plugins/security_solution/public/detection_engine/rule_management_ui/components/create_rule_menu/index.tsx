@@ -34,7 +34,7 @@ interface CreateRuleContextMenuProps {
  * Alternative implementation using SecuritySolutionLinkButton components
  * for better integration with existing routing
  */
-const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
+const AI_RULE_CREATION_INITIAL_MESSAGE = `Create a new ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
 
 You can review and edit everything before enabling the rule. 
 Desired behavior or activity to detect:

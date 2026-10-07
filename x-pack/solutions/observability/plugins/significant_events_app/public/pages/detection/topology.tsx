@@ -431,7 +431,7 @@ export const DetectionTopology = ({
           {layout.nodes.map(({ entity, x, y }) => {
             const selected = selection.has(entity.id);
             const activeRules = entity.queries.filter((query) => query.rule_backed).length;
-            const openEvents = entity.events.filter((event) => event.status === 'open').length;
+            const openEvents = entity.events.filter((event) => event.status === 'active').length;
             const color = openEvents
               ? euiTheme.colors.danger
               : activeRules

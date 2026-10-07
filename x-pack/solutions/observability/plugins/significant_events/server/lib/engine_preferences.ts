@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SignificantEvent, Severity } from '@kbn/significant-events-schema';
+import {
+  SEVERITY_OPTIONS,
+  type SignificantEvent,
+  type Severity,
+} from '@kbn/significant-events-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers, type SavedObjectsType } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../types';
@@ -36,10 +40,10 @@ export const enginePreferencesSavedObjectType: SavedObjectsType = {
               schema.string({ maxLength: 20000 }),
               schema.object({
                 severity: schema.oneOf([
-                  schema.literal('80-critical'),
-                  schema.literal('60-high'),
-                  schema.literal('40-medium'),
-                  schema.literal('20-low'),
+                  schema.literal('critical'),
+                  schema.literal('high'),
+                  schema.literal('medium'),
+                  schema.literal('low'),
                 ]),
                 reason: schema.string({ maxLength: 1000 }),
                 updatedAt: schema.string({ maxLength: 64 }),
@@ -74,12 +78,25 @@ const defaults = (): EnginePreferences => ({
 });
 const repository = (server: SignificantEventsServer) =>
   server.core.savedObjects.createInternalRepository([TYPE]);
+const normalizePreferences = (preferences: EnginePreferences): EnginePreferences => ({
+  ...preferences,
+  severityFeedback: Object.fromEntries(
+    Object.entries(preferences.severityFeedback ?? {}).flatMap(([key, feedback]) => {
+      const severity = SEVERITY_OPTIONS.find(
+        (value) => value === feedback.severity.split('-').at(-1)
+      );
+      return severity ? [[key, { ...feedback, severity }]] : [];
+    })
+  ),
+});
 export const readEnginePreferences = async (
   server: SignificantEventsServer,
   spaceId: string
 ): Promise<EnginePreferences> => {
   try {
-    return (await repository(server).get<EnginePreferences>(TYPE, spaceId)).attributes;
+    return normalizePreferences(
+      (await repository(server).get<EnginePreferences>(TYPE, spaceId)).attributes
+    );
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) return defaults();
     throw error;
@@ -99,7 +116,7 @@ export const mutateEnginePreferences = async (
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) throw error;
     }
-    const next = change(current?.attributes ?? defaults());
+    const next = change(normalizePreferences(current?.attributes ?? defaults()));
     try {
       if (current)
         await client.update<EnginePreferences>(TYPE, spaceId, next, { version: current.version });

@@ -104,8 +104,12 @@ export const DetectionEventsFeed = ({
             ? Number(b.kind === 'event') - Number(a.kind === 'event')
             : 0) ||
           (sort === 'severity'
-            ? (b.kind === 'event' ? parseInt(b.event.severity, 10) : 0) -
-              (a.kind === 'event' ? parseInt(a.event.severity, 10) : 0)
+            ? (b.kind === 'event'
+                ? SEVERITY_OPTIONS.length - SEVERITY_OPTIONS.indexOf(b.event.severity)
+                : 0) -
+              (a.kind === 'event'
+                ? SEVERITY_OPTIONS.length - SEVERITY_OPTIONS.indexOf(a.event.severity)
+                : 0)
             : 0) ||
           Date.parse(b.timestamp) - Date.parse(a.timestamp)
       );
@@ -171,9 +175,18 @@ export const DetectionEventsFeed = ({
             }}
             options={[
               { value: 'all', text: labels.allStatuses },
-              { value: 'open', text: labels.open },
-              { value: 'closed', text: labels.closed },
-              { value: 'dismissed', text: labels.dismissed },
+              {
+                value: 'active',
+                text: i18n.translate('xpack.significantEventsApp.feed.active', {
+                  defaultMessage: 'Active',
+                }),
+              },
+              {
+                value: 'inactive',
+                text: i18n.translate('xpack.significantEventsApp.feed.inactive', {
+                  defaultMessage: 'Inactive',
+                }),
+              },
               { value: 'pending', text: labels.pendingDetection },
               { value: 'processed', text: labels.processedDetection },
             ]}
@@ -334,8 +347,7 @@ export const DetectionEventsFeed = ({
                       <EuiFlexItem grow={false}>
                         <EuiBadge
                           color={
-                            item.event.severity === '80-critical' ||
-                            item.event.severity === '60-high'
+                            item.event.severity === 'critical' || item.event.severity === 'high'
                               ? 'danger'
                               : 'hollow'
                           }

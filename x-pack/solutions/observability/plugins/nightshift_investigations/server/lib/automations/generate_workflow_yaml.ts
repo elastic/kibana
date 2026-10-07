@@ -43,7 +43,7 @@ export function generateWorkflowYaml(
   );
   if (eventRows.length) {
     const conditions = eventRows.map((row) => {
-      const parts = ['event.status: "open"'];
+      const parts = ['event.status: "active"'];
       if (row.titlePattern) parts.push(`event.title: "*${escapeKql(row.titlePattern)}*"`);
       if (row.severities?.length)
         parts.push(

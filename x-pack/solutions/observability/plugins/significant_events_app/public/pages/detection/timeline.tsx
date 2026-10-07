@@ -244,11 +244,13 @@ export const DetectionTimeline = ({
               kind: 'event' as const,
               timestamp: Date.parse(event['@timestamp']),
               title: `${
-                event.status === 'dismissed'
-                  ? labels.dismissed
-                  : event.status === 'closed'
-                  ? labels.closed
-                  : labels.open
+                event.status === 'active'
+                  ? i18n.translate('xpack.significantEventsApp.timeline.active', {
+                      defaultMessage: 'Active',
+                    })
+                  : i18n.translate('xpack.significantEventsApp.timeline.inactive', {
+                      defaultMessage: 'Inactive',
+                    })
               } · ${event.title}`,
               entity: event.stream_names.join(' · '),
               event,

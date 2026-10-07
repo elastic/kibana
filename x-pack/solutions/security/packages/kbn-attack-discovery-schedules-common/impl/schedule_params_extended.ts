@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
 
 /**
@@ -15,14 +15,16 @@ import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
 export type AttackDiscoveryScheduleParamsExtended = z.infer<
   typeof AttackDiscoveryScheduleParamsExtended
 >;
-export const AttackDiscoveryScheduleParamsExtended = AttackDiscoveryScheduleParams.extend({
-  /** Discriminator indicating the type of insight (e.g. 'attack_discovery') */
-  insightType: z.string().optional(),
-  /** Workflow orchestration configuration */
-  workflowConfig: z
-    .object({
-      /** The workflow graph identifier to execute */
-      graphId: z.string(),
-    })
-    .optional(),
-});
+export const AttackDiscoveryScheduleParamsExtended = lazySchema(() =>
+  AttackDiscoveryScheduleParams.extend({
+    /** Discriminator indicating the type of insight (e.g. 'attack_discovery') */
+    insightType: z.string().optional(),
+    /** Workflow orchestration configuration */
+    workflowConfig: z
+      .object({
+        /** The workflow graph identifier to execute */
+        graphId: z.string(),
+      })
+      .optional(),
+  })
+);
