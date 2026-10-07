@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
+import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -883,6 +883,7 @@ describe('tab mapping utils', () => {
     ): NonNullable<DiscoverSessionTab['tabTypeState']> => ({
       type: DiscoverTabType.Metrics,
       ...METRICS_GRID_SETTINGS_DEFAULTS,
+      ...METRICS_GRID_SORT_DEFAULTS,
       dimensions,
     });
 
@@ -904,6 +905,7 @@ describe('tab mapping utils', () => {
       expect(tabState.profileState).toEqual({
         metricsState: {
           ...METRICS_GRID_SETTINGS_DEFAULTS,
+          ...METRICS_GRID_SORT_DEFAULTS,
           dimensions: ['host.name'],
         },
       });

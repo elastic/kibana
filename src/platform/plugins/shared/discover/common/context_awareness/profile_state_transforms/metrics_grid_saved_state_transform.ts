@@ -20,6 +20,8 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
     counterAggregation: settings.counterAggregation,
     gaugeAggregation: settings.gaugeAggregation,
     histogramPercentile: settings.histogramPercentile,
+    sortField: settings.sortField,
+    sortDirection: settings.sortDirection,
   }),
   fromSavedState: (settings) => [settings],
 });

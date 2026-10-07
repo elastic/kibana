@@ -449,6 +449,8 @@ describe('Discover session conversion and UI preparation', () => {
       counter_aggregation: 'max',
       gauge_aggregation: 'min',
       histogram_percentile: 'p99',
+      grid_sort_field: 'recency',
+      grid_sort_direction: 'desc',
     };
     const metricsResponse: DiscoverSessionApiResponse = {
       ...response,
@@ -464,6 +466,8 @@ describe('Discover session conversion and UI preparation', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p99',
+      sortField: 'recency',
+      sortDirection: 'desc',
     });
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });

@@ -39,6 +39,10 @@ export const METRICS_GRID_SIMPLE_AGGREGATIONS = ['avg', 'sum', 'min', 'max'] as 
 
 export const METRICS_GRID_HISTOGRAM_PERCENTILES = ['p50', 'p75', 'p90', 'p95', 'p99'] as const;
 
+export const METRICS_GRID_SORT_FIELDS = ['alphabetically', 'recency'] as const;
+
+export const METRICS_GRID_SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
 export type SavedSearchContentType = typeof SavedSearchType;
 
 export enum VIEW_MODE {

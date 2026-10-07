@@ -41,6 +41,8 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       histogramPercentile: 'p50',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
+      sortField: 'recency',
+      sortDirection: 'desc',
     });
     expect(registry.fromSavedState(savedState)).toEqual({
       metricsState: {
@@ -49,8 +51,33 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
         histogramPercentile: 'p50',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
+        sortField: 'recency',
+        sortDirection: 'desc',
       },
     });
+  });
+
+  it('restores a session saved before sort was persisted without sort fields', () => {
+    const restored = createRegistry().fromSavedState({
+      type: DiscoverTabType.Metrics,
+      counterAggregation: 'max',
+      gaugeAggregation: 'min',
+      histogramPercentile: 'p50',
+      dimensions: ['host.name'],
+      searchTerm: 'bytes',
+    });
+
+    expect(restored).toEqual({
+      metricsState: {
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+        dimensions: ['host.name'],
+        searchTerm: 'bytes',
+      },
+    });
+    expect(restored.metricsState).not.toHaveProperty('sortField');
+    expect(restored.metricsState).not.toHaveProperty('sortDirection');
   });
 
   it('expands grid setting defaults when saving', () => {
@@ -61,6 +88,8 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       histogramPercentile: 'p95',
       dimensions: [],
       searchTerm: '',
+      sortField: 'alphabetically',
+      sortDirection: 'asc',
     });
   });
 });

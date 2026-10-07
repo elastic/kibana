@@ -9,9 +9,13 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 
-export type MetricsGridSortField = 'alphabetically' | 'recency';
+export const METRICS_GRID_SORT_FIELDS = ['alphabetically', 'recency'] as const;
 
-export type MetricsGridSortDirection = 'asc' | 'desc';
+export type MetricsGridSortField = (typeof METRICS_GRID_SORT_FIELDS)[number];
+
+export const METRICS_GRID_SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+export type MetricsGridSortDirection = (typeof METRICS_GRID_SORT_DIRECTIONS)[number];
 
 export interface MetricsGridSort extends SerializableRecord {
   sortField: MetricsGridSortField;
