@@ -33,6 +33,7 @@ import {
   type RoundStartedEvent,
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
@@ -550,6 +551,30 @@ describe('handleAgentExecution', () => {
         })
       ).rejects.toThrow('Conversation not found');
       expect(executeAgentMock).not.toHaveBeenCalled();
+    });
+
+    it('does not generate a title for a conversation it does not store', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+        title: DEFAULT_CONVERSATION_TITLE,
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Summarize' },
+          storeConversation: false,
+        },
+        conversationClient,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(generateTitleMock).not.toHaveBeenCalled();
     });
 
     it('marks a one-shot run as storing nothing, but not as read-only', async () => {

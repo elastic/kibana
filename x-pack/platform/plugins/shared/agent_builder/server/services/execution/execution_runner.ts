@@ -284,7 +284,8 @@ const handleConversationExecution = async ({
 
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
-    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const needsTitle =
+      storeConversation && conversationNeedsTitle(conversation) && !subagentCreation;
     const title$ = (
       needsTitle
         ? generateTitle({
