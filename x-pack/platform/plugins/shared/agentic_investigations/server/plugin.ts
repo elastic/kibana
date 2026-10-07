@@ -23,6 +23,7 @@ import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionStepDefinitions } from './workflow_execution/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { createSetImpactTool } from './impact/tools/set_impact_tool';
 import { registerSubjectAttachment, subjectAttachment } from './subjects/attachments';
@@ -168,6 +169,11 @@ export class AgenticInvestigationsPlugin
     registerInvestigationStepDefinitions({
       workflowsExtensions,
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    registerWorkflowExecutionStepDefinitions({
+      workflowsExtensions,
       getConversationClient: (request) => this.getConversationClient(request),
     });
 
