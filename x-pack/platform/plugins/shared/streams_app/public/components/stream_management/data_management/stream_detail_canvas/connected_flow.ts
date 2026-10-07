@@ -46,12 +46,8 @@ export const getConnectedFlow = (
   const walkFlow = (adjacency: Map<string, FlowEdge[]>, next: (edge: FlowEdge) => string) => {
     const visited = new Set<string>(startIds);
     const queue = [...startIds];
-    while (queue.length > 0) {
-      const current = queue.shift();
-      if (current === undefined) {
-        break;
-      }
-      for (const edge of adjacency.get(current) ?? []) {
+    for (let head = 0; head < queue.length; head++) {
+      for (const edge of adjacency.get(queue[head]) ?? []) {
         edgeIds.add(edge.id);
         const nextId = next(edge);
         nodeIds.add(nextId);
