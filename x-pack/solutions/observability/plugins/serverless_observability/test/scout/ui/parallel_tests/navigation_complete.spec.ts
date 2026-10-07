@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 // Suite fails on MKI: https://github.com/elastic/kibana/issues/267191
 test.describe(
   'Serverless Observability Navigation - Complete tier body',
-  { tag: ['@local-serverless-observability-complete'] },
+  { tag: ['@local-serverless-observability_complete'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
