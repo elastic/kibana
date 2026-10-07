@@ -218,6 +218,15 @@ describe('createContractContext', () => {
     });
   });
 
+  it('fills Azure shared keys with base64, as the signer decodes them', async () => {
+    const { ctx } = await createContractContext({
+      connector: { ...FigmaConnector, auth: { types: ['azure_shared_key'] } },
+      specs: [figmaSpec],
+    });
+
+    expect(atob(String(ctx.secrets?.accountKey))).toBe('contract-mock-accountKey');
+  });
+
   it('rejects auth types the connector does not declare', async () => {
     await expect(
       createContractContext({

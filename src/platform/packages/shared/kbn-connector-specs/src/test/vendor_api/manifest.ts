@@ -143,6 +143,16 @@ export const toPaginationDescriptor = (
   pagination: Exclude<ManifestPagination, 'none'>
 ): PaginationDescriptor => pagination;
 
+/** Whether a request path fits a path template, where a `{name}` segment matches any segment. */
+export const matchesPathTemplate = (template: string, requestPath: string): boolean => {
+  const expected = template.split('/');
+  const actual = requestPath.split('/');
+  return (
+    expected.length === actual.length &&
+    expected.every((segment, index) => segment === actual[index] || /^\{[^/{}]+\}$/.test(segment))
+  );
+};
+
 export const parseManifest = (json: string): VendorApiManifest =>
   vendorApiManifestSchema.parse(JSON.parse(json));
 

@@ -76,8 +76,14 @@ const sampleServiceAccountJson = (): string =>
     token_uri: 'https://oauth2.googleapis.com/token',
   });
 
+// Secrets whose schema takes any string, but that auth types decode.
+const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
+  serviceAccountJson: sampleServiceAccountJson,
+  accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
+};
+
 const placeholdersFor = (key: string): readonly string[] => [
-  ...(key === 'serviceAccountJson' ? [sampleServiceAccountJson()] : []),
+  ...(key in DECODED_PLACEHOLDERS ? [DECODED_PLACEHOLDERS[key]()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
   'contract-mock@example.com',

@@ -28,7 +28,7 @@ import type {
   UnmatchedRequest,
   VendorApiManifest,
 } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -88,15 +88,6 @@ const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
 const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
   const version = isJsonObject(info) ? info.version : undefined;
   return typeof version === 'string' ? version : undefined;
-};
-
-const matchesPathTemplate = (template: string, requestPath: string): boolean => {
-  const expected = template.split('/');
-  const actual = requestPath.split('/');
-  return (
-    expected.length === actual.length &&
-    expected.every((segment, index) => segment === actual[index] || /^\{[^/{}]+\}$/.test(segment))
-  );
 };
 
 const listSnapshots = async (directory: string): Promise<string[]> => {

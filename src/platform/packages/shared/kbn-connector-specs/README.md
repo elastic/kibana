@@ -694,7 +694,7 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 Per action:
 
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
-- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec.
+- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.

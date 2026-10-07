@@ -185,6 +185,28 @@ describe('recordActions', () => {
     ]);
   });
 
+  it('matches queries against the path of requests that match no operation', async () => {
+    const mcp: ConnectorSpec = {
+      ...connector,
+      actions: {
+        callTool: action(z.object({}), async ({ client }) =>
+          client.post(`${V1}/mcp/tools`, {}).catch(() => undefined)
+        ),
+      },
+    };
+    const readScope = (fixtures = {}) =>
+      recordActions({ connector: mcp, specs, fixtures }).then(({ findings }) =>
+        findings.filter(({ kind }) => kind === 'read-scope' || kind === 'unused-query')
+      );
+
+    expect(await readScope()).toEqual([
+      { kind: 'read-scope', action: 'callTool', request: `POST ${V1}/mcp/tools` },
+    ]);
+    expect(
+      await readScope({ callTool: { queries: [{ method: 'POST', path: '/v1/mcp/{name}' }] } })
+    ).toEqual([]);
+  });
+
   it('runs actions with a config sampled from the connector schema, unless one is given', async () => {
     const configured: ConnectorSpec = {
       ...connector,
