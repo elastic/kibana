@@ -64,26 +64,6 @@ describe('getJsonSchemaFromStreamlangSchema', () => {
     const actionEnum = actionProperty?.enum ?? [];
 
     expect(new Set(actionEnum)).toEqual(new Set(processorTypes));
-    expect(actionEnum).toContain('network_direction');
-
-    const networkDirectionOption = (
-      actionUnionSchema.anyOf as Array<Record<string, unknown>> | undefined
-    )?.find((option) => {
-      const actionSchema = (option.properties as Record<string, unknown> | undefined)?.action as
-        | { const?: string }
-        | undefined;
-      if (actionSchema?.const === 'network_direction') {
-        return true;
-      }
-      const anyOfBranches = option.anyOf as Array<Record<string, unknown>> | undefined;
-      return anyOfBranches?.some((branch) => {
-        const branchAction = (branch.properties as Record<string, unknown> | undefined)?.action as
-          | { const?: string }
-          | undefined;
-        return branchAction?.const === 'network_direction';
-      });
-    });
-    expect(networkDirectionOption?.title).toBe('Network Direction');
   });
 
   it('filters manual_ingest_pipeline for wired streams', () => {

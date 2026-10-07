@@ -24,120 +24,34 @@ type JsonSchemaNode = Record<string, unknown>;
  * (`allOf`), negations (`not`), recursion, and `z.any` / `z.unknown` are
  * rejected.
  */
-const unsupportedCompositionError = (path: string, typeName: string) =>
-  new Error(
-    `Artifact type "${typeName}" dataSchema at ${path} uses allOf/not; supported constructs are strict objects, bounded strings/arrays, numbers, booleans, enums/literals, and unions`
-  );
-
-interface ZodDef {
-  type: string;
-  [key: string]: unknown;
-}
-
-function assertSupportedZodSchema(
-  schema: z.ZodType,
-  path: string,
-  typeName: string,
-  visiting: Set<z.ZodType>
-): void {
-  if (visiting.has(schema)) {
-    throw new Error(
-      `Artifact type "${typeName}" dataSchema at ${path} is recursive; recursive schemas are not supported`
-    );
-  }
-  visiting.add(schema);
-
-  const def = schema.def as ZodDef;
-
-  switch (def.type) {
-    case 'intersection':
-      throw unsupportedCompositionError(path, typeName);
-    case 'object': {
-      const shape = def.shape as Record<string, z.ZodType>;
-      for (const [key, child] of Object.entries(shape)) {
-        assertSupportedZodSchema(child, `${path}.${key}`, typeName, visiting);
-      }
-      const catchall = def.catchall as z.ZodType | undefined;
-      if (catchall) {
-        assertSupportedZodSchema(catchall, `${path}.*`, typeName, visiting);
-      }
-      break;
-    }
-    case 'array':
-      assertSupportedZodSchema(def.element as z.ZodType, `${path}[]`, typeName, visiting);
-      break;
-    case 'record':
-      assertSupportedZodSchema(def.keyType as z.ZodType, `${path}<key>`, typeName, visiting);
-      assertSupportedZodSchema(def.valueType as z.ZodType, `${path}<value>`, typeName, visiting);
-      break;
-    case 'tuple': {
-      const items = def.items as readonly z.ZodType[];
-      items.forEach((item, index) => {
-        assertSupportedZodSchema(item, `${path}[${index}]`, typeName, visiting);
-      });
-      const rest = def.rest as z.ZodType | null | undefined;
-      if (rest) {
-        assertSupportedZodSchema(rest, `${path}[]`, typeName, visiting);
-      }
-      break;
-    }
-    case 'union':
-    case 'xor': {
-      const options = def.options as readonly z.ZodType[];
-      options.forEach((option, index) => {
-        assertSupportedZodSchema(option, `${path}|${index}`, typeName, visiting);
-      });
-      break;
-    }
-    case 'optional':
-    case 'nullable':
-    case 'default':
-    case 'prefault':
-    case 'nonoptional':
-    case 'catch':
-    case 'readonly':
-    case 'promise':
-    case 'success':
-      assertSupportedZodSchema(def.innerType as z.ZodType, path, typeName, visiting);
-      break;
-    case 'pipe':
-      assertSupportedZodSchema(def.in as z.ZodType, `${path}<in>`, typeName, visiting);
-      assertSupportedZodSchema(def.out as z.ZodType, `${path}<out>`, typeName, visiting);
-      break;
-    case 'lazy': {
-      const inner = (def.getter as () => z.ZodType)();
-      assertSupportedZodSchema(inner, path, typeName, visiting);
-      break;
-    }
-    case 'map':
-      assertSupportedZodSchema(def.keyType as z.ZodType, `${path}<key>`, typeName, visiting);
-      assertSupportedZodSchema(def.valueType as z.ZodType, `${path}<value>`, typeName, visiting);
-      break;
-    case 'set':
-      assertSupportedZodSchema(def.valueType as z.ZodType, `${path}<value>`, typeName, visiting);
-      break;
-    default:
-      break;
-  }
-
-  visiting.delete(schema);
-}
-
 export function assertBoundedSchema(dataSchema: z.ZodType, typeName: string): void {
-  assertSupportedZodSchema(dataSchema, 'data', typeName, new Set());
-
   let json: JsonSchemaNode;
+  let usesIntersection = false;
   try {
     // `input` io bounds what a client may send, and is the only mode that tells a
     // stripping `z.object()` (no `additionalProperties`) apart from a closed
     // `.strict()` one (`additionalProperties: false`). Under `output` io both emit
     // `false`, so a stripping object would register while silently accepting — and
     // persisting, since the raw `data` is stored — undeclared fields.
-    json = z.toJSONSchema(dataSchema, { io: 'input' }) as JsonSchemaNode;
+    json = z.toJSONSchema(dataSchema, {
+      io: 'input',
+      // zod >= 4.5 folds intersections into a single object instead of emitting `allOf`.
+      override: ({ zodSchema }) => {
+        if (zodSchema._zod.def.type === 'intersection') {
+          usesIntersection = true;
+        }
+      },
+    }) as JsonSchemaNode;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Artifact type "${typeName}" dataSchema cannot be converted to JSON Schema: ${message}`
+    );
+  }
+
+  if (usesIntersection) {
+    throw new Error(
+      `Artifact type "${typeName}" dataSchema uses allOf/not; supported constructs are strict objects, bounded strings/arrays, numbers, booleans, enums/literals, and unions`
     );
   }
 

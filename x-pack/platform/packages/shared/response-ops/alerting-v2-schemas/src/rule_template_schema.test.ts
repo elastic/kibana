@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { createRuleDataSchema } from './rule_data_schema';
-import { toAlertingV2JsonSchema } from './json_schema';
 import {
   findRuleTemplatesRequestSchema,
   ruleTemplateDataSchema,
@@ -193,7 +193,26 @@ describe('findRuleTemplatesRequestSchema', () => {
  * (same Zod value, including refines), not a forked copy.
  */
 describe('rule template create-rule schema coupling', () => {
-  const toStableJsonSchema = toAlertingV2JsonSchema;
+  const toStableJsonSchema = (schema: z.ZodType) => {
+    const { $schema: _schema, ...rest } = z.toJSONSchema(schema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as Record<string, unknown>;
+    const {
+      $ref: ref,
+      definitions = {},
+      ...root
+    } = rest as {
+      $ref?: string;
+      definitions?: Record<string, Record<string, unknown>>;
+    };
+    if (typeof ref !== 'string') {
+      return rest;
+    }
+    const { [ref.replace('#/definitions/', '')]: rootDefinition, ...otherDefinitions } =
+      definitions;
+    return { ...root, ...rootDefinition, definitions: otherDefinitions };
+  };
 
   it('top-level keys are engine and rule', () => {
     expect(Object.keys(ruleTemplateDataSchema.shape).sort()).toEqual(['engine', 'rule']);

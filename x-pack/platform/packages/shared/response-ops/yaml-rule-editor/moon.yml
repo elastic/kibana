@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/monaco'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
