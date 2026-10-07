@@ -14,7 +14,6 @@ import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
-  createBulkWriteOutcomeUnknownError,
   type CompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
@@ -44,6 +43,7 @@ import {
   type EventsWriteResult,
   type WriteCandidate,
 } from './types';
+import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
 
 const WRITE_CONCURRENCY = 10;
 
