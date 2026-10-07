@@ -46,6 +46,7 @@ const meta: Meta<Args> = {
     numTabs: 0,
     titleAsLink: false,
     titleIcon: false,
+    titleIsLoading: false,
     description: true,
     numMetaBlocks: 0,
     numBadges: 0,
@@ -86,6 +87,11 @@ const meta: Meta<Args> = {
     },
     titleIcon: {
       name: 'Title icon',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+    titleIsLoading: {
+      name: 'Loading',
       control: { type: 'boolean' },
       table: { category: 'Header' },
     },
