@@ -250,6 +250,7 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       privileges: startPrivileges,
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     if (this.escalationsEnabled) {

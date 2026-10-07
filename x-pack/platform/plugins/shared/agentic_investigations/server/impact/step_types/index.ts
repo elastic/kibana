@@ -40,6 +40,6 @@ export const registerImpactStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
-    getGetImpactStepDefinition({ getImpactService, privileges })
+    getGetImpactStepDefinition({ getImpactService, privileges, getConversationClient })
   );
 };

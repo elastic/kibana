@@ -14,7 +14,10 @@ import type { SubjectsService } from './subjects_service';
 const request = httpServerMock.createKibanaRequest();
 const user = { username: 'analyst', fullName: null, email: null };
 
-const setup = ({ allowed = true }: { allowed?: boolean } = {}) => {
+const setup = ({
+  allowed = true,
+  readableIds = ['conv-1', 'conv-2'],
+}: { allowed?: boolean; readableIds?: string[] } = {}) => {
   const service = {
     upsertSubjects: jest.fn().mockResolvedValue([]),
     findConversationIdsBySubjects: jest.fn().mockResolvedValue(['conv-1']),
@@ -26,7 +29,12 @@ const setup = ({ allowed = true }: { allowed?: boolean } = {}) => {
     assertCanManage: allowed ? jest.fn().mockResolvedValue(undefined) : deny,
     assertCanRead: allowed ? jest.fn().mockResolvedValue(undefined) : deny,
   };
-  const conversations = {} as ConversationPublicClient;
+  const conversations = {
+    bulkGet: jest.fn(
+      async (ids: string[]) =>
+        new Map(ids.filter((id) => readableIds.includes(id)).map((id) => [id, { id }] as const))
+    ),
+  } as unknown as ConversationPublicClient;
   const attachments = {} as AttachmentPublicClient;
   const client = createSubjectsClient({
     getSubjectsService: () => service as unknown as SubjectsService,
@@ -80,6 +88,25 @@ describe('createSubjectsClient', () => {
       isHolderOpen,
       spaceId: 'space-a',
     });
+  });
+
+  it('leaves out investigations the caller cannot read', async () => {
+    const { client, service } = setup({ readableIds: ['conv-2'] });
+    service.findConversationIdsBySubjects.mockResolvedValue(['conv-1', 'conv-2']);
+
+    await expect(
+      client.findConversationIdsBySubjects([{ type: 'alert', id: 'a-1' }])
+    ).resolves.toEqual(['conv-2']);
+
+    await client.listByConversationIds(['conv-1', 'conv-2']);
+    expect(service.listByConversationIds).toHaveBeenCalledWith(['conv-2'], 'space-a');
+  });
+
+  it('does not read subjects when the caller can read none of the investigations', async () => {
+    const { client, service } = setup({ readableIds: [] });
+
+    await expect(client.listByConversationIds(['private-1'])).resolves.toEqual([]);
+    expect(service.listByConversationIds).not.toHaveBeenCalled();
   });
 
   it('checks the privilege before touching the index', async () => {
