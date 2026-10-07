@@ -497,8 +497,10 @@ include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RB
 require no ACL acknowledgment. Their documents are removed before best-effort
 history cleanup, and cleanup failures do not fail deletion.
 Hard deletion of a private workflow first marks it as deleted and disabled, then
-removes its steps and executions before removing the workflow document. If history
-cleanup fails or is incomplete, the API returns an error and retains the
+removes its steps and executions before removing the workflow document. Cleanup
+counts as incomplete only when history documents still remain, so a concurrent
+write that conflicts with the purge is retried instead of failing the request. If
+documents remain after the retries, the API returns an error and retains the
 soft-deleted workflow and its ACL. The caller can retry force deletion after the
 error is resolved.
 Direct Elasticsearch document deletion bypasses these checks. Private workflows

@@ -120,40 +120,17 @@ const restoreDisabledWorkflows = async (
   }
 };
 
-const VERSION_CONFLICT_PURGE_ATTEMPTS = 3;
+const STRICT_PURGE_ATTEMPTS = 3;
+const STRICT_PURGE_RETRY_BASE_DELAY_MS = 75;
 
-interface PurgeDeleteResponse {
-  timed_out?: boolean;
-  version_conflicts?: number;
-  failures?: Array<{ cause?: { type?: string } }>;
-}
+const waitMs = (durationMs: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, durationMs));
 
 class HistoryCleanupIncompleteError extends Error {
-  constructor(response: PurgeDeleteResponse) {
-    super(
-      `History cleanup incomplete: timed_out=${response.timed_out ?? false}, ` +
-        `version_conflicts=${response.version_conflicts ?? 0}, ` +
-        `failures=${response.failures?.length ?? 0}`
-    );
+  constructor(label: string, remaining: number) {
+    super(`History cleanup incomplete: ${remaining} ${label} document(s) remain.`);
   }
 }
-
-const isVersionConflictOnly = (response: PurgeDeleteResponse | undefined): boolean => {
-  if (!response?.version_conflicts || response.timed_out) {
-    return false;
-  }
-  return (response.failures ?? []).every(
-    (failure) => failure.cause?.type === 'version_conflict_engine_exception'
-  );
-};
-
-const thrownVersionConflict = (error: unknown): boolean => {
-  if (typeof error !== 'object' || error === null || !('statusCode' in error)) {
-    return false;
-  }
-  const { statusCode, body } = error as { statusCode?: unknown; body?: PurgeDeleteResponse };
-  return statusCode === 409 && isVersionConflictOnly(body);
-};
 
 const purgeWorkflowRelatedData = async (
   workflowIds: string[],
@@ -175,8 +152,20 @@ const purgeWorkflowRelatedData = async (
   const deleteByQueryRequest = {
     query,
     refresh: true,
-    conflicts: strict ? 'abort' : 'proceed',
+    conflicts: 'proceed',
   } as const;
+
+  const countRemaining = async (
+    dataClient: WorkflowExecutionsDataClient | StepExecutionsDataClient,
+    deleteError: unknown
+  ): Promise<number> => {
+    try {
+      const { count } = await dataClient.count({ query });
+      return count;
+    } catch (countError) {
+      throw deleteError ?? countError;
+    }
+  };
 
   const purge = async (
     dataClient: WorkflowExecutionsDataClient | StepExecutionsDataClient,
@@ -195,36 +184,31 @@ const purgeWorkflowRelatedData = async (
       return;
     }
 
-    for (let attempt = 1; attempt <= VERSION_CONFLICT_PURGE_ATTEMPTS; attempt++) {
+    for (let attempt = 1; attempt <= STRICT_PURGE_ATTEMPTS; attempt++) {
+      let deleteError: unknown;
       try {
         const response = await dataClient.deleteByQuery(deleteByQueryRequest);
-        const incomplete = Boolean(
-          response.timed_out || response.version_conflicts || response.failures?.length
-        );
-        if (!incomplete) {
+        if (!response.timed_out && !response.version_conflicts && !response.failures?.length) {
           return;
         }
-        if (!(isVersionConflictOnly(response) && attempt < VERSION_CONFLICT_PURGE_ATTEMPTS)) {
-          throw new HistoryCleanupIncompleteError(response);
-        }
-        logger.warn(
-          `Retrying ${label} purge for workflows [${workflowIds.join(
-            ', '
-          )}] after a version conflict (${attempt}/${VERSION_CONFLICT_PURGE_ATTEMPTS})`
-        );
       } catch (error) {
-        if (error instanceof HistoryCleanupIncompleteError) {
-          throw error;
-        }
-        if (!(thrownVersionConflict(error) && attempt < VERSION_CONFLICT_PURGE_ATTEMPTS)) {
-          throw error;
-        }
-        logger.warn(
-          `Retrying ${label} purge for workflows [${workflowIds.join(
-            ', '
-          )}] after a version conflict (${attempt}/${VERSION_CONFLICT_PURGE_ATTEMPTS})`
-        );
+        deleteError = error;
       }
+
+      // The purge only owes "no history left behind", so a reported conflict may already be moot.
+      const remaining = await countRemaining(dataClient, deleteError);
+      if (remaining === 0) {
+        return;
+      }
+      if (attempt === STRICT_PURGE_ATTEMPTS) {
+        throw deleteError ?? new HistoryCleanupIncompleteError(label, remaining);
+      }
+      logger.warn(
+        `Retrying ${label} purge for workflows [${workflowIds.join(
+          ', '
+        )}]: ${remaining} document(s) remain (${attempt}/${STRICT_PURGE_ATTEMPTS})`
+      );
+      await waitMs(STRICT_PURGE_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
     }
   };
 
