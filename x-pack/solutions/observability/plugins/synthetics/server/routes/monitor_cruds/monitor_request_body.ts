@@ -8,16 +8,16 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../common/constants/monitor_management';
-import { AlertConfigsCodec } from '../../../common/runtime_types/zod/alert_config';
+import { AlertConfigsCodec } from '../../../common/runtime_types/schemas/alert_config';
 import { MonitorTypeEnum } from '../../../common/runtime_types/monitor_management/monitor_configs';
-import { NameSpaceString } from '../../../common/runtime_types/zod/common';
+import { NameSpaceString } from '../../../common/runtime_types/schemas/common';
 import {
   FormMonitorTypeCodec,
   ModeCodec,
   MonitorTypeCodec,
   ScheduleUnitCodec,
   SourceTypeCodec,
-} from '../../../common/runtime_types/zod/monitor_configs';
+} from '../../../common/runtime_types/schemas/monitor_configs';
 import {
   MAX_MONITOR_FANOUT_SIZE,
   MAX_PARAM_VALUE_LENGTH,
