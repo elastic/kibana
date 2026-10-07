@@ -13,7 +13,13 @@ import { mockCase, mockSimilarObservables } from '../../containers/mock';
 
 describe('SimilarCasesTable', () => {
   const props: SimilarCasesTableProps = {
-    cases: [{ ...mockCase, similarities: { observables: mockSimilarObservables } }],
+    cases: [
+      {
+        ...mockCase,
+        similarities: { observables: mockSimilarObservables },
+        createdAt: '2023-01-01T00:00:00.000Z',
+      },
+    ],
     isLoading: false,
     onChange: jest.fn(),
     pagination: { pageIndex: 0, totalItemCount: 1 },
@@ -33,6 +39,12 @@ describe('SimilarCasesTable', () => {
     renderWithTestingProviders(<SimilarCasesTable {...props} />);
 
     expect(await screen.findByTestId('similar-cases-table-column-similarities')).toBeTruthy();
+  });
+
+  it('renders the createdAt column by default', async () => {
+    renderWithTestingProviders(<SimilarCasesTable {...props} />);
+
+    expect(await screen.findByTestId('similar-cases-table-column-createdAt')).toBeInTheDocument();
   });
 
   it('renders loading indicator when loading', async () => {
