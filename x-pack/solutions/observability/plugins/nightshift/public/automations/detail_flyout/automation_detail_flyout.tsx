@@ -546,7 +546,11 @@ export const AutomationDetailFlyout = ({
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
-                      onRaiseLimit={(limit) => startEditing({ dailyDispatchLimit: String(limit) })}
+                      onRaiseLimit={
+                        canManage
+                          ? (limit) => startEditing({ dailyDispatchLimit: String(limit) })
+                          : undefined
+                      }
                       onChange={() => {}}
                     />
                   </>

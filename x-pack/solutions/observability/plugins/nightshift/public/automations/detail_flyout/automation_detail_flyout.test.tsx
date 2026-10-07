@@ -63,7 +63,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
   });
 
-  const renderFlyout = () => {
+  const renderFlyout = ({ canManage = true, usedToday = 0 } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
@@ -71,8 +71,8 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
           <AutomationDetailFlyout
             automations={[automation]}
             automation={automation}
-            canManage
-            usedToday={0}
+            canManage={canManage}
+            usedToday={usedToday}
             runRange={runRange}
             rangeLabel="Last 24 hours"
             onClose={onClose}
@@ -171,4 +171,16 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     expect(history.location.pathname).toBe('/automations');
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [true, 1],
+    [false, 0],
+  ])(
+    'with manage access %s, shows %s Raise limit actions at the daily limit',
+    (canManage, count) => {
+      renderFlyout({ canManage, usedToday: 20 });
+
+      expect(screen.queryAllByText(/Raise limit/)).toHaveLength(count);
+    }
+  );
 });
