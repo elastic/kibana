@@ -240,6 +240,85 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
   });
 
+  it('preserves non-convertible annotation layers in the form-based datasource', () => {
+    const annotationLayerId = 'annotation-layer';
+    const annotationLayer = {
+      ...mockFormBasedLayer,
+      columnOrder: ['annotation-col'],
+      columns: {
+        'annotation-col': {
+          operationType: 'count',
+          sourceField: 'records',
+          label: 'Annotation',
+          dataType: 'number',
+          isBucketed: false,
+          scale: 'ratio',
+        },
+      },
+    };
+    const formBasedState = {
+      ...mockFormBasedState,
+      layers: {
+        [layerId]: mockFormBasedLayer,
+        [annotationLayerId]: annotationLayer,
+      },
+    } as unknown as FormBasedPrivateState;
+    const datasourceStates: DatasourceStates = {
+      formBased: { state: formBasedState, isLoading: false },
+    };
+    const attributes = {
+      ...mockAttributes,
+      state: {
+        ...mockAttributes.state,
+        datasourceStates: { formBased: formBasedState },
+      },
+    } as TypedLensSerializedState['attributes'];
+    const annotationConversion: ConvertibleLayer = {
+      id: annotationLayerId,
+      icon: 'layers',
+      name: 'Annotation layer',
+      type: 'annotations',
+      query: '',
+      isConvertibleToEsql: false,
+      conversionData: { esAggsIdMap: {}, partialRows: false },
+    };
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: [...defaultConvertibleLayers, annotationConversion],
+      attributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates,
+      framePublicAPI: createFrameAPI(),
+    });
+
+    expect(result?.state.datasourceStates.textBased?.layers).toHaveProperty(layerId);
+    expect(result?.state.datasourceStates.formBased?.layers).toEqual({
+      [annotationLayerId]: annotationLayer,
+    });
+  });
+
+  it('returns undefined instead of parsing an empty query for non-convertible layers', () => {
+    const annotationConversion: ConvertibleLayer = {
+      id: 'annotation-layer',
+      icon: 'layers',
+      name: 'Annotation layer',
+      type: 'annotations',
+      query: '',
+      isConvertibleToEsql: false,
+      conversionData: { esAggsIdMap: {}, partialRows: false },
+    };
+
+    expect(
+      convertFormBasedToTextBasedLayer({
+        layersToConvert: [annotationConversion],
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      })
+    ).toBeUndefined();
+  });
+
   it('preserves original column IDs in visualization state', () => {
     const result = convertFormBasedToTextBasedLayer({
       layersToConvert: defaultConvertibleLayers,
@@ -264,6 +343,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
         fieldName: '@timestamp',
         label: '@timestamp',
         meta: { type: 'date' },
+        params: { dropPartials: false },
       },
     ]);
   });
@@ -458,6 +538,105 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
       expect(column).not.toHaveProperty('params');
+    });
+  });
+
+  describe('drop partial buckets', () => {
+    const getDateHistogramColumn = (
+      dropPartials: boolean | undefined,
+      datasourceStates: DatasourceStates = mockDatasourceStates
+    ) => {
+      const layers = [
+        createConvertibleLayer(
+          `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)`,
+          {
+            bucket_0_0: createColumnMapping('col2', 'Count of records', 'number'),
+            '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {
+              operationType: 'date_histogram',
+              sourceField: '@timestamp',
+              interval: 1800000,
+              ...(dropPartials !== undefined ? { dropPartials } : {}),
+            }),
+          }
+        ),
+      ];
+
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
+
+      return result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.find(
+        (column) => column.columnId === 'col1'
+      );
+    };
+
+    it('explicitly keeps partial buckets when the form-based column does not drop them', () => {
+      expect(getDateHistogramColumn(false)?.params).toEqual({ dropPartials: false });
+    });
+
+    it('explicitly keeps partial buckets when the form-based column has no drop partials setting', () => {
+      expect(getDateHistogramColumn(undefined)?.params).toEqual({ dropPartials: false });
+    });
+
+    it('preserves drop partial buckets when the form-based column drops them', () => {
+      expect(getDateHistogramColumn(true)?.params).toEqual({ dropPartials: true });
+    });
+
+    it('keeps the user format alongside drop partials', () => {
+      const formBasedLayerWithFormat = {
+        ...mockFormBasedLayer,
+        columns: {
+          ...mockFormBasedLayer.columns,
+          col1: {
+            ...mockFormBasedLayer.columns.col1,
+            params: { interval: 'auto', format: { id: 'date', params: { pattern: 'YYYY' } } },
+          },
+        },
+      } as typeof mockFormBasedLayer;
+      const datasourceStates: DatasourceStates = {
+        formBased: {
+          state: {
+            ...mockFormBasedState,
+            layers: { [layerId]: formBasedLayerWithFormat },
+          } as FormBasedPrivateState,
+          isLoading: false,
+        },
+      };
+      const layers = [
+        createConvertibleLayer(
+          `FROM test-index | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)`,
+          {
+            bucket_0_0: createColumnMapping('col2', 'Count of records', 'number'),
+            '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {
+              operationType: 'date_histogram',
+              sourceField: '@timestamp',
+              interval: 1800000,
+              dropPartials: false,
+              format: { id: 'date', params: { pattern: 'YYYY' } },
+            }),
+          }
+        ),
+      ];
+
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
+
+      const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.find(
+        (col) => col.columnId === 'col1'
+      );
+      expect(column?.params).toEqual({
+        format: { id: 'date', params: { pattern: 'YYYY' } },
+        dropPartials: false,
+      });
     });
   });
 });

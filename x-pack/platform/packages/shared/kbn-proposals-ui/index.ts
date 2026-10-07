@@ -6,13 +6,7 @@
  */
 
 export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
-export {
-  ApprovalContent,
-  type ApprovalContentProps,
-  type ApprovalAction,
-  type ApprovalDecision,
-  type AlwaysAllowOption,
-} from './src/approval_content';
+export { ApprovalContent, type ApprovalContentProps } from './src/approval_content';
 export {
   getApprovalOutcomeBadge,
   type ApprovalOutcomeBadge,
@@ -29,4 +23,16 @@ export {
   getProposalTone,
   isProposalExpired,
 } from './src/proposal_helpers';
-export type { ApprovalProposal } from './src/types';
+export type {
+  ApprovalProposal,
+  ApprovalAction,
+  ApprovalDecision,
+  AlwaysAllowOption,
+  DeclineParams,
+} from './src/types';
+export {
+  DISMISS_REASON_LABELS,
+  DISMISS_REASON_OPTIONS,
+  formatDismissReason,
+} from './src/dismiss_reason';
+export { DeclineReasonForm, type DeclineReasonFormProps } from './src/decline_reason_form';

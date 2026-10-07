@@ -14,12 +14,13 @@ import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const getStackManagementSectionLinks = async (
-  sectionId: string
+  sectionId: string,
+  alertingV2Enabled = false
 ): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
-  coreStart.settings.globalClient.get.mockReturnValue(false);
+  coreStart.settings.globalClient.get.mockReturnValue(alertingV2Enabled);
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },
@@ -37,13 +38,26 @@ const getStackManagementSectionLinks = async (
 };
 
 describe('Observability solution navigation tree', () => {
-  it('does not include Stack Alerts in Stack Management > Alerts and Insights', async () => {
-    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights');
+  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', async () => {
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', false);
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).toEqual(
       expect.arrayContaining([
         'management:triggersActions',
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
+    );
+  });
+
+  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', async () => {
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', true);
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
         'management:triggersActionsConnectors',
         'management:maintenanceWindows',
       ])

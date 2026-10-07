@@ -46,7 +46,6 @@ const AGENT_BUILDER_DEEP_LINK_SOURCES: readonly AgentBuilderDeepLinkSource[] = [
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
-    isExperimental: true,
   },
   {
     id: 'tools',
@@ -76,6 +75,7 @@ export const registerApp = ({
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
+    order: 2060,
     visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
     keywords: ['agent builder', 'ai agent', 'chat agent'],
     updater$: appUpdater$,

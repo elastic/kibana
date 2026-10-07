@@ -30,6 +30,7 @@ import { UserMessageText } from './user_message_text';
 import { UserMessageAvatar } from './user_message_avatar';
 import { AuthorHeader } from '../author_header';
 import { UserMessageImages } from './user_message_images';
+import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.userMessage.userInput', {
@@ -49,6 +50,7 @@ interface UserMessageProps {
 }
 
 const EXCLUDE_IMAGE_TYPES: AttachmentType[] = [AttachmentType.image];
+const USER_ACTOR_FILTER = [ATTACHMENT_REF_ACTOR.user];
 
 export const UserMessage = ({
   input,
@@ -68,6 +70,15 @@ export const UserMessage = ({
     name: authorName,
     isCurrentUser,
   } = useUserMessageAuthor({ author, origin, isPendingCurrentRound });
+  const thumbnails = useUserMessageThumbnails({
+    attachmentRefs,
+    conversationAttachments,
+    fallbackAttachments,
+    actorFilter: USER_ACTOR_FILTER,
+  });
+
+  const hasText = input.trim().length > 0;
+  const hasBubble = hasText || thumbnails.length > 0;
 
   const inputContainerStyles = css`
     width: 100%;
@@ -106,40 +117,38 @@ export const UserMessage = ({
           <EuiFlexItem grow={false}>
             <AuthorHeader name={authorName} origin={origin} startedAt={startedAt} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel
-              css={inputContainerStyles}
-              hasShadow={false}
-              hasBorder={false}
-              aria-label={labels.userMessage}
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <UserMessageImages
-                  attachmentRefs={attachmentRefs}
-                  conversationAttachments={conversationAttachments}
-                  fallbackAttachments={fallbackAttachments}
-                  actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-                  hoveredImageName={hoveredImageName}
-                />
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <UserMessageText text={input} onHoverImage={setHoveredImageName} />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
+          {hasBubble && (
+            <EuiFlexItem grow={false}>
+              <EuiPanel
+                css={inputContainerStyles}
+                hasShadow={false}
+                hasBorder={false}
+                aria-label={labels.userMessage}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <UserMessageImages thumbnails={thumbnails} hoveredImageName={hoveredImageName} />
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <UserMessageText text={input} onHoverImage={setHoveredImageName} />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
           <AttachmentReferences
             attachmentRefs={attachmentRefs}
             conversationAttachments={conversationAttachments}
             fallbackAttachments={fallbackAttachments}
-            actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+            actorFilter={USER_ACTOR_FILTER}
             justifyContent="flexStart"
             excludeTypes={EXCLUDE_IMAGE_TYPES}
           />
-          <EuiFlexItem grow={false}>
-            <ResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
-          </EuiFlexItem>
+          {hasText && (
+            <EuiFlexItem grow={false}>
+              <ResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
