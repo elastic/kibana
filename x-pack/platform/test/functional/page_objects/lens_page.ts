@@ -404,7 +404,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.existOrFail('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
