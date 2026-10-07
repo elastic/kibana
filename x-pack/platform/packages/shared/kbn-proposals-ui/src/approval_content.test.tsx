@@ -277,6 +277,14 @@ describe('ApprovalContent', () => {
     ).toBeInTheDocument();
   });
 
+  it('explains why the workflow expired the proposal early, when it said', () => {
+    const reason =
+      "The rule was deleted after this proposal was created, so this tuning can't be applied.";
+    renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
+
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
+  });
+
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
     renderContent({
       alwaysAllow: {

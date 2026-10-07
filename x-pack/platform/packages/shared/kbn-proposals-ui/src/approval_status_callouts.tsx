@@ -23,6 +23,8 @@ interface ApprovalStatusCalloutsProps {
    * hold for either cause since this flag does not distinguish them.
    */
   isExpired: boolean;
+  /** Why the workflow expired the proposal early, when it said; shown under the expired title. */
+  expiredReason?: string;
   'data-test-subj'?: string;
 }
 
@@ -33,7 +35,13 @@ interface ApprovalStatusCalloutsProps {
  * spacer-callout-spacer shape, not because they share any state.
  */
 export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
-  ({ isPending, previousExecutionError, isExpired, 'data-test-subj': dataTestSubj }) => {
+  ({
+    isPending,
+    previousExecutionError,
+    isExpired,
+    expiredReason,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -65,7 +73,9 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
                 size="s"
                 title={APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle}
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-expired` : undefined}
-              />
+              >
+                {expiredReason}
+              </KbnWarningCallout>
               <EuiSpacer size="m" />
             </div>
           </>

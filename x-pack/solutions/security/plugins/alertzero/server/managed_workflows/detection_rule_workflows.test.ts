@@ -740,6 +740,111 @@ describe('detection rule workflows', () => {
         expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
+      // A pending tuning proposal whose rule was edited or deleted since can never be
+      // applied, so the sweep expires it rather than leaving Approve and Decline on it.
+      describe('expiring stale tuning proposals', () => {
+        const list = tuningSteps.find(({ name }) => name === 'list_pending_tuning_proposals')!;
+        const loop = tuningSteps.find(({ name }) => name === 'expire_stale_tuning_proposals')!;
+        const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
+          (stepName) => tuningSteps.find(({ name }) => name === stepName)!
+        );
+        const proposal = (expectedRevision?: number) => ({
+          id: 'proposal-1',
+          actionWorkflowId: ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+          actionInput: { id: 'rule-1', expected_revision: expectedRevision, query: 'from logs' },
+        });
+
+        const firedSteps = (context: Record<string, unknown>) =>
+          expireSteps
+            .filter((step) => resolveExpression(step.if, context) === true)
+            .map(({ name }) => name);
+
+        it('checks every pending AlertZero rule edit before harvesting', () => {
+          const names = tuningSteps.map(({ name }) => name);
+
+          expect(list.with?.path).toBe('/s/{{ workflow.spaceId }}/internal/proposals');
+          expect(list.with?.query).toEqual({
+            status: 'pending',
+            origin: 'alertzero',
+            category: 'configure',
+            size: 100,
+          });
+          expect(list['on-failure']).toEqual({ continue: true });
+          expect(names.indexOf('expire_stale_tuning_proposals')).toBeLessThan(
+            names.indexOf('harvest_fp_alerts_by_rule')
+          );
+
+          const otherAction = { ...proposal(0), actionWorkflowId: 'some-other-action' };
+          expect(
+            resolveExpression((loop as NestedStep & { foreach?: string }).foreach, {
+              consts: tuning.consts,
+              steps: {
+                list_pending_tuning_proposals: {
+                  output: { proposals: [proposal(0), otherAction] },
+                },
+              },
+            })
+          ).toEqual([proposal(0)]);
+          expect(
+            resolveExpression((loop as NestedStep & { foreach?: string }).foreach, {
+              consts: tuning.consts,
+              steps: { list_pending_tuning_proposals: { error: { message: 'HTTP 500' } } },
+            })
+          ).toEqual([]);
+        });
+
+        it.each([
+          [
+            'a deleted rule',
+            { error: { message: 'HTTP 404: Not Found' } },
+            0,
+            ['expire_deleted_rule_proposal'],
+          ],
+          [
+            'any other read failure',
+            { error: { message: 'HTTP 500: Internal Server Error' } },
+            0,
+            [],
+          ],
+          ['a rule edited since', { output: { revision: 1 } }, 0, ['expire_changed_rule_proposal']],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, []],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, []],
+        ])('handles %s', (_, fetchRule, expectedRevision, expected) => {
+          expect(
+            firedSteps({
+              foreach: { item: proposal(expectedRevision) },
+              steps: { fetch_proposal_rule: fetchRule },
+            })
+          ).toEqual(expected);
+        });
+
+        // An expired proposal is settled, so the record keeps it as `expired`; the
+        // gate's own timeout later rewrites `executionError` but not `rationale`.
+        it('expires the proposal and explains why in plain text', async () => {
+          const context = {
+            foreach: { item: proposal(0) },
+            steps: { fetch_proposal_rule: { output: { revision: 1, updated_by: 'jane' } } },
+          };
+          const engine = createWorkflowLiquidEngine();
+          const [deleted, changed] = await Promise.all(
+            expireSteps.map((step) => engine.parseAndRender(String(step.with?.rationale), context))
+          );
+
+          for (const step of expireSteps) {
+            expect(step.type).toBe('proposals.updateProposal');
+            expect(step.with?.proposalId).toBe('{{ foreach.item.id }}');
+            expect(step.with?.status).toBe('expired');
+            expect(step['on-failure']).toEqual({ continue: true });
+          }
+          expect(deleted).toBe(
+            "The rule was deleted after this proposal was created, so this tuning can't be applied."
+          );
+          expect(changed).toBe(
+            'The rule was changed by "jane" after this proposal was created, so this tuning can\'t be applied.'
+          );
+        });
+      });
+
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
       // the launch cap for the enabled filter to have anything to backfill from.
       it('overscans the harvest pool beyond the launch cap', () => {
