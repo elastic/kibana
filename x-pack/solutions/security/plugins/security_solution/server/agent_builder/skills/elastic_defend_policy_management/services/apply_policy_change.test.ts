@@ -30,7 +30,7 @@ import {
 const SPACE_ID = 'space-marketing';
 const POLICY_ID = 'policy-id-1';
 const EXPECTED_VERSION = 'WzEsMV0=';
-const generator = new FleetPackagePolicyGenerator();
+const generator = new FleetPackagePolicyGenerator('apply-policy-change-tests');
 const authenticatedUser = {
   username: 'analyst',
   roles: ['superuser'],

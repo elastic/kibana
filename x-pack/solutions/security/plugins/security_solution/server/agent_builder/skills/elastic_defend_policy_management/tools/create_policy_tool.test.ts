@@ -356,8 +356,9 @@ describe('createPolicyTool', () => {
       revision: 5,
       version: overlongVersion,
     };
+    const cause = new Error('so version conflict');
     const run = jest.fn(async () => {
-      throw new PolicyWriteUnverifiedError(before, observed);
+      throw new PolicyWriteUnverifiedError(before, observed, cause);
     });
     const { result } = await getHandlerResult(run, { logger });
     const serialized = JSON.stringify(result.data);
@@ -386,7 +387,13 @@ describe('createPolicyTool', () => {
       },
     });
     expect(serialized).not.toContain('proposedConfig');
-    expect(logger.warn).toHaveBeenCalledWith(`Write unverified in ${TOOL_ID} for policy policy-1`);
+    expect(result.data).not.toHaveProperty('cause');
+    expect(result.data).not.toHaveProperty('meta');
+    expect(result.data).not.toHaveProperty('debug');
+    expect(result.data).not.toHaveProperty('stack');
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Write unverified in ${TOOL_ID} for policy policy-1: so version conflict`
+    );
     expect(logger.error).not.toHaveBeenCalled();
   });
 

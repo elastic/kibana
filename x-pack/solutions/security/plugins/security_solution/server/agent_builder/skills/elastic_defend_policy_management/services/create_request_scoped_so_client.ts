@@ -8,8 +8,9 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 
-export class PolicyReadonlySoClientMethodNotAllowedError extends Error {
+export class PolicyReadonlySoClientMethodNotAllowedError extends EndpointError {
   constructor(methodName: string) {
     super(`Method [${methodName}] not allowed on readonly SO client`);
     this.name = 'PolicyReadonlySoClientMethodNotAllowedError';
