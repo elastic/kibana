@@ -12,7 +12,15 @@ import { DataViewEditorService } from './data_view_editor_service';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
-const createService = (dataViewsOverrides: Partial<DataViewsServicePublic> = {}) =>
+jest.mock('./lib', () => ({
+  ...jest.requireActual('./lib'),
+  ensureMinimumTime: (promiseOrPromises: Promise<unknown> | Array<Promise<unknown>>) =>
+    Array.isArray(promiseOrPromises) ? Promise.all(promiseOrPromises) : promiseOrPromises,
+}));
+
+type DataViewsMocks = Partial<Record<keyof DataViewsServicePublic, jest.Mock>>;
+
+const createService = (dataViewsOverrides: DataViewsMocks = {}) =>
   new DataViewEditorService({
     services: {
       http: { get: jest.fn().mockResolvedValue({}) } as unknown as HttpSetup,
@@ -62,8 +70,12 @@ describe('DataViewEditorService', () => {
   });
 
   describe('timestamp fields', () => {
+    let service: DataViewEditorService;
+
+    afterEach(() => service.destroy());
+
     it('should expose the failure when the field list request fails', async () => {
-      const service = createService({
+      service = createService({
         getFieldsForWildcard: jest.fn().mockRejectedValue(new Error('Fields API is unavailable')),
       });
 
@@ -74,13 +86,11 @@ describe('DataViewEditorService', () => {
       );
 
       expect(error?.message).toBe('Fields API is unavailable');
-      expect(await firstValueFrom(service.timestampFieldOptions$)).toEqual([]);
-
-      service.destroy();
+      expect(await firstValueFrom(service.loadingTimestampFields$)).toBe(false);
     });
 
     it('should clear a previous failure once the field list request succeeds', async () => {
-      const service = createService({
+      service = createService({
         getFieldsForWildcard: jest
           .fn()
           .mockRejectedValueOnce(new Error('Fields API is unavailable'))
@@ -92,30 +102,29 @@ describe('DataViewEditorService', () => {
         service.timestampFieldsError$.pipe(first((value) => value !== undefined))
       );
 
-      service.setIndexPattern('other*');
+      service.setIndexPattern('tracks-2*');
       const options = await firstValueFrom(
         service.timestampFieldOptions$.pipe(first((value) => value.length > 0))
       );
 
       expect(options.map(({ fieldName }) => fieldName)).toContain('@timestamp');
       expect(await firstValueFrom(service.timestampFieldsError$)).toBeUndefined();
-
-      service.destroy();
     });
 
     it('should ignore a failure of a superseded request once no indices match', async () => {
       let rejectFieldsRequest: (error: Error) => void = () => {};
-      const service = createService({
+      const getFieldsForWildcard = jest.fn(
+        () =>
+          new Promise((_resolve, reject) => {
+            rejectFieldsRequest = reject;
+          })
+      );
+      service = createService({
         getIndices: jest.fn(async ({ pattern }: { pattern: string }) =>
           pattern === '*' || pattern.startsWith('tracks') ? [{ name: 'tracks', item: {} }] : []
         ),
-        getFieldsForWildcard: jest.fn(
-          () =>
-            new Promise((_resolve, reject) => {
-              rejectFieldsRequest = reject;
-            })
-        ),
-      } as unknown as Partial<DataViewsServicePublic>);
+        getFieldsForWildcard,
+      });
 
       service.setIndexPattern('tracks*');
       await firstValueFrom(
@@ -131,12 +140,11 @@ describe('DataViewEditorService', () => {
         )
       );
 
+      expect(getFieldsForWildcard).toHaveBeenCalledTimes(1);
       rejectFieldsRequest(new Error('Fields API is unavailable'));
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(await firstValueFrom(service.timestampFieldsError$)).toBeUndefined();
-
-      service.destroy();
     });
   });
 });
