@@ -28,6 +28,8 @@ const tsRuleTester = new RuleTester({
   },
 });
 
+// The rule is typescript-eslint's `no-restricted-imports`; these cases (including import syntax
+// variants and report locations) prove it behaves the same through Oxlint's ESLint-compatible API.
 tsRuleTester.run('@kbn/eslint/security_imports_restriction', rule, {
   valid: [
     {

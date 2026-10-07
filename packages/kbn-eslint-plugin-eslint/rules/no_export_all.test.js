@@ -78,11 +78,15 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
         export * as foo from './foo';
         export type * as baz from './baz';
         export * from './missing';
+        export * as missing from './missing';
+        export * as pkg from '@kbn/some-package';
       `,
       errors: [
         { line: 1, message },
         { line: 2, message },
         { line: 3, message },
+        { line: 4, message },
+        { line: 5, message },
       ],
       output: null,
     },

@@ -70,7 +70,7 @@ const checkExtensions = (basePath) => {
  */
 const getImportPath = (dir, specifier) => {
   const base = normalizeRelativeSpecifier(dir, specifier);
-  if (!specifier) {
+  if (!base) {
     return undefined;
   }
 
@@ -97,7 +97,7 @@ const getImportPath = (dir, specifier) => {
  *
  * @param {Parser} parser
  * @param {string} from
- * @param {string | undefined} specifier module specifier of the `export *` declaration
+ * @param {string} specifier module specifier of the `export *` declaration
  * @param {ExportSet | undefined} exportSet only passed when called recursively
  * @param {boolean | undefined} assumeAllTypes only passed when called recursively
  * @returns {ExportSet | undefined}
@@ -109,10 +109,6 @@ const getExportNamesDeep = (
   exportSet = new ExportSet(),
   assumeAllTypes = false
 ) => {
-  if (!specifier) {
-    return undefined;
-  }
-
   const importPath = getImportPath(Path.dirname(from), specifier);
   if (!importPath) {
     return undefined;
@@ -165,12 +161,14 @@ const getExportNamesDeep = (
 
       // export * from '../foo';
       if (!clause) {
+        if (!ts.isStringLiteral(statement.moduleSpecifier)) {
+          return undefined;
+        }
+
         const childTypes = getExportNamesDeep(
           parser,
           sourceFile.fileName,
-          ts.isStringLiteral(statement.moduleSpecifier)
-            ? statement.moduleSpecifier.text
-            : undefined,
+          statement.moduleSpecifier.text,
           exportSet,
           types
         );

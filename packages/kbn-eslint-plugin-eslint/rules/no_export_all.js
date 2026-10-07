@@ -44,29 +44,27 @@ module.exports = {
   },
   createOnce: (context) => ({
     ExportAllDeclaration(node) {
-      const esNode = /** @type EsTreeExportAllDeclaration */ (node);
-      const source = esNode.source.value;
-      const exportSet = getExportNamesDeep(parser, context.filename, source);
-      const isTypeExport = esNode.exportKind === 'type';
-      const isNamespaceExportWithTypes = esNode.exported && (isTypeExport || exportSet.types.size);
-
-      /** @param {Fixer} fixer */
-      const fix = (fixer) =>
-        fixer.replaceText(
-          node,
-          esNode.exported
-            ? getExportNamedNamespaceCode(
-                context.sourceCode.getText(esNode.exported),
-                Array.from(exportSet.values),
-                source
-              )
-            : getExportCode(exportSet, source)
-        );
+      const { source, exported, exportKind } = /** @type EsTreeExportAllDeclaration */ (node);
+      const exportSet = getExportNamesDeep(parser, context.filename, source.value);
+      const canFix =
+        exportSet?.size > 0 && !(exported && (exportKind === 'type' || exportSet.types.size > 0));
 
       context.report({
         message: ERROR_MSG,
         loc: node.loc,
-        fix: exportSet?.size && !isNamespaceExportWithTypes ? fix : undefined,
+        fix: canFix
+          ? /** @param {Fixer} fixer */ (fixer) =>
+              fixer.replaceText(
+                node,
+                exported
+                  ? getExportNamedNamespaceCode(
+                      context.sourceCode.getText(exported),
+                      Array.from(exportSet.values),
+                      source.value
+                    )
+                  : getExportCode(exportSet, source.value)
+              )
+          : undefined,
       });
     },
   }),

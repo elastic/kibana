@@ -12,7 +12,6 @@ require('@kbn/swc-register').install();
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
-const { AXIOS_LEGACY_CONSUMERS } = require('./.oxlint/axios_legacy_consumers');
 
 /**
  * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
@@ -1450,6 +1449,16 @@ module.exports = {
       },
     },
     {
+      // The server entry and tests are never bundled into UI code, so they may import server modules.
+      files: [
+        'src/platform/packages/shared/kbn-connector-specs/server.ts',
+        'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
+      },
+    },
+    {
       files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'off',
@@ -2507,23 +2516,6 @@ module.exports = {
             ],
           },
         ],
-      },
-    },
-    {
-      // Files that already import axios; the axios allowlist itself is applied by
-      // @kbn/eslint/security_imports_restriction in .oxlint/security_imports.mts.
-      // The `no-restricted-imports` entry preserves this block's historical
-      // behavior: it is placed last, so the allowlisted files that overlap with
-      // an earlier override (e.g. the security_solution block) lose that
-      // override's `*legacy*` pattern check; verified that none of them
-      // currently import any path matching `*legacy*`. The workflows_management
-      // overlap is gone, and this entry can be dropped entirely once the
-      // remaining security_solution consumers migrate. The js-yaml freeze is
-      // handled separately via @kbn/eslint/module_migration in .oxlint/module_migration.mts
-      // so it does not interact with this override.
-      files: AXIOS_LEGACY_CONSUMERS,
-      rules: {
-        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
       },
     },
     {

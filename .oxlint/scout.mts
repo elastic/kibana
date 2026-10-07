@@ -9,13 +9,9 @@
 
 import type { OxlintOverride } from 'oxlint';
 
-/**
- * `SCOUT_TEST_FILE_GLOBS` in `.eslintrc.js`, with the `@kbn/scout-info` root path glob expanded.
- * oxlint does not match `**` inside `{}` alternatives, so `x-pack/**` gets its own glob.
- */
+/** Mirrors `SCOUT_TEST_FILE_GLOBS` in `.eslintrc.js`, with the `@kbn/scout-info` root path glob expanded. */
 const SCOUT_TEST_FILE_GLOBS = [
-  '{src/platform,src/core}/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
-  'x-pack/**/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
+  '{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
   '{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts',
   'src/core/test/scout{_*,}/**/*.ts',
   'packages/**/test/scout{_*,}/**/*.ts',
