@@ -22,11 +22,12 @@ const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
     'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
     {
       defaultMessage:
-        'This policy matches all alerts from rules with one of the following tags AND the matching query.',
+        'This policy matches all alerts from rules with one of the following routing tags AND the matching query.',
     }
   ),
   tagsOnly: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
-    defaultMessage: 'This policy matches all alerts from rules with one of the following tags.',
+    defaultMessage:
+      'This policy matches all alerts from rules with one of the following routing tags.',
   }),
   expressionOnly: i18n.translate(
     'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression',
@@ -42,7 +43,7 @@ const normalizeMatcher = (matcher?: PolicyMatcher | null) => ({
   expression: matcher?.expression?.trim() || null,
 });
 
-/** Classifies a policy matcher by whether rule tags, the matching query, or both narrow down its alerts. */
+/** Classifies a policy matcher by whether routing tags, the matching query, or both narrow down its alerts. */
 export const getPolicyScopeKind = (matcher?: PolicyMatcher | null): PolicyScopeKind => {
   const { tags, expression } = normalizeMatcher(matcher);
   if (tags) {
@@ -69,7 +70,7 @@ export const PolicyScopeSummary = ({ matcher }: Props) => {
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.ruleTags',
-                  { defaultMessage: 'Rule tags:' }
+                  { defaultMessage: 'Routing tags:' }
                 )}
               </EuiText>
             </EuiFlexItem>

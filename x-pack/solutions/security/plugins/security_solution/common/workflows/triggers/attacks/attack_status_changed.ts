@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
@@ -33,18 +33,22 @@ triggers:
       condition: 'event.status: "acknowledged"'
 \`\`\``;
 
-const attackStatusChangedEventSchema = z.object({
-  attackIds: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
-  status: workflowStatusEnum.meta({ description: TRIGGER_SCHEMA_STATUS_DESCRIPTION }),
-  previousStatuses: z
-    .array(previousStatusSchema)
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION }),
-  truncated: z.boolean().meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
-});
+const attackStatusChangedEventSchema = lazySchema(() =>
+  z.object({
+    attackIds: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
+    status: workflowStatusEnum.meta({ description: TRIGGER_SCHEMA_STATUS_DESCRIPTION }),
+    previousStatuses: z
+      .array(previousStatusSchema)
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION }),
+    truncated: z
+      .boolean()
+      .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  })
+);
 
 export const attackStatusChangedTriggerDef: CommonTriggerDefinition = {
   id: AttackStatusChangedTriggerId,
