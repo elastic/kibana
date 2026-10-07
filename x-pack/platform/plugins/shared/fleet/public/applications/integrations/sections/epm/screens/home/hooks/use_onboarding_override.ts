@@ -66,16 +66,12 @@ function getSearchMembers(hidden: IntegrationCardItem[]): IntegrationCardItem['s
         Number(a.name === AWS_ONBOARDING_PACKAGE_NAME)
     );
   const seen = new Set<string>();
-  const members: NonNullable<IntegrationCardItem['searchMembers']> = [];
+  const members: Array<{ name: string; title: string }> = [];
   for (const card of sorted) {
     const key = card.title.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    members.push({
-      name: card.integration || card.name,
-      title: card.title,
-      description: card.description,
-    });
+    members.push({ name: card.integration || card.name, title: card.title });
   }
   return members;
 }
