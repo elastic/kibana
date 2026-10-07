@@ -1,0 +1,52 @@
+name: Prefetch flaky-test fix candidates
+
+# Shortlist other flaky-test-fixer PRs that may fix the same failure.
+# The verifier checks their diffs to confirm whether the fixes overlap.
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: Flaky-test fix PR to find potential duplicate fixes for.
+        required: true
+        type: string
+      artifact_name:
+        description: Artifact name for the potential duplicate flaky-test fixes.
+        required: true
+        type: string
+
+jobs:
+  prefetch_flaky_test_fix_candidates:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Checkout trusted workflow scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Find potential duplicate flaky-test fix PRs
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+            await writeDuplicateCandidates({
+              github,
+              core,
+              prNumber: Number(process.env.PR_NUMBER),
+              outputDir: '/tmp/flaky-test-fix-candidates',
+            });
+
+      - name: Upload potential duplicate flaky-test fixes
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: /tmp/flaky-test-fix-candidates/duplicate-candidates.json
+          if-no-files-found: error
+          retention-days: 1

@@ -18,6 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
+  - prefetch-flaky-test-fix-candidates.yml
 
 permissions:
   contents: read
@@ -77,6 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME: &flaky_test_fix_candidates_artifact_name flaky-test-fix-candidates-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -137,13 +139,26 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
-      include_duplicate_candidates: true
+  prefetch_flaky_test_fix_candidates:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-flaky-test-fix-candidates.yml
+    with:
+      pr_number: *pr_number
+      artifact_name: *flaky_test_fix_candidates_artifact_name
 
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
+  - name: Download potential duplicate flaky-test fixes
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
@@ -358,7 +373,7 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 ## Prefetched PR context
 
-A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
 
 - `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
 - `pr-diff.txt` — unified diff of every changed file.
@@ -366,7 +381,7 @@ A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer 
 - `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
 - `flaky-run-count.json` — `{ triggeredByBot }`: the deterministic, pre-computed number of `/flaky` runs `kibanamachine` has already triggered on this PR (see [Number of runs](#number-of-runs)).
 - `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
-- `duplicate-candidates.json` — `{ team, candidates }`: `team` is this PR's owning team (read from its `failed-test` issue's `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Same team means same owning code area, not necessarily the same test — so confirm each against the diffs. See [Duplicate detection](#duplicate-detection). Prepared from `main` by the prefetch job; a detection failure stops preparation.
+- `duplicate-candidates.json` — `{ team, candidates }`: `team` is this PR's owning team (read from its `failed-test` issue's `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Same team means same owning code area, not necessarily the same test — so confirm each against the diffs. See [Duplicate detection](#duplicate-detection). Prepared from `main` by the dedicated flaky-test fix candidate workflow; a lookup failure stops preparation.
 
 Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
 
