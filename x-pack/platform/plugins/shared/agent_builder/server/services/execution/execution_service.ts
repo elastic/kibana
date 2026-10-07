@@ -859,6 +859,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
         source: 'chat_input',
         actor: userMessageActor({ ...conversation, user }, { author, origin }),
+        trigger_event_id: eventId,
         created_at: receivedAt.toISOString(),
       }),
       attachments: { snapshot, produced: stateManager.getAll() },

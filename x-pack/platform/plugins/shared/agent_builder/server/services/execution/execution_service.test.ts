@@ -1520,7 +1520,7 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('persists an attachment-only message without refs, its attachments as events after it', async () => {
+    it('persists an attachment-only message with its attachments linked to it', async () => {
       (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
         getAll: () => [],
         drainChanges: () => [
@@ -1544,12 +1544,15 @@ describe('AgentExecutionService', () => {
       );
 
       const [{ events }] = conversationClient.appendEvents.mock.calls[0];
-      expect(events[0]).toMatchObject({ type: TimelineEventType.userMessage });
-      expect(events[0].data).toEqual({ message: '' });
-      expect(events[1]).toMatchObject({
+      const [userMessage, attachmentEvent] = events;
+      expect(userMessage).toMatchObject({ type: TimelineEventType.userMessage });
+      expect(userMessage.data).toEqual({ message: '' });
+      expect(attachmentEvent).toMatchObject({
         type: TimelineEventType.attachmentAdded,
-        data: { attachment_id: 'attachment-1', source: 'chat_input' },
+        trigger_event_id: userMessage.id,
+        data: { attachment_id: 'attachment-1', source: 'chat_input', format: 2 },
       });
+      expect(attachmentEvent).not.toHaveProperty('execution_id');
     });
 
     it('requires something to say', async () => {

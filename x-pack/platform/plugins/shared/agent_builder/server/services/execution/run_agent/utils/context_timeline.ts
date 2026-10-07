@@ -255,7 +255,10 @@ export const isTimelineStandaloneUserMessage = <E extends AnyTimelineEvent>(
 export const standaloneUserMessages = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<UserMessageOf<E>> => {
-  const triggerIds = new Set(timeline.map((event) => event.trigger_event_id));
+  // Input attachments of a message appended without execution point at it too; they trigger nothing.
+  const triggerIds = new Set(
+    timeline.filter((event) => event.execution_id).map((event) => event.trigger_event_id)
+  );
   return timeline.filter(
     (event): event is E & UserMessageOf<E> =>
       event.type === TimelineEventType.userMessage &&

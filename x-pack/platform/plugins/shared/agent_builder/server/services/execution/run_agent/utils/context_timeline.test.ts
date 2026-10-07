@@ -36,6 +36,7 @@ import {
   lastExecutionTerminal,
   roundInterruption,
   roundResponse,
+  standaloneUserMessages,
   type ContextTimelineEvent,
   type TimelineEntry,
 } from './context_timeline';
@@ -333,5 +334,33 @@ describe('groupTimelineEntries with custom events', () => {
   it('is ignored by groupTimelineRounds and selected by standaloneEvents', () => {
     expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
     expect(standaloneEvents(timeline).map((event) => event.id)).toEqual(['note']);
+  });
+});
+
+describe('standaloneUserMessages', () => {
+  it('keeps a message as standalone when only its input attachment events point at it', () => {
+    const message = {
+      id: 'm1',
+      type: TimelineEventType.userMessage,
+      created_at: T0,
+      actor: userActor,
+      data: { message: 'note' },
+    } as TimelineEvent;
+    const linked = {
+      id: 'att',
+      type: TimelineEventType.attachmentAdded,
+      created_at: T0,
+      actor: userActor,
+      trigger_event_id: 'm1',
+      data: {
+        attachment_id: 'a1',
+        attachment_type: 'text',
+        current_version: 1,
+        render_inline: false,
+        source: 'chat_input',
+        format: 2,
+      },
+    } as TimelineEvent;
+    expect(standaloneUserMessages([message, linked]).map((event) => event.id)).toEqual(['m1']);
   });
 });
