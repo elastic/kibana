@@ -12,11 +12,13 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
+import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { getMaxAlertLimit } from '../common';
 import type { Rule } from '../common';
 
@@ -65,6 +67,7 @@ export interface PluginStartContract {
 export interface AlertingPluginSetup {
   management: ManagementSetup;
   maintenanceWindows?: MaintenanceWindowsServerStart;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface AlertingPluginStart {
@@ -113,6 +116,10 @@ export class AlertingPublicPlugin
       applicationId: string,
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
+
+    if (plugins.workflowsExtensions) {
+      registerTriggerDefinitions(plugins.workflowsExtensions);
+    }
 
     return {
       registerNavigation,
