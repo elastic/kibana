@@ -490,7 +490,8 @@ export const buildRiskScoreBucket =
 export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   entityType: EntityType
 ): { type: 'keyword'; script: { source: string } } => {
-  const evalScript = euid.painless.getEuidEvaluation(entityType);
+  // Store membership is enforced separately, by `inStoreScores` in the maintainer's score_base_entities step.
+  const evalScript = euid.painless.getEuidEvaluationForSearch(entityType);
   const typePrefix = `${entityType}:`;
 
   const source = [
@@ -528,6 +529,10 @@ export const getEuidCompositeQuery = (
   return {
     index: params.index,
     size: 0,
+    // The target is a single space's alerts index, which doesn't exist until a detection rule has
+    // run in that space at least once. Without this, that case throws `index_not_found_exception`
+    // instead of yielding the empty result an index with genuinely no alerts would produce.
+    ignore_unavailable: true,
     runtime_mappings: { ...params.runtimeMappings, entity_id: runtimeMapping },
     query: filter.length > 0 ? { bool: { filter } } : { match_all: {} },
     aggs: {

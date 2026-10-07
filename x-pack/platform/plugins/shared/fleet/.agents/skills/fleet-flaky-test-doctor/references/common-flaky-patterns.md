@@ -43,7 +43,7 @@ before(async () => {
 **Fix (local):** Ensure Docker is running before starting the FTR server. Use a free port:
 
 ```bash
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/platform/test/fleet_api_integration/config.epm.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:server --config x-pack/platform/test/fleet_api_integration/config.epm.ts
 ```
 
 **Fix (CI flake):** If this only fails in CI, check whether the `before all` hook has sufficient retry on registry readiness. Strong `flaky-rerun` candidate.

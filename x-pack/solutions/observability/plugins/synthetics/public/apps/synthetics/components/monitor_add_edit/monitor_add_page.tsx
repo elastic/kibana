@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { Redirect, useLocation } from 'react-router-dom';
+import { OutPortal } from 'react-reverse-portal';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCloneMonitor } from './hooks/use_clone_monitor';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
@@ -24,7 +26,12 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
+import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../common/constants';
+import { PLUGIN } from '../../../../../common/constants/plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
+import { CREATE_MONITOR_TITLE, MONITORS_TITLE, SyntheticsPage } from '../common/app_header';
+import { InspectMonitorHeaderProvider, useInspectMonitorHeader } from './inspect_monitor_header';
+import { InspectMonitorPortalNode } from './portals';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
@@ -36,6 +43,8 @@ export const MonitorAddPage = () => {
   useEnablement();
 
   const canUsePublicLocations = useCanUsePublicLocations();
+  const { application } = useKibana<ClientPluginsStart>().services;
+  const { register, primaryActionItem } = useInspectMonitorHeader();
 
   const { data: cloneMonitor, loading: cloneMonitorLoading } = useCloneMonitor();
 
@@ -50,33 +59,44 @@ export const MonitorAddPage = () => {
     error: locationsError,
   } = useSelector(selectServiceLocationsState);
 
-  if (locationsError) {
-    return <LocationsLoadingError />;
-  }
-
-  if (!locationsLoaded || locationsLoading || cloneMonitorLoading) {
-    return <LoadingState />;
-  }
-
-  if (locationsLoaded && locations.length === 0) {
+  // `locationsLoaded` is set when the request starts, not when it finishes.
+  if (locationsLoaded && !locationsLoading && !locationsError && locations.length === 0) {
     return <Redirect to={{ pathname: GETTING_STARTED_ROUTE, search }} />;
   }
 
   return (
-    <MonitorForm
-      space={space?.id}
-      defaultValues={
-        cloneMonitor
-          ? {
-              ...cloneMonitor,
-              name: `${cloneMonitor.name} - copy`,
+    <InspectMonitorHeaderProvider register={register}>
+      <SyntheticsPage
+        title={CREATE_MONITOR_TITLE}
+        back={{
+          href: `${application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? ''}${MONITORS_ROUTE}`,
+          label: MONITORS_TITLE,
+        }}
+        menu={{ primaryActionItem }}
+      >
+        <OutPortal node={InspectMonitorPortalNode} />
+        {locationsError ? (
+          <LocationsLoadingError />
+        ) : !locationsLoaded || locationsLoading || cloneMonitorLoading ? (
+          <LoadingState />
+        ) : (
+          <MonitorForm
+            space={space?.id}
+            defaultValues={
+              cloneMonitor
+                ? {
+                    ...cloneMonitor,
+                    name: `${cloneMonitor.name} - copy`,
+                  }
+                : undefined
             }
-          : undefined
-      }
-    >
-      <DisabledCallout />
-      <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
-      <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
-    </MonitorForm>
+          >
+            <DisabledCallout />
+            <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
+            <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
+          </MonitorForm>
+        )}
+      </SyntheticsPage>
+    </InspectMonitorHeaderProvider>
   );
 };

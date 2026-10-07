@@ -44,7 +44,6 @@ const BASE_COMPOSE_VALUES: FormValues = {
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: {
-    format: 'composed',
     base: BASE_QUERY,
     breach: { segment: ALERT_BLOCK },
   },
@@ -123,19 +122,17 @@ const renderStep = (
   return { dispatch, state, formRef };
 };
 
-const STANDALONE_QUERY: RuleQuery = {
-  format: 'standalone',
-  breach: { query: 'FROM logs-* | LIMIT 10' },
+const UNIFIED_QUERY: RuleQuery = {
+  base: 'FROM logs-* | LIMIT 10',
+  breach: { segment: '' },
 };
 
-const COMPOSED_QUERY: RuleQuery = {
-  format: 'composed',
+const SPLIT_QUERY: RuleQuery = {
   base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
   breach: { segment: '| WHERE count > 100' },
 };
 
-const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
-  format: 'composed',
+const SPLIT_QUERY_EMPTY_BASE: RuleQuery = {
   base: '',
   breach: { segment: '| WHERE count > 100' },
 };
@@ -153,14 +150,12 @@ describe('AlertConditionStep', () => {
     it('shows a unified query summary for signal kind without alert-condition messaging', () => {
       renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
+        { formValueOverrides: { kind: 'signal', query: UNIFIED_QUERY } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
-      expect(screen.getByText('Query')).toBeInTheDocument();
-      expect(screen.queryByText('Base query')).not.toBeInTheDocument();
-      expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();
+      expect(screen.getByText('FROM logs-* | LIMIT 10')).toBeInTheDocument();
       expect(
         screen.queryByText('Base query defined — no separate alert condition')
       ).not.toBeInTheDocument();
@@ -170,7 +165,7 @@ describe('AlertConditionStep', () => {
     it('shows the success state with base and alert condition for alert kind', () => {
       renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-success')).toBeInTheDocument();
@@ -182,7 +177,7 @@ describe('AlertConditionStep', () => {
     it('shows split-failed state (no callout) when base query is empty', () => {
       renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY_EMPTY_BASE } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-split_failed')).toBeInTheDocument();
@@ -195,7 +190,7 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             kind: 'alert',
-            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+            query: { base: 'FROM logs-*', breach: { segment: '' } },
           },
         }
       );
@@ -215,7 +210,7 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             kind: 'alert',
-            query: { format: 'composed', base: '', breach: { segment: '' } },
+            query: { base: '', breach: { segment: '' } },
           },
         }
       );
@@ -228,7 +223,7 @@ describe('AlertConditionStep', () => {
     it('does not show the no-alert-condition callout when both queries are defined', () => {
       renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY } }
       );
 
       expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
@@ -245,7 +240,7 @@ describe('AlertConditionStep', () => {
     it('disables "Edit query" when child flyout is open (signal)', () => {
       renderStep(
         { queryCommitted: true, childOpen: true },
-        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
+        { formValueOverrides: { kind: 'signal', query: UNIFIED_QUERY } }
       );
 
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
@@ -254,7 +249,7 @@ describe('AlertConditionStep', () => {
     it('disables the edit CTA when child flyout is open (alert committed)', () => {
       renderStep(
         { queryCommitted: true, childOpen: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY } }
       );
 
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
@@ -309,7 +304,7 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             kind: 'alert',
-            query: { format: 'composed', base: '', breach: { segment: '' } },
+            query: { base: '', breach: { segment: '' } },
           },
         }
       );
@@ -321,7 +316,7 @@ describe('AlertConditionStep', () => {
     it('enables time field and group fields once a usable query is committed', () => {
       renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY } }
       );
 
       expect(screen.getByTestId('composeDiscoverTimeField')).toBeEnabled();
@@ -330,13 +325,12 @@ describe('AlertConditionStep', () => {
   });
 
   describe('group-by auto-population in tracking mode', () => {
-    it('extracts BY columns from the base query (composed format)', async () => {
+    it('extracts BY columns from the base query', async () => {
       renderStep(
         { queryCommitted: true },
         {
           formValueOverrides: {
             query: {
-              format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
               breach: { segment: '| WHERE count > 100' },
             },
@@ -355,7 +349,6 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             query: {
-              format: 'composed',
               base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
               breach: { segment: '| WHERE total > 1000' },
             },
@@ -375,7 +368,6 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             query: {
-              format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*)',
               breach: { segment: '| WHERE count > 100' },
             },
@@ -392,14 +384,13 @@ describe('AlertConditionStep', () => {
   });
 
   describe('query field validation', () => {
-    it('passes trigger for a composed alert with base but no breach segment (conditionless rule)', async () => {
+    it('passes trigger for an alert with base but no breach segment (conditionless rule)', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
           formValueOverrides: {
             kind: 'alert',
             query: {
-              format: 'composed',
               base: 'FROM logs-*',
               breach: { segment: '' },
             },
@@ -416,10 +407,10 @@ describe('AlertConditionStep', () => {
       expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
 
-    it('passes trigger for a valid composed alert query', async () => {
+    it('passes trigger for a valid split alert query', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
-        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+        { formValueOverrides: { kind: 'alert', query: SPLIT_QUERY } }
       );
 
       let valid = false;
@@ -431,13 +422,13 @@ describe('AlertConditionStep', () => {
       expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
 
-    it('passes trigger for a standalone alert query without a WHERE clause (conditionless rule)', async () => {
+    it('passes trigger for a unified alert query without a WHERE clause (conditionless rule)', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
           formValueOverrides: {
             kind: 'alert',
-            query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+            query: { base: 'FROM logs-*', breach: { segment: '' } },
           },
         }
       );

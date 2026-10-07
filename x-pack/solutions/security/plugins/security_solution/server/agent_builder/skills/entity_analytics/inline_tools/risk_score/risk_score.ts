@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerResult, ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -26,32 +26,34 @@ import { escapeEsqlString } from '../common';
 
 const DEFAULT_LIMIT = 10;
 
-export const riskScoreStaticSchema = z.object({
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
-  entityId: z
-    .string()
-    .describe(
-      'The identifier of the entity to retrieve the risk score for. If not provided, the tool will query for the riskiest entities'
-    )
-    .optional(),
-  interval: z
-    .string()
-    .regex(
-      /^\d+[smhdwM]$/,
-      `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
-    )
-    .describe(
-      `The time interval to compare risk scores. Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
-    )
-    .optional(),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of results to return when entityId is not provided (default: 10)'),
-});
+export const riskScoreStaticSchema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
+    entityId: z
+      .string()
+      .describe(
+        'The identifier of the entity to retrieve the risk score for. If not provided, the tool will query for the riskiest entities'
+      )
+      .optional(),
+    interval: z
+      .string()
+      .regex(
+        /^\d+[smhdwM]$/,
+        `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
+      )
+      .describe(
+        `The time interval to compare risk scores. Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
+      )
+      .optional(),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of results to return when entityId is not provided (default: 10)'),
+  })
+);
 
 export type RiskScoreType = Omit<z.infer<typeof riskScoreStaticSchema>, 'entityType'> & {
   entityType: EntityType;

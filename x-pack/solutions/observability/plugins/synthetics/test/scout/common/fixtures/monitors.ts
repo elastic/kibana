@@ -60,7 +60,7 @@ export async function addMonitor(
     body: monitor,
     responseType: 'json',
   });
-  expect(res).toHaveStatusCode(statusCode);
+  expect(res, JSON.stringify(res.body)).toHaveStatusCode(statusCode);
   return res;
 }
 
@@ -418,6 +418,27 @@ export async function bulkUpdateMonitors(
   const { spaceId, statusCode = 200 } = opts;
   const path = `${monitorsPath(spaceId)}/_bulk_update`;
   const res = await apiClient.put(path, {
+    headers: withPublicApiVersion(headers),
+    body,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `POST /api/synthetics/monitors/_bulk_create` — create many monitors in one
+ * request. This is a public versioned route, so it sends the same API-version
+ * header as the individual monitor CRUD helpers.
+ */
+export async function bulkCreateMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  body: { monitors: Array<Record<string, unknown>> },
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const res = await apiClient.post(`${monitorsPath(spaceId)}/_bulk_create`, {
     headers: withPublicApiVersion(headers),
     body,
     responseType: 'json',

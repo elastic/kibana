@@ -22,20 +22,14 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  isPrivatelySharedConversation,
   normalizeConversationAccessControl,
   type Conversation,
 } from '@kbn/agent-builder-common';
 import { getUserDisplayName, type UserProfileWithAvatar } from '@kbn/user-profile-components';
-import {
-  useConversation,
-  useConversationPermissions,
-  useIsUnpersistedConversation,
-} from '../../../../hooks/use_conversation';
-import {
-  hasInviteMembersSummary,
-  useUpdateConversationAccessControl,
-} from '../../../../hooks/use_conversation_access_control';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useConversation, useConversationPermissions } from '../../../../hooks/use_conversation';
+import { useUpdateConversationAccessControl } from '../../../../hooks/use_conversation_access_control';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationParticipantsList } from './conversation_participants_list';
@@ -53,19 +47,13 @@ const POPOVER_WIDTH = 470;
 const POPOVER_HEADER_MIN_HEIGHT = 48;
 
 export const ConversationShareButton: React.FC = () => {
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
-  const isUnpersistedConversation = useIsUnpersistedConversation(conversation);
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
-  const canOpenSharePopover = canUpdateAccessControl || hasInviteMembersSummary(accessControl);
+  const canOpenSharePopover =
+    canUpdateAccessControl || isPrivatelySharedConversation(accessControl);
 
-  if (
-    !conversation ||
-    isUnpersistedConversation ||
-    !canOpenSharePopover ||
-    !isExperimentalFeaturesEnabled
-  ) {
+  if (!conversation || !canOpenSharePopover) {
     return null;
   }
 
@@ -102,6 +90,8 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
     enabled: isPopoverOpen,
   });
   const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
+
+  const { agent } = useAgentBuilderAgentById(conversation.agent_id);
 
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const suggestedUsersSearch = searchValue ? debouncedSearch : '';
@@ -276,6 +266,7 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
                 onAdd: onAddUser,
                 onSearch: setSearchValue,
               }}
+              agentName={agent?.name}
             />
           ) : (
             <ConversationParticipantsList

@@ -142,6 +142,9 @@ export const applicationUsageSchema = {
   context_engine: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Playground app are never expired
+   */
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
@@ -169,6 +172,7 @@ export const applicationUsageSchema = {
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  observabilityAlerting: commonSchema,
   onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,

@@ -10,17 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
-
-const renderTemplate = (ui: React.ReactElement) =>
-  render(ui, {
-    wrapper: ({ children }) => (
-      <KibanaErrorBoundaryProvider>{children}</KibanaErrorBoundaryProvider>
-    ),
-  });
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -29,7 +21,7 @@ const TABS = [
 
 describe('FlyoutTemplate tabs', () => {
   it('renders a tab bar with correct roles', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -48,8 +40,45 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByRole('tabpanel')).toBeInTheDocument();
   });
 
+  it('names the tab bar and forwards its test subject', () => {
+    render(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={TABS}
+        tabBarProps={{ 'aria-label': 'Alert views', 'data-test-subj': 'alertTabs' }}
+      >
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('tablist', { name: 'Alert views' })).toHaveAttribute(
+      'data-test-subj',
+      'alertTabs'
+    );
+  });
+
+  it('derives the tab bar test subject from the header test subject', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('tablist')).toHaveAttribute('data-test-subj', 'myFlyoutHeaderTabs');
+  });
   it('selects the first tab by default (uncontrolled)', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -71,7 +100,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('respects defaultSelectedTabId (uncontrolled)', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} defaultSelectedTabId="metadata">
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -92,7 +121,7 @@ describe('FlyoutTemplate tabs', () => {
 
   it('switches panel on tab click (uncontrolled)', async () => {
     const user = userEvent.setup();
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -115,7 +144,7 @@ describe('FlyoutTemplate tabs', () => {
   it('calls onTabChange and respects selectedTabId in controlled mode', async () => {
     const user = userEvent.setup();
     const onTabChange = jest.fn();
-    const { rerender } = renderTemplate(
+    const { rerender } = render(
       <FlyoutTemplate
         onClose={noop}
         session="never"
@@ -142,25 +171,23 @@ describe('FlyoutTemplate tabs', () => {
 
     // Consumer updates the controlled value.
     rerender(
-      <KibanaErrorBoundaryProvider>
-        <FlyoutTemplate
-          onClose={noop}
-          session="never"
-          tabs={TABS}
-          selectedTabId="metadata"
-          onTabChange={onTabChange}
-        >
-          <FlyoutTemplate.Header title="Alert" />
-          <FlyoutTemplate.Body>
-            <FlyoutTemplate.Body.TabPanel tabId="overview">
-              <span>overview content</span>
-            </FlyoutTemplate.Body.TabPanel>
-            <FlyoutTemplate.Body.TabPanel tabId="metadata">
-              <span>metadata content</span>
-            </FlyoutTemplate.Body.TabPanel>
-          </FlyoutTemplate.Body>
-        </FlyoutTemplate>
-      </KibanaErrorBoundaryProvider>
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={TABS}
+        selectedTabId="metadata"
+        onTabChange={onTabChange}
+      >
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+          <FlyoutTemplate.Body.TabPanel tabId="metadata">
+            <span>metadata content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
     );
 
     expect(screen.getByText('metadata content')).toBeInTheDocument();
@@ -168,7 +195,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('wires a11y ids between tab and panel', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={[{ id: 'overview', label: 'Overview' }]}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -188,7 +215,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('keeps tab and panel DOM ids unique across flyout instances', () => {
-    renderTemplate(
+    render(
       <>
         <FlyoutTemplate
           onClose={noop}
@@ -228,7 +255,7 @@ describe('FlyoutTemplate tabs', () => {
   it('falls back to the first tab and warns when selectedTabId is invalid', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="missing">
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -248,7 +275,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('falls back to the first tab when defaultSelectedTabId is invalid', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} defaultSelectedTabId="missing">
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -289,16 +316,16 @@ describe('FlyoutTemplate tabs', () => {
     };
 
     const user = userEvent.setup();
-    const { rerender } = renderTemplate(renderFlyout(true));
+    const { rerender } = render(renderFlyout(true));
     await user.click(screen.getByRole('tab', { name: 'Metadata' }));
     expect(screen.getByText('metadata content')).toBeInTheDocument();
 
-    rerender(<KibanaErrorBoundaryProvider>{renderFlyout(false)}</KibanaErrorBoundaryProvider>);
+    rerender(renderFlyout(false));
     expect(screen.getByText('overview content')).toBeInTheDocument();
   });
 
   it('deduplicates tabs sharing an id, yielding one rendered tab', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate
         onClose={noop}
         session="never"
@@ -324,7 +351,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('renders a tab bar and empty body when tabs are set but no TabPanel is declared', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -339,7 +366,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('renders a tab whose id has no matching panel', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -355,7 +382,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('renders an empty tabpanel wrapper when the selected tab has no panel supplied', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS} selectedTabId="metadata">
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -403,7 +430,7 @@ describe('FlyoutTemplate tabs', () => {
       );
     };
 
-    renderTemplate(<OnDemandPanels />);
+    render(<OnDemandPanels />);
 
     expect(screen.getAllByRole('tab')).toHaveLength(3);
     expect(screen.getByText('overview content')).toBeInTheDocument();
@@ -421,7 +448,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('keeps the tab bar visible when the header is permanently collapsed', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Header title="Alert" collapsed />
         <FlyoutTemplate.Body>
@@ -440,7 +467,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('does not render top-level passthrough body content in tabbed mode', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={[{ id: 'overview', label: 'Overview' }]}>
         <FlyoutTemplate.Header title="Alert" />
         <FlyoutTemplate.Body>
@@ -457,7 +484,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('renders header and body unchanged when no tabs are declared', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="noTabs">
         <FlyoutTemplate.Header title="No tabs" />
         <FlyoutTemplate.Body>
@@ -471,7 +498,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('renders non-part passthrough content when Body.TabPanel is declared without tabs', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="No tabs" />
         <FlyoutTemplate.Body>
@@ -491,7 +518,7 @@ describe('FlyoutTemplate tabs', () => {
   it('warns in development when tabs are set but no Header is provided', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
         <FlyoutTemplate.Body>
           <FlyoutTemplate.Body.TabPanel tabId="overview">
@@ -503,5 +530,32 @@ describe('FlyoutTemplate tabs', () => {
 
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('tabs` is set but no'));
     warnSpy.mockRestore();
+  });
+
+  it('forwards a tab entry custom data attribute and className to the tab element', () => {
+    render(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={[
+          { id: 'overview', label: 'Overview', 'data-foo': 'overviewTab', className: 'myTab' },
+          { id: 'metadata', label: 'Metadata' },
+        ]}
+      >
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const tab = screen.getByRole('tab', { name: 'Overview' });
+    expect(tab).toHaveAttribute('data-foo', 'overviewTab');
+    expect(tab).toHaveClass('myTab');
+    // The entry's `id` remains the logical tab id; the template still owns the DOM id and the link to the panel.
+    expect(tab.id).not.toBe('overview');
+    expect(tab).toHaveAttribute('aria-controls', `${tab.id}-panel`);
   });
 });

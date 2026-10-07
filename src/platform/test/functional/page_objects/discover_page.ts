@@ -65,7 +65,7 @@ export class DiscoverPageObject extends FtrService {
    * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
    */
   private async isStandaloneDiscoverSession(): Promise<boolean> {
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       return !(await this.isOnDashboardsEditMode());
     }
     return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';
@@ -217,7 +217,7 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
-    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+    if (await this.testSubjects.exists('appLeaveConfirmModal')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
     await this.header.waitUntilLoadingHasFinished();
@@ -259,6 +259,27 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
       timeout: this.defaultFindTimeout * 10,
     });
+  }
+
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New ES|QL tabs start empty, so the previous query is copied onto the tab first.
+   * Use `unifiedTabs.createNewTab()` for the uninitialized empty state.
+   */
+  public async createNewTabAndSearch() {
+    const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
+    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+      ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
+      : '';
+
+    await unifiedTabs.createNewTab();
+
+    if (esqlQuery) {
+      await this.ctx.getService('monacoEditor').setCodeEditorValue(esqlQuery);
+    }
+
+    await this.queryBar.clickQuerySubmitButton();
+    await this.waitUntilTabIsLoaded();
   }
 
   public async getColumnHeaders() {
@@ -593,7 +614,7 @@ export class DiscoverPageObject extends FtrService {
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();
@@ -828,36 +849,48 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    // First check if the button is directly visible
-    if (await this.testSubjects.exists('select-text-based-language-btn')) {
-      await this.testSubjects.click('select-text-based-language-btn');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.waitUntilSearchingHasFinished();
-      return;
-    }
+    // Button may be directly in toolbar or hidden in overflow menu; retry both paths.
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists('select-classic-mode-btn')) return;
 
-    // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.retry.try(async () => {
+      // Check if the button is directly visible (with brief wait for page render)
+      if (
+        await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 1000 })
+      ) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        return;
+      }
+
+      // Try the overflow menu
+      if (await this.testSubjects.waitForExists('app-menu-overflow-button', { timeout: 1000 })) {
         try {
           await this.testSubjects.moveMouseTo('kbnQueryBar');
         } catch {
           // Ignore if query bar is not present
         }
         await this.testSubjects.click('app-menu-overflow-button');
-      });
+        await this.testSubjects.existOrFail('app-menu-popover', { timeout: 1000 });
 
-      if (await this.testSubjects.exists('select-text-based-language-btn')) {
-        await this.testSubjects.click('select-text-based-language-btn');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
+        if (await this.testSubjects.exists('select-classic-mode-btn')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+          return;
+        }
+
+        if (
+          await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })
+        ) {
+          await this.testSubjects.click('select-text-based-language-btn');
+          return;
+        }
+
+        // Close the popover if button wasn't found
+        if (await this.testSubjects.exists('app-menu-popover')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+        }
       }
 
-      // Close the popover if open
-      if (await this.testSubjects.exists('app-menu-popover')) {
-        await this.testSubjects.click('app-menu-overflow-button');
-      }
-    }
+      throw new Error('select-text-based-language-btn not found in toolbar or overflow menu');
+    });
   }
 
   private async clickSelectedTabMenuItem(menuItemTestSubj: string) {
@@ -1223,8 +1256,7 @@ export class DiscoverPageObject extends FtrService {
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
-    await this.retry.tryWithRetries(
-      `expect the request to match count ${requestCount}`,
+    await this.retry.try(
       async () => {
         if (requestCount === this.resetRequestCount) {
           await this.browser.execute(async () => {
@@ -1250,7 +1282,7 @@ export class DiscoverPageObject extends FtrService {
           expect(count).to.be(requestCount);
         }
       },
-      { retryCount: 5, retryDelay: 500 }
+      { description: `expect the request to match count ${requestCount}`, retryDelay: 500 }
     );
   }
 

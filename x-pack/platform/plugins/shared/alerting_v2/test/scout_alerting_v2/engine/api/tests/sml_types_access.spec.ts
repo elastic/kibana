@@ -123,7 +123,8 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
  * pinned on. The generic Scout config leaves that setting unpinned, and
  * `rule_management_skill_gating.spec.ts` toggles it at runtime.
  */
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/289954
+apiTest.describe.skip(
   'Agent Builder — alerting V2 SML type access',
   { tag: tags.stateful.classic },
   () => {
@@ -165,14 +166,12 @@ apiTest.describe(
         kind: 'alert',
         metadata: { name: ruleTitle },
         schedule: { every: '1m', lookback: '1m' },
-        recovery_strategy: 'no_breach',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 10' },
-        },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+        query: { base: 'FROM logs-* | LIMIT 10' },
         time_field: '@timestamp',
         grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       };
 
       const createdRule = await kbnClient.request<RuleResponse>({

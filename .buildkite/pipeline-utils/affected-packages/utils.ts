@@ -8,7 +8,6 @@
  */
 
 import { Minimatch } from 'minimatch';
-
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 

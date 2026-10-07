@@ -28,16 +28,16 @@ import type {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
-  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
 import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -46,16 +46,17 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesBlockingError &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   } & Partial<HasParentApi>;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
@@ -128,6 +129,24 @@ const getRelevantESQLVariables = (
   return [];
 };
 
+const getEsqlSourceCacheIdentity = ({
+  esql,
+  esqlVariables,
+  projectRouting,
+  timeRange,
+}: {
+  esql: string;
+  esqlVariables?: ESQLControlVariable[];
+  projectRouting?: string;
+  timeRange?: { from: string; to: string };
+}): string =>
+  JSON.stringify({
+    esql,
+    esqlVariables: esqlVariables?.map(({ key, value, type }) => ({ key, value, type })),
+    projectRouting: projectRouting ?? null,
+    timeRange: timeRange ? { from: timeRange.from, to: timeRange.to } : null,
+  });
+
 export function initializeFetch({
   api,
   stateManager,
@@ -135,7 +154,9 @@ export function initializeFetch({
   scopedProfilesManager,
   refreshTrigger$,
   setDataLoading,
-  setBlockingError,
+  setSearchError,
+  setApproximationApplied,
+  esqlSource$,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -143,10 +164,13 @@ export function initializeFetch({
   scopedProfilesManager: ScopedProfilesManager;
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
-  setBlockingError: (error: Error | undefined) => void;
+  setSearchError: (error: Error | undefined) => void;
+  setApproximationApplied: (value: boolean | undefined) => void;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
@@ -163,7 +187,7 @@ export function initializeFetch({
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
-        setBlockingError(undefined);
+        setSearchError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -197,6 +221,7 @@ export function initializeFetch({
           // Get new abort controller
           const currentAbortController = new AbortController();
           abortController = currentAbortController;
+          api.abortSignal$.next(currentAbortController.signal);
 
           await scopedProfilesManager.resolveDataSourceProfile({
             dataSource: createDataSource({ dataView, query: searchSourceQuery }),
@@ -204,35 +229,73 @@ export function initializeFetch({
             query: searchSourceQuery,
           });
 
-          const esqlMode = isEsqlMode(savedSearch);
           if (
-            esqlMode &&
-            searchSourceQuery &&
+            isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
+            const timeRange = getTimeRangeFromFetchContext(fetchContext);
+            const esqlVariables = getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables);
+            const identity = getEsqlSourceCacheIdentity({
+              esql: searchSourceQuery.esql,
+              esqlVariables,
+              projectRouting: fetchContext.projectRouting,
+              timeRange,
+            });
+            const publishedSource = esqlSource$?.getValue();
+            // The panel already resolved this query before fetch. Resolving again and
+            // publishing a new data view emits dataViews$, which aborts this request.
+            if (
+              !cachedEsqlSource &&
+              publishedSource &&
+              publishedSource.query === searchSourceQuery.esql.trim()
+            ) {
+              cachedEsqlSource = {
+                identity,
+                source: publishedSource,
+              };
+            } else if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
+              const { esqlSource, dataView: resolvedDataView } = await resolveEsqlSource({
+                esql: searchSourceQuery.esql,
+                services: discoverServices,
+                projectRoutingFallback: fetchContext.projectRouting,
+                timeRange,
+                esqlVariables,
+                previousSourceId: cachedEsqlSource?.source.id ?? publishedSource?.id,
+              });
+              cachedEsqlSource = {
+                identity,
+                source: esqlSource,
+              };
+              esqlSource$?.next(esqlSource);
+              if (resolvedDataView && resolvedDataView.id !== dataView.id) {
+                savedSearch.searchSource.setField('index', resolvedDataView);
+              }
+            }
+            const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              timeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange,
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              dataView,
+              esqlSource: embeddableEsqlSource,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
-              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+              esqlVariables,
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              columnsMeta: columnsToColumnsMeta(
+                (result.dataSource ?? embeddableEsqlSource).getColumns()
+              ),
               rows: result.records,
               hitCount: result.records.length,
+              approximationApplied: result.approximationApplied,
               fetchContext,
             };
           }
@@ -285,7 +348,7 @@ export function initializeFetch({
     .subscribe((next) => {
       setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        setBlockingError(next?.error);
+        setSearchError(next?.error);
         return;
       }
 
@@ -298,10 +361,14 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
+      setApproximationApplied(next.approximationApplied);
     });
 
   return {
-    cleanup: () => fetchSubscription.unsubscribe(),
+    cleanup: () => {
+      abortController?.abort(AbortReason.CLEANUP);
+      fetchSubscription.unsubscribe();
+    },
     cancelRequests: () => {
       abortController?.abort();
       abortController = undefined;

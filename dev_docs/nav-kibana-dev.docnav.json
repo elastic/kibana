@@ -104,9 +104,6 @@
           ]
         },
         {
-          "id": "kibBuildingBlocks"
-        },
-        {
           "id": "kibDevDocsSecurityAPIAuthorization"
         },
         {
@@ -223,9 +220,6 @@
           "id": "kibDevTutorialServerEndpoint"
         },
         {
-          "id": "kibDevTutorialAdvancedSettings"
-        },
-        {
           "id": "kibDevTutorialCcsSetup"
         },
         {
@@ -255,69 +249,6 @@
         {
           "id": "kibDevDocsOpsOverview",
           "label": "Overview"
-        }
-      ]
-    },
-    {
-      "label": "Shared UX",
-      "pageId": "kibDevDocsSharedUxOverview",
-      "items": [
-        {
-          "id": "kibDevTutorialFileService",
-          "label": "File service"
-        },
-        {
-          "id": "kibUserStorageService",
-          "label": "User Storage"
-        },
-        {
-          "id": "kibDevSharePluginReadme",
-          "label": "Sharing"
-        },
-        {
-          "label": "Content Management",
-          "id": "kibContentManagement",
-          "items": [
-            {
-              "id": "kibDevTutorialsContentManagementOnboarding"
-            }
-          ]
-        },
-        {
-          "id": "kibDevTutorialAdvancedSettings",
-          "label": "Advanced Settings"
-        },
-        {
-          "id": "kibDevDocsKPTTutorial",
-          "label": "Kibana Page Template"
-        },
-        {
-          "id": "kibDevRenderingService",
-          "label": "Core Rendering Service"
-        },
-        {
-          "id": "kibDevDocsChromeLayout",
-          "label": "Chrome Layout"
-        },
-        {
-          "id": "kibDevDocsChromeNavigation",
-          "label": "Chrome Navigation"
-        },
-        {
-          "id": "kibDevDocsChromeRecentlyAccessed",
-          "label": "Recently Viewed"
-        },
-        {
-          "id": "kibDevDocsChromeAppMenu",
-          "label": "App Menu"
-        },
-        {
-          "id": "kibDevDocsChromeSidebar",
-          "label": "Chrome Sidebar"
-        },
-        {
-          "id": "kibDevDocsFeedbackPlugin",
-          "label": "Feedback Plugin (One Feedback)"
         }
       ]
     },

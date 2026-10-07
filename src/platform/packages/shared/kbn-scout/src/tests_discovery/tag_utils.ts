@@ -76,7 +76,7 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
     // ['serverless', 'security_essentials'],
     // ['serverless', 'security_ease'],
     // ['serverless', 'workplaceai'],
-    // ['serverless', 'vectordb'],
+    ['serverless', 'vectordb'],
   ];
   // TODO: Uncomment above to run tests for these targets in CI
 

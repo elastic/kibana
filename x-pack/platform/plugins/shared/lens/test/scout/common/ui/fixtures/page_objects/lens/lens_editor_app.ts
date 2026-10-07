@@ -49,6 +49,10 @@ export class LensEditorApp extends LensApp {
     this.dimensions = createLazyPageObject(LensDimensions, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       closeDimensionEditor: () => this.closeDimensionEditor(),
+      getVisualizationRenderCount: (chartTestSubj: string) =>
+        this.workspace.getVisualizationRenderCount(chartTestSubj),
+      waitForVisualization: (chartTestSubj: string, options?: { afterCount?: number }) =>
+        this.waitForVisualization(chartTestSubj, options),
     });
     this.style = createLazyPageObject(LensStyle, page);
     this.metric = createLazyPageObject(LensMetric, page);
@@ -60,8 +64,7 @@ export class LensEditorApp extends LensApp {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
-      getFormulaModelIndex: () => this.getFormulaModelIndex(),
-      getCodeEditorValue: (modelIndex: number) => this.codeEditor.getCodeEditorValue(modelIndex),
+      getFormulaText: () => this.getFormulaText(),
     });
     this.dragDrop = createLazyPageObject(LensDragDrop, page, {
       getFieldAttrName: (field: string) => this.getFieldAttrName(field),
@@ -82,6 +85,7 @@ export class LensEditorApp extends LensApp {
    */
   private async openSaveModalWithTitle(title: string): Promise<void> {
     await this.page.components.toast().closeAll();
+    await this.openSaveOptionsIfNeeded();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);

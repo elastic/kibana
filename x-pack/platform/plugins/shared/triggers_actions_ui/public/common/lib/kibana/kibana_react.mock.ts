@@ -10,6 +10,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -58,6 +59,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     } as unknown as DataViewEditorStart,
     uiActions: uiActionsPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),

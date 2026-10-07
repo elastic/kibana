@@ -30,11 +30,6 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": true,
           },
-          "casesRedesign": Object {
-            "details": true,
-            "list": true,
-            "settings": true,
-          },
           "chat": Object {
             "enabled": true,
           },

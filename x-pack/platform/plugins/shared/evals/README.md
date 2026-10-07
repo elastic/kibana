@@ -81,6 +81,7 @@ The plugin reads from the following indices:
 | `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
 | `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
 | `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
+| `logs-*`                       | OTLP / EDOT collector | OpenTelemetry log events   |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -177,10 +178,18 @@ Other plugins can contribute their own production feature as an additional targe
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
-- **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
+- **Experiments** — list, detail, scores, and statistical comparison of two experiments. Dataset-level examples are returned as one unpaginated group with eager score and evaluator details but without complete inputs or outputs. Input/output previews are bounded to 2,048 characters, and complete input and output are retrieved for one example repetition on demand.
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
-- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones
+- **Evaluators** — `/internal/evals/evaluators` lists every evaluator available in the space and creates, reads, updates, or deletes user-defined ones. Built-in names cannot be created, updated, or deleted, and cannot be used for a draft; each returns `409`. Four action routes operate on traces, and they do not all sit under the same path segment:
+
+  | Route                                             | Purpose                                                              |
+  | ------------------------------------------------- | -------------------------------------------------------------------- |
+  | `/internal/evals/_evaluate`                       | Grade a trace with one or more saved evaluators                       |
+  | `/internal/evals/evaluators/_test`                | Run an unsaved draft definition against a trace, before it exists     |
+  | `/internal/evals/evaluators/_validate`            | Report whether a trace carries the evidence each evaluator declares   |
+  | `/internal/evals/traces/_resolve_instrumentation` | Probe which instrumentation profiles a trace matches                  |
+
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID
@@ -204,7 +213,9 @@ Concurrent writes are guarded with optimistic concurrency, so a suite adding exa
 
 ## Instrumentation profiles
 
-Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.
+Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate` / `_test`; when omitted, **`elastic-inference`** is used. User-defined judges receive the same normalized round as built-in LLM evaluators, so a judge prompt describes what to assess rather than how to query a trace.
+
+`_evaluate` and `_test` wait for a trace to finish exporting before grading it, so an in-flight response is not scored as if it were final. `_validate` deliberately does not wait: it reports the evidence present now, because "not indexed yet" is a useful answer when you are diagnosing instrumentation.
 
 | Profile                       | `user_query`                                                | `agent_response`                                             | `tool_calls`                               |
 | ----------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
@@ -215,12 +226,51 @@ Evaluator routes reconstruct a normalized evidence round (`input.message`, `resp
 
 Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
 
+### Reading normalized trace evidence
+
+`GET /internal/evals/traces/{traceId}/evidence` returns the normalized single-turn evidence used by evaluators. Omit `profile` to auto-detect the instrumentation or pass one explicitly.
+
+`wait` defaults to `none` for an immediate read. `stable` waits for non-empty evidence to remain unchanged for five seconds. `complete` also requires a response and root span; log-backed profiles normally take at least 7.5 seconds. Waits can run for about 28 seconds, including for a valid but missing trace ID, and return available evidence as `best_effort` on expiry.
+
+`_evaluate` uses the same whole-round `complete` readiness check.
+
+The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
+
 ## UI pages
 
-The plugin UI is organized into four navigation tabs:
+The plugin UI is organized into five navigation tabs:
 
 - **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
+- **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
+
+#### Score direction
+
+Each score a user-defined judge declares carries its own `direction`, so one judge can maximize groundedness while minimizing a hallucination rate:
+
+| Direction | Editor label | Comparisons read it as |
+| --- | --- | --- |
+| `maximize` | Higher is better | An increase is an improvement |
+| `minimize` | Lower is better | A decrease is an improvement |
+| `neutral` | Neutral | Informational; never an improvement or a regression |
+
+Direction covers both numeric scores and the values assigned to categorical labels. A score that omits it is `maximize`, which is how every score was read before scores could declare one, so existing versions behave exactly as before. A numeric score's direction is also stated to the judge, so a lower-is-better score is not reported on an inverted scale.
+
+`_evaluate` and `_test` return the direction on each score, and every score document is stamped with it. Experiment comparison reads it per score, so improvements and regressions are colored correctly even when one evaluator's scores point different ways. The evaluator-level `direction` remains the fallback for scores that do not set one, which is how built-in evaluators and older score documents are read. For a user-defined judge it is the direction its scores share, or `maximize` when they point different ways.
+
+#### Evaluator versions
+
+Every saved change writes a new immutable version; saving without changing anything writes nothing. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
+
+| Level | What changed | Effect on past scores |
+| --- | --- | --- |
+| `patch` | Only the catalog description, which the judge never sees | Still comparable |
+| `minor` | The judge's instructions: prompts, or the criteria attached to a score | Scores may shift, but still line up |
+| `major` | The scores themselves (added, removed, renamed, retyped, relabelled, or given a different direction) or the required evidence and reference data keys | Earlier runs no longer line up |
+
+A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was. Changing a score's direction is a major because the same movement would read the opposite way: when two experiments straddle the change, comparison uses the target experiment's direction for both sides. Re-saving a version that predates per-score direction, with every score left at Higher is better, is not a change and writes no version.
+
+Order matters in one place only. Evidence and reference data keys are sets of requirements, so their order is normalized and reordering them alone writes no version at all. Score order is part of the definition a reader sees and the order the judge is asked for them, so reordering scores is a `minor` — the set of scores is unchanged, which is why it is not a `major`.
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view
 - **Remotes** — configure remote Kibana instances for cross-cluster dataset management
 
@@ -232,10 +282,10 @@ The trace waterfall UI lives in the standalone `@kbn/llm-trace-waterfall` packag
 
 ```bash
 # Plugin unit tests
-yarn test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
+pnpm test:jest --config=x-pack/platform/plugins/shared/evals/jest.config.js
 
 # Shared query builders tests
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-evals-common/jest.config.js
 ```
 
 ### Regenerating OpenAPI schemas
@@ -244,7 +294,7 @@ The Zod types in `@kbn/evals-common` are generated from OpenAPI `.schema.yaml` f
 
 ```bash
 cd x-pack/platform/packages/shared/kbn-evals-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 After regenerating, you may need to fix unused imports added by the generator:
