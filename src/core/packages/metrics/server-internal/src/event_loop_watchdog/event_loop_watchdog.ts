@@ -41,8 +41,28 @@ export interface LoadedPprof {
   binary?: string;
 }
 
-/** Loads the native profiler lazily so that nothing native is loaded unless the watchdog runs. */
-export const loadPprof = async (): Promise<LoadedPprof> => {
+type NodeBuildVariables = typeof process.config.variables & {
+  v8_enable_pointer_compression?: number | boolean;
+};
+
+/** Whether Node.js was built with V8 pointer compression (as Serverless runs Kibana). */
+export const isPointerCompressed = (
+  variables: NodeBuildVariables = process.config.variables
+): boolean => Number(variables.v8_enable_pointer_compression ?? 0) === 1;
+
+/**
+ * Loads the native profiler lazily so that nothing native is loaded unless the watchdog runs.
+ * Its prebuilt binaries target standard Node.js builds: with pointer compression V8's object
+ * layout differs and starting the profiler crashes the process, so it is refused there.
+ */
+export const loadPprof = async (
+  pointerCompressed: boolean = isPointerCompressed()
+): Promise<LoadedPprof> => {
+  if (pointerCompressed) {
+    throw new Error(
+      'the prebuilt @datadog/pprof binaries are incompatible with Node.js built with pointer compression'
+    );
+  }
   const { time } = await import('@datadog/pprof');
   const binary = Object.keys(require.cache).find(
     (path) => path.endsWith('.node') && path.includes('pprof')
