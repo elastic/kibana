@@ -900,11 +900,15 @@ describe('Perform bulk action route', () => {
           ...(query ? { query } : {}),
         });
 
+      // The event follows the gate's answer, so it is only there once pending promises have run.
+      const flush = () => new Promise((resolve) => setImmediate(resolve));
+
       it('emits one event for the duplicated rule, carrying the saved object id', async () => {
         const response = await busServer.inject(
           duplicateRequest(),
           requestContextMock.convertContext(context)
         );
+        await flush();
 
         expect(response.status).toEqual(200);
         expect(events).toHaveLength(1);
@@ -929,6 +933,22 @@ describe('Perform bulk action route', () => {
         );
 
         expect(clients.rulesClient.create).not.toHaveBeenCalled();
+        expect(events).toHaveLength(0);
+      });
+
+      // Only AlertZero consumes the event, so a deployment that does not use it must not emit. The
+      // duplicate itself still succeeds.
+      it('duplicates the rule but does not emit while AlertZero is not enabled', async () => {
+        context.securitySolution.isRulesCreatedTriggerEnabled.mockResolvedValue(false);
+
+        const response = await busServer.inject(
+          duplicateRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await flush();
+
+        expect(response.status).toEqual(200);
+        expect(clients.rulesClient.create).toHaveBeenCalledTimes(1);
         expect(events).toHaveLength(0);
       });
 

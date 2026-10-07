@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   detectionRulesCreatedTriggerDef,
@@ -115,5 +116,62 @@ describe('emitDetectionRulesCreatedInChunks', () => {
       })
     ).not.toThrow();
     expect(logger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  // The gate keeps deployments that do not use AlertZero from emitting at all, so each outcome of
+  // it is tested, including that it is checked before anything reaches the event bus.
+  describe('with a gate', () => {
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+    const emitGated = (isEnabled: () => Promise<boolean>, logger?: Logger) =>
+      emitDetectionRulesCreatedInChunks({
+        eventBus,
+        request,
+        rules: makeRules(MAX_RULES_PER_TRIGGER + 1),
+        source: 'api',
+        isEnabled,
+        logger,
+      });
+
+    it('emits every chunk once the gate resolves to true', async () => {
+      emitGated(() => Promise.resolve(true));
+      await flush();
+
+      expect(payloads.map(({ ids }) => ids.length)).toEqual([MAX_RULES_PER_TRIGGER, 1]);
+    });
+
+    it('emits nothing when the gate resolves to false', async () => {
+      emitGated(() => Promise.resolve(false));
+      await flush();
+
+      expect(payloads).toHaveLength(0);
+    });
+
+    it('does not emit before the gate has answered', async () => {
+      let open: (enabled: boolean) => void = () => {};
+      emitGated(() => new Promise<boolean>((resolve) => (open = resolve)));
+      await flush();
+      expect(payloads).toHaveLength(0);
+
+      open(true);
+      await flush();
+      expect(payloads).toHaveLength(2);
+    });
+
+    it('does not call the gate when nothing was created', () => {
+      const isEnabled = jest.fn(() => Promise.resolve(true));
+      emitDetectionRulesCreatedInChunks({ eventBus, request, rules: [], source: 'api', isEnabled });
+
+      expect(isEnabled).not.toHaveBeenCalled();
+    });
+
+    it('never throws when the gate fails and logs a warning', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      expect(() => emitGated(() => Promise.reject(new Error('gate down')), logger)).not.toThrow();
+      await flush();
+
+      expect(payloads).toHaveLength(0);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('gate down'));
+    });
   });
 });

@@ -33,6 +33,8 @@ interface EmitDetectionRulesCreatedParams {
   request: KibanaRequest;
   rules: readonly CreatedRuleSummary[];
   source: DetectionRulesCreatedSource;
+  /** When given, nothing is emitted unless it resolves to true. Omit it to always emit. */
+  isEnabled?: () => Promise<boolean>;
   logger?: Logger;
 }
 
@@ -60,19 +62,13 @@ const toPayload = (
   };
 };
 
-/**
- * Emits `detectionRulesCreated` for the rules a request created. Requests larger than
- * MAX_RULES_PER_TRIGGER are split into several events rather than truncated. Never throws.
- */
-export const emitDetectionRulesCreatedInChunks = ({
+const emitChunks = ({
   eventBus,
   request,
   rules,
   source,
   logger,
-}: EmitDetectionRulesCreatedParams): void => {
-  if (rules.length === 0) return;
-
+}: Omit<EmitDetectionRulesCreatedParams, 'isEnabled'>): void => {
   const totalCount = rules.length;
   for (let start = 0; start < totalCount; start += MAX_RULES_PER_TRIGGER) {
     const chunk = rules.slice(start, start + MAX_RULES_PER_TRIGGER);
@@ -85,4 +81,31 @@ export const emitDetectionRulesCreatedInChunks = ({
       logger?.warn(`Failed to emit detectionRulesCreated workflow trigger: ${err}`);
     }
   }
+};
+
+/**
+ * Emits `detectionRulesCreated` for the rules a request created. Requests larger than
+ * MAX_RULES_PER_TRIGGER are split into several events rather than truncated. Never throws.
+ *
+ * With `isEnabled` the check runs first and the events follow once it resolves, so the caller is
+ * never held up by it.
+ */
+export const emitDetectionRulesCreatedInChunks = ({
+  isEnabled,
+  ...params
+}: EmitDetectionRulesCreatedParams): void => {
+  if (params.rules.length === 0) return;
+
+  if (!isEnabled) {
+    emitChunks(params);
+    return;
+  }
+
+  isEnabled()
+    .then((enabled) => {
+      if (enabled) emitChunks(params);
+    })
+    .catch((err) => {
+      params.logger?.warn(`Failed to emit detectionRulesCreated workflow trigger: ${err}`);
+    });
 };

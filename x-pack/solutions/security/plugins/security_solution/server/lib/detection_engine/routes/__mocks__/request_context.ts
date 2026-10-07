@@ -183,6 +183,7 @@ const createSecuritySolutionRequestContextMock = (
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getDetectionRulesClient: jest.fn(() => clients.detectionRulesClient),
+    isRulesCreatedTriggerEnabled: jest.fn(() => Promise.resolve(true)),
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
