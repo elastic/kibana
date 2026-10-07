@@ -38,6 +38,7 @@
     "@kbn/nightshift-ai",
     "@kbn/nightshift-shared",
     "@kbn/agent-builder-server",
+    "@kbn/connector-specs",
     "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",
     "@kbn/core-saved-objects-server",

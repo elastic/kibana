@@ -68,8 +68,11 @@ interface InvestigationAgentTypeOptions {
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
-  /** Resolves the telemetry connector for the run's space (onboarding connector, else kibana.yml). */
-  resolveTelemetryConnectorId?: (ctx: AgentConfigContext) => Promise<string | undefined>;
+  /**
+   * Resolves the connectors the run may use: the space's telemetry connector (onboarding, else
+   * kibana.yml) plus the other tools connected during onboarding.
+   */
+  resolveConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -106,7 +109,7 @@ export const getInvestigationAgentType = ({
   cortexEnabled,
   memoryEnabled = false,
   decisionTreesEnabled = false,
-  resolveTelemetryConnectorId,
+  resolveConnectorIds,
   getCustomContextInstructions,
   logger,
 }: InvestigationAgentTypeOptions): AgentTypeDefinition => {
@@ -152,10 +155,10 @@ export const getInvestigationAgentType = ({
     description: INVESTIGATION_AGENT_DESCRIPTION,
     avatar_icon: 'logoElastic',
     baseConfiguration:
-      !getCustomContextInstructions && !resolveTelemetryConnectorId
+      !getCustomContextInstructions && !resolveConnectorIds
         ? baseConfiguration
         : async (ctx) => {
-            const [instructionsWithContext, telemetryConnectorId] = await Promise.all([
+            const [instructionsWithContext, connectorIds = []] = await Promise.all([
               getCustomContextInstructions
                 ? appendCustomContext({
                     instructions: baseConfiguration.instructions,
@@ -164,16 +167,16 @@ export const getInvestigationAgentType = ({
                     logger,
                   })
                 : baseConfiguration.instructions,
-              resolveTelemetryConnectorId?.(ctx).catch((error) => {
-                // A missing telemetry connector only limits what the agent can query.
-                logger?.warn(`Failed to resolve the telemetry connector: ${error.message}`);
-                return undefined;
+              resolveConnectorIds?.(ctx).catch((error): string[] => {
+                // Missing connectors only limit what the agent can query.
+                logger?.warn(`Failed to resolve the agent connectors: ${error.message}`);
+                return [];
               }),
             ]);
             return {
               ...baseConfiguration,
               instructions: instructionsWithContext,
-              connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+              connector_ids: connectorIds,
             };
           },
   };
@@ -186,7 +189,7 @@ export const registerInvestigationAgentType = (
     cortexEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
-    resolveTelemetryConnectorId,
+    resolveConnectorIds,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -197,7 +200,7 @@ export const registerInvestigationAgentType = (
       cortexEnabled,
       memoryEnabled,
       decisionTreesEnabled,
-      resolveTelemetryConnectorId,
+      resolveConnectorIds,
       getCustomContextInstructions,
       logger,
     })

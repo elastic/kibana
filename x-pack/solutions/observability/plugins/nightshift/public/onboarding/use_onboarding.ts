@@ -61,17 +61,27 @@ export const useStartOnboardingSuggestions = () => {
   });
 };
 
-export interface ElasticsearchConnector {
+/** Connector types onboarding can connect; mirrors ONBOARDING_CONNECTOR_TYPE_IDS on the server. */
+export const ONBOARDING_CONNECTOR_TYPES = {
+  elasticsearch: '.elasticsearch',
+  slack: '.slack2',
+  github: '.github',
+} as const;
+
+const SUPPORTED_TYPES = new Set<string>(Object.values(ONBOARDING_CONNECTOR_TYPES));
+
+export interface OnboardingConnector {
   id: string;
   name: string;
+  connectorTypeId: string;
   url?: string;
   kibanaUrl?: string;
 }
 
-/** External Elasticsearch connectors of the current space. */
-export const useElasticsearchConnectors = () => {
+/** Connectors of the current space that onboarding can use (Elastic deployments, Slack, GitHub). */
+export const useOnboardingConnectors = () => {
   const { http } = useKibana().services;
-  return useQuery<ElasticsearchConnector[]>({
+  return useQuery<OnboardingConnector[]>({
     queryKey: ['nightshift.onboarding.connectors'],
     queryFn: async ({ signal }) => {
       const connectors = await http.get<
@@ -83,10 +93,11 @@ export const useElasticsearchConnectors = () => {
         }>
       >('/api/actions/connectors', { signal });
       return connectors
-        .filter(({ connector_type_id: typeId }) => typeId === '.elasticsearch')
-        .map(({ id, name, config }) => ({
+        .filter(({ connector_type_id: typeId }) => SUPPORTED_TYPES.has(typeId))
+        .map(({ id, name, connector_type_id: connectorTypeId, config }) => ({
           id,
           name,
+          connectorTypeId,
           url: config?.url,
           kibanaUrl: config?.kibanaUrl,
         }));

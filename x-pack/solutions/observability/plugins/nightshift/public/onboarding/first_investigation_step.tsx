@@ -32,6 +32,7 @@ import type {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useStartInvestigation } from '../hooks/use_start_investigation';
 import { useStartOnboardingSuggestions } from './use_onboarding';
+import { getConnectorIcon } from './connect_step';
 
 /** Generic prompts offered when the suggestion run failed; they work on any cluster. */
 const FALLBACK_SUGGESTIONS: OnboardingSuggestion[] = [
@@ -72,7 +73,24 @@ const SOURCE_LABELS: Record<OnboardingSuggestion['source'], string> = {
   latency: i18n.translate('xpack.nightshift.onboarding.source.latency', {
     defaultMessage: 'Latency',
   }),
+  code_change: i18n.translate('xpack.nightshift.onboarding.source.codeChange', {
+    defaultMessage: 'Code change',
+  }),
+  discussion: i18n.translate('xpack.nightshift.onboarding.source.discussion', {
+    defaultMessage: 'Discussion',
+  }),
   other: i18n.translate('xpack.nightshift.onboarding.source.other', { defaultMessage: 'Signal' }),
+};
+
+const SOURCE_ICONS: Record<OnboardingSuggestion['source'], string> = {
+  alert: 'bell',
+  slo: 'visGauge',
+  case: 'casesApp',
+  error_spike: 'error',
+  latency: 'clock',
+  code_change: 'logoGithub',
+  discussion: 'logoSlack',
+  other: 'sparkles',
 };
 
 const SEVERITY_COLORS: Record<NonNullable<OnboardingSuggestion['severity']>, string> = {
@@ -138,8 +156,6 @@ export function OnboardingFirstInvestigationStep({
     startInvestigation(trimmedMessage, picked?.title);
   }, [isStarting, startInvestigation, suggestions, trimmedMessage]);
 
-  const connectorNames = execution.connectors.map(({ name }) => name).join(', ');
-
   return (
     <div data-test-subj="nightshiftOnboardingFirstInvestigationStep">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -153,15 +169,18 @@ export function OnboardingFirstInvestigationStep({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge iconType="logoElasticsearch" color="hollow">
-                {connectorNames ||
-                  i18n.translate('xpack.nightshift.onboarding.investigate.unknownDeployment', {
-                    defaultMessage: 'Connected deployment',
-                  })}
-              </EuiBadge>
-            </EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+            {execution.connectors.map((connector) => (
+              <EuiFlexItem grow={false} key={connector.id}>
+                <EuiBadge
+                  iconType={getConnectorIcon(connector.connector_type_id)}
+                  color="hollow"
+                  data-test-subj="nightshiftOnboardingConnectedBadge"
+                >
+                  {connector.name}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
@@ -169,7 +188,7 @@ export function OnboardingFirstInvestigationStep({
                 data-test-subj="nightshiftOnboardingChangeDeploymentButton"
               >
                 {i18n.translate('xpack.nightshift.onboarding.investigate.changeDeployment', {
-                  defaultMessage: 'Change',
+                  defaultMessage: 'Edit connections',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -206,7 +225,7 @@ export function OnboardingFirstInvestigationStep({
               <EuiText size="s" color="subdued">
                 {i18n.translate('xpack.nightshift.onboarding.investigate.analyzingDescription', {
                   defaultMessage:
-                    'Looking for alerts, errors and anything else worth investigating first. This usually takes about a minute.',
+                    'Looking at your deployments, discussions and recent changes for anything worth investigating first. This usually takes about a minute.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -352,7 +371,7 @@ function SuggestionCard({
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={suggestion.source === 'alert' ? 'bell' : 'sparkles'}
+            type={SOURCE_ICONS[suggestion.source]}
             color="primary"
             size="m"
             aria-hidden={true}

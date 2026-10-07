@@ -14,6 +14,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   ONBOARDING_CONNECTOR_TYPE_ID,
+  isOnboardingConnectorTypeId,
   type GetOnboardingResponse,
   type OnboardingConnectorSummary,
   type OnboardingSuggestionsExecution,
@@ -44,8 +45,11 @@ export interface OnboardingClient {
     request: KibanaRequest,
     connectorIds: string[]
   ) => Promise<StartOnboardingSuggestionsResponse>;
-  /** The first connector of the space's latest onboarding execution, if any. */
-  getConnectorId: (request: KibanaRequest) => Promise<string | undefined>;
+  /**
+   * The connectors of the space's latest onboarding execution the caller can read. The first
+   * Elastic deployment among them is the space's telemetry connector.
+   */
+  getConnectors: (request: KibanaRequest) => Promise<OnboardingConnectorSummary[]>;
 }
 
 const IN_PROGRESS_STATUSES = new Set([
@@ -135,6 +139,7 @@ export const createOnboardingClient = ({
       return {
         id: connector.id,
         name: connector.name,
+        connector_type_id: connector.actionTypeId,
         url: readString(connector.config?.url),
         kibana_url: readString(connector.config?.kibanaUrl),
       };
@@ -144,13 +149,19 @@ export const createOnboardingClient = ({
     }
   };
 
+  const summarizeConnectors = async (
+    request: KibanaRequest,
+    connectorIds: string[]
+  ): Promise<OnboardingConnectorSummary[]> =>
+    (await Promise.all(connectorIds.map((id) => summarizeConnector(request, id)))).filter(
+      (connector): connector is OnboardingConnectorSummary => Boolean(connector)
+    );
+
   const toExecutionResponse = async (
     request: KibanaRequest,
     execution: WorkflowExecutionDto
   ): Promise<OnboardingSuggestionsExecution> => {
-    const connectors = (
-      await Promise.all(readConnectorIds(execution).map((id) => summarizeConnector(request, id)))
-    ).filter((connector): connector is OnboardingConnectorSummary => Boolean(connector));
+    const connectors = await summarizeConnectors(request, readConnectorIds(execution));
     const status = toStatus(execution.status);
     const output = (execution.context?.output ?? {}) as { suggestions?: unknown };
     return {
@@ -164,7 +175,10 @@ export const createOnboardingClient = ({
     };
   };
 
-  const validateConnector = async (request: KibanaRequest, connectorId: string) => {
+  const validateConnector = async (
+    request: KibanaRequest,
+    connectorId: string
+  ): Promise<string> => {
     const actionsClient = await getActionsClient(request);
     let connector: Awaited<ReturnType<typeof actionsClient.get>>;
     try {
@@ -172,10 +186,13 @@ export const createOnboardingClient = ({
     } catch (err) {
       throw new OnboardingValidationError(`Connector "${connectorId}" was not found`);
     }
-    if (connector.actionTypeId !== ONBOARDING_CONNECTOR_TYPE_ID) {
+    if (!isOnboardingConnectorTypeId(connector.actionTypeId)) {
       throw new OnboardingValidationError(
-        `Connector "${connector.name}" is not an External Elasticsearch connector`
+        `Connector "${connector.name}" (${connector.actionTypeId}) cannot be used for onboarding`
       );
+    }
+    if (connector.actionTypeId !== ONBOARDING_CONNECTOR_TYPE_ID) {
+      return connector.actionTypeId;
     }
     const result = await actionsClient.execute({
       actionId: connectorId,
@@ -188,6 +205,7 @@ export const createOnboardingClient = ({
         }`
       );
     }
+    return connector.actionTypeId;
   };
 
   return {
@@ -197,8 +215,11 @@ export const createOnboardingClient = ({
     },
 
     start: async (request, connectorIds) => {
-      for (const connectorId of connectorIds) {
-        await validateConnector(request, connectorId);
+      const types = await Promise.all(
+        connectorIds.map((connectorId) => validateConnector(request, connectorId))
+      );
+      if (!types.includes(ONBOARDING_CONNECTOR_TYPE_ID)) {
+        throw new OnboardingValidationError('Connect at least one Elastic deployment');
       }
       const { management } = getWorkflowsManagement();
       const spaceId = getSpaceId(request);
@@ -221,13 +242,13 @@ export const createOnboardingClient = ({
       return { execution_id: executionId };
     },
 
-    getConnectorId: async (request) => {
+    getConnectors: async (request) => {
       try {
         const execution = await getLatestExecution(request);
-        return execution ? readConnectorIds(execution)[0] : undefined;
+        return execution ? await summarizeConnectors(request, readConnectorIds(execution)) : [];
       } catch (error) {
-        logger.debug(`Could not read the onboarding connector: ${error.message}`);
-        return undefined;
+        logger.debug(`Could not read the onboarding connectors: ${error.message}`);
+        return [];
       }
     },
   };

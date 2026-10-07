@@ -10,6 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   MAX_ONBOARDING_CONNECTOR_ID_LENGTH,
+  MAX_ONBOARDING_CONNECTORS,
   type GetOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
@@ -54,7 +55,7 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
     access: 'internal',
     summary: 'Suggest first investigations',
     description:
-      'Validates the External Elasticsearch connectors and starts the onboarding suggestions workflow for them.',
+      'Validates the connected tools (at least one External Elasticsearch connector, optionally Slack and GitHub) and starts the onboarding suggestions workflow for them.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
@@ -62,7 +63,7 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
       connector_ids: z
         .array(z.string().min(1).max(MAX_ONBOARDING_CONNECTOR_ID_LENGTH))
         .min(1)
-        .max(5),
+        .max(MAX_ONBOARDING_CONNECTORS),
     }),
   }),
   handler: async ({

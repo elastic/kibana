@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-/** Connector type the onboarding flow connects: the External Elasticsearch connector spec. */
+/** Connector type of a connected Elastic deployment: the External Elasticsearch connector spec. */
 export const ONBOARDING_CONNECTOR_TYPE_ID = '.elasticsearch';
+
+/** Connector types onboarding can connect and explore. At least one Elastic deployment is required. */
+export const ONBOARDING_CONNECTOR_TYPE_IDS = ['.elasticsearch', '.slack2', '.github'] as const;
+export type OnboardingConnectorTypeId = (typeof ONBOARDING_CONNECTOR_TYPE_IDS)[number];
+
+export const isOnboardingConnectorTypeId = (value: string): value is OnboardingConnectorTypeId =>
+  (ONBOARDING_CONNECTOR_TYPE_IDS as readonly string[]).includes(value);
+
+export const MAX_ONBOARDING_CONNECTORS = 10;
 
 export const MAX_ONBOARDING_SUGGESTIONS = 6;
 export const MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH = 120;
@@ -22,6 +31,8 @@ export const ONBOARDING_SUGGESTION_SOURCES = [
   'case',
   'error_spike',
   'latency',
+  'code_change',
+  'discussion',
   'other',
 ] as const;
 export type OnboardingSuggestionSource = (typeof ONBOARDING_SUGGESTION_SOURCES)[number];
@@ -45,6 +56,7 @@ export type OnboardingSuggestionsStatus = 'running' | 'succeeded' | 'failed';
 export interface OnboardingConnectorSummary {
   id: string;
   name: string;
+  connector_type_id: string;
   url?: string;
   kibana_url?: string;
 }

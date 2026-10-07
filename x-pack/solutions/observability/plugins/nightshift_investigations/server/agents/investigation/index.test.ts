@@ -128,11 +128,11 @@ describe('Nightshift investigation agent type', () => {
     ]);
   });
 
-  it('allow-lists the telemetry connector resolved for the space', async () => {
+  it('allow-lists the connectors resolved for the space', async () => {
     const type = getInvestigationAgentType({
       sandboxEnabled: true,
       cortexEnabled: true,
-      resolveTelemetryConnectorId: async () => 'elasticsearch-telemetry',
+      resolveConnectorIds: async () => ['elasticsearch-telemetry', 'github'],
     });
     if (typeof type.baseConfiguration !== 'function') {
       throw new Error('expected a dynamic base configuration');
@@ -143,7 +143,7 @@ describe('Nightshift investigation agent type', () => {
       spaceId: 'default',
     });
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
   });
 
   describe('custom context', () => {

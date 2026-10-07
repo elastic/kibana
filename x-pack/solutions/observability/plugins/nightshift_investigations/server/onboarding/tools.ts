@@ -16,16 +16,26 @@ import type {
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { ONBOARDING_CONNECTOR_TYPE_ID } from '../../common/onboarding';
+import { getConnectorSpec, isToolAction, type ConnectorSpec } from '@kbn/connector-specs';
+import { formatSchemaForLlm } from '@kbn/agent-builder-server';
+import {
+  ONBOARDING_CONNECTOR_TYPE_ID,
+  MAX_ONBOARDING_CONNECTORS,
+  isOnboardingConnectorTypeId,
+} from '../../common/onboarding';
 
 export const ONBOARDING_ESQL_TOOL_ID = 'nightshift_onboarding_esql';
 export const ONBOARDING_LIST_INDICES_TOOL_ID = 'nightshift_onboarding_list_indices';
 export const ONBOARDING_KIBANA_GET_TOOL_ID = 'nightshift_onboarding_kibana_get';
+export const ONBOARDING_DESCRIBE_CONNECTORS_TOOL_ID = 'nightshift_onboarding_describe_connectors';
+export const ONBOARDING_CALL_CONNECTOR_TOOL_ID = 'nightshift_onboarding_call_connector';
 
 export const ONBOARDING_TOOL_IDS = [
   ONBOARDING_ESQL_TOOL_ID,
   ONBOARDING_LIST_INDICES_TOOL_ID,
   ONBOARDING_KIBANA_GET_TOOL_ID,
+  ONBOARDING_DESCRIBE_CONNECTORS_TOOL_ID,
+  ONBOARDING_CALL_CONNECTOR_TOOL_ID,
 ] as const;
 
 /** Tool results are truncated to keep a dozen calls well inside the model context. */
@@ -75,6 +85,35 @@ const kibanaGetSchema = z.object({
     .describe('Query string parameters, e.g. { "per_page": 20 }'),
 });
 
+const describeConnectorsSchema = z.object({
+  connector_ids: z
+    .array(z.string().min(1).max(256))
+    .min(1)
+    .max(MAX_ONBOARDING_CONNECTORS)
+    .describe('Ids of the connected tools to describe.'),
+});
+
+const callConnectorSchema = z.object({
+  connector_id: connectorIdField,
+  sub_action: z
+    .string()
+    .min(1)
+    .max(100)
+    .describe(
+      'Read-only sub-action name, exactly as listed by nightshift_onboarding_describe_connectors.'
+    ),
+  params: z
+    .record(z.string().max(200), z.unknown())
+    .optional()
+    .describe('Arguments of the sub-action.'),
+});
+
+/** Read-only, agent-callable sub-actions of a connector spec. */
+const getReadOnlyActions = (spec: ConnectorSpec) =>
+  Object.entries(spec.actions).filter(
+    ([name, action]) => isToolAction(spec, name) && action.scope === 'read'
+  );
+
 const truncate = (data: unknown): unknown => {
   const json = JSON.stringify(data);
   if (json === undefined || json.length <= MAX_RESULT_CHARS) return data;
@@ -95,7 +134,9 @@ const executeOnConnector = async (
   request: KibanaRequest,
   connectorId: string,
   subAction: string,
-  subActionParams: Record<string, unknown>
+  subActionParams: Record<string, unknown>,
+  isAllowedType: (actionTypeId: string) => boolean = (typeId) =>
+    typeId === ONBOARDING_CONNECTOR_TYPE_ID
 ) => {
   const actions = getActions();
   if (!actions) {
@@ -110,14 +151,27 @@ const executeOnConnector = async (
       results: [createErrorResult({ message: `Connector '${connectorId}' was not found.` })],
     };
   }
-  if (actionTypeId !== ONBOARDING_CONNECTOR_TYPE_ID) {
+  if (!isAllowedType(actionTypeId)) {
     return {
       results: [
         createErrorResult({
-          message: `Connector '${connectorId}' is not an External Elasticsearch connector.`,
+          message: `Connector '${connectorId}' (${actionTypeId}) cannot be used with this tool.`,
         }),
       ],
     };
+  }
+  if (actionTypeId !== ONBOARDING_CONNECTOR_TYPE_ID) {
+    const spec = getConnectorSpec(actionTypeId);
+    const isReadOnly = spec ? getReadOnlyActions(spec).some(([name]) => name === subAction) : false;
+    if (!isReadOnly) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Sub-action '${subAction}' is not a read-only action of connector '${connectorId}'. Call ${ONBOARDING_DESCRIBE_CONNECTORS_TOOL_ID} to list them.`,
+          }),
+        ],
+      };
+    }
   }
   const result = await actionsClient.execute({
     actionId: connectorId,
@@ -198,6 +252,86 @@ export const registerOnboardingTools = (
     handler: async ({ connector_id: connectorId, path, queryParams }, { request }) =>
       executeOnConnector(deps, request, connectorId, 'kibanaRequest', { path, queryParams }),
   };
+  const describeConnectorsTool: BuiltinToolDefinition<typeof describeConnectorsSchema> = {
+    id: ONBOARDING_DESCRIBE_CONNECTORS_TOOL_ID,
+    type: ToolType.builtin,
+    description:
+      'Describe the tools (Elastic deployments, Slack, GitHub, ...) the user connected during Nightshift onboarding: their type and the read-only sub-actions you can call with nightshift_onboarding_call_connector. Call this first.',
+    schema: describeConnectorsSchema,
+    availability: deps.availability,
+    tags: ['nightshift', 'onboarding'],
+    excludeFromMcp: true,
+    annotations: { ...annotations, title: 'Nightshift onboarding: describe connected tools' },
+    handler: async ({ connector_ids: connectorIds }, { request }) => {
+      const actions = deps.getActions();
+      if (!actions) {
+        return { results: [createErrorResult({ message: 'Connectors are not available.' })] };
+      }
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      const sections = await Promise.all(
+        connectorIds.map(async (connectorId) => {
+          try {
+            const connector = await actionsClient.get({ id: connectorId });
+            if (!isOnboardingConnectorTypeId(connector.actionTypeId)) {
+              return `## ${connectorId}\nNot usable during onboarding (${connector.actionTypeId}).`;
+            }
+            if (connector.actionTypeId === ONBOARDING_CONNECTOR_TYPE_ID) {
+              return [
+                `## ${connector.name} (connector_id: ${connectorId}, type: Elastic deployment)`,
+                `Use ${ONBOARDING_LIST_INDICES_TOOL_ID}, ${ONBOARDING_ESQL_TOOL_ID} and ${ONBOARDING_KIBANA_GET_TOOL_ID}.`,
+                connector.config?.kibanaUrl
+                  ? 'Kibana URL configured.'
+                  : 'No Kibana URL configured.',
+              ].join('\n');
+            }
+            const spec = getConnectorSpec(connector.actionTypeId);
+            const readOnly = spec ? getReadOnlyActions(spec) : [];
+            return [
+              `## ${connector.name} (connector_id: ${connectorId}, type: ${
+                spec?.metadata.displayName ?? connector.actionTypeId
+              })`,
+              `Call ${ONBOARDING_CALL_CONNECTOR_TOOL_ID} with one of these read-only sub-actions:`,
+              ...readOnly.map(([name, action]) =>
+                [
+                  `- ${name}: ${action.description ?? ''}`,
+                  action.input ? formatSchemaForLlm(action.input).replace(/^/gm, '    ') : '',
+                ]
+                  .filter(Boolean)
+                  .join('\n')
+              ),
+            ].join('\n');
+          } catch (error) {
+            return `## ${connectorId}\nCould not be read: ${error.message}`;
+          }
+        })
+      );
+      return {
+        results: [{ type: ToolResultType.other, data: { connectors: sections.join('\n\n') } }],
+      };
+    },
+  };
+  const callConnectorTool: BuiltinToolDefinition<typeof callConnectorSchema> = {
+    id: ONBOARDING_CALL_CONNECTOR_TOOL_ID,
+    type: ToolType.builtin,
+    description:
+      'Call a read-only sub-action of a tool connected during Nightshift onboarding (for example Slack searchMessages or GitHub searchIssues). List the sub-actions with nightshift_onboarding_describe_connectors first.',
+    schema: callConnectorSchema,
+    availability: deps.availability,
+    tags: ['nightshift', 'onboarding'],
+    excludeFromMcp: true,
+    annotations: { ...annotations, title: 'Nightshift onboarding: call connected tool' },
+    handler: async ({ connector_id: connectorId, sub_action: subAction, params }, { request }) =>
+      executeOnConnector(
+        deps,
+        request,
+        connectorId,
+        subAction,
+        params ?? {},
+        (typeId) => isOnboardingConnectorTypeId(typeId) && typeId !== ONBOARDING_CONNECTOR_TYPE_ID
+      ),
+  };
+  tools.register(describeConnectorsTool);
+  tools.register(callConnectorTool);
   tools.register(esqlTool);
   tools.register(listIndicesTool);
   tools.register(kibanaGetTool);

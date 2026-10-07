@@ -14,7 +14,7 @@ export type OnboardingStepStatus = 'complete' | 'current' | 'disabled';
 
 const STEP_TITLES = [
   i18n.translate('xpack.nightshift.onboarding.steps.connect', {
-    defaultMessage: 'Connect your deployment',
+    defaultMessage: 'Connect your tools',
   }),
   i18n.translate('xpack.nightshift.onboarding.steps.investigate', {
     defaultMessage: 'Try first investigation',

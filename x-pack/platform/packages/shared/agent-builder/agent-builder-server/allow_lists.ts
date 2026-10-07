@@ -145,6 +145,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_onboarding_esql',
   'nightshift_onboarding_list_indices',
   'nightshift_onboarding_kibana_get',
+  'nightshift_onboarding_describe_connectors',
+  'nightshift_onboarding_call_connector',
 
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',

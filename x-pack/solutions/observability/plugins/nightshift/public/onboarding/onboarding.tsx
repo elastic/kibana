@@ -95,6 +95,7 @@ export function NightshiftOnboarding({
           <EuiLoadingSpinner size="l" />
         ) : showConnect || !execution ? (
           <OnboardingConnectStep
+            initialSelectedIds={execution?.connectors.map(({ id }) => id)}
             onCancel={isConnected ? () => setIsChangingDeployment(false) : undefined}
           />
         ) : (

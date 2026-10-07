@@ -83,6 +83,7 @@ import {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
+import { ONBOARDING_CONNECTOR_TYPE_ID } from '../common/onboarding';
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { registerOnboardingTools } from './onboarding/tools';
 import { createSandboxSecretsClient } from './sandbox_secrets';
@@ -205,9 +206,11 @@ export class NightshiftInvestigationsPlugin
     const resolveTelemetryConnector = async (
       request: KibanaRequest
     ): Promise<{ connectorId: string; readableIndices?: string } | undefined> => {
-      const onboardingConnectorId = await onboardingClient.getConnectorId(request);
-      if (onboardingConnectorId) {
-        return { connectorId: onboardingConnectorId };
+      const onboardingTelemetry = (await onboardingClient.getConnectors(request)).find(
+        ({ connector_type_id: typeId }) => typeId === ONBOARDING_CONNECTOR_TYPE_ID
+      );
+      if (onboardingTelemetry) {
+        return { connectorId: onboardingTelemetry.id };
       }
       const { sandbox } = this.ctx.config.get();
       return sandbox?.telemetry_connector_id
@@ -244,8 +247,20 @@ export class NightshiftInvestigationsPlugin
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
-        resolveTelemetryConnectorId: async ({ request }) =>
-          (await resolveTelemetryConnector(request))?.connectorId,
+        // The telemetry connector plus every other tool connected during onboarding (Slack,
+        // GitHub, ...), so the sandbox can reach them through /workspace/connectors.md.
+        resolveConnectorIds: async ({ request }) => {
+          const [telemetryConnector, onboarded] = await Promise.all([
+            resolveTelemetryConnector(request),
+            onboardingClient.getConnectors(request),
+          ]);
+          return [
+            ...new Set([
+              ...(telemetryConnector ? [telemetryConnector.connectorId] : []),
+              ...onboarded.map(({ id }) => id),
+            ]),
+          ];
+        },
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
@@ -282,25 +297,21 @@ export class NightshiftInvestigationsPlugin
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
             getSavedConnectorSecrets: async (request) => {
-              const connectorId = await onboardingClient.getConnectorId(request);
               const actions = this.actionsStart;
-              if (
-                !connectorId ||
-                !actions ||
-                actions.inMemoryConnectors.some(({ id }) => id === connectorId)
-              ) {
-                return [];
-              }
-              try {
-                const { secrets } = await actions.getConnectorWithDecryptedSecrets(
-                  request,
-                  connectorId
-                );
-                return [secrets];
-              } catch {
-                // A connector the caller cannot read is never injected into their commands.
-                return [];
-              }
+              if (!actions) return [];
+              const savedConnectorIds = (await onboardingClient.getConnectors(request))
+                .map(({ id }) => id)
+                .filter((id) => !actions.inMemoryConnectors.some((c) => c.id === id));
+              const secrets = await Promise.all(
+                savedConnectorIds.map((id) =>
+                  actions
+                    .getConnectorWithDecryptedSecrets(request, id)
+                    .then((connector) => connector.secrets)
+                    // A connector the caller cannot read is never injected into their commands.
+                    .catch(() => undefined)
+                )
+              );
+              return secrets.filter((value): value is Record<string, unknown> => Boolean(value));
             },
           }),
           logger: sandboxLogger.get('output_redaction'),
