@@ -160,10 +160,7 @@ export const persistUserMessage = async ({
     {
       id: eventId,
       createdAt: receivedAt.toISOString(),
-      input: {
-        message: input.message?.trim() ?? '',
-        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
-      },
+      input: { message: input.message?.trim() ?? '' },
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
     },
@@ -549,17 +546,15 @@ export const persistExecutionInterruption = async (
     };
 
     if (!isResume) {
-      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
-      // the receipt-time event; only `data` is upgraded to the processed input when known.
+      // Rebuilt with the exact inputs `persistUserMessage` used, so the stored message is never rewritten.
       const receiptInput: RoundInput = {
         message: input.message?.trim() ?? '',
-        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       };
       const userMessage = userMessageEvent(
         {
           id: roundUserMessageEventId(roundId),
           createdAt: receivedAt.toISOString(),
-          input: processedInput ?? receiptInput,
+          input: receiptInput,
           ...(author ? { author } : {}),
           ...(origin ? { origin } : {}),
         },

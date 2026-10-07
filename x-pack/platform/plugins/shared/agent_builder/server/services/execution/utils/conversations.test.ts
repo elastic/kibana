@@ -812,7 +812,7 @@ describe('conversations utils', () => {
         { type: ConversationRoundStepType.reasoning, reasoning: 'done' } as ConversationRoundStep,
       ],
       response: { message: 'ok' },
-      input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+      input: { message: 'resume msg' },
     });
 
     const run = (
@@ -909,7 +909,7 @@ describe('conversations utils', () => {
       expect(promptResponse.data).toMatchObject({
         prompt_requested_event_id: 'round-1::execution_terminated',
         responses: { 'tools.my_tool.confirmation': { allow: true } },
-        input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
+        input: { message: 'resume msg' },
       });
       expect(emitted.map((event) => event.type)).toEqual([
         TimelineEventType.executionTerminated,
@@ -1151,7 +1151,8 @@ describe('conversations utils', () => {
         'r1::step::0',
         'r1::execution_failed',
       ]);
-      expect(call.events[0].data).toEqual({ message: 'hi', attachment_refs: [ref] }); // processed input wins
+      // the received message, never the processed input the interruption carries
+      expect(call.events[0].data).toEqual({ message: 'hi' });
       expect(call.events[0].created_at).toBe(T0);
       // an interrupted round is `completed` (with an `interruption`); it carries no resume state
       expect(call.status).toBe(ConversationRoundStatus.completed);
@@ -1188,7 +1189,7 @@ describe('conversations utils', () => {
       expect(written.map((e) => e.type)).toEqual([TimelineEventType.executionAborted]);
     });
 
-    it('fresh round: the processed attachment_context is persisted on the rewritten user_message', async () => {
+    it('fresh round: a processed attachment_context never reaches the rewritten user_message', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);
 
@@ -1201,7 +1202,7 @@ describe('conversations utils', () => {
       });
 
       const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(call.events[0].data).toMatchObject({ attachment_context: '<attachments/>' });
+      expect(call.events[0].data).toEqual({ message: 'hi' });
     });
 
     it('fresh round: the rebuilt user_message equals what persistUserMessage wrote', async () => {
@@ -1214,7 +1215,7 @@ describe('conversations utils', () => {
         conversationClient: receiptClient,
         eventId: roundUserMessageEventId('r1'),
         receivedAt,
-        input: { message: 'hi', attachment_refs: [ref] },
+        input: { message: 'hi' },
         author,
         origin,
       });
@@ -1225,7 +1226,8 @@ describe('conversations utils', () => {
       await persistExecutionInterruption({
         ...baseParams(conversationClient),
         conversation,
-        input: { message: 'hi', attachment_refs: [ref] },
+        input: { message: 'hi' },
+        interrupted: interruptedData(),
         author,
         origin,
         error: new Error('boom'),
@@ -1542,7 +1544,7 @@ describe('conversations utils', () => {
         'r1::step::0',
         'r1::execution_failed',
       ]);
-      expect(call.events[0].data).toEqual({ message: 'processed', attachment_refs: [ref] });
+      expect(call.events[0].data).toEqual({ message: 'hi' });
       expect(call.events[2].data).toEqual({ step, sequence: 0 });
       expect(call.events[3].data).toMatchObject({
         time_to_last_token: 42,

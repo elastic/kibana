@@ -17,10 +17,7 @@ import type {
   ConversationRoundStep,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
-import type { Conversation } from '@kbn/agent-builder-common';
-import { EventActorType } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
@@ -31,63 +28,19 @@ import {
   isPromptRequestEvent,
   isToolCallStep,
   isUserQuestionAnsweredEvent,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES,
 } from '@kbn/agent-builder-common';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
-import type {
-  AttachmentChange,
-  AttachmentStateManager,
-} from '@kbn/agent-builder-server/attachments';
-import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
-import { userMessageActor } from '../../../conversation/client/rounds_to_events';
+import type { RunAttachmentEvents } from '../run_attachment_events';
 import type { RunStateSnapshot, RunTracker } from '../run_tracker';
 import { persistableSteps } from '../step_state';
-import { formatAttachmentsMetadata } from './attachment_presentation';
 import type { PendingTurn } from './conversation_turn';
 import { getModelUsage } from './round_summary';
 import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
-import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 
 type SourceEvents = ChatAgentEvent;
-
-/**
- * `chat_input` (attachments sent with the message) and `execution` (made by tools) attachment
- * events for a run, stamped with the round's initial execution id. Shared by the success and the
- * interruption paths.
- */
-export const buildAttachmentEvents = ({
-  conversation,
-  round,
-  chatInputChanges,
-  executionChanges,
-  agentId,
-  createdAt,
-}: {
-  conversation: Conversation | undefined;
-  round: Pick<ConversationRound, 'id' | 'author' | 'origin'>;
-  chatInputChanges: AttachmentChange[];
-  executionChanges: AttachmentChange[];
-  agentId: string;
-  createdAt: string;
-}) => {
-  const executionId = `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`;
-  return [
-    ...attachmentChangesToEvents(chatInputChanges, {
-      source: 'chat_input',
-      actor: userMessageActor(conversation, round),
-      execution_id: executionId,
-      created_at: createdAt,
-    }),
-    ...attachmentChangesToEvents(executionChanges, {
-      source: 'execution',
-      actor: { type: EventActorType.agent, id: agentId },
-      execution_id: executionId,
-      created_at: createdAt,
-    }),
-  ];
-};
 
 export const addRoundCompleteEvent = ({
   pendingTurn,
@@ -105,9 +58,7 @@ export const addRoundCompleteEvent = ({
   configurationOverrides,
   roundId: providedRoundId,
   getWorkspaceId,
-  chatInputChanges,
-  agentId,
-  conversation,
+  runAttachmentEvents,
 }: {
   /** The turn being resumed, when this execution is a HITL resume. */
   pendingTurn: PendingTurn | undefined;
@@ -140,19 +91,8 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
-  /**
-   * Attachment changes caused by the incoming message (drained from the state manager right after
-   * `prepareConversation`). Emitted as `chat_input` attachment events.
-   */
-  chatInputChanges: AttachmentChange[];
-  /** Agent running this round; actor of the `execution` attachment events. */
-  agentId: string;
-  /**
-   * Existing conversation, when this round is on an already-persisted one. Undefined for CREATE.
-   * Used to resolve the `chat_input` actor's fallback to the conversation owner when the round
-   * carries no author.
-   */
-  conversation: Conversation | undefined;
+  /** The run's attachment events; drained for the last time here. */
+  runAttachmentEvents: RunAttachmentEvents;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(shareReplay());
@@ -161,7 +101,6 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const finalGraphState = tracker.finalState();
           const fullSteps = resolveRoundSteps({ tracker, finalGraphState });
 
@@ -179,7 +118,6 @@ export const addRoundCompleteEvent = ({
               endTime,
               modelProvider,
               mainConnectorId,
-              attachmentRefs,
               configurationOverrides,
             });
             round = resumed.round;
@@ -196,7 +134,6 @@ export const addRoundCompleteEvent = ({
               endTime,
               modelProvider,
               mainConnectorId,
-              attachmentRefs,
               configurationOverrides,
               lastCallInputTokens: finalGraphState.lastCallUsage?.inputTokens,
             });
@@ -208,30 +145,8 @@ export const addRoundCompleteEvent = ({
             resumeExecution.follow_up_round.state = round.state;
           }
 
-          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
-            const attachmentContext = formatAttachmentsMetadata(
-              round.input.attachment_refs,
-              attachmentStateManager
-            );
-            if (attachmentContext) {
-              round.input = { ...round.input, attachment_context: attachmentContext };
-              if (resumeExecution) {
-                resumeExecution.follow_up_round.input = {
-                  ...resumeExecution.follow_up_round.input,
-                  attachment_context: attachmentContext,
-                };
-              }
-            }
-          }
-
-          const attachmentEvents = buildAttachmentEvents({
-            conversation,
-            round,
-            chatInputChanges,
-            executionChanges: attachmentStateManager.drainChanges(),
-            agentId,
-            createdAt: (endTime ?? new Date()).toISOString(),
-          });
+          runAttachmentEvents.drainRemaining();
+          const attachmentEvents = runAttachmentEvents.list();
 
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
@@ -279,7 +194,6 @@ const resumeRound = ({
   endTime = new Date(),
   modelProvider,
   mainConnectorId,
-  attachmentRefs,
   configurationOverrides,
 }: {
   pendingTurn: PendingTurn;
@@ -292,7 +206,6 @@ const resumeRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
   mainConnectorId: string;
-  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): { round: ConversationRound; followUpRound: ConversationRound } => {
   // ask_user_question answers from the replayed answered events, keyed by prompt_id.
@@ -312,7 +225,6 @@ const resumeRound = ({
     endTime,
     modelProvider,
     mainConnectorId,
-    attachmentRefs,
     configurationOverrides,
     lastCallInputTokens: finalGraphState.lastCallUsage?.inputTokens,
   });
@@ -338,7 +250,6 @@ const createRound = ({
   endTime = new Date(),
   modelProvider,
   mainConnectorId,
-  attachmentRefs,
   configurationOverrides,
   lastCallInputTokens,
 }: {
@@ -352,7 +263,6 @@ const createRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
   mainConnectorId: string;
-  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   lastCallInputTokens?: number;
 }): ConversationRound => {
@@ -379,12 +289,7 @@ const createRound = ({
       : ConversationRoundStatus.completed,
     pending_prompts: hasPromptRequests ? promptRequestEvents.map((e) => e.data.prompt) : undefined,
     state: undefined,
-    input: {
-      ...input,
-      ...(attachmentRefs.length > 0
-        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
-        : {}),
-    },
+    input,
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),
     ...(author ? { author } : {}),

@@ -1904,7 +1904,7 @@ describe('conversation model converters', () => {
       }
     );
 
-    it('refreshes the preserved user_message when a rounds-path input change hits a resumed round', () => {
+    it('keeps the preserved user_message unchanged when a rounds-path input change hits a resumed round', () => {
       const events = multiExecutionTimeline();
 
       const rounds = eventsToRounds(events);
@@ -1933,11 +1933,7 @@ describe('conversation model converters', () => {
         expect.arrayContaining(['mr::execution::1::execution_terminated'])
       );
       const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
-      expect((userMessage?.data as { attachment_refs?: unknown }).attachment_refs).toEqual([
-        { attachment_id: 'att-1', version: 1 },
-      ]);
-      // Keep the original user message, not the resume message.
-      expect((userMessage?.data as { message: string }).message).toBe('do it');
+      expect(userMessage).toEqual(conversation.events?.find((e) => e.id === 'mr::user_message'));
     });
 
     it('regenerates round-derived events when rounds change', () => {

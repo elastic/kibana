@@ -9,9 +9,9 @@ import type {
   ConversationEvent,
   ConversationRoundAuthor,
   ConverseInput,
-  RoundInput,
   MetadataFieldValue,
   SubagentEntry,
+  UserMessageEventData,
 } from '@kbn/agent-builder-common';
 import { TimelineEventType, isTimelineEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -25,7 +25,6 @@ import type {
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
 import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
-import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
@@ -105,7 +104,6 @@ export const prepareConversation = async ({
       continue;
     }
     if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
-    attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
     if (input.attachments && input.attachments.length > 0) {
       await mergeAttachmentInputs({
@@ -116,12 +114,8 @@ export const prepareConversation = async ({
         validateContext,
       });
     }
-    const attachmentRefs = mergeAttachmentRefs(
-      input.attachment_refs,
-      attachmentStateManager.getAccessedRefs()
-    );
     const processedInput = prepareRoundInput({
-      input: { ...input, attachments: [], attachment_refs: attachmentRefs },
+      input: { ...input, attachments: [] },
       author: authorAndOrigin(round.userMessage).author,
       attachmentStateManager,
     });
@@ -143,7 +137,6 @@ export const prepareConversation = async ({
     }
   }
 
-  attachmentStateManager.clearAccessTracking();
   // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
   // only the next input's attachments surface as chat_input attachment events.
   attachmentStateManager.clearChanges();
@@ -156,19 +149,8 @@ export const prepareConversation = async ({
     validateContext,
     updateOriginSnapshot: true,
   });
-  const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();
-  const mergedNextInputRefs = mergeAttachmentRefs(
-    effectiveNextInput.attachment_refs,
-    nextInputAccessedRefs
-  );
-
-  const strippedNextInput: ConverseInput = {
-    ...effectiveNextInput,
-    attachments: [],
-    ...(mergedNextInputRefs ? { attachment_refs: mergedNextInputRefs } : {}),
-  };
   const processedNextInput = prepareRoundInput({
-    input: strippedNextInput,
+    input: { message: effectiveNextInput.message ?? '' },
     author: nextInputAuthor,
     attachmentStateManager,
   });
@@ -249,7 +231,7 @@ const prepareRoundInput = ({
   author,
   attachmentStateManager,
 }: {
-  input: RoundInput | ConverseInput;
+  input: UserMessageEventData;
   author?: ConversationRoundAuthor;
   attachmentStateManager: AttachmentStateManager;
 }): ProcessedRoundInput => {

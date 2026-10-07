@@ -330,9 +330,9 @@ apiTest.describe(
           (event) => event.type === TimelineEventType.userMessage
         )!;
         expect((userMessage.data as { message?: string }).message).toBe('');
-        expect((userMessage.data as { attachment_refs?: unknown[] }).attachment_refs).toHaveLength(
-          1
-        );
+        expect(
+          (userMessage.data as { attachment_refs?: unknown[] }).attachment_refs
+        ).toBeUndefined();
         expect(
           conversation.events!.some((event) => event.type === TimelineEventType.attachmentAdded)
         ).toBe(true);

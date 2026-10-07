@@ -231,7 +231,6 @@ const buildAttributedMessage = async (
 
 const buildRoundInput = ({ nextInput }: RunAgentParams): RoundInput => ({
   message: nextInput.message ?? '',
-  ...(nextInput.attachment_refs ? { attachment_refs: nextInput.attachment_refs } : {}),
 });
 
 const tryParseStructuredOutput = (answer: string): object | undefined => {

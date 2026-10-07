@@ -63,7 +63,7 @@ export type ProcessedTimelineEvent =
   | ProcessedUserMessageEvent
   | ProcessedStandaloneEvent;
 
-type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | ConversationEvent;
+export type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | ConversationEvent;
 /**
  * The `user_message` member of a timeline element type. Selected by discriminant rather than
  * intersected, so a custom event (whose `type` is any string) never masquerades as one.
