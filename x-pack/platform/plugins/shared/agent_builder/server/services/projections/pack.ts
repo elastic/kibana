@@ -54,7 +54,7 @@ const markdown = definePrimitive<MarkdownNode>({
 const describeAttachment = ({ attachmentId }: AttachmentNode) => `Attachment ${attachmentId}`;
 
 /**
- * Attachment nodes are resolved by `resolveSpec` before rendering, so these renderers only name
+ * Attachment nodes are resolved by `buildSpec` before rendering, so these renderers only name
  * the attachment.
  */
 const attachment = definePrimitive<AttachmentNode>({

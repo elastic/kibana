@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { slackProjection } from '.';
+import { slackProjection } from './slack';
 
 describe('slackProjection', () => {
   it('renders the spec as Block Kit', () => {

@@ -10,18 +10,17 @@ import type {
   OriginIsomerProjection,
   RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { replyToSpec } from './reply_to_spec';
-import { resolveSpec } from './resolve_spec';
 import { slackProjection } from './slack';
+import { buildSpec } from './spec';
 import type { ProjectionContext, IsomerProjectionDefinition } from './types';
 
 /** The projections of rounds, one per origin type. */
 const projectionDefinitions: IsomerProjectionDefinition[] = [slackProjection];
 
 /**
- * Renders the projection of the round's origin through Isomer: the reply becomes a spec, its
- * attachments are resolved, and the origin's definition renders it. Returns nothing when the
- * origin has no projection, nothing in the reply can be rendered, or rendering fails.
+ * Renders the projection of the round's origin through Isomer: the reply becomes a spec, and the
+ * origin's definition renders it. Returns nothing when the origin has no projection, nothing in
+ * the reply can be rendered, or rendering fails.
  */
 export const renderIsomerProjection = (
   { data: { round, attachments = [] } }: RoundCompleteEvent,
@@ -38,28 +37,22 @@ export const renderIsomerProjection = (
   }
 
   try {
-    const spec = replyToSpec(round.response.message);
-
-    if (!spec) {
-      logger.warn(`Leaving out the ${definition.id} projection: the reply is empty`);
-      return undefined;
-    }
-
-    const resolved = resolveSpec(spec, {
+    const spec = buildSpec({
+      message: round.response.message,
       attachments,
       attachmentRefs: round.input.attachment_refs,
-      getMapping: (type) => attachmentsService.getTypeDefinition(type)?.toSpec,
+      attachmentsService,
       logger,
     });
 
-    if (resolved.body.length === 0) {
+    if (spec.body.length === 0) {
       logger.warn(
         `Leaving out the ${definition.id} projection: none of the reply could be rendered`
       );
       return undefined;
     }
 
-    return { [definition.id]: definition.render(resolved) };
+    return { [definition.id]: definition.render(spec) };
   } catch (error) {
     logger.warn(`Leaving out the ${definition.id} projection: rendering failed: ${error.message}`);
 
