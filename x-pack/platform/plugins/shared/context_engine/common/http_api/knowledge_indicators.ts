@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KiLifecycleStatus } from '../step_types/ki';
 import type { KiTypeCount } from './ai_indices';
 
 export interface KiListItem {
@@ -12,6 +13,8 @@ export interface KiListItem {
   index: string;
   type?: string;
   title?: string;
+  updated_at?: string;
+  lifecycle_status?: KiLifecycleStatus;
 }
 
 /** Unfiltered store stats. */

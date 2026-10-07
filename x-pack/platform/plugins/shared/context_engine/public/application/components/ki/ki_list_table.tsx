@@ -18,7 +18,9 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getKiDetailPath } from '../../paths';
-import { getKiDisplayTitle, getKiDisplayTypeLabel } from './helpers';
+import { getKiDisplayTitle, getKiDisplayTypeLabel, noneValueLabel } from './helpers';
+import { KiFormattedDate } from './ki_formatted_date';
+import { KiListLifecycleStatusBadge } from './ki_list_lifecycle_status_badge';
 
 interface KiListTableRow extends KiListItem {
   rowKey: string;
@@ -47,7 +49,7 @@ export const KiListTable = ({ aiIndexId, kis }: KiListTableProps) => {
           defaultMessage: 'Title',
         }),
         sortable: false,
-        width: '60%',
+        width: '46%',
         render: (_, ki) => (
           <EuiTextBlockTruncate lines={2} cloneElement>
             <span data-test-subj="contextKiRowTitle">{getKiDisplayTitle(ki.title)}</span>
@@ -60,11 +62,39 @@ export const KiListTable = ({ aiIndexId, kis }: KiListTableProps) => {
           defaultMessage: 'Type',
         }),
         sortable: false,
+        width: '18%',
         render: (_, ki) => (
           <EuiText size="s" color="subdued" data-test-subj="contextKiRowType">
             {getKiDisplayTypeLabel(ki.type)}
           </EuiText>
         ),
+      },
+      {
+        field: 'lifecycle_status',
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnStatus', {
+          defaultMessage: 'Status',
+        }),
+        sortable: false,
+        width: '15%',
+        render: (_, ki) => <KiListLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} />,
+      },
+      {
+        field: 'updated_at',
+        name: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.columnUpdatedAt', {
+          defaultMessage: 'Updated',
+        }),
+        sortable: false,
+        width: '21%',
+        render: (_, ki) =>
+          ki.updated_at ? (
+            <EuiText size="s" data-test-subj="contextKiRowUpdatedAt">
+              <KiFormattedDate value={ki.updated_at} />
+            </EuiText>
+          ) : (
+            <EuiText size="s" color="subdued" data-test-subj="contextKiRowUpdatedAt">
+              {noneValueLabel}
+            </EuiText>
+          ),
       },
     ];
   }, []);

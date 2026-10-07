@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { GetKiResponse, KiDocument } from '../../common/http_api/knowledge_indicators';
 import { KiNotFoundError } from './errors';
@@ -27,18 +28,35 @@ export const kiIdQuery = (kiId: string) => ({
   },
 });
 
-const isDeleted = (document: KiDocument): boolean => {
+const readLifecycleStatus = (document: KiDocument): KiLifecycleStatus | undefined => {
   const governance = document.governance;
   const lifecycle =
     typeof governance === 'object' && governance !== null && !Array.isArray(governance)
       ? governance.lifecycle
       : undefined;
-  return (
+  if (
     typeof lifecycle === 'object' &&
     lifecycle !== null &&
     !Array.isArray(lifecycle) &&
-    lifecycle.status === 'deleted'
-  );
+    (lifecycle.status === 'active' || lifecycle.status === 'deleted')
+  ) {
+    return lifecycle.status;
+  }
+  return undefined;
+};
+
+const isKiLifecycleAllowed = (
+  document: KiDocument,
+  lifecycleStatuses?: KiLifecycleStatus[]
+): boolean => {
+  if (lifecycleStatuses === undefined) {
+    return readLifecycleStatus(document) !== 'deleted';
+  }
+  const status = readLifecycleStatus(document);
+  if (status === undefined) {
+    return lifecycleStatuses.includes('active');
+  }
+  return lifecycleStatuses.includes(status);
 };
 
 /** How many equal-timestamp revisions to consider when picking the current one. */
@@ -71,12 +89,14 @@ export interface GetKiOptions {
   dest: AiIndexDest;
   index: string;
   kiId: string;
+  /** When omitted, deleted KIs are excluded (unset status counts as active). */
+  lifecycleStatuses?: KiLifecycleStatus[];
 }
 
 /** Fetches the current revision of a KI. */
 export const getKi = async (
   esClient: ElasticsearchClient,
-  { aiIndexId, dest, index, kiId }: GetKiOptions
+  { aiIndexId, dest, index, kiId, lifecycleStatuses }: GetKiOptions
 ): Promise<GetKiResponse> => {
   const response = await esClient.search<KiDocument>({
     index: dest.value,
@@ -94,7 +114,11 @@ export const getKi = async (
   });
 
   const { _id, _source: document } = pickCurrentRevision(response.hits.hits) ?? {};
-  if (_id === undefined || document === undefined || isDeleted(document)) {
+  if (
+    _id === undefined ||
+    document === undefined ||
+    !isKiLifecycleAllowed(document, lifecycleStatuses)
+  ) {
     throw new KiNotFoundError(aiIndexId, kiId);
   }
 

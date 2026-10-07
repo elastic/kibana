@@ -1020,11 +1020,25 @@ describe('ai indices routes', () => {
 
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis', () => {
     const rows = (values: unknown[][]) => ({
-      columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
+      columns: [
+        { name: '_index' },
+        { name: 'id' },
+        { name: 'type' },
+        { name: 'title' },
+        { name: 'updated_at' },
+        { name: 'governance.lifecycle.status' },
+      ],
       values,
     });
     const probe = {
-      columns: ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'].map((name) => ({
+      columns: [
+        'id',
+        '@timestamp',
+        'updated_at',
+        'type',
+        'title',
+        'governance.lifecycle.status',
+      ].map((name) => ({
         name,
       })),
       values: [],
@@ -1039,7 +1053,9 @@ describe('ai indices routes', () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
         .mockResolvedValueOnce(probe)
-        .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook']]))
+        .mockResolvedValueOnce(
+          rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook', null, 'active']])
+        )
         .mockResolvedValueOnce(totals(12))
         .mockResolvedValueOnce(buckets([[12, 'playbook']]));
 
@@ -1066,6 +1082,7 @@ describe('ai indices routes', () => {
               index: kiBackingIndex,
               type: 'playbook',
               title: 'Refund playbook',
+              lifecycle_status: 'active',
             },
           ],
         },

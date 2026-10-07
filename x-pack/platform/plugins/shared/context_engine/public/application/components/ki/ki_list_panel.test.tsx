@@ -41,6 +41,11 @@ const SAMPLE_INDEX_MANAGEMENT_URL =
   '/app/management/data/index_management/indices/index_details?indexName=ai-index-idx-sample-ki';
 const SAMPLE_DISCOVER_URL = '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx-sample-ki))';
 
+const selectTypeFilter = (type: string) => {
+  fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
+  fireEvent.click(screen.getByTestId(`contextKiListFilter-${type}`));
+};
+
 interface RenderOptions {
   discoverShow?: boolean;
   indexManagementMonitor?: boolean;
@@ -125,13 +130,12 @@ describe('KiListPanel', () => {
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
 
     expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextKiListPanelContent')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListRows')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent('Refund playbook');
-    expect(screen.getByTestId('contextKiListFilter-all')).toHaveTextContent('All (6)');
+    expect(screen.getByTestId('contextKiListTypeFilters')).toHaveTextContent('All (6)');
+    fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
     expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextKiListFilter-others')).not.toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId('contextKiListPanelDestLink')).toHaveAttribute(
         'href',
@@ -151,10 +155,10 @@ describe('KiListPanel', () => {
     expect(screen.queryByTestId('contextKiListPanelDestLink')).not.toBeInTheDocument();
   });
 
-  it('requests a type filter when a type button is selected', () => {
+  it('requests a type filter when a type is selected from the dropdown', () => {
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
 
-    fireEvent.click(screen.getByTestId('contextKiListFilter-playbook'));
+    selectTypeFilter('playbook');
 
     expect(mockUseKiList).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -163,24 +167,25 @@ describe('KiListPanel', () => {
     );
   });
 
-  it('keeps all type filter buttons visible after selecting a type', () => {
+  it('keeps all type filter options in the dropdown after selecting a type', () => {
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
 
-    fireEvent.click(screen.getByTestId('contextKiListFilter-playbook'));
+    selectTypeFilter('playbook');
 
+    fireEvent.click(screen.getByTestId('contextKiListTypeFilters'));
     expect(screen.getByTestId('contextKiListFilter-all')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-faq')).toBeInTheDocument();
   });
 
-  it('keeps the header summary count at the unfiltered total when a type is selected', () => {
+  it('keeps the backing index label unchanged when a type is selected', () => {
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
 
-    fireEvent.click(screen.getByTestId('contextKiListFilter-playbook'));
+    selectTypeFilter('playbook');
 
     expect(screen.getByTestId('contextKiListPanelSummary')).toHaveTextContent(
-      '6 Knowledge Indicators in ai-index-idx-sample-ki'
+      'Backing index ai-index-idx-sample-ki'
     );
   });
 

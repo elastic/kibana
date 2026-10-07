@@ -126,6 +126,41 @@ describe('ki_get', () => {
     expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
   });
 
+  it('returns a deleted KI when lifecycleStatuses includes deleted', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'generated-es-id',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: {
+              id: 'ki-1',
+              type: 'playbook',
+              governance: { lifecycle: { status: 'deleted' } },
+            },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'data_stream', value: 'ai-index-ds-sample' },
+        index: '.ds-ai-index-ds-sample-000001',
+        kiId: 'ki-1',
+        lifecycleStatuses: ['active', 'deleted'],
+      })
+    ).resolves.toEqual({
+      id: 'ki-1',
+      document: {
+        id: 'ki-1',
+        type: 'playbook',
+        governance: { lifecycle: { status: 'deleted' } },
+      },
+    });
+  });
+
   it('throws KiNotFoundError when the current revision is deleted', async () => {
     search.mockResolvedValue({
       hits: {

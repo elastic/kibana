@@ -17,7 +17,14 @@ const probeResponse = (fields: string[]) => ({
   columns: fields.map((name) => ({ name })),
   values: [],
 });
-const ALL_FIELDS = ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'];
+const ALL_FIELDS = [
+  'id',
+  '@timestamp',
+  'updated_at',
+  'type',
+  'title',
+  'governance.lifecycle.status',
+];
 const unknownIndexError = () =>
   new errors.ResponseError({
     statusCode: 400,
@@ -26,8 +33,17 @@ const unknownIndexError = () =>
     meta: {} as never,
   });
 
-const rowsResponse = (rows: Array<[string, string, string | null, string | null]>) => ({
-  columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
+const rowsResponse = (
+  rows: Array<[string, string, string | null, string | null, string | null, string | null]>
+) => ({
+  columns: [
+    { name: '_index' },
+    { name: 'id' },
+    { name: 'type' },
+    { name: 'title' },
+    { name: 'updated_at' },
+    { name: 'governance.lifecycle.status' },
+  ],
   values: rows,
 });
 const totalsResponse = (total: number, filtered?: number) =>
@@ -51,12 +67,19 @@ describe('ki_list', () => {
     query.mockResolvedValueOnce(probeResponse(ALL_FIELDS));
   });
 
-  it('returns the current revision of each KI with exact totals and capped type buckets', async () => {
+  it('returns the current revision of each KI with exact totals and all type buckets', async () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
-          [BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook'],
-          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy'],
+          [
+            BACKING_INDEX,
+            'ki-1',
+            'playbook',
+            'Refund playbook',
+            '2026-01-02T00:00:00.000Z',
+            'active',
+          ],
+          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy', null, null],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(6))
@@ -79,7 +102,14 @@ describe('ki_list', () => {
         ],
       },
       kis: [
-        { id: 'ki-1', index: BACKING_INDEX, type: 'playbook', title: 'Refund playbook' },
+        {
+          id: 'ki-1',
+          index: BACKING_INDEX,
+          type: 'playbook',
+          title: 'Refund playbook',
+          updated_at: '2026-01-02T00:00:00.000Z',
+          lifecycle_status: 'active',
+        },
         { id: 'ki-2', index: BACKING_INDEX, type: 'policy', title: 'Refund policy' },
       ],
     });
@@ -95,13 +125,49 @@ describe('ki_list', () => {
         'WHERE _id == latest_doc',
         'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
         'SORT revision_time DESC, id ASC',
-        'KEEP _index, id, type, title',
+        'KEEP _index, id, type, title, updated_at, governance.lifecycle.status',
         'LIMIT 25',
       ].join('\n| ')
     );
     expect(queryText(1)).toContain('| STATS total = COUNT(*)');
     expect(queryText(2)).toContain(
-      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
+      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC'
+    );
+    expect(queryText(2)).not.toContain('| LIMIT');
+  });
+
+  it('includes deleted KIs when lifecycleStatuses lists active and deleted', async () => {
+    query
+      .mockResolvedValueOnce(
+        rowsResponse([
+          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted'],
+        ])
+      )
+      .mockResolvedValueOnce(totalsResponse(1))
+      .mockResolvedValueOnce(bucketsResponse([[1, 'memory.session']]));
+
+    await expect(
+      getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        lifecycleStatuses: ['active', 'deleted'],
+      })
+    ).resolves.toEqual({
+      total: 1,
+      summary: { total: 1, counts_by_type: [{ type: 'memory.session', count: 1 }] },
+      kis: [
+        {
+          id: 'ki-deleted',
+          index: BACKING_INDEX,
+          type: 'memory.session',
+          title: 'Forgotten',
+          lifecycle_status: 'deleted',
+        },
+      ],
+    });
+
+    expect(queryText(0)).toContain(
+      'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" OR governance.lifecycle.status == "deleted"'
     );
   });
 
@@ -161,7 +227,9 @@ describe('ki_list', () => {
 
   it('filters rows and the total by type but keeps unfiltered type counts', async () => {
     query
-      .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook']]))
+      .mockResolvedValueOnce(
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook', null, 'active']])
+      )
       .mockResolvedValueOnce(totalsResponse(5, 1))
       .mockResolvedValueOnce(
         bucketsResponse([
@@ -202,9 +270,16 @@ describe('ki_list', () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
-          [BACKING_INDEX, 'ki-complete', 'playbook', 'Complete KI'],
-          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type'],
-          [BACKING_INDEX, 'ki-missing-title', 'policy', null],
+          [
+            BACKING_INDEX,
+            'ki-complete',
+            'playbook',
+            'Complete KI',
+            '2026-01-01T00:00:00.000Z',
+            'active',
+          ],
+          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type', null, null],
+          [BACKING_INDEX, 'ki-missing-title', 'policy', null, null, null],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(3))
@@ -225,7 +300,14 @@ describe('ki_list', () => {
         ],
       },
       kis: [
-        { id: 'ki-complete', index: BACKING_INDEX, type: 'playbook', title: 'Complete KI' },
+        {
+          id: 'ki-complete',
+          index: BACKING_INDEX,
+          type: 'playbook',
+          title: 'Complete KI',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          lifecycle_status: 'active',
+        },
         { id: 'ki-missing-type', index: BACKING_INDEX, title: 'Missing type' },
         { id: 'ki-missing-title', index: BACKING_INDEX, type: 'policy' },
       ],
@@ -251,7 +333,9 @@ describe('ki_list', () => {
     query.mockReset();
     query.mockResolvedValueOnce(probeResponse(['type', 'title']));
     query
-      .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales']]))
+      .mockResolvedValueOnce(
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales', null, null]])
+      )
       .mockResolvedValueOnce(totalsResponse(1))
       .mockResolvedValueOnce(bucketsResponse([[1, 'dashboard']]));
 
@@ -261,8 +345,9 @@ describe('ki_list', () => {
       [
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = _id',
+        'EVAL updated_at = TO_STRING(NULL)',
         'SORT id ASC',
-        'KEEP _index, id, type, title',
+        'KEEP _index, id, type, title, updated_at',
         'LIMIT 25',
       ].join('\n| ')
     );

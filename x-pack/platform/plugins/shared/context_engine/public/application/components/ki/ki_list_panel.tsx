@@ -59,7 +59,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     () =>
       [{ type: ALL_TYPE_FILTER.value, count: summary.total }, ...summary.countsByType].map(
         ({ type, count }) => ({
-          id: type,
+          value: type,
           label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterType', {
             defaultMessage: '{typeLabel} ({count})',
             values: { typeLabel: getKiListTypeFilterLabel(type), count },
@@ -107,16 +107,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
 
   return (
     <div data-test-subj="contextKiListPanel">
-      <EuiText size="xs" color="subdued" data-test-subj="contextKiListPanelDescription">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.description', {
-            defaultMessage: 'The knowledge your agents retrieve.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
       <KiListHeader
-        total={summary.total}
         destValue={dest.value}
         indexManagementHref={indexManagementHref}
         discoverHref={discoverHref}

@@ -8,17 +8,20 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+
+const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
 const KI_LIST_FIELDS = [
   'id',
   '@timestamp',
+  'updated_at',
   'type',
   'title',
-  'governance.lifecycle.status',
+  KI_LIFECYCLE_STATUS_FIELD,
 ] as const;
 type KiListField = (typeof KI_LIST_FIELDS)[number];
 
@@ -26,6 +29,8 @@ export interface GetKisOptions {
   dest: AiIndexDest;
   size: number;
   type?: string;
+  /** When omitted, non-deleted KIs only (unset status counts as active). */
+  lifecycleStatuses?: KiLifecycleStatus[];
 }
 
 const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
@@ -35,14 +40,45 @@ const toRecords = (response: ESQLSearchResponse): Array<Record<string, unknown>>
     Object.fromEntries(response.columns.map((column, i) => [column.name, row[i]]))
   );
 
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const toKiListItem = (row: Record<string, unknown>): KiListItem => {
-  const { _index: index, id, type, title } = row;
+  const { _index: index, id, type, title, updated_at: updatedAt } = row;
+  const updatedAtValue = toOptionalString(updatedAt);
+  const lifecycleStatus = toOptionalString(row[KI_LIFECYCLE_STATUS_FIELD]);
   return {
     id: String(id),
     index: String(index),
     ...(typeof type === 'string' ? { type } : {}),
     ...(typeof title === 'string' ? { title } : {}),
+    ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
+    ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
   };
+};
+
+const lifecycleStatusClauses: Record<KiLifecycleStatus, readonly string[]> = {
+  active: [`${KI_LIFECYCLE_STATUS_FIELD} IS NULL`, `${KI_LIFECYCLE_STATUS_FIELD} == "active"`],
+  deleted: [`${KI_LIFECYCLE_STATUS_FIELD} == "deleted"`],
+};
+
+const lifecycleFilterClause = (
+  has: (field: KiListField) => boolean,
+  lifecycleStatuses?: KiLifecycleStatus[]
+): string[] => {
+  if (!has(KI_LIFECYCLE_STATUS_FIELD)) {
+    return [];
+  }
+  if (lifecycleStatuses === undefined) {
+    return [
+      `WHERE ${KI_LIFECYCLE_STATUS_FIELD} IS NULL OR ${KI_LIFECYCLE_STATUS_FIELD} != "deleted"`,
+    ];
+  }
+  const parts = lifecycleStatuses.flatMap((status) => lifecycleStatusClauses[status]);
+  if (parts.length === 0) {
+    return ['WHERE FALSE'];
+  }
+  return [`WHERE ${parts.join(' OR ')}`];
 };
 
 /** A dest value may be a comma-separated list of index expressions. */
@@ -75,15 +111,15 @@ const probeColumns = async (
 };
 
 /**
- * One row per KI: the latest revision by `@timestamp` for each logical id,
- * excluding KIs whose lifecycle status is deleted. On an index dest the same
- * id may exist in several backing indices, so those are distinct KIs.
+ * One row per KI: the latest revision by `@timestamp` for each logical id.
+ * On an index dest the same id may exist in several backing indices, so those are distinct KIs.
  * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
 const currentKisQuery = (
   dest: AiIndexDest,
   sources: string[],
-  has: (field: KiListField) => boolean
+  has: (field: KiListField) => boolean,
+  lifecycleStatuses?: KiLifecycleStatus[]
 ): string => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   return [
@@ -98,17 +134,16 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
-    ...(has('governance.lifecycle.status')
-      ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
-      : []),
+    ...lifecycleFilterClause(has, lifecycleStatuses),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
+    ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
   ].join('\n| ');
 };
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type }: GetKisOptions
+  { dest, size, type, lifecycleStatuses }: GetKisOptions
 ): Promise<ListKisResponse> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
@@ -128,15 +163,24 @@ export const getKis = async (
   const base = currentKisQuery(
     dest,
     sources.map(({ expression }) => expression),
-    has
+    has,
+    lifecycleStatuses
   );
   const typeParams = type !== undefined ? { params: [{ type }] } : {};
+  const keepFields = [
+    '_index',
+    'id',
+    'type',
+    'title',
+    'updated_at',
+    ...(has(KI_LIFECYCLE_STATUS_FIELD) ? [KI_LIFECYCLE_STATUS_FIELD] : []),
+  ].join(', ');
 
   const rowsQuery = [
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
     has('@timestamp') ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC',
-    'KEEP _index, id, type, title',
+    `KEEP ${keepFields}`,
     `LIMIT ${size}`,
   ].join('\n| ');
   // Exact counts, independent of how many type buckets exist.
@@ -151,7 +195,6 @@ export const getKis = async (
     'WHERE type IS NOT NULL',
     'STATS count = COUNT(*) BY type',
     'SORT count DESC, type ASC',
-    `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
   ].join('\n| ');
 
   const [rows, totals, buckets] = await Promise.all([
@@ -163,12 +206,10 @@ export const getKis = async (
   const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);
   const totalAll = Number(totalRow?.total ?? 0);
   const total = type === undefined ? totalAll : Number(totalRow?.filtered ?? 0);
-  const countsByType = takeTopKiTypeCounts(
-    toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
-      type: String(row.type),
-      count: Number(row.count),
-    }))
-  );
+  const countsByType = toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
+    type: String(row.type),
+    count: Number(row.count),
+  }));
 
   return {
     kis: rows ? toRecords(rows as unknown as ESQLSearchResponse).map(toKiListItem) : [],
