@@ -161,7 +161,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
   const ecfInstances = useMemo(() => {
     const stored = serviceSettings?.instances;
-    if (stored && stored.length > 0) return stored;
+    // Filter against selectedServiceIds: Step 2 reconciles on mount but may not be mounted here,
+    // so raw session storage can still contain instances for services removed in Step 1.
+    const valid = stored?.filter((inst) => selectedServiceIds.includes(inst.serviceId));
+    if (valid && valid.length > 0) return valid;
     return selectedServiceIds.flatMap((id) => {
       const service = awsServicesMap?.get(id);
       if (!service?.showInUI) return [];
