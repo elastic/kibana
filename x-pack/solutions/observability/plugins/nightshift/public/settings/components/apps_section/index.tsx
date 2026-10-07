@@ -36,12 +36,6 @@ interface AppsSectionProps {
   canEdit: boolean;
 }
 
-/**
- * "Apps" section under Significant Events settings. Surfaces the Elastic
- * Slack App connect/disconnect flow for a single workspace.
- * Only rendered by the caller (`tab.tsx`) when the
- * `streams.significantEventsAppsEnabled` feature flag is on.
- */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const {
     isLoading,
