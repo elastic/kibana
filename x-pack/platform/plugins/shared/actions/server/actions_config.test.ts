@@ -33,6 +33,7 @@ const defaultActionsConfig: ActionsConfig = {
   preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
   maxResponseContentLength: new ByteSizeValue(1000000),
+  maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
   responseTimeout: moment.duration(60000),
   ssl: {
     proxyVerificationMode: 'full',
@@ -305,6 +306,16 @@ describe('getResponseSettingsFromConfig', () => {
       timeout: 60000,
       maxContentLength: 1000000,
     });
+  });
+});
+
+describe('getMaxPayloadBytes', () => {
+  test('returns the configured maxPayloadSize in bytes', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      maxPayloadSize: new ByteSizeValue(5 * 1024 * 1024),
+    };
+    expect(getActionsConfigurationUtilities(config).getMaxPayloadBytes()).toBe(5 * 1024 * 1024);
   });
 });
 

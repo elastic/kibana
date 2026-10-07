@@ -17,6 +17,8 @@ const fetchOptionsSchema = z4
   .strict()
   .optional();
 
+type FetchOptions = z4.infer<typeof fetchOptionsSchema>;
+
 export const generateParamsSchema = (
   actions: ConnectorSpec['actions']
 ): ValidatorType<ActionTypeParams> => {
@@ -40,5 +42,22 @@ export const generateParamsSchema = (
       actionParamSchemas[0],
       ...actionParamSchemas.slice(1),
     ]),
+    customValidator: ({ subActionParams, fetchOptions }, { configurationUtilities }) => {
+      const maxBytes = configurationUtilities.getMaxPayloadBytes();
+
+      const maxContentLength = (fetchOptions as FetchOptions | undefined)?.max_content_length;
+      if (maxContentLength !== undefined && maxContentLength > maxBytes) {
+        throw new Error(
+          `fetchOptions.max_content_length is ${maxContentLength} bytes, which exceeds xpack.actions.maxPayloadSize (${maxBytes} bytes)`
+        );
+      }
+
+      const size = Buffer.byteLength(JSON.stringify(subActionParams ?? null), 'utf8');
+      if (size > maxBytes) {
+        throw new Error(
+          `subActionParams is ${size} bytes, which exceeds xpack.actions.maxPayloadSize (${maxBytes} bytes)`
+        );
+      }
+    },
   };
 };

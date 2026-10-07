@@ -153,6 +153,7 @@ export interface ActionsConfigurationUtilities {
   isInboundEventsEnabled: () => boolean;
   getInboundEventsMaxBodyBytes: () => number;
   getInboundEventsMaxEmitted: () => number;
+  getMaxPayloadBytes: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -379,5 +380,6 @@ export function getActionsConfigurationUtilities(
     isInboundEventsEnabled: () => config.inboundEvents.enabled,
     getInboundEventsMaxBodyBytes: () => config.inboundEvents.maxBodyBytes.getValueInBytes(),
     getInboundEventsMaxEmitted: () => config.inboundEvents.maxEmitted,
+    getMaxPayloadBytes: () => config.maxPayloadSize.getValueInBytes(),
   };
 }
