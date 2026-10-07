@@ -1474,7 +1474,7 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact is the one other attachment, and it is bookkeeping, not evidence. Reads and
-      // the verdict refresh write no new attachment.
+      // the verdict refresh write no new attachment, nor do investigation metadata updates.
       it('writes no other attachment than the Impact', () => {
         const evidenceSteps = ['ai.attachment.add', 'ai.attachment.read', 'ai.attachment.update'];
 
@@ -1483,7 +1483,7 @@ describe('Attack Discovery worker chain', () => {
             .filter(
               (step) =>
                 (step.type.startsWith('ai.attachment.') ||
-                  step.type.startsWith('investigations.')) &&
+                  step.type.startsWith('investigations.attach')) &&
                 !evidenceSteps.includes(step.type)
             )
             .map((step) => step.type)
