@@ -19,7 +19,7 @@ spec:
       description: Kibana validation and testing beyond merging to `main`
     spec:
       env:
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: false

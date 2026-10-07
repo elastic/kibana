@@ -112,7 +112,7 @@ const runPreBuildScript = (overrides: Record<string, string> = {}) => {
     ...process.env,
     PATH: `${binDir}:${process.env.PATH ?? ''}`,
     CALLS_FILE: callsFile,
-    KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
+    ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
     // Neutralize ambient vars that CI injects (e.g. ES_SNAPSHOT_MANIFEST) and that alter
     // pre_build.sh's control flow. Without this the manifest-resolution branch is skipped on
     // CI but taken locally, so tests pass locally and fail on CI. Each test sets what it needs

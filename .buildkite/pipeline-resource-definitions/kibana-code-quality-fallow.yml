@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         FALLOW_SAVE_SNAPSHOT: 'true'
       schedules:
         Weekly code quality:

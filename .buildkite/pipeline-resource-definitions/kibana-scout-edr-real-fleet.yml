@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#security-defend-workflows-tests'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
