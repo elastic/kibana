@@ -48,7 +48,6 @@ import {
   useGraphDisplayOptions,
   useNodeDisplayOverrides,
   type GraphDisplayOptions,
-  type NodeDisplayOverrides,
 } from '../graph/graph_display_options_context';
 import { LayersPanel } from '../controls/layers_panel';
 
@@ -824,7 +823,7 @@ interface ToolbarButtonRowProps {
   /** When provided, renders a Layers button at the end of the toolbar with a per-node LayersPanel. */
   nodeLayersButton?: {
     displayOptions: GraphDisplayOptions;
-    onChange: (opts: NodeDisplayOverrides) => void;
+    onChange: (opts: GraphDisplayOptions) => void;
   };
 }
 
@@ -900,9 +899,7 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
         >
           <LayersPanel
             displayOptions={nodeLayersButton.displayOptions}
-            onChange={(opts) =>
-              nodeLayersButton.onChange({ entity: opts.entity, event: opts.event })
-            }
+            onChange={nodeLayersButton.onChange}
             showEventMetadata={false}
           />
         </EuiPopover>
