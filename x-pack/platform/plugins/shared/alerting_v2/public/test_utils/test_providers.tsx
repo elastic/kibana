@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import {
   LocatorProvider,
   type AlertingV2Locators,
@@ -54,14 +54,14 @@ export function MockLocatorProvider({
   return <LocatorProvider locators={locators}>{children}</LocatorProvider>;
 }
 
-export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
+export const createDefaultServicesMock = (): AlertsKibanaServices => {
   return {
     ...coreMock.createStart(),
     data: dataPluginMock.createStartContract(),
     share: sharePluginMock.createStartContract(),
     expressions: {} as unknown,
     rendering: {} as unknown,
-  } as unknown as AlertEpisodesKibanaServices;
+  } as unknown as AlertsKibanaServices;
 };
 
 export const createTestQueryClient = () =>
@@ -90,7 +90,7 @@ export const createHookTestProviders = ({
 };
 
 export type TestProvidersProps = PropsWithChildren<{
-  services?: AlertEpisodesKibanaServices;
+  services?: AlertsKibanaServices;
   queryClient?: QueryClient;
   locators?: AlertingV2Locators;
 }>;
