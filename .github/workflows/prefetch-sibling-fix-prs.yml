@@ -1,22 +1,22 @@
-name: Prefetch flaky-test fix candidates
+name: Prefetch sibling fix PRs
 
-# Shortlist other flaky-test-fixer PRs that may fix the same failure.
+# Shortlist sibling flaky-test-fixer PRs (same owning team) that may fix the same failure.
 # The flaky fix verifier checks their diffs to confirm whether the fixes overlap.
 
 on:
   workflow_call:
     inputs:
       pr_number:
-        description: flaky-test-fixer PR to find potential duplicate fixes for.
+        description: flaky-test-fixer PR to find sibling fix PRs for.
         required: true
         type: string
       artifact_name:
-        description: Artifact name for the potential duplicate flaky-test fixes.
+        description: Artifact name for the sibling fix PRs.
         required: true
         type: string
 
 jobs:
-  prefetch_flaky_test_fix_candidates:
+  prefetch_sibling_fix_prs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,7 +29,7 @@ jobs:
           ref: main
           persist-credentials: false
 
-      - name: Find potential duplicate flaky-test fix PRs
+      - name: Find sibling fix PRs
         # Non-fatal: a lookup failure must not block verification. No file is written, and the
         # verifier treats a missing file as "no candidates".
         env:
@@ -43,16 +43,16 @@ jobs:
                 github,
                 core,
                 prNumber: Number(process.env.PR_NUMBER),
-                outputDir: '/tmp/flaky-test-fix-candidates',
+                outputDir: '/tmp/sibling-fix-prs',
               });
             } catch (err) {
               core.warning(`Duplicate detection failed: ${err.message}`);
             }
 
-      - name: Upload potential duplicate flaky-test fixes
+      - name: Upload sibling fix PRs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ inputs.artifact_name }}
-          path: /tmp/flaky-test-fix-candidates/duplicate-candidates.json
+          path: /tmp/sibling-fix-prs/duplicate-candidates.json
           if-no-files-found: ignore
           retention-days: 1

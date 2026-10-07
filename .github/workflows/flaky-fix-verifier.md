@@ -18,7 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
-  - prefetch-flaky-test-fix-candidates.yml
+  - prefetch-sibling-fix-prs.yml
 
 permissions:
   contents: read
@@ -78,7 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
-  FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME: &flaky_test_fix_candidates_artifact_name flaky-test-fix-candidates-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  SIBLING_FIX_PRS_ARTIFACT_NAME: &sibling_fix_prs_artifact_name sibling-fix-prs-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -139,15 +139,15 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
-  prefetch_flaky_test_fix_candidates:
+  prefetch_sibling_fix_prs:
     permissions:
       contents: read
       issues: read
       pull-requests: read
-    uses: ./.github/workflows/prefetch-flaky-test-fix-candidates.yml
+    uses: ./.github/workflows/prefetch-sibling-fix-prs.yml
     with:
       pr_number: *pr_number
-      artifact_name: *flaky_test_fix_candidates_artifact_name
+      artifact_name: *sibling_fix_prs_artifact_name
 
 steps:
   - name: Download prefetched PR context
@@ -155,12 +155,12 @@ steps:
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
-  - name: Download potential duplicate flaky-test-fixer PRs
+  - name: Download sibling fix PRs
     # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
     continue-on-error: true
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
-      name: ${{ env.FLAKY_TEST_FIX_CANDIDATES_ARTIFACT_NAME }}
+      name: ${{ env.SIBLING_FIX_PRS_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
