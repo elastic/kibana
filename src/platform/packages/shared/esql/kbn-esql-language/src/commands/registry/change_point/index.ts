@@ -26,6 +26,7 @@ export const changePointCommand: ICommand = {
   name: Commands.CHANGE_POINT,
   methods: changePointCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.changePointDoc', {
       defaultMessage: 'Detect change point in the query results',

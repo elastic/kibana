@@ -27,6 +27,7 @@ export const highlightCommand: ICommand = {
   name: Commands.HIGHLIGHT,
   methods: highlightCommandMethods,
   metadata: {
+    docPreserving: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.highlightDoc', {
       defaultMessage:
         'Highlights matching terms in text fields and returns the highlighted content as a new column.',
