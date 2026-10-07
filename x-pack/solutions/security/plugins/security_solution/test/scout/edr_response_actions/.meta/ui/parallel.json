@@ -1,5 +1,5 @@
 {
-  "sha1": "cad083d37dffe3f50d01bfa029a8c265e2020f44",
+  "sha1": "320fc9571cb547bd9bd4ed49a7e74c874fb6c208",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -74,6 +74,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/history_log.spec.ts",
         "line": 47,
         "column": 7
+      }
+    },
+    {
+      "id": "18ecf87397f6650-e3c2619ee71c56e",
+      "title": "Isolate a host from an alert shows the host as isolated and clears that status after release",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_alert.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "b0dffb06abbb800-0ad39475aa1614d",
+      "title": "Isolate a host from a case adds the isolate and release comments to the case activity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
+        "line": 64,
+        "column": 31
       }
     }
   ]
