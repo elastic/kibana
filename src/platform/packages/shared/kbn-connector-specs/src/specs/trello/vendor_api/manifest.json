@@ -31,6 +31,17 @@
     "getCardComments": [
       {
         "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "firstPage": 0,
+            "pageParam": "page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
         "path": "/cards/{id}/actions",
         "source": "v3"
       }
@@ -52,6 +63,7 @@
     "listBoardLists": [
       {
         "method": "get",
+        "pagination": "none",
         "path": "/boards/{id}/lists",
         "source": "v3"
       }
@@ -66,6 +78,7 @@
     "listBoards": [
       {
         "method": "get",
+        "pagination": "none",
         "path": "/members/{id}/boards",
         "source": "v3"
       }
@@ -73,6 +86,7 @@
     "listListCards": [
       {
         "method": "get",
+        "pagination": "none",
         "path": "/lists/{id}/cards",
         "source": "v3"
       }
@@ -80,6 +94,7 @@
     "search": [
       {
         "method": "get",
+        "pagination": "none",
         "path": "/search",
         "source": "v3"
       }

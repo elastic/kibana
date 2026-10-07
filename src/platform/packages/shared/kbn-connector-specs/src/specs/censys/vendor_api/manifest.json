@@ -10,6 +10,18 @@
     "censEyeJobResult": [
       {
         "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "result.results",
+            "nextPath": "result.next_page_token"
+          },
+          "style": "cursor"
+        },
         "path": "/v3/threat-hunting/censeye/jobs/{job_id}/results",
         "source": "platform"
       }
