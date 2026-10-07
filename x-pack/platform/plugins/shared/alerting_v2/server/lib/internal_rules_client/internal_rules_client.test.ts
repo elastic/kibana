@@ -22,6 +22,7 @@ import { createLoggerService } from '../services/logger_service/logger_service.m
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { createRuleSoAttributes } from '../test_utils';
 import { InternalRulesClient } from './internal_rules_client';
+import { InternalRulesClientProvider } from './internal_rules_client_provider';
 
 const foundRule = (id: string, namespaces?: string[]): RulesFindAllResultItem => ({
   id,
@@ -89,13 +90,8 @@ const setup = (
   };
 
   const { loggerService, mockLogger } = createLoggerService();
-  const client = new InternalRulesClient(
-    injection,
-    savedObjects,
-    spaces,
-    rulesSavedObjectService,
-    loggerService
-  );
+  const provider = new InternalRulesClientProvider(injection, savedObjects, spaces, loggerService);
+  const client = new InternalRulesClient(provider, rulesSavedObjectService);
   return {
     client,
     mockLogger,

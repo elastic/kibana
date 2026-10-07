@@ -6,3 +6,4 @@
  */
 
 export { InternalRulesClient } from './internal_rules_client';
+export { InternalRulesClientProvider } from './internal_rules_client_provider';

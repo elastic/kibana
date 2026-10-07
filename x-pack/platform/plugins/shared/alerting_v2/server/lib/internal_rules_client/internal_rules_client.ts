@@ -6,34 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import { PluginStart, type CoreDiServiceStart } from '@kbn/core-di';
-import { Global } from '@kbn/core-di-internal';
 import { MAX_BULK_ITEMS, entityIdSchema } from '@kbn/alerting-v2-schemas';
 import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { AlertingServerStartDependencies, InternalRulesClientApi } from '../../types';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
-import { EventOriginToken } from '../event_origin/token';
+import type { InternalRulesClientApi } from '../../types';
 import type { BulkByIdsParams, BulkResponse } from '../rules_client';
-import { RulesClient } from '../rules_client';
 import { toBulkError } from '../rules_client/utils';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import {
-  RuleSavedObjectsClientToken,
-  RulesSavedObjectServiceInternalToken,
-} from '../services/rules_saved_object_service/tokens';
-import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
-import { savedObjectNamespacesToSpaceId, spaceIdToNamespace } from '../space_id_to_namespace';
-import { createInternalUserRequest } from './internal_user_request';
+import { RulesSavedObjectServiceInternalToken } from '../services/rules_saved_object_service/tokens';
+import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
+import { InternalRulesClientProvider } from './internal_rules_client_provider';
 
 /**
  * Rules client for system work with no user request. It only disables rules.
@@ -44,24 +27,12 @@ import { createInternalUserRequest } from './internal_user_request';
  */
 @injectable()
 export class InternalRulesClient implements InternalRulesClientApi {
-  private readonly internalSavedObjectsClient: SavedObjectsClientContract;
-  private readonly logger: LoggerServiceContract;
-
   constructor(
-    @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
-    @inject(CoreStart('savedObjects')) savedObjects: SavedObjectsServiceStart,
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: SpacesPluginStart,
+    @inject(InternalRulesClientProvider) private readonly provider: InternalRulesClientProvider,
     /** Must search every namespace, i.e. be backed by an internal repository. */
     @inject(RulesSavedObjectServiceInternalToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.internalSavedObjectsClient = savedObjects.getUnsafeInternalClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
-    this.logger = loggerService.forSubsystem('rulesClient');
-  }
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
+  ) {}
 
   public async bulkDisableRules({ ids }: BulkByIdsParams): Promise<BulkResponse> {
     const uniqueIds = [...new Set(ids)];
@@ -93,7 +64,7 @@ export class InternalRulesClient implements InternalRulesClientApi {
     const errors: BulkResponse['errors'] = [];
     for (const [spaceId, spaceRuleIds] of idsBySpace) {
       try {
-        const response = await this.withRulesClientInSpace(spaceId, (client) =>
+        const response = await this.provider.withRulesClientInSpace(spaceId, (client) =>
           client.bulkDisableRules({ ids: spaceRuleIds })
         );
         affectedCount += response.affected_count;
@@ -119,45 +90,5 @@ export class InternalRulesClient implements InternalRulesClientApi {
     }
 
     return { affected_count: affectedCount, errors };
-  }
-
-  /**
-   * Lends the regular rules client of a space, running as the internal user: a credential-less
-   * request bound to the space and a rules saved objects client that is not tied to a user.
-   * The scope is released once `fn` settles, so the client must not be used after it.
-   */
-  private async withRulesClientInSpace<T>(
-    spaceId: SpaceId,
-    fn: (client: RulesClient) => Promise<T>
-  ): Promise<T> {
-    const scope = this.injection.fork();
-    try {
-      scope.bind(Request).toConstantValue(createInternalUserRequest(spaceId));
-      scope.bind(Global).toConstantValue(Request);
-      scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
-      scope.bind(Global).toConstantValue(RequestSpaceIdToken);
-      scope.bind(EventOriginToken).toConstantValue('internal');
-      scope.bind(Global).toConstantValue(EventOriginToken);
-
-      const namespace = spaceIdToNamespace(this.spaces, spaceId);
-      scope
-        .bind(RuleSavedObjectsClientToken)
-        .toConstantValue(
-          namespace
-            ? this.internalSavedObjectsClient.asScopedToNamespace(namespace)
-            : this.internalSavedObjectsClient
-        );
-
-      return await fn(scope.get(RulesClient));
-    } finally {
-      // A failed release must not fail a disable that already succeeded.
-      await scope.unbindAllAsync().catch((error) => {
-        this.logger.warn({
-          message: () => `Failed to release the internal rules client scope for space ${spaceId}`,
-          error,
-          code: ALERTING_LOG_CODES.INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED,
-        });
-      });
-    }
   }
 }
