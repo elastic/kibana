@@ -26,11 +26,14 @@ async function getFileContent(path: string, ref: string) {
     ref,
   });
 
-  if (Array.isArray(response.data) || response.data.type !== 'file') {
+  if (
+    Array.isArray(response.data) ||
+    response.data.type !== 'file' ||
+    !('content' in response.data)
+  ) {
     throw new Error(`Expected file at ${path}`);
   }
 
-  // @ts-ignore ts-node doesn't infer the type of response.data.content
   const content = Buffer.from(response.data.content, 'base64').toString('utf8');
 
   return JSON.parse(content);
@@ -71,8 +74,8 @@ async function main() {
     return;
   }
 
-  const packageJsonPath = Path.join(__dirname, '../../../../package.json');
-  const thirdPartyPackagesPath = Path.join(__dirname, './third_party_packages.txt');
+  const packageJsonPath = Path.join(import.meta.dirname, '../../../../package.json');
+  const thirdPartyPackagesPath = Path.join(import.meta.dirname, 'third_party_packages.txt');
 
   const diffOutput = execSync(
     `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD -- ${packageJsonPath} ${thirdPartyPackagesPath}`
