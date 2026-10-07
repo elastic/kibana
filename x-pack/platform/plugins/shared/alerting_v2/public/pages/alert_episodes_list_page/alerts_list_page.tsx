@@ -67,7 +67,7 @@ import { experimentalBadge } from '../../components/experimental_badge';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
@@ -78,17 +78,17 @@ import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
-import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
 import {
-  filterEpisodeActionsByPrivilege,
-  EPISODE_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_episode_actions_by_privilege';
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_alert_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
-const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
+const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'manageRules',
     label: i18n.EPISODES_LIST_MANAGE_RULES,
@@ -166,29 +166,29 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export interface AlertEpisodesListPageProps {
+export interface AlertsListPageProps {
   dataSource?: EpisodeDataSource;
 }
 
-export const AlertEpisodesListPage = ({
-  dataSource = CLASSIC_EPISODES_DATA_SOURCE,
-}: AlertEpisodesListPageProps = {}) => {
+export const AlertsListPage = ({
+  dataSource = CLASSIC_ALERTS_DATA_SOURCE,
+}: AlertsListPageProps = {}) => {
   const queryV2Source = useService(UserCapabilities).canRead('alerts');
   return (
     <EpisodeDataSourceProvider dataSource={dataSource} queryV2Source={queryV2Source}>
-      <AlertEpisodesListPageContent />
+      <AlertsListPageContent />
     </EpisodeDataSourceProvider>
   );
 };
 
-const AlertEpisodesListPageContent = () => {
-  const services = useKibana<AlertEpisodesKibanaServices>().services;
+const AlertsListPageContent = () => {
+  const services = useKibana<AlertsKibanaServices>().services;
   const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const additionalDataSource = useAdditionalEpisodesDataSource();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? EPISODE_ACTIONS_PRIVILEGE.all
-    : EPISODE_ACTIONS_PRIVILEGE.read;
+    ? ALERT_ACTIONS_PRIVILEGE.all
+    : ALERT_ACTIONS_PRIVILEGE.read;
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -387,7 +387,7 @@ const AlertEpisodesListPageContent = () => {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterEpisodeActionsByPrivilege(
+      filterAlertActionsByPrivilege(
         createEpisodeActions({
           http: services.http,
           overlays: services.overlays,
@@ -402,14 +402,14 @@ const AlertEpisodesListPageContent = () => {
           additionalDataSource,
           isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-            getDiscoverHrefForRuleAndEpisodeTimestamp({
+            getDiscoverHrefForRuleAndAlertTimestamp({
               share: services.share,
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
               ruleEsql: rulesCache[ruleId]?.query
                 ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
                 : undefined,
-              episodeIsoTimestamp,
+              alertIsoTimestamp: episodeIsoTimestamp,
             }),
         }),
         alertsCapability
@@ -589,7 +589,7 @@ const AlertEpisodesListPageContent = () => {
     ]
   );
 
-  const episodesMenu = useMemo(() => getEpisodesListMenu({ manageRulesHref }), [manageRulesHref]);
+  const alertsMenu = useMemo(() => getAlertsListMenu({ manageRulesHref }), [manageRulesHref]);
 
   return (
     <div
@@ -607,7 +607,7 @@ const AlertEpisodesListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         badges={[experimentalBadge]}
         spacing="bleed"
-        menu={episodesMenu}
+        menu={alertsMenu}
       />
       <EuiSpacer size="m" />
 

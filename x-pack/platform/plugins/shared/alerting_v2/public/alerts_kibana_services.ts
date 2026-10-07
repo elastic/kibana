@@ -19,10 +19,10 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /**
- * Kibana context services for the Alert episodes management UI
+ * Kibana context services for the alerts management UI
  * (`mountEpisodesApp` + `KibanaContextProvider`).
  */
-export type AlertEpisodesKibanaServices = CoreStart & {
+export type AlertsKibanaServices = CoreStart & {
   share: SharePluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

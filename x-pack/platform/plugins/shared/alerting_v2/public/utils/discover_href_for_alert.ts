@@ -16,7 +16,7 @@ import moment from 'moment';
 export const DISCOVER_CONTEXT_HALF_WINDOW_MINUTES = 15;
 
 /**
- * Absolute ISO time range centered on an episode / alert timestamp for opening Discover.
+ * Absolute ISO time range centered on an alert timestamp for opening Discover.
  */
 export function getDiscoverTimeRangeAroundTimestamp(
   isoTimestamp: string | undefined
@@ -65,22 +65,22 @@ export function getDiscoverHrefForRuleQuery({
 }
 
 /**
- * Discover URL for a rule’s ES|QL in a ±30m window around an episode row timestamp.
+ * Discover URL for a rule’s ES|QL in a ±30m window around an alert row timestamp.
  */
-export function getDiscoverHrefForRuleAndEpisodeTimestamp({
+export function getDiscoverHrefForRuleAndAlertTimestamp({
   share,
   capabilities,
   uiSettings,
   ruleEsql,
-  episodeIsoTimestamp,
+  alertIsoTimestamp,
 }: {
   share: SharePluginStart;
   capabilities: Capabilities;
   uiSettings: IUiSettingsClient;
   ruleEsql: string | undefined;
-  episodeIsoTimestamp: string | undefined;
+  alertIsoTimestamp: string | undefined;
 }): string | undefined {
-  const timeRange = getDiscoverTimeRangeAroundTimestamp(episodeIsoTimestamp);
+  const timeRange = getDiscoverTimeRangeAroundTimestamp(alertIsoTimestamp);
   if (!timeRange) {
     return undefined;
   }

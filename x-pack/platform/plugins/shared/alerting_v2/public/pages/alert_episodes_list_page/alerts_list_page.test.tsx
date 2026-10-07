@@ -11,7 +11,7 @@ import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
-import { AlertEpisodesListPage } from './alert_episodes_list_page';
+import { AlertsListPage } from './alerts_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
@@ -234,12 +234,12 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 const renderPage = () => {
   return render(
     <ListPageTestProviders locators={mockLocators}>
-      <AlertEpisodesListPage />
+      <AlertsListPage />
     </ListPageTestProviders>
   );
 };
 
-describe('AlertEpisodesListPage', () => {
+describe('AlertsListPage', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
@@ -258,7 +258,7 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alert episodes');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
@@ -520,7 +520,7 @@ describe('episode count + reset filters toolbar', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
+    expect(node.textContent).toMatch(/^Showing\s+3\s+alerts$/);
   });
 
   it('uses the loaded row count even when it differs from a larger filter total', async () => {
@@ -528,7 +528,7 @@ describe('episode count + reset filters toolbar', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node).toHaveTextContent('Showing 3 episodes');
+    expect(node).toHaveTextContent('Showing 3 alerts');
     expect(node).not.toHaveTextContent('Showing first');
   });
 
@@ -549,7 +549,7 @@ describe('episode count + reset filters toolbar', () => {
     });
 
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+episodes$/);
+    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+alerts$/);
     expect(node).toHaveAttribute('tabindex', '0');
   });
 
@@ -733,7 +733,7 @@ const classicEpisodes = [
   },
 ];
 
-describe('AlertEpisodesListPage fetch errors', () => {
+describe('AlertsListPage fetch errors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
@@ -754,14 +754,12 @@ describe('AlertEpisodesListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alert episodes for v1 alerts' })
+        expect.objectContaining({ title: 'Failed to fetch alerts for v1 alerts' })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Failed to fetch alert episodes for v1 alerts')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Failed to fetch alerts for v1 alerts')).not.toBeInTheDocument();
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
@@ -791,7 +789,7 @@ describe('AlertEpisodesListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alert episodes for v2 alerts' })
+        expect.objectContaining({ title: 'Failed to fetch alerts for v2 alerts' })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
@@ -821,7 +819,7 @@ describe('manageRulesHref override', () => {
     render(
       <ManageRulesHrefProvider value={overrideHref}>
         <ListPageTestProviders locators={mockLocators}>
-          <AlertEpisodesListPage />
+          <AlertsListPage />
         </ListPageTestProviders>
       </ManageRulesHrefProvider>
     );
@@ -833,7 +831,7 @@ describe('manageRulesHref override', () => {
   it('falls back to the locator href when no override is provided', async () => {
     render(
       <ListPageTestProviders locators={mockLocators}>
-        <AlertEpisodesListPage />
+        <AlertsListPage />
       </ListPageTestProviders>
     );
 

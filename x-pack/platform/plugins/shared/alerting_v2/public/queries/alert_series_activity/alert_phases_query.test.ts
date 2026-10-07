@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { buildEpisodePhasesQuery } from './episode_phases_query';
+import { buildAlertPhasesQuery } from './alert_phases_query';
 
 const RULE_ID = 'rule-abc';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
 const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
-describe('buildEpisodePhasesQuery', () => {
-  const queryString = buildEpisodePhasesQuery({
+describe('buildAlertPhasesQuery', () => {
+  const queryString = buildAlertPhasesQuery({
     ruleId: RULE_ID,
     windowStartMs: WINDOW_START_MS,
     windowEndMs: WINDOW_END_MS,
-    episodeIds: ['ep-1', 'ep-2'],
+    alertIds: ['ep-1', 'ep-2'],
   }).print('basic');
 
   it('scopes to alert type, rule, lookback window and the given episodes', () => {
