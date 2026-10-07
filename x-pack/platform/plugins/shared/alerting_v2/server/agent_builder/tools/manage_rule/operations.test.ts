@@ -743,7 +743,7 @@ describe('executeRuleOperations', () => {
       expect(result.warnings?.[0]).toContain('"@timestamp" was auto-selected');
     });
 
-    it('does not warn when the existing time_field is on the new index', async () => {
+    it('keeps a non-default time_field on an index with multiple date fields without warning', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [{ name: 'value', type: 'long' }],
