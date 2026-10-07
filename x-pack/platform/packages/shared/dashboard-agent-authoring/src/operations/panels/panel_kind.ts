@@ -54,6 +54,26 @@ interface RequestPanelKindDefinition<
   readonly renderer: TRenderer;
 }
 
+/** A defined by-value panel kind, as listed in the registry. */
+export type ConfigPanelKind<
+  TType extends string,
+  TAddShape extends z.ZodRawShape,
+  TEdit extends z.ZodObject
+> = ConfigPanelKindDefinition<TType, TAddShape, TEdit> & {
+  readonly source: 'config';
+  readonly addPanelsInputSchema: ReturnType<typeof withSectionId<TAddShape>>;
+};
+
+/** A defined server-generated panel kind, as listed in the registry. */
+export type RequestPanelKind<
+  TRenderer extends string,
+  TAddShape extends z.ZodRawShape,
+  TEdit extends z.ZodObject
+> = RequestPanelKindDefinition<TRenderer, TAddShape, TEdit> & {
+  readonly source: 'request';
+  readonly addPanelsInputSchema: ReturnType<typeof withSectionId<TAddShape>>;
+};
+
 /**
  * Defines a by-value panel kind. Its module is the only place the kind is described; the registry
  * in `panels/index.ts` derives the operation schemas and lookups from it.
@@ -64,9 +84,9 @@ export const defineConfigPanelKind = <
   TEdit extends z.ZodObject
 >(
   kind: ConfigPanelKindDefinition<TType, TAddShape, TEdit>
-) => ({
+): ConfigPanelKind<TType, TAddShape, TEdit> => ({
   ...kind,
-  source: 'config' as const,
+  source: 'config',
   addPanelsInputSchema: withSectionId(kind.addInputSchema),
 });
 
@@ -80,8 +100,8 @@ export const defineRequestPanelKind = <
   TEdit extends z.ZodObject
 >(
   kind: RequestPanelKindDefinition<TRenderer, TAddShape, TEdit>
-) => ({
+): RequestPanelKind<TRenderer, TAddShape, TEdit> => ({
   ...kind,
-  source: 'request' as const,
+  source: 'request',
   addPanelsInputSchema: withSectionId(kind.addInputSchema),
 });
