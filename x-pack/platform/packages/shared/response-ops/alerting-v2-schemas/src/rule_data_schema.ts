@@ -834,8 +834,7 @@ export const ruleResponseSchema = createRuleDataBaseSchema
           .optional()
           .describe('The rule template this rule was created from.'),
       })
-      .describe('Rule metadata.')
-      .meta({ id: 'alerting_rule_response_metadata' }),
+      .describe('Rule metadata.'),
     // `null` clears the field on write; the server stores that as absent, so a
     // response never carries it.
     state_transition: stateTransitionSchema.optional(),

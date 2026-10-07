@@ -119,7 +119,6 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [stateTransitionSchema, 'alerting_rule_state_transition'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
-  [ruleResponseSchema.shape.metadata, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],
