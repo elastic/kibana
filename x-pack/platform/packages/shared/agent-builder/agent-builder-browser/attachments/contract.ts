@@ -270,6 +270,8 @@ export interface CreateAttachmentArgs {
   origin?: string;
   description?: string;
   hidden?: boolean;
+  // POC: show the attachment in the chat timeline (pdf added before the message)
+  render_inline?: boolean;
 }
 
 /**

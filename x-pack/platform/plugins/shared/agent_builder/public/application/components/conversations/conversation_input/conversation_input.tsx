@@ -7,8 +7,11 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiText,
   euiCanAnimate,
   euiShadow,
@@ -23,6 +26,7 @@ import {
   ConversationInputShell,
   formatAgentBuilderErrorMessage,
 } from '@kbn/agent-builder-browser';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
@@ -47,6 +51,7 @@ import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 import { useImageUpload } from './use_image_upload';
+import { usePdfAttachments } from './use_pdf_attachments';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -303,16 +308,26 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
-  const {
-    uploadingNames,
-    isUploadingPdf,
-    handlePasteFile,
-    handleAfterInput,
-    handleRemoveAttachment,
-  } = useImageUpload({
-    addErrorToast,
-    messageEditorController,
-  });
+  const { readingJobs, pendingPdfs, addPdf, removePdf, cancelReading } = usePdfAttachments();
+  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
+    useImageUpload({
+      addErrorToast,
+      messageEditorController,
+      addPdf,
+    });
+
+  const handleRemoveAnyAttachment = useCallback(
+    (attachment: ConversationAttachment) => {
+      const pendingPdf =
+        !('items' in attachment) && pendingPdfs.find(({ id }) => id === attachment.id);
+      if (pendingPdf) {
+        removePdf(pendingPdf.id);
+        return;
+      }
+      handleRemoveAttachment?.(attachment);
+    },
+    [pendingPdfs, removePdf, handleRemoveAttachment]
+  );
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -328,7 +343,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     !isAgentIdValid ||
     isAwaitingPrompt ||
     uploadingNames.size > 0 ||
-    isUploadingPdf;
+    readingJobs.length > 0;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -343,12 +358,21 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
   const visibleAttachments = useMemo(() => {
-    if (!attachments || shouldHideAttachments) return [];
-    return attachments.filter((attachment) => {
+    if (shouldHideAttachments) return [];
+    // POC: PDFs live in the conversation, not in the input state. Show the ones not sent yet.
+    const pdfPills = pendingPdfs.map(
+      ({ id, type, versions }): ConversationAttachment => ({
+        id,
+        type,
+        data: { name: (versions[versions.length - 1]?.data as { name?: string })?.name },
+      })
+    );
+    const inputAttachments = (attachments ?? []).filter((attachment) => {
       if ('items' in attachment) return true; // AttachmentGroup — always visible
       return !attachment.hidden;
     });
-  }, [attachments, shouldHideAttachments]);
+    return [...inputAttachments, ...pdfPills];
+  }, [attachments, pendingPdfs, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
@@ -482,13 +506,34 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
     >
+      {readingJobs.length > 0 && (
+        <EuiFlexItem grow={false}>
+          {/* POC: plain badge, no i18n */}
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            {readingJobs.map((job) => (
+              <EuiFlexItem key={job.key} grow={false}>
+                <EuiBadge
+                  color="hollow"
+                  iconType="cross"
+                  iconSide="right"
+                  iconOnClick={() => cancelReading(job)}
+                  iconOnClickAriaLabel="Remove PDF"
+                  data-test-subj="agentBuilderReadingPdfPill"
+                >
+                  <EuiLoadingSpinner size="s" /> Reading PDF... {job.name}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
             removable
-            onRemoveAttachment={handleRemoveAttachment}
+            onRemoveAttachment={handleRemoveAnyAttachment}
             hoveredImageName={hoveredImageName}
           />
         </EuiFlexItem>

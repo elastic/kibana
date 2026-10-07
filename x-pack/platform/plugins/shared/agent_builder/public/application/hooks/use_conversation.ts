@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isSharedConversation } from '@kbn/agent-builder-common';
+import { isAttachmentEvent, isSharedConversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -145,6 +145,15 @@ export const useIsSharedConversation = (): boolean => {
 export const useHasActiveConversation = () => {
   const hasPersistedConversation = useHasPersistedConversation();
   const { conversation } = useConversation();
+  const isThisConversationStreaming = useIsCurrentConversationStreaming();
+  // POC: a conversation with only attachments (a PDF pasted before the 1st message) keeps the
+  // centered "new conversation" layout, so the input doesn't jump to the bottom on paste.
+  if (hasPersistedConversation && conversation && !isThisConversationStreaming) {
+    return (
+      (conversation.rounds?.length ?? 0) > 0 ||
+      (conversation.events ?? []).some((event) => !isAttachmentEvent(event))
+    );
+  }
   return hasPersistedConversation || (conversation?.events?.length ?? 0) > 0;
 };
 

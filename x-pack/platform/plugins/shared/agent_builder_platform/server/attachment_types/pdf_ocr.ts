@@ -7,15 +7,19 @@
 
 import type { Readable } from 'stream';
 import pMap from 'p-map';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { pdfToImages } from './pdf_to_images';
 
 // POC: hardcoded endpoint, no config / availability check
 const JINA_OCR_INFERENCE_ID = '.jina-ocr-v1-chat_completion';
 const OCR_CONCURRENCY = 4;
-// POC: per page, large to avoid timeouts on slow OCR. Used by ES and by the ES client.
-const OCR_TIMEOUT_MINUTES = 10;
-const OCR_TIMEOUT_MS = OCR_TIMEOUT_MINUTES * 60 * 1000;
+// POC: whole PDF. Below the 120 s default socket timeout of the attachments route.
+const OCR_TOTAL_TIMEOUT_SECONDS = 100;
+// POC: one page can take as long as the whole PDF (cold EIS took > 60 s for 1 page).
+// Used by ES and by the ES client.
+const OCR_PAGE_TIMEOUT_SECONDS = OCR_TOTAL_TIMEOUT_SECONDS;
+const OCR_TOO_SLOW_MESSAGE = 'Reading the PDF took too long. Try a smaller PDF.';
 
 const readStreamText = async (stream: Readable): Promise<string> => {
   let raw = '';
@@ -37,11 +41,17 @@ const readStreamText = async (stream: Readable): Promise<string> => {
     .join('');
 };
 
-const ocrPage = async (esClient: ElasticsearchClient, pngBase64: string): Promise<string> => {
+const ocrPage = async (
+  esClient: ElasticsearchClient,
+  pngBase64: string,
+  signal: AbortSignal
+): Promise<string> => {
+  // pages still waiting in the queue don't start after the time limit
+  signal.throwIfAborted();
   const stream = await esClient.inference.chatCompletionUnified(
     {
       inference_id: JINA_OCR_INFERENCE_ID,
-      timeout: `${OCR_TIMEOUT_MINUTES}m`,
+      timeout: `${OCR_PAGE_TIMEOUT_SECONDS}s`,
       chat_completion_request: {
         messages: [
           {
@@ -56,7 +66,8 @@ const ocrPage = async (esClient: ElasticsearchClient, pngBase64: string): Promis
     } as Parameters<typeof esClient.inference.chatCompletionUnified>[0],
     {
       asStream: true,
-      requestTimeout: OCR_TIMEOUT_MS,
+      requestTimeout: OCR_PAGE_TIMEOUT_SECONDS * 1000,
+      signal,
       // asStream skips decompression, so ask for plain bytes
       headers: { 'accept-encoding': 'identity' },
     }
@@ -74,9 +85,21 @@ export const extractPdfText = async ({
   esClient: ElasticsearchClient;
   buffer: Buffer;
 }): Promise<string> => {
-  const pages = await pdfToImages(buffer);
-  const texts = await pMap(pages, (page) => ocrPage(esClient, page), {
-    concurrency: OCR_CONCURRENCY,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OCR_TOTAL_TIMEOUT_SECONDS * 1000);
+  let texts: string[];
+  try {
+    const pages = await pdfToImages(buffer);
+    texts = await pMap(pages, (page) => ocrPage(esClient, page, controller.signal), {
+      concurrency: OCR_CONCURRENCY,
+    });
+  } catch (error) {
+    if (controller.signal.aborted || error instanceof errors.TimeoutError) {
+      throw new Error(OCR_TOO_SLOW_MESSAGE);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
   return texts.map((text, index) => `--- page ${index + 1} ---\n${text.trim()}`).join('\n\n');
 };

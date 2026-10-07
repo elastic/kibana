@@ -10,12 +10,7 @@ import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType, SUPPORTED_PDF_MIME_TYPE } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import {
-  processImageFile,
-  processPdfFile,
-  getUniqueName,
-  rejectIfTooManyImages,
-} from './upload_image';
+import { processImageFile, getUniqueName, rejectIfTooManyImages } from './upload_image';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -23,11 +18,11 @@ import { useConversationContext } from '../../../context/conversation/conversati
 export interface UseImageUploadParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
+  addPdf: (file: File) => Promise<void>;
 }
 
 export interface UseImageUploadResult {
   uploadingNames: Set<string>;
-  isUploadingPdf: boolean;
   handlePasteFile?: (file: File) => string | undefined;
   handleAfterInput: () => void;
   handleRemoveAttachment?: (attachment: ConversationAttachment) => void;
@@ -36,13 +31,13 @@ export interface UseImageUploadResult {
 export const useImageUpload = ({
   addErrorToast,
   messageEditorController,
+  addPdf,
 }: UseImageUploadParams): UseImageUploadResult => {
-  const { filesClient, pdfFilesClient } = useAgentBuilderServices();
+  const { filesClient } = useAgentBuilderServices();
   const { services } = useKibana();
   const { attachments, conversationId, upsertAttachments, removeAttachment } =
     useConversationContext();
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
-  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   const uploadControllers = useRef<Map<string, AbortController>>(new Map());
 
   const attachmentsRef = useRef(attachments);
@@ -66,14 +61,8 @@ export const useImageUpload = ({
       const current = attachmentsRef.current ?? [];
 
       if (file.type === SUPPORTED_PDF_MIME_TYPE) {
-        // POC: max 1 PDF per message, a 2nd paste is ignored. No chip, no uploadingNames,
-        // no uploading pill and no abort on conversation change.
-        const hasPdf = current.some((a) => !('items' in a) && a.type === AttachmentType.pdf);
-        if (!pdfFilesClient || hasPdf || isUploadingPdf) return undefined;
-        setIsUploadingPdf(true);
-        processPdfFile({ file, filesClient: pdfFilesClient, upsertAttachments }).finally(() =>
-          setIsUploadingPdf(false)
-        );
+        // POC: the PDF goes to the conversation, not to the input state. A 2nd paste replaces it.
+        addPdf(file);
         return undefined;
       }
 
@@ -131,8 +120,7 @@ export const useImageUpload = ({
     [
       upsertAttachments,
       filesClient,
-      pdfFilesClient,
-      isUploadingPdf,
+      addPdf,
       addErrorToast,
       services.analytics,
       uploadingNames,
@@ -199,7 +187,6 @@ export const useImageUpload = ({
 
   return {
     uploadingNames,
-    isUploadingPdf,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,

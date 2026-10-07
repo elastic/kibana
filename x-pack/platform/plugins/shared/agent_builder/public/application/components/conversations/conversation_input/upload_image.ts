@@ -13,7 +13,6 @@ import {
   AttachmentType,
   MAX_IMAGE_BYTES,
   MAX_IMAGES_PER_ROUND,
-  MAX_PDF_BYTES,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -156,29 +155,18 @@ export const processImageFile = async ({
 };
 
 /**
- * Uploads a pasted PDF to the Files service and calls upsertAttachments.
+ * Uploads a pasted PDF to the Files service and returns its file id.
  */
-export const processPdfFile = async ({
+export const uploadPdfFile = async ({
   file,
+  name,
   filesClient,
-  upsertAttachments,
 }: {
   file: File;
+  name: string;
   filesClient: ScopedFilesClient;
-  upsertAttachments: (attachments: ConversationAttachment[]) => void;
-}): Promise<void> => {
-  // POC: no toast for a PDF that is too big
-  if (file.size > MAX_PDF_BYTES) return;
-
-  try {
-    const name = file.name || 'document.pdf';
-    const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
-    await filesClient.upload({ id: fileEntry.id, body: file, contentType: file.type });
-    // POC: send the file id as origin only. The server reads the PDF and runs OCR.
-    upsertAttachments([
-      { type: AttachmentType.pdf, origin: fileEntry.id } as ConversationAttachment,
-    ]);
-  } catch (err: unknown) {
-    // POC: no toast for upload errors
-  }
+}): Promise<string> => {
+  const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
+  await filesClient.upload({ id: fileEntry.id, body: file, contentType: file.type });
+  return fileEntry.id;
 };

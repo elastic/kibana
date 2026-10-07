@@ -19,18 +19,7 @@ import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
-/**
- * Single source of truth for "send this message". A new conversation is created on the server
- * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
- * user is moved to it, by URL in the routed app or by state in the embeddable.
- * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
- */
-export const useSubmitMessage = () => {
-  const conversationId = useConversationId();
-  const { sendMessage } = useConversationStream();
-  const { isEmbeddedContext, setConversationId } = useConversationContext();
-  const agentId = useAgentId();
-  const { navigateToAgentBuilderUrl } = useNavigation();
+const useCreateConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addErrorToast } = useToasts();
@@ -44,6 +33,58 @@ export const useSubmitMessage = () => {
     },
     onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
   });
+
+  return { createConversation, isCreatingConversation };
+};
+
+/**
+ * POC: creates an empty conversation and opens it, so a PDF can be added before the first message.
+ * Returns the new conversation id, or undefined when the create failed.
+ */
+export const useOpenNewConversation = () => {
+  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const agentId = useAgentId();
+  const { navigateToAgentBuilderUrl } = useNavigation();
+  const { createConversation } = useCreateConversation();
+
+  return useCallback(async (): Promise<string | undefined> => {
+    if (!agentId) return undefined;
+    let created;
+    try {
+      created = await createConversation(agentId);
+    } catch {
+      return undefined;
+    }
+    if (isEmbeddedContext) {
+      setConversationId?.(created.id);
+    } else {
+      navigateToAgentBuilderUrl(
+        appPaths.agent.conversations.byId({ agentId, conversationId: created.id })
+      );
+    }
+    return created.id;
+  }, [
+    agentId,
+    createConversation,
+    isEmbeddedContext,
+    setConversationId,
+    navigateToAgentBuilderUrl,
+  ]);
+};
+
+/**
+ * Single source of truth for "send this message". A new conversation is created on the server
+ * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
+ * user is moved to it, by URL in the routed app or by state in the embeddable.
+ * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
+ */
+export const useSubmitMessage = () => {
+  const conversationId = useConversationId();
+  const { sendMessage } = useConversationStream();
+  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const agentId = useAgentId();
+  const { navigateToAgentBuilderUrl } = useNavigation();
+  const { createConversation, isCreatingConversation } = useCreateConversation();
 
   const submitMessage = useCallback(
     async (message: string) => {
