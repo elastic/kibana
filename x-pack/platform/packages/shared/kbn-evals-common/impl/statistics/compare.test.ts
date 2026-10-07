@@ -7,7 +7,7 @@
 
 import type { Direction, EvaluationScoreDocument } from '../schemas/common_attributes.gen';
 import { compareScores } from './compare';
-import { pairScores } from './pairing';
+import { isImproved, pairScores } from './pairing';
 
 const baseTaskModel = {
   id: 'gpt-4',
@@ -386,5 +386,33 @@ describe('compareScores (grouping, means and direction)', () => {
     );
 
     expect(result.direction).toBe('minimize');
+  });
+
+  it("keeps each score's direction when one evaluator's scores point different ways", () => {
+    const scoresFor = (grounded: number, hallucination: number) => [
+      createMockScore({
+        evaluatorName: 'answer-quality.grounded',
+        score: grounded,
+        direction: 'maximize',
+      }),
+      createMockScore({
+        evaluatorName: 'answer-quality.hallucination',
+        score: hallucination,
+        direction: 'minimize',
+      }),
+    ];
+
+    const results = computePairedTTestResults(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
+
+    expect(
+      results.map(({ evaluatorName, direction, meanTarget, meanBaseline }) => ({
+        evaluatorName,
+        direction,
+        improved: isImproved(meanTarget - meanBaseline, direction),
+      }))
+    ).toEqual([
+      { evaluatorName: 'answer-quality.grounded', direction: 'maximize', improved: true },
+      { evaluatorName: 'answer-quality.hallucination', direction: 'minimize', improved: true },
+    ]);
   });
 });

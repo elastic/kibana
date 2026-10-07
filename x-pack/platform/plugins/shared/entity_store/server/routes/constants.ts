@@ -7,6 +7,7 @@
 
 import type { AuthzEnabled } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import { HistorySnapshotParams, LogExtractionOverride } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
@@ -30,4 +31,4 @@ export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallPara
 export const LogExtractionInstallParams = LogExtractionOverride;
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
-export const HistorySnapshotBodyParams = HistorySnapshotParams.partial();
+export const HistorySnapshotBodyParams = lazySchema(() => HistorySnapshotParams.partial());

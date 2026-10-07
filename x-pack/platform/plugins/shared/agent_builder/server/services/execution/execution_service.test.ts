@@ -30,11 +30,15 @@ import {
   createRequestAbortedError,
   isBadRequestError,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
 import {
+  createAgentsServiceStartMock,
   createConversationClientMock,
   createEmptyConversation,
+  createMockedAgentRegistry,
+  createMockedInternalAgent,
   createRound,
 } from '../../test_utils';
 import { findConversationEvent } from './utils/chat_response';
@@ -146,13 +150,16 @@ describe('AgentExecutionService', () => {
     endpoints: { getForFeature },
   };
 
+  const agentRegistry = createMockedAgentRegistry();
+  const agentService = createAgentsServiceStartMock();
+
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
     taskManager,
     inference,
     conversationService: conversationService as any,
-    agentService: {} as any,
+    agentService,
     runAgent: jest.fn(),
     attachmentsService,
     uiSettings,
@@ -164,6 +171,8 @@ describe('AgentExecutionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
+    agentService.getRegistry.mockResolvedValue(agentRegistry);
+    agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
     (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
       async (attachments) =>
         attachments?.map((attachment: { type: string; data: unknown }) => ({
@@ -904,17 +913,53 @@ describe('AgentExecutionService', () => {
         warnings: [],
         soEntryFound: false,
       });
-      inference.getConnectorById.mockResolvedValueOnce(
-        createEisConnector(['xhigh'], 'default-endpoint')
-      );
 
       await executeWithReasoningLevel();
 
-      expect(inference.getConnectorById).toHaveBeenCalledWith(
-        'default-endpoint',
+      expect(getForFeature).toHaveBeenCalledWith(
+        AGENT_BUILDER_INFERENCE_FEATURE_ID,
         expect.anything()
       );
+      expect(inference.getConnectorById).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).toHaveBeenCalled();
+    });
+
+    it("rejects a level the Agent Builder feature's first endpoint does not support", async () => {
+      getForFeature.mockResolvedValueOnce({
+        endpoints: [createEisConnector(['high'], 'default-endpoint')],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      await expect(executeWithReasoningLevel()).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it("validates the agent's inference feature model when the agent declares one", async () => {
+      agentRegistry.get.mockResolvedValueOnce(
+        createMockedInternalAgent({
+          id: 'agent-1',
+          configuration: { tools: [], inference_feature_id: 'my_feature' },
+        })
+      );
+      getForFeature.mockResolvedValueOnce({
+        endpoints: [createEisConnector(['high'], 'feature-endpoint')],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      await expect(executeWithReasoningLevel()).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+      });
+
+      expect(getForFeature).toHaveBeenCalledWith('my_feature', expect.anything(), {
+        onlyReturnConfigured: true,
+      });
+      expect(inference.getConnectorById).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
     it('persists and schedules nothing when the model does not support the level', async () => {
@@ -1227,6 +1272,13 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('writes the opening user message without waiting for a refresh', async () => {
+      await converse();
+
+      const [, options] = conversationClient.appendEvents.mock.calls[0];
+      expect(options).toMatchObject({ refresh: false });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 
@@ -1288,7 +1340,8 @@ describe('AgentExecutionService', () => {
       });
 
       expect(conversationClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({ read_only: true })
+        expect.objectContaining({ read_only: true }),
+        { source: 'execution' }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
@@ -1384,6 +1437,8 @@ describe('AgentExecutionService', () => {
       expect(events[0]).toMatchObject({ data: { message: 'Pool limit is now 200' } });
       // A standalone message must not look round-derived, or a round write would drop it.
       expect(events[0].id).not.toContain('::user_message');
+      // The caller refreshes its conversation list from the response, so the write waits for it.
+      expect(conversationClient.appendEvents.mock.calls[0][1]).not.toHaveProperty('refresh');
 
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
