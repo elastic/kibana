@@ -22,7 +22,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
-  impactPills,
+  useEntityFilter,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -117,20 +117,7 @@ const ConversationsPageContent: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [entityFilter, setEntityFilter] = useState<string | null>(null);
-  const availableEntityIds = useMemo(
-    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
-    [conversations]
-  );
-  // A poll or a collapsed section can drop the selected entity from the loaded
-  // rows. Keep filtering only while that pill is still there to clear.
-  const effectiveEntityFilter =
-    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
-  useEffect(() => {
-    if (entityFilter !== effectiveEntityFilter) {
-      setEntityFilter(effectiveEntityFilter);
-    }
-  }, [entityFilter, effectiveEntityFilter]);
+  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(conversations);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -272,10 +259,14 @@ const ConversationsPageContent: React.FC = () => {
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
-        <LazyConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
       </EscalationModalBoundary>
     ),
-    []
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(
@@ -428,7 +419,7 @@ const ConversationsPageContent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <Impact
-            investigations={conversations}
+            items={conversations}
             entityFilter={effectiveEntityFilter}
             onEntityFilterChange={setEntityFilter}
           />

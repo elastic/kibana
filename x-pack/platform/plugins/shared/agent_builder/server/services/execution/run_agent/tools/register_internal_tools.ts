@@ -153,6 +153,9 @@ export const registerInternalTools = async ({
 
     if (allowedSubagents.length > 0) {
       const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const inferenceFeatureIdBySubagent = new Map(
+        allowedSubagents.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+      );
       const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       tools.push(
@@ -178,6 +181,7 @@ export const registerInternalTools = async ({
           backgroundExecutionService,
           subagentTracker,
           allowedIds,
+          inferenceFeatureIdBySubagent,
         })
       );
       tools.push(createSleepTool());

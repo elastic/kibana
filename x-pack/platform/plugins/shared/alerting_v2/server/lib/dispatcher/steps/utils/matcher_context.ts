@@ -12,8 +12,8 @@ export function createMatcherContext(episode: AlertEpisode): MatcherContext {
   return {
     last_event_timestamp: episode.last_event_timestamp,
     group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
+    alert_id: episode.episode_id,
+    alert_status: episode.episode_status,
     ...(episode.severity ? { severity: episode.severity } : {}),
     ...(episode.data ? { data: episode.data } : {}),
   };
