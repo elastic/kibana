@@ -52,7 +52,9 @@ const log: ScoutLog = {
 // Files that cannot affect Scout Playwright test execution and should not inflate
 // the module graph. Doc patterns mirror SCOUT_TESTS_ONLY_IGNORE_PATTERNS in @kbn/scout-info.
 const SCOUT_MODULE_GRAPH_IGNORE = [
-  '**/README*', '**/*.md', '**/CHANGELOG*', // documentation noise
+  '**/README*',
+  '**/*.md',
+  '**/CHANGELOG*', // documentation noise
   '**/*.test.ts', // Jest tests — only Jest needs to run, not Playwright
 ];
 
