@@ -5,7 +5,22 @@
  * 2.0.
  */
 
-import type { Anonymization, RegexAnonymizationRule } from '@kbn/inference-common';
+import type { Duration } from 'moment';
+import type { Anonymization } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+
+/**
+ * Settings for the worker pool that runs regex rules off the main thread.
+ * Structurally matches `workers.anonymization` in the inference plugin's config schema.
+ */
+export interface AnonymizationWorkerConfig {
+  enabled: boolean;
+  minThreads: number;
+  maxThreads: number;
+  maxQueue: number;
+  idleTimeout: Duration;
+  taskTimeout: Duration;
+}
 
 /**
  * AnonymizationRecord maps JSON Pointer paths to string values that need anonymization.

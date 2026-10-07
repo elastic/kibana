@@ -12,15 +12,15 @@ import type {
   BoundOptions,
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationRule,
   InferenceCallbacks,
 } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';

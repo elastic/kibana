@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { aiAnonymizationSettings, type AnonymizationSettings } from '@kbn/inference-common';
-import { getUiSettings } from './ui_settings';
+import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
+import type { AnonymizationSettings } from '@kbn/ai-anonymization-common';
+import { getAnonymizationUiSettings } from './ui_settings';
 
-describe('getUiSettings', () => {
-  const setting = getUiSettings()[aiAnonymizationSettings];
+describe('getAnonymizationUiSettings', () => {
+  const setting = getAnonymizationUiSettings()[aiAnonymizationSettings];
 
   it('registers the anonymization setting in the general category for every solution view', () => {
     expect(setting.category).toEqual(['general']);

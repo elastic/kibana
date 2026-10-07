@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { NamedEntityRecognitionRule } from '@kbn/inference-common';
+import type { NamedEntityRecognitionRule } from '@kbn/ai-anonymization-common';
 import { executeNerRule } from './execute_ner_rule';
 
 const mockEsClient = {

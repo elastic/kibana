@@ -8,7 +8,7 @@
 import { deanonymize } from './deanonymize';
 import type { Anonymization, AssistantMessage, Message, UserMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import { createMask } from '../../test_utils';
+import { createMask } from './test_utils';
 
 describe('deanonymize', () => {
   describe('email mask', () => {

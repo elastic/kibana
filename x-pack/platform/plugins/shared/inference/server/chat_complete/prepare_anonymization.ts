@@ -8,15 +8,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-  ChatCompleteOptions,
-} from '@kbn/inference-common';
+import type { ChatCompleteAnonymizationTarget, ChatCompleteOptions } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
-import { anonymizeMessages } from './anonymization/anonymize_messages';
-import type { RegexWorkerService } from './anonymization/regex_worker_service';
+import { anonymizeMessages } from '@kbn/ai-anonymization-server';
+import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
 

@@ -1062,6 +1062,8 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-act
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-infra/ai-anonymization-common @elastic/security-investigations
+x-pack/platform/packages/shared/ai-infra/ai-anonymization-server @elastic/security-investigations
 x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/anonymization-ui @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-ml-ux

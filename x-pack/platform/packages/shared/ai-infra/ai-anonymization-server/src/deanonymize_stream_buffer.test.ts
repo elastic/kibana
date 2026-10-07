@@ -8,7 +8,7 @@
 import type { Anonymization } from '@kbn/inference-common';
 import { indexEntitiesByMask, replaceMasks } from './deanonymize';
 import { DeanonymizeStreamBuffer } from './deanonymize_stream_buffer';
-import { createMask } from '../../test_utils';
+import { createMask } from './test_utils';
 
 describe('DeanonymizeStreamBuffer', () => {
   it('emits plain text immediately when there is nothing token-like at the tail', () => {

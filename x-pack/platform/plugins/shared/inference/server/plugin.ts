@@ -11,23 +11,22 @@ import type { Logger } from '@kbn/logging';
 import type {
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationRule,
   ChatCompleteAnonymizationTarget,
-  AnonymizationSettings,
 } from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
+import type { AnonymizationRule, AnonymizationSettings } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
+import { RegexWorkerService, getAnonymizationUiSettings } from '@kbn/ai-anonymization-server';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
   createChatModel,
 } from './inference_client';
-import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
@@ -38,7 +37,6 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
@@ -115,7 +113,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    coreSetup.uiSettings.register(getUiSettings());
+    coreSetup.uiSettings.register(getAnonymizationUiSettings());
     const router = coreSetup.http.createRouter();
 
     registerRoutes({

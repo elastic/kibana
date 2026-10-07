@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
+import type { AnonymizationOutput, Message } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';

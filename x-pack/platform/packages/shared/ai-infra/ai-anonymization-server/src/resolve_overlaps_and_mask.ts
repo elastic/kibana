@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { AnonymizationState, DetectedMatch } from './types';
 import { getEntityMask } from './get_entity_mask';
 

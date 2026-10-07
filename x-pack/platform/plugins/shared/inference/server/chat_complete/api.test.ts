@@ -19,7 +19,6 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
-  type AnonymizationRule,
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
@@ -35,7 +34,8 @@ import {
   chunkEvent,
   tokensEvent,
 } from '../test_utils';
-import { executeRegexRulesTask } from './anonymization/execute_regex_rule_task';
+import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common';
+import type { Anonymization } from '@kbn/inference-common';
+import type { NamedEntityRecognitionRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';

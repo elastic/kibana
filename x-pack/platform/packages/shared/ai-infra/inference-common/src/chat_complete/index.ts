@@ -90,17 +90,12 @@ export {
 } from './errors';
 
 export type {
-  AnonymizationRule,
   AnonymizationEntity,
-  AnonymizationEntityClass,
   Anonymization,
   Deanonymization,
   AnonymizationOutput,
   DeanonymizationOutput,
   DeanonymizedMessage,
-  RegexAnonymizationRule,
-  NamedEntityRecognitionRule,
-  AnonymizationSettings,
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './anonymization';

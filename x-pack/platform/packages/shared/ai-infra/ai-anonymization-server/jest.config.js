@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export type {
-  AnonymizationEntity,
-  Anonymization,
-  Deanonymization,
-  AnonymizationOutput,
-  DeanonymizationOutput,
-  DeanonymizedMessage,
-  AnonymizationResponseMetadata,
-  DeanonymizedMessageData,
-} from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-infra/ai-anonymization-server'],
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { DetectedMatch } from './types';
 import type { RegexWorkerService } from './regex_worker_service';
 

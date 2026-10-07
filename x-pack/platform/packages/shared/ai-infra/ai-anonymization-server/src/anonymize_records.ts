@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { partition } from 'lodash';
 import { unescapePointerToken, type AnonymizationState } from './types';

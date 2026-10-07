@@ -5,13 +5,5 @@
  * 2.0.
  */
 
-export type {
-  AnonymizationEntity,
-  Anonymization,
-  Deanonymization,
-  AnonymizationOutput,
-  DeanonymizationOutput,
-  DeanonymizedMessage,
-  AnonymizationResponseMetadata,
-  DeanonymizedMessageData,
-} from './types';
+/** Advanced setting holding the AI anonymization rules. */
+export const aiAnonymizationSettings = 'ai:anonymizationSettings';

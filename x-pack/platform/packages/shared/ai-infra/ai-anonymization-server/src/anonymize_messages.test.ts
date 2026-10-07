@@ -9,17 +9,13 @@ import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/t
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { anonymizeMessages } from './anonymize_messages';
-import type {
-  AnonymizationRule,
-  AssistantMessage,
-  Message,
-  UserMessage,
-} from '@kbn/inference-common';
+import type { AssistantMessage, Message, UserMessage } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { MessageRole } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
 import { RegexWorkerService } from './regex_worker_service';
-import type { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from './types';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),

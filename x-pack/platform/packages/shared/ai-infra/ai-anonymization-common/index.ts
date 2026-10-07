@@ -6,12 +6,10 @@
  */
 
 export type {
-  AnonymizationEntity,
-  Anonymization,
-  Deanonymization,
-  AnonymizationOutput,
-  DeanonymizationOutput,
-  DeanonymizedMessage,
-  AnonymizationResponseMetadata,
-  DeanonymizedMessageData,
-} from './types';
+  AnonymizationEntityClass,
+  AnonymizationRule,
+  AnonymizationSettings,
+  NamedEntityRecognitionRule,
+  RegexAnonymizationRule,
+} from './src/types';
+export { aiAnonymizationSettings } from './src/constants';
