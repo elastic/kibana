@@ -1,3 +1,3 @@
 # Agent Builder Dashboards
 
-Contains dashboard-related entities for the Agent Builder, including tools, attachment types, and a dashboard skill.
+The `agentBuilderDashboards` plugin registers dashboard-related entities for Agent Builder, including tools, attachment types, and a dashboard skill.
