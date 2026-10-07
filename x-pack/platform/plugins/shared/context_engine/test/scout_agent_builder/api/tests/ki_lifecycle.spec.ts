@@ -139,6 +139,20 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
     expect(columnValues(body, 'id')).toStrictEqual(['active', 'single', 'unexpired']);
   });
 
+  apiTest(
+    'keeps the filters when a query only displays a lifecycle field',
+    async ({ apiClient }) => {
+      const expiry = await run(apiClient, `FROM ${DEST} | KEEP id, expires_at | SORT id`);
+      expect(columnValues(expiry, 'id')).toStrictEqual(['active', 'single', 'unexpired']);
+
+      const status = await run(
+        apiClient,
+        `FROM ${DEST} | KEEP id, governance.lifecycle.status | SORT id`
+      );
+      expect(columnValues(status, 'id')).toStrictEqual(['active', 'single', 'unexpired']);
+    }
+  );
+
   apiTest('keeps KIs that share an id across targets', async ({ apiClient }) => {
     const body = await run(apiClient, `FROM ${DEST}, ${DS_DEST} | KEEP id | SORT id`);
 

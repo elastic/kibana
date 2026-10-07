@@ -86,7 +86,7 @@ describe('useActionPolicyForm', () => {
         name: 'My policy',
         description: 'A description',
         matcher: null,
-        groupingMode: 'per_episode',
+        groupingMode: 'per_alert',
         groupBy: [],
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
@@ -197,7 +197,7 @@ describe('useActionPolicyForm', () => {
         })
       );
 
-      expect(result.current.methods.getValues().groupingMode).toBe('per_episode');
+      expect(result.current.methods.getValues().groupingMode).toBe('per_alert');
       expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
     });
 
