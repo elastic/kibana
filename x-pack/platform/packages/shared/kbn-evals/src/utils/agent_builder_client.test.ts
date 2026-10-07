@@ -189,11 +189,23 @@ describe('createAgentBuilderClient', () => {
     expect(result).toEqual(conversation);
   });
 
-  // ── configurationOverrides → configuration_overrides ───────────────────────
-  // Suites pin a skill (or tools, or capabilities) per eval run through this
-  // translation, so a camelCase→snake_case slip here silently unpins every suite
-  // that relies on it. Each field is asserted separately, including the values
-  // that are easy to drop: explicit `false`, empty arrays and empty strings.
+  it('preserves attachments alongside runtime configuration overrides', async () => {
+    http.fetch.mockResolvedValue({});
+    const attachments = [{ type: 'dashboard', data: { title: 'AlertZero evidence', panels: [] } }];
+
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      attachments,
+      configurationOverrides: { skillIds: [], enableElasticCapabilities: false },
+    });
+
+    expect(lastRequestBody()).toMatchObject({
+      attachments,
+      configuration_overrides: { skill_ids: [], enable_elastic_capabilities: false },
+    });
+  });
+
   describe('configurationOverrides', () => {
     it('omits configuration_overrides entirely when not provided', async () => {
       http.fetch.mockResolvedValue({});

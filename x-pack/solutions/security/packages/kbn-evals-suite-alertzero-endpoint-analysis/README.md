@@ -1,0 +1,51 @@
+# AlertZero Endpoint Analysis evals
+
+Consolidated L0–L4 coverage of the current production Endpoint Analysis worker.
+All owned suite names are AlertZero. Workflow IDs and endpoint-forensic skill/tool
+IDs are imported or inherited from production, not renamed by this suite.
+
+| Level | Executable contract |
+| --- | --- |
+| L0 | Registered worker IDs, production settings schema, production manual inputs, sweep-to-child dispatch, AlertZero proposal gate |
+| L1 | Real Agent Builder routing to a successful endpoint forensic discovery tool |
+| L2 | Current worker `structured_output` schema; chronological, nonempty host-specific timeline, grounded command and host IoCs; negative regression cases |
+| L3 | Installed worker sweep executes through the real workflow test API, dispatches the installed analysis child, observes a completed real `ai.agent`, successful OTEL tool calls joined by conversation ID, and both persisted finding attachments |
+| L4 | Real AlertZero proposal bridge and generic proposal gate; proposals API reads pending persistence, then dismisses and rereads durable `no_action` / `dismissed` state |
+
+L3/L4 do not inject workflow executors or synthetic output. The sweep test API
+runs the installed production definition even when its scheduled worker is disabled;
+no managed definition is installed or edited by this suite. L4 uses a non-action
+endpoint-analysis proposal, so it does not isolate or kill a real endpoint. It
+proves the persistence/gate contract, not model containment-choice quality.
+
+Each L3 run owns a UUID-scoped endpoint index, AI index, indicator and investigation.
+The pending indicator uses the production `security.analyze_endpoint` type,
+`attributes.status: pending`, default space and manual autonomy. Before dispatch,
+the suite queries its real seeded event IDs. Cleanup cancels pending parent/child
+runs and deletes only fixture-owned conversations and indices. L2 grounding uses
+host/command evidence because the production timeline schema does not expose event IDs.
+
+## Gates
+
+Run from the Kibana worktree, with its pinned Node on PATH:
+
+```sh
+node scripts/jest --config x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/jest.config.js --runInBand
+node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/tsconfig.json
+node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis --no-cache
+node scripts/evals start --profile local --suite alertzero-endpoint-analysis --judge gemini-3-1-pro --repetitions 1
+```
+
+The live run requires local ES/Kibana, AlertZero and context engine enabled,
+installed managed workflows, Agent Builder inference endpoint configuration,
+and trace collection readable by `traceEsClient`. Missing connectors or missing
+trace evidence fail the run; they are not replaced by fabricated results or N/A.
+No remote or production Elasticsearch is needed or permitted by this fixture.
+
+## Explicitly deferred
+
+This package does not assert the raw-log report store, the old
+Floor → Dark → Deep → Detection ladder, Investigation → Incident promotion or
+two-document audit. Identity, requestedIndex, and dispatcher allowlist seams
+remain separate contracts. Those legacy semantics are not equivalent to the
+current Endpoint Analysis sweep, structured agent findings and proposals store.
