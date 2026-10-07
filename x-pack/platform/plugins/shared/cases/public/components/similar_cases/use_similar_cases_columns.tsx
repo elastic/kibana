@@ -88,7 +88,7 @@ export const useSimilarCasesColumns = ({
       title: {
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
-        sortable: false,
+        sortable: true,
         render: (_title: string, theCase: SimilarCaseUI) => {
           if (theCase.id != null && theCase.title != null) {
             return (
@@ -203,7 +203,7 @@ export const useSimilarCasesColumns = ({
       category: {
         field: casesColumnsConfig.category.field,
         name: casesColumnsConfig.category.name,
-        sortable: false,
+        sortable: true,
         render: (category: CaseUI['category']) => {
           if (category != null) {
             return (
@@ -250,7 +250,7 @@ export const useSimilarCasesColumns = ({
       status: {
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
-        sortable: false,
+        sortable: true,
         render: (status: CaseUI['status']) => {
           if (status != null) {
             return <Status status={status} />;
@@ -262,7 +262,7 @@ export const useSimilarCasesColumns = ({
       severity: {
         field: casesColumnsConfig.severity.field,
         name: casesColumnsConfig.severity.name,
-        sortable: false,
+        sortable: true,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
             return (
