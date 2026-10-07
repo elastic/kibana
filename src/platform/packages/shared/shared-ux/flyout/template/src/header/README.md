@@ -17,7 +17,7 @@ See the package README for the tab bar.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Anything else, such as elements, components, or bare text, is not rendered. The assembly library warns in development about unrecognized children.
 
-The bottom divider bleeds to the flyout edges using the root `paddingSize`, so it lines up with the flyout chrome at every padding size.
+The bottom divider bleeds past the header's padding to the flyout edges, so it lines up with the flyout chrome.
 
 ## Blocks
 

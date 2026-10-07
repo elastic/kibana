@@ -62,7 +62,7 @@ execute_workflow({
 When the user wants to investigate a Significant Event, gather the event's metadata first, then trigger the investigation with that context.
 
 **1. Source the event.**
-- **If a SignificantEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Event UUID`, `Status`, `Severity`, `Confidence`, `Streams`, and `Summary`. Use those values directly; do not re-fetch.
+- **If a SignificantEvent is already attached to the conversation**, read its fields directly from the attachment — it renders as text with `Event ID`, `Status`, `Severity`, `Confidence`, `Streams`, and `Summary`. Use those values directly; do not re-fetch.
 - **If no SignificantEvent is attached**, load the `significant-events-management` skill (via the `load_skill` tool) and use its `event_search` tool to find the relevant event, then attach it and render the attachment inline per that skill's rules. Read its metadata from the attachment.
 
 **2. Build the workflow inputs from the event:**
@@ -83,9 +83,8 @@ execute_workflow({
     concurrency_key: "checkout-latency-slo-breach",
     context: {
       source: "significant_event",
-      event_uuid: "8f1c...",  // workflow context payload only — NOT a valid event_investigation_attach parameter
       event_id: "checkout-latency-slo-breach",  // use this as the event_id for event_investigation_attach
-      status: "open",
+      status: "active",
       severity: "high",
       confidence: 0.82
     }
@@ -144,7 +143,7 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
 
 **On start** (right after `execute_workflow` returns an execution id):
-- `event_id` — the stable slug identifier of the Significant Event (same `event_id` returned by `event_write`; does not change across re-opens, unlike `event_uuid`).
+- `event_id` — the stable slug identifier of the Significant Event (same `event_id` returned by `event_write`; does not change across status changes).
 - `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
 - `started_at` — the execution start time from the workflow execution object.
 - Omit `completed_at`.

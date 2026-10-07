@@ -9,12 +9,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
-import { ensureMemoryIndex } from './memory/ensure_memory_index';
 import { NightshiftInvestigationsPlugin } from './plugin';
-
-jest.mock('./memory/ensure_memory_index', () => ({
-  ensureMemoryIndex: jest.fn().mockResolvedValue(undefined),
-}));
 
 const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
@@ -91,37 +86,5 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift.memoryOptimize',
       ])
     );
-  });
-});
-
-describe('NightshiftInvestigationsPlugin start', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('does not initialize Semantic Memory when it is disabled', () => {
-    const plugin = createPlugin();
-    plugin.setup(coreMock.createSetup(), createSetupDeps());
-    plugin.start(coreMock.createStart(), {} as never);
-
-    expect(ensureMemoryIndex).not.toHaveBeenCalled();
-  });
-
-  it('starts Semantic Memory initialization without blocking plugin startup', () => {
-    let resolveInitialization: () => void = () => {};
-    jest.mocked(ensureMemoryIndex).mockImplementationOnce(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveInitialization = resolve;
-        })
-    );
-
-    const plugin = createPlugin(true);
-    plugin.setup(coreMock.createSetup(), createSetupDeps());
-
-    expect(() => plugin.start(coreMock.createStart(), {} as never)).not.toThrow();
-    expect(ensureMemoryIndex).toHaveBeenCalledTimes(1);
-
-    resolveInitialization();
   });
 });

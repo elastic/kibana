@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSkeletonText,
+} from '@elastic/eui';
 import { RunWorkflowPanel } from '@kbn/workflows-ui';
 import type { RunWorkflowExecutor, RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import { useFocusButtonTrap } from '../use_focus_button';
+import { useCaseWorkflowTags } from './use_run_case_workflow';
 import * as i18n from './translations';
 
 interface RunCaseWorkflowModalProps
@@ -29,6 +37,7 @@ interface RunCaseWorkflowModalProps
  * cases list page. Provides a standard "Select workflow" header and returns
  * focus to the trigger button on close when `focusButtonRef` is supplied.
  * Every Cases executor raises its own success toast, so the panel's is always suppressed.
+ * The workflow list is withheld until the case configuration (and its workflow tags) has loaded.
  */
 export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   inputs,
@@ -41,6 +50,39 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   focusButtonRef,
 }) => {
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
+  const { isLoading, isError } = useCaseWorkflowTags();
+
+  const renderBody = () => {
+    if (isLoading) {
+      return <EuiSkeletonText data-test-subj="cases-run-workflow-modal-loading" lines={3} />;
+    }
+
+    if (isError) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          size="s"
+          title={i18n.WORKFLOW_SETTINGS_LOAD_ERROR}
+          data-test-subj="cases-run-workflow-modal-error"
+        />
+      );
+    }
+
+    return (
+      <RunWorkflowPanel
+        inputs={inputs}
+        runWorkflow={runWorkflow}
+        sortWorkflow={sortWorkflow}
+        filterWorkflow={filterWorkflow}
+        onClose={onClose}
+        onExecute={onExecute}
+        onExecutionSettled={onExecutionSettled}
+        showSuccessToast={false}
+      />
+    );
+  };
 
   return (
     <EuiModal
@@ -53,18 +95,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle size="xs">{i18n.SELECT_WORKFLOW_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        <RunWorkflowPanel
-          inputs={inputs}
-          runWorkflow={runWorkflow}
-          sortWorkflow={sortWorkflow}
-          filterWorkflow={filterWorkflow}
-          onClose={onClose}
-          onExecute={onExecute}
-          onExecutionSettled={onExecutionSettled}
-          showSuccessToast={false}
-        />
-      </EuiModalBody>
+      <EuiModalBody>{renderBody()}</EuiModalBody>
     </EuiModal>
   );
 };

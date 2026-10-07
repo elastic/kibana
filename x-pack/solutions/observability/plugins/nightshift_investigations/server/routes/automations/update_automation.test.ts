@@ -7,53 +7,115 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { updateAutomationRoute } from './update_automation';
-import type { NightshiftAutomationCompletion } from '../../lib/automations/types';
+import { createRouteContext } from './test_helpers';
 
-const { handler } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
-const request = httpServerMock.createKibanaRequest();
-const get = jest.fn();
-const update = jest.fn();
+const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
+
+const soClient = { get: jest.fn(), update: jest.fn() };
+const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
 const updateWorkflow = jest.fn();
-const call = (completion: NightshiftAutomationCompletion) =>
+const getWorkflowsManagement = jest.fn().mockReturnValue({ management: { updateWorkflow } });
+
+const existing = {
+  name: 'Triage',
+  tags: ['oncall'],
+  automationType: 'custom',
+  isEnabled: true,
+  workflowId: 'workflow-1',
+  trigger: { rows: [{ kind: 'alert' }] },
+  execution: { promptTemplate: 'Find the cause' },
+  completion: {},
+  runtime: { dailyDispatchLimit: 20 },
+  createdAt: '2026-10-01T00:00:00.000Z',
+  updatedAt: '2026-10-01T00:00:00.000Z',
+};
+
+const call = (body: Record<string, unknown>) =>
   handler({
-    request,
-    params: { path: { id: 'auto-1' }, body: { completion } },
-    getAutomationsSoClient: () => ({ get, update }),
-    getWorkflowsManagement: () => ({ management: { updateWorkflow } }),
-    context: {
-      core: Promise.resolve({ savedObjects: { client: { getCurrentNamespace: () => 'ops' } } }),
-    },
+    request: httpServerMock.createKibanaRequest(),
+    params: { path: { id: 'automation-1' }, body },
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    context: createRouteContext(),
   } as never);
 
 beforeEach(() => {
   jest.clearAllMocks();
-  get.mockResolvedValue({
-    attributes: {
-      name: 'Test',
-      automationType: 'custom',
-      isEnabled: true,
-      workflowId: 'wf-1',
-      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
-      execution: {},
-      completion: { action: 'post_to_slack', targetMode: 'thread', connectorId: 'slack' },
-      runtime: {},
-      createdAt: '2026-10-01',
-      updatedAt: '2026-10-01',
-    },
+  soClient.get.mockResolvedValue({ attributes: existing });
+});
+
+it('replaces tags and keeps the other attributes', async () => {
+  const result = await call({ tags: ['triage'] });
+
+  expect(updateWorkflow).toHaveBeenCalledWith(
+    'workflow-1',
+    { yaml: expect.any(String) },
+    'default',
+    expect.anything()
+  );
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ tags: ['triage'], name: 'Triage', isEnabled: true })
+  );
+  expect(result).toMatchObject({ id: 'automation-1', tags: ['triage'] });
+});
+
+it('merges partial nested updates', async () => {
+  const result = await call({ isEnabled: false, execution: { reasoningMode: 'investigate' } });
+
+  expect(result).toMatchObject({
+    tags: ['oncall'],
+    isEnabled: false,
+    execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
+  });
+});
+
+describe('request validation', () => {
+  const slackRow = {
+    kind: 'slack',
+    event: 'message',
+    channels: ['#alerts'],
+    users: ['U123'],
+    messageFilter: 'error',
+  };
+  const parseRows = (rows: unknown[]) =>
+    params.parse({ path: { id: 'automation-1' }, body: { trigger: { rows } } });
+
+  it('accepts Slack trigger rows and keeps their fields', () => {
+    expect(parseRows([slackRow]).body.trigger?.rows).toEqual([slackRow]);
+  });
+
+  it('rejects Slack events other than message', () => {
+    expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 });
 
 it('rejects a partial change to channel mode without a merged destination before writes', async () => {
-  await expect(call({ targetMode: 'channel' })).rejects.toThrow('Slack channel destination');
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: { action: 'post_to_slack', targetMode: 'thread', connectorId: 'slack' },
+    },
+  });
+  await expect(call({ completion: { targetMode: 'channel' } })).rejects.toThrow(
+    'Slack channel destination'
+  );
   expect(updateWorkflow).not.toHaveBeenCalled();
-  expect(update).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
 });
 
 it('validates merged completion and preserves omitted connector and action fields', async () => {
-  await call({ targetMode: 'channel', destination: '#alerts' });
-  expect(update).toHaveBeenCalledWith(
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: { action: 'post_to_slack', targetMode: 'thread', connectorId: 'slack' },
+    },
+  });
+  await call({ completion: { targetMode: 'channel', destination: '#alerts' } });
+  expect(soClient.update).toHaveBeenCalledWith(
     expect.any(String),
-    'auto-1',
+    'automation-1',
     expect.objectContaining({
       completion: {
         action: 'post_to_slack',
@@ -64,9 +126,9 @@ it('validates merged completion and preserves omitted connector and action field
     })
   );
   expect(updateWorkflow).toHaveBeenCalledWith(
-    'wf-1',
+    'workflow-1',
     { yaml: expect.stringContaining('notificationDestinations:') },
-    'ops',
-    request
+    'default',
+    expect.anything()
   );
 });

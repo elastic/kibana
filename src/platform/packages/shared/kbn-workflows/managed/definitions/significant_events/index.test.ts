@@ -16,6 +16,14 @@ import {
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
+interface WorkflowJsonSchema {
+  type?: string;
+  enum?: string[];
+  description?: string;
+  properties?: Record<string, WorkflowJsonSchema>;
+  items?: WorkflowJsonSchema;
+}
+
 interface WorkflowStep {
   name: string;
   type?: string;
@@ -36,6 +44,7 @@ interface WorkflowStep {
     stream_names?: string;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
+    schema?: WorkflowJsonSchema;
   };
   foreach?: string;
 }
@@ -75,8 +84,27 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(24);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+  });
+
+  it('accepts every non-written events_write result reason in the discovery output schema', () => {
+    const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
+    const properties = schema?.properties;
+    const eventProperties = properties?.significant_events?.items?.properties;
+    const nonWrittenReasons = [
+      'bulk_error',
+      'duplicate_in_batch',
+      'existing_active_event',
+      'unchanged_outcome',
+      'unknown_event_id',
+    ];
+
+    expect(eventProperties?.reason?.enum).toEqual(nonWrittenReasons);
+    expect(properties?.written_rule_uuids?.description).toContain('unknown_event_id');
+    expect(properties?.written_rule_uuids?.description).toContain(
+      'intentionally determined not event-eligible'
+    );
   });
 
   it('bounds and forwards discovery model overrides', () => {
@@ -138,7 +166,7 @@ describe('significant events persistence workflow contracts', () => {
 
     const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
       steps: {
-        resolve_open_event: {
+        resolve_active_event: {
           output: {
             hits: [
               {
@@ -175,7 +203,7 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('stamps discovery detections only from confirmed write outcomes', () => {
+  it('stamps discovery detections only from reported completed outcomes', () => {
     expect(requireStep(discovery, 'compute_written_rule_uuids').with?.written_rule_uuids).toContain(
       '| default: [] | uniq'
     );
@@ -186,7 +214,7 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits[0] != null'
+      'steps.resolve_active_event.output.hits[0] != null'
     );
   });
 
@@ -203,7 +231,7 @@ describe('significant events persistence workflow contracts', () => {
     const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
 
     const makeContext = (investigations: unknown[]) => ({
-      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+      steps: { resolve_active_event: { output: { hits: [{ investigations }] } } },
     });
 
     // Empty investigations → condition is true → investigation should be triggered.

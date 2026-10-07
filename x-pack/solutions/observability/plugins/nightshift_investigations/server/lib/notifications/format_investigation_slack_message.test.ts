@@ -13,7 +13,7 @@ const URL = 'https://kibana.example.com/app/nightshift?investigationId=inv-1';
 const completed = (overrides: Partial<NotifiableInvestigation> = {}): NotifiableInvestigation => ({
   title: 'Checkout latency spike',
   status: 'completed',
-  severity: '60-high',
+  severity: 'high',
   summary: 'p99 latency on checkout rose after the 14:02 deploy of payments-api.',
   impact: {
     entities: [
@@ -68,9 +68,9 @@ describe('formatInvestigationSlackMessage', () => {
   });
 
   it.each([
-    ['80-critical', 'Critical'],
-    ['40-medium', 'Medium'],
-    ['20-low', 'Low'],
+    ['critical', 'Critical'],
+    ['medium', 'Medium'],
+    ['low', 'Low'],
   ] as const)('labels severity %s as %s', (severity, label) => {
     expect(
       formatInvestigationSlackMessage({ investigation: completed({ severity }), url: URL })

@@ -13,7 +13,6 @@ import {
   MAX_RECOMMENDATIONS,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
-  SEVERITY_OPTIONS,
 } from '@kbn/significant-events-schema';
 import {
   INVESTIGATION_STATUSES,
@@ -23,8 +22,13 @@ import {
   MAX_INVESTIGATION_NOTIFICATIONS,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
+import { MAX_THREAD_SEEN_EVENTS } from '../storage/types';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
+
+// Pinned literally: the persisted contract must not change when the shared `Severity` grows.
+// `storage/severity.ts` fails to compile for a new `Severity`, forcing a deliberate migration.
+const PERSISTED_SEVERITIES = ['80-critical', '60-high', '40-medium', '20-low'] as const;
 
 const MAX_ISO_DATE_LENGTH = 64;
 const LEGACY_MAX_TRIGGER_FEEDBACK = 3;
@@ -70,7 +74,7 @@ const investigationAttributesSchemaBase = schema.object({
   error: optionalText,
   summary: optionalText,
   conclusion: optionalText,
-  severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
+  severity: schema.maybe(enumOf(PERSISTED_SEVERITIES)),
   hypotheses: opaqueArray(MAX_HYPOTHESES),
   recommendations: opaqueArray(MAX_RECOMMENDATIONS),
   blind_spots: opaqueArray(LEGACY_MAX_BLIND_SPOTS),
@@ -96,7 +100,7 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
-// Adds impact details and optional notification state without new mappings, and drops blind spots.
+// Adds impact details, notification state, the owning run and chat thread without new mappings.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   blind_spots: undefined,
   impact: schema.maybe(
@@ -112,6 +116,23 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
   ),
   notificationDestinations: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
   notifications: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
+  execution_id: optionalKeyword,
+  // Every write sets the thread's surface, workspace, channel and thread_ts. They are optional here
+  // only because an existing model version cannot gain required fields.
+  thread: schema.maybe(
+    schema.object({
+      surface: schema.maybe(enumOf(['slack'] as const)),
+      workspace: optionalKeyword,
+      channel: optionalKeyword,
+      thread_ts: optionalKeyword,
+      status_message_ts: optionalKeyword,
+      seen_events: schema.maybe(
+        schema.arrayOf(schema.object({ event_id: keyword, execution_id: keyword }), {
+          maxSize: MAX_THREAD_SEEN_EVENTS,
+        })
+      ),
+    })
+  ),
 });
 
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {

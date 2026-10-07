@@ -32,7 +32,7 @@ const investigation = (
   investigation_id: 'inv-1',
   title: 'Checkout latency spike',
   status,
-  severity: '60-high' as const,
+  severity: 'high' as const,
   summary: 'Latency rose after a deploy.',
   notificationDestinations,
   notifications: [] as InvestigationNotification[],

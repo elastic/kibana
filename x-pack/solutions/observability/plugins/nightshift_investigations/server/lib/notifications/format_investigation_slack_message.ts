@@ -14,10 +14,10 @@ const MAX_IMPACT_ENTITIES = 5;
 
 // The only severity label map lives in the nightshift public plugin, which the server cannot import.
 const SEVERITY_LABELS: Record<Severity, string> = {
-  '80-critical': 'Critical',
-  '60-high': 'High',
-  '40-medium': 'Medium',
-  '20-low': 'Low',
+  critical: 'Critical',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
 /** Slack mrkdwn treats these as control characters, so LLM text has to be escaped before posting. */
