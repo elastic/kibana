@@ -17,10 +17,10 @@ import type { HeartbeatConfig } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
+import { SyntheticsTelemetry } from '../telemetry/synthetics_telemetry';
 import * as monitorUpgradeSender from '../routes/telemetry/monitor_upgrade_sender';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
 jest.mock('axios', () => jest.fn());
 
@@ -75,7 +75,10 @@ describe('SyntheticsService', () => {
 
   const logger = loggerMock.create();
 
-  const telemetry = createMockTelemetryEventsSender(true);
+  const telemetry = new SyntheticsTelemetry(
+    coreMock.createSetup().analytics,
+    loggerMock.create()
+  );
 
   const serverMock: SyntheticsServerSetup = {
     logger,
