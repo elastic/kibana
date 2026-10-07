@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Live Elastic Defend Scout: Docker Fleet Server + Endpoint VM (Vagrant/VirtualBox).
 # Must not run in the default Scout lane — see scout_ci_config.yml excluded_configs.
-# CI passes one target per step so ESS and Serverless retry independently.
+# CI passes one target per step so ECH and Serverless retry independently.
 # Resolve it before sourcing CI setup, which bootstraps the workspace.
 
 TARGET="${1:-}"

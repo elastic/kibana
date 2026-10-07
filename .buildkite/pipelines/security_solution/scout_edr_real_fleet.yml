@@ -23,7 +23,7 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful
-    label: Scout EDR Real Fleet - ESS
+    label: Scout EDR Real Fleet - ECH
     key: scout-edr-real-fleet-ess
     agents:
       image: family/kibana-ubuntu-2404
@@ -53,7 +53,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
-    # UI stack, then API stack. ESS is a separate step.
+    # UI stack, then API stack. ECH is a separate step.
     timeout_in_minutes: 120
     retry:
       automatic:

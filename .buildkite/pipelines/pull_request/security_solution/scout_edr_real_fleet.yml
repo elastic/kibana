@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful
-    label: 'Scout EDR Real Fleet - ESS'
+    label: 'Scout EDR Real Fleet - ECH'
     key: scout-edr-real-fleet-ess
     agents:
       enableNestedVirtualization: true
@@ -28,7 +28,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-    # UI stack, then API stack. ESS is a separate step.
+    # UI stack, then API stack. ECH is a separate step.
     timeout_in_minutes: 120
     retry:
       automatic:
