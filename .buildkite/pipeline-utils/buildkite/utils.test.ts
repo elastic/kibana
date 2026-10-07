@@ -163,6 +163,8 @@ describe('getPipeline', () => {
     const mutuallyExclusivePairs = new Set([
       'build_project.yml:deploy_project.yml',
       'deploy_project.yml:build_project.yml',
+      'build_cloud_image.yml:deploy_cloud.yml',
+      'deploy_cloud.yml:build_cloud_image.yml',
     ]);
 
     const allKeys = new Map<string, string>();

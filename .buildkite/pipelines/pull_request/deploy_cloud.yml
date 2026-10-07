@@ -1,12 +1,24 @@
 steps:
-  - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
-    label: 'Build and Deploy to Cloud'
+  - command: .buildkite/scripts/steps/cloud/build_cloud_image.sh
+    label: 'Build Cloud Image'
+    key: build_cloud_image
+    agents:
+      machineType: n2-standard-16
+      preemptible: true
+    timeout_in_minutes: 60
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+  - command: .buildkite/scripts/steps/cloud/deploy.sh
+    label: 'Deploy to Cloud'
     key: deploy_cloud
     agents:
       machineType: n2-standard-2
       preemptible: true
     depends_on:
-      - build
+      - build_cloud_image
     timeout_in_minutes: 30
     soft_fail: true
     retry:

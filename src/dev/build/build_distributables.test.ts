@@ -82,6 +82,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   versionQualifier: undefined,
   targetAllPlatforms: false,
   targetServerlessPlatforms: false,
+  targetCloudPlatforms: false,
   skipServerless: false,
   tarZstd: false,
   withExamplePlugins: false,

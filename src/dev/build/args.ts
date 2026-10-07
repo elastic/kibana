@@ -50,6 +50,7 @@ export function readCliArgs(argv: string[]) {
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
+      'cloud',
       'tar-zstd',
     ],
     string: ['docker-namespace', 'epr-registry'],
@@ -142,7 +143,9 @@ export function readCliArgs(argv: string[]) {
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
-    createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloud:
+      (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud'])) ||
+      Boolean(flags.cloud),
     createDockerCloudFIPS:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
@@ -154,6 +157,7 @@ export function readCliArgs(argv: string[]) {
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),
+    targetCloudPlatforms: Boolean(flags.cloud),
     skipServerless: Boolean(flags['skip-serverless']),
     eprRegistry: flags['epr-registry'],
     tarZstd: Boolean(flags['tar-zstd']),
