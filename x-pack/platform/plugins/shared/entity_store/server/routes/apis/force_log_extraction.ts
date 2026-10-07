@@ -22,6 +22,8 @@ import {
   resolveExtractionMode,
 } from '../../../common/domain/definitions/registry';
 
+const ALL_PROCESSES = 'all';
+
 const paramsSchema = lazySchema(() =>
   z.object({
     entityType: EntityType,
@@ -32,8 +34,11 @@ const bodySchema = lazySchema(() =>
   z.object({
     fromDateISO: z.string().datetime(),
     toDateISO: z.string().datetime(),
-    /** Which extraction process to run as. Defaults to the one this deployment actually runs. */
-    process: ExtractionMode.optional(),
+    /**
+     * Which extraction process to run as. Defaults to the one this deployment actually runs.
+     * `all` runs priority and non-priority at the same time, the way their tasks overlap.
+     */
+    process: z.union([ExtractionMode, z.literal(ALL_PROCESSES)]).optional(),
   })
 );
 
@@ -81,6 +86,19 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
               message: `Entity type ${entityType} only runs the single extraction process`,
             },
           });
+        }
+
+        if (process === ALL_PROCESSES) {
+          logger.debug(`Force log extraction API called for entity type ${entityType} as all`);
+          const extract = (mode: ExtractionMode) =>
+            logsExtractionClient
+              .withExtractionMode(mode)
+              .extractLogs(entityType, { specificWindow: { fromDateISO, toDateISO } });
+          const [priority, nonPriority] = await Promise.all([
+            extract(EXTRACTION_MODE.priority),
+            extract(EXTRACTION_MODE.nonPriority),
+          ]);
+          return res.ok({ body: { priority, nonPriority } });
         }
 
         // Without an explicit process, run as whichever mode this deployment actually uses:

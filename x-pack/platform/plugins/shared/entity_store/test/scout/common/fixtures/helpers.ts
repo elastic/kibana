@@ -514,8 +514,11 @@ export const forceLogExtraction = async (
   entityType: EntityType,
   fromDateISO: string,
   toDateISO: string,
-  /** Omitted lets the server pick the process this deployment runs. */
-  process?: 'single' | 'priority' | 'nonPriority'
+  /**
+   * Omitted lets the server pick the process this deployment runs. `all` runs priority and
+   * non-priority together and answers with one summary per process.
+   */
+  process?: 'single' | 'priority' | 'nonPriority' | 'all'
 ) =>
   await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,

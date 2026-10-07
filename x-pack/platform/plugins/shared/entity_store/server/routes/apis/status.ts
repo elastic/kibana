@@ -83,7 +83,8 @@ export type StatusRequestQuery = z.infer<typeof querySchema>;
 
 function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
-  logsExtractionConfig: LogExtractionConfig
+  logsExtractionConfig: LogExtractionConfig,
+  dualProcess: boolean
 ): StatusEngine {
   const {
     versionState,
@@ -127,7 +128,9 @@ function toPublicEngine(
     maxPageSearchSize: 10000,
     lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
     // Only types with a priority gate run a second process; for the rest there is nothing to report.
-    ...(hasPriorityExtractionGate(engine.type)
+    // With the flag off the non-priority task skips every run without updating its stored status,
+    // so reporting it would show a stale `started`.
+    ...(dualProcess && hasPriorityExtractionGate(engine.type)
       ? {
           nonPriority: {
             status: nonPriorityStatus ?? null,
@@ -174,10 +177,13 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager, isDualProcessEnabled } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
-          const { status, engines, ...rest } = await assetManager.getStatus(withComponents);
+          const [{ status, engines, ...rest }, dualProcess] = await Promise.all([
+            assetManager.getStatus(withComponents),
+            isDualProcessEnabled(),
+          ]);
 
           if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
             return res.ok({
@@ -194,7 +200,8 @@ export function registerStatus(router: EntityStorePluginRouter) {
               engines: engines.map((engine) =>
                 toPublicEngine(
                   engine,
-                  logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
+                  logsExtractionConfigByType[engine.type] ?? logsExtractionConfig,
+                  dualProcess
                 )
               ),
               excludedUserNames,
