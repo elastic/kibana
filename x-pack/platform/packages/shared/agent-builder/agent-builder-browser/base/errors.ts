@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 const PAYLOAD_TOO_LARGE_STATUS = 413;
 
 const payloadTooLargeMessage = i18n.translate('xpack.agentBuilder.errors.payloadTooLarge', {
-  defaultMessage:
-    'The request is too large to send. Shorten your message or reduce the size of the attachments, then try again.',
+  defaultMessage: 'The request is too large to send. Reduce its size and try again.',
 });
 
 // The status of a failed HTTP request, if the error carries a response (e.g. an `HttpFetchError`)
@@ -36,7 +35,8 @@ export function formatAgentBuilderErrorMessage(error: any): string {
 
   const httpStatus = getHttpStatus(error);
 
-  // the server rejects oversized bodies before they reach the route, with a message that is not meant for users
+  // the server rejects oversized bodies before they reach the route, with a message that is not meant for users;
+  // this is shared by every caller, so the wording must not assume what was being sent
   if (httpStatus === PAYLOAD_TOO_LARGE_STATUS) {
     return payloadTooLargeMessage;
   }

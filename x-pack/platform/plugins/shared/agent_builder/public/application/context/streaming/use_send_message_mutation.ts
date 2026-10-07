@@ -188,6 +188,7 @@ export const useSendMessageMutation = ({
 
       let timelineExecutionId: string | undefined;
       let triggerEventId: string | undefined;
+      let streamEventArrived = false;
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -213,6 +214,7 @@ export const useSendMessageMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
+            streamEventArrived = true;
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
             }
@@ -225,7 +227,8 @@ export const useSendMessageMutation = ({
 
         // Failures of a run are persisted by the server and arrive through the refetch below, so a
         // stream that errors ends the same way as one that completed or was stopped. Requests the
-        // server rejected up front have nothing persisted, so those are reported with a toast.
+        // server rejected before any event arrived have nothing persisted, so those are reported with
+        // a toast. An error after events arrived (e.g. a failed reattach) concerns a run that started.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
@@ -233,7 +236,7 @@ export const useSendMessageMutation = ({
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
         }).catch((error: unknown) => {
-          if (isRequestRejectedError(error)) {
+          if (!streamEventArrived && isRequestRejectedError(error)) {
             addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
           }
         });

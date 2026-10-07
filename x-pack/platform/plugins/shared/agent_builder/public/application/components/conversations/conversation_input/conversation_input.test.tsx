@@ -183,7 +183,6 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
-  characterCount: 0,
   getPlaceholderNames: jest.fn(() => []),
   removePlaceholderByName: jest.fn(),
 };
@@ -198,7 +197,6 @@ describe('ConversationInput', () => {
     jest.clearAllMocks();
     editorController.getContent.mockReturnValue('hello agent');
     editorController.isEmpty = false;
-    editorController.characterCount = 0;
 
     mockedUseConversationStream.mockReturnValue({
       pendingMessage: undefined,
@@ -243,6 +241,7 @@ describe('ConversationInput', () => {
     mockedUseMessageEditor.mockReturnValue({
       messageEditor: {} as never,
       controller: editorController,
+      overLimitCharacterCount: 0,
     } as never);
   });
 
@@ -282,15 +281,17 @@ describe('ConversationInput', () => {
 
   describe('message length limit', () => {
     it('does not show a warning for a message within the limit', () => {
-      editorController.characterCount = CHAT_MESSAGE_MAX_LENGTH;
-
       renderInput(<ConversationInput />);
 
       expect(screen.queryByTestId('agentBuilderConversationInputTooLong')).not.toBeInTheDocument();
     });
 
     it('shows a warning and blocks submit when the message exceeds the limit', () => {
-      editorController.characterCount = CHAT_MESSAGE_MAX_LENGTH + 1;
+      mockedUseMessageEditor.mockReturnValue({
+        messageEditor: {} as never,
+        controller: editorController,
+        overLimitCharacterCount: CHAT_MESSAGE_MAX_LENGTH + 1,
+      } as never);
 
       renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));

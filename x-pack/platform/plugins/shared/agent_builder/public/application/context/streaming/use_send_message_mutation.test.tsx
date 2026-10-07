@@ -298,6 +298,26 @@ describe('useSendMessageMutation', () => {
     }
   );
 
+  it('does not show a toast for an HTTP error that arrives after the run started', async () => {
+    const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+    const reattachError = Object.assign(new Error('Internal Server Error'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 500 },
+    });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => {
+      source.next(started as ChatEvent);
+      source.error(reattachError);
+    });
+
+    await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+    expect(mockAddDanger).not.toHaveBeenCalled();
+  });
+
   it.each([502, 503, 504])(
     'does not show a toast for a %s gateway error, which is left to the reattach logic',
     async (status) => {

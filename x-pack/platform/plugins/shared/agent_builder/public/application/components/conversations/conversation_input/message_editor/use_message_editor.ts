@@ -9,7 +9,11 @@ import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
-import { createCommandBadgeElement, deserializeInputSegments } from './command_badge';
+import {
+  CommandBadgeSerializationError,
+  createCommandBadgeElement,
+  deserializeInputSegments,
+} from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
   createImagePlaceholderElement,
@@ -45,10 +49,23 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
-  characterCount: number;
   getPlaceholderNames: () => string[];
   removePlaceholderByName: (name: string) => void;
 }
+
+// The limit applies to what is sent, and image placeholders and command badges serialize to
+// markdown links longer than the text they display. Falls back to the displayed length for a
+// badge that cannot be serialized, which submit reports on its own.
+const getSerializedLength = (element: HTMLElement, displayedLength: number): number => {
+  try {
+    return serializeEditorContent(element).length;
+  } catch (error) {
+    if (error instanceof CommandBadgeSerializationError) {
+      return displayedLength;
+    }
+    throw error;
+  }
+};
 
 /**
  * Reactive bindings for the MessageEditor component.
@@ -161,12 +178,10 @@ const useMessageEditorController = ({
   ref,
   syncIsEmpty,
   isEmpty,
-  characterCount,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   isEmpty: boolean;
-  characterCount: number;
 }): MessageEditorController => {
   const controller = useMemo(
     () => ({
@@ -214,9 +229,8 @@ const useMessageEditorController = ({
         }
       },
       isEmpty,
-      characterCount,
     }),
-    [ref, isEmpty, characterCount, syncIsEmpty]
+    [ref, isEmpty, syncIsEmpty]
   );
   return controller;
 };
@@ -238,22 +252,24 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void; onContentChange?: () => void } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void; maxLength?: number } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
+  overLimitCharacterCount: number;
 } => {
-  const { onEditorFocus, onContentChange } = options;
+  const { onEditorFocus, onContentChange, maxLength = Infinity } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
-  const [characterCount, setCharacterCount] = useState(0);
+  const [overLimitCharacterCount, setOverLimitCharacterCount] = useState(0);
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
       return;
     }
     const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
-    setCharacterCount(textContent.length);
+    const contentLength = getSerializedLength(ref.current, textContent.length);
+    setOverLimitCharacterCount(contentLength > maxLength ? contentLength : 0);
     const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
@@ -261,16 +277,17 @@ export const useMessageEditor = (
       ref.current.innerHTML = '';
     }
     setIsEmpty(nextIsEmpty);
-  }, []);
+  }, [maxLength]);
 
   const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, characterCount });
+  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,
       controller,
+      overLimitCharacterCount,
     }),
-    [instance, controller]
+    [instance, controller, overLimitCharacterCount]
   );
 
   return messageEditor;

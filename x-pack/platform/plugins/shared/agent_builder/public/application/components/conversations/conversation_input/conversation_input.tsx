@@ -290,9 +290,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     }
   }, [saveDraft]);
 
-  const { messageEditor, controller: messageEditorController } = useMessageEditor({
+  const {
+    messageEditor,
+    controller: messageEditorController,
+    overLimitCharacterCount,
+  } = useMessageEditor({
     onEditorFocus,
     onContentChange: handleContentChange,
+    maxLength: CHAT_MESSAGE_MAX_LENGTH,
   });
   messageEditorControllerRef.current = messageEditorController;
 
@@ -335,7 +340,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled =
     isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
-  const isMessageTooLong = messageEditorController.characterCount > CHAT_MESSAGE_MAX_LENGTH;
+  const isMessageTooLong = overLimitCharacterCount > 0;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isMessageTooLong ||
@@ -527,7 +532,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       {isMessageTooLong && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="danger" data-test-subj="agentBuilderConversationInputTooLong">
-            {getMessageTooLongLabel(messageEditorController.characterCount)}
+            {getMessageTooLongLabel(overLimitCharacterCount)}
           </EuiText>
         </EuiFlexItem>
       )}
