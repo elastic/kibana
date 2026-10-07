@@ -163,6 +163,17 @@ describe('getColumnsWithHighlights', () => {
     expect(Object.keys(getColumnsWithHighlights(query, ['title', 'author']))).toEqual(['title']);
   });
 
+  it('uses the response columns when an omitted-ON query targets a parameter', () => {
+    for (const query of [
+      'FROM books | HIGHLIGHT MATCH(?field, "Tolkien")',
+      'FROM books | HIGHLIGHT ??field : "Tolkien"',
+    ]) {
+      expect(Object.keys(getColumnsWithHighlights(query, ['title', 'highlight_title']))).toEqual([
+        'highlight_title',
+      ]);
+    }
+  });
+
   it('cannot tell the derived columns apart when the prefix is empty', () => {
     const query = 'FROM books | HIGHLIGHT prefix = "" "Tolkien" ON *';
     expect(getColumnsWithHighlights(query, ['title', 'description'])).toEqual({});

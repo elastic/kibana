@@ -21,6 +21,7 @@ import {
   isIdentifier,
   isMap,
   isOptionNode,
+  isParamLiteral,
 } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
 import { isTextColumn } from '../../definitions/utils/full_text_match';
@@ -182,6 +183,15 @@ const FIELD_TARGETING_QUERY_FUNCTIONS = ['match', 'match_phrase', ':'];
 
 const WILDCARD = '*';
 
+/**
+ * The field a field-targeting function searches, or undefined when it is not a plain column,
+ * such as an unresolved parameter (`?field`, or `??field` that parses as a column).
+ */
+const getTargetFieldName = ({ args: [target] }: ESQLFunction): string | undefined =>
+  !Array.isArray(target) && isColumn(target) && !target.args.some(isParamLiteral)
+    ? target.name
+    : undefined;
+
 /** Names of the fields a field-targeting query (MATCH, MATCH_PHRASE, `:`) searches. */
 export const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
   const queryFields: string[] = [];
@@ -192,10 +202,10 @@ export const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
         return;
       }
 
-      const [target] = fn.args;
+      const fieldName = getTargetFieldName(fn);
 
-      if (!Array.isArray(target) && isColumn(target)) {
-        queryFields.push(target.name);
+      if (fieldName !== undefined) {
+        queryFields.push(fieldName);
       }
     },
   });
@@ -212,11 +222,14 @@ const collectDerivedFieldNames = (expression: ESQLAstItem, names: string[]): boo
   const name = expression.name.toLowerCase();
 
   if (FIELD_TARGETING_QUERY_FUNCTIONS.includes(name)) {
-    const [target] = expression.args;
+    const fieldName = getTargetFieldName(expression);
 
-    if (!Array.isArray(target) && isColumn(target)) {
-      names.push(target.name);
+    // A field that cannot be resolved here, such as a parameter, could be any column.
+    if (fieldName === undefined) {
+      return false;
     }
+
+    names.push(fieldName);
 
     return true;
   }

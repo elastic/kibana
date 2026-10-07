@@ -117,6 +117,11 @@ describe('HIGHLIGHT > columnsAfter', () => {
       ).toHaveLength(3);
     });
 
+    it('highlights every text column when the query targets a parameter', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(?field, "fox")')).toHaveLength(3);
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT ??field : "fox"')).toHaveLength(3);
+    });
+
     it('leaves out a named field that is not a text column of the input', () => {
       expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(year, "1") AND title : "x"')).toEqual([
         'highlight_title',
