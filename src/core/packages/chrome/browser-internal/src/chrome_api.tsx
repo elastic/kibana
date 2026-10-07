@@ -146,6 +146,10 @@ export function createChromeApi({
       get$: () => state.projectPicker.$,
       set: state.projectPicker.set,
     },
+    subscriptionBadge: {
+      get$: () => state.subscriptionBadge.$,
+      set: state.subscriptionBadge.set,
+    },
     userMenu: {
       get$: () => state.userMenu.$,
       set: (content) => state.userMenu.set(content),

@@ -42,6 +42,7 @@ const createStartContractMock = () => {
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
+  const nextSubscriptionBadgeState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject<InlineAppHeaderState | undefined>(undefined);
   const docTitleBase = 'Elastic';
@@ -77,6 +78,12 @@ const createStartContractMock = () => {
     get$: jest.fn().mockReturnValue(nextProjectPickerState$),
     set: jest.fn((content?: ReactNode) => {
       nextProjectPickerState$.next(content ?? null);
+    }),
+  });
+  const subscriptionBadge = lazyObject({
+    get$: jest.fn().mockReturnValue(nextSubscriptionBadgeState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextSubscriptionBadgeState$.next(content ?? null);
     }),
   });
   const registerFeedbackHandler = jest.fn().mockReturnValue(() => {});
@@ -121,6 +128,7 @@ const createStartContractMock = () => {
     userMenu,
     contextSwitcher,
     projectPicker,
+    subscriptionBadge,
   });
   const help = lazyObject({
     registerFeedbackHandler,

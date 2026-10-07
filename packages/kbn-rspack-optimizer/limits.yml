@@ -203,6 +203,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
+  subscriptionStatus: 5000
   synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
