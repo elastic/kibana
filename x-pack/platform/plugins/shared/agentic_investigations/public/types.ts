@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RegisterFlyoutGroupedAttachment } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
@@ -24,5 +25,7 @@ export interface AgenticInvestigationsPublicConfig {
   escalations: { enabled: boolean };
 }
 
-export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
+export interface AgenticInvestigationsPublicPluginSetup {
+  registerFlyoutGroupedAttachment: RegisterFlyoutGroupedAttachment;
+}
 export type AgenticInvestigationsPublicPluginStart = Record<string, never>;

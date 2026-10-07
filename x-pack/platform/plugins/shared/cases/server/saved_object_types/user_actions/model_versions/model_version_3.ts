@@ -6,14 +6,13 @@
  */
 
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
-import { userActionCreateSchemaV2, userActionForwardCompatibilitySchemaV2 } from '../schemas';
+import { userActionCreateSchemaV3, userActionForwardCompatibilitySchemaV3 } from '../schemas';
 
 /**
  * Indexes `payload.origin.type` and `payload.origin.attachmentType` on workflow user actions so
  * the usage collector can break workflow runs down by the surface they were triggered from and,
  * for attachment surfaces, by attachment type. The rest of `origin` stays unmapped under the
- * payload's `dynamic: false` mapping. Mappings-only: the attribute shape is unchanged, so the v2
- * schemas still apply.
+ * payload's `dynamic: false` mapping.
  */
 export const modelVersion3: SavedObjectsFullModelVersion = {
   changes: [
@@ -34,7 +33,7 @@ export const modelVersion3: SavedObjectsFullModelVersion = {
     },
   ],
   schemas: {
-    forwardCompatibility: userActionForwardCompatibilitySchemaV2,
-    create: userActionCreateSchemaV2,
+    forwardCompatibility: userActionForwardCompatibilitySchemaV3,
+    create: userActionCreateSchemaV3,
   },
 };

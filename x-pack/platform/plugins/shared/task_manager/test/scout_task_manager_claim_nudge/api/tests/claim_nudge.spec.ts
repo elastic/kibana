@@ -25,7 +25,8 @@ import {
 } from '../fixtures/constants';
 
 // Local-only: config sets don't apply on Cloud, where default 500ms polling meets the budget alone.
-apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/295825
+apiTest.describe.skip('Task Manager claim nudge', { tag: ['@local-stateful-classic'] }, () => {
   const taskIdsToCleanup: string[] = [];
 
   // Far enough out that only a nudge can make it run during the test.
