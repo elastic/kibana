@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import { registerSubjectAttachmentTypes } from './subjects/attachments';
+import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
@@ -22,9 +24,10 @@ import type {
 } from './types';
 
 /**
- * Registers Impact workflow steps, the Impact attachment UI, and the conversation details flyout
- * UI of the `investigation` and `escalation` templates. Escalations, user profiles and the
- * connected investigation components are also consumed directly by a solution's UI.
+ * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
+ * conversation details flyout UI of the `investigation` and `escalation` templates. Escalations,
+ * user profiles and the connected investigation components are also consumed directly by a
+ * solution's UI.
  */
 export class AgenticInvestigationsPublicPlugin
   implements
@@ -63,6 +66,8 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
+      registerSubjectAttachmentTypes(agentBuilder);
+      registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
         startDeps: { ...startDeps, agentBuilder },

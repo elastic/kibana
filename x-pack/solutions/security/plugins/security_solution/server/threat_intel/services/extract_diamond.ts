@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CostTraceBuilder } from '../lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
 import {
@@ -225,17 +225,21 @@ const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max)
  */
 const DIAMOND_SUMMARY_CHAR_LIMIT = 4_000;
 
-const diamondVertexSchema = z.object({
-  signal: z.enum(['HIGH', 'PARTIAL', 'NONE']),
-  summary: boundedText(DIAMOND_SUMMARY_CHAR_LIMIT),
-});
+const diamondVertexSchema = lazySchema(() =>
+  z.object({
+    signal: z.enum(['HIGH', 'PARTIAL', 'NONE']),
+    summary: boundedText(DIAMOND_SUMMARY_CHAR_LIMIT),
+  })
+);
 
-export const extractDiamondLlmOutputSchema = z.object({
-  adversary: diamondVertexSchema,
-  capability: diamondVertexSchema,
-  infrastructure: diamondVertexSchema,
-  victim: diamondVertexSchema,
-});
+export const extractDiamondLlmOutputSchema = lazySchema(() =>
+  z.object({
+    adversary: diamondVertexSchema,
+    capability: diamondVertexSchema,
+    infrastructure: diamondVertexSchema,
+    victim: diamondVertexSchema,
+  })
+);
 
 type DiamondVertexResult = z.infer<typeof diamondVertexSchema>;
 type DiamondLlmOutput = z.infer<typeof extractDiamondLlmOutputSchema>;

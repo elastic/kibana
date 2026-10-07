@@ -1801,6 +1801,43 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('findByWorkflowExecutionId', () => {
+    it('returns the original proposal its gate execution created, within the space', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID);
+
+      expect(proposal).toMatchObject({ id: 'proposal-1', workflowExecutionId: EXECUTION_ID });
+      expect(proposal).not.toHaveProperty('ranks');
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                { term: { workflowExecutionId: EXECUTION_ID } },
+                { term: { spaceId: SPACE_ID } },
+              ],
+            },
+          },
+          sort: [{ createdAt: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('returns undefined before the create step ran, or for a blank id', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID)).resolves.toBe(
+        undefined
+      );
+      await expect(service.findByWorkflowExecutionId('', SPACE_ID)).resolves.toBe(undefined);
+      expect(storage.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
@@ -2320,6 +2357,45 @@ describe('ProposalsService', () => {
 
       // Normalised: a category carries no key until its first event.
       expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
+    });
+
+    it('should report what is open now, not what was open at any point, in the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 1, 0]);
+    });
+
+    it('should not count a proposal that opened and closed within the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        opens: byIdxAndCategory('opens', [[4, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 0, 0, 0]);
+    });
+
+    it('should keep a category in the current bucket once it has closed down to zero', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets[4].counts).toEqual({ contain: 0 });
     });
 
     it('should report currentOpen from the scalar query', async () => {

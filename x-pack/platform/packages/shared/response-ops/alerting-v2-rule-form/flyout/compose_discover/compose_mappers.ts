@@ -40,6 +40,9 @@ export const composeFormToCreateRequest = (
       name: formValues.metadata.name,
       description: formValues.metadata.description,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
+      ...(formValues.metadata.routingTags?.length
+        ? { routing_tags: formValues.metadata.routingTags }
+        : {}),
       ...(builderType ? { builder_type: builderType } : {}),
     },
     time_field: formValues.timeField,
@@ -69,6 +72,9 @@ export const composeFormToUpdateRequest = (
       // Empty tags must be sent as an explicit `null` to clear them; omitting
       // the key would preserve the existing tags on a partial update.
       tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
+      routing_tags: formValues.metadata.routingTags?.length
+        ? formValues.metadata.routingTags
+        : null,
     },
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
@@ -98,6 +104,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       description: rule.metadata.description,
       enabled: rule.enabled,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {

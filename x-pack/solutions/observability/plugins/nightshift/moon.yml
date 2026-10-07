@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/nightshift-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/nightshift-plugin'
   description: Moon project for @kbn/nightshift-plugin
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift
 dependsOn:
   - '@kbn/agent-builder-browser'
