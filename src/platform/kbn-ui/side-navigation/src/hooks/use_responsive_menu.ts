@@ -35,10 +35,9 @@ interface ResponsiveMenuState {
  * (e.g. because items were explicitly hidden by the user). When true, space is reserved for it.
  * @returns an object containing:
  * - `primaryMenuRef` - a ref to the primary menu.
- * - `isOverflowMeasured` - whether the split between `visibleMenuItems` and `overflowMenuItems` is
- * final, i.e. no measurement is pending. It is `false` for the render that publishes a new item
- * set, because measuring requires every item to be in the DOM first, and drops back to `false`
- * while a resize-driven re-measurement is pending, because that can move items too.
+ * - `isOverflowMeasured` - whether the current item set has been measured, i.e. whether the split
+ * between `visibleMenuItems` and `overflowMenuItems` is final. It is `false` for the render that
+ * publishes a new item set, because measuring requires every item to be in the DOM first.
  * - `visibleMenuItems` - the visible menu items.
  * - `overflowMenuItems` - the overflow menu items.
  */
@@ -86,18 +85,13 @@ export function useResponsiveMenu(
     setIsOverflowMeasured(true);
   }, [stableItemsReference, hasForcedMoreButton]);
 
-  const [recalculateOnNextFrame, cancelRecalculation] =
+  const [scheduleRecalculation, cancelRecalculation] =
     useRafDebouncedCallback(recalculateMenuLayout);
-
-  // A pending recalculation can still move items in or out of "More", so the split is not final.
-  const scheduleRecalculation = useCallback(() => {
-    setIsOverflowMeasured(false);
-    recalculateOnNextFrame();
-  }, [recalculateOnNextFrame]);
 
   useLayoutEffect(() => {
     // Invalidate the cache when items change
     setVisibleCount(stableItemsReference.length);
+    setIsOverflowMeasured(false);
     heightsCacheRef.current = [];
 
     const observer = new ResizeObserver(() => {

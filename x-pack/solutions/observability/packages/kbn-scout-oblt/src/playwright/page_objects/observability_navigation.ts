@@ -162,10 +162,10 @@ export class ObservabilityNavigation {
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
    * open "More" when it is not in the primary nav so the returned locator is reachable.
    *
-   * The returned locator is container-agnostic: chrome re-splits the primary menu and "More" on
-   * every re-measure, so a locator scoped to the container the item happened to be in can be
-   * stale by the time the caller acts on it. To act on an item, prefer `clickBodyNavItem*` /
-   * `openPanelById`, which re-resolve placement for every attempt.
+   * The locator matches the item in either container. Chrome re-splits the menu on
+   * remeasure, so a locator scoped to the container the item was in can miss by the
+   * time the caller acts. To click an item, use `clickBodyNavItem*` / `openPanelById`,
+   * which re-resolve placement on every attempt.
    *
    * Do not `or()` the item with the More trigger and `waitFor` — both can
    * be visible at once, which Playwright treats as a strict-mode violation.
@@ -195,9 +195,9 @@ export class ObservabilityNavigation {
   }
 
   /**
-   * Nav has painted and its overflow split is measured, so placement can be read. Chrome can
-   * paint the More trigger (for other overflow items) before this item lands in primary, or
-   * paint primary late after `waitForLoad()` only saw the nav container.
+   * Nav has painted and its overflow split is measured. Chrome can paint the More trigger
+   * before this item lands in the primary nav, or paint the primary nav late after
+   * `waitForLoad()` only saw the nav container.
    */
   private async waitForMeasuredNav(): Promise<void> {
     await this.waitForLoad();
@@ -248,11 +248,10 @@ export class ObservabilityNavigation {
   }
 
   /**
-   * Resolve placement and click within one bounded wait, exiting on `outcome` instead of on the
-   * click resolving. Chrome re-splits the primary menu and "More" on every re-measure, so an item
-   * can be re-parented between the read that places it and the click; re-resolving per attempt
-   * re-opens "More" instead of burning the action timeout on a placement that no longer holds.
-   * Clicking a nav item only opens a panel or navigates, so repeating it is side-effect free.
+   * Resolve placement and click inside one wait, and stop when `outcome` is visible.
+   * An item can move between the primary nav and More between a placement read and the
+   * click; each attempt looks again and re-opens More. Repeating the click is safe:
+   * the side panel follows the active item, so a second click does not close it.
    */
   private async clickBodyNavItem(bodyItem: Locator, outcome?: Locator): Promise<void> {
     await this.waitForMeasuredNav();
