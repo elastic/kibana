@@ -969,9 +969,6 @@ describe('rule_request_mappers', () => {
       });
     });
 
-    // PATCH merges these objects leaf by leaf, so a key the form owns but leaves
-    // out would keep its stored value instead of being cleared. `toStrictEqual`
-    // is what makes that an assertion: it tells an absent key from a null one.
     it.each([
       [
         'cleared',
@@ -1003,9 +1000,6 @@ describe('rule_request_mappers', () => {
       }
     );
 
-    // A delay mode owns its whole phase, so the leaves the new mode does not use
-    // have to be nulled: merging would otherwise keep the duration or operator
-    // the user just switched away from.
     it.each([
       ['an immediate', 'immediate' as const, { count: 0, timeframe: null, operator: null }],
       ['a breach-count', 'breaches' as const, { count: 2, timeframe: null, operator: null }],

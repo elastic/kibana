@@ -109,7 +109,6 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle?.strategy).toBe('every_time');
     });
 
-    // A throttle without a strategy configures nothing: omit the block instead.
     it('rejects an empty throttle object', () => {
       expect(createActionPolicyDataSchema.safeParse({ ...base, throttle: {} }).success).toBe(false);
     });

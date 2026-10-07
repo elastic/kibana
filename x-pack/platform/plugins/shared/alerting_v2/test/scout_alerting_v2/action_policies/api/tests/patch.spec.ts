@@ -223,13 +223,31 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
 
       // An empty array used to reach the saved object schema's `minSize: 1` and surface as a 500.
       expect(await patch({ group_by: [] })).toHaveStatusCode(400);
-      expect(await patch({ throttle: {} })).toHaveStatusCode(400);
+      // A throttle is cleared whole, with `throttle: null`, never by nulling its strategy.
       expect(await patch({ throttle: { strategy: null } })).toHaveStatusCode(400);
 
       const after = await actionPolicySavedObject.getAttributes(created.id);
       expect(after).toStrictEqual(before);
     }
   );
+
+  apiTest('treats an empty throttle patch as a no-op merge', async ({ apiServices }) => {
+    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+    const created = await actionPolicies.create(
+      buildCreateActionPolicyData({
+        name: 'patch-throttle-noop',
+        grouping_mode: 'all',
+        throttle: { strategy: 'time_interval', interval: '5m' },
+      })
+    );
+
+    // Unlike create, where `{}` configures nothing and is rejected, a patch merges leaf by leaf:
+    // an empty object names no leaf, so the stored throttle survives untouched.
+    await actionPolicies.patch(created.id, { throttle: {} });
+
+    const after = await actionPolicySavedObject.getAttributes(created.id);
+    expect(after.throttle).toStrictEqual({ strategy: 'time_interval', interval: '5m' });
+  });
 
   apiTest('never writes enabled or the snooze state', async ({ apiServices }) => {
     const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;

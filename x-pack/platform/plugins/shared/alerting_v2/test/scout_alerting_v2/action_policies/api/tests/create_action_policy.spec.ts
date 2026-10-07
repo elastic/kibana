@@ -205,7 +205,8 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects missing description', async ({ apiClient }) => {
+  // `description` is optional: an absent one is absent on disk and in the response, not `''`.
+  apiTest('accepts a body with no description', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
@@ -214,8 +215,8 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       },
     });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response).toHaveStatusCode(201);
+    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects description over the maximum length', async ({ apiClient }) => {
@@ -436,17 +437,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('creates a policy with no description', async ({ apiClient }) => {
-    const { description, ...body } = buildCreateActionPolicyData({ name: 'no-description' });
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body,
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {

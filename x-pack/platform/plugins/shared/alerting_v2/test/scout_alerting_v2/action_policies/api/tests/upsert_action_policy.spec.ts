@@ -289,7 +289,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects missing description', async ({ apiClient }) => {
+  // `description` is optional: an absent one is absent on disk and in the response, not `''`.
+  apiTest('accepts a body with no description', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-description'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
@@ -298,8 +299,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       },
     });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response).toHaveStatusCode(201);
+    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
