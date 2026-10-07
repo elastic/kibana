@@ -358,11 +358,12 @@ export const RunHistory = ({
         css={css`
           position: sticky;
           inset-block-start: 0;
-          z-index: ${euiTheme.levels.content};
+          z-index: calc(${euiTheme.levels.content} + 1);
           display: flex;
           flex-direction: column;
           gap: ${euiTheme.size.s};
-          padding-block: ${euiTheme.size.s} ${euiTheme.size.l};
+          margin: -${euiTheme.size.base} -${euiTheme.size.base} 0;
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.l};
           border-block-end: ${euiTheme.border.thin};
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
