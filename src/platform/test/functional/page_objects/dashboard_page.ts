@@ -306,12 +306,12 @@ export class DashboardPageObject extends FtrService {
 
   public async switchToEditMode() {
     this.log.debug('Switching to edit mode');
-    if (await this.testSubjects.exists('dashboardEditMode')) {
-      // if the dashboard is not already in edit mode
+    if (!(await this.testSubjects.exists('dashboardViewOnlyMode'))) {
       await this.testSubjects.click('dashboardEditMode');
     }
     // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
+      if (!(await this.testSubjects.exists('dashboardViewOnlyMode'))) return false;
       const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]');
       const dragHandles = await this.find.allByCssSelector(
         '[data-test-subj="embeddablePanelDragHandle"]'
