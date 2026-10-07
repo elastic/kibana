@@ -42,22 +42,18 @@ import {
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type {
-  CanvasCreateHistoryRef,
-  CanvasStateServiceDeps,
-  CanvasUrlInput,
-  CanvasUrlEvent,
-  CanvasState,
+import {
+  defaultCanvasUrlState,
+  type CanvasCreateHistoryRef,
+  type CanvasStateServiceDeps,
+  type CanvasUrlInput,
+  type CanvasUrlEvent,
+  type CanvasState,
 } from './types';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
-
-const defaultUrlState = {
-  flyoutName: null,
-  flyoutTab: null,
-};
 
 export const canvasStateMachine = setup({
   types: {
@@ -389,6 +385,21 @@ export const canvasStateMachine = setup({
             raise({ type: 'url.sync' }),
           ],
         },
+        'search.change': {
+          actions: [
+            {
+              type: 'storeUrlState',
+              params: ({ event, context }) => ({
+                urlState: {
+                  ...context.urlState,
+                  query: event.query || null,
+                },
+              }),
+            },
+            // Typing should not leave one history entry per keystroke.
+            raise({ type: 'url.sync', replace: true }),
+          ],
+        },
       },
       states: {
         unit: {
@@ -562,7 +573,7 @@ export const canvasStateMachine = setup({
   context: ({ spawn, self }) => {
     const unitDefinition = createDefaultUnit();
     return {
-      urlState: defaultUrlState,
+      urlState: defaultCanvasUrlState,
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
@@ -761,9 +772,9 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
 function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
-  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+  return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     urlStateStorageContainer.set(CANVAS_URL_STATE_KEY, context.urlState, {
-      replace: false,
+      replace: event.type === 'url.sync' && event.replace === true,
     });
   };
 }
@@ -778,18 +789,21 @@ function createUrlInitializerActor({
     if (!urlStateValues) {
       return sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
 
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      urlState.data.flyoutTab =
-        urlState.data.flyoutName && !urlState.data.flyoutTab ? 'overview' : urlState.data.flyoutTab;
+      const { flyoutName, flyoutTab, query } = urlState.data;
       sendBack({
         type: 'url.init',
-        urlState: urlState.data,
+        urlState: {
+          flyoutName,
+          flyoutTab: flyoutName && !flyoutTab ? 'overview' : flyoutTab,
+          query: query || null,
+        },
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -797,7 +811,7 @@ function createUrlInitializerActor({
       );
       sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
   });

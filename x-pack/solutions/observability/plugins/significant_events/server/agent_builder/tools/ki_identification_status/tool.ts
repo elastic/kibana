@@ -12,6 +12,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -23,8 +25,10 @@ const onboardingStatusSchema = z.object({
 });
 
 export const createKiIdentificationStatusTool = ({
+  server,
   streamsKIsOnboardingClient,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID,
@@ -47,6 +51,7 @@ export const createKiIdentificationStatusTool = ({
   schema: onboardingStatusSchema,
   handler: async ({ stream_name: streamName }, { request }) => {
     try {
+      await assertCanReadSignificantEvents({ request, server });
       const data = await getKiIdentificationStatusToolHandler({
         streamName,
         request,

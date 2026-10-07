@@ -16,6 +16,8 @@ import {
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
   isStateTransitionAllowed,
+  isRoutingTagsAllowedForKind,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -79,6 +81,15 @@ describe('createRuleDataSchema', () => {
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'ignore' },
       });
+    });
+
+    it('accepts builder metadata', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder: { type: 'threshold' } },
+      });
+
+      expect(result.metadata.builder).toEqual({ type: 'threshold' });
     });
 
     it('accepts a full payload with all optional fields', () => {
@@ -243,6 +254,62 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('metadata.routing_tags', () => {
+    it('accepts routing tags on an alert rule', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: ['sre', 'payments'] },
+      });
+
+      expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
+    });
+
+    it('rejects routing tags on a signal rule', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validSignalCreateData,
+        metadata: { name: 'test rule', routing_tags: ['sre'] },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual([
+        expect.objectContaining({
+          path: ['metadata', 'routing_tags'],
+          message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+        }),
+      ]);
+    });
+
+    it('rejects an empty routing tags array', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: [] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects routing tags exceeding 20 items', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          routing_tags: Array.from({ length: 21 }, (_, i) => `route-${i}`),
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a routing tag exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 
@@ -1170,6 +1237,21 @@ describe('updateRuleDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts a non-empty routing tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { routing_tags: ['sre'] } });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('accepts metadata.routing_tags set to null (clear all routing tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { routing_tags: null } });
+    expect(result.metadata?.routing_tags).toBeNull();
+  });
+
+  it('rejects metadata.routing_tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { routing_tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
       artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
@@ -1976,6 +2058,27 @@ describe('isStateTransitionAllowed', () => {
   it('rejects state_transition on signal rules', () => {
     expect(
       isStateTransitionAllowed({ kind: 'signal', state_transition: { pending: { count: 1 } } })
+    ).toBe(false);
+  });
+});
+
+describe('isRoutingTagsAllowedForKind', () => {
+  it('allows routing tags on alert rules', () => {
+    expect(
+      isRoutingTagsAllowedForKind({ kind: 'alert', metadata: { routing_tags: ['sre'] } })
+    ).toBe(true);
+  });
+
+  it('allows absent or null routing tags on signal rules', () => {
+    expect(isRoutingTagsAllowedForKind({ kind: 'signal', metadata: {} })).toBe(true);
+    expect(isRoutingTagsAllowedForKind({ kind: 'signal', metadata: { routing_tags: null } })).toBe(
+      true
+    );
+  });
+
+  it('rejects routing tags on signal rules', () => {
+    expect(
+      isRoutingTagsAllowedForKind({ kind: 'signal', metadata: { routing_tags: ['sre'] } })
     ).toBe(false);
   });
 });
