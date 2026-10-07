@@ -6,6 +6,7 @@
  */
 
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { attachImpactStepInputSchema } from '../../../common/impact/step_types/attach_impact_step';
@@ -231,11 +232,35 @@ describe('investigations.getImpact step', () => {
     jest.clearAllMocks();
   });
 
-  const getDefinition = (getByConversationId: jest.Mock, privileges = allowAll()) =>
+  const getDefinition = (
+    getByConversationId: jest.Mock,
+    privileges = allowAll(),
+    readableIds: string[] | undefined = undefined
+  ) =>
     getGetImpactStepDefinition({
       getImpactService: () => ({ getByConversationId } as unknown as ImpactService),
       privileges,
+      getConversationClient: async () =>
+        ({
+          bulkGet: async (ids: string[]) =>
+            new Map(
+              ids
+                .filter((id) => readableIds === undefined || readableIds.includes(id))
+                .map((id) => [id, { id }])
+            ),
+        } as unknown as ConversationPublicClient),
     });
+
+  it('should report a conversation the workflow identity cannot read as not found', async () => {
+    const getByConversationId = jest.fn();
+
+    await expect(
+      getDefinition(getByConversationId, allowAll(), []).handler(
+        createContext({ conversationId: 'someone-elses-private' })
+      )
+    ).rejects.toMatchObject({ type: 'NotFoundError' });
+    expect(getByConversationId).not.toHaveBeenCalled();
+  });
 
   it('should return the fields a workflow can branch on', async () => {
     const entities = [{ id: 'host-1', name: 'fin-dc-01' }];

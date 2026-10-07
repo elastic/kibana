@@ -91,12 +91,19 @@ export class InProgressResolver {
     return ids;
   }
 
-  private isStale({ status, lastHeartbeat }: AgentExecution): boolean {
-    if (status !== ExecutionStatus.running || lastHeartbeat === undefined) {
+  /**
+   * A running execution is stale when its last liveness signal is older than
+   * {@link STALE_AGENT_HEARTBEAT_MS}. Agent Builder writes a heartbeat when it creates the
+   * execution and every 10s while it runs; an execution without one (written before Agent
+   * Builder recorded heartbeats) falls back to its creation time, so it cannot read as in
+   * progress forever. Scheduled executions are waiting for a node and are not judged here.
+   */
+  private isStale(execution: AgentExecution): boolean {
+    if (execution.status !== ExecutionStatus.running) {
       return false;
     }
-    const heartbeatAt = Date.parse(lastHeartbeat);
-    return Number.isFinite(heartbeatAt) && this.now() - heartbeatAt > STALE_AGENT_HEARTBEAT_MS;
+    const lastSignalAt = Date.parse(execution.lastHeartbeat ?? execution['@timestamp']);
+    return Number.isFinite(lastSignalAt) && this.now() - lastSignalAt > STALE_AGENT_HEARTBEAT_MS;
   }
 }
 
