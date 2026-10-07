@@ -8,6 +8,7 @@
  */
 
 import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-contract-mock';
+import type { ConnectorSpec } from '../../connector_spec';
 import type { ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
 import type { VendorApiFixtures } from './fixtures';
@@ -74,6 +75,17 @@ const uniqueSorted = <T>(items: readonly T[], keyOf: (item: T) => string): T[] =
 const isUnmatched = ({ matched, operation, status }: ContractCall): boolean =>
   matched === undefined && operation === undefined && (status === 404 || status === 405);
 
+// Required properties only, so optional settings such as custom base URLs keep their defaults.
+const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, unknown>> => {
+  if (!schema) {
+    return {};
+  }
+  const {
+    inputs: [config],
+  } = await generateActionInputs({ input: schema });
+  return (config as Record<string, unknown> | undefined) ?? {};
+};
+
 /**
  * Runs every action of a connector against the contract mock, with inputs generated from its
  * schema, and records the vendor operations each one calls. Handlers that throw, e.g. on a
@@ -83,8 +95,10 @@ export const recordActions = async ({
   connector,
   specs,
   fixtures = {},
+  config,
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
+  const connectorConfig = config ?? (await sampleConfig(connector));
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
   const findings: RecordingFinding[] = [];
@@ -103,6 +117,7 @@ export const recordActions = async ({
       const { mock, runAction } = await createContractContext({
         ...contextOptions,
         connector,
+        config: connectorConfig,
         specs,
         fixtures: toResponseFixtures(fixture.responses),
       });

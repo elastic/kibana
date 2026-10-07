@@ -1,0 +1,110 @@
+{
+  "operations": {
+    "addComment": [
+      {
+        "method": "post",
+        "path": "/cards/{id}/actions/comments",
+        "source": "v3"
+      }
+    ],
+    "createCard": [
+      {
+        "method": "post",
+        "path": "/cards",
+        "source": "v3"
+      }
+    ],
+    "getBoard": [
+      {
+        "method": "get",
+        "path": "/boards/{id}",
+        "source": "v3"
+      }
+    ],
+    "getCard": [
+      {
+        "method": "get",
+        "path": "/cards/{id}",
+        "source": "v3"
+      }
+    ],
+    "getCardComments": [
+      {
+        "method": "get",
+        "path": "/cards/{id}/actions",
+        "source": "v3"
+      }
+    ],
+    "listBoardCards": [
+      {
+        "method": "get",
+        "path": "/boards/{id}/cards",
+        "source": "v3"
+      }
+    ],
+    "listBoardLabels": [
+      {
+        "method": "get",
+        "path": "/boards/{id}/labels",
+        "source": "v3"
+      }
+    ],
+    "listBoardLists": [
+      {
+        "method": "get",
+        "path": "/boards/{id}/lists",
+        "source": "v3"
+      }
+    ],
+    "listBoardMembers": [
+      {
+        "method": "get",
+        "path": "/boards/{id}/members",
+        "source": "v3"
+      }
+    ],
+    "listBoards": [
+      {
+        "method": "get",
+        "path": "/members/{id}/boards",
+        "source": "v3"
+      }
+    ],
+    "listListCards": [
+      {
+        "method": "get",
+        "path": "/lists/{id}/cards",
+        "source": "v3"
+      }
+    ],
+    "search": [
+      {
+        "method": "get",
+        "path": "/search",
+        "source": "v3"
+      }
+    ],
+    "updateCard": [
+      {
+        "method": "put",
+        "path": "/cards/{id}",
+        "source": "v3"
+      }
+    ],
+    "whoAmI": [
+      {
+        "method": "get",
+        "path": "/members/{id}",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T11:57:20.726Z",
+      "format": "openapi",
+      "url": "https://developer.atlassian.com/cloud/trello/swagger.v3.json"
+    }
+  }
+}

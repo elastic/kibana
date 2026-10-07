@@ -1,0 +1,8 @@
+{
+  "getMonitor": { "readOnly": true },
+  "listMonitors": { "readOnly": true },
+  "queryTimeseries": { "readOnly": true },
+  "scheduleDowntime": {
+    "input": { "start": "2026-06-01T10:00:00Z", "end": "2026-06-01T12:00:00Z" }
+  }
+}

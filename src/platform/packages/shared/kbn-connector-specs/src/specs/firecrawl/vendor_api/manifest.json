@@ -1,0 +1,59 @@
+{
+  "operations": {
+    "crawl": [
+      {
+        "method": "post",
+        "path": "/crawl",
+        "source": "v2"
+      }
+    ],
+    "crawlAndWait": [
+      {
+        "method": "post",
+        "path": "/crawl",
+        "source": "v2"
+      },
+      {
+        "method": "get",
+        "path": "/crawl/{id}",
+        "source": "v2"
+      }
+    ],
+    "getCrawlStatus": [
+      {
+        "method": "get",
+        "path": "/crawl/{id}",
+        "source": "v2"
+      }
+    ],
+    "map": [
+      {
+        "method": "post",
+        "path": "/map",
+        "source": "v2"
+      }
+    ],
+    "scrape": [
+      {
+        "method": "post",
+        "path": "/scrape",
+        "source": "v2"
+      }
+    ],
+    "search": [
+      {
+        "method": "post",
+        "path": "/search",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "v2",
+      "fetchedAt": "2026-10-07T11:53:52.787Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/firecrawl/firecrawl-docs/main/api-reference/v2-openapi.json"
+    }
+  }
+}

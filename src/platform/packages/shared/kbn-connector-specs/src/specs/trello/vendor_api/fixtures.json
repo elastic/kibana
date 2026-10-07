@@ -1,0 +1,16 @@
+{
+  "addComment": { "input": { "cardId": "5abbe4b7ddc1b351ef961415" } },
+  "createCard": { "input": { "listId": "5abbe4b7ddc1b351ef961416" } },
+  "getBoard": { "input": { "boardId": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "getCard": { "input": { "cardId": "5abbe4b7ddc1b351ef961415" }, "readOnly": true },
+  "getCardComments": { "input": { "cardId": "5abbe4b7ddc1b351ef961415" }, "readOnly": true },
+  "listBoardCards": { "input": { "boardId": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "listBoardLabels": { "input": { "boardId": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "listBoardLists": { "input": { "boardId": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "listBoardMembers": { "input": { "boardId": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "listBoards": { "readOnly": true },
+  "listListCards": { "input": { "listId": "5abbe4b7ddc1b351ef961416" }, "readOnly": true },
+  "search": { "input": { "idBoards": "5abbe4b7ddc1b351ef961414" }, "readOnly": true },
+  "updateCard": { "input": { "cardId": "5abbe4b7ddc1b351ef961415", "idList": "5abbe4b7ddc1b351ef961416" } },
+  "whoAmI": { "readOnly": true }
+}

@@ -602,6 +602,10 @@ The folder holds:
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
+Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults.
+
+Connectors without a usable vendor spec, such as database drivers, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. A test checks that each entry is a connector without a `vendor_api` folder.
+
 The script fails when a `readOnly` action changes state, a response override breaks the spec, or a request matches no operation and isn't listed in `unmatched`. Requests that break the spec and handler errors are reported as warnings.
 
 ### `manifest.json`

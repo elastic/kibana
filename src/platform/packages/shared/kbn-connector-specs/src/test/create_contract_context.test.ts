@@ -137,6 +137,28 @@ describe('createContractContext', () => {
     ]);
   });
 
+  it('authenticates OAuth auth types with a bearer token the spec accepts', async () => {
+    const { ctx, runAction, mock } = await createContractContext({
+      connector: FigmaConnector,
+      specs: [
+        {
+          ...figmaSpec,
+          security: [{ OAuth2: [] }],
+          components: { securitySchemes: { OAuth2: { type: 'http', scheme: 'bearer' } } },
+        },
+      ],
+    });
+
+    await runAction('whoAmI', {});
+
+    expect(ctx.client.defaults.headers.common.Authorization).toBe(
+      'Bearer contract-mock-access-token'
+    );
+    expect(mock.calls.map(({ status, requestViolations }) => [status, requestViolations])).toEqual([
+      [200, []],
+    ]);
+  });
+
   it('reports requests the vendor spec rejects', async () => {
     const { runAction, mock } = await createContractContext({
       connector: FirecrawlConnector,

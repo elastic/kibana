@@ -154,6 +154,26 @@ describe('recordActions', () => {
     );
   });
 
+  it('runs actions with a config sampled from the connector schema, unless one is given', async () => {
+    const configured: ConnectorSpec = {
+      ...connector,
+      schema: z.object({ region: z.enum(['us', 'eu']), debug: z.boolean().optional() }),
+      actions: {
+        getItem: action(z.object({}), async ({ client, config }) => {
+          if (config?.region === undefined || 'debug' in config) {
+            throw new Error(`Unexpected config ${JSON.stringify(config)}`);
+          }
+          return (await client.get(`${V1}/items/${config.region}`)).data;
+        }),
+      },
+    };
+
+    expect((await recordActions({ connector: configured, specs })).findings).toEqual([]);
+    expect(
+      (await recordActions({ connector: configured, specs, config: { debug: true } })).findings
+    ).toEqual([expect.objectContaining({ kind: 'handler-error' })]);
+  });
+
   it('serves response overrides and reports those the spec contradicts', async () => {
     const { findings } = await recordActions({
       connector,

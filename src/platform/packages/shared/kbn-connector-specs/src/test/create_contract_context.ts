@@ -21,8 +21,9 @@ import type {
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
 
-// The mock accepts any credential, so OAuth auth types get a fixed token.
-const ACCESS_TOKEN = 'contract-mock-access-token';
+// The mock accepts any credential, so OAuth auth types get a fixed token. Like the actions
+// plugin's getToken, it includes the token type, as auth types use it as the header value.
+const ACCESS_TOKEN = 'Bearer contract-mock-access-token';
 
 export interface ContractContextOptions extends ContractMockOptions {
   readonly connector: ConnectorSpec;
