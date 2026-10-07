@@ -41,11 +41,8 @@ const isExecutionLifecycleEvent = (event: ConversationEvent): boolean =>
   (event.type === TimelineEventType.executionStarted || isExecutionTerminalEvent(event));
 
 // Hidden attachments are agent-only, so their events are not reported to subscribers.
-// Forward-compatible: attachment events carry no `hidden` flag yet, so this matches nothing today.
 const isHiddenAttachmentEvent = (event: ConversationEvent): boolean =>
-  isAttachmentEvent(event) &&
-  'hidden' in event.data &&
-  (event.data as { hidden: unknown }).hidden === true;
+  isAttachmentEvent(event) && event.data.hidden === true;
 
 const isHiddenOrAbsent = (attachment: VersionedAttachment | undefined): boolean =>
   !attachment || attachment.hidden === true;

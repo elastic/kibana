@@ -60,11 +60,13 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * References to versioned conversation-level attachments.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_context?: string;
 }

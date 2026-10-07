@@ -68,4 +68,9 @@ export const TIMELINE_EVENT_LABELS = Object.freeze({
       defaultMessage: 'Removed a {type} attachment',
       values: { type },
     }),
+  attachmentRestored: (type: string) =>
+    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentRestored', {
+      defaultMessage: 'Restored a {type} attachment',
+      values: { type },
+    }),
 });

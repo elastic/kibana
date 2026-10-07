@@ -6,6 +6,8 @@
  */
 
 import type {
+  AttachmentEventSource,
+  AttachmentTimelineEvent,
   Conversation,
   ConversationEvent,
   ConversationRound,
@@ -16,6 +18,7 @@ import type {
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
+  ATTACHMENT_EVENT_FORMAT,
   AgentBuilderErrorCode,
   CONVERSATION_SCHEMA_VERSION,
   EventActorType,
@@ -403,6 +406,86 @@ export const processedCustomEventFixture = ({
     ...customEventFixture({ ...event, data }),
     representation: { type: 'text', value: representation ?? String(data.text ?? '') },
   };
+};
+
+/** A stored attachment event; current format unless `legacy`. */
+export const attachmentEventFixture = ({
+  id,
+  kind = 'added',
+  attachmentId = 'att-1',
+  attachmentType = 'text',
+  version = 1,
+  source = 'execution',
+  createdAt = T0,
+  executionId,
+  triggerEventId,
+  toolCallId,
+  description,
+  hidden = false,
+  legacy = false,
+}: {
+  id: string;
+  kind?: 'added' | 'updated' | 'deleted' | 'restored';
+  attachmentId?: string;
+  attachmentType?: string;
+  version?: number;
+  source?: AttachmentEventSource;
+  createdAt?: string;
+  executionId?: string;
+  triggerEventId?: string;
+  toolCallId?: string;
+  description?: string;
+  hidden?: boolean;
+  legacy?: boolean;
+}): AttachmentTimelineEvent => {
+  const envelope = {
+    id,
+    created_at: createdAt,
+    actor: source === 'execution' ? agentActor : userActor,
+    ...(executionId ? { execution_id: executionId } : {}),
+    ...(triggerEventId ? { trigger_event_id: triggerEventId } : {}),
+  };
+  const common = {
+    attachment_id: attachmentId,
+    attachment_type: attachmentType,
+    source,
+    ...(toolCallId ? { tool_call_id: toolCallId } : {}),
+    ...(hidden ? { hidden: true } : {}),
+    ...(legacy ? {} : { format: ATTACHMENT_EVENT_FORMAT }),
+  };
+  const described = description !== undefined ? { description } : {};
+  switch (kind) {
+    case 'added':
+      return {
+        ...envelope,
+        type: TimelineEventType.attachmentAdded,
+        data: { ...common, ...described, current_version: version, render_inline: false },
+      };
+    case 'updated':
+      return {
+        ...envelope,
+        type: TimelineEventType.attachmentUpdated,
+        data: {
+          ...common,
+          ...described,
+          previous_version: version - 1,
+          current_version: version,
+          render_inline: false,
+        },
+      };
+    case 'deleted':
+      return {
+        ...envelope,
+        type: TimelineEventType.attachmentDeleted,
+        data: { ...common, hard_delete: false },
+      };
+    case 'restored':
+      return {
+        ...envelope,
+        type: TimelineEventType.attachmentRestored,
+        data: { ...common, ...described, current_version: version },
+      };
+  }
 };
 
 /**

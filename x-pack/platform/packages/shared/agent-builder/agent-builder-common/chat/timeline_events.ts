@@ -8,6 +8,7 @@
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
+import type { Attachment, AttachmentVersionRef } from '../attachments';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -104,6 +105,7 @@ export enum TimelineEventType {
   attachmentAdded = 'attachment_added',
   attachmentUpdated = 'attachment_updated',
   attachmentDeleted = 'attachment_deleted',
+  attachmentRestored = 'attachment_restored',
 }
 
 /** Fields the server fills in when an event is accepted; absent on producer input. */
@@ -152,7 +154,15 @@ export type BaseTimelineEvent<TType extends TimelineEventType, TData> = Conversa
 >;
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
-export type UserMessageEventData = RoundInput;
+export interface UserMessageEventData {
+  message: string;
+  /** @deprecated Inline attachments of legacy messages, migrated to conversation attachments on read. */
+  attachments?: Attachment[];
+  /** @deprecated Written before attachment events became the source of truth; read-only. */
+  attachment_refs?: AttachmentVersionRef[];
+  /** @deprecated Written before attachment events became the source of truth; read-only. */
+  attachment_context?: string;
+}
 export type UserMessageEvent = BaseTimelineEvent<
   TimelineEventType.userMessage,
   UserMessageEventData
@@ -280,15 +290,33 @@ export type AttachmentEventSource =
   | 'chat_input'
   | 'execution';
 
-/** An attachment was created in the conversation. */
-export interface AttachmentAddedEventData {
+/** Format of attachment events written since attachment events became the agent's source of truth. */
+export const ATTACHMENT_EVENT_FORMAT = 2 as const;
+
+/** Fields every attachment event's data may carry. */
+interface AttachmentEventCommonData {
   attachment_id: string;
   attachment_type: string;
+  source: AttachmentEventSource;
+  /** Tool call that made the change, for `source: 'execution'` changes made by a tool. */
+  tool_call_id?: string;
+  /** The attachment is hidden: agent-visible, filtered out by the UI and workflow triggers. */
+  hidden?: boolean;
+  /**
+   * Absent on events written before this format. An unmarked event is only rendered to the agent
+   * when it is a standalone out-of-execution event; legacy refs cover the others.
+   */
+  format?: typeof ATTACHMENT_EVENT_FORMAT;
+}
+
+/** An attachment was created in the conversation. */
+export interface AttachmentAddedEventData extends AttachmentEventCommonData {
   /** Always 1 today; kept so consumers never special-case the first version. */
   current_version: number;
   /** When true, the UI should render the attachment automatically on open. */
   render_inline: boolean;
-  source: AttachmentEventSource;
+  /** The attachment's description when the event was created. */
+  description?: string;
 }
 export type AttachmentAddedEvent = BaseTimelineEvent<
   TimelineEventType.attachmentAdded,
@@ -296,13 +324,12 @@ export type AttachmentAddedEvent = BaseTimelineEvent<
 >;
 
 /** An attachment received a new content version. */
-export interface AttachmentUpdatedEventData {
-  attachment_id: string;
-  attachment_type: string;
+export interface AttachmentUpdatedEventData extends AttachmentEventCommonData {
   previous_version: number;
   current_version: number;
   render_inline: boolean;
-  source: AttachmentEventSource;
+  /** The attachment's description when the event was created. */
+  description?: string;
 }
 export type AttachmentUpdatedEvent = BaseTimelineEvent<
   TimelineEventType.attachmentUpdated,
@@ -310,30 +337,44 @@ export type AttachmentUpdatedEvent = BaseTimelineEvent<
 >;
 
 /** An attachment was soft- or hard-deleted. */
-export interface AttachmentDeletedEventData {
-  attachment_id: string;
-  attachment_type: string;
+export interface AttachmentDeletedEventData extends AttachmentEventCommonData {
   hard_delete: boolean;
-  source: AttachmentEventSource;
 }
 export type AttachmentDeletedEvent = BaseTimelineEvent<
   TimelineEventType.attachmentDeleted,
   AttachmentDeletedEventData
 >;
 
+/** A soft-deleted attachment became active again; its version is unchanged. */
+export interface AttachmentRestoredEventData extends AttachmentEventCommonData {
+  current_version: number;
+  /** The attachment's description when the event was created. */
+  description?: string;
+}
+export type AttachmentRestoredEvent = BaseTimelineEvent<
+  TimelineEventType.attachmentRestored,
+  AttachmentRestoredEventData
+>;
+
 export type AttachmentTimelineEvent =
   | AttachmentAddedEvent
   | AttachmentUpdatedEvent
-  | AttachmentDeletedEvent;
+  | AttachmentDeletedEvent
+  | AttachmentRestoredEvent;
 
 const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
   TimelineEventType.attachmentAdded,
   TimelineEventType.attachmentUpdated,
   TimelineEventType.attachmentDeleted,
+  TimelineEventType.attachmentRestored,
 ]);
 
 export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
   ATTACHMENT_EVENT_TYPES.has(event.type);
+
+/** True for attachment events written in the current format (see {@link ATTACHMENT_EVENT_FORMAT}). */
+export const isCurrentFormatAttachmentEvent = (event: AttachmentTimelineEvent): boolean =>
+  event.data.format === ATTACHMENT_EVENT_FORMAT;
 
 const EXECUTION_TERMINAL_EVENT_TYPES: ReadonlySet<string> = new Set([
   TimelineEventType.executionTerminated,
@@ -420,7 +461,8 @@ export type TimelineEvent =
   | ExecutionAbortedEvent
   | AttachmentAddedEvent
   | AttachmentUpdatedEvent
-  | AttachmentDeletedEvent;
+  | AttachmentDeletedEvent
+  | AttachmentRestoredEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -433,7 +475,8 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
-  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>
+  | BaseTimelineEventInput<TimelineEventType.attachmentRestored, AttachmentRestoredEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.
