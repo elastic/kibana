@@ -200,6 +200,7 @@ apiTest.describe(
         current_version: 1,
         render_inline: true,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -222,6 +223,7 @@ apiTest.describe(
         current_version: 2,
         render_inline: false,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -257,6 +259,7 @@ apiTest.describe(
           attachment_type: 'text',
           hard_delete: false,
           source: 'http_api',
+          format: 2,
         });
       }
     );
@@ -291,6 +294,7 @@ apiTest.describe(
           attachment_type: 'text',
           hard_delete: true,
           source: 'http_api',
+          format: 2,
         });
       }
     );

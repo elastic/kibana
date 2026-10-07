@@ -890,14 +890,115 @@ describe('AttachmentStateManager', () => {
       expect(manager.drainChanges()).toEqual([]);
     });
 
-    it('records nothing on restore(), rename() and updateOrigin()', async () => {
-      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+    it('records restored on restore(), and nothing on rename() and updateOrigin()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, description: 'd' });
       manager.delete(created.id);
       manager.clearChanges();
       manager.restore(created.id);
       manager.rename(created.id, 'new name');
       await manager.updateOrigin(created.id, 'origin-1');
-      expect(manager.drainChanges()).toEqual([]);
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'restored',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          current_version: 1,
+          description: 'd',
+        },
+      ]);
+    });
+
+    it('flags changes of hidden attachments instead of skipping them', async () => {
+      const hidden = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      await manager.update(hidden.id, { data: { content: 'b' } });
+      manager.delete(hidden.id);
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'added',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          current_version: 1,
+          hidden: true,
+        },
+        {
+          kind: 'updated',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+          hidden: true,
+        },
+        {
+          kind: 'deleted',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          hard_delete: false,
+          hidden: true,
+        },
+      ]);
+    });
+
+    it('snapshots the description set in the same update as the content', async () => {
+      const created = await manager.add({
+        type: 'text',
+        data: { content: 'a' },
+        description: 'old',
+      });
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'b' }, description: 'new' });
+      expect(manager.drainChanges()).toEqual([
+        expect.objectContaining({ kind: 'updated', description: 'new' }),
+      ]);
+    });
+
+    it('never puts a description on a deletion', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, description: 'd' });
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()[0]).not.toHaveProperty('description');
+    });
+
+    it('stamps the tool call id on changes recorded through forToolCall, over shared state', async () => {
+      const view = manager.forToolCall('call-1');
+      const created = await view.add({ type: 'text', data: { content: 'a' } });
+      await manager.update(created.id, { data: { content: 'b' } });
+      expect(manager.getAttachmentRecord(created.id)?.current_version).toBe(2);
+      expect(view.hasChanges()).toBe(true);
+      expect(manager.drainChanges().map((change) => change.tool_call_id)).toEqual([
+        'call-1',
+        undefined,
+      ]);
+    });
+
+    it('shares access tracking with tool call views', async () => {
+      const created = await manager
+        .forToolCall('call-1')
+        .add({ type: 'text', data: { content: 'a' } });
+      expect(manager.getAccessedRefs()).toEqual([
+        expect.objectContaining({ attachment_id: created.id, version: 1 }),
+      ]);
+    });
+
+    it('records one change per mutation when a call adds then updates the same attachment', async () => {
+      const view = manager.forToolCall('call-1');
+      const created = await view.add({ type: 'text', data: { content: 'a' } });
+      await view.update(created.id, { data: { content: 'b' } });
+      expect(manager.drainChanges().map((change) => [change.kind, change.tool_call_id])).toEqual([
+        ['added', 'call-1'],
+        ['updated', 'call-1'],
+      ]);
+    });
+
+    it('drains only the changes matching the filter and keeps the rest in order', async () => {
+      await manager.forToolCall('call-1').add({ id: 'a', type: 'text', data: { content: 'a' } });
+      await manager.forToolCall('call-2').add({ id: 'b', type: 'text', data: { content: 'b' } });
+      await manager.add({ id: 'c', type: 'text', data: { content: 'c' } });
+      expect(
+        manager
+          .drainChanges((change) => change.tool_call_id === 'call-2')
+          .map((c) => c.attachment_id)
+      ).toEqual(['b']);
+      expect(manager.drainChanges().map((c) => c.attachment_id)).toEqual(['a', 'c']);
     });
 
     it('preserves insertion order across mixed mutations', async () => {
@@ -905,23 +1006,6 @@ describe('AttachmentStateManager', () => {
       await manager.update(a.id, { data: { content: 'b' } });
       manager.delete(a.id);
       expect(manager.drainChanges().map((c) => c.kind)).toEqual(['added', 'updated', 'deleted']);
-    });
-
-    it('records nothing for hidden attachments (add / update / soft delete / permanentDelete)', async () => {
-      const hidden = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
-      expect(manager.drainChanges()).toEqual([]);
-
-      await manager.update(hidden.id, { data: { content: 'b' } });
-      expect(manager.drainChanges()).toEqual([]);
-
-      manager.delete(hidden.id);
-      expect(manager.drainChanges()).toEqual([]);
-
-      // Re-create and try permanentDelete on an active hidden attachment.
-      const hidden2 = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
-      manager.clearChanges();
-      manager.permanentDelete(hidden2.id);
-      expect(manager.drainChanges()).toEqual([]);
     });
 
     it('records a change if the update also unhides the attachment', async () => {

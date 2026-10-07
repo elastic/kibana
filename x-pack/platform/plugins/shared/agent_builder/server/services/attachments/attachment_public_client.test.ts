@@ -180,6 +180,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 1,
             render_inline: true,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -322,6 +323,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 2,
             render_inline: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -417,6 +419,7 @@ describe('createAttachmentPublicClient', () => {
             attachment_type: 'text',
             hard_delete: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -477,6 +480,7 @@ describe('createAttachmentPublicClient', () => {
         attachment_type: 'text',
         hard_delete: true,
         source: 'http_api',
+        format: 2,
       });
     });
 
