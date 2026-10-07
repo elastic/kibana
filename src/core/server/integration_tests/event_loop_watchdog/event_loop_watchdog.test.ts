@@ -133,7 +133,9 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
       const profile = (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana
         .event_loop_watchdog.profile;
       expect(profile).toMatchObject({ scope: 'blocks', kept: 1 });
-      expect(Path.basename(profile.file)).toMatch(/^event-loop-block-\d{6}ms-/);
+      // not marked running: Kibana is still starting up
+      expect(profile).toMatchObject({ phase: 'startup' });
+      expect(Path.basename(profile.file)).toMatch(/^event-loop-block-startup-\d{6}ms-/);
       expect(profile.samples).toBeGreaterThan(0);
 
       const decoded = Profile.decode(Zlib.gunzipSync(Fs.readFileSync(profile.file)));
@@ -160,9 +162,17 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
     ).toBe('blocks');
   });
 
-  it('writes only windows with a larger block, logging the others', async () => {
+  it('writes only running windows with a larger block, logging the others', async () => {
+    watchdog.markRunning();
+    await sleep(200); // a block starts at the last heartbeat: let one follow the mark
     spinTheEventLoop(1_000);
-    await waitFor(() => profileLogs()[0]);
+    const [, written] = await waitFor(() => profileLogs()[0]);
+    expect(
+      Path.basename(
+        (written as { kibana: { event_loop_watchdog: { profile: any } } }).kibana
+          .event_loop_watchdog.profile.file
+      )
+    ).toMatch(/^event-loop-block-running-001\d{3}ms-/);
     await sleep(200); // let a heartbeat follow the rotation, as after the profiler start
     spinTheEventLoop(300);
     const [message, meta] = await waitFor(() =>
@@ -172,7 +182,7 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
     expect(
       (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
         .profile
-    ).toMatchObject({ kept: 2, notWritten: expect.any(String) });
+    ).toMatchObject({ kept: 2, phase: 'running', notWritten: expect.any(String) });
     expect(Fs.readdirSync(diagnosticDir)).toHaveLength(1);
   });
 

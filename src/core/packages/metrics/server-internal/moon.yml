@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/safer-lodash-set'
+  - '@kbn/core-status-common'
 tags:
   - shared-server
   - package

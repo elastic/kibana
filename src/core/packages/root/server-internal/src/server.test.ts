@@ -249,6 +249,10 @@ test('runs services on "start"', async () => {
 
   await server.setup();
 
+  // startup ends once Kibana's overall status is first available
+  expect(mockEventLoopWatchdogService.setup).toHaveBeenCalledWith(
+    expect.objectContaining({ status: expect.anything() })
+  );
   expect(mockHttpService.start).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();

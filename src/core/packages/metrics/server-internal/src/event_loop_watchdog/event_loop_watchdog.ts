@@ -72,6 +72,8 @@ export class EventLoopWatchdog {
   private session?: ProfilingSession;
   private stopping?: Promise<void>;
   private generation = 0;
+  private shared?: BigInt64Array;
+  private runningSinceUs = 0;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -86,6 +88,8 @@ export class EventLoopWatchdog {
     let lastStampUs = monotonicUs();
     let stallEndedUs = 0;
     Atomics.store(shared, Slot.heartbeat, BigInt(lastStampUs));
+    Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
+    this.shared = shared;
     this.heartbeatTimer = setInterval(() => {
       const nowUs = monotonicUs();
       if (nowUs - lastStampUs >= BLOCK_THRESHOLD_MS * 1000) stallEndedUs = nowUs;
@@ -142,6 +146,13 @@ export class EventLoopWatchdog {
     void this.startProfiling(shared, ++this.generation);
   }
 
+  /** Marks the end of startup: later blocks are written within the running budget. */
+  public markRunning(): void {
+    if (this.runningSinceUs) return;
+    this.runningSinceUs = monotonicUs();
+    if (this.shared) Atomics.store(this.shared, Slot.runningSince, BigInt(this.runningSinceUs));
+  }
+
   /** Whether a profiling session is collecting samples (and so labels). */
   public get isProfiling(): boolean {
     return this.session?.isActive ?? false;
@@ -161,6 +172,7 @@ export class EventLoopWatchdog {
     this.session = undefined;
     this.worker = undefined;
     this.post = undefined;
+    this.shared = undefined;
     clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = undefined;
     this.stopping = worker

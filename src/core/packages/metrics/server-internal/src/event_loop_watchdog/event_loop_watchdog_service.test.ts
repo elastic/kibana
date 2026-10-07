@@ -12,10 +12,12 @@ const mockWatchdog = {
   start: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),
   runWithLabels: jest.fn((_context, run) => run()),
+  markRunning: jest.fn(),
 };
 jest.mock('./event_loop_watchdog', () => ({ EventLoopWatchdog: jest.fn(() => mockWatchdog) }));
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
@@ -25,6 +27,7 @@ import {
   EventLoopWatchdogService,
   resolveDiagnosticDir,
 } from './event_loop_watchdog_service';
+import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 
 describe('EventLoopWatchdogService', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -32,7 +35,7 @@ describe('EventLoopWatchdogService', () => {
   it('toggles the watchdog with the feature flag and labels execution contexts', async () => {
     const service = new EventLoopWatchdogService(mockCoreContext.create());
     const executionContext = executionContextServiceMock.createInternalSetupContract();
-    service.setup({ executionContext });
+    service.setup({ executionContext, status: { overall$: NEVER } });
     const wrapper = executionContext.registerContextWrapper.mock.calls[0][0];
     const toJSON = jest.fn(() => ({ type: 'a' }));
     expect(wrapper({ toJSON } as never, () => 1)).toBe(1);
@@ -59,6 +62,49 @@ describe('EventLoopWatchdogService', () => {
     await new Promise(setImmediate);
     expect(mockWatchdog.stop).toHaveBeenCalledTimes(2); // initial disabled value, then the toggle
     await service.stop();
+  });
+});
+
+describe('EventLoopWatchdogService startup phase', () => {
+  const featureFlags = coreFeatureFlagsMock.createStart();
+  featureFlags.getBooleanValue$.mockReturnValue(new BehaviorSubject(true));
+  const status = (level: ServiceStatus['level']): ServiceStatus => ({ level, summary: '' });
+  let service: EventLoopWatchdogService;
+  let overall$: Subject<ServiceStatus>;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    overall$ = new Subject();
+    service = new EventLoopWatchdogService(mockCoreContext.create());
+    service.setup({
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
+      status: { overall$ },
+    });
+    service.start({ featureFlags, threads: {} as InternalThreadsStart });
+  });
+
+  afterEach(async () => {
+    await service.stop();
+    jest.useRealTimers();
+  });
+
+  it('ends a grace period after Kibana is first available', () => {
+    overall$.next(status(ServiceStatusLevels.degraded));
+    overall$.next(status(ServiceStatusLevels.available));
+    jest.advanceTimersByTime(RUNNING_GRACE_MS - 1);
+    expect(mockWatchdog.markRunning).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(mockWatchdog.markRunning).toHaveBeenCalledTimes(1);
+    overall$.next(status(ServiceStatusLevels.available));
+    jest.advanceTimersByTime(RUNNING_FALLBACK_MS);
+    expect(mockWatchdog.markRunning).toHaveBeenCalledTimes(1);
+  });
+
+  it('ends after a fallback delay if Kibana never becomes available', () => {
+    overall$.next(status(ServiceStatusLevels.degraded));
+    jest.advanceTimersByTime(RUNNING_FALLBACK_MS);
+    expect(mockWatchdog.markRunning).toHaveBeenCalledTimes(1);
   });
 });
 

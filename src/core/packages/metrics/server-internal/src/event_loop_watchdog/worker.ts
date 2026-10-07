@@ -22,7 +22,7 @@ import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { Profile } from 'pprof-format';
 import { BlockDetector, type DetectedBlock } from './block_detector';
-import { WriteAdmission } from './admission';
+import { WriteAdmission, type AdmissionLimits } from './admission';
 import {
   formatSummary,
   summarizeProfile,
@@ -33,10 +33,12 @@ import {
 import {
   BLOCK_THRESHOLD_MS,
   CONTEXT_MARGIN_MS,
+  MAX_STARTUP_FILES,
   POLL_INTERVAL_MS,
   Slot,
   monotonicUs,
   type LogMessage,
+  type Phase,
   type MainToWorkerMessage,
   type WatchdogWorkerData,
 } from './types';
@@ -49,6 +51,7 @@ interface Block {
   startUs: number;
   endUs: number;
   blockedMs: number;
+  phase: Phase;
 }
 
 /** Whether a rotation of the main thread's profiler overlapped `[startUs, endUs]`. */
@@ -62,17 +65,33 @@ export const overlapsRotation = (
   rotationStartUs <= endUs &&
   (rotationEndUs < rotationStartUs || rotationEndUs >= startUs);
 
-/** Leads with the largest block, zero-padded, so that sorted listings surface the worst first. */
-const fileName = (maxBlockedMs: number, date: Date) =>
-  `event-loop-block-${String(Math.round(maxBlockedMs)).padStart(6, '0')}ms-${date
+/** Leads with the phase and the zero-padded largest block, so sorted listings surface the worst. */
+const fileName = (phase: Phase, maxBlockedMs: number, date: Date) =>
+  `event-loop-block-${phase}-${String(Math.round(maxBlockedMs)).padStart(6, '0')}ms-${date
     .toISOString()
     .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.pb.gz`;
+
+/** Startup windows are written only for a new largest startup block. */
+const STARTUP_ADMISSION_LIMITS: AdmissionLimits = {
+  maxLargest: 1,
+  minGrowth: 1,
+  maxRanked: 0,
+  maxFiles: MAX_STARTUP_FILES,
+};
 
 export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void => {
   const { sanitizeRoot, diagnosticDir } = data;
   const shared = new BigInt64Array(data.shared);
   const detector = new BlockDetector(BLOCK_THRESHOLD_MS);
-  const admission = new WriteAdmission(data.admissionLimits);
+  /** Phase at `atUs` (now by default): running once the main thread has marked it. */
+  const currentPhase = (atUs = monotonicUs()): Phase => {
+    const runningSince = Number(Atomics.load(shared, Slot.runningSince));
+    return runningSince > 0 && atUs >= runningSince ? 'running' : 'startup';
+  };
+  const admissions: Record<Phase, WriteAdmission> = {
+    startup: new WriteAdmission(STARTUP_ADMISSION_LIMITS),
+    running: new WriteAdmission(data.admissionLimits),
+  };
   const blocks: Block[] = [];
   const epochOffsetUs =
     Math.round((performance.timeOrigin + performance.now()) * 1000) - monotonicUs();
@@ -97,7 +116,7 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
       Number(Atomics.load(shared, Slot.rotationEnd))
     );
     if (!profilerCaused) {
-      blocks.push({ startUs, endUs, blockedMs: block.blockedMs });
+      blocks.push({ startUs, endUs, blockedMs: block.blockedMs, phase: currentPhase(startUs) });
       if (blocks.length > MAX_REMEMBERED_BLOCKS) blocks.shift();
       Atomics.add(shared, Slot.blocks, 1n);
     }
@@ -134,13 +153,19 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     const summary = summarizeProfile(profile, ranges, sanitizeRoot);
     const blockedMs = windowBlocks.map(({ blockedMs: ms }) => Math.round(ms));
     const maxBlockedMs = Math.max(0, ...blockedMs);
+    // A window belongs to the phase of its largest block.
+    const largest = windowBlocks.reduce<Block | undefined>(
+      (max, block) => (max && max.blockedMs >= block.blockedMs ? max : block),
+      undefined
+    );
+    const phase = largest?.phase ?? currentPhase();
     let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
     if (diagnosticDir) {
-      const admitted = admission.admit(maxBlockedMs);
+      const admitted = admissions[phase].admit(maxBlockedMs);
       if (admitted.write) {
         // Without samples in blocks, the whole window is the only evidence: keep it.
         if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
-        const file = Path.join(diagnosticDir, fileName(maxBlockedMs, new Date()));
+        const file = Path.join(diagnosticDir, fileName(phase, maxBlockedMs, new Date()));
         await Fs.writeFile(file, await gzip(profile.encode()));
         outcome = { file };
       } else {
@@ -151,7 +176,9 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     log('file' in outcome ? 'warn' : 'info', formatSummary(summary, blockedMs, kept, outcome), {
       tags: ['event-loop-watchdog'],
       kibana: {
-        event_loop_watchdog: { profile: { ...summary, kept, blockedMs, maxBlockedMs, ...outcome } },
+        event_loop_watchdog: {
+          profile: { ...summary, kept, phase, blockedMs, maxBlockedMs, ...outcome },
+        },
       },
     });
   };

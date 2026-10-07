@@ -30,6 +30,15 @@ export const MIN_BLOCK_GROWTH = 1.25;
 export const MAX_RANKED_FILES = 70;
 /** Safety cap on files written per worker. */
 export const MAX_WRITTEN_FILES = 100;
+/** Startup windows are written only for a new largest startup block, at most this many. */
+export const MAX_STARTUP_FILES = 10;
+/** Kibana is considered running this long after its overall status first becomes available... */
+export const RUNNING_GRACE_MS = 30_000;
+/** ...or this long after the watchdog service starts, whichever comes first. */
+export const RUNNING_FALLBACK_MS = 5 * 60_000;
+
+/** Startup blocks are expected (and seen before serving traffic); they get their own budget. */
+export type Phase = 'startup' | 'running';
 
 /** Label holding each sample's epoch timestamp in microseconds, to locate blocks in a window. */
 export const TIMESTAMP_LABEL = 'timestamp_us';
@@ -54,8 +63,10 @@ export const Slot = {
   rotationEnd: 3,
   /** Last heartbeat the worker has classified, published after counting any block it ended. */
   classified: 4,
+  /** When Kibana was considered running (0 while starting up); blocks before it are startup. */
+  runningSince: 5,
 } as const;
-export const SLOT_COUNT = 5;
+export const SLOT_COUNT = 6;
 /** Longest the main thread defers rotation after a stall, waiting for the worker to classify it. */
 export const MAX_CLASSIFY_WAIT_MS = 2_000;
 

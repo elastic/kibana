@@ -7,20 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { concatMap, distinctUntilChanged, type Subscription } from 'rxjs';
+import {
+  EMPTY,
+  concatMap,
+  delay,
+  distinctUntilChanged,
+  filter,
+  merge,
+  take,
+  timer,
+  type Observable,
+  type Subscription,
+} from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { EventLoopWatchdog } from './event_loop_watchdog';
+import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 
 /** Feature flag enabling the event-loop watchdog (and its profiling session) at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
 
 export interface EventLoopWatchdogSetupDeps {
   executionContext: Pick<InternalExecutionContextSetup, 'registerContextWrapper'>;
+  /** Kibana's overall status: startup ends once it is first available. */
+  status: { overall$: Observable<ServiceStatus> };
 }
 
 export interface EventLoopWatchdogStartDeps {
@@ -46,12 +61,14 @@ export class EventLoopWatchdogService {
   private readonly logger: Logger;
   private watchdog?: EventLoopWatchdog;
   private subscription?: Subscription;
+  private overall$?: Observable<ServiceStatus>;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics', 'event_loop_watchdog');
   }
 
-  public setup({ executionContext }: EventLoopWatchdogSetupDeps): void {
+  public setup({ executionContext, status }: EventLoopWatchdogSetupDeps): void {
+    this.overall$ = status.overall$;
     // Only a getter check while not profiling: the context is converted only when labelling.
     executionContext.registerContextWrapper((context, run) =>
       this.watchdog?.isProfiling ? this.watchdog.runWithLabels(context.toJSON(), run) : run()
@@ -83,6 +100,15 @@ export class EventLoopWatchdogService {
         })
       )
       .subscribe();
+    // Startup ends once Kibana is first available (plus a grace period to settle), or regardless
+    // after a while: blocks after that are written within their own, running budget.
+    const available$ = (this.overall$ ?? EMPTY).pipe(
+      filter(({ level }) => level === ServiceStatusLevels.available),
+      take(1),
+      delay(RUNNING_GRACE_MS)
+    );
+    const running$ = merge(available$, timer(RUNNING_FALLBACK_MS)).pipe(take(1));
+    this.subscription.add(running$.subscribe(() => watchdog.markRunning()));
   }
 
   public async stop(): Promise<void> {

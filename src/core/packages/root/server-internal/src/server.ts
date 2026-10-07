@@ -369,7 +369,6 @@ export class Server {
       executionContext: executionContextSetup,
       userActivity: userActivitySetup,
     });
-    this.eventLoopWatchdog.setup({ executionContext: executionContextSetup });
 
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
@@ -439,6 +438,10 @@ export class Server {
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
       loggingSystem: this.loggingSystem,
+    });
+    this.eventLoopWatchdog.setup({
+      executionContext: executionContextSetup,
+      status: statusSetup,
     });
 
     const customBrandingSetup = this.customBranding.setup();
