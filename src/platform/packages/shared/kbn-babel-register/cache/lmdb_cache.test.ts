@@ -80,6 +80,6 @@ it('supports UTF-8 cache keys', async () => {
   });
   const key = 'prefix:日本語:🚀';
 
-  await cache.update(key, { code: 'var utf8 = true' });
+  await cache.update(key, { code: 'var utf8 = true', map: {} });
   expect(cache.getCode(key)).toBe('var utf8 = true');
 });
