@@ -29,6 +29,7 @@ import type {
 import { internalApiPath, publicApiPath } from '../../../common/constants';
 
 /** Static, so it does not read as a dynamic http path. */
+const AGENT_BY_ID_PATH = `${publicApiPath}/agents/{id}`;
 const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
 const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
 const AGENT_MODEL_BY_ID_PATH = `${internalApiPath}/agents/{id}/_model`;
@@ -54,7 +55,7 @@ export class AgentService {
    * Get a single agent by id
    */
   async get(id: string): Promise<GetAgentResponse> {
-    return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+    return await this.http.get<GetAgentResponse>(buildPath(AGENT_BY_ID_PATH, { id }));
   }
 
   /**
