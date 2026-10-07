@@ -16,7 +16,6 @@ import type { SortValues } from './query_live_actions_dsl';
 export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
-  spaceId: string;
   integrationNamespaces?: readonly string[];
   ccsEnabled?: boolean;
   logger: Logger;
@@ -37,7 +36,6 @@ const collectSubActionIds = (hit: LiveActionHit): string[] => {
 export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
-  spaceId,
   integrationNamespaces,
   ccsEnabled = false,
   logger,
@@ -61,7 +59,6 @@ export const processLiveHistory = async ({
         liveHits,
         liveRows,
         osqueryContext,
-        spaceId,
         integrationNamespaces,
         ccsEnabled
       );
@@ -77,7 +74,6 @@ const enrichWithResultCounts = async (
   liveHits: LiveActionHit[],
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
-  spaceId: string,
   integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean
 ): Promise<void> => {
@@ -91,7 +87,6 @@ const enrichWithResultCounts = async (
   const resultCountsMap = await getResultCountsForActions(
     internalEsClient,
     uniqueActionIds,
-    spaceId,
     integrationNamespaces,
     ccsEnabled
   );
