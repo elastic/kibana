@@ -17,7 +17,7 @@ import { NotificationControlsSection } from './components/notification_controls_
 import { NotificationSummary } from './components/notification_summary';
 import { optionalLabel } from './components/optional_label';
 import { PolicyScopeDescription } from './components/policy_scope_description';
-import { RuleTagsSelector } from './components/rule_tags_selector';
+import { RoutingTagsSelector } from './components/routing_tags_selector';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormConfig, ActionPolicyFormState } from './types';
@@ -126,7 +126,7 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
           control={control}
           render={({ field }) => (
             <>
-              <RuleTagsSelector matcher={field.value} onChange={field.onChange} />
+              <RoutingTagsSelector matcher={field.value} onChange={field.onChange} />
               <EuiSpacer size="m" />
               <AdvancedMatchingAccordion
                 matcher={field.value}
