@@ -12,6 +12,7 @@ import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { withTestHistoryDashboardLink } from './test_history_dashboard';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
   const escaped = suffix.replace(/\./g, '\\.');
@@ -88,11 +89,14 @@ function createFTRBody(
     `First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
   ];
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+    }),
+    failure
+  );
 }
 
 /**
@@ -159,12 +163,15 @@ function createScoutBody(
     }
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-    'test.type': 'scout',
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+      'test.type': 'scout',
+    }),
+    failure
+  );
 }
 
 async function createFTRFailureIssue(
@@ -211,8 +218,16 @@ export async function createFailureIssue(
   }
 }
 
-function createFTRComment(buildUrl: string, branch: string, pipeline: string): string {
-  return `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+function createFTRComment(
+  buildUrl: string,
+  branch: string,
+  pipeline: string,
+  failure?: TestFailure
+): string {
+  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  return branch === 'main' && failure
+    ? withTestHistoryDashboardLink(buildLink, failure)
+    : buildLink;
 }
 
 function createScoutComment(
@@ -222,9 +237,10 @@ function createScoutComment(
   pipeline: string,
   newErrorMessage?: string
 ): string {
-  const base = `New failure for "${failure.target}" target: [${
+  const buildLink = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
+  const base = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
   if (!newErrorMessage) {
     /*
      * If there's a failure with the same error message as before, just post a comment
@@ -270,16 +286,20 @@ async function updateFTRFailureIssue(
   issue: ExistingFailedTestIssue,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = failure
+    ? withTestHistoryDashboardLink(
+        updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+        failure
+      )
+    : updateIssueMetadata(issue.github.body, { 'test.failCount': newCount });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createFTRComment(buildUrl, branch, pipeline);
+  const commentText = createFTRComment(buildUrl, branch, pipeline, failure);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -294,9 +314,10 @@ async function updateScoutFailureIssue(
   failure: ScoutTestFailureExtended
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = withTestHistoryDashboardLink(
+    updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+    failure
+  );
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
@@ -331,6 +352,6 @@ export async function updateFailureIssue(
   if (failure && isScoutFailure(failure)) {
     return updateScoutFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   } else {
-    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline);
+    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   }
 }
