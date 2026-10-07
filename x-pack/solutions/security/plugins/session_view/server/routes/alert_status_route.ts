@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertsClient,
@@ -16,6 +17,7 @@ import {
   ALERT_STATUS_ROUTE,
   ALERT_UUID_PROPERTY,
   PREVIEW_ALERTS_INDEX,
+  PROCESS_ENTITY_ID_PROPERTY,
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 import { alertIdSchema } from './validation';
@@ -76,6 +78,7 @@ export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string)
   }
 
   const result = await client.find({
+    _source: [ALERT_WORKFLOW_STATUS, PROCESS_ENTITY_ID_PROPERTY],
     query: {
       match: {
         [ALERT_UUID_PROPERTY]: alertUuid,
