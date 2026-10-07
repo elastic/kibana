@@ -1337,6 +1337,12 @@ describe('HITL external channel schemas', () => {
       channels: ['C0123'],
       message: 'slack2 note',
     },
+    servicenow: {
+      'connector-id': 'snow-1',
+      table: 'incident',
+      'sys-id': 'abc123',
+      message: 'snow note',
+    },
   };
 
   const channelPropertyNames = (schema: z.ZodType): Record<string, string[]> => {
@@ -1366,6 +1372,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
+      servicenow: ['connector-id', 'table', 'sys-id', 'message'],
     });
   });
 
@@ -1381,6 +1388,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
       slack2: ['connector-id', 'channels'],
+      servicenow: ['connector-id', 'table', 'sys-id'],
     });
   });
 });

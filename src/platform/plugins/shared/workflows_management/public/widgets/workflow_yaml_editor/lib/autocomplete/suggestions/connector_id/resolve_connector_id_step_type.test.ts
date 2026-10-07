@@ -132,6 +132,20 @@ describe('resolveConnectorIdStepType', () => {
       )
     ).toBe('slack2.sendMessage');
   });
+
+  it('maps waitForApproval servicenow channel connector-id to servicenow_search.addComment', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'servicenow', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('servicenow_search.addComment');
+  });
 });
 
 describe('resolveConnectorIdTriggerType', () => {

@@ -30,9 +30,21 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
   return { channelIds: [channel] };
 }
 
+/** Builds Actions params for a ServiceNow `addComment` call. */
+export function buildServiceNowAddCommentInput(table: string, sysId: string, comment: string) {
+  return {
+    subAction: 'addComment' as const,
+    subActionParams: {
+      table,
+      sysId,
+      comment,
+    },
+  };
+}
+
 /**
  * Builds Actions params for a Slack v2 `sendMessage` call.
- * Unfurling is off so Slack does not GET the resume URL.
+ * Unfurling is off so Slack does not GET the resume URL on preview.
  */
 export function buildSlack2SendMessageInput(channel: string, text: string) {
   return {

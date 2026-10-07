@@ -15,6 +15,7 @@ import {
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
@@ -24,6 +25,17 @@ type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['c
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildDefaultInputServiceNowComment({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
+  return `${prompt}Open form: ${formUrl}`;
 }
 
 function buildDefaultInputSlackMessage({
@@ -200,5 +212,29 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const comment =
+      serviceNowConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: serviceNowConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : buildDefaultInputServiceNowComment({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(serviceNowTable, serviceNowSysId, comment),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }
