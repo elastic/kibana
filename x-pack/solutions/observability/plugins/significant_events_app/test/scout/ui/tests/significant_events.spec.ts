@@ -79,9 +79,9 @@ test.describe(
       }
       await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
 
-      await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
+      await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
 
-      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/(general|detections)/);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
     });
 

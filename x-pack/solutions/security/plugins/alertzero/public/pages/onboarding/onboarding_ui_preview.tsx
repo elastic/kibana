@@ -10,14 +10,14 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { OnboardingPreviewRow } from './onboarding_preview_row';
 import { OnboardingPreviewTabs } from './onboarding_preview_tabs';
 import { useAutoAdvanceIndex } from './use_auto_advance_index';
@@ -32,8 +32,42 @@ const AUTO_ADVANCE_MS = 6000;
  */
 export const OnboardingUiPreview: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const rowPaddingCss = css`
+  // Slide content animates in on change: the header leads with a fade-and-rise, rows cascade after
+  // it (see OnboardingPreviewRow), and the subtitle cross-fades. Everything is gated on
+  // euiCanAnimate so reduced-motion users get the instant swap the auto-advance hook already honors.
+  const slideEnter = keyframes`
+    from {
+      opacity: 0;
+      transform: translateY(${euiTheme.size.s});
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  `;
+  const fadeIn = keyframes`
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  `;
+  const subtitleCss = css`
+    ${euiCanAnimate} {
+      animation: ${fadeIn} ${euiTheme.animation.normal} ${euiTheme.animation.resistance} both;
+    }
+  `;
+  // Group header mirrors the notdaybreak_mvp section header with its toggle removed: size.base
+  // (16px) above and below the title, size.base inline, in a track no shorter than a 16px glyph
+  // plus that padding.
+  const headerRowCss = css`
+    min-block-size: calc(${euiTheme.size.base} + ${euiTheme.size.base} * 2);
     padding: ${euiTheme.size.base};
+
+    ${euiCanAnimate} {
+      animation: ${slideEnter} ${euiTheme.animation.normal} ${euiTheme.animation.resistance} both;
+    }
   `;
   const { activeIndex, select, pauseProps } = useAutoAdvanceIndex(
     i18n.PREVIEW_SLIDES.length,
@@ -46,6 +80,9 @@ export const OnboardingUiPreview: React.FC = () => {
     <EuiPanel
       color="transparent"
       hasShadow={false}
+      // Without shadows EUI draws its own 1px ::after border, which would stack with the gradient
+      // border below into a 2px edge. The gradient border is the only one this panel should have.
+      hasBorder={false}
       paddingSize="l"
       css={css`
         border: ${euiTheme.border.width.thin} solid transparent;
@@ -71,7 +108,7 @@ export const OnboardingUiPreview: React.FC = () => {
           <EuiTitle size="xs">
             <p>{i18n.INTRO_PREVIEW_HEADING}</p>
           </EuiTitle>
-          <EuiText color="subdued">
+          <EuiText key={activeIndex} color="subdued" css={subtitleCss}>
             <p>{subtitle}</p>
           </EuiText>
         </EuiFlexItem>
@@ -81,22 +118,22 @@ export const OnboardingUiPreview: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder hasShadow={false} paddingSize="none" aria-hidden="true">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={rowPaddingCss}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="chevronSingleDown" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <p>{label}</p>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={badgeColor}>{count}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {items.map((item) => (
-          <OnboardingPreviewRow key={item.title} {...item} />
-        ))}
+        {/* Keyed on the slide so the header and rows remount, replaying their entrance. */}
+        <React.Fragment key={activeIndex}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={headerRowCss}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <p>{label}</p>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={badgeColor}>{count}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {items.map((item, index) => (
+            <OnboardingPreviewRow key={item.title} index={index} {...item} />
+          ))}
+        </React.Fragment>
       </EuiPanel>
     </EuiPanel>
   );

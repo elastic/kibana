@@ -11,7 +11,6 @@ import React from 'react';
 import { DateRangeRedirect } from '../app_root/date_range_redirect';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
-import { SettingsPage } from '../pages/settings/page';
 import { SignificantEventsPage } from '../pages/significant_events/page';
 
 /**
@@ -30,15 +29,6 @@ const significantEventsAppRoutes = {
     children: {
       '/': {
         element: <RedirectTo path="/{tab}" params={{ path: { tab: 'sources' } }} />,
-      },
-      '/settings': {
-        element: <SettingsPage />,
-        params: t.partial({
-          query: t.partial({
-            // The Management tab Settings was opened from; without it, Back goes to Nightshift.
-            fromTab: t.string,
-          }),
-        }),
       },
       '/{tab}': {
         element: (

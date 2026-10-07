@@ -109,8 +109,10 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
-  // Settings also opens from Nightshift; `fromTab` makes its Back link return to this tab.
-  const settingsHref = router.link('/settings', { query: { fromTab: tab } });
+  const settingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings' });
+  const detectionSettingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/detections',
+  });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
@@ -123,7 +125,7 @@ export function SignificantEventsPage() {
                 label: settingsLabel,
                 iconType: 'gear',
                 href: settingsHref,
-                testId: 'significantEventsSettingsLink',
+                testId: 'nightshiftSettingsLink',
               },
             ],
           }
@@ -308,7 +310,7 @@ export function SignificantEventsPage() {
                 </p>
                 {canManageAndConfigure && (
                   <EuiButton
-                    href={settingsHref}
+                    href={detectionSettingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -354,7 +356,7 @@ export function SignificantEventsPage() {
                 )}
                 {canManageAndConfigure && (
                   <EuiButton
-                    href={settingsHref}
+                    href={detectionSettingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -368,7 +370,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          <RunLimitsBanner manageHref={settingsHref} />
+          <RunLimitsBanner />
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'sources' && <SourcesView />}
