@@ -524,7 +524,7 @@ export async function getPackageInfo({
   if (cacheResult) {
     return cacheResult;
   }
-  const cachedError = getPackageInfoCacheError(pkgName, pkgVersion);
+  const cachedError = getPackageInfoCacheError(pkgName, pkgVersion, prerelease);
   if (cachedError !== undefined) {
     throw cachedError;
   }
@@ -541,7 +541,7 @@ export async function getPackageInfo({
   } catch (error) {
     // Only "not found" is remembered: transient registry/ES errors must stay retryable.
     if (error instanceof PackageNotFoundError) {
-      setPackageInfoCacheError(pkgName, pkgVersion, error);
+      setPackageInfoCacheError(pkgName, pkgVersion, error, prerelease);
     }
     throw error;
   }

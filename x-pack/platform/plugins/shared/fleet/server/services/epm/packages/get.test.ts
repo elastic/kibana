@@ -1184,6 +1184,29 @@ owner: elastic`,
       expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
     });
 
+    it('should not reuse a not-found result for a lookup with a different prerelease option', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('second lookup ran'));
+
+      const lookup = (prerelease: boolean) =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'pre-package',
+          pkgVersion: '1.0.0',
+          prerelease,
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup(false)).rejects.toBeInstanceOf(PackageNotFoundError);
+        await expect(lookup(true)).rejects.toThrow('second lookup ran');
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(2);
+    });
+
     it('should not remember a transient failure within a cache session', async () => {
       const soClient = savedObjectsClientMock.create();
       soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());

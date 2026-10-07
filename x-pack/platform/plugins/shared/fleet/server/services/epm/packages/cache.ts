@@ -86,6 +86,10 @@ class CacheSession {
 
 const packageInfoCacheKey = (pkgName: string, pkgVersion: string) => `${pkgName}:${pkgVersion}`;
 
+// "Not found" depends on `prerelease`, so it is part of the key to avoid blocking lookups with other options.
+const packageInfoErrorCacheKey = (pkgName: string, pkgVersion: string, prerelease?: boolean) =>
+  `${packageInfoCacheKey(pkgName, pkgVersion)}:error:${prerelease ? 'prerelease' : 'ga'}`;
+
 export function getPackageInfoCache(pkgName: string, pkgVersion: string) {
   const entry = cacheStore
     .getStore()
@@ -97,11 +101,15 @@ export function getPackageInfoCache(pkgName: string, pkgVersion: string) {
 }
 
 /** A failed lookup stored for this cache session. Absent when the key was never fetched. */
-export function getPackageInfoCacheError(pkgName: string, pkgVersion: string): unknown {
+export function getPackageInfoCacheError(
+  pkgName: string,
+  pkgVersion: string,
+  prerelease?: boolean
+): unknown {
   const entry = cacheStore
     .getStore()
     ?.getPackageInfoCache()
-    ?.get(packageInfoCacheKey(pkgName, pkgVersion));
+    ?.get(packageInfoErrorCacheKey(pkgName, pkgVersion, prerelease));
   if (entry?.status === 'rejected') {
     return entry.error;
   }
@@ -114,11 +122,16 @@ export function setPackageInfoCache(pkgName: string, pkgVersion: string, package
     ?.set(packageInfoCacheKey(pkgName, pkgVersion), { status: 'fulfilled', packageInfo });
 }
 
-export function setPackageInfoCacheError(pkgName: string, pkgVersion: string, error: unknown) {
+export function setPackageInfoCacheError(
+  pkgName: string,
+  pkgVersion: string,
+  error: unknown,
+  prerelease?: boolean
+) {
   return cacheStore
     .getStore()
     ?.getPackageInfoCache()
-    ?.set(packageInfoCacheKey(pkgName, pkgVersion), { status: 'rejected', error });
+    ?.set(packageInfoErrorCacheKey(pkgName, pkgVersion, prerelease), { status: 'rejected', error });
 }
 
 export function getPackageAssetsMapCache(pkgName: string, pkgVersion: string) {
