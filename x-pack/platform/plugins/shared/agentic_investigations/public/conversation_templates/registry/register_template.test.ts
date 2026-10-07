@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import {
+  createFlyoutGroupedAttachmentsRegistry,
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
 } from '@kbn/agentic-investigations-common';
@@ -37,15 +38,18 @@ const register = ({
   core?: ReturnType<typeof coreMock.createStart>;
   escalationsEnabled?: boolean;
 } = {}) => {
+  const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   registerTemplate({
     core,
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
     escalationsEnabled,
+    groupedAttachments,
     templates: escalationsEnabled
       ? [investigationTemplate, escalationTemplate]
       : [investigationTemplate],
   });
   return {
+    groupedAttachments,
     investigation: mockRegisterInvestigation.mock.calls[0][0],
     escalation: mockRegisterEscalation.mock.calls[0]?.[0],
   };
@@ -55,6 +59,12 @@ describe('registerTemplate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetInvestigationsPrivilegesCache();
+  });
+
+  it('hands the investigation template the registry solutions register their groups on', () => {
+    const { groupedAttachments, investigation } = register();
+
+    expect(investigation.groupedAttachments).toBe(groupedAttachments);
   });
 
   it('registers both templates with the shared names and icons', () => {
