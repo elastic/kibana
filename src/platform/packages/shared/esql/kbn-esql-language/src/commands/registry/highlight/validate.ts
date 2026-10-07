@@ -209,8 +209,14 @@ export const validate = (
     }
   }
 
-  // With both the query and ON explicit, every field the query targets must be in ON.
-  if (queryExpression !== undefined && onFields.length > 0 && !hasWildcardField) {
+  // With both the query and ON explicit, every field the query targets must be in ON. A
+  // parameter in ON cannot be resolved here, so it may hold any of them.
+  if (
+    queryExpression !== undefined &&
+    onFields.length > 0 &&
+    !hasWildcardField &&
+    onFields.every(isColumn)
+  ) {
     const onFieldNames = onFields.filter(isColumn).map(({ name }) => name);
 
     for (const queryField of getQueryFieldNames(queryExpression)) {

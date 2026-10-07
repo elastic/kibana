@@ -203,6 +203,57 @@ export const getQueryFieldNames = (queryExpression: ESQLAstItem): string[] => {
   return queryFields;
 };
 
+/** Collects the fields a query narrows to; false when it cannot be narrowed. */
+const collectDerivedFieldNames = (expression: ESQLAstItem, names: string[]): boolean => {
+  if (Array.isArray(expression) || !isFunctionExpression(expression)) {
+    return false;
+  }
+
+  const name = expression.name.toLowerCase();
+
+  if (FIELD_TARGETING_QUERY_FUNCTIONS.includes(name)) {
+    const [target] = expression.args;
+
+    if (!Array.isArray(target) && isColumn(target)) {
+      names.push(target.name);
+    }
+
+    return true;
+  }
+
+  if (name === 'and' || name === 'or') {
+    return expression.args.every((arg) => collectDerivedFieldNames(arg, names));
+  }
+
+  // A negated condition highlights nothing, but it does not widen the fields either, unless it
+  // holds a QSTR, which names no field.
+  if (name === 'not') {
+    const [operand] = expression.args;
+    let hasQueryString = false;
+
+    Walker.walk(operand as ESQLFunction, {
+      visitFunction: (fn) => {
+        hasQueryString ||= fn.name.toLowerCase() === 'qstr';
+      },
+    });
+
+    return !hasQueryString && collectDerivedFieldNames(operand, []);
+  }
+
+  return false;
+};
+
+/**
+ * The fields an omitted ON resolves to: the ones the query names, or undefined when the query
+ * cannot be narrowed to fields (a string literal, QSTR, KQL, or any of them combined with
+ * field-targeting conditions), which highlights every text column instead.
+ */
+export const deriveQueryFieldNames = (queryExpression: ESQLAstItem): string[] | undefined => {
+  const names: string[] = [];
+
+  return collectDerivedFieldNames(queryExpression, names) ? names : undefined;
+};
+
 /** Every text and keyword column, which is what `ON *` covers; metadata columns are excluded. */
 const getHighlightableColumnNames = (columns: ESQLColumnData[]): string[] =>
   columns.filter(isTextColumn).map(({ name }) => name);
@@ -242,9 +293,18 @@ const getHighlightFieldNames = (
       return getReusedWhereColumnNames(columns);
     }
 
-    const queryFields = getQueryFieldNames(queryExpression);
+    const queryFields = deriveQueryFieldNames(queryExpression);
 
-    return queryFields.length > 0 ? queryFields : getHighlightableColumnNames(columns);
+    if (queryFields === undefined) {
+      return getHighlightableColumnNames(columns);
+    }
+
+    // Like Elasticsearch, a named field that is not a text column of the input is left out.
+    const textColumnNames = getHighlightableColumnNames(columns);
+
+    return columns.length === 0
+      ? queryFields
+      : queryFields.filter((field) => textColumnNames.includes(field));
   }
 
   return highlightFields.flatMap((field) => {

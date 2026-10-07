@@ -40,7 +40,7 @@ import { suggestForExpression } from '../../definitions/utils';
 const LONE_WILDCARD_ON_REGEX = /\bon\s+\*\s*$/i;
 
 /** Matches the first entry of the ON list, still empty or being typed. */
-const FIRST_ON_ENTRY_REGEX = /\bon\s*\S*$/i;
+const FIRST_ON_ENTRY_REGEX = /\bon\s*[^\s,]*$/i;
 
 export const getQueryText = () =>
   i18n.translate('kbn-esql-language.commands.highlight.autocomplete.queryTextPlaceholder', {

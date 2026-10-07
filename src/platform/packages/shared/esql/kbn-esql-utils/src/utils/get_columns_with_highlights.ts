@@ -11,6 +11,7 @@ import {
   isAssignment,
   isBooleanLiteral,
   isColumn,
+  isFunctionExpression,
   isList,
   isMap,
   isStringLiteral,
@@ -22,10 +23,11 @@ import {
 import type {
   ESQLAstHighlightCommand,
   ESQLAstQueryExpression,
+  ESQLCommand,
   ESQLFunction,
   ESQLMap,
 } from '@elastic/esql/types';
-import { replaceColumnNamesIfRenamed } from './query_parsing_helpers';
+import { getArgsFromRenameFunction, replaceColumnNamesIfRenamed } from './query_parsing_helpers';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
 export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
@@ -121,6 +123,15 @@ export function getColumnsWithHighlights(
     };
   }
 
+  const renamedColumnNames = (
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && node.name === 'rename'
+    ) as ESQLCommand[]
+  ).flatMap(({ args }) =>
+    args.filter(isFunctionExpression).map((fn) => getArgsFromRenameFunction(fn).original.name)
+  );
+
   const highlightCommands = Walker.findAll(
     root,
     (node) => node.type === 'command' && node.name === 'highlight'
@@ -163,9 +174,16 @@ export function getColumnsWithHighlights(
       highlightFields.some((field) => isColumn(field) && field.name === '*');
 
     if (highlightsDerivedFields && prefix !== '') {
-      for (const columnName of availableColumnNames) {
-        if (columnName.startsWith(prefix)) {
-          columnsWithHighlights[columnName] = { preTag, postTag };
+      // A generated column may have been renamed later, so its original name is only in RENAME.
+      const generatedColumnNames = [...availableColumnNames, ...renamedColumnNames].filter((name) =>
+        name.startsWith(prefix)
+      );
+
+      for (const columnName of generatedColumnNames) {
+        const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
+
+        if (availableColumnNames.includes(resolvedColumnName)) {
+          columnsWithHighlights[resolvedColumnName] = { preTag, postTag };
         }
       }
     }

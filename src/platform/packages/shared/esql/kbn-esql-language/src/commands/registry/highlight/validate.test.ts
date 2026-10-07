@@ -100,6 +100,14 @@ describe('HIGHLIGHT Validation', () => {
       );
     });
 
+    it('accepts any query field when ON holds a parameter', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON ?field', []);
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT MATCH(textField, "ring") ON keywordField, ?field',
+        []
+      );
+    });
+
     it('accepts any query field when ON is *', () => {
       highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON *', []);
     });

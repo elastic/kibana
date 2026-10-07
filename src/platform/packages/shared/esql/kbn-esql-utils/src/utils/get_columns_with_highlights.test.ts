@@ -136,6 +136,15 @@ describe('getColumnsWithHighlights', () => {
     ).toEqual(['hl_title']);
   });
 
+  it('follows a RENAME of a derived highlight column', () => {
+    const query =
+      'FROM books | HIGHLIGHT "Tolkien" ON * | RENAME highlight_title AS hl | RENAME hl AS h';
+    expect(Object.keys(getColumnsWithHighlights(query, ['title', 'h', 'highlight_body']))).toEqual([
+      'highlight_body',
+      'h',
+    ]);
+  });
+
   it('cannot tell the derived columns apart when the prefix is empty', () => {
     const query = 'FROM books | HIGHLIGHT prefix = "" "Tolkien" ON *';
     expect(getColumnsWithHighlights(query, ['title', 'description'])).toEqual({});

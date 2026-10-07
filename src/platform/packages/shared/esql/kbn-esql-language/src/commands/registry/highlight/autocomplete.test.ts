@@ -268,6 +268,16 @@ describe('HIGHLIGHT Autocomplete', () => {
       );
     });
 
+    test('does not suggest * after a comma in the ON list', async () => {
+      for (const onClause of ['textField,', 'textField, ', 'textField,key']) {
+        await expectHighlightSuggestions(
+          buildHighlightQuery({ query: '"search query"', onClause }),
+          { notContains: ['*'] },
+          mockCallbacks
+        );
+      }
+    });
+
     test('suggests ON fields when the query is omitted', async () => {
       await expectHighlightSuggestions(
         'from a | highlight ON ',

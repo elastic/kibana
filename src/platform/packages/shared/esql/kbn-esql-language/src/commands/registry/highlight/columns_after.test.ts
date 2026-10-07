@@ -99,6 +99,30 @@ describe('HIGHLIGHT > columnsAfter', () => {
       ]);
     });
 
+    it('highlights every text column when a field-targeting query is combined with one that names no field', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(title, "fox") AND QSTR("x")')).toEqual([
+        'highlight_title',
+        'highlight_author',
+        'highlight_body',
+      ]);
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(title, "fox") OR "x"')).toHaveLength(3);
+    });
+
+    it('keeps narrowing to the named fields next to a negated condition', () => {
+      expect(
+        getGeneratedColumns('FROM a | HIGHLIGHT MATCH(title, "fox") AND NOT MATCH(author, "x")')
+      ).toEqual(['highlight_title']);
+      expect(
+        getGeneratedColumns('FROM a | HIGHLIGHT MATCH(title, "fox") AND NOT QSTR("x")')
+      ).toHaveLength(3);
+    });
+
+    it('leaves out a named field that is not a text column of the input', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT MATCH(year, "1") AND title : "x"')).toEqual([
+        'highlight_title',
+      ]);
+    });
+
     it('highlights every text and keyword column for a query that targets no field', () => {
       expect(getGeneratedColumns('FROM a | HIGHLIGHT "fox"')).toEqual([
         'highlight_title',
