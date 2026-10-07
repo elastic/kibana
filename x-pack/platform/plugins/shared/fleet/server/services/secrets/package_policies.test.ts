@@ -1420,6 +1420,30 @@ describe('Package policy secrets', () => {
       });
     });
 
+    describe('when the policy uses a cloud connector', () => {
+      it('accepts the connector secret refs without looking them up (the connector may be new)', async () => {
+        const mockPackagePolicy = {
+          supports_cloud_connector: true,
+          cloud_connector_id: 'connector-1',
+          vars: {
+            'pkg-secret-1': { value: { isSecretRef: true, id: 'connector-secret-1' } },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+          soClient: soClientMock,
+        });
+
+        expect(result.secretReferences).toEqual([{ id: 'connector-secret-1' }]);
+        expect(mockedPackagePolicyService.list).not.toHaveBeenCalled();
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+      });
+    });
+
     describe('when a var references a secret no accessible package policy uses', () => {
       it('rejects the request and creates nothing', async () => {
         const mockPackagePolicy = {

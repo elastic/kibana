@@ -133,7 +133,7 @@ test.describe(
       ).toBeHidden();
     });
 
-    test('replacing a stored key makes Next redeploy with the new value and the kept ref', async ({
+    test('replacing the stored keys makes Next redeploy with the new values', async ({
       browserAuth,
       page,
     }) => {
@@ -141,7 +141,8 @@ test.describe(
 
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
-      // Nothing else changed, so only the replaced key can make the step redeploy.
+      await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
+      // Nothing else changed, so only the replaced keys can make the step redeploy.
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       const policyPut = page.waitForRequest(
@@ -157,7 +158,7 @@ test.describe(
       await nextButton.click();
 
       const body = JSON.parse((await policyPut).postData() ?? '{}');
-      expect(body.vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
+      expect(body.vars.access_key_id).toBe('NEW-ACCESS-KEY');
       expect(body.vars.secret_access_key).toBe('NEW-SECRET-VALUE');
     });
   }

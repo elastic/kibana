@@ -14,6 +14,8 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { sendGetAgentlessPolicy, sendGetOnePackagePolicy } from '@kbn/fleet-plugin/public';
 
 import {
+  completeAgentCredentials,
+  completeStaticKeysOnly,
   detectSecretRefs,
   fetchAgentlessSecretRefs,
   filterSecretRefsForMethod,
@@ -223,5 +225,76 @@ describe('withoutCoveredCredentials', () => {
     expect(withoutCoveredCredentials({ access_key_id: 'AKID' }, tokenRefs)).toStrictEqual({
       access_key_id: 'AKID',
     });
+  });
+});
+
+describe('useExistingSecretRefs failure handling', () => {
+  it('stops loading and reports nothing stored when the lookup rejects', async () => {
+    const fetchRefs = jest.fn().mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() => useExistingSecretRefs('p1', fetchRefs));
+    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.existingSecretRefs.size).toBe(0);
+  });
+});
+
+describe('completeStaticKeysOnly', () => {
+  it('keeps a complete pair', () => {
+    const keys = { access_key_id: 'AKID', secret_access_key: 'SECRET' };
+    expect(completeStaticKeysOnly(keys)).toBe(keys);
+  });
+
+  it.each([
+    [{ access_key_id: 'AKID', secret_access_key: '' }],
+    [{ access_key_id: '', secret_access_key: 'SECRET' }],
+    [{ access_key_id: '', secret_access_key: '' }],
+  ])('drops a half-typed or empty pair %j', (keys) => {
+    expect(completeStaticKeysOnly(keys)).toBeUndefined();
+  });
+
+  it('passes undefined through', () => {
+    expect(completeStaticKeysOnly(undefined)).toBeUndefined();
+  });
+});
+
+describe('completeAgentCredentials', () => {
+  it('keeps complete static and temporary keys', () => {
+    const stat = { method: 'static_keys', access_key_id: 'a', secret_access_key: 's' };
+    const temp = { ...stat, method: 'temporary_keys', session_token: 't' };
+    expect(completeAgentCredentials(stat)).toBe(stat);
+    expect(completeAgentCredentials(temp)).toBe(temp);
+  });
+
+  it('blanks every key when static keys are half typed, keeping the method', () => {
+    expect(
+      completeAgentCredentials({ method: 'static_keys', access_key_id: 'a', secret_access_key: '' })
+    ).toStrictEqual({
+      method: 'static_keys',
+      access_key_id: '',
+      secret_access_key: '',
+      session_token: '',
+    });
+  });
+
+  it('needs the session token too for temporary keys', () => {
+    expect(
+      completeAgentCredentials({
+        method: 'temporary_keys',
+        access_key_id: 'a',
+        secret_access_key: 's',
+        session_token: '',
+      })
+    ).toStrictEqual({
+      method: 'temporary_keys',
+      access_key_id: '',
+      secret_access_key: '',
+      session_token: '',
+    });
+  });
+
+  it('leaves the methods without secret keys alone', () => {
+    const role = { method: 'assume_role', role_arn: 'arn:aws:iam::1:role/r' };
+    expect(completeAgentCredentials(role)).toBe(role);
+    expect(completeAgentCredentials(undefined)).toBeUndefined();
   });
 });

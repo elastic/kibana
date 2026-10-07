@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { AwsServiceMatrixEntry, DataFormat } from '../../aws_service_matrix';
 import type {
@@ -17,7 +17,11 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
-import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
+import {
+  completeStaticKeysOnly,
+  fetchAgentlessSecretRefs,
+  withoutCoveredCredentials,
+} from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
@@ -225,7 +229,7 @@ export function useMiDeploy({
   deployGroups,
   nonAgentlessServices,
   serviceSettings,
-  authenticateAndDeployStep,
+  authenticateAndDeployStep: typedAuthenticateAndDeployStep,
   namespace,
   selectedServiceIds,
   dataFormat,
@@ -250,6 +254,15 @@ export function useMiDeploy({
   isDirty,
   isAuthDirty,
 }: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
+  // Half-typed keys are never sent (see completeStaticKeysOnly): that covers the deploy, the
+  // dirty update and the cleanup updates alike.
+  const authenticateAndDeployStep = useMemo(
+    () => ({
+      ...typedAuthenticateAndDeployStep,
+      staticKeys: completeStaticKeysOnly(typedAuthenticateAndDeployStep.staticKeys),
+    }),
+    [typedAuthenticateAndDeployStep]
+  );
   return useCallback(
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;
@@ -476,7 +489,9 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
-            authenticateAndDeployStep,
+            // A dirty update may have just stored new keys for the policies this updates: keep
+            // them instead of storing the typed ones again, which would orphan the shared refs.
+            authenticateAndDeployStep: withSharedRefs(dirtySharedRefs),
             servicesMap: servicesMap ?? new Map(),
           });
           ({ cleanedInstanceIds, remainingPending, cleanupFailed } = reconcileMiCleanupOps(
@@ -569,7 +584,9 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
-            authenticateAndDeployStep,
+            // A dirty update may have just stored new keys for the policies this updates: keep
+            // them instead of storing the typed ones again, which would orphan the shared refs.
+            authenticateAndDeployStep: withSharedRefs(dirtySharedRefs),
             servicesMap: servicesMap ?? new Map(),
           });
           const retryReconciliation = reconcileMiCleanupOps(

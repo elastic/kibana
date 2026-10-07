@@ -223,23 +223,26 @@ test.describe(
       expect(JSON.stringify(body)).toContain('drift-bucket');
     });
 
-    test('replacing the secret access key alone redeploys, sending the new value and keeping the access key id', async ({
+    test('replacing the keys alone redeploys, sending the new values', async ({
       browserAuth,
       page,
     }) => {
       await resume(browserAuth, page, { drift: false });
 
-      // The deployment is unchanged until a stored value is replaced.
+      // The deployment is unchanged until the stored keys are replaced.
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
 
+      // The keys are replaced as a set: a new secret only works with its own access key id.
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
+      await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeHidden();
       await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeHidden();
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
-      // The stored access key id is untouched.
-      await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
+      // Half of the set is not a change yet: nothing is sent until both are entered.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+      await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
 
-      // Replacing the key is the only change, and it marks the deployment as changed.
+      // Replacing the keys is the only change, and it marks the deployment as changed.
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
@@ -266,8 +269,26 @@ test.describe(
       await deployButton.click();
 
       const body = JSON.parse((await policyPut).postData() ?? '{}');
-      expect(body.vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
+      expect(body.vars.access_key_id).toBe('NEW-ACCESS-KEY');
       expect(body.vars.secret_access_key).toBe('NEW-SECRET-VALUE');
+    });
+
+    test('Keep the stored secrets goes back to the placeholders and clears the change', async ({
+      browserAuth,
+      page,
+    }) => {
+      await resume(browserAuth, page, { drift: false });
+
+      await page.testSubj.locator('awsStaticKeysForm-secretAccessKey-replace').click();
+      await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
+      await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+      await page.testSubj.locator('awsStaticKeysForm-cancelReplace').click();
+
+      await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
+      await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey-stored')).toBeVisible();
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
   }
 );

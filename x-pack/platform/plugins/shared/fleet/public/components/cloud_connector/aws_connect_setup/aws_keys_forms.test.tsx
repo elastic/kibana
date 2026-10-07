@@ -37,7 +37,7 @@ describe('AwsStaticKeysForm stored secrets', () => {
     expect(onReadyChange).toHaveBeenLastCalledWith(true);
   });
 
-  it('only stores the listed field; the other one still has to be filled in', () => {
+  it('a field that is not stored still has to be filled in', () => {
     const onReadyChange = jest.fn();
     renderWithI18n(
       <AwsStaticKeysForm storedSecretFields={['secret_access_key']} onReadyChange={onReadyChange} />
@@ -52,25 +52,7 @@ describe('AwsStaticKeysForm stored secrets', () => {
     expect(onReadyChange).toHaveBeenLastCalledWith(true);
   });
 
-  it('reports a kept stored field as an empty string', () => {
-    const onFieldsChange = jest.fn();
-    renderWithI18n(
-      <AwsStaticKeysForm
-        storedSecretFields={['secret_access_key']}
-        onFieldsChange={onFieldsChange}
-      />
-    );
-
-    fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
-      target: { value: 'AKIA' },
-    });
-    expect(onFieldsChange).toHaveBeenLastCalledWith({
-      access_key_id: 'AKIA',
-      secret_access_key: '',
-    });
-  });
-
-  it('Replace shows the input and requires a new value', () => {
+  it('Replace on one field replaces the whole set and every field then needs a new value', () => {
     const onReadyChange = jest.fn();
     renderWithI18n(
       <AwsStaticKeysForm
@@ -81,6 +63,8 @@ describe('AwsStaticKeysForm stored secrets', () => {
 
     fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
 
+    // Both inputs are shown: a new secret only works with its own access key id.
+    expect(screen.queryByTestId('awsStaticKeysForm-accessKeyId-stored')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('awsStaticKeysForm-secretAccessKey-stored')
     ).not.toBeInTheDocument();
@@ -89,14 +73,89 @@ describe('AwsStaticKeysForm stored secrets', () => {
     fireEvent.change(screen.getByTestId('awsStaticKeysForm-secretAccessKey'), {
       target: { value: 'new-secret' },
     });
+    expect(onReadyChange).toHaveBeenLastCalledWith(false);
+    fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
+      target: { value: 'new-key' },
+    });
     expect(onReadyChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('reports the replaced set and nothing while the stored one is kept', () => {
+    const onFieldsChange = jest.fn();
+    renderWithI18n(
+      <AwsStaticKeysForm
+        storedSecretFields={['access_key_id', 'secret_access_key']}
+        onFieldsChange={onFieldsChange}
+      />
+    );
+    expect(onFieldsChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
+    fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
+      target: { value: 'new-key' },
+    });
+    fireEvent.change(screen.getByTestId('awsStaticKeysForm-secretAccessKey'), {
+      target: { value: 'new-secret' },
+    });
+    expect(onFieldsChange).toHaveBeenLastCalledWith({
+      access_key_id: 'new-key',
+      secret_access_key: 'new-secret',
+    });
+  });
+
+  describe('keeping the stored secrets after Replace', () => {
+    it('offers a way back only after Replace, and it restores the stored placeholders', () => {
+      const onReadyChange = jest.fn();
+      const onFieldsChange = jest.fn();
+      renderWithI18n(
+        <AwsStaticKeysForm
+          storedSecretFields={['access_key_id', 'secret_access_key']}
+          onReadyChange={onReadyChange}
+          onFieldsChange={onFieldsChange}
+        />
+      );
+      expect(screen.queryByTestId('awsStaticKeysForm-cancelReplace')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
+      fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
+        target: { value: 'typed-key' },
+      });
+      expect(onReadyChange).toHaveBeenLastCalledWith(false);
+
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-cancelReplace'));
+
+      expect(screen.getByTestId('awsStaticKeysForm-accessKeyId-stored')).toBeInTheDocument();
+      expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey-stored')).toBeInTheDocument();
+      expect(screen.queryByTestId('awsStaticKeysForm-cancelReplace')).not.toBeInTheDocument();
+      // Ready again without typing, and nothing entered is reported any more.
+      expect(onReadyChange).toHaveBeenLastCalledWith(true);
+      expect(onFieldsChange).toHaveBeenLastCalledWith(undefined);
+    });
+
+    it('does not bring back what was typed before cancelling', () => {
+      renderWithI18n(
+        <AwsStaticKeysForm storedSecretFields={['access_key_id', 'secret_access_key']} />
+      );
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
+      fireEvent.change(screen.getByTestId('awsStaticKeysForm-accessKeyId'), {
+        target: { value: 'typed-key' },
+      });
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-cancelReplace'));
+      fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
+      expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('');
+    });
+
+    it('has nothing to cancel when no secret is stored', () => {
+      renderWithI18n(<AwsStaticKeysForm />);
+      expect(screen.queryByTestId('awsStaticKeysForm-cancelReplace')).not.toBeInTheDocument();
+    });
   });
 });
 
 describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
   const STAGED = { access_key_id: 'staged-key', secret_access_key: '' };
 
-  it('starts a stored field that already has a value as replaced and keeps the value', () => {
+  it('starts as replaced, keeping the value, when a stored field already has one', () => {
     const onReadyChange = jest.fn();
     renderWithI18n(
       <AwsStaticKeysForm
@@ -106,12 +165,16 @@ describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
       />
     );
     expect(screen.queryByTestId('awsStaticKeysForm-accessKeyId-stored')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('awsStaticKeysForm-secretAccessKey-stored')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('staged-key');
-    expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey-stored')).toBeInTheDocument();
-    expect(onReadyChange).toHaveBeenLastCalledWith(true);
+    expect(screen.getByTestId('awsStaticKeysForm-cancelReplace')).toBeInTheDocument();
+    // The secret still has to be entered with it.
+    expect(onReadyChange).toHaveBeenLastCalledWith(false);
   });
 
-  it('keeps an earlier replacement when another stored field is replaced after a remount', () => {
+  it('keeps an earlier entry when the rest is entered after a remount', () => {
     const onFieldsChange = jest.fn();
     renderWithI18n(
       <AwsStaticKeysForm
@@ -120,7 +183,6 @@ describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
         onFieldsChange={onFieldsChange}
       />
     );
-    fireEvent.click(screen.getByTestId('awsStaticKeysForm-secretAccessKey-replace'));
     fireEvent.change(screen.getByTestId('awsStaticKeysForm-secretAccessKey'), {
       target: { value: 'new-secret' },
     });
@@ -128,20 +190,6 @@ describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
       access_key_id: 'staged-key',
       secret_access_key: 'new-secret',
     });
-  });
-
-  it('shows an empty input after Replace, not the value kept in memory', () => {
-    renderWithI18n(
-      <AwsStaticKeysForm
-        initialValues={{ access_key_id: '', secret_access_key: 'previous-secret' }}
-        storedSecretFields={['access_key_id', 'secret_access_key']}
-      />
-    );
-    // The secret already has a value (replaced earlier); clicking Replace on the other field
-    // leaves it alone, and a field without a value starts empty.
-    fireEvent.click(screen.getByTestId('awsStaticKeysForm-accessKeyId-replace'));
-    expect(screen.getByTestId('awsStaticKeysForm-accessKeyId')).toHaveValue('');
-    expect(screen.getByTestId('awsStaticKeysForm-secretAccessKey')).toHaveValue('previous-secret');
   });
 
   it('still seeds fields that are not stored', () => {
@@ -153,7 +201,7 @@ describe('AwsStaticKeysForm stored secrets with values kept in memory', () => {
 });
 
 describe('AwsTemporaryKeysForm stored secrets', () => {
-  it('is ready when all three fields are stored and not ready after replacing one', () => {
+  it('replaces all three fields together and needs a value for each', () => {
     const onReadyChange = jest.fn();
     renderWithI18n(
       <AwsTemporaryKeysForm
@@ -165,10 +213,33 @@ describe('AwsTemporaryKeysForm stored secrets', () => {
 
     fireEvent.click(screen.getByTestId('awsTemporaryKeysForm-sessionToken-replace'));
     expect(onReadyChange).toHaveBeenLastCalledWith(false);
+    expect(screen.getByTestId('awsTemporaryKeysForm-accessKeyId')).toBeInTheDocument();
+    expect(screen.getByTestId('awsTemporaryKeysForm-secretAccessKey')).toBeInTheDocument();
 
     fireEvent.change(screen.getByTestId('awsTemporaryKeysForm-sessionToken'), {
       target: { value: 'token' },
     });
+    fireEvent.change(screen.getByTestId('awsTemporaryKeysForm-accessKeyId'), {
+      target: { value: 'key' },
+    });
+    expect(onReadyChange).toHaveBeenLastCalledWith(false);
+    fireEvent.change(screen.getByTestId('awsTemporaryKeysForm-secretAccessKey'), {
+      target: { value: 'secret' },
+    });
+    expect(onReadyChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('can go back to the stored secrets after Replace', () => {
+    const onReadyChange = jest.fn();
+    renderWithI18n(
+      <AwsTemporaryKeysForm
+        storedSecretFields={['access_key_id', 'secret_access_key', 'session_token']}
+        onReadyChange={onReadyChange}
+      />
+    );
+    fireEvent.click(screen.getByTestId('awsTemporaryKeysForm-accessKeyId-replace'));
+    fireEvent.click(screen.getByTestId('awsTemporaryKeysForm-cancelReplace'));
+    expect(screen.getByTestId('awsTemporaryKeysForm-sessionToken-stored')).toBeInTheDocument();
     expect(onReadyChange).toHaveBeenLastCalledWith(true);
   });
 });

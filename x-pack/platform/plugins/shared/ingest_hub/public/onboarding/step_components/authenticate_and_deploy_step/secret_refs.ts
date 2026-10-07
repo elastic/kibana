@@ -97,6 +97,44 @@ export function withoutCoveredCredentials<T extends Partial<Record<CredentialVar
   return result;
 }
 
+/**
+ * Typed access keys count only as a complete set. An access key id works only with its own secret
+ * access key, so a half-typed pair is never sent: sending it next to a stored ref for the other
+ * half would leave a live policy with mismatched credentials.
+ */
+export function completeStaticKeysOnly<
+  T extends { access_key_id?: string; secret_access_key?: string }
+>(keys: T | undefined): T | undefined {
+  return keys?.access_key_id && keys.secret_access_key ? keys : undefined;
+}
+
+/**
+ * Agent-based counterpart of {@link completeStaticKeysOnly}: the key methods need every key of the
+ * method typed (the session token too for temporary keys), otherwise the typed values are blanked
+ * so the stored refs are used for all of them. Other methods are left alone.
+ */
+export function completeAgentCredentials<
+  T extends {
+    method: string;
+    access_key_id?: string;
+    secret_access_key?: string;
+    session_token?: string;
+  }
+>(credentials: T | undefined): T | undefined {
+  if (!credentials) return credentials;
+  const {
+    method,
+    access_key_id: id,
+    secret_access_key: secret,
+    session_token: token,
+  } = credentials;
+  if (method !== 'static_keys' && method !== 'temporary_keys') return credentials;
+  const isComplete = Boolean(id && secret && (method === 'static_keys' || token));
+  return isComplete
+    ? credentials
+    : { ...credentials, access_key_id: '', secret_access_key: '', session_token: '' };
+}
+
 /** Fresh secret refs of one deployed managed-integration (agentless) policy; none when unreadable. */
 export async function fetchAgentlessSecretRefs(policyId: string | undefined) {
   if (!policyId) return NO_REFS;
@@ -135,9 +173,15 @@ export function useExistingSecretRefs(
   useEffect(() => {
     if (!policyId) return;
     let cancelled = false;
-    fetchRefs(policyId).then((refs) => {
-      if (!cancelled) setState({ policyId, refs });
-    });
+    fetchRefs(policyId)
+      .then((refs) => {
+        if (!cancelled) setState({ policyId, refs });
+      })
+      // Nothing stored is the safe answer: without it a rejected lookup would leave the form
+      // loading forever.
+      .catch(() => {
+        if (!cancelled) setState({ policyId, refs: NO_REFS });
+      });
     return () => {
       cancelled = true;
     };

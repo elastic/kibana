@@ -121,7 +121,14 @@ export function AgentBasedSection({
     () => TEMPORARY_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
     [isKeysMethod, existingSecretRefs]
   );
-  const hasStoredSecrets = storedStaticFields.length > 0;
+  // Any stored field means typing replaces something and the parent must redeploy; the re-enter
+  // callout goes away only when every field of the selected method is stored.
+  const storedFields =
+    credentialMethod === 'temporary_keys' ? storedTemporaryFields : storedStaticFields;
+  const requiredFieldCount =
+    credentialMethod === 'temporary_keys' ? TEMPORARY_KEY_FIELDS.length : STATIC_KEY_FIELDS.length;
+  const hasStoredSecrets = storedFields.length > 0;
+  const hasAllStoredSecrets = storedFields.length === requiredFieldCount;
   // Typing into a stored field replaces it; the parent must then redeploy.
   const notifyStoredCredentialsReplaced = (
     creds: { access_key_id: string; secret_access_key: string; session_token?: string } | undefined
@@ -444,7 +451,7 @@ export function AgentBasedSection({
                 <EuiSpacer size="m" />
 
                 {/* Resume callout — credentials are never persisted; user must re-enter them. */}
-                {isEditMode && !isCredentialReady && !hasStoredSecrets && (
+                {isEditMode && !isCredentialReady && !hasAllStoredSecrets && (
                   <>
                     <KbnWarningCallout
                       announceOnMount

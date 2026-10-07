@@ -71,16 +71,19 @@ export async function extractAndWriteSecrets(opts: {
   const providedSecretRefs = secretPaths.filter(
     (secretPath) => !!secretPath.value.value?.isSecretRef
   );
-  await assertSecretRefsReusable(soClient, providedSecretRefs);
 
   const hasCloudConnectorSecretReferences =
     packagePolicy.supports_cloud_connector &&
     packagePolicy.cloud_connector_id &&
     cloudConnectorsSecretReferences.length;
 
+  // The refs of a cloud connector belong to the connector, which may have just been created and
+  // is not referenced by any package policy yet: they are accepted as they are.
   if (hasCloudConnectorSecretReferences) {
     return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
   }
+
+  await assertSecretRefsReusable(soClient, providedSecretRefs);
 
   const secrets = await createSecrets({
     esClient,
@@ -112,12 +115,6 @@ export async function extractAndWriteSecrets(opts: {
 }
 
 /**
- * Given a package policy update, extracts any secrets, creates them in Elasticsearch,
- * and returns a package policy update with secret references in place of the
- * original secret values, along with an array of secret references for
- * storage on the package policy object itself.
- */
-/**
  * A create request may carry refs to existing secrets (to reuse the credentials of a sibling
  * policy). Secret ids are not credentials of their own, so a ref is only accepted when a package
  * policy the caller can see already references that secret: this stops a request from pointing a
@@ -145,6 +142,12 @@ async function assertSecretRefsReusable(
   }
 }
 
+/**
+ * Given a package policy update, extracts any secrets, creates them in Elasticsearch,
+ * and returns a package policy update with secret references in place of the
+ * original secret values, along with an array of secret references for
+ * storage on the package policy object itself.
+ */
 export async function extractAndUpdateSecrets(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;

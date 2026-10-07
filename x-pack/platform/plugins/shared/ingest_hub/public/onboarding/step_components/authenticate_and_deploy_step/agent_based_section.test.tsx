@@ -855,6 +855,27 @@ describe('AgentBasedSection', () => {
         expect(onStoredCredentialsReplacedChange).not.toHaveBeenCalled();
       });
 
+      it('keeps asking for credentials when only some temporary-key fields are stored', async () => {
+        // The session token has no ref: its input stays empty and Next stays disabled, so the
+        // callout must stay.
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1' });
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+        expect(MockTemporaryKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+        ]);
+        expect(
+          screen.getByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).toBeInTheDocument();
+      });
+
       it('does not look up secrets for methods without secret keys', async () => {
         setupMocks({
           agentHostsMode: 'existing',

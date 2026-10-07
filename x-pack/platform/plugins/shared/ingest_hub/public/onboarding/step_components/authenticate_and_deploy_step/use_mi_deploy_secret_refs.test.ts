@@ -347,6 +347,61 @@ describe('useMiDeploy — kept secret refs', () => {
       }
     );
 
+    it('cleanup of a surviving policy keeps the secret a dirty update just stored, so new policies can still use it', async () => {
+      mockFetchRefs.mockImplementation(async (id?: string) =>
+        id === 'policy-A' ? FULL_REFS : new Map()
+      );
+      mockUpdate.mockResolvedValue(undefined);
+      mockCleanup.mockResolvedValue({
+        toDelete: [],
+        toUpdate: [{ policyId: 'policy-A', survivingInstanceIds: ['elb'] }],
+      });
+      await runDeploy(
+        makeParams({
+          deployGroups: [makeGroup('elb'), makeGroup('s3')],
+          serviceStatuses: { elb: 'receiving' },
+          policyIdsByInstance: { elb: 'policy-A', removed: 'policy-A' },
+          pendingCleanupPolicyIds: { removed: 'policy-A' },
+          isDirty: true,
+          authenticateAndDeployStep: TYPED,
+        })
+      );
+
+      // The dirty update stored the typed keys on policy-A once...
+      expect(mockUpdate.mock.calls[0][2].authenticateAndDeployStep.staticKeys).toStrictEqual(
+        TYPED.staticKeys
+      );
+      // ...cleanup then updates policy-A with that stored secret, not the typed keys again...
+      const cleanupAuth = mockCleanup.mock.calls[0][0].authenticateAndDeployStep;
+      expect(cleanupAuth.existingSecretRefs).toBe(FULL_REFS);
+      expect(cleanupAuth.staticKeys).toStrictEqual({ access_key_id: '', secret_access_key: '' });
+      // ...so the refs the new policy is created with are still the live ones.
+      expect(mockDeployGroup.mock.calls[0][1].authenticateAndDeployStep.existingSecretRefs).toBe(
+        FULL_REFS
+      );
+    });
+
+    it('never sends half-typed keys: a cleanup-only run keeps the stored secrets', async () => {
+      mockCleanup.mockResolvedValue({
+        toDelete: [],
+        toUpdate: [{ policyId: 'policy-A', survivingInstanceIds: ['elb'] }],
+      });
+      await runDeploy(
+        makeParams({
+          deployGroups: [makeGroup('elb')],
+          serviceStatuses: { elb: 'receiving' },
+          policyIdsByInstance: { elb: 'policy-A', removed: 'policy-A' },
+          pendingCleanupPolicyIds: { removed: 'policy-A' },
+          // The access key id was typed, the secret was not.
+          authenticateAndDeployStep: {
+            staticKeys: { access_key_id: 'AKID', secret_access_key: '' },
+          },
+        })
+      );
+
+      expect(mockCleanup.mock.calls[0][0].authenticateAndDeployStep.staticKeys).toBeUndefined();
+    });
+
     it('does not share anything for a single policy or without typed keys', async () => {
       await runDeploy(makeParams());
       expect(mockUpdate).not.toHaveBeenCalled();

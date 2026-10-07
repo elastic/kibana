@@ -754,6 +754,41 @@ describe('ManagedIntegrationsSection', () => {
       expect(MockStaticKeys.mock.calls[0][0].storedSecretFields).toEqual([]);
     });
 
+    describe('re-enter credentials callout on resume', () => {
+      const CALLOUT = 'managedIntegrationsSection-resumeCredentialsCallout';
+
+      it('is shown when nothing is stored (lookup found nothing or failed)', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+      });
+
+      it('is hidden when the keys are stored', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('is hidden while the stored secrets are still loading', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, isStoredSecretsLoading: true });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('goes away once the keys are entered', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        fireEvent.click(screen.getByText('mark-ready'));
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('is not shown outside resume mode', () => {
+        setupMocks({ searchParams: '', connectorId: undefined });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+    });
+
     it('shows no form while the stored secrets are loading', () => {
       setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
       renderSection({ showIdentityFederation: false, isStoredSecretsLoading: true });

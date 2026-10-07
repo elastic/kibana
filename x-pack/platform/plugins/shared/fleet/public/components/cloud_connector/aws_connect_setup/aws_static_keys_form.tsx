@@ -9,7 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { StoredSecretField, useStoredSecretFields } from './stored_secret_field';
+import {
+  CancelReplaceButton,
+  StoredSecretField,
+  useStoredSecretFields,
+} from './stored_secret_field';
 
 export const AWS_STATIC_KEYS_FORM_TEST_SUBJ = 'awsStaticKeysForm';
 
@@ -43,11 +47,26 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
     secret_access_key: initialValues?.secret_access_key ?? '',
   });
 
-  const { isStored, replace } = useStoredSecretFields(storedSecretFields, initialValues);
-  // A replaced field starts empty: the value kept in memory from an earlier entry is not shown.
-  const handleReplace = (field: keyof typeof fields) => {
-    replace(field);
-    setFields((prev) => ({ ...prev, [field]: '' }));
+  const { isStored, replace, cancel, canCancel } = useStoredSecretFields(
+    storedSecretFields,
+    initialValues
+  );
+  // The stored credentials are replaced or kept together; a replaced field starts empty, not with
+  // the value kept in memory from an earlier entry.
+  const resetStoredFields = () =>
+    setFields((prev) => ({
+      ...prev,
+      ...Object.fromEntries((storedSecretFields ?? []).map((field) => [field, ''])),
+    }));
+  const handleReplace = () => {
+    replace();
+    resetStoredFields();
+  };
+  const handleCancelReplace = () => {
+    cancel();
+    resetStoredFields();
+    // Nothing is entered any more.
+    onFieldsChange?.(undefined);
   };
   const hasAccessKeyId = !!fields.access_key_id || isStored('access_key_id');
   const hasSecretAccessKey = !!fields.secret_access_key || isStored('secret_access_key');
@@ -84,7 +103,7 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
       >
         {isStored('access_key_id') ? (
           <StoredSecretField
-            onReplace={() => handleReplace('access_key_id')}
+            onReplace={handleReplace}
             data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-accessKeyId`}
           />
         ) : (
@@ -116,7 +135,7 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
       >
         {isStored('secret_access_key') ? (
           <StoredSecretField
-            onReplace={() => handleReplace('secret_access_key')}
+            onReplace={handleReplace}
             data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-secretAccessKey`}
           />
         ) : (
@@ -129,6 +148,12 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
           />
         )}
       </EuiFormRow>
+      {canCancel && (
+        <CancelReplaceButton
+          onCancel={handleCancelReplace}
+          data-test-subj={AWS_STATIC_KEYS_FORM_TEST_SUBJ}
+        />
+      )}
     </div>
   );
 };

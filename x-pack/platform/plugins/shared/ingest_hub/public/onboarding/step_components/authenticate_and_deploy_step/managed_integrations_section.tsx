@@ -343,6 +343,31 @@ export function ManagedIntegrationsSection({
 
             <EuiSpacer size="m" />
 
+            {/* Credentials are never persisted: when none are stored (the lookup found nothing, or
+                the package keeps them as plain values) a resumed deployment needs them again. */}
+            {isStaticKeysEditMode &&
+              preferredMethod === 'access_keys' &&
+              !isStoredSecretsLoading &&
+              storedSecretFields.length === 0 &&
+              !isDeployReady && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.resumeCredentialsCallout',
+                      {
+                        defaultMessage:
+                          'Credentials aren’t saved between sessions — re-enter them to continue.',
+                      }
+                    )}
+                    data-test-subj="managedIntegrationsSection-resumeCredentialsCallout"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
                 <LazyAwsIdentityFederationSetup
