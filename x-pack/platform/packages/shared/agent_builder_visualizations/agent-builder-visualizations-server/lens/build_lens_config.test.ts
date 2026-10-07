@@ -153,6 +153,7 @@ describe('buildLensConfig', () => {
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({
       client: esClient.asCurrentUser,
       internalClient: esClient.asInternalUser,
+      logger,
     });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke).toHaveBeenCalledTimes(1);

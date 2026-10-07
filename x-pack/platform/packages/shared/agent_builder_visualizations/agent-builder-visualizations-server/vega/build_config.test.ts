@@ -76,6 +76,7 @@ describe('buildVegaConfig', () => {
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({
       client: esClient.asCurrentUser,
       internalClient: esClient.asInternalUser,
+      logger,
     });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });

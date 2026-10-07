@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
 import { getSourcesScope } from './sources_scope';
@@ -16,6 +16,7 @@ export interface BuildServerESQLCallbacksOptions {
   client: ElasticsearchClient;
   /** Client used for the node roles lookup; defaults to `client`. */
   internalClient?: ElasticsearchClient;
+  logger: Logger;
 }
 
 /**
@@ -28,12 +29,13 @@ export interface BuildServerESQLCallbacksOptions {
 export const buildServerESQLCallbacks = ({
   client,
   internalClient = client,
+  logger,
 }: BuildServerESQLCallbacksOptions): ESQLCallbacks => {
   const service = new EsqlService({ client });
 
   return {
     getSources: async () => {
-      return service.getAllIndices(await getSourcesScope(internalClient));
+      return service.getAllIndices(await getSourcesScope(internalClient, logger));
     },
 
     getColumnsFor: async ({ query } = { query: '' }) => {

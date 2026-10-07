@@ -74,6 +74,7 @@ export const buildVegaConfig = async ({
         buildServerESQLCallbacks({
           client: esClient.asCurrentUser,
           internalClient: esClient.asInternalUser,
+          logger,
         })
       );
     } catch {

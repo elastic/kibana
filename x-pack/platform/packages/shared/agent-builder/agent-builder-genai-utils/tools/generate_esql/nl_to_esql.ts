@@ -171,6 +171,7 @@ export const generateEsql = async ({
   const esqlCallbacks = buildServerESQLCallbacks({
     client: esClient,
     internalClient: internalEsClient,
+    logger,
   });
 
   const graph = createNlToEsqlGraph({

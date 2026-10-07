@@ -9,11 +9,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { validateQuery } from '@kbn/esql-language';
+import { loggerMock } from '@kbn/logging-mocks';
 import { buildServerESQLCallbacks } from './build_server_esql_callbacks';
 import { resetSourcesScopeCache } from './sources_scope';
 
 const makeClient = (resolveIndex: jest.Mock, nodesInfo: jest.Mock) =>
   ({ indices: { resolveIndex }, nodes: { info: nodesInfo } } as unknown as ElasticsearchClient);
+
+const logger = loggerMock.create();
 
 const nodesInfoWithRoles = (roles: string[]) =>
   jest.fn().mockResolvedValue({ nodes: { node1: { roles } } });
@@ -31,6 +34,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const nodesInfo = nodesInfoWithRoles(['data', 'master', 'remote_cluster_client']);
     const { getSources } = buildServerESQLCallbacks({
       client: makeClient(resolveIndex, nodesInfo),
+      logger,
     });
 
     const sources = await getSources?.();
@@ -46,6 +50,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const nodesInfo = nodesInfoWithRoles(['data', 'master', 'ingest']);
     const { getSources } = buildServerESQLCallbacks({
       client: makeClient(resolveIndex, nodesInfo),
+      logger,
     });
 
     const sources = await getSources?.();
@@ -62,6 +67,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const nodesInfo = jest.fn().mockRejectedValue(new Error('unauthorized'));
     const { getSources } = buildServerESQLCallbacks({
       client: makeClient(resolveIndex, nodesInfo),
+      logger,
     });
 
     await getSources?.();
@@ -77,6 +83,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const { getSources } = buildServerESQLCallbacks({
       client: makeClient(resolveIndexWith([]), currentNodesInfo),
       internalClient: makeClient(jest.fn(), internalNodesInfo),
+      logger,
     });
 
     await getSources?.();
@@ -92,6 +99,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
     const nodesInfo = nodesInfoWithRoles(['data']);
     const { getSources } = buildServerESQLCallbacks({
       client: makeClient(resolveIndexWith([]), nodesInfo),
+      logger,
     });
 
     await getSources?.();
@@ -103,6 +111,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
   it('reports remote sources as unknown when the node lacks the role', async () => {
     const callbacks = buildServerESQLCallbacks({
       client: makeClient(resolveIndexWith(['logs-test']), nodesInfoWithRoles(['data'])),
+      logger,
     });
 
     const { errors } = await validateQuery('FROM remote:logs | LIMIT 10', callbacks);

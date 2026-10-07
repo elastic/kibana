@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export type SourcesScope = 'all' | 'local';
-
-const REMOTE_CLUSTER_CLIENT_ROLE = 'remote_cluster_client';
-
-const CACHE_TTL_MS = 60 * 1000;
 
 let cache: { scope: SourcesScope; timestamp: number } | null = null;
 
@@ -24,9 +20,12 @@ export const resetSourcesScopeCache = (): void => {
 /**
  * Returns `local` when the node lacks the `remote_cluster_client` role, since `_resolve/index` rejects remote patterns there.
  */
-export const getSourcesScope = async (client: ElasticsearchClient): Promise<SourcesScope> => {
+export const getSourcesScope = async (
+  client: ElasticsearchClient,
+  logger: Logger
+): Promise<SourcesScope> => {
   const now = Date.now();
-  if (cache && now - cache.timestamp < CACHE_TTL_MS) {
+  if (cache && now - cache.timestamp < 60 * 1000) {
     return cache.scope;
   }
 
@@ -36,12 +35,13 @@ export const getSourcesScope = async (client: ElasticsearchClient): Promise<Sour
       filter_path: 'nodes.*.roles',
     });
     const hasRole = Object.values(nodes).every((node) =>
-      node.roles?.includes(REMOTE_CLUSTER_CLIENT_ROLE)
+      node.roles?.includes('remote_cluster_client')
     );
     const scope = hasRole ? 'all' : 'local';
     cache = { scope, timestamp: now };
     return scope;
-  } catch {
+  } catch (error) {
+    logger.debug(`Failed to read node roles, using 'all' ES|QL sources scope: ${error.message}`);
     return 'all';
   }
 };
