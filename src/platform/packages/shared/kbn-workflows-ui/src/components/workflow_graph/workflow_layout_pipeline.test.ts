@@ -479,6 +479,45 @@ describe('workflow layout pipeline', () => {
       const sorted = [...triggerNodes].sort((a, b) => centerX(a) - centerX(b));
       expect(sorted[0].id).toContain('manual');
     });
+
+    /**
+     * Regression for an unbalanced T-junction: two triggers feeding one `if`
+     * whose branches are asymmetric (a wide `foreach` container on `true`, an
+     * empty/thin bypass lane on `false`). enforceForkLaneOrder re-centers the
+     * `if` over its branch heads, which pulls it away from the trigger row's
+     * midpoint — the fix must shift the trigger row back under the `if`
+     * (fan-in propagation), not leave it stranded at its original dagre spot.
+     */
+    it('two triggers feeding an asymmetric if stay centered under it (no unbalanced T-junction)', () => {
+      const yaml = minimal({
+        triggers: [{ type: 'manual' }, { type: 'alert' }],
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'wide_loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner_a', type: 'http' }],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result, transformed } = runLayout(yaml, 'TB');
+      const triggerIds = new Set(
+        transformed.nodes.filter((n) => n.type === 'trigger').map((n) => n.id)
+      );
+      const triggerNodes = result.nodes.filter((n) => triggerIds.has(n.id));
+      expect(triggerNodes.length).toBe(2);
+      const gate = findNode(result.nodes, 'gate');
+      const triggerRowCenter =
+        (Math.min(...triggerNodes.map(centerX)) + Math.max(...triggerNodes.map(centerX))) / 2;
+      expect(Math.abs(triggerRowCenter - centerX(gate))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+    });
   });
 
   it('throws on a cyclic foreach group graph', () => {

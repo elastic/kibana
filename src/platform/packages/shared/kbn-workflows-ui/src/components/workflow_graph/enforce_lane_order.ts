@@ -200,6 +200,49 @@ const applyLaneDelta = (
 };
 
 /**
+ * After re-centering a fork source by `forkDelta`, keep its ancestors in sync
+ * so the fork doesn't visually drift away from whatever feeds into it —
+ * e.g. a trigger (or row of triggers) directly above an `if`/`switch`.
+ *
+ * Walks upward from `source`, one rank at a time. At each rank every current
+ * parent is shifted by the same delta, but only when *all* of them have
+ * exactly one out-edge (the one leading to the node we just shifted) — a
+ * parent with more than one out-edge also feeds a sibling branch elsewhere
+ * and must not move. With exactly one parent the walk continues through it
+ * (a straight chain, e.g. trigger → step → if); with several parents (e.g.
+ * two triggers fanning into the same fork) all of them are shifted together
+ * and the walk stops there, since fan-in parents share no further ancestor
+ * to reconcile.
+ */
+const propagateForkDeltaToAncestors = (
+  source: string,
+  forkDelta: number,
+  inEdges: ReadonlyMap<string, string[]>,
+  outEdges: ReadonlyMap<string, string[]>,
+  mutableNodes: MutableNodes,
+  crossAxis: 'x' | 'y',
+  containerInnerIds: ReadonlyMap<string, ReadonlySet<string>>
+): void => {
+  const dx = crossAxis === 'x' ? forkDelta : 0;
+  const dy = crossAxis === 'y' ? forkDelta : 0;
+  let cur = source;
+  const visited = new Set<string>([cur]);
+  for (;;) {
+    const parents = inEdges.get(cur) ?? [];
+    if (parents.length === 0) break;
+    if (parents.some((p) => visited.has(p))) break; // cycle guard
+    const eligible = parents.every(
+      (p) => mutableNodes.has(p) && (outEdges.get(p) ?? []).length === 1
+    );
+    if (!eligible) break; // a parent is itself a fork (or missing) — leave it put
+    applyLaneDelta(new Set(parents), mutableNodes, containerInnerIds, dx, dy);
+    for (const p of parents) visited.add(p);
+    if (parents.length !== 1) break; // fan-in parents have no shared further ancestor
+    cur = parents[0];
+  }
+};
+
+/**
  * Run one fork-order enforcement pass over a single graph.
  *
  * Algorithm (rank-aware profile packing):
@@ -343,27 +386,18 @@ const enforceForkLaneOrderForGraph = (
                     y: crossAxis === 'y' ? newForkCross : forkNode.y,
                   });
 
-                  // Propagate upward through straight-chain ancestors (single out-edge)
-                  // so that, e.g., a trigger directly above an if-gate stays aligned.
-                  let cur = source;
-                  const visited = new Set<string>([cur]);
-                  for (;;) {
-                    const parents = inEdges.get(cur) ?? [];
-                    if (parents.length !== 1) break; // only straight-chain (one parent)
-                    const parent = parents[0];
-                    if (visited.has(parent)) break;
-                    const parentOuts = outEdges.get(parent);
-                    if (!parentOuts || parentOuts.length !== 1) break; // parent is itself a fork
-                    const parentNode = mutableNodes.get(parent);
-                    if (!parentNode) break;
-                    mutableNodes.set(parent, {
-                      ...parentNode,
-                      x: crossAxis === 'x' ? parentNode.x + forkDelta : parentNode.x,
-                      y: crossAxis === 'y' ? parentNode.y + forkDelta : parentNode.y,
-                    });
-                    visited.add(parent);
-                    cur = parent;
-                  }
+                  // Propagate upward through ancestors (including fan-in, e.g.
+                  // two triggers feeding the same fork) so the fork doesn't
+                  // visually drift away from whatever feeds into it.
+                  propagateForkDeltaToAncestors(
+                    source,
+                    forkDelta,
+                    inEdges,
+                    outEdges,
+                    mutableNodes,
+                    crossAxis,
+                    containerInnerIds
+                  );
                 }
               }
             }
@@ -820,20 +854,16 @@ export const enforceForkBranchCompoundOrder = (
             const forkDelta = newForkCross - forkNode[crossAxis];
             if (Math.abs(forkDelta) >= 0.001) {
               shiftNode(source, forkDelta);
-              // Propagate to straight-chain ancestors (same rule as pass 1).
-              let cur = source;
-              const visited = new Set<string>([cur]);
-              for (;;) {
-                const parents = inEdges.get(cur) ?? [];
-                if (parents.length !== 1) break;
-                const parent = parents[0];
-                if (visited.has(parent)) break;
-                const parentOuts = outEdges.get(parent);
-                if (!parentOuts || parentOuts.length !== 1) break;
-                shiftNode(parent, forkDelta);
-                visited.add(parent);
-                cur = parent;
-              }
+              // Propagate to ancestors, including fan-in (same rule as pass 1).
+              propagateForkDeltaToAncestors(
+                source,
+                forkDelta,
+                inEdges,
+                outEdges,
+                mutableNodes,
+                crossAxis,
+                containerDescendants
+              );
             }
           }
         }
