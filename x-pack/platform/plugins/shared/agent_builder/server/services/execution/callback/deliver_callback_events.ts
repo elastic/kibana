@@ -57,7 +57,12 @@ export const deliverCallbackEvents = ({
   getKibanaUrl: () => string;
   logger: Logger;
 }): Promise<void> => {
-  const callbackUrl = callbackDeliveryService.getCallbackUrl(execution);
+  // Only conversation executions have callbacks.
+  if (execution.executionMode !== AgentExecutionMode.conversation) {
+    return Promise.resolve();
+  }
+
+  const callbackUrl = execution.agentParams.callback?.url;
 
   if (!callbackUrl) {
     return Promise.resolve();
@@ -128,11 +133,6 @@ export const deliverCallbackEvents = ({
           defer(() => {
             if (!roundCompleteEvent) {
               return EMPTY;
-            }
-
-            // Callbacks are only delivered for conversation executions, so this only narrows the type.
-            if (execution.executionMode !== AgentExecutionMode.conversation) {
-              return deliverEvent(roundCompleteEvent);
             }
 
             const { agentId, spaceId, agentParams } = execution;

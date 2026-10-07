@@ -131,11 +131,6 @@ const createExecutionAbortedEvent = (): ChatEvent =>
 const createCallbackDeliveryServiceMock = () => {
   const transport = jest.fn().mockResolvedValue({ status: 200 });
   const service = {
-    getCallbackUrl: jest.fn((execution: AgentExecution) =>
-      execution.executionMode === AgentExecutionMode.conversation
-        ? execution.agentParams.callback?.url
-        : undefined
-    ),
     validateCallbackUrl: jest.fn(),
     createTransport: jest.fn().mockReturnValue(transport),
     makeCallbackRequest: jest.fn().mockResolvedValue(undefined),
