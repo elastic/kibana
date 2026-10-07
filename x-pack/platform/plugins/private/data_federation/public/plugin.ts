@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
 import { MINIMUM_LICENSE_TYPE, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { buildFederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
@@ -31,6 +32,7 @@ export class DataFederationPlugin
 
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
+  private isManagementUiEnabled = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     const {
@@ -57,6 +59,11 @@ export class DataFederationPlugin
     if (!this.enabled) {
       return;
     }
+
+    this.isManagementUiEnabled = core.settings.globalClient.get<boolean>(
+      DATA_FEDERATION_ENABLED_SETTING_ID,
+      false
+    );
 
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
@@ -102,7 +109,7 @@ export class DataFederationPlugin
     const canManageFederatedData =
       coreStart.application.capabilities?.[PLUGIN_ID]?.manageFederatedData === true;
 
-    if (!this.registeredApp || !canManageFederatedData) {
+    if (!this.registeredApp || !this.isManagementUiEnabled || !canManageFederatedData) {
       return {};
     }
 

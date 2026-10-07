@@ -66,6 +66,8 @@ export interface HuntEvidenceSummary {
 export interface CurrentRunState {
   runId: string;
   reportId: string;
+  /** Count of current-run SSE attachments matched (scoped by runId/reportId). */
+  sseCount: number;
   /** True when at least one current-run SSE has `hunt_result.has_confirmed_hit`. */
   hasConfirmedHit: boolean;
   /** SSE titles for the closure summary. */

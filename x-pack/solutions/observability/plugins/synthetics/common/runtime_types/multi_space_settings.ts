@@ -6,12 +6,7 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import { syntheticsMultiSpaceSettingsSchema } from './zod/settings';
-
-// Multi-space Synthetics settings stored in the `synthetics-settings-multi-space`
-// saved object. Today it carries only CCS-related fields; future space-scoped
-// settings should be added here.
-export { syntheticsMultiSpaceSettingsSchema };
+import type { syntheticsMultiSpaceSettingsSchema } from './schemas/settings';
 
 export type SyntheticsMultiSpaceSettings = SchemaOutput<typeof syntheticsMultiSpaceSettingsSchema>;
 

@@ -8,7 +8,6 @@
  */
 
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   type InternalStateDispatch,
@@ -21,6 +20,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
+import { isNonEmptyEsqlQuery } from './is_non_empty_esql_query';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -89,12 +89,7 @@ export const buildStateSubscribe =
       }
     }
 
-    if (
-      isEsqlMode &&
-      queryChanged &&
-      isOfAggregateQueryType(nextState.query) &&
-      nextState.query.esql.trim() !== ''
-    ) {
+    if (isEsqlMode && queryChanged && isNonEmptyEsqlQuery(nextState.query)) {
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();

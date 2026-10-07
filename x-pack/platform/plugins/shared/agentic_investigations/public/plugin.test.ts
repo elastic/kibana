@@ -7,7 +7,12 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { getEscalationTabIds, getInvestigationTabIds } from '@kbn/agentic-investigations-common';
+import {
+  FlyoutGroupedAttachments,
+  getEscalationTabIds,
+  getInvestigationTabIds,
+} from '@kbn/agentic-investigations-common';
+import type { AgenticInvestigationsPublicSetupDependencies } from './types';
 import { AgenticInvestigationsPublicPlugin } from './plugin';
 
 const createPlugin = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
@@ -60,6 +65,19 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     );
   });
 
+  it('registers the impact, subject, and hypotheses attachment renderers', () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    createPlugin().start(coreMock.createStart(), { agentBuilder });
+
+    const types = agentBuilder.attachments.addAttachmentType.mock.calls.map(([type]) => type);
+    expect(types).toEqual([
+      'investigation_impact',
+      'investigation_subject',
+      'investigation_hypotheses',
+    ]);
+  });
+
   it('registers nothing without Agent Builder', () => {
     const plugin = createPlugin();
 
@@ -83,5 +101,22 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
         expect.any(Function)
       );
     }
+  });
+
+  it('exposes a registration that the investigation overview reads from', () => {
+    const plugin = createPlugin();
+    const workflowsExtensions = {
+      registerStepDefinition: jest.fn(),
+    } as unknown as AgenticInvestigationsPublicSetupDependencies['workflowsExtensions'];
+    const renderer = () => null;
+
+    const { registerFlyoutGroupedAttachment } = plugin.setup(coreMock.createSetup(), {
+      workflowsExtensions,
+    });
+    registerFlyoutGroupedAttachment(FlyoutGroupedAttachments.RULES, ['security.rule'], renderer);
+
+    expect(() =>
+      registerFlyoutGroupedAttachment(FlyoutGroupedAttachments.RULES, ['security.rule'], renderer)
+    ).toThrow('already registered');
   });
 });

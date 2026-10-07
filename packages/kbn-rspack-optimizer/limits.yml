@@ -7,7 +7,7 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1152
-  agenticInvestigations: 30572
+  agenticInvestigations: 38001
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -193,7 +193,7 @@ pageLoadAssetSize:
   shared-misc: 155260
   shared-packages: 5513030
   shared-plugins: 13536562
-  shared-solution-packages: 347767
+  shared-solution-packages: 392658
   significantEvents: 4439
   significantEventsApp: 5212
   slo: 19531
@@ -232,7 +232,7 @@ pageLoadAssetSize:
   visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
-  visualizationListing: 1339
+  visualizationListing: 1488
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
