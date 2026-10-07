@@ -15,7 +15,7 @@ import type { SecurityCanvasEmbeddedBundle } from '../../components/security_red
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { FlyoutRow, RULE_FALLBACK_TITLE, RULE_SUBTITLE } from '../grouped_attachments';
-import { getRuleIdFromAttachment, getRuleName } from './helpers';
+import { getRuleName, getSavedRuleId } from './helpers';
 import type { RuleAttachment } from './helpers';
 
 export interface RulesGroupRendererDeps {
@@ -31,7 +31,7 @@ export const createRulesGroupRenderer = ({
     const rules = new Map<string, RuleAttachment>();
     for (const attachment of attachments) {
       const rule = attachment as unknown as RuleAttachment;
-      const key = getRuleIdFromAttachment(rule) ?? attachment.id;
+      const key = getSavedRuleId(rule) ?? attachment.id;
       if (!rules.has(key)) {
         rules.set(key, rule);
       }
@@ -42,7 +42,7 @@ export const createRulesGroupRenderer = ({
         {[...rules].map(([key, ruleAttachment]) => {
           const ruleName = getRuleName(ruleAttachment);
           const title = ruleName ?? RULE_FALLBACK_TITLE;
-          const ruleId = getRuleIdFromAttachment(ruleAttachment);
+          const ruleId = getSavedRuleId(ruleAttachment);
 
           if (ruleId) {
             return (

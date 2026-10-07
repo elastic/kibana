@@ -15,15 +15,7 @@ const WINDOW_BEFORE_CREATION_MS = 28 * 24 * 60 * 60 * 1000;
 const WINDOW_AFTER_NOW_MS = 60 * 60 * 1000;
 
 const buildIdsFilter = (ids: readonly string[]): Filter => ({
-  meta: {
-    alias: 'Alert Ids',
-    negate: false,
-    disabled: false,
-    type: 'phrases',
-    key: '_id',
-    value: ids.join(),
-    params: [...ids],
-  },
+  meta: { alias: 'Alert Ids', negate: false, disabled: false, type: 'custom' },
   query: { bool: { filter: { ids: { values: [...ids] } } } },
   $state: { store: FilterStateStore.APP_STATE },
 });
@@ -47,11 +39,15 @@ const buildTimerange = (createdAt: string): string => {
   });
 };
 
+// `,` and `:` are the bulk of a rison array of ids and are legal in a query string value.
+const encodeParam = (value: string): string =>
+  encodeURIComponent(value).replace(/%2C/g, ',').replace(/%3A/g, ':');
+
 export const buildAlertsPagePath = (alertIds: readonly string[], createdAt: string): string =>
   [
     [URL_PARAM_KEY.filters, encode([buildIdsFilter(alertIds)])],
     [URL_PARAM_KEY.timerange, buildTimerange(createdAt)],
     [URL_PARAM_KEY.pageFilter, ALL_STATUSES_PAGE_FILTER],
   ]
-    .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodeURIComponent(value)}`)
+    .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodeParam(value)}`)
     .join('');
