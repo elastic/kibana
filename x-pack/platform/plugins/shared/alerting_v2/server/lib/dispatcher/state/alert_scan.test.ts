@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { createAlertEpisode } from '../fixtures/test_utils';
-import { EpisodeScan } from './episode_scan';
+import { createAlert } from '../fixtures/test_utils';
+import { AlertScan } from './alert_scan';
 
-describe('EpisodeScan', () => {
+describe('AlertScan', () => {
   describe('empty', () => {
-    it('has no episodes and is not truncated', () => {
-      const scan = EpisodeScan.empty();
+    it('has no alerts and is not truncated', () => {
+      const scan = AlertScan.empty();
 
-      expect(scan.episodes).toHaveLength(0);
+      expect(scan.alerts).toHaveLength(0);
       expect(scan.truncated).toBe(false);
       expect(scan.isEmpty()).toBe(true);
     });
   });
 
   describe('of', () => {
-    it('exposes the given episodes and truncation flag', () => {
-      const episodes = [createAlertEpisode({ episode_id: 'e1' })];
-      const scan = EpisodeScan.of({ episodes, truncated: true });
+    it('exposes the given alerts and truncation flag', () => {
+      const alerts = [createAlert({ alert_id: 'e1' })];
+      const scan = AlertScan.of({ alerts, truncated: true });
 
-      expect(scan.episodes).toBe(episodes);
+      expect(scan.alerts).toBe(alerts);
       expect(scan.truncated).toBe(true);
       expect(scan.isEmpty()).toBe(false);
     });
 
     it('defaults truncated to false', () => {
-      expect(EpisodeScan.of({ episodes: [createAlertEpisode()] }).truncated).toBe(false);
+      expect(AlertScan.of({ alerts: [createAlert()] }).truncated).toBe(false);
     });
   });
 
   describe('truncationEdge', () => {
-    it('returns the last episode timestamp (rows sorted asc)', () => {
-      const scan = EpisodeScan.of({
-        episodes: [
-          createAlertEpisode({
-            episode_id: 'e1',
+    it('returns the last alert timestamp (rows sorted asc)', () => {
+      const scan = AlertScan.of({
+        alerts: [
+          createAlert({
+            alert_id: 'e1',
             last_event_timestamp: '2026-01-22T07:21:00.000Z',
           }),
-          createAlertEpisode({
-            episode_id: 'e2',
+          createAlert({
+            alert_id: 'e2',
             last_event_timestamp: '2026-01-22T07:33:00.000Z',
           }),
         ],
@@ -54,12 +54,12 @@ describe('EpisodeScan', () => {
     });
 
     it('returns undefined when the scan is empty', () => {
-      expect(EpisodeScan.empty().truncationEdge()).toBeUndefined();
+      expect(AlertScan.empty().truncationEdge()).toBeUndefined();
     });
 
     it('returns an Invalid Date for a corrupt timestamp instead of throwing', () => {
-      const scan = EpisodeScan.of({
-        episodes: [createAlertEpisode({ last_event_timestamp: 'not-a-date' })],
+      const scan = AlertScan.of({
+        alerts: [createAlert({ last_event_timestamp: 'not-a-date' })],
         truncated: true,
       });
 
