@@ -22,6 +22,7 @@ export const INBOUND_INGRESS_OUTCOMES = [
   'identity_missing',
   'http_ack',
   'accepted',
+  'rate_limited',
 ] as const;
 
 export type InboundIngressOutcome = (typeof INBOUND_INGRESS_OUTCOMES)[number];
@@ -38,9 +39,15 @@ export interface InboundIngressLogFields {
   requestId?: string;
   /** Optional detail (eventId, error message, etc.) — truncated when logged. */
   detail?: string;
+  /** Set for `rate_limited` only. */
+  budget?: 'remoteAddress' | 'connector' | 'inflight';
+  scope?: 'process' | 'connector';
+  retryAfterSeconds?: number;
 }
 
-const OUTCOME_LOG_LEVEL: Record<InboundIngressOutcome, 'debug' | 'info' | 'warn' | 'error'> = {
+type IngressLogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+const OUTCOME_LOG_LEVEL: Record<Exclude<InboundIngressOutcome, 'rate_limited'>, IngressLogLevel> = {
   disabled: 'warn',
   // Expected fail-closed 404s: debug to limit scanner noise on public ingress.
   no_spec: 'debug',
@@ -54,6 +61,13 @@ const OUTCOME_LOG_LEVEL: Record<InboundIngressOutcome, 'debug' | 'info' | 'warn'
   accepted: 'info',
 };
 
+const ingressLogLevel = (fields: InboundIngressLogFields): IngressLogLevel => {
+  if (fields.outcome === 'rate_limited') {
+    return fields.budget === 'connector' ? 'info' : 'debug';
+  }
+  return OUTCOME_LOG_LEVEL[fields.outcome];
+};
+
 export const truncateInboundIngressDetail = (detail: string): string => {
   if (detail.length <= INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH) {
     return detail;
@@ -65,8 +79,18 @@ export const truncateInboundIngressDetail = (detail: string): string => {
  * Logs a single inbound ingress outcome with stable fields for grep and future metrics.
  */
 export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressLogFields): void => {
-  const { outcome, spaceId, connectorId, connectorTypeId, requestId, detail } = fields;
-  const level = OUTCOME_LOG_LEVEL[outcome];
+  const {
+    outcome,
+    spaceId,
+    connectorId,
+    connectorTypeId,
+    requestId,
+    detail,
+    budget,
+    scope,
+    retryAfterSeconds,
+  } = fields;
+  const level = ingressLogLevel(fields);
   const truncatedDetail = detail !== undefined ? truncateInboundIngressDetail(detail) : undefined;
   const requestSuffix = requestId !== undefined ? ` requestId=${requestId}` : '';
   const detailSuffix = truncatedDetail !== undefined ? ` detail=${truncatedDetail}` : '';
@@ -81,6 +105,9 @@ export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressL
         connectorTypeId,
         ...(requestId !== undefined ? { requestId } : {}),
         ...(truncatedDetail !== undefined ? { detail: truncatedDetail } : {}),
+        ...(budget !== undefined ? { budget } : {}),
+        ...(scope !== undefined ? { scope } : {}),
+        ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
       },
     }
   );

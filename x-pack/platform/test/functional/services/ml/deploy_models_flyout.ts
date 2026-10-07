@@ -29,7 +29,7 @@ export function DeployDFAModelFlyoutProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
+  const monacoEditor = getService('monacoEditor');
 
   return new (class DeployTrainedModelsFlyout {
     public async setTrainedModelsInferenceFlyoutCustomValue(target: string, customValue: string) {
@@ -107,18 +107,16 @@ export function DeployDFAModelFlyoutProvider(
       selector: string,
       defaultValue?: string
     ) {
-      const configElement = await testSubjects.find(selector);
-      const editor = await configElement.findByClassName('kibanaCodeEditor');
-      await editor.click();
-      const input = await find.activeElement();
-      // check default value then clear
-      const editorContent = await input.getAttribute('value');
+      // Use Monaco API instead of Selenium keyboard (Monaco 0.54.0 uses EditContext API)
+      await monacoEditor.waitCodeEditorReady(selector);
+
       if (defaultValue !== undefined) {
+        const editorContent = await monacoEditor.getCodeEditorValueByTestSubj(selector);
         expect(editorContent).to.contain(defaultValue);
       }
-      await input.clearValueWithKeyboard();
-      // Ensure the editor is cleared
-      const editorContentAfterClearing = await input.getAttribute('value');
+
+      await monacoEditor.clearCodeEditorValue(selector);
+      const editorContentAfterClearing = await monacoEditor.getCodeEditorValueByTestSubj(selector);
       expect(editorContentAfterClearing).to.eql('');
     }
 
@@ -126,16 +124,7 @@ export function DeployDFAModelFlyoutProvider(
       selector: string,
       value: string
     ) {
-      const configElement = await testSubjects.find(selector);
-      const editor = await configElement.findByClassName('kibanaCodeEditor');
-      await editor.click();
-      const input = await find.activeElement();
-
-      for (const chr of value) {
-        await retry.tryForTime(5000, async () => {
-          await input.type(chr, { charByChar: true });
-        });
-      }
+      await monacoEditor.typeCodeEditorValue(value, selector, false);
     }
 
     public async setTrainedModelsInferenceFlyoutCustomPipelineConfig(values: {
