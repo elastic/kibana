@@ -408,7 +408,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...taskInstance.state,
         privateLocationId: undefined,
       });
-      expect(result.schedule).toBeUndefined();
+      expect(result).not.toHaveProperty('schedule');
     });
 
     it('should not return a schedule when a per-location sync fails', async () => {
@@ -433,7 +433,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(result.error).toBeDefined();
       // a schedule here would convert this one-shot task into a recurring one
-      expect(result.schedule).toBeUndefined();
+      expect(result).not.toHaveProperty('schedule');
       expect(result.state.privateLocationId).toBeUndefined();
     });
 
@@ -561,7 +561,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       // the recreate did not fully succeed, so cleanup must be able to re-attempt it
       expect(result.error).toBeDefined();
-      expect(result.schedule).toBeUndefined();
+      expect(result).not.toHaveProperty('schedule');
     });
 
     it('should stop re-running cleanup once the retry budget is exhausted across task runs', async () => {
