@@ -121,13 +121,20 @@ export function DataSourceSelect({
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
         await dataSourcesClient.add(dataSource);
-        await loadDataSources();
-        onChange(dataSource.name);
-        setIsCreateDataSourceOpen(false);
-        return null;
       } catch (error) {
         return getFlyoutSaveErrorMessage(error);
       }
+      try {
+        await loadDataSources();
+      } catch (error) {
+        return createDatasetWizardStrings.dataSourceRefreshAfterSaveError(
+          dataSource.name,
+          getFlyoutSaveErrorMessage(error)
+        );
+      }
+      onChange(dataSource.name);
+      setIsCreateDataSourceOpen(false);
+      return null;
     },
     [dataSourcesClient, loadDataSources, onChange]
   );
