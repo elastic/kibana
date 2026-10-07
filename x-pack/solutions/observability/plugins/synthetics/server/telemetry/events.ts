@@ -84,11 +84,17 @@ const monitorUpdateSchema: RootSchema<MonitorUpdateEvent> = {
           properties: {
             status: {
               type: 'long',
-              _meta: { description: 'HTTP status returned by the synthetics service' },
+              _meta: {
+                description: 'HTTP status returned by the synthetics service',
+                optional: true,
+              },
             },
             reason: {
               type: 'text',
-              _meta: { description: 'Failure reason returned by the synthetics service' },
+              _meta: {
+                description: 'Failure reason returned by the synthetics service',
+                optional: true,
+              },
             },
           },
         },
