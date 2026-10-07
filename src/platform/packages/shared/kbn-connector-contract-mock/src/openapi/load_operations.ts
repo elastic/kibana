@@ -181,6 +181,9 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
           explode,
           schema: toSchema(value, resolved),
           content,
+          ...(value.in === 'path' && value['x-ms-skip-url-encoding'] === true
+            ? { multiSegment: true as const }
+            : {}),
         },
       ];
     });

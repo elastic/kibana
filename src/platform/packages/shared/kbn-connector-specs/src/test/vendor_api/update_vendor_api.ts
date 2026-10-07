@@ -18,7 +18,7 @@ import {
 } from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
 import { bundleSpec } from './bundle_spec';
-import { isJsonObject } from './json_pointer';
+import { forEachRef, isJsonObject } from './json_pointer';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
 import type {
@@ -288,6 +288,9 @@ export const updateVendorApi = async ({
     }
   }
 
+  // Offline runs apply the overlay to the snapshots, so they keep what its updates reference.
+  const overlayRefs: string[] = [];
+  overlay?.actions.forEach(({ update }) => forEachRef(update, (ref) => overlayRefs.push(ref)));
   const files: Record<string, string> = {};
   const sources: Record<string, ManifestSource> = {};
   for (const [name, document] of Object.entries(raw)) {
@@ -295,7 +298,7 @@ export const updateVendorApi = async ({
       .flat()
       .filter(({ source }) => source === name);
     const file = snapshotFile(name);
-    files[file] = toStableJson(projectSpec(document, used));
+    files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
     const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;

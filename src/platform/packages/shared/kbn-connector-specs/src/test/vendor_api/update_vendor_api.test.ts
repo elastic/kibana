@@ -45,6 +45,9 @@ paths:
   /unused:
     get:
       responses: { '204': { description: none } }
+components:
+  schemas:
+    Legacy: { type: object }
 `;
 
 const modelsYaml = `
@@ -327,6 +330,34 @@ actions:
     expect(warnings).toEqual([
       'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
     ]);
+  });
+
+  it('keeps the components that overlay updates reference in the snapshot', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    await fs.writeFile(
+      path.join(directory, 'overlay.yaml'),
+      `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths
+    update:
+      /legacy:
+        get:
+          responses:
+            '200':
+              description: ok
+              content:
+                application/json:
+                  schema: { $ref: '#/components/schemas/Legacy' }
+`
+    );
+
+    expect((await update({ connector: withLegacy, refresh: true })).problems).toEqual([]);
+    expect((await readJson('snapshots/main.openapi.json')).components.schemas.Legacy).toEqual({
+      type: 'object',
+    });
+    expect(await update({ connector: withLegacy })).toEqual({ changed: [], problems: [] });
   });
 
   it('reports what would change in check mode without writing', async () => {

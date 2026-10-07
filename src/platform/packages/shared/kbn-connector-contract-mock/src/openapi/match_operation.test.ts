@@ -50,6 +50,42 @@ describe('createOperationMatcher', () => {
     });
   });
 
+  it('matches path parameters marked x-ms-skip-url-encoding across segments', () => {
+    const scoped = (multiSegment: boolean) =>
+      createOperationMatcher(
+        loadOperations({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1' },
+          servers: [{ url: 'https://management.azure.com' }],
+          paths: {
+            '/{scope}/providers/Microsoft.AlertsManagement/alerts': {
+              get: {
+                operationId: 'listAlerts',
+                parameters: [
+                  {
+                    name: 'scope',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'string' },
+                    ...(multiSegment ? { 'x-ms-skip-url-encoding': true } : {}),
+                  },
+                ],
+                responses: ok,
+              },
+            },
+          },
+        })
+      );
+    const url =
+      'https://management.azure.com/subscriptions/s1/providers/Microsoft.AlertsManagement/alerts';
+
+    expect(match(scoped(true), 'GET', url)).toEqual({
+      operation: 'listAlerts',
+      pathParameters: { scope: 'subscriptions/s1' },
+    });
+    expect(match(scoped(false), 'GET', url)).toMatchObject({ status: 404 });
+  });
+
   it('matches server URL variables by their enum values', () => {
     const matcher = createMatcher([
       {
