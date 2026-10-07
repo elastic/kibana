@@ -226,6 +226,21 @@ describe('readCurrentRunState', () => {
     expect(state?.hasProcessBearingEvent).toBe(false);
   });
 
+  it('counts current-run SSE attachments actually matched, for the packaging shortfall check', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1' }),
+        sseAttachment({ attachmentId: 'sse-2' }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.sseCount).toBe(2);
+  });
+
   it('returns undefined when no current-run SSE exists', async () => {
     const state = await readCurrentRunState({
       attachments: [],
