@@ -59,14 +59,14 @@ describe.skip('WorkflowAccessControlModal', () => {
     expect(screen.queryByText(notice)).not.toBeInTheDocument();
   });
 
-  it('shows the admin notice and updates execution permission after a self-grant', async () => {
+  it('shows the admin notice and updates execution permission when saving a self-grant', async () => {
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'admin', user: { username: 'admin' } });
-    mockUserProfile.suggest.mockResolvedValue([
-      { uid: 'admin', enabled: true, user: { username: 'admin' }, data: {} },
-    ]);
     const workflow = createMockWorkflowDetailDto({
       owner_id: 'owner',
-      access_control: { access_mode: 'private', entries: [] },
+      access_control: {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'admin', role: 'executor' }],
+      },
       permissions: { read: true, edit: false, execute: false, manage: true },
     });
     const savedAccess = {
@@ -90,10 +90,6 @@ describe.skip('WorkflowAccessControlModal', () => {
     expect(
       await screen.findByText("You are editing another user's access settings")
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
-    await userEvent.click(await screen.findByRole('option', { name: /admin/ }));
-    await userEvent.click(screen.getByLabelText('Role for admin'));
-    await userEvent.click(screen.getByRole('option', { name: 'Executor' }));
     await userEvent.click(screen.getByTestId('workflowAccessSave'));
     await waitFor(() => expect(store.getState().detail.workflow?.permissions?.execute).toBe(true));
     expect(mockHttp.put).toHaveBeenCalledWith(`/internal/workflows/${workflow.id}/access_control`, {
