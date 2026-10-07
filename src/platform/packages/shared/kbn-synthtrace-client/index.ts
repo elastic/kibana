@@ -55,10 +55,16 @@ export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
 export {
+  otelProfiling,
   universalProfiling,
+  OTEL_PROFILING_EVENTS_INDEX,
+  OTEL_PROFILING_HOSTS_INDEX,
   UNIVERSAL_PROFILING_EVENTS_INDEX,
   UNIVERSAL_PROFILING_HOSTS_INDEX,
+  type OtelProfilingDocument,
+  type OtelProfilingEventDocument,
+  type OtelProfilingHostDocument,
   type UniversalProfilingDocument,
   type UniversalProfilingEventDocument,
   type UniversalProfilingHostDocument,
-} from './src/lib/universal_profiling';
+} from './src/lib/profiling';

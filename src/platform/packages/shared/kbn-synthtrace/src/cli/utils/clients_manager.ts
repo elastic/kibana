@@ -20,8 +20,10 @@ import { SyntheticsSynthtraceEsClientImpl } from '../../lib/synthetics/synthetic
 import type { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { StreamsSynthtraceClientImpl } from '../../lib/streams/streams_synthtrace_client';
 import type { PackageManagement } from '../../lib/shared/types';
-import type { UniversalProfilingSynthtraceEsClient } from '../../lib/universal_profiling/universal_profiling_synthtrace_es_client';
-import { UniversalProfilingSynthtraceEsClientImpl } from '../../lib/universal_profiling/universal_profiling_synthtrace_es_client';
+import type { OtelProfilingSynthtraceEsClient } from '../../lib/profiling/otel_profiling_synthtrace_es_client';
+import { OtelProfilingSynthtraceEsClientImpl } from '../../lib/profiling/otel_profiling_synthtrace_es_client';
+import type { UniversalProfilingSynthtraceEsClient } from '../../lib/profiling/universal_profiling_synthtrace_es_client';
+import { UniversalProfilingSynthtraceEsClientImpl } from '../../lib/profiling/universal_profiling_synthtrace_es_client';
 
 export interface PipelineOptions {
   includePipelineSerialization?: boolean;
@@ -33,7 +35,8 @@ type DefaultSynthtraceClients = [
   'logsEsClient',
   'syntheticsEsClient',
   'streamsClient',
-  'universalProfilingEsClient'
+  'universalProfilingEsClient',
+  'otelProfilingEsClient'
 ];
 
 export interface SynthtraceClients {
@@ -43,6 +46,7 @@ export interface SynthtraceClients {
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
   streamsClient: StreamsSynthtraceClient;
   universalProfilingEsClient: UniversalProfilingSynthtraceEsClient;
+  otelProfilingEsClient: OtelProfilingSynthtraceEsClient;
 }
 
 export type SynthtraceClientsWithFleetPackage = {
@@ -91,6 +95,8 @@ export class SynthtraceClientsManager {
         },
         universalProfilingEsClient: () =>
           new UniversalProfilingSynthtraceEsClientImpl({ ...this.options, kibana }),
+        otelProfilingEsClient: () =>
+          new OtelProfilingSynthtraceEsClientImpl({ ...this.options, kibana }),
       };
 
     const clientsToInitialize = opts?.clients

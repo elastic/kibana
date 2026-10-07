@@ -8,26 +8,24 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ESDocumentWithOperation, UniversalProfilingDocument } from '@kbn/synthtrace-client';
+import type {
+  UniversalProfilingDocument,
+  UniversalProfilingEventDocument,
+} from '@kbn/synthtrace-client';
 import { UNIVERSAL_PROFILING_EVENTS_INDEX } from '@kbn/synthtrace-client';
-import { chunk, uniqBy } from 'lodash';
 import type { Readable } from 'stream';
-import { pipeline, Transform } from 'stream';
+import { pipeline } from 'stream';
 import { setTimeout as sleep } from 'timers/promises';
-import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
-import { SynthtraceEsClientBase } from '../shared/base_client';
+import type { SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import type { Logger } from '../utils/create_logger';
-import type { UniversalProfilingMetadataDocument } from './stack_traces';
+import { getDownsampledIndexName, getDownsamplingTransform } from './downsampling';
+import type { ProfilingSynthtraceEsClient } from './profiling_synthtrace_es_client_base';
+import { ProfilingSynthtraceEsClientBase } from './profiling_synthtrace_es_client_base';
 
 const SETUP_PATH = '/api/profiling/setup/es_resources';
 const SETUP_MAX_ATTEMPTS = 3;
 const SETUP_RETRY_DELAY_MS = 5_000;
-
-const DOWNSAMPLING_BASE = 5;
-const MAX_DOWNSAMPLING_EXPONENT = 11;
-
-const METADATA_BULK_CHUNK_SIZE = 5_000;
 
 // Excludes the OTel profiling data streams (`profiling-*.otel-*`), which this client doesn't write.
 const UNIVERSAL_PROFILING_DATA_INDICES = [
@@ -45,13 +43,12 @@ export type UniversalProfilingSynthtraceEsClientOptions = Omit<
 >;
 
 export interface UniversalProfilingSynthtraceEsClient
-  extends SynthtraceEsClient<UniversalProfilingDocument> {
+  extends ProfilingSynthtraceEsClient<UniversalProfilingDocument> {
   setupResources(): Promise<void>;
-  loadMetadata(documents: UniversalProfilingMetadataDocument[]): Promise<void>;
 }
 
 export class UniversalProfilingSynthtraceEsClientImpl
-  extends SynthtraceEsClientBase<UniversalProfilingDocument>
+  extends ProfilingSynthtraceEsClientBase<UniversalProfilingDocument>
   implements UniversalProfilingSynthtraceEsClient
 {
   constructor(
@@ -91,38 +88,6 @@ export class UniversalProfilingSynthtraceEsClientImpl
     }
   }
 
-  /** Indexes stacktraces, stackframes and executables, skipping the documents that already exist. */
-  async loadMetadata(documents: UniversalProfilingMetadataDocument[]): Promise<void> {
-    // Stack traces share frames and executables.
-    const uniqueDocuments = uniqBy(documents, ({ index, id }) => `${index}/${id}`);
-
-    this.logger.info(`Loading ${uniqueDocuments.length} Universal Profiling metadata documents`);
-
-    for (const documentsChunk of chunk(uniqueDocuments, METADATA_BULK_CHUNK_SIZE)) {
-      const response = await this.client.bulk({
-        operations: documentsChunk.flatMap(({ index, id, document }) => [
-          { create: { _index: index, _id: id } },
-          document,
-        ]),
-      });
-
-      // Metadata is keyed by ID, so a conflict means the document was loaded by a previous run.
-      const failedItems = response.items.filter(
-        ({ create }) => create?.error && create.status !== 409
-      );
-
-      if (failedItems.length) {
-        throw new Error(
-          `Failed to load ${
-            failedItems.length
-          } Universal Profiling metadata documents: ${JSON.stringify(failedItems.slice(0, 5))}`
-        );
-      }
-    }
-
-    await this.refresh();
-  }
-
   /**
    * Deletes the Universal Profiling documents but keeps the setup, so it doesn't need to be redone.
    * Deleting the indices instead would require disabling the ES resource management first,
@@ -143,43 +108,17 @@ export class UniversalProfilingSynthtraceEsClientImpl
   }
 }
 
-/**
- * Also writes each event to the downsampled `profiling-events-5powNN` indices, which the
- * `_profiling` APIs read for larger time ranges. An event lands in `5powNN` with probability
- * 5^-NN, and every event in `5powNN` is also in `5pow(NN-1)`, like in recorded data.
- */
-function getDownsamplingTransform() {
-  return new Transform({
-    objectMode: true,
-    transform(document: ESDocumentWithOperation<UniversalProfilingDocument>, encoding, callback) {
-      this.push(document);
-
-      if (document._index === UNIVERSAL_PROFILING_EVENTS_INDEX) {
-        const sample = Math.random();
-
-        for (
-          let exponent = 1;
-          exponent <= MAX_DOWNSAMPLING_EXPONENT && sample < DOWNSAMPLING_BASE ** -exponent;
-          exponent++
-        ) {
-          this.push({
-            ...document,
-            _index: `profiling-events-5pow${String(exponent).padStart(2, '0')}`,
-          });
-        }
-      }
-
-      callback();
-    },
-  });
-}
-
 function universalProfilingPipeline() {
   return (base: Readable) => {
     return pipeline(
       base,
       getSerializeTransform<UniversalProfilingDocument>(),
-      getDownsamplingTransform(),
+      getDownsamplingTransform<UniversalProfilingEventDocument>({
+        eventsIndex: UNIVERSAL_PROFILING_EVENTS_INDEX,
+        getDownsampledIndex: (exponent) => getDownsampledIndexName(exponent),
+        getCount: (event) => event['Stacktrace.count'] ?? 1,
+        withCount: (event, count) => ({ ...event, 'Stacktrace.count': count }),
+      }),
       (err: unknown) => {
         if (err) {
           throw err;

@@ -99,6 +99,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exit_span_missing_destination.ts',
   otel_logs_and_metrics_only:
     'x-pack/platform/plugins/shared/streams/test/scenarios/otel_logs_and_metrics_only.ts',
+  otel_profiling:
+    'x-pack/solutions/observability/plugins/profiling/test/scenarios/otel_profiling.ts',
   otel_simple_trace:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_simple_trace.ts',
   other_bucket_group:
