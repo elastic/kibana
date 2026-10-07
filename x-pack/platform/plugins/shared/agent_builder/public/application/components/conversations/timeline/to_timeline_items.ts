@@ -7,7 +7,7 @@
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { ConversationEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, isCurrentFormatAttachmentEvent } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import {
   EXECUTION_STREAMING_EVENT_TYPE,
@@ -25,6 +25,11 @@ import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
 import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps';
 import { resumeToOriginalExecutionId } from './execution_chains';
+import {
+  agentRefsByExecutionId,
+  attachmentEventToRef,
+  inputRefsByMessageId,
+} from './attachment_event_refs';
 
 export const groupTimelineEvents = (
   events: ConversationEvent[],
@@ -38,6 +43,8 @@ export const groupTimelineEvents = (
   const answers = answersByPromptId(displayEvents);
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
+  const inputRefs = inputRefsByMessageId(displayEvents);
+  const agentRefs = agentRefsByExecutionId(displayEvents, resumeLinks);
 
   const ordered: Array<
     UserEntry | UnresolvedAttachmentItem | UnresolvedCustomEventItem | ExecutionAccumulator
@@ -59,6 +66,7 @@ export const groupTimelineEvents = (
         triggerEventId,
         steps: [],
         attachmentRefs: Array.from(seenAttachmentRefs.values()),
+        agentAttachmentRefs: agentRefs.get(canonicalId) ?? [],
       };
       accMap.set(canonicalId, acc);
       ordered.push(acc);
@@ -73,15 +81,21 @@ export const groupTimelineEvents = (
       continue;
     }
     switch (event.type) {
-      case TimelineEventType.userMessage:
+      case TimelineEventType.userMessage: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
+        const attachmentRefs = [
+          ...(event.data.attachment_refs ?? []),
+          ...(inputRefs.get(event.id) ?? []),
+        ];
         ordered.push({
           kind: 'userMessage',
           key: event.id,
           event,
+          ...(attachmentRefs.length > 0 ? { attachmentRefs } : {}),
           ...(event.id === pendingUserMessageId ? { isPending: true } : {}),
         });
         break;
+      }
 
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
@@ -89,12 +103,32 @@ export const groupTimelineEvents = (
 
       case TimelineEventType.attachmentAdded:
       case TimelineEventType.attachmentUpdated:
+      case TimelineEventType.attachmentDeleted:
+      case TimelineEventType.attachmentRestored: {
+        const ref = isCurrentFormatAttachmentEvent(event) ? attachmentEventToRef(event) : undefined;
+        if (ref) {
+          foldAttachmentRefs(seenAttachmentRefs, [ref]);
+          // A turn's own events land after it started: refresh its snapshot so its response
+          // resolves them.
+          const acc = event.execution_id
+            ? accMap.get(resumeLinks.get(event.execution_id) ?? event.execution_id)
+            : undefined;
+          if (acc) {
+            acc.attachmentRefs = Array.from(seenAttachmentRefs.values());
+          }
+        }
         // Only the server's explicit ask to show the attachment becomes an item. Whether the
         // attachment still exists and can draw is the resolve step's call.
-        if (event.data.render_inline) {
+        if (
+          (event.type === TimelineEventType.attachmentAdded ||
+            event.type === TimelineEventType.attachmentUpdated) &&
+          event.data.render_inline &&
+          !event.data.hidden
+        ) {
           ordered.push({ kind: 'attachment', key: event.id, event });
         }
         break;
+      }
 
       case TimelineEventType.executionStarted: {
         if (!event.execution_id) break;
