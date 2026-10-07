@@ -10,7 +10,6 @@ import {
   SYSTEM_SECURITY_WORKER_CATALOG,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { useWorkerSelection } from './use_worker_selection';
@@ -19,9 +18,9 @@ jest.mock('../../hooks/use_workers_api');
 
 const mockUseWorkers = useWorkers as jest.Mock;
 
-const respondWith = (ids: string[], blockingReasons: WorkerBlockingReason[] = []) =>
+const respondWith = (ids: string[]) =>
   mockUseWorkers.mockReturnValue({
-    data: { workers: ids.map((id) => ({ id, enabled: true, settings: {}, blockingReasons })) },
+    data: { workers: ids.map((id) => ({ id, enabled: true, settings: {} })) },
   });
 
 const ALL_IDS = SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => id);
@@ -36,19 +35,6 @@ describe('useWorkerSelection', () => {
     const { result } = renderHook(() => useWorkerSelection());
     expect(result.current.availableWorkerIds).toEqual(ALL_IDS);
     expect(result.current.enabledCount).toBe(ALL_IDS.length);
-  });
-
-  it('reports that enabling is blocked when the workers have no model', () => {
-    respondWith(ALL_IDS, ['no_model']);
-    const { result } = renderHook(() => useWorkerSelection());
-
-    expect(result.current.isEnableBlocked).toBe(true);
-  });
-
-  it('reports that enabling is not blocked when the workers have a model', () => {
-    const { result } = renderHook(() => useWorkerSelection());
-
-    expect(result.current.isEnableBlocked).toBe(false);
   });
 
   it('omits catalog workers missing from the server response', () => {

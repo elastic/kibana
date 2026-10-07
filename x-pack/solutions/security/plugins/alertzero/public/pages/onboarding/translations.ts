@@ -440,7 +440,3 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
     ],
   },
 ];
-
-export const NO_MODEL_TITLE = i18n.translate('xpack.alertzero.onboarding.noModel.title', {
-  defaultMessage: 'Set up an AI model before enabling Workers',
-});

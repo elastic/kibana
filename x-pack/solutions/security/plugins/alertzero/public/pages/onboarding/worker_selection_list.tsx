@@ -19,8 +19,6 @@ interface Props {
   enabledCount: number;
   isSaving: boolean;
   canModifyWorkers: boolean;
-  /** No model is available, so no Worker can be switched on. */
-  isEnableBlocked: boolean;
   onToggle: (workerId: string, checked: boolean) => void;
 }
 
@@ -31,7 +29,6 @@ export const WorkerSelectionList: React.FC<Props> = ({
   enabledCount,
   isSaving,
   canModifyWorkers,
-  isEnableBlocked,
   onToggle,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -60,12 +57,7 @@ export const WorkerSelectionList: React.FC<Props> = ({
                   worker={worker}
                   scheduleInterval={serverWorkers.get(worker.id)?.settings?.scheduleInterval}
                   checked={checked}
-                  disabled={
-                    (checked && enabledCount <= 1) ||
-                    isSaving ||
-                    !canModifyWorkers ||
-                    isEnableBlocked
-                  }
+                  disabled={(checked && enabledCount <= 1) || isSaving || !canModifyWorkers}
                   onToggle={onToggle}
                 />
               </React.Fragment>

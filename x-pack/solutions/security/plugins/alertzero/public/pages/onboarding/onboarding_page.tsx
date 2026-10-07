@@ -19,15 +19,12 @@ import {
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { FeatureSettingsLink } from '../watches/components/feature_settings_link';
 import { ServiceAccountField } from '../watches/components/service_account_field';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
@@ -61,7 +58,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     workerEnabled,
     enabledCount,
     canModifyWorkers,
-    isEnableBlocked,
     toggleWorker,
   } = useWorkerSelection();
   const [serviceAccountId, setServiceAccountId] = useState<string | undefined>();
@@ -139,28 +135,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           </>
         )}
 
-        {isEnableBlocked ? (
-          <>
-            <KbnWarningCallout
-              title={i18n.NO_MODEL_TITLE}
-              data-test-subj="alertZeroOnboardingNoModel"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.alertzero.onboarding.noModel.body"
-                  defaultMessage="Workers need an AI model to run, and none is available to you in this space. Configure one in {featureSettingsLink}, or ask an administrator for access to connectors."
-                  values={{
-                    featureSettingsLink: (
-                      <FeatureSettingsLink data-test-subj="alertZeroOnboardingNoModelLink" />
-                    ),
-                  }}
-                />
-              </p>
-            </KbnWarningCallout>
-            <EuiSpacer size="l" />
-          </>
-        ) : null}
-
         <WorkerSelectionList
           workers={workers}
           serverWorkers={serverWorkers}
@@ -168,7 +142,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           enabledCount={enabledCount}
           isSaving={isSaving}
           canModifyWorkers={canModifyWorkers}
-          isEnableBlocked={isEnableBlocked}
           onToggle={toggleWorker}
         />
 
@@ -206,7 +179,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           availableWorkerIds.length === 0 ||
           enabledCount === 0 ||
           !canModifyWorkers ||
-          isEnableBlocked ||
           serviceAccountId == null
         }
         onEnable={handleEnableAndContinue}

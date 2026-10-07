@@ -21,7 +21,6 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
@@ -83,7 +82,6 @@ const renderPage = ({
       enabled: boolean;
       settingsRevision?: number | null;
       settings?: { scheduleInterval?: string };
-      blockingReasons?: WorkerBlockingReason[];
     }>;
     canModifyWorkers?: boolean;
   };
@@ -95,12 +93,7 @@ const renderPage = ({
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
-  // The API always sends `blockingReasons`; fixtures only spell it out when a test needs it.
-  const workersResponse = {
-    ...serverWorkers,
-    workers: serverWorkers.workers.map((worker) => ({ blockingReasons: [], ...worker })),
-  };
-  const resolvedHttpGet = httpGet ?? jest.fn().mockResolvedValue(workersResponse);
+  const resolvedHttpGet = httpGet ?? jest.fn().mockResolvedValue(serverWorkers);
   const core = {
     ...coreStart,
     http: { ...coreStart.http, get: resolvedHttpGet, patch: httpPatch },
@@ -128,7 +121,7 @@ const renderPage = ({
 
   // Pre-populate the workers list cache so the component renders synchronously
   // with the configured server response and useEnableWorkers can filter IDs on the first click.
-  queryClient.setQueryData(queryKeys.workers.list(), workersResponse);
+  queryClient.setQueryData(queryKeys.workers.list(), serverWorkers);
 
   render(
     <I18nProvider>
@@ -263,52 +256,6 @@ describe('OnboardingPage', () => {
       renderPage({ canWrite: true });
       expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
       expect(screen.getByText('Alert Triage')).toBeInTheDocument();
-    });
-
-    it('explains the missing model and disables enabling when the user has no model', () => {
-      renderPage({
-        canWrite: true,
-        serverWorkers: {
-          workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
-            id,
-            enabled: false,
-            blockingReasons: ['no_model' as const],
-          })),
-        },
-      });
-
-      expect(screen.getByTestId('alertZeroOnboardingNoModel')).toHaveTextContent(
-        'Workers need an AI model to run, and none is available to you in this space.'
-      );
-      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
-      for (const id of ALL_ONBOARDING_WORKER_IDS) {
-        expect(screen.getByTestId(`alertZeroOnboardingWorkerToggle-${id}`)).toBeDisabled();
-      }
-    });
-
-    it('shows no model callout when the user has a model', () => {
-      renderPage({ canWrite: true });
-
-      expect(screen.queryByTestId('alertZeroOnboardingNoModel')).not.toBeInTheDocument();
-      selectServiceAccount();
-      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeEnabled();
-    });
-
-    it('keeps enabling disabled with no model even after a service account is picked', () => {
-      renderPage({
-        canWrite: true,
-        serverWorkers: {
-          workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
-            id,
-            enabled: false,
-            blockingReasons: ['no_model' as const],
-          })),
-        },
-      });
-
-      selectServiceAccount();
-
-      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     });
 
     it('renders a Read more link pointing at the placeholder docs URL', () => {
@@ -460,7 +407,6 @@ describe('OnboardingPage', () => {
           id,
           enabled: id !== triageId && savedRevision != null,
           settingsRevision: id === triageId ? null : savedRevision,
-          blockingReasons: [],
         })),
       });
       const httpGet = jest.fn(async () => list());
@@ -649,8 +595,8 @@ describe('OnboardingPage', () => {
       // enabledCount should drop to 0 and the Enable button must be disabled.
       const twoWorkers = {
         workers: [
-          { id: ALL_ONBOARDING_WORKER_IDS[0], enabled: false, blockingReasons: [] },
-          { id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false, blockingReasons: [] },
+          { id: ALL_ONBOARDING_WORKER_IDS[0], enabled: false },
+          { id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false },
         ],
       };
       const coreStart = coreMock.createStart();
@@ -710,7 +656,7 @@ describe('OnboardingPage', () => {
       // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
       // Update the http mock so the next fetch returns only Alert Triage (B), then force a refetch.
       const oneWorker = {
-        workers: [{ id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false, blockingReasons: [] }], // only B = Alert Triage
+        workers: [{ id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false }], // only B = Alert Triage
       };
       httpGet.mockResolvedValue(oneWorker);
       await act(async () => {

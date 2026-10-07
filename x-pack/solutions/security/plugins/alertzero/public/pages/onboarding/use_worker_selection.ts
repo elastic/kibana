@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
-import { SYSTEM_SECURITY_WORKER_CATALOG, isWorkerEnableBlocked } from '@kbn/alertzero-common';
+import { SYSTEM_SECURITY_WORKER_CATALOG } from '@kbn/alertzero-common';
 import { useWorkers } from '../../hooks/use_workers_api';
 
 type WorkerToggleState = Record<string, boolean>;
@@ -27,10 +27,6 @@ export const useWorkerSelection = () => {
   // absent from the response are not shown as toggles (or counted toward the minimum).
   const { data: workersData } = useWorkers();
   const canModifyWorkers = workersData?.canModifyWorkers !== false;
-  // Every Worker gets the same reasons, so any one of them says whether enabling would be refused.
-  const isEnableBlocked = (workersData?.workers ?? []).some((worker) =>
-    isWorkerEnableBlocked(worker.blockingReasons)
-  );
   const serverWorkers = useMemo(
     () => new Map((workersData?.workers ?? []).map((w) => [w.id, w])),
     [workersData]
@@ -57,7 +53,6 @@ export const useWorkerSelection = () => {
     workerEnabled,
     enabledCount,
     canModifyWorkers,
-    isEnableBlocked,
     toggleWorker,
   };
 };
