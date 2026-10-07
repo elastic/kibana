@@ -8,17 +8,8 @@
 import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  act,
-  fireEvent,
-  render as renderWithoutProviders,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
-import { coreMock } from '@kbn/core/public/mocks';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
@@ -131,18 +122,7 @@ jest.mock('./components/watches_section_layout', () => ({
   },
 }));
 
-const coreStart = coreMock.createStart();
-coreStart.application.getUrlForApp.mockImplementation(
-  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
-);
-
-const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>
-    <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
-  </I18nProvider>
-);
-
-const render = (ui: React.ReactElement) => renderWithoutProviders(ui, { wrapper: Providers });
+const renderWithI18n = (ui: React.ReactElement) => render(ui, { wrapper: I18nProvider });
 
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
@@ -389,6 +369,11 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroModelsRow-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -397,6 +382,7 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
     }
 
     // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
@@ -509,7 +495,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -564,7 +550,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -759,7 +745,7 @@ describe('WatchDetailPage', () => {
         </Route>
       </MemoryRouter>
     );
-    const { rerender } = render(tree());
+    const { rerender } = renderWithI18n(tree());
 
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     fireEvent.change(field, { target: { value: '7' } });
@@ -1065,7 +1051,7 @@ describe('WatchDetailPage', () => {
           </Route>
         </MemoryRouter>
       );
-      const { rerender } = render(tree());
+      const { rerender } = renderWithI18n(tree());
 
       fireEvent.click(enabledSwitch(ruleTuning));
       expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'true');
@@ -1091,7 +1077,7 @@ describe('WatchDetailPage', () => {
       const modal = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
       expect(modal).toHaveTextContent("Saved — but Rule Tuning won't run properly yet");
       expect(modal).toHaveTextContent(
-        'Some AI-powered steps in this Worker may not be configured. Check Feature settings.'
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings'
       );
 
       fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));
@@ -1221,7 +1207,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1303,7 +1289,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1368,7 +1354,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1421,7 +1407,7 @@ describe('WatchDetailPage', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />

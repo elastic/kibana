@@ -7,42 +7,34 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import type { LinkId } from '@kbn/deeplinks-management';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLocatorUrl } from '@kbn/share-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import * as settingsI18n from '../settings_translations';
 
-/** Registered by `searchInferenceEndpoints`; resolves to the "Feature Settings" page. */
-const FEATURE_SETTINGS_LOCATOR_ID = 'SEARCH_INFERENCE_ENDPOINTS';
+/** Stack Management's "Feature Settings" page, registered by `searchInferenceEndpoints`. */
+const FEATURE_SETTINGS_DEEP_LINK_ID: LinkId = 'model_settings';
 
 interface FeatureSettingsLinkProps {
   'data-test-subj'?: string;
 }
 
-/** Link to Stack Management > Feature Settings; plain text when that page has no locator. */
+/**
+ * Link to Stack Management > Feature Settings. Opens a new tab because unsaved Worker edits live
+ * only in page state.
+ */
 export const FeatureSettingsLink: React.FC<FeatureSettingsLinkProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const {
-    services: { share },
-  } = useKibana<{ share?: SharePluginStart }>();
-  const locator = share?.url.locators.get(FEATURE_SETTINGS_LOCATOR_ID);
-  const href = useLocatorUrl(locator, {});
-
-  if (!locator || !href) {
-    return <>{settingsI18n.FEATURE_SETTINGS_LINK}</>;
-  }
+    services: { application },
+  } = useKibana<CoreStart>();
 
   return (
     <EuiLink
-      href={href}
-      onClick={(event: React.MouseEvent) => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
-          return;
-        }
-        event.preventDefault();
-        void locator.navigate({});
-      }}
+      href={application.getUrlForApp('management', { deepLinkId: FEATURE_SETTINGS_DEEP_LINK_ID })}
+      target="_blank"
+      external
       data-test-subj={dataTestSubj}
     >
       {settingsI18n.FEATURE_SETTINGS_LINK}

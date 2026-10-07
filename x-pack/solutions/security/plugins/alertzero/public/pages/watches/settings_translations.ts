@@ -90,6 +90,43 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
+/** Shown instead of navigating when managed workflows are hidden in this space. */
+export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',
+  { defaultMessage: 'Managed workflows are turned off' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledBody',
+  {
+    defaultMessage:
+      'Execution history lives in Managed workflows, which is turned off for this space.',
+  }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_DISMISS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledDismiss',
+  { defaultMessage: 'Not now' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_OPEN_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledOpenSettings',
+  { defaultMessage: 'Open Advanced Settings' }
+);
+
+/** Read-only spaces get no popover, so the requirement is stated on the link itself. */
+export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsRequiredTooltip',
+  {
+    defaultMessage: 'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.',
+  }
+);
+
+export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowExecutionsPermissionTooltip',
+  { defaultMessage: 'Requires permission to view managed workflow executions.' }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }

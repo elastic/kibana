@@ -9,7 +9,6 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -43,6 +42,7 @@ import {
 } from '../../../../../../common/data_sources';
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
+import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 import { fetchData } from './tab_state';
 
@@ -152,7 +152,7 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setEsqlVariables({ tabId, esqlVariables }));
 
     const query = selectTab(getState(), tabId).appState.query;
-    if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
+    if (isNonEmptyEsqlQuery(query)) {
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
       const { esqlSource } = await resolveEsqlSource({
