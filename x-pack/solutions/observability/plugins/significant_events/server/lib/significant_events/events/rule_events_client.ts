@@ -14,7 +14,8 @@ import {
   type AlertEventSeverity,
 } from '@kbn/alerting-v2-schemas';
 import {
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEvent,
   type SignificantEventResponse,
@@ -40,7 +41,7 @@ import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types'
 const GROUP_HASH_FIELD = 'group_hash';
 
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
-  status === ALERT_EPISODE_STATUS.ACTIVE || status === ALERT_EPISODE_STATUS.INACTIVE;
+  (SIGNIFICANT_EVENT_STATUS_OPTIONS as readonly string[]).includes(status);
 
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
   severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
@@ -227,7 +228,7 @@ export class RuleEventsClient {
       to: options.to,
       activeWhere: esql.exp`${esql.col(
         'alert.status'
-      )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
+      )} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
     });
 
     if (options.status?.length) {
@@ -356,9 +357,9 @@ export class RuleEventsClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${esql.col(
-      'alert.status'
-    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`;
+    query = query.where`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
+      (status) => esql.str(status)
+    )})`;
 
     if (options.streamNames?.length) {
       query = query.where`${streamNamesIntersects(options.streamNames)}`;

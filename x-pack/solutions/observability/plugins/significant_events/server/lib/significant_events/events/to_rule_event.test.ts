@@ -88,6 +88,24 @@ describe('toRuleEvent', () => {
       });
     });
 
+    it('carries the engine-owned evaluation count in data, and omits it when absent', () => {
+      expect(
+        getEventData(createSignificantEvent({ status: 'recovering', status_evaluations: 2 }))
+      ).toMatchObject({
+        status_evaluations: 2,
+      });
+      expect(getEventData(createSignificantEvent())).not.toHaveProperty('status_evaluations');
+    });
+
+    it('stays valid for the alert event schema with the evaluation count set', () => {
+      const parsed = createAlertEventDataSchema.safeParse({
+        ...toRuleEvent(createSignificantEvent({ status: 'recovering', status_evaluations: 2 })),
+        source: 'probe_source',
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
     it('maps a maximal event to the full CreateAlertEventData shape', () => {
       const event = createSignificantEvent({
         event_id: 'ev-max',

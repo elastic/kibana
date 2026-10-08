@@ -29,17 +29,45 @@ const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
   signal.verdict === 'not_checked' &&
   /no backed query KI (?:matched|available)/i.test(signal.description);
 
-/** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
+/**
+ * Rules the dataset expects inside an active event, when it declares expected events. A rule outside
+ * them (a benign or unbacked detection) is correctly never written, so it owes no signal; whether an
+ * event was wrongly written for it is graded by `mechanism_present_correctness`.
+ */
+const ruleUuidsInExpectedActiveEvents = (
+  expectedEvents: NonNullable<
+    Parameters<DiscoveryEvaluator['evaluate']>[0]['expected']
+  >['expected_significant_events']
+): Set<string> | undefined =>
+  expectedEvents === undefined
+    ? undefined
+    : new Set(
+        expectedEvents
+          .filter((event) => event.status === 'active')
+          .flatMap((event) => event.signals ?? [])
+          .map((signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid : undefined))
+          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+      );
+
+/**
+ * CODE evaluator: every input detection that belongs in an expected active event has one signal and
+ * evidence when an exact backed query exists. Without declared expected events, every input
+ * detection is expected.
+ */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: ({ input, output }) => {
+  evaluate: ({ input, output, expected }) => {
     const detections = output.inputDetections ?? input.detections ?? [];
+    const inputRuleUuids = detections
+      .map(({ rule_uuid: ruleUuid }) => ruleUuid)
+      .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid));
+    const eventRuleUuids = ruleUuidsInExpectedActiveEvents(expected?.expected_significant_events);
     const expectedRuleUuids = new Set(
-      detections
-        .map(({ rule_uuid: ruleUuid }) => ruleUuid)
-        .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+      eventRuleUuids === undefined
+        ? inputRuleUuids
+        : inputRuleUuids.filter((ruleUuid) => eventRuleUuids.has(ruleUuid))
     );
     const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
     const issues: string[] = [];
@@ -49,7 +77,10 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No input detections present — nothing to collect evidence for',
+        explanation:
+          inputRuleUuids.length === 0
+            ? 'No input detections present — nothing to collect evidence for'
+            : 'No input detection belongs in an expected active event — nothing to collect evidence for',
       });
     }
 
@@ -66,8 +97,9 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
       }
     }
 
+    const inputRuleUuidSet = new Set(inputRuleUuids);
     const unexpectedRuleUuids = [...signalsByRuleUuid.keys()].filter(
-      (ruleUuid) => !expectedRuleUuids.has(ruleUuid)
+      (ruleUuid) => !inputRuleUuidSet.has(ruleUuid)
     );
     if (unexpectedRuleUuids.length > 0) {
       const unexpectedRules = unexpectedRuleUuids

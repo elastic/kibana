@@ -352,4 +352,8 @@ describe('POST /internal/significant_events/events/{id}/update — body schema',
     const result = bodySchema.safeParse({ status: 'active' });
     expect(result.success).toBe(true);
   });
+
+  it('rejects recovering, which only the status reconciliation writes', () => {
+    expect(bodySchema.safeParse({ status: 'recovering' }).success).toBe(false);
+  });
 });

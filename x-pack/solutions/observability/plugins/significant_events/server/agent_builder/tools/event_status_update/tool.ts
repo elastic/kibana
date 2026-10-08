@@ -10,7 +10,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  significantEventManualStatusSchema,
+  significantEventSchema,
+} from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -23,13 +26,13 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = significantEventSchema
+export const eventStatusUpdateSchema = significantEventSchema
   .pick({
-    status: true,
     event_id: true,
     assessment_note: true,
   })
   .extend({
+    status: significantEventManualStatusSchema,
     event_id: significantEventSchema.shape.event_id.describe(
       'The event_id of the existing significant event to update.'
     ),

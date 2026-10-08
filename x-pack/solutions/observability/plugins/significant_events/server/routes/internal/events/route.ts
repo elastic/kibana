@@ -8,6 +8,7 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
@@ -25,7 +26,8 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle_controller';
+import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle_state_machine';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -375,7 +377,7 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventStatusSchema,
+      status: significantEventManualStatusSchema,
       assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
     }),
   }),
@@ -385,10 +387,10 @@ const eventsUpdateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return updateSignificantEventStatus({
+    return applyLifecycleInput({
       eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
-      status: params.body.status,
+      input: operatorInputFor(params.body.status),
       assessmentNote: params.body.assessment_note,
       alertEventsClient: await getAlertEventsClient(),
       emitTrigger,

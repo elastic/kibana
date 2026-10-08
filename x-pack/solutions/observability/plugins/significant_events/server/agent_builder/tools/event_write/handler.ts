@@ -8,11 +8,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   type SignificantEvent,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { LifecycleDecision } from '../../../lib/significant_events/events/lifecycle_state_machine';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
@@ -56,6 +57,15 @@ export type EventsWriteInput = Pick<
   event_id?: string;
   conversation_id?: string;
 };
+
+/**
+ * Decides the status a caller's write carries, from the event's latest version (undefined for a
+ * new event): the status and the carried evaluation count to write, or a refusal. Lifecycle rules
+ * live in the state machine; the writer only applies the answer, so it holds no policy of its own.
+ */
+export type LifecycleResolver = (args: {
+  latest: SignificantEvent | undefined;
+}) => LifecycleDecision;
 
 export interface EventsWriteResult {
   index: number;
@@ -112,7 +122,10 @@ interface SnapshotCandidate {
   eventId: string;
 }
 
-type WriteCandidate = DedupCandidate | SnapshotCandidate;
+type WriteCandidate = (DedupCandidate | SnapshotCandidate) & {
+  /** Evaluations to carry on the version; set only when the resolver keeps a series recovering. */
+  statusEvaluations?: number;
+};
 
 export type EventsWriteBulkResult =
   | EventsWriteResult
@@ -307,7 +320,7 @@ const resolveDedupSkips = (
   activeEvents: SignificantEvent[],
   results: BulkResults
 ): WriteCandidate[] => {
-  const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+  const activeStatuses = SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS as readonly string[];
   const sortedActiveEvents = activeEvents.toSorted((a, b) => {
     const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
     return timestampOrder !== 0
@@ -389,7 +402,7 @@ const buildPendingWrite = (
         blastRadius: rest.blast_radius ?? [],
       };
 
-  // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
+  // The status was resolved before the build (`resolveLifecycle`), or is the caller's own.
   const status = candidate.input.status;
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to
@@ -426,6 +439,7 @@ const buildPendingWrite = (
       blast_radius: episodeContext.blastRadius,
       severity: candidate.input.severity,
       status,
+      status_evaluations: candidate.statusEvaluations,
     },
   };
 };
@@ -489,6 +503,7 @@ export async function eventsWriteBulkHandler({
   inputs,
   source,
   rejectUnknownEventIds,
+  resolveLifecycle,
   logger,
 }: {
   /** Reads prior versions and active events from `.rule-events`. */
@@ -500,6 +515,8 @@ export async function eventsWriteBulkHandler({
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
+  /** Resolves the status each write carries; see {@link LifecycleResolver}. */
+  resolveLifecycle?: LifecycleResolver;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
@@ -542,7 +559,35 @@ export async function eventsWriteBulkHandler({
     }
     return true;
   });
-  const calibrated = knownCandidates.map((candidate) => ({
+  // The writer holds no lifecycle policy: a caller that must not choose its own status supplies a
+  // resolver (the agent's is `agentLifecycle`), and a refusal is reported as a skip.
+  const writable = knownCandidates.flatMap((candidate): WriteCandidate[] => {
+    if (resolveLifecycle === undefined) {
+      return [candidate];
+    }
+    const latest = latestByEventId.get(candidate.eventId);
+    const decision = resolveLifecycle({ latest });
+    if (decision.write) {
+      return [
+        {
+          ...candidate,
+          input: { ...candidate.input, status: decision.status },
+          statusEvaluations: decision.evaluations,
+        },
+      ];
+    }
+    results[candidate.index] = {
+      index: candidate.index,
+      event_id: candidate.eventId,
+      status: latest?.status ?? candidate.input.status,
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
+      existing_event_id: candidate.eventId,
+    };
+    return [];
+  });
+  const calibrated = writable.map((candidate) => ({
     ...candidate,
     input: {
       ...candidate.input,
@@ -588,9 +633,25 @@ export async function eventsWriteBulkHandler({
   // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
   const writeLimit = pLimit(WRITE_CONCURRENCY);
   const errors = await Promise.all(
-    pendingToWrite.map(({ document }) =>
+    pendingToWrite.map(({ candidate, document }) =>
       writeLimit(async (): Promise<CompactBulkError | undefined> => {
         try {
+          // The lifecycle decision was made from the version read at the start of this call. If
+          // another writer (an evaluation, an operator) appended since, appending now would
+          // overwrite their transition with a stale status and count, so the item is dropped and
+          // the next discovery cycle routes it again from fresh search results.
+          const readVersion = latestByEventId.get(candidate.eventId);
+          if (readVersion !== undefined) {
+            const head = await eventSearchClient.findLatestByEventId(candidate.eventId);
+            if (head !== undefined && head['@timestamp'] !== readVersion['@timestamp']) {
+              return {
+                type: 'superseded_write',
+                reason: `event_id ${JSON.stringify(
+                  candidate.eventId
+                )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+              };
+            }
+          }
           await alertEventsClient.createAlertEvent(toRuleEvent(document));
           return undefined;
         } catch (err) {

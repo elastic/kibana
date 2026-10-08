@@ -82,4 +82,34 @@ describe('emitSignificantEventWriteTriggers', () => {
 
     expect(emitTrigger).not.toHaveBeenCalled();
   });
+
+  it.each<[string, SignificantEvent['status'], SignificantEvent['status']]>([
+    ['active to recovering', 'active', 'recovering'],
+    ['recovering back to active', 'recovering', 'active'],
+  ])('emits nothing for %s: the event was never closed', (_label, previous, next) => {
+    const emitTrigger = jest.fn();
+
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: createEvent({ status: next }),
+      priorSignificantEvent: { status: previous },
+    });
+
+    expect(emitTrigger).not.toHaveBeenCalled();
+  });
+
+  it('reports a recovering event closing as active to inactive', () => {
+    const emitTrigger = jest.fn();
+
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: createEvent({ status: 'inactive' }),
+      priorSignificantEvent: { status: 'recovering' },
+    });
+
+    expect(emitTrigger).toHaveBeenCalledWith(
+      EVENT_STATUS_CHANGED_TRIGGER_ID,
+      expect.objectContaining({ status: 'inactive', previous_status: 'active' })
+    );
+  });
 });
