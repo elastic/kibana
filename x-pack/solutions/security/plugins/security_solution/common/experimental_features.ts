@@ -131,6 +131,12 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: true,
 
   /**
+   * Enables the Entity Analytics Executive Brief proof of concept
+   * (async generation routes and the header AI button).
+   */
+  entityAnalyticsExecutiveBriefEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
