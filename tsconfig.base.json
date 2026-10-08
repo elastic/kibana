@@ -2211,6 +2211,8 @@
       "@kbn/response-ops-scheduling-types/*": ["./x-pack/platform/packages/shared/response-ops/scheduling-types/*"],
       "@kbn/response-stream-plugin": ["./examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["./examples/response_stream/*"],
+      "@kbn/responsive-app-area-example-plugin": ["./examples/responsive_app_area_example"],
+      "@kbn/responsive-app-area-example-plugin/*": ["./examples/responsive_app_area_example/*"],
       "@kbn/restorable-state": ["./src/platform/packages/shared/kbn-restorable-state"],
       "@kbn/restorable-state/*": ["./src/platform/packages/shared/kbn-restorable-state/*"],
       "@kbn/rison": ["./src/platform/packages/shared/kbn-rison"],

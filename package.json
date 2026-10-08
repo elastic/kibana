@@ -1077,6 +1077,7 @@
     "@kbn/response-ops-schedule-schema": "workspace:*",
     "@kbn/response-ops-scheduling-types": "workspace:*",
     "@kbn/response-stream-plugin": "workspace:*",
+    "@kbn/responsive-app-area-example-plugin": "workspace:*",
     "@kbn/restorable-state": "workspace:*",
     "@kbn/rison": "workspace:*",
     "@kbn/rollup": "workspace:*",

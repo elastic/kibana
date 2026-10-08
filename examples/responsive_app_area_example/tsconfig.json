@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/core-chrome-sidebar-components"
+  ]
+}

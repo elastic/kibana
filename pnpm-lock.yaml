@@ -3149,6 +3149,9 @@ importers:
       '@kbn/response-stream-plugin':
         specifier: workspace:*
         version: link:examples/response_stream
+      '@kbn/responsive-app-area-example-plugin':
+        specifier: workspace:*
+        version: link:examples/responsive_app_area_example
       '@kbn/restorable-state':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-restorable-state
@@ -6911,6 +6914,8 @@ importers:
   examples/resizable_layout_examples: {}
 
   examples/response_stream: {}
+
+  examples/responsive_app_area_example: {}
 
   examples/routing_example: {}
 
