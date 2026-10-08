@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
@@ -18,6 +18,10 @@ import { queryClient } from '../../query_client';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import {
+  getPackQueryStaleIntervalError,
+  getPackQueryStaleRruleError,
+} from '../../components/schedule_section/translations';
 
 const mockUseRouterNavigate = jest.fn();
 const mockAddDanger = jest.fn();
@@ -81,6 +85,23 @@ jest.mock('../use_create_pack', () => ({
 jest.mock('../use_update_pack', () => ({
   useUpdatePack: () => ({
     mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
+  }),
+}));
+
+// Mock the version options hook so tests don't need a live schema endpoint.
+const MOCK_PACK_VERSION_OPTIONS = [
+  { label: '5.23.1' },
+  { label: '5.23.0' },
+  { label: '5.0.1' },
+  { label: '5.0.0' },
+];
+jest.mock('../queries/use_osquery_version_options', () => ({
+  useOsqueryVersionOptions: () => ({
+    options: MOCK_PACK_VERSION_OPTIONS,
+    osqueryVersion: '5.23.1',
+    pkgVersion: undefined,
+    helpText:
+      'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.0: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.',
   }),
 }));
 
@@ -173,6 +194,39 @@ describe('PackForm', () => {
 
       expect(radioInput(getByTestId('osqueryPackTypePolicy'))).toBeDisabled();
       expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).toBeDisabled();
+    });
+
+    // `isDisabled` must reach EuiFormRow (not EuiFieldText, which forwards it to the
+    // DOM). The row-level disabled label is the observable proof: when the prop only
+    // reached the input, the label stayed enabled. (React's unknown-prop warning is
+    // logged once per process, so it can't be asserted reliably here.)
+    // Scoped to the input's own row: EUI ids are all "generated-id" under Jest.
+    const labelFor = (container: HTMLElement, inputName: string) =>
+      container
+        .querySelector(`input[name="${inputName}"]`)
+        ?.closest('.euiFormRow')
+        ?.querySelector('label.euiFormLabel');
+
+    it('disables the Name and Description rows, label and input, for a read-only user', () => {
+      const { container } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={true} defaultValue={readOnlyDefaultValue} />
+      );
+
+      for (const fieldName of ['name', 'description']) {
+        expect(container.querySelector(`input[name="${fieldName}"]`)).toBeDisabled();
+        expect(labelFor(container, fieldName)).toHaveClass('euiFormLabel-isDisabled');
+      }
+    });
+
+    it('keeps the Name and Description rows enabled when writable', () => {
+      const { container } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={false} defaultValue={readOnlyDefaultValue} />
+      );
+
+      for (const fieldName of ['name', 'description']) {
+        expect(container.querySelector(`input[name="${fieldName}"]`)).not.toBeDisabled();
+        expect(labelFor(container, fieldName)).not.toHaveClass('euiFormLabel-isDisabled');
+      }
     });
 
     it('keeps the pack Type selectable cards enabled when writable', () => {
@@ -840,6 +894,53 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleIntervalError('q-stale')
+      );
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // The mirror of the case above. Without it this direction reached the user
+    // only as a 400 from the route, since the client checked one way round.
+    it('shows the backstop error in a toast when a query keeps an rrule override on an interval pack', async () => {
+      const defaultValue = {
+        id: 'pack-stale-rrule-q',
+        saved_object_id: 'saved-stale-rrule-q',
+        name: 'stale-rrule-query-pack',
+        description: '',
+        enabled: true,
+        queries: {
+          'q-stale-rrule': {
+            query: 'SELECT 1;',
+            interval: 3600,
+            ecs_mapping: {},
+            schedule_type: 'rrule' as const,
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleRruleError('q-stale-rrule')
+      );
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
@@ -1287,6 +1388,259 @@ describe('PackForm', () => {
       } finally {
         getItemSpy.mockRestore();
       }
+    });
+
+    it('version picker shows options from the mocked schema version (5.23.1 at top)', async () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
+
+      // First option is the live version from the mock
+      const list = getByTestId('comboBoxOptionsList pack-version-field-optionsList');
+      expect(within(list).getByText('5.23.1')).toBeInTheDocument();
+    });
+
+    it('typing an invalid version in pack version field shows an error', async () => {
+      const { getByTestId, getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      const comboBox = within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: 'latest' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+    });
+
+    it('blocks save while a rejected typed version is shown', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId, getByText, container } = renderWithContext(
+        <PackForm editMode={false} />
+      );
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      const comboBox = within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.x' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => {
+        expect(getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('save-pack-button'));
+      // Let the submit's async validation settle before asserting it was blocked.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(mockCreateAsync).not.toHaveBeenCalled();
+    });
+
+    it('shows help text with the osquery version known to the package', () => {
+      const { getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(
+        getByText(
+          'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.0: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('stepped layout', () => {
+    const stepTitles = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll('.euiStep__title')).map((el) => el.textContent);
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    it('should render four steps in order when rruleScheduling is enabled', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { container } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(stepTitles(container)).toEqual([
+        'Definition',
+        'Schedule',
+        'Queries',
+        'Policy assignment',
+      ]);
+    });
+
+    it('should omit the Schedule step and render three steps when rruleScheduling is disabled', () => {
+      const { container, queryByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+      expect(queryByTestId('osqueryPackFormStep-schedule')).toBeNull();
+    });
+
+    it('should render exactly one Schedule heading inside the Schedule step', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { getAllByRole, getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      const scheduleHeadings = getAllByRole('heading', { name: 'Schedule' });
+      expect(scheduleHeadings).toHaveLength(1);
+      // The heading comes from the step chrome, not from ScheduleSection.
+      expect(scheduleHeadings[0]).toHaveClass('euiStep__title');
+      expect(
+        within(getByTestId('osquery-schedule-section')).queryByRole('heading', {
+          name: 'Schedule',
+        })
+      ).toBeNull();
+    });
+
+    it('should not render any step in a disabled state', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { container, queryByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(container.querySelectorAll('.euiStep')).toHaveLength(4);
+      expect(queryByText(/is disabled/)).toBeNull();
+    });
+
+    it('should place pack Type and policy controls inside the Policy assignment step, after Queries', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      const policyStep = getByTestId('osqueryPackFormStep-policyAssignment');
+      const queriesStep = getByTestId('osqueryPackFormStep-queries');
+
+      expect(within(policyStep).getByTestId('osqueryPackTypePolicy')).toBeInTheDocument();
+      expect(within(policyStep).getByTestId('osqueryPackTypeGlobal')).toBeInTheDocument();
+      expect(within(policyStep).getByText('Partial deployments (shards)')).toBeInTheDocument();
+      // Sibling steps, so the position is exactly FOLLOWING (no containment bits).
+      expect(queriesStep.compareDocumentPosition(policyStep)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
+    it('should show the inheritance copy in the Queries step', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(
+        within(getByTestId('osqueryPackFormStep-queries')).getByText(
+          "These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should render the same steps with disabled controls for a read-only user', () => {
+      const { container, getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={true}
+          defaultValue={{
+            id: 'ro-pack',
+            saved_object_id: 'ro-pack',
+            name: 'Read-only Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+    });
+
+    it('should lock the Definition step but keep Policy assignment editable for a prebuilt pack', () => {
+      // A prebuilt pack is the one case where steps disagree: its content is
+      // immutable, but a writePacks user can still re-target its policies.
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            'policy-1': { id: 'policy-1', name: 'Alpha Policy', agents: 0 },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const { container, getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={false}
+          isPrebuilt={true}
+          defaultValue={{
+            id: 'prebuilt-pack',
+            saved_object_id: 'prebuilt-pack',
+            name: 'Prebuilt Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+
+      const definitionStep = getByTestId('osqueryPackFormStep-definition');
+      for (const fieldName of ['name', 'description']) {
+        expect(definitionStep.querySelector(`input[name="${fieldName}"]`)).toBeDisabled();
+      }
+
+      const policyStep = getByTestId('osqueryPackFormStep-policyAssignment');
+      expect(
+        within(policyStep).getByTestId('osqueryPackTypePolicy').querySelector('input[type="radio"]')
+      ).not.toBeDisabled();
+      expect(
+        within(policyStep).getByRole('checkbox', { name: 'Select policy Alpha Policy' })
+      ).not.toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+    });
+
+    it('should label the create button "Create pack" and the edit button "Update pack"', () => {
+      const { getByTestId, unmount } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('save-pack-button')).toHaveTextContent('Create pack');
+      unmount();
+
+      const { getByTestId: getByTestIdEdit } = renderWithContext(
+        <PackForm
+          editMode={true}
+          defaultValue={{
+            id: 'p',
+            saved_object_id: 'p',
+            name: 'Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+      expect(getByTestIdEdit('update-pack-button')).toHaveTextContent('Update pack');
+    });
+
+    it('should render the Description label without an embedded "(optional)"', () => {
+      const { getByText, queryByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(getByText('Description', { selector: 'label' })).toBeInTheDocument();
+      expect(queryByText('Description (optional)')).toBeNull();
     });
   });
 });

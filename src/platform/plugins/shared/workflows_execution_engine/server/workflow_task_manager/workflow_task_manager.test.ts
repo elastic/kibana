@@ -517,6 +517,50 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
+  describe('removeParkedImmediateResume', () => {
+    const executionId = 'exec-parked';
+    const stableId = getWorkflowImmediateResumeTaskId(executionId);
+
+    it('removes an idle parked runner', async () => {
+      mockTaskManager.get.mockResolvedValue({ id: stableId, status: TaskStatus.Idle } as any);
+
+      await workflowTaskManager.removeParkedImmediateResume(executionId);
+
+      expect(mockTaskManager.get).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
+    });
+
+    it.each([TaskStatus.Claiming, TaskStatus.Running])(
+      'does not remove a runner whose claim is %s',
+      async (status) => {
+        mockTaskManager.get.mockResolvedValue({ id: stableId, status } as any);
+
+        await workflowTaskManager.removeParkedImmediateResume(executionId);
+
+        expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      }
+    );
+
+    it('is a no-op when no runner exists', async () => {
+      mockTaskManager.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', stableId)
+      );
+
+      await workflowTaskManager.removeParkedImmediateResume(executionId);
+
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+    });
+
+    it('propagates unexpected lookup errors', async () => {
+      mockTaskManager.get.mockRejectedValue(new Error('Task manager unavailable'));
+
+      await expect(workflowTaskManager.removeParkedImmediateResume(executionId)).rejects.toThrow(
+        'Task manager unavailable'
+      );
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+    });
+  });
+
   describe('scheduleAndRunImmediateResume', () => {
     it('should call scheduleImmediateResume and then runSoon on the returned taskId', async () => {
       const executionId = 'exec-and-run';

@@ -18,7 +18,6 @@ import type {
 } from '@kbn/inspector-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -39,7 +38,6 @@ export interface DataSetupDependencies {
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
-  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {

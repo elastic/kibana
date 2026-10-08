@@ -17,24 +17,20 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation } from '../../../types';
+import type { ImpactFilterable } from './entity_ids';
 import { impactPills } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
 
 interface ImpactProps {
-  investigations: Investigation[];
+  items: readonly ImpactFilterable[];
   entityFilter: string | null;
   onEntityFilterChange: (entityId: string | null) => void;
 }
 
-export const Impact: React.FC<ImpactProps> = ({
-  investigations,
-  entityFilter,
-  onEntityFilterChange,
-}) => {
+export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFilterChange }) => {
   const { euiTheme } = useEuiTheme();
 
-  const pills = useMemo(() => impactPills(investigations), [investigations]);
+  const pills = useMemo(() => impactPills(items), [items]);
 
   if (pills.length === 0) {
     return null;

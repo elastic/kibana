@@ -39,7 +39,16 @@ export interface ScoutServerConfig {
     ssl: boolean;
     secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean; uiamOAuth?: boolean; cps?: boolean };
+  esServerlessOptions?: {
+    uiam: boolean;
+    uiamOAuth?: boolean;
+    cps?: boolean;
+    /**
+     * Extra host IP to publish the serverless ES port on. Docker otherwise
+     * binds loopback only, which an Endpoint VM cannot reach.
+     */
+    host?: string;
+  };
   kbnTestServer: {
     env: any;
     buildArgs: string[];

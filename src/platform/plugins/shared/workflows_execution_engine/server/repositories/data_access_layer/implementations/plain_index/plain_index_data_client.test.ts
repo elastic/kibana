@@ -39,94 +39,77 @@ describe('PlainIndexDataClient', () => {
     });
   });
 
-  describe('scriptUpdate', () => {
-    it('returns updated when ES reports an update', async () => {
-      const { esClient, dataAccess } = createDataAccess();
-      esClient.update.mockResolvedValue({ result: 'updated' } as never);
+  it('bulk stamps the configured index on plain items', async () => {
+    const { esClient, dataAccess } = createDataAccess();
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [{ create: { _id: 'a', _index: '.workflows-executions', result: 'created' } }],
+    } as never);
 
-      await expect(
-        dataAccess.scriptUpdate({
-          id: 'step-1',
-          script: 'ctx._source.status = params.status',
-          params: { status: 'completed' },
-          retryOnConflict: 3,
-          refresh: 'wait_for',
-        })
-      ).resolves.toEqual({ result: 'updated' });
+    await dataAccess.bulk({
+      items: [{ operation: 'create', document: { id: 'a' } }],
+    });
 
-      expect(esClient.update).toHaveBeenCalledWith({
-        index: '.workflows-executions',
-        id: 'step-1',
-        script: {
-          source: 'ctx._source.status = params.status',
-          lang: 'painless',
-          params: { status: 'completed' },
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [{ create: { _id: 'a', _index: '.workflows-executions' } }, { id: 'a' }],
+      })
+    );
+  });
+
+  it('bulk updater mgets the configured index', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const dataAccess = new PlainIndexDataClient<{ id: string; status: string }>({
+      esClient,
+      indexName: '.workflows-executions',
+      logger: loggerMock.create(),
+    });
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: '.workflows-executions',
+          found: true,
+          _source: { id: 'a', status: 'queued' },
+          _seq_no: 0,
+          _primary_term: 1,
         },
-        retry_on_conflict: 3,
-        refresh: 'wait_for',
-      });
-    });
-
-    it('returns noop when ES reports a noop', async () => {
-      const { esClient, dataAccess } = createDataAccess();
-      esClient.update.mockResolvedValue({ result: 'noop' } as never);
-
-      await expect(
-        dataAccess.scriptUpdate({
-          id: 'step-1',
-          script: 'ctx.op = "noop"',
-          params: {},
-        })
-      ).resolves.toEqual({ result: 'noop' });
-    });
-
-    it('returns not_found when ES throws a 404', async () => {
-      const { esClient, dataAccess } = createDataAccess();
-      const notFoundError = new Error('Not Found');
-      (notFoundError as { statusCode?: number }).statusCode = 404;
-      esClient.update.mockRejectedValue(notFoundError);
-
-      await expect(
-        dataAccess.scriptUpdate({
-          id: 'missing-step',
-          script: 'ctx.op = "noop"',
-          params: {},
-        })
-      ).resolves.toEqual({ result: 'not_found' });
-    });
-
-    it('omits optional retry and refresh when not provided', async () => {
-      const { esClient, dataAccess } = createDataAccess();
-      esClient.update.mockResolvedValue({ result: 'updated' } as never);
-
-      await dataAccess.scriptUpdate({
-        id: 'step-1',
-        script: 'ctx._source.status = params.status',
-        params: { status: 'completed' },
-      });
-
-      expect(esClient.update).toHaveBeenCalledWith({
-        index: '.workflows-executions',
-        id: 'step-1',
-        script: {
-          source: 'ctx._source.status = params.status',
-          lang: 'painless',
-          params: { status: 'completed' },
+      ],
+    } as never);
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: '.workflows-executions',
+            result: 'updated',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
         },
-      });
+      ],
+    } as never);
+
+    await dataAccess.bulk({
+      items: [
+        {
+          operation: 'update',
+          documentId: 'a',
+          sourceFields: ['status'] as const,
+          updater: (current) => (current.status === 'queued' ? { status: 'pending' } : 'noop'),
+        },
+      ],
     });
 
-    it('rethrows unexpected ES failures', async () => {
-      const { esClient, dataAccess } = createDataAccess();
-      esClient.update.mockRejectedValue(new Error('cluster unavailable'));
-
-      await expect(
-        dataAccess.scriptUpdate({
-          id: 'step-1',
-          script: 'ctx._source.status = params.status',
-          params: { status: 'completed' },
-        })
-      ).rejects.toThrow('cluster unavailable');
+    expect(esClient.mget).toHaveBeenCalledWith({
+      docs: [
+        {
+          _id: 'a',
+          _index: '.workflows-executions',
+          _source: { includes: ['status'] },
+        },
+      ],
     });
   });
 });

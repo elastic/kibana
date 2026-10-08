@@ -7,8 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { DurationInput } from './duration_input';
 
 describe('DurationInput', () => {
@@ -32,35 +31,29 @@ describe('DurationInput', () => {
     expect(unitSelect).toHaveValue('m');
   });
 
-  it('calls onChange with combined string when number changes', async () => {
-    const user = userEvent.setup();
+  it('calls onChange with combined string when number changes', () => {
     const onChange = jest.fn();
     render(<DurationInput value="5m" onChange={onChange} />);
 
-    const numberInput = screen.getByTestId('durationValueInput');
-    await user.clear(numberInput);
-    await user.type(numberInput, '10');
+    fireEvent.change(screen.getByTestId('durationValueInput'), { target: { value: '10' } });
 
     expect(onChange).toHaveBeenCalledWith('10m');
   });
 
-  it('calls onChange with combined string when unit changes', async () => {
-    const user = userEvent.setup();
+  it('calls onChange with combined string when unit changes', () => {
     const onChange = jest.fn();
     render(<DurationInput value="5m" onChange={onChange} />);
 
-    await user.selectOptions(screen.getByTestId('durationUnitSelect'), 'h');
+    fireEvent.change(screen.getByTestId('durationUnitSelect'), { target: { value: 'h' } });
 
     expect(onChange).toHaveBeenCalledWith('5h');
   });
 
-  it('calls onChange with empty string when number is cleared', async () => {
-    const user = userEvent.setup();
+  it('calls onChange with empty string when number is cleared', () => {
     const onChange = jest.fn();
     render(<DurationInput value="5m" onChange={onChange} />);
 
-    const numberInput = screen.getByTestId('durationValueInput');
-    await user.clear(numberInput);
+    fireEvent.change(screen.getByTestId('durationValueInput'), { target: { value: '' } });
 
     expect(onChange).toHaveBeenCalledWith('');
   });

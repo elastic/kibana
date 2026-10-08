@@ -53,15 +53,46 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
 }));
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useCurrentUserProfile: jest.fn(() => ({ data: null })),
-  useAssignInvestigation: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-  useSetInvestigationStatus: jest.fn(),
-  useInvestigationClosePreview: jest.fn(),
-}));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => {
+  const mockUseSetInvestigationStatus = jest.fn();
+  return {
+    ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+    useCurrentUserProfile: jest.fn(() => ({ data: null })),
+    useAssignInvestigation: jest.fn(),
+    useUserProfiles: jest.fn(),
+    useSuggestUserProfiles: jest.fn(),
+    useSetInvestigationStatus: mockUseSetInvestigationStatus,
+    useInvestigationClosePreview: jest.fn(),
+    // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
+    // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
+    // so the mutation assertions still hold.
+    // eslint-disable-next-line react/display-name
+    LazyConnectedCloseInvestigationModal: ({
+      investigation,
+      onClose,
+    }: {
+      investigation: { conversationId?: string; id?: string };
+      onClose: () => void;
+    }) => {
+      const { mutate } = mockUseSetInvestigationStatus();
+      return (
+        <div role="dialog" aria-label="Close this investigation?">
+          <button
+            onClick={() =>
+              mutate({
+                investigationId: investigation.conversationId ?? investigation.id,
+                body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+              })
+            }
+          >
+            Close investigation
+          </button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      );
+    },
+  };
+});
 jest.mock('@kbn/agentic-investigations-common', () => {
   const actual = jest.requireActual('@kbn/agentic-investigations-common');
   return {
@@ -97,39 +128,6 @@ jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
-// Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
-// affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
-// so the mutation assertions still hold.
-jest.mock('../../components/connected_status/connected_close_investigation_modal', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
-  // eslint-disable-next-line react/display-name
-  const ConnectedCloseInvestigationModal = ({
-    investigation,
-    onClose,
-  }: {
-    investigation: { conversationId?: string; id?: string };
-    onClose: () => void;
-  }) => {
-    const { mutate } = agenticInvestigationsPublic.useSetInvestigationStatus();
-    return (
-      <div role="dialog" aria-label="Close this investigation?">
-        <button
-          onClick={() =>
-            mutate({
-              investigationId: investigation.conversationId ?? investigation.id,
-              body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
-            })
-          }
-        >
-          Close investigation
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
-    );
-  };
-  return { ConnectedCloseInvestigationModal };
-});
 
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
@@ -232,15 +230,27 @@ const proposal: ProposalItem = {
   category: 'investigate',
   origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  expired: false,
   conversationAssignees: [],
 };
 
 const renderPage = (
   initialEntry: string,
-  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+  {
+    capabilities = {},
+    proposalsCapabilities = { showProposals: true, decideProposals: true },
+    alertZeroWrite = true,
+  }: {
+    capabilities?: Record<string, unknown>;
+    proposalsCapabilities?: Record<string, boolean>;
+    alertZeroWrite?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: alertZeroWrite },
+    proposals: proposalsCapabilities,
+  };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
@@ -298,6 +308,36 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+});
+
+describe('ConversationsPage proposals access', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it.each<Record<string, boolean>>([{}, { showProposals: false }])(
+    'names the missing privilege and prevents queue requests with capabilities %s',
+    (proposalsCapabilities) => {
+      renderPage('/', { proposalsCapabilities });
+
+      expect(
+        screen.getByText(
+          'To view the AlertZero queue in this space, you need the Proposed Actions Read privilege.'
+        )
+      ).toBeInTheDocument();
+      expect(mockUseProposalsByCategory).not.toHaveBeenCalled();
+      expect(mockUseProposalsByCategoryCount).not.toHaveBeenCalled();
+      expect(mockUseClosedProposals).not.toHaveBeenCalled();
+      expect(mockUseClosedProposalsCount).not.toHaveBeenCalled();
+      expect(mockUseProposalChartsSummary).not.toHaveBeenCalled();
+    }
+  );
+
+  it('allows the queue with Proposals read access alone', () => {
+    mockProposals({ investigate: [proposal] });
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+
+    expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
+    expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
 });
 
 describe('ConversationsPage scan failures', () => {
@@ -484,8 +524,8 @@ describe('ConversationsPage decisions', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
-    renderPage('/');
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', () => {
+    renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
@@ -494,6 +534,16 @@ describe('ConversationsPage decisions', () => {
       id: 'prop-1',
       body: { actionInput: { user: 'cfo@corp' } },
     });
+  });
+
+  it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+    // Only the read-only "Copy link" remains in the menu: no decision can be made from it.
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
@@ -571,15 +621,15 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
-    // A decided investigation without `canManageEscalations` has no available actions —
-    // the menu trigger must not be rendered at all, not just show an empty popover.
+  it('offers only Copy link for a decided proposal when escalation is not available', () => {
+    // A decided investigation without `canManageEscalations` keeps just the read-only item.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
     expandClosed();
 
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Copy link']);
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.

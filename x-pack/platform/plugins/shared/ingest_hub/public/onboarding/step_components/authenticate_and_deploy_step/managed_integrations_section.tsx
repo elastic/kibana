@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -61,6 +61,19 @@ interface ManagedIntegrationsSectionProps {
   hasFailed: boolean;
   /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
   isCleanupOnly?: boolean;
+  /**
+   * When true, settings have drifted from the last deploy. With an existing identity-federation
+   * connector the Deploy button is enabled immediately — credentials were already validated by the
+   * previous deploy and the connector is still the same. This bypasses the form's async
+   * re-validation window which would otherwise disable the button on section re-open.
+   */
+  isDirty?: boolean;
+  /**
+   * Called when the static-key replace form becomes ready or is cancelled. Lets the parent
+   * merge form dirty with SO-derived drift so cancelling the replace form correctly clears
+   * the callout when there is no underlying service-var drift.
+   */
+  onReplaceFormDirtyChange?: (dirty: boolean) => void;
 }
 
 export function ManagedIntegrationsSection({
@@ -72,10 +85,17 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
   isCleanupOnly = false,
+  isDirty = false,
+  onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
-  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
-    useOnboardingFlow();
+  const {
+    setConnectorId,
+    setStaticKeys,
+    clearStagedStaticKeys,
+    setPendingIacTemplate,
+    authenticateAndDeployStep,
+  } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template
@@ -97,6 +117,7 @@ export function ManagedIntegrationsSection({
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
+  const isIfEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'identity_federation';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
@@ -116,22 +137,59 @@ export function ManagedIntegrationsSection({
 
   useEffect(() => {
     if (isDone) setIsOpen(false);
+    else setIsOpen(true); // Re-open when drift is detected (isDone reverts from true to false).
   }, [isDone]);
 
   // Re-seed from session so the user doesn't have to re-enter credentials they already provided
   // (e.g. after navigating Back/Forward or adding a new service without changing auth).
   // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  // isDeployReady is authoritative — set to true only when the form explicitly reports ready.
+  // Do not seed true from connectorId: if the IaC key check fails, the form will not emit a
+  // second false (it was already false internally), so the seed would leave Deploy enabled for
+  // an invalid connector.
   const [isDeployReady, setIsDeployReady] = useState(() => {
     if (isStaticKeysEditMode) return false;
+    if (authenticateAndDeployStep.connectorId) return false;
     const keys = authenticateAndDeployStep.staticKeys;
     return Boolean(keys?.access_key_id && keys?.secret_access_key);
   });
+
+  const handleIdentityFedConnectorChange = useCallback(
+    (id: string | undefined, name?: string) => {
+      setConnectorId(id, name);
+    },
+    [setConnectorId]
+  );
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
       setStaticKeys(fields);
     },
     [setStaticKeys]
+  );
+
+  // Whether the replace form has ever reported ready in this component lifetime.
+  // Used to distinguish the initial-mount false (empty fields on fresh mount after Back+Next)
+  // from an explicit cancellation (user entered keys then cleared them), so remounting the form
+  // does not propagate false to the parent and clear a persisted isDirty flag.
+  const replaceFormEverReady = useRef(false);
+  const handleStaticKeyReplaceReadyChange = useCallback(
+    (ready: boolean) => {
+      setIsDeployReady(ready);
+      if (ready) {
+        replaceFormEverReady.current = true;
+        onReplaceFormDirtyChange?.(true);
+      } else if (replaceFormEverReady.current) {
+        // Form was previously ready — user cleared the fields, treat as cancellation.
+        // Clear only the in-memory staged keys without touching persisted authMethod/connectorId so
+        // isStaticKeysEditMode stays true and the SO comparison does not report false auth drift.
+        clearStagedStaticKeys();
+        onReplaceFormDirtyChange?.(false);
+      }
+      // If form was never ready, its false is a mount-time event, not a cancellation —
+      // don't forward it so the persisted isDirty from a prior visit is preserved.
+    },
+    [clearStagedStaticKeys, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -148,6 +206,7 @@ export function ManagedIntegrationsSection({
   const radioOptions = [
     {
       id: 'identity_federation',
+      disabled: isStaticKeysEditMode,
       label: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.identityFederation',
         { defaultMessage: 'Identity Federation' }
@@ -155,6 +214,7 @@ export function ManagedIntegrationsSection({
     },
     {
       id: 'access_keys',
+      disabled: isIfEditMode,
       label: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.accessKeys',
         { defaultMessage: 'Access Keys' }
@@ -163,7 +223,12 @@ export function ManagedIntegrationsSection({
   ];
 
   const gettingStartedLink = (
-    <EuiLink target="_blank" external>
+    <EuiLink
+      href={services.docLinks?.links.fleet.cloudConnectorDeployment}
+      target="_blank"
+      external
+      data-test-subj="managedIntegrationsSection-gettingStartedLink"
+    >
       <FormattedMessage
         id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.gettingStartedLink"
         defaultMessage="Getting Started"
@@ -290,14 +355,15 @@ export function ManagedIntegrationsSection({
                   cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
+                  isEditPage={isIfEditMode}
                   onReadyChange={setIsDeployReady}
-                  onConnectorIdChange={setConnectorId}
+                  onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
               ) : isStaticKeysEditMode ? (
                 <StaticKeysReplaceView
-                  onReadyChange={setIsDeployReady}
+                  onReadyChange={handleStaticKeyReplaceReadyChange}
                   onFieldsChange={handleStaticKeysChange}
                 />
               ) : (
@@ -333,6 +399,15 @@ export function ManagedIntegrationsSection({
                   size="s"
                   color="danger"
                   onClick={onDeploy}
+                  isDisabled={
+                    !isDeployReady &&
+                    !(
+                      isDirty &&
+                      isStaticKeysEditMode &&
+                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
+                    )
+                  }
                   data-test-subj="managedIntegrationsSection-retryButton"
                 >
                   <FormattedMessage
@@ -356,7 +431,17 @@ export function ManagedIntegrationsSection({
 
             {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady && !isCleanupOnly}
+                isDisabled={
+                  isDeploying ||
+                  (!isDeployReady &&
+                    !isCleanupOnly &&
+                    !(
+                      isDirty &&
+                      isStaticKeysEditMode &&
+                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
+                    ))
+                }
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"

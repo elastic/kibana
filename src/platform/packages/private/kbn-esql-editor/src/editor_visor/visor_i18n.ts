@@ -14,7 +14,7 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
 });
 
 export const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
-  defaultMessage: 'Describe the query you want in natural language',
+  defaultMessage: 'Describe your query in natural language',
 });
 
 export const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
@@ -25,20 +25,16 @@ export const stopLabel = i18n.translate('esqlEditor.visor.stopLabel', {
   defaultMessage: 'Stop',
 });
 
-export const aiModeLabel = i18n.translate('esqlEditor.visor.aiModeLabel', {
-  defaultMessage: 'AI mode',
-});
-
 export const aiModeTooltip = i18n.translate('esqlEditor.visor.aiModeTooltip', {
   defaultMessage: 'Query using natural language',
 });
 
 export const kqlModeLabel = i18n.translate('esqlEditor.visor.kqlModeLabel', {
-  defaultMessage: 'Filter using KQL',
+  defaultMessage: 'Filter your data',
 });
 
 export const visorModeLegend = i18n.translate('esqlEditor.visor.modeLegend', {
-  defaultMessage: 'Switch between KQL and AI mode',
+  defaultMessage: 'Switch between filter and natural language',
 });
 
 export const enterHintFilterLabel = i18n.translate('esqlEditor.visor.enterHintFilter', {

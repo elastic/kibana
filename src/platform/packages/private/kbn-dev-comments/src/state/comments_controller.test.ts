@@ -13,7 +13,9 @@ import {
   createLocation,
   deferred,
   flush,
+  formatDateLocally,
   mockCanvas,
+  mockLayout,
   query,
   renderPage,
 } from '../test_helpers';
@@ -27,6 +29,7 @@ const createHost = () => {
   const { location, navigate } = createLocation('/app/one?x=1');
   const api: jest.Mocked<CommentsApi> = {
     list: jest.fn(async () => []),
+    get: jest.fn(async (id: string) => createComment(id)),
     getSnapshot: jest.fn(async (_id: string) => undefined),
     create: jest.fn(async (input) => ({ ...input, ...createComment('created'), text: input.text })),
     update: jest.fn(async (id, patch) =>
@@ -41,6 +44,7 @@ const createHost = () => {
     location,
     navigateToPath: jest.fn(async (next: string) => navigate(next)),
     getCurrentUser: jest.fn(async () => ({ username: 'capybara', fullName: 'Capybara Designer' })),
+    formatDate: formatDateLocally,
   };
   return { api, services };
 };
@@ -167,6 +171,68 @@ describe('createCommentsController', () => {
       expect(api.list).toHaveBeenCalledTimes(2);
       expect(controller.store.getState()).toEqual(
         expect.objectContaining({ pending, drafts: { a: 'Draft' }, active: true })
+      );
+    });
+
+    it('fetches one comment on its own, once at a time, and again when a write completed meanwhile', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController(services);
+      api.list.mockResolvedValueOnce([createComment('a'), createComment('b')]);
+      controller.start();
+      await flush();
+
+      const first = deferred<Comment | undefined>();
+      api.get.mockReturnValueOnce(first.promise);
+      const refreshing = controller.refresh('a');
+      void controller.refresh('a');
+      expect(api.get).toHaveBeenCalledTimes(1);
+      expect(controller.store.getState().refreshingIds.has('a')).toBe(true);
+
+      // A reply completes under the fetch: what it returns may predate the reply.
+      await controller.reply('a', 'hello', 'Capybara');
+      api.get.mockResolvedValueOnce(createComment('a', { text: 'Fresh' }));
+      first.resolve(createComment('a', { text: 'Stale' }));
+      await refreshing;
+
+      expect(api.get).toHaveBeenCalledTimes(2);
+      expect(api.list).toHaveBeenCalledTimes(1);
+      const { comments, refreshedAt, refreshingIds, loadedAt } = controller.store.getState();
+      expect(comments).toEqual([createComment('a', { text: 'Fresh' }), createComment('b')]);
+      expect(refreshedAt).toEqual({ a: expect.any(String) });
+      expect(refreshingIds.size).toBe(0);
+      expect(loadedAt).toEqual(expect.any(String));
+
+      // The list, once fetched again, is newer than any refresh.
+      await controller.reload();
+      expect(controller.store.getState().refreshedAt).toEqual({});
+    });
+
+    it('reports a refresh that failed, and takes a comment that is gone off the list', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController(services);
+      api.list.mockResolvedValueOnce([createComment('a'), createComment('b')]);
+      controller.start();
+      await flush();
+      controller.setActive(true);
+      controller.openThread('a');
+
+      api.get.mockRejectedValueOnce(new Error('offline'));
+      await controller.refresh('a');
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          notice: { type: 'error', message: 'Could not refresh the thread - offline' },
+          activeThreadId: 'a',
+        })
+      );
+
+      api.get.mockResolvedValueOnce(undefined);
+      await controller.refresh('a');
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          comments: [createComment('b')],
+          activeThreadId: null,
+          notice: { type: 'error', message: 'The comment no longer exists.' },
+        })
       );
     });
 
@@ -391,6 +457,86 @@ describe('createCommentsController', () => {
           })
         );
       });
+
+      it('takes the screenshot as a comment on a tooltip, or on what else hovering revealed, is started, and posts it, or says what went wrong, when saving', async () => {
+        const { api, services } = createHost();
+        const controller = createCommentsController({ ...services, captureViewport });
+        controller.start();
+        renderPage(`
+          <button id="save">Save</button>
+          <div id="tip" role="tooltip"><p id="tipText">Saves the rule</p></div>
+        `);
+
+        controller.pick(query('#tip'), { x: 5, y: 5 }, query('#tipText'));
+        expect(captureViewport).toHaveBeenCalledTimes(1);
+        await flush();
+        // What was on screen then is what the comment is about, even off it.
+        query('#tip').remove();
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(captureViewport).toHaveBeenCalledTimes(1);
+        expect(api.create).toHaveBeenCalledWith(
+          expect.objectContaining({ snapshot: expect.objectContaining({ mimeType: 'image/jpeg' }) })
+        );
+
+        renderPage('<button id="save">Save</button><button id="target">Target</button>');
+        captureViewport.mockRejectedValueOnce(new Error('Tainted canvases may not be exported'));
+        controller.pick(target(), { x: 5, y: 5 }, target(), { revealedBy: query('#save') });
+        await flush();
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(api.create).toHaveBeenCalledTimes(1);
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: expect.objectContaining({ element: target(), saving: false }),
+            notice: {
+              type: 'error',
+              message:
+                'Could not take the screenshot - Tainted canvases may not be exported. Turn off "Attach screenshot" to post without one.',
+            },
+          })
+        );
+        // Without the screenshot, the comment goes through.
+        await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+        expect(api.create).toHaveBeenCalledTimes(2);
+        expect(api.create).toHaveBeenLastCalledWith(
+          expect.not.objectContaining({ snapshot: expect.anything() })
+        );
+      });
+    });
+
+    it('records the hover that revealed the element as the last step of the trail, unless of UI left out', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController({ ...services, ignoreSelectors: ['#host'] });
+      controller.start();
+      renderPage(`
+        <button id="save" aria-label="Save">S</button>
+        <div id="saveTip" role="tooltip">Saves the rule</div>
+        <div id="host"><button id="hostButton">Host</button></div>
+        <div id="hostTip" role="tooltip">Of the host</div>
+      `);
+
+      controller.pick(query('#saveTip'), { x: 5, y: 5 }, query('#saveTip'), {
+        revealedBy: query('#save'),
+      });
+      await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+      expect(api.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          trail: [
+            {
+              kind: 'hover',
+              label: 'Save',
+              anchor: expect.objectContaining({
+                locators: expect.arrayContaining([{ type: 'id', value: 'save' }]),
+              }),
+            },
+          ],
+        })
+      );
+
+      controller.pick(query('#hostTip'), { x: 5, y: 5 }, query('#hostTip'), {
+        revealedBy: query('#hostButton'),
+      });
+      await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+      expect(api.create).toHaveBeenLastCalledWith(expect.objectContaining({ trail: [] }));
     });
 
     it('opens the new comment with its pin focused, and reports failures while keeping the draft', async () => {
@@ -415,6 +561,54 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().notice).toEqual({
         type: 'error',
         message: 'Could not save the comment: offline',
+      });
+    });
+
+    describe('of a comment on a tooltip', () => {
+      mockLayout();
+
+      const pickTooltip = () => {
+        const { services } = createHost();
+        const controller = createCommentsController(services);
+        controller.start();
+        renderPage(`
+          <button id="save">Save</button>
+          <div id="tip" role="tooltip">Saves the rule</div>
+        `);
+        controller.pick(query('#tip'), { x: 5, y: 5 }, query('#tip'), {
+          revealedBy: query('#save'),
+        });
+        controller.setPanelMinimized(true);
+        return controller;
+      };
+
+      it('opens the new comment at its pin while the tooltip still shows', async () => {
+        const controller = pickTooltip();
+        await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: null,
+            activeThreadId: 'created',
+            focusPinId: 'created',
+            panelThreadId: null,
+            panelMinimized: true,
+          })
+        );
+      });
+
+      it('shows the new comment in the panel when the tooltip, and any pin on it, are gone by the time it is saved', async () => {
+        const controller = pickTooltip();
+        query('#tip').remove();
+        await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: null,
+            panelThreadId: 'created',
+            panelMinimized: false,
+            activeThreadId: null,
+            focusPinId: null,
+          })
+        );
       });
     });
   });
@@ -501,7 +695,25 @@ describe('createCommentsController', () => {
       await controller.guideTo(lost);
       controller.stopGuide(true);
       expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ panelThreadId: null, activeThreadId: 'lost', guide: null })
+        expect.objectContaining({
+          panelThreadId: null,
+          activeThreadId: 'lost',
+          focusPinId: 'lost',
+          guide: null,
+        })
+      );
+
+      // The pin does not have to take focus: it would take a tooltip shown for the focus along.
+      controller.showInPanel('lost');
+      await controller.guideTo(lost);
+      controller.stopGuide(true, { focusPin: false });
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          panelThreadId: null,
+          activeThreadId: 'lost',
+          focusPinId: null,
+          guide: null,
+        })
       );
     });
   });

@@ -121,11 +121,8 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems,
-    (items.overflowItems?.length ?? 0) > 0
-  );
+  const { isOverflowMeasured, overflowMenuItems, primaryMenuRef, visibleMenuItems } =
+    useResponsiveMenu(isCollapsed, items.primaryItems, (items.overflowItems?.length ?? 0) > 0);
 
   const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
   const hasMoreMenu = allOverflowItems.length > 0;
@@ -161,7 +158,11 @@ export const Navigation = ({
       <SideNav isCollapsed={isCollapsed}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu
+          ref={primaryMenuRef}
+          isCollapsed={isCollapsed}
+          isOverflowMeasured={isOverflowMeasured}
+        >
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
