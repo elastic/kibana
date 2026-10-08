@@ -153,33 +153,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
-        await testSubjects.click('querySubmitButton');
 
-        // Wait for the secondary button — records when the async-search ID is ready client-side.
-        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
-        await testSubjects.existOrFail('queryCancelButton');
-        const buttonEnabledAt = Date.now();
+        // Retry the whole sequence — see https://github.com/elastic/kibana/issues/271662. Whether
+        // the local cluster's partial result has reached the coordinator by cancel time is not
+        // observable from the browser, and cancelling before it does yields warnings but no rows.
+        await retry.try(async () => {
+          await testSubjects.click('querySubmitButton');
 
-        // Poll until the ES|QL compute task is still running AND ≥500ms has elapsed since
-        // button-enabled (covers round-trip jitter for the first async response). Click fires
-        // immediately after — no sleep between the last check and the action.
-        // See https://github.com/elastic/kibana/issues/246775 for the full rationale.
-        await retry.waitFor(
-          'esql compute task still running and response buffer elapsed',
-          async () => {
-            if (Date.now() - buttonEnabledAt < 500) return false;
-            const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
-            return Object.values(nodes ?? {}).some(
-              (node) => Object.keys(node.tasks ?? {}).length > 0
-            );
-          }
-        );
+          // Wait for the secondary button — records when the async-search ID is ready client-side.
+          await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+          await testSubjects.existOrFail('queryCancelButton');
+          const buttonEnabledAt = Date.now();
 
-        await testSubjects.click('queryCancelButton');
-        await header.waitUntilLoadingHasFinished();
+          // Poll until the ES|QL compute task is still running AND ≥500ms has elapsed since
+          // button-enabled (covers round-trip jitter for the first async response). Click fires
+          // immediately after — no sleep between the last check and the action.
+          // See https://github.com/elastic/kibana/issues/246775 for the full rationale.
+          await retry.waitFor(
+            'esql compute task still running and response buffer elapsed',
+            async () => {
+              if (Date.now() - buttonEnabledAt < 500) return false;
+              const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
+              return Object.values(nodes ?? {}).some(
+                (node) => Object.keys(node.tasks ?? {}).length > 0
+              );
+            }
+          );
 
-        // Warning callout is shown
-        await testSubjects.existOrFail('searchResponseWarningsCallout');
+          await testSubjects.click('queryCancelButton');
+          await header.waitUntilLoadingHasFinished();
+
+          // Short timeout so a failed attempt is detected quickly and retried. The hit count must
+          // be asserted here too: a cancel that returns zero rows renders the empty prompt, while
+          // the wrong row set would otherwise slip past the callout assertion.
+          await testSubjects.existOrFail('searchResponseWarningsCallout', { timeout: 15_000 });
+
+          // Ensure documents are still returned for the successful shards
+          const hitCount = await discover.getHitCount({ isPartial: true });
+          expect(hitCount).to.be('746');
+        });
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);
@@ -192,12 +204,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'inspectorRequestClustersTableCell-Status-ftr-remote'
         );
         expect(txt).to.be('partial');
-
-        // Ensure documents are still returned for the successful shards
-        await retry.try(async () => {
-          const hitCount = await discover.getHitCount({ isPartial: true });
-          expect(hitCount).to.be('746');
-        });
       });
     });
   });
