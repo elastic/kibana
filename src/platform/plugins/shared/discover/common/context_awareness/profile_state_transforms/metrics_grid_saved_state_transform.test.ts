@@ -57,27 +57,47 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
     });
   });
 
-  it('restores a session saved before sort was persisted without sort fields', () => {
-    const restored = createRegistry().fromSavedState({
-      type: DiscoverTabType.Metrics,
-      counterAggregation: 'max',
-      gaugeAggregation: 'min',
-      histogramPercentile: 'p50',
-      dimensions: ['host.name'],
-      searchTerm: 'bytes',
-    });
-
-    expect(restored).toEqual({
+  it('restores the default sort for a session saved before sort was persisted', () => {
+    expect(
+      createRegistry().fromSavedState({
+        type: DiscoverTabType.Metrics,
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+        dimensions: ['host.name'],
+        searchTerm: 'bytes',
+      })
+    ).toEqual({
       metricsState: {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
+        sortField: 'alphabetically',
+        sortDirection: 'asc',
       },
     });
-    expect(restored.metricsState).not.toHaveProperty('sortField');
-    expect(restored.metricsState).not.toHaveProperty('sortDirection');
+  });
+
+  it('replaces the current sort with the default when resetting to a session without sort fields', () => {
+    const registry = createRegistry();
+    const currentState = {
+      metricsState: { sortField: 'recency', sortDirection: 'desc' },
+    } as const;
+    const restored = registry.fromSavedState({
+      type: DiscoverTabType.Metrics,
+      counterAggregation: 'sum',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p95',
+      dimensions: [],
+      searchTerm: '',
+    });
+
+    expect(registry.mergeState(currentState, restored).metricsState).toMatchObject({
+      sortField: 'alphabetically',
+      sortDirection: 'asc',
+    });
   });
 
   it('expands grid setting defaults when saving', () => {
