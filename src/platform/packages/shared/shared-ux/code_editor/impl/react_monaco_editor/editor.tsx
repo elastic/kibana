@@ -29,7 +29,7 @@
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
 import {
-  defaultThemesResolvers,
+  defineCodeEditorThemes,
   initializeSupportedLanguages,
   monaco,
   HoverParticipantRegistry,
@@ -279,18 +279,7 @@ export function MonacoEditor({
   };
 
   useEffect(() => {
-    // register default theme code editor theme
-    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
-    });
-
-    // register theme configurations for supported languages
-    monaco.languages.getLanguages().forEach(({ id: languageId }) => {
-      let languageThemeResolver;
-      if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
-        monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
-      }
-    });
+    defineCodeEditorThemes(euiTheme);
   }, [euiTheme]);
 
   const initMonaco = () => {
