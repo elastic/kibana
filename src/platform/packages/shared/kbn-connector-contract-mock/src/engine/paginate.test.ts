@@ -95,6 +95,9 @@ const spec = {
         responses: listResponse({ '@odata.nextLink': { type: 'string' } }),
       },
     },
+    '/alerts': {
+      get: { responses: listResponse({ nextLink: { type: 'string', format: 'uri' } }) },
+    },
     '/monitors': {
       get: {
         parameters: query('page', 'page_size'),
@@ -170,6 +173,14 @@ const pagination: PaginatedOperation[] = [
       style: 'next_url',
       request: { cursorParam: '$skiptoken', sizeParam: '$top' },
       response: { itemsPath: 'channels', nextPath: '["@odata.nextLink"]' },
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/alerts' },
+    pagination: {
+      style: 'next_url',
+      response: { itemsPath: 'channels', nextPath: 'nextLink' },
+      defaultSize: 2,
     },
   },
   {
@@ -350,6 +361,18 @@ describe('withPagination', () => {
     expect([ids(first), ids(last)]).toEqual([['C1-1', 'C1-2'], ['C1-3']]);
     expect(last).not.toHaveProperty(['@odata.nextLink']);
     expect(calls.map(({ status }) => status)).toEqual([200, 200]);
+  });
+
+  it('follows opaque next-page URLs, selecting the page with its own unvalidated parameter', async () => {
+    const { fetch, calls } = createMock(3);
+
+    const first = await (await fetch('https://api.example.com/alerts')).json();
+    const last = await (await fetch(first.nextLink)).json();
+
+    expect([ids(first), ids(last)]).toEqual([['C1-1', 'C1-2'], ['C1-3']]);
+    expect(new URL(first.nextLink).searchParams.has('contract-mock-page')).toBe(true);
+    expect(last).not.toHaveProperty('nextLink');
+    expect(calls.flatMap(({ requestViolations }) => requestViolations)).toEqual([]);
   });
 
   describe('with recorded pages', () => {
