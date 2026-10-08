@@ -177,6 +177,7 @@ interface StepLogsViewProps {
 
 export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, config, logsApi }) => {
   const [entries, setEntries] = useState<StepLogEntry[] | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   // Refs so the poll loop always reads the latest values without restarting on every parent re-render.
   const stepExecutionRef = useRef(stepExecution);
@@ -187,6 +188,7 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
   useEffect(() => {
     let cancelled = false;
     let delay = INITIAL_POLL_INTERVAL_MS;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const fetchOnce = (): Promise<StepLogEntry[]> => {
       const { getLogs } = configRef.current;
@@ -204,31 +206,50 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
           );
     };
 
+    const isTerminal = () =>
+      TerminalExecutionStatuses.includes(stepExecutionRef.current.status as ExecutionStatus);
+
     const poll = async () => {
       if (cancelled) return;
+      // Stop only when the step was already terminal before this fetch started, so there is
+      // always one last fetch after the step finishes and late-indexed logs are not missed.
+      const wasTerminal = isTerminal();
       try {
         const result = await fetchOnce();
-        if (!cancelled) setEntries(result);
+        if (!cancelled) {
+          setEntries(result);
+          setHasError(false);
+        }
       } catch {
-        // keep previous entries on fetch error, keep polling
+        // keep previous entries on fetch error, keep polling while the step is running
+        if (!cancelled) setHasError(true);
       }
-      if (
-        !cancelled &&
-        !TerminalExecutionStatuses.includes(stepExecutionRef.current.status as ExecutionStatus)
-      ) {
+      if (!cancelled && !wasTerminal) {
         // Back off gradually so long-running steps do not poll at full rate forever.
         delay = Math.min(delay * 1.5, MAX_POLL_INTERVAL_MS);
-        setTimeout(poll, delay);
+        timeoutId = setTimeout(poll, delay);
       }
     };
 
     poll();
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [logsApi]); // logsApi is memoized on stepExecution.id — restarts only when the step changes
 
   if (entries === null) {
+    if (hasError) {
+      return (
+        <EuiText color="danger" size="s">
+          <p>
+            {i18n.translate('workflowsManagement.stepLogsView.fetchError', {
+              defaultMessage: 'Failed to load logs.',
+            })}
+          </p>
+        </EuiText>
+      );
+    }
     return <EuiLoadingSpinner size="m" />;
   }
 
