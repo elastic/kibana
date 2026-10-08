@@ -1292,6 +1292,61 @@ describe('AttachmentService', () => {
       });
     });
 
+    describe('bulkDelete return value', () => {
+      it('returns only the ids whose SO delete succeeded in this call', async () => {
+        const svc = makeService(makeMirrorWriter());
+        // id-1: legacy delete succeeded → deleted.
+        // id-2: legacy delete failed with a 500 → the SO may survive, not deleted.
+        // id-3: both types 404 → already gone before this call, not deleted by it.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2', 'id-3'], refresh: false })
+        ).resolves.toEqual(['id-1']);
+      });
+
+      it('returns an empty array without calling the SO client when there are no ids', async () => {
+        const svc = makeService(makeMirrorWriter());
+
+        await expect(svc.bulkDelete({ savedObjectIds: [], refresh: false })).resolves.toEqual([]);
+        expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      });
+    });
+
     describe('fire-and-forget: a throwing analytics writer never breaks the primary SO write', () => {
       it('create: swallows a synchronous writer throw and still returns the created attachment', async () => {
         const writer = makeMirrorWriter();
@@ -1352,9 +1407,9 @@ describe('AttachmentService', () => {
           ],
         });
 
-        await expect(
-          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
-        ).resolves.toBeUndefined();
+        await expect(svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })).resolves.toEqual(
+          ['id-1']
+        );
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining('attachments mirror dispatch threw')
         );
