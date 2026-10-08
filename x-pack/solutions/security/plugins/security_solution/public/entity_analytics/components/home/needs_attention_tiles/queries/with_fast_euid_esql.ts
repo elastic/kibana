@@ -14,7 +14,7 @@ import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../new_entiti
  *
  * TODO: remove once that copy is ported to the entity store generator.
  */
-export const withFastEuidEsql = (euid: EntityStoreEuid): EntityStoreEuid => ({
+export const getEuidWithFastEsql = (euid: EntityStoreEuid): EntityStoreEuid => ({
   ...euid,
   esql: {
     ...euid.esql,

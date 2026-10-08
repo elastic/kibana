@@ -35,7 +35,7 @@ see the comment on `useEntityGridData` in `../hooks/use_entity_grid_data.ts`.
 - **Paging**: each query returns one page plus one extra row. The extra row tells whether there
   is a next page. The last row of a page is where the next page starts (`buildCursorClause` in
   `esql.ts`).
-- **Time range**: always written as `esqlLookback(range)`, which is `NOW() - N days`. The grid
+- **Time range**: always written as `buildLookback(range)`, which is `NOW() - N days`. The grid
   and the tiles use the same helper, so they agree on the window.
 - **Count**: always the number of entities in view. Besides showing the total, it tells the
   grid how big the view is, which decides the query below.
@@ -76,13 +76,13 @@ have a change.
 - Empty rows: the entities without a score (a plain query), plus the scored entities that had
   no old score.
 
-**Groups and single entities** (Records, `runAliasGroupsPage`). Most entities are alone in their
+**Groups and single entities** (Records, `fetchAliasGroupsPage`). Most entities are alone in their
 group. So:
 - the groups with aliases are built from the alias entities, which are few;
 - the single entities are read in order from the entity index, a page at a time;
 - the browser merges both, and then reads the entity fields of the page's groups.
 
-**Records with a search** (`runSearchedTargetsPage`). The search decides which rows show, but
+**Records with a search** (`fetchSearchedTargetsPage`). The search decides which rows show, but
 not their values: a row keeps the size of its whole group, so it can still be expanded.
 - Up to `MAX_DIRECT_TARGETS` matches: read the matching entities, then the size of just their
   groups. This is fast for narrow searches.

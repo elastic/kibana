@@ -21,9 +21,9 @@ import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
 
 // ── index name helpers ────────────────────────────────────────────────────────
 
-export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
-export const alertsIndexOf = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
-export const riskScoreIndexOf = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
+export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
+export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
+export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
 
 // ── ML anomalies ─────────────────────────────────────────────────────────────
 // One definition of an entity anomaly, shared by the anomalies tile and column.
@@ -55,7 +55,7 @@ const IDENTITY_SOURCE_FIELDS = [
   ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
 ];
 
-const stringValuesOf = (value: unknown): string[] =>
+const getStringValues = (value: unknown): string[] =>
   [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
 
 /**
@@ -66,7 +66,7 @@ const stringValuesOf = (value: unknown): string[] =>
  */
 export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined => {
   const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
-    const values = [...new Set(rows.flatMap((row) => stringValuesOf(row[field])))];
+    const values = [...new Set(rows.flatMap((row) => getStringValues(row[field])))];
     return values.length ? [`${field} IN (${toList(values)})`] : [];
   });
   return parts.length ? parts.join(' OR ') : undefined;
@@ -120,7 +120,7 @@ export const buildLookupJoinClause = (concreteEntityIndexName: string): string =
  * query filters on it, so they agree on the window, and ES|QL folds it into a constant that
  * still pushes down to Lucene.
  */
-export const esqlLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
+export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 

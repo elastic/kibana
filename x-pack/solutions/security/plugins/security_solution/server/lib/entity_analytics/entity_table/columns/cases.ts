@@ -15,7 +15,7 @@ interface CaseAggs {
 }
 
 /** Returns case counts keyed by entity ID for the given entity IDs. Rejects when the query fails. */
-export const batchCaseCounts = async (
+export const fetchCaseCounts = async (
   soClient: ISavedObjectsRepository,
   entityIds: readonly string[]
 ): Promise<Map<string, number>> => {

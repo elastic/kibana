@@ -8,14 +8,14 @@
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
 import {
   buildIdentityPrefilter,
-  alertsIndexOf,
+  getAlertsIndex,
   buildLookupJoinClause,
-  entityAliasOf,
-  esqlLookback,
+  getEntityAlias,
+  buildLookback,
   toList,
 } from './esql';
 import {
-  entityIdsOf,
+  getEntityIds,
   getEntityId,
   ALERT_COUNT_FIELD,
   ALLOWED_ENTITY_TYPES,
@@ -30,7 +30,7 @@ import {
 } from './entities_in_view';
 import { buildForeignSortPageSteps } from './foreign_sort';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
-import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
+import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
@@ -120,8 +120,8 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
   return [
-    `FROM ${alertsIndexOf(namespace)}, ${entityAliasOf(namespace)} METADATA _index`,
-    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${esqlLookback(
+    `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
+    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
       timeRange
     )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc, ...entityConditions].join(' AND ')})`,
     ...buildAlertEuidPipeline({
@@ -145,8 +145,8 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
 
 /** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
 const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
-  `FROM ${alertsIndexOf(namespace)}`,
-  `| WHERE \`@timestamp\` >= ${esqlLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
+  `FROM ${getAlertsIndex(namespace)}`,
+  `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
 ];
 
@@ -163,7 +163,7 @@ const ALERT_EMPTY_COLUMNS = [
   `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
 ].join(', ');
 
-export const alertSplitSortPlan = (sortField: string): SplitSortPlan =>
+export const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
   buildEntityListSortPlan({
     sortField,
     // Entities without alerts count 0, so they sort first ascending; their last alert is null.
@@ -184,8 +184,8 @@ const buildAlertsEnrichQuery = (
 ): string => {
   const { namespace, timeRange } = args;
   return [
-    `FROM ${alertsIndexOf(namespace)}`,
-    `| WHERE \`@timestamp\` >= ${esqlLookback(timeRange)}`,
+    `FROM ${getAlertsIndex(namespace)}`,
+    `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
@@ -197,7 +197,7 @@ const buildAlertsEnrichQuery = (
 const alertsEnricher: PageEnricher = {
   fields: ALERT_FIELDS,
   read: async (pageRows, args, { runQuery }) => {
-    const entityIds = entityIdsOf(pageRows);
+    const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 
     const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
@@ -226,7 +226,8 @@ export const alertCountQuerySpec = {
     // Entities without alerts count 0, so they sort first in ascending order.
     buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
     buildCountQuery: buildEntitiesInViewCountQuery,
-    runSortPage: (args, ctx) => runSplitSortPage(alertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
+    fetchSortPage: (args, ctx) =>
+      fetchSplitSortPage(getAlertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
   },
   enricher: alertsEnricher,
 } satisfies ColumnQuerySpec;
@@ -235,8 +236,8 @@ export const lastSeenAlertQuerySpec = {
   sort: {
     buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
     buildCountQuery: buildEntitiesInViewCountQuery,
-    runSortPage: (args, ctx) =>
-      runSplitSortPage(alertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
+    fetchSortPage: (args, ctx) =>
+      fetchSplitSortPage(getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
   },
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;

@@ -7,7 +7,7 @@
 
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import {
-  entityAliasOf,
+  getEntityAlias,
   buildKeepClause,
   buildCursorClause,
   buildResolvedRowsFilter,
@@ -28,7 +28,7 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
     entityExpression,
   } = args;
   return [
-    `FROM ${entityAliasOf(namespace)}`,
+    `FROM ${getEntityAlias(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedRowsFilter(rowsMode),
     ...buildCombinedFilterClause(searchExpression, entityExpression),

@@ -141,7 +141,7 @@ export interface SortQuerySpec {
    * Loads one page of rows plus one with more than one query, for views where that is
    * cheaper than `buildSortQuery`. Returns the same rows as `buildSortQuery`.
    */
-  runSortPage?: (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
+  fetchSortPage?: (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
 }
 
 /** How the grid reads a column: its sort, if it has one, and the enricher of its values. */
@@ -173,7 +173,7 @@ export const getNumber = (row: Row, field: string): number | undefined => {
 export const getEntityId = (row: Row): string | undefined => getString(row, ENTITY_ID_FIELD);
 
 /** Entity ids of the rows, without rows that have no id. */
-export const entityIdsOf = (rows: readonly Row[]): string[] =>
+export const getEntityIds = (rows: readonly Row[]): string[] =>
   rows.flatMap((row) => getEntityId(row) ?? []);
 
 /** Narrows a sort column value for a cursor. */
@@ -220,7 +220,7 @@ export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
 export const RESOLUTION_GROUPING_ID = 'ea-new-home-resolution';
 
 /** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
-const lacksFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
+const isMissingFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
   fields.some((field) => rows.some((row) => !(field in row)));
 
 export interface EnrichedRows {
@@ -234,7 +234,7 @@ export interface EnrichedRows {
  * fail the page: its error is returned with the rows. An abort still rejects: the query key
  * changed and the caller drops the result.
  */
-export const enrichEntityRows = async (
+export const fetchEnrichedRows = async (
   rows: readonly Row[],
   args: QueryArgs,
   ctx: RunContext,
@@ -242,7 +242,7 @@ export const enrichEntityRows = async (
 ): Promise<EnrichedRows> => {
   const settled = await Promise.allSettled(
     enrichers
-      .filter((enricher) => lacksFields(rows, enricher))
+      .filter((enricher) => isMissingFields(rows, enricher))
       .map(({ read }) => read(rows, args, ctx))
   );
   const results: EnrichedFields[] = [];

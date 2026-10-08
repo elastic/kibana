@@ -32,8 +32,8 @@ import type { TimeRange } from './common';
 /** Most records an expanded group shows. */
 const MAX_GROUP_RECORDS = 100;
 
-const truncatedGroupLabel = (shown: number, total: number) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.truncatedGroupLabel', {
+const getTruncatedGroupLabel = (shown: number, total: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.getTruncatedGroupLabel', {
     defaultMessage: 'Showing {shown} of {total} records',
     values: { shown, total },
   });
@@ -42,7 +42,7 @@ const truncatedGroupLabel = (shown: number, total: number) =>
  * Grid options of a group's records: its target and the entities resolved to it, as
  * individual rows. Expanding is structural, so the table filters don't apply.
  */
-export const groupRecordsOptions = (
+export const getGroupRecordsOptions = (
   entityId: string,
   timeRange: TimeRange,
   keepFields: readonly string[]
@@ -82,7 +82,7 @@ interface ExpandedEntityRowProps {
 /** EUI grid row heights for the compact (s), normal (m) and expanded (l) densities. */
 const ROW_HEIGHT_PX: Record<EuiDataGridStyleCellPaddings, number> = { s: 25, m: 37, l: 41 };
 
-const cellPaddingBlock = (
+const getCellPaddingBlock = (
   euiTheme: EuiThemeComputed,
   cellPadding: EuiDataGridStyleCellPaddings
 ): string => {
@@ -102,7 +102,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   watchlistNames,
   handlers,
 }) => {
-  const paddingBlock = cellPaddingBlock(euiTheme, cellPadding);
+  const paddingBlock = getCellPaddingBlock(euiTheme, cellPadding);
   return (
     <div
       role="row"
@@ -256,7 +256,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
     rows: records,
     isEnriching,
     total,
-  } = useEntityGridData(groupRecordsOptions(entityId, timeRange, keepFields));
+  } = useEntityGridData(getGroupRecordsOptions(entityId, timeRange, keepFields));
   // Child rows show the parent grid's columns, Records included: each is one record.
   const rows = useMemo(
     () => records.map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),
@@ -284,11 +284,11 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
           role="row"
           css={css`
             background: ${euiTheme.colors.body};
-            padding: ${cellPaddingBlock(euiTheme, cellPadding)} ${euiTheme.size.xl};
+            padding: ${getCellPaddingBlock(euiTheme, cellPadding)} ${euiTheme.size.xl};
           `}
         >
           <EuiText size="xs" color="subdued">
-            {truncatedGroupLabel(rows.length, total)}
+            {getTruncatedGroupLabel(rows.length, total)}
           </EuiText>
         </div>
       )}

@@ -11,13 +11,13 @@ import { buildAlertBasedTilesQuery } from './entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_query';
 import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
-import { withFastEuidEsql } from './with_fast_euid_esql';
+import { getEuidWithFastEsql } from './with_fast_euid_esql';
 
 const ENTITIES_INDEX = '.entities.v2.latest.default-00001';
 const ENTITY_FILTER_CLAUSES = ['asset.criticality IN ("high_impact", "extreme_impact")'];
 
 // The tiles derive entity ids with the same EUID ES|QL the page uses.
-const euid = withFastEuidEsql({ esql: {} } as unknown as EntityStoreEuid);
+const euid = getEuidWithFastEsql({ esql: {} } as unknown as EntityStoreEuid);
 
 describe('needs attention tile queries', () => {
   describe.each([

@@ -12,7 +12,7 @@ import type { RowsMode } from '../new_entities_table/common';
 /** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
 export const MAX_TILE_FILTER_ENTITY_IDS = 1000;
 
-export const capTileEntityIds = (ids: readonly string[]): readonly string[] =>
+export const getCappedTileEntityIds = (ids: readonly string[]): readonly string[] =>
   ids.length > MAX_TILE_FILTER_ENTITY_IDS ? ids.slice(0, MAX_TILE_FILTER_ENTITY_IDS) : ids;
 
 /** ES|QL condition that keeps the rows of the active tile's entities. */

@@ -11,7 +11,7 @@ import type { TimeRange } from '../../new_entities_table';
 import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
-  esqlLookback,
+  buildLookback,
   ML_ANOMALY_INDICES,
 } from '../../new_entities_table/queries/esql';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
@@ -35,7 +35,7 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ML_ANOMALY_INDICES}`);
   parts.push(
-    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= ${esqlLookback(
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= ${buildLookback(
       timeRange
     )} AND ${buildAnomalyJobFilter(jobIds)}`
   );

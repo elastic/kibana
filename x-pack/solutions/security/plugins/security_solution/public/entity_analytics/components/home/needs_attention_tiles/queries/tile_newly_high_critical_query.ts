@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '../../new_entities_table';
-import { esqlLookback, riskScoreIndexOf } from '../../new_entities_table/queries/esql';
+import { buildLookback, getRiskScoreIndex } from '../../new_entities_table/queries/esql';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical risk
@@ -47,8 +47,8 @@ export const buildNewlyHighCriticalCountQuery = (
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = []
 ): string => {
-  const index = riskScoreIndexOf(spaceId);
-  const boundary = esqlLookback(timeRange);
+  const index = getRiskScoreIndex(spaceId);
+  const boundary = buildLookback(timeRange);
   return [
     `SET unmapped_fields="nullify";`,
     'FROM (',

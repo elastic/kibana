@@ -11,15 +11,15 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookupJoinClause,
-  esqlLookback,
+  buildLookback,
   toList,
 } from './esql';
-import { entityIdsOf, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
+import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
 import { buildEntitiesInViewConditions, buildEntitiesInViewCountQuery } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
-import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
+import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
@@ -35,7 +35,7 @@ const buildAnomalyEntityRows = (
   identityPrefilter?: string
 ): string[] => [
   `FROM ${ML_ANOMALY_INDICES}`,
-  `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= ${esqlLookback(
+  `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= ${buildLookback(
     timeRange
   )} AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
   ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
@@ -83,14 +83,14 @@ const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: readonly Row[])
   [
     SET_UNMAPPED_NULLIFY,
     ...buildAnomalyEntityRows(args, buildIdentityPrefilter(pageRows)),
-    `| WHERE \`entity.id\` IN (${toList(entityIdsOf(pageRows))})`,
+    `| WHERE \`entity.id\` IN (${toList(getEntityIds(pageRows))})`,
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
 const anomalyCountEnricher: PageEnricher = {
   fields: [ANOMALY_COUNT_FIELD],
   read: async (pageRows, args, { runQuery }) => {
-    const entityIds = entityIdsOf(pageRows);
+    const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 
     const rows = await runQuery(buildAnomalyCountEnrichQuery(args, pageRows));
@@ -106,7 +106,7 @@ export const anomalyCountQuerySpec = {
   sort: {
     buildSortQuery: buildAnomalyCountSortQuery,
     buildCountQuery: buildEntitiesInViewCountQuery,
-    runSortPage: (args, ctx) => runSplitSortPage(anomalySplitSortPlan, args, ctx),
+    fetchSortPage: (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
   },
   enricher: anomalyCountEnricher,
 } satisfies ColumnQuerySpec;

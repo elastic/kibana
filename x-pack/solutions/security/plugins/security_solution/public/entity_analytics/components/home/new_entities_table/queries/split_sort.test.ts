@@ -10,8 +10,8 @@ import {
   SPLIT_SORT_MIN_VIEW_SIZE,
   buildEmptyRowsQuery,
   buildValueCursorClause,
-  runSplitSortPage,
-  shouldSplitSort,
+  fetchSplitSortPage,
+  isLargeView,
 } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
@@ -42,7 +42,7 @@ const fakePlan = (
     emptyValue,
     buildValueRowsQuery: (args, limit) =>
       `values cursor=${args.cursor?.entityId ?? '-'} limit=${limit}`,
-    runEmptyRows: async (_args, _runQuery, afterId, limit) => {
+    fetchEmptyRows: async (_args, _runQuery, afterId, limit) => {
       calls.push(`empty after=${afterId ?? '-'} limit=${limit}`);
       return emptyRows == null ? null : emptyRows.slice(0, limit);
     },
@@ -58,23 +58,21 @@ const runner = (calls: string[], valueRows: Row[]) => async (query: string) => {
   return valueRows.slice(0, limit);
 };
 
-describe('shouldSplitSort', () => {
+describe('isLargeView', () => {
   it('splits large views without search', () => {
-    expect(shouldSplitSort(baseArgs, LARGE_VIEW)).toBe(true);
+    expect(isLargeView(baseArgs, LARGE_VIEW)).toBe(true);
   });
 
   it('keeps the general query for small views and for search', () => {
-    expect(shouldSplitSort(baseArgs, LARGE_VIEW - 1)).toBe(false);
-    expect(shouldSplitSort({ ...baseArgs, searchExpression: 'KQL("""x""")' }, LARGE_VIEW)).toBe(
-      false
-    );
+    expect(isLargeView(baseArgs, LARGE_VIEW - 1)).toBe(false);
+    expect(isLargeView({ ...baseArgs, searchExpression: 'KQL("""x""")' }, LARGE_VIEW)).toBe(false);
   });
 });
 
-describe('runSplitSortPage', () => {
+describe('fetchSplitSortPage', () => {
   it('runs the general query for small views', async () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], []);
-    const rows = await runSplitSortPage(plan, baseArgs, {
+    const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, []),
       viewSize: 10,
     });
@@ -85,7 +83,7 @@ describe('runSplitSortPage', () => {
   it('reads only value rows when they fill the page', async () => {
     const values = [row('a', 3), row('b', 2), row('c', 1)];
     const { plan, calls } = fakePlan(0, values, []);
-    const rows = await runSplitSortPage(plan, baseArgs, {
+    const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
       viewSize: LARGE_VIEW,
     });
@@ -96,7 +94,7 @@ describe('runSplitSortPage', () => {
   it('completes the page with the first empty rows after the last value row', async () => {
     const values = [row('a', 3)];
     const { plan, calls } = fakePlan(0, values, [row('x', 0), row('y', 0)]);
-    const rows = await runSplitSortPage(plan, baseArgs, {
+    const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
       viewSize: LARGE_VIEW,
     });
@@ -112,7 +110,7 @@ describe('runSplitSortPage', () => {
       sortValue: null,
       entityId: 'w',
     };
-    await runSplitSortPage(
+    await fetchSplitSortPage(
       plan,
       { ...baseArgs, cursor },
       {
@@ -126,7 +124,7 @@ describe('runSplitSortPage', () => {
   it('puts empty rows first for a 0 empty value in ascending order', async () => {
     const values = [row('a', 1), row('b', 2)];
     const { plan, calls } = fakePlan(0, values, [row('x', 0)]);
-    const rows = await runSplitSortPage(
+    const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
       { runQuery: runner(calls, values), viewSize: LARGE_VIEW }
@@ -138,7 +136,7 @@ describe('runSplitSortPage', () => {
   it('keeps null empty rows last in ascending order', async () => {
     const values = [row('a', 1)];
     const { plan, calls } = fakePlan(null, values, [row('x', null), row('y', null)]);
-    const rows = await runSplitSortPage(
+    const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
       { runQuery: runner(calls, values), viewSize: LARGE_VIEW }
@@ -148,7 +146,7 @@ describe('runSplitSortPage', () => {
 
   it('runs the general query when the empty rows can not be read', async () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], null);
-    const rows = await runSplitSortPage(plan, baseArgs, {
+    const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, [row('a', 3)]),
       viewSize: LARGE_VIEW,
     });

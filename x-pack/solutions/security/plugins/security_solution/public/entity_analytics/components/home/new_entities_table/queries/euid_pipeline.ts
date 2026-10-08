@@ -35,7 +35,7 @@ export const buildEuidStages = (): string[] => {
  * which is not null when any EUID exists, and MV_DEDUPE removes the repeats.
  * This is about 3.5x faster than a CASE over every null combination.
  */
-const evalTypedEuidsAsMultiValue = (outputColumn: string): string =>
+const buildTypedEuidsEval = (outputColumn: string): string =>
   [
     `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
     '  COALESCE(user_euid, host_euid, service_euid),',
@@ -101,7 +101,7 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     if (fieldEvals) unstampedEvals.push(`| EVAL ${fieldEvals}`);
     unstampedEvals.push(`| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`);
   }
-  unstampedEvals.push(evalTypedEuidsAsMultiValue('_ea_entity_id'));
+  unstampedEvals.push(buildTypedEuidsEval('_ea_entity_id'));
 
   let unstampedWhere: string;
   if (idsList != null && unstampedIdentityClause == null) {

@@ -89,13 +89,13 @@ const isEntityType = (v: string): v is EntityType => VALID_ENTITY_TYPES.has(v);
 const isRiskSeverity = (v: string): v is RiskSeverity => VALID_RISK_LEVELS.has(v);
 const isCriticality = (v: string): boolean => VALID_CRITICALITY.has(v);
 
-const splitParam = (raw: string) => raw.split(',').filter(Boolean);
+const getParamValues = (raw: string) => raw.split(',').filter(Boolean);
 
 /** Expanded ids, one `eaExpanded` param each: ids can contain commas. */
-const readExpandedIds = (params: URLSearchParams): string[] =>
+const getExpandedIds = (params: URLSearchParams): string[] =>
   params.getAll(PARAM.EXPANDED).filter(Boolean).slice(-MAX_EXPANDED_ENTITY_IDS);
 
-const writeExpandedIds = (params: URLSearchParams, ids: string[]) => {
+const setExpandedIds = (params: URLSearchParams, ids: string[]) => {
   params.delete(PARAM.EXPANDED);
   for (const id of ids.slice(-MAX_EXPANDED_ENTITY_IDS)) params.append(PARAM.EXPANDED, id);
 };
@@ -174,16 +174,16 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const rawDataSources = p.get(PARAM.DATA_SOURCES) ?? '';
   const entityFilters = useMemo(
     (): EntityFilters => ({
-      entityTypes: splitParam(rawEntityTypes).filter(isEntityType),
-      riskLevels: splitParam(rawRiskLevels).filter(isRiskSeverity),
-      assetCriticality: splitParam(rawAssetCriticality).filter(isCriticality),
-      watchlists: splitParam(rawWatchlists),
-      dataSources: splitParam(rawDataSources),
+      entityTypes: getParamValues(rawEntityTypes).filter(isEntityType),
+      riskLevels: getParamValues(rawRiskLevels).filter(isRiskSeverity),
+      assetCriticality: getParamValues(rawAssetCriticality).filter(isCriticality),
+      watchlists: getParamValues(rawWatchlists),
+      dataSources: getParamValues(rawDataSources),
     }),
     [rawEntityTypes, rawRiskLevels, rawAssetCriticality, rawWatchlists, rawDataSources]
   );
 
-  const expandedIds = useMemo(() => readExpandedIds(p), [p]);
+  const expandedIds = useMemo(() => getExpandedIds(p), [p]);
 
   const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
   const activeTile = useMemo(
@@ -277,11 +277,11 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (entityId: string) =>
       update(
         (params) => {
-          const current = readExpandedIds(params);
+          const current = getExpandedIds(params);
           const next = current.includes(entityId)
             ? current.filter((id) => id !== entityId)
             : [...current.filter((id) => id !== entityId), entityId];
-          writeExpandedIds(params, next);
+          setExpandedIds(params, next);
         },
         { replace: true }
       ),

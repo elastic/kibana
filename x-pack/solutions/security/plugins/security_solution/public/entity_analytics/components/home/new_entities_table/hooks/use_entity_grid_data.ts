@@ -28,8 +28,8 @@ import type {
 import {
   ANOMALY_COUNT_FIELD,
   createEsqlRunner,
-  enrichEntityRows,
-  entityIdsOf,
+  fetchEnrichedRows,
+  getEntityIds,
   getEntityId,
   getNumber,
   nullOnFailure,
@@ -150,7 +150,7 @@ const getEnrichKey = (context: GridContext, options: UseEntityGridDataOptions, b
     {
       ...getViewKey(context, options),
       sortDirection: options.sortDirection,
-      entityIds: entityIdsOf(batch.rows).join('\0'),
+      entityIds: getEntityIds(batch.rows).join('\0'),
       anomalyJobIds: context.anomalyJobIds.join('\0'),
     },
   ] as const;
@@ -221,8 +221,11 @@ const fetchSortRows = async (
   const sortSpec = findSortQuerySpec(options.sortField);
   if (!sortSpec) throw new Error(`Column ${options.sortField} is not sortable`);
   const runQuery = createEsqlRunner(context.searchService, signal);
-  if (!sortSpec.runSortPage) return runQuery(sortSpec.buildSortQuery(args));
-  return sortSpec.runSortPage(args, { runQuery, viewSize: await fetchViewSize(context, options) });
+  if (!sortSpec.fetchSortPage) return runQuery(sortSpec.buildSortQuery(args));
+  return sortSpec.fetchSortPage(args, {
+    runQuery,
+    viewSize: await fetchViewSize(context, options),
+  });
 };
 
 const getCursorAfter = (row: Row, { sort }: QueryArgs): PageCursor => ({
@@ -262,7 +265,7 @@ const fetchEnrichedBatch = (
   signal?: AbortSignal
 ): Promise<EnrichedRows> => {
   if (!context.concreteEntityIndexName) return Promise.resolve({ rows: [], errors: [] });
-  return enrichEntityRows(
+  return fetchEnrichedRows(
     batch.rows,
     buildQueryArgs(context, options, context.concreteEntityIndexName, null),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },

@@ -6,7 +6,7 @@
  */
 
 import {
-  entityIdsOf,
+  getEntityIds,
   getEntityId,
   getNumber,
   getString,
@@ -16,7 +16,7 @@ import {
 } from '../common';
 import {
   ENTITY_TYPE_FILTER,
-  entityAliasOf,
+  getEntityAlias,
   buildKeepClause,
   buildFilterClause,
   buildLookupJoinClause,
@@ -54,7 +54,7 @@ const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
  */
 const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
   [
-    `FROM ${entityAliasOf(args.namespace)}`,
+    `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| EVAL group_key = ${GROUP_KEY}, is_head = CASE(${RESOLVED_TO_FIELD} IS NULL, 1, 0)`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*), has_head = MAX(is_head) BY group_key`,
@@ -88,7 +88,7 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
   return [
     'FROM (',
     ...indent([
-      `FROM ${entityAliasOf(args.namespace)}`,
+      `FROM ${getEntityAlias(args.namespace)}`,
       `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
       `| STATS alias_count = COUNT(*) BY group_key = ${RESOLVED_TO_FIELD}`,
       '| RENAME group_key AS `entity.id`',
@@ -101,7 +101,7 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
     ]),
     '), (',
     ...indent([
-      `FROM ${entityAliasOf(args.namespace)}`,
+      `FROM ${getEntityAlias(args.namespace)}`,
       `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
       ...entityFilter,
       `| EVAL ${GROUP_SIZE_FIELD} = TO_LONG(1)`,
@@ -129,7 +129,7 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
 const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
   buildMergedForeignSortQuery(args, {
     foreignRows: [
-      `FROM ${entityAliasOf(args.namespace)}`,
+      `FROM ${getEntityAlias(args.namespace)}`,
       `| WHERE ${ENTITY_TYPE_FILTER}`,
       `| EVAL group_key = ${GROUP_KEY}`,
       `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
@@ -154,7 +154,7 @@ const buildGroupSizeSortQuery = (args: QueryArgs): string => {
  */
 const buildAliasGroupsQuery = (args: QueryArgs): string =>
   [
-    `FROM ${entityAliasOf(args.namespace)}`,
+    `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
     `| STATS alias_count = COUNT(*) BY group_key = ${RESOLVED_TO_FIELD}`,
     '| RENAME group_key AS `entity.id`',
@@ -181,13 +181,13 @@ const buildSingleEntitiesQuery = (args: QueryArgs, afterId: string | null, limit
     buildKeepClause(args, GROUP_SIZE_FIELD),
   ].join('\n');
 
-const groupSizeOf = (row: Row): number => getNumber(row, GROUP_SIZE_FIELD) ?? 1;
+const getGroupSize = (row: Row): number => getNumber(row, GROUP_SIZE_FIELD) ?? 1;
 
 /** `SORT group_size <dir>, entity.id ASC` order. */
 const compareGroups =
   (direction: SortDir) =>
   (a: Row, b: Row): number => {
-    const bySize = groupSizeOf(a) - groupSizeOf(b);
+    const bySize = getGroupSize(a) - getGroupSize(b);
     if (bySize !== 0) return direction === 'desc' ? -bySize : bySize;
     return (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;
   };
@@ -196,7 +196,7 @@ const isAfterCursor =
   (cursor: PageCursor | null) =>
   (row: Row): boolean => {
     if (cursor == null || typeof cursor.sortValue !== 'number') return true;
-    const size = groupSizeOf(row);
+    const size = getGroupSize(row);
     if (size === cursor.sortValue) return (getEntityId(row) ?? '') > cursor.entityId;
     return cursor.sortDirection === 'desc' ? size < cursor.sortValue : size > cursor.sortValue;
   };
@@ -208,7 +208,7 @@ const MAX_DIRECT_TARGETS = 10_000;
 const ID_LIST_CHUNK_SIZE = 2_000;
 
 /** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
-const runPerIdChunk = async (
+const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
   buildQuery: (chunk: readonly string[]) => string
@@ -224,7 +224,7 @@ const runPerIdChunk = async (
 const buildGroupSizesQuery = ({ namespace }: QueryArgs, targetIds: readonly string[]): string => {
   const ids = toList(targetIds);
   return [
-    `FROM ${entityAliasOf(namespace)}`,
+    `FROM ${getEntityAlias(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| WHERE ${RESOLVED_TO_FIELD} IN (${ids}) OR (${ENTITY_ID_FIELD} IN (${ids}) AND ${RESOLVED_TO_FIELD} IS NULL)`,
     `| EVAL group_key = ${GROUP_KEY}`,
@@ -244,17 +244,17 @@ const buildSearchedTargetsQuery = (args: QueryArgs, targetIds: readonly string[]
   ].join('\n');
 
 /** Adds the entity fields to the page rows in `ids`, which carry only id and size. */
-const withEntityDocs = async (
+const fetchWithEntityDocs = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
   page: Row[],
   ids: ReadonlySet<string>
 ): Promise<Row[]> => {
-  const pageIds = entityIdsOf(page).filter((id) => ids.has(id));
+  const pageIds = getEntityIds(page).filter((id) => ids.has(id));
   if (!pageIds.length) return page;
   const docs = await runQuery(
     [
-      `FROM ${entityAliasOf(args.namespace)}`,
+      `FROM ${getEntityAlias(args.namespace)}`,
       `| WHERE ${ENTITY_ID_FIELD} IN (${toList(pageIds)})`,
       buildKeepClause(args),
     ].join('\n')
@@ -266,7 +266,7 @@ const withEntityDocs = async (
   });
 };
 
-const pageOf = (rows: Row[], { sort, cursor, pageSize }: QueryArgs): Row[] =>
+const getPage = (rows: Row[], { sort, cursor, pageSize }: QueryArgs): Row[] =>
   rows
     .sort(compareGroups(sort.direction))
     .filter(isAfterCursor(cursor))
@@ -277,7 +277,7 @@ const pageOf = (rows: Row[], { sort, cursor, pageSize }: QueryArgs): Row[] =>
  * the narrower the search (about 0.6s for one name on a 10M-entity ECH). `null` when the
  * search matches more than MAX_DIRECT_TARGETS targets.
  */
-const runSearchedTargetsPage = async (
+const fetchSearchedTargetsPage = async (
   args: QueryArgs,
   runQuery: EsqlRunner
 ): Promise<Row[] | null> => {
@@ -288,18 +288,18 @@ const runSearchedTargetsPage = async (
       `| LIMIT ${MAX_DIRECT_TARGETS + 1}`,
     ].join('\n')
   );
-  const targetIds = entityIdsOf(targets);
+  const targetIds = getEntityIds(targets);
   if (targetIds.length > MAX_DIRECT_TARGETS) return null;
 
-  const sizes = await runPerIdChunk(runQuery, targetIds, (chunk) =>
+  const sizes = await fetchPerIdChunk(runQuery, targetIds, (chunk) =>
     buildGroupSizesQuery(args, chunk)
   );
-  const sizeById = new Map(sizes.map((row) => [getEntityId(row), groupSizeOf(row)]));
-  const page = pageOf(
+  const sizeById = new Map(sizes.map((row) => [getEntityId(row), getGroupSize(row)]));
+  const page = getPage(
     targetIds.map((id) => ({ [ENTITY_ID_FIELD]: id, [GROUP_SIZE_FIELD]: sizeById.get(id) ?? 1 })),
     args
   );
-  return withEntityDocs(args, runQuery, page, new Set(targetIds));
+  return fetchWithEntityDocs(args, runQuery, page, new Set(targetIds));
 };
 
 /**
@@ -307,16 +307,16 @@ const runSearchedTargetsPage = async (
  * the groups whose target matches it. Grouping every entity in one query took about 20s for
  * 10M entities on ECH; this takes 2–5s.
  */
-const runAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
+const fetchAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
   const aliasGroups = await runQuery(buildAliasGroupsQuery(args));
   if (aliasGroups.length > MAX_ALIAS_GROUPS) return runQuery(buildGroupSizeSortQuery(args));
-  const aliasGroupIds = new Set(entityIdsOf(aliasGroups));
+  const aliasGroupIds = new Set(getEntityIds(aliasGroups));
 
   // KQL can't run after the join in the alias groups query: check their targets separately.
   const searchedIds = args.searchExpression
     ? new Set(
-        entityIdsOf(
-          await runPerIdChunk(runQuery, [...aliasGroupIds], (chunk) =>
+        getEntityIds(
+          await fetchPerIdChunk(runQuery, [...aliasGroupIds], (chunk) =>
             buildSearchedTargetsQuery(args, chunk)
           )
         )
@@ -341,7 +341,7 @@ const runAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promis
         .filter((row) => !aliasGroupIds.has(getEntityId(row) ?? ''))
     : [];
 
-  return withEntityDocs(args, runQuery, pageOf([...groups, ...singles], args), searchedIds);
+  return fetchWithEntityDocs(args, runQuery, getPage([...groups, ...singles], args), searchedIds);
 };
 
 /**
@@ -350,15 +350,15 @@ const runAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promis
  * few rows the search keeps. Without a search, views of SPLIT_SORT_MIN_VIEW_SIZE entities or
  * more read the page in parts, and smaller views keep the single query.
  */
-const runGroupSizeSortPage = async (
+const fetchGroupSizeSortPage = async (
   args: QueryArgs,
   { runQuery, viewSize }: SortPageContext
 ): Promise<Row[]> => {
   if (args.searchExpression) {
-    return (await runSearchedTargetsPage(args, runQuery)) ?? runAliasGroupsPage(args, runQuery);
+    return (await fetchSearchedTargetsPage(args, runQuery)) ?? fetchAliasGroupsPage(args, runQuery);
   }
   if (viewSize < SPLIT_SORT_MIN_VIEW_SIZE) return runQuery(buildGroupSizeSortQuery(args));
-  return runAliasGroupsPage(args, runQuery);
+  return fetchAliasGroupsPage(args, runQuery);
 };
 
 // ── enrichment ────────────────────────────────────────────────────────────────
@@ -369,7 +369,7 @@ const buildGroupSizeEnrichQuery = (
 ): string => {
   const keys = toList(groupKeys);
   return [
-    `FROM ${entityAliasOf(namespace)}`,
+    `FROM ${getEntityAlias(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     // Pushable prefilter for the group_key filter below.
     `| WHERE ${RESOLVED_TO_FIELD} IN (${keys}) OR ${ENTITY_ID_FIELD} IN (${keys})`,
@@ -382,7 +382,7 @@ const buildGroupSizeEnrichQuery = (
 const groupSizeEnricher: PageEnricher = {
   fields: [GROUP_SIZE_FIELD],
   read: async (pageRows, args, { runQuery }) => {
-    const entityIds = [...new Set(entityIdsOf(pageRows))];
+    const entityIds = [...new Set(getEntityIds(pageRows))];
     if (!entityIds.length) return new Map();
 
     const rows = await runQuery(buildGroupSizeEnrichQuery(args, entityIds));
@@ -403,7 +403,7 @@ export const groupSizeQuerySpec = {
     buildSortQuery: buildGroupSizeSortQuery,
     // One row per target in view, like every other sort.
     buildCountQuery: buildEntitiesInViewCountQuery,
-    runSortPage: runGroupSizeSortPage,
+    fetchSortPage: fetchGroupSizeSortPage,
   },
   enricher: groupSizeEnricher,
 } satisfies ColumnQuerySpec;

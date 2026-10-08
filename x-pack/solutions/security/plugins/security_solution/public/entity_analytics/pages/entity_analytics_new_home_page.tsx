@@ -74,7 +74,7 @@ import { SignalCards } from '../components/home/needs_attention_tiles/signal_car
 import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
-  capTileEntityIds,
+  getCappedTileEntityIds,
 } from '../components/home/needs_attention_tiles/tile_entity_filter';
 import {
   EMPTY_ENTITY_IDS,
@@ -415,7 +415,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   ]);
 
   const cappedTileEntityIds = useMemo(
-    () => (activeTile ? capTileEntityIds(selectedEntityIds) : null),
+    () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
     [activeTile, selectedEntityIds]
   );
 

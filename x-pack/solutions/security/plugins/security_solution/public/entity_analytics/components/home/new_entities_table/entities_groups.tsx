@@ -116,7 +116,7 @@ interface GroupContentProps extends GroupLevelProps {
   parentGroupFilters?: ParentGroupFilters;
 }
 
-const mergeFilters = (current: Filter[], parentJson: ParentGroupFilters): Filter[] => [
+const getMergedFilters = (current: Filter[], parentJson: ParentGroupFilters): Filter[] => [
   ...current,
   ...(parentJson ? (JSON.parse(parentJson) as Filter[]) : []),
 ];
@@ -129,7 +129,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
 }) => {
   const { selectedGroupOptions } = level;
   if (groupingLevel < selectedGroupOptions.length) {
-    const merged = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
+    const merged = processGroupFilters(getMergedFilters(currentGroupFilters, parentGroupFilters));
     return (
       <GroupWithLocalPagination
         {...level}
@@ -231,7 +231,9 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   }, []);
 
   const leafSearchExpression = useMemo(() => {
-    const groupFilters = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
+    const groupFilters = processGroupFilters(
+      getMergedFilters(currentGroupFilters, parentGroupFilters)
+    );
     const { esqlExpression: groupExpr } = convertFiltersToESQLExpression(groupFilters);
     return joinAnd(searchExpression, groupExpr);
   }, [searchExpression, currentGroupFilters, parentGroupFilters]);

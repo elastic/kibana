@@ -9,17 +9,17 @@ import {
   MAX_TILE_FILTER_ENTITY_IDS,
   buildTileFilter,
   buildTileWhereExpression,
-  capTileEntityIds,
+  getCappedTileEntityIds,
 } from './tile_entity_filter';
 
 const IDS = ['host:a', 'user:b@c'];
 
-describe('capTileEntityIds', () => {
+describe('getCappedTileEntityIds', () => {
   it('keeps the first ids up to the cap', () => {
     const ids = Array.from({ length: MAX_TILE_FILTER_ENTITY_IDS + 5 }, (_, i) => `host:${i}`);
 
-    expect(capTileEntityIds(ids)).toEqual(ids.slice(0, MAX_TILE_FILTER_ENTITY_IDS));
-    expect(capTileEntityIds(IDS)).toEqual(IDS);
+    expect(getCappedTileEntityIds(ids)).toEqual(ids.slice(0, MAX_TILE_FILTER_ENTITY_IDS));
+    expect(getCappedTileEntityIds(IDS)).toEqual(IDS);
   });
 });
 

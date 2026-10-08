@@ -13,7 +13,7 @@ import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
-import { batchCaseCounts } from './columns/cases';
+import { fetchCaseCounts } from './columns/cases';
 
 export const registerEntityGridCasesRoute = ({
   router,
@@ -45,7 +45,7 @@ export const registerEntityGridCasesRoute = ({
         try {
           const [coreStart] = await getStartServices();
           const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
-          const counts = await batchCaseCounts(soClient, request.body.entity_ids);
+          const counts = await fetchCaseCounts(soClient, request.body.entity_ids);
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {
           logger.error(`Failed to count cases of entities: ${err}`);

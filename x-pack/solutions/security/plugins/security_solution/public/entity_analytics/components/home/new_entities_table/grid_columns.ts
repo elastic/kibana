@@ -61,10 +61,10 @@ const GRID_COLUMN_ID_SET: ReadonlySet<string> = new Set(COLUMNS.map(({ id }) => 
 
 export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID_SET.has(id);
 
-const querySpecOf = (id: string): ColumnQuerySpec | undefined =>
+const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
   isGridColumnId(id) ? QUERY_SPECS[id] : undefined;
 
-export const findSortQuerySpec = (id: string): SortQuerySpec | undefined => querySpecOf(id)?.sort;
+export const findSortQuerySpec = (id: string): SortQuerySpec | undefined => getQuerySpec(id)?.sort;
 
 /** Sortable columns with their sort, in grid order. */
 export const SORT_QUERY_SPECS: ReadonlyArray<[GridColumnId, SortQuerySpec]> = COLUMNS.flatMap(
@@ -94,27 +94,29 @@ const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
   isResizable: false,
 }));
 
-const columnsWithout = (...ids: GridColumnId[]): readonly EuiDataGridColumn[] =>
+const getColumnsWithout = (...ids: GridColumnId[]): readonly EuiDataGridColumn[] =>
   ALL_COLUMNS.filter(({ id }) => !(ids as string[]).includes(id));
 
 // Resolved rows: entities grouped by identity; shows "Records" count, hides "Resolved to".
-export const RESOLVED_ROWS_COLUMNS = columnsWithout('entity.relationships.resolution.resolved_to');
+export const RESOLVED_ROWS_COLUMNS = getColumnsWithout(
+  'entity.relationships.resolution.resolved_to'
+);
 
 // Individual rows: records; shows "Resolved to" identity, hides "Records" count.
-export const INDIVIDUAL_ROWS_COLUMNS = columnsWithout('group_size');
+export const INDIVIDUAL_ROWS_COLUMNS = getColumnsWithout('group_size');
 
 // Child rows (expanded under a resolved entity): neither rows-mode column applies.
-export const CHILD_ROWS_COLUMNS = columnsWithout(
+export const CHILD_ROWS_COLUMNS = getColumnsWithout(
   'group_size',
   'entity.relationships.resolution.resolved_to'
 );
 
-const enrichersOf = (columns: readonly EuiDataGridColumn[]): readonly PageEnricher[] =>
-  columns.flatMap(({ id }) => querySpecOf(id)?.enricher ?? []);
+const getEnrichers = (columns: readonly EuiDataGridColumn[]): readonly PageEnricher[] =>
+  columns.flatMap(({ id }) => getQuerySpec(id)?.enricher ?? []);
 
 /** Enrichers of the columns each kind of row shows. */
 export const PAGE_ENRICHERS: Readonly<Record<RowsMode | 'child', readonly PageEnricher[]>> = {
-  resolved: enrichersOf(RESOLVED_ROWS_COLUMNS),
-  individual: enrichersOf(INDIVIDUAL_ROWS_COLUMNS),
-  child: enrichersOf(CHILD_ROWS_COLUMNS),
+  resolved: getEnrichers(RESOLVED_ROWS_COLUMNS),
+  individual: getEnrichers(INDIVIDUAL_ROWS_COLUMNS),
+  child: getEnrichers(CHILD_ROWS_COLUMNS),
 };

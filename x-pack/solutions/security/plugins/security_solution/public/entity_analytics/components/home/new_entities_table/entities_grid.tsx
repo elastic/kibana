@@ -38,7 +38,7 @@ import {
 } from './hooks/use_entity_grid_data';
 import { GROUP_SIZE_FIELD, getEntityId, getNumber } from './common';
 import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
-import { ExpandedEntityGroup, groupRecordsOptions } from './entities_expanded_row';
+import { ExpandedEntityGroup, getGroupRecordsOptions } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
 import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
@@ -90,7 +90,7 @@ const rowCellsCss = css`
   display: flex;
 `;
 
-const expandRowLabel = (isExpanded: boolean) =>
+const getExpandRowLabel = (isExpanded: boolean) =>
   isExpanded
     ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
         defaultMessage: 'Collapse group',
@@ -171,7 +171,7 @@ const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) 
   const groupSize = getNumber(row, GROUP_SIZE_FIELD) ?? 1;
   if (!entityId || groupSize <= 1) return null;
   const isExpanded = expandedIds.has(entityId);
-  const label = expandRowLabel(isExpanded);
+  const label = getExpandRowLabel(isExpanded);
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -234,8 +234,8 @@ const LOAD_MORE_LABEL = i18n.translate(
   { defaultMessage: 'Load more' }
 );
 
-const shownCountLabel = (shown: number, total: number) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.shownCountLabel', {
+const getShownCountLabel = (shown: number, total: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.getShownCountLabel', {
     defaultMessage: 'Showing {shown, number} of {total, number}',
     values: { shown, total },
   });
@@ -264,7 +264,7 @@ const EntityGridLoadMore = () => {
       `}
     >
       <EuiText size="xs" color="subdued">
-        {isAtLoadLimit ? LOAD_LIMIT_LABEL : shownCountLabel(rows.length, total)}
+        {isAtLoadLimit ? LOAD_LIMIT_LABEL : getShownCountLabel(rows.length, total)}
       </EuiText>
       {canLoadMore && (
         <EuiButton size="s" onClick={loadMore} isLoading={isLoadingMore}>
@@ -486,7 +486,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   // Expanded groups on this page read their records; the URL can hold more expanded ids.
   const isChildrenFetching = useIsFetching({ queryKey: ENTITY_GRID_CHILDREN_QUERY_KEY }) > 0;
   const prefetchChildren = useCallback(
-    (entityId: string) => prefetch(groupRecordsOptions(entityId, timeRange, keepFields)),
+    (entityId: string) => prefetch(getGroupRecordsOptions(entityId, timeRange, keepFields)),
     [prefetch, timeRange, keepFields]
   );
 

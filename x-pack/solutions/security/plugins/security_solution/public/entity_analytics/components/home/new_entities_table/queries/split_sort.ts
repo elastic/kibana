@@ -42,7 +42,7 @@ export interface SplitSortPlan {
   /** Page of value rows after the cursor, sorted, at most `limit` rows. */
   buildValueRowsQuery: (args: QueryArgs, limit: number) => string;
   /** Page of empty rows after `afterId`, sorted by entity.id, at most `limit` rows. */
-  runEmptyRows: (
+  fetchEmptyRows: (
     args: QueryArgs,
     runQuery: EsqlRunner,
     afterId: string | null,
@@ -52,7 +52,7 @@ export interface SplitSortPlan {
   buildSortQuery: (args: QueryArgs) => string;
 }
 
-export const shouldSplitSort = (args: QueryArgs, viewSize: number): boolean =>
+export const isLargeView = (args: QueryArgs, viewSize: number): boolean =>
   !args.searchExpression && viewSize >= SPLIT_SORT_MIN_VIEW_SIZE;
 
 /**
@@ -114,7 +114,7 @@ export const buildEmptyRowsQuery = (
  * Empty rows when the value rows come from a list of entities: the empty rows are the
  * entities in view that are not in the list. `null` when the list doesn't fit in one response.
  */
-const runEmptyRowsExcludingValueIds = async (
+const fetchEmptyRowsExcludingValueIds = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
   /** Entities with a value, one row per `entity.id`. */
@@ -170,8 +170,8 @@ export const buildEntityListSortPlan = ({
       ...buildValueSortSuffix(args, sortField, limit),
       buildKeepClause(args, ...columns),
     ].join('\n'),
-  runEmptyRows: (args, runQuery, afterId, limit) =>
-    runEmptyRowsExcludingValueIds(
+  fetchEmptyRows: (args, runQuery, afterId, limit) =>
+    fetchEmptyRowsExcludingValueIds(
       args,
       runQuery,
       buildEntitiesWithValues(args, '| STATS BY `entity.id`'),
@@ -186,19 +186,19 @@ export const buildEntityListSortPlan = ({
  * One page of rows plus one, read as value rows and empty rows. Falls back to the general
  * sort query for small views, search, and when the empty rows can't be read.
  */
-export const runSplitSortPage = async (
+export const fetchSplitSortPage = async (
   plan: SplitSortPlan,
   args: QueryArgs,
   { runQuery, viewSize }: SortPageContext
 ): Promise<Row[]> => {
   const general = () => runQuery(plan.buildSortQuery(args));
-  if (!shouldSplitSort(args, viewSize)) return general();
+  if (!isLargeView(args, viewSize)) return general();
 
   const limit = args.pageSize + 1;
   const { cursor } = args;
   const inEmptyBlock = cursor != null && cursor.sortValue === plan.emptyValue;
   const emptyRows = async (afterId: string | null, count: number): Promise<Row[] | null> =>
-    plan.runEmptyRows(args, runQuery, afterId, count);
+    plan.fetchEmptyRows(args, runQuery, afterId, count);
   const valueRows = (valueArgs: QueryArgs, count: number) =>
     runQuery(plan.buildValueRowsQuery(valueArgs, count));
 

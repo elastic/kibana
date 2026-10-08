@@ -7,7 +7,7 @@
 
 import { RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { ENTITY_TYPE_FILTER, entityAliasOf } from './esql';
+import { ENTITY_TYPE_FILTER, getEntityAlias } from './esql';
 
 // ── entities in view ─────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ export const buildEntitiesInViewConditions = ({
 
 /** Entity docs that are rows of the grid for the current rows mode and filters. */
 export const buildEntitiesInViewSteps = (args: QueryArgs): string[] => [
-  `FROM ${entityAliasOf(args.namespace)}`,
+  `FROM ${getEntityAlias(args.namespace)}`,
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
 ];
 

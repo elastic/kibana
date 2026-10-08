@@ -80,7 +80,7 @@ const fakeRunner = (
 };
 
 const runPage = (args: QueryArgs, runQuery: (q: string) => Promise<Row[]>, viewSize = LARGE_VIEW) =>
-  groupSizeQuerySpec.sort.runSortPage(args, { runQuery, viewSize });
+  groupSizeQuerySpec.sort.fetchSortPage(args, { runQuery, viewSize });
 
 const ids = (rows: Row[]) => rows.map((r) => r['entity.id']);
 

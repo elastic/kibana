@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { buildKeepClause } from './esql';
-import { enrichEntityRows } from '../common';
+import { fetchEnrichedRows } from '../common';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
 import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
 import { alertCountQuerySpec } from './alerts';
@@ -131,10 +131,10 @@ describe('entities grid query builders', () => {
   );
 
   describe.each(
-    SORT_QUERY_SPECS.flatMap(([id, { runSortPage }]) =>
-      runSortPage ? [[id, runSortPage] as const] : []
+    SORT_QUERY_SPECS.flatMap(([id, { fetchSortPage }]) =>
+      fetchSortPage ? [[id, fetchSortPage] as const] : []
     )
-  )('sort page by %s on a large view', (sortField, runSortPage) => {
+  )('sort page by %s on a large view', (sortField, fetchSortPage) => {
     const emptyCursor: PageCursor = {
       ...cursorFor(sortField),
       sortValue: EMPTY_SORT_VALUES[sortField] ?? null,
@@ -167,7 +167,7 @@ describe('entities grid query builders', () => {
         async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]
       );
 
-      await runSortPage({ ...BASE_ARGS, ...overrides }, { runQuery, viewSize: LARGE_VIEW_SIZE });
+      await fetchSortPage({ ...BASE_ARGS, ...overrides }, { runQuery, viewSize: LARGE_VIEW_SIZE });
 
       expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
     });
@@ -212,7 +212,7 @@ describe('entities grid query builders', () => {
         },
       ]);
 
-      const { rows: enriched, errors } = await enrichEntityRows(
+      const { rows: enriched, errors } = await fetchEnrichedRows(
         rows,
         BASE_ARGS,
         createRunContext(runQuery),
@@ -259,7 +259,7 @@ describe('entities grid query builders', () => {
         alert_low: 0,
       }));
 
-      await enrichEntityRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [alertsEnricher]);
+      await fetchEnrichedRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [alertsEnricher]);
 
       expect(runQuery).not.toHaveBeenCalled();
     });
@@ -271,7 +271,7 @@ describe('entities grid query builders', () => {
         return [{ 'entity.id': 'host:h-1', anomaly_count: 2 }];
       });
 
-      const { rows, errors } = await enrichEntityRows(
+      const { rows, errors } = await fetchEnrichedRows(
         PAGE_ROWS,
         BASE_ARGS,
         createRunContext(runQuery),
@@ -290,7 +290,7 @@ describe('entities grid query builders', () => {
       });
 
       await expect(
-        enrichEntityRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [alertsEnricher])
+        fetchEnrichedRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [alertsEnricher])
       ).rejects.toBe(abort);
     });
   });

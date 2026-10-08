@@ -18,7 +18,7 @@ import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import { withFastEuidEsql } from '../queries/with_fast_euid_esql';
+import { getEuidWithFastEsql } from '../queries/with_fast_euid_esql';
 import {
   buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
@@ -68,7 +68,7 @@ export const useEntitiesWithAnomaliesCount = ({
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
     return buildEntitiesWithAnomaliesCountQuery(
-      withFastEuidEsql(euidApi.euid),
+      getEuidWithFastEsql(euidApi.euid),
       resolvedIndex.indexName,
       timeRange,
       buildEntityFilterClauses(entityFilters),
