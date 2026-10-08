@@ -9,7 +9,9 @@ import type { PDFDocument as PdfDocument } from 'pdf-lib';
 import type domtoimageModule from 'dom-to-image-more';
 import type { ExecutiveBriefJob } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EXECUTIVE_BRIEF_BODY_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
-import { A4_POINTS, PAGE_PADDING, USABLE_PAGE_WIDTH } from './page_layout';
+import { A4_POINTS, PAGE_PADDING, USABLE_PAGE_HEIGHT, USABLE_PAGE_WIDTH } from './page_layout';
+
+const SECTION_GAP = 12;
 
 /**
  * Exports an executive brief to a PDF file.
@@ -135,34 +137,49 @@ const addImagesToPdf = async (
   }
 
   try {
+    // pdf-lib's origin is bottom-left, so `usedHeight` tracks space consumed from the top margin.
+    const pageTop = A4_POINTS.height - PAGE_PADDING;
     let currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-    let currentY = PAGE_PADDING;
+    let usedHeight = 0;
 
-    for (const { url, height: originalHeight } of imageUrls) {
+    for (const { url } of imageUrls) {
       const imageBytes = await fetch(url).then((r) => r.arrayBuffer());
       const pngImage = await pdfDoc.embedPng(imageBytes);
 
-      const originalWidth = pngImage.width;
-      const widthScale = USABLE_PAGE_WIDTH / originalWidth;
       const scaledWidth = USABLE_PAGE_WIDTH;
-      const scaledHeight = originalHeight * widthScale;
+      const scaledHeight = pngImage.height * (USABLE_PAGE_WIDTH / pngImage.width);
 
-      // Check if image fits on current page
-      if (currentY + scaledHeight > A4_POINTS.height - PAGE_PADDING) {
-        // Start new page
-        currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-        currentY = PAGE_PADDING;
+      if (scaledHeight <= USABLE_PAGE_HEIGHT) {
+        if (usedHeight + scaledHeight > USABLE_PAGE_HEIGHT) {
+          currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
+          usedHeight = 0;
+        }
+        currentPage.drawImage(pngImage, {
+          x: PAGE_PADDING,
+          y: pageTop - usedHeight - scaledHeight,
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+        usedHeight += scaledHeight + SECTION_GAP;
+      } else {
+        // Taller than a page: draw the same image on consecutive pages, shifted up by one page
+        // height each time; the page boundary clips each slice.
+        if (usedHeight > 0) {
+          currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
+        }
+        for (let offset = 0; offset < scaledHeight; offset += USABLE_PAGE_HEIGHT) {
+          if (offset > 0) {
+            currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
+          }
+          currentPage.drawImage(pngImage, {
+            x: PAGE_PADDING,
+            y: pageTop - scaledHeight + offset,
+            width: scaledWidth,
+            height: scaledHeight,
+          });
+        }
+        usedHeight = (scaledHeight % USABLE_PAGE_HEIGHT) + SECTION_GAP;
       }
-
-      // Draw the full image at the current position
-      currentPage.drawImage(pngImage, {
-        x: PAGE_PADDING,
-        y: currentY,
-        width: scaledWidth,
-        height: scaledHeight,
-      });
-
-      currentY += scaledHeight;
     }
   } finally {
     // Clean up blob URLs
