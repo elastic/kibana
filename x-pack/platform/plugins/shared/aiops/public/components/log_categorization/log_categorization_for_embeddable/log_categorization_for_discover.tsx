@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { getCategorizationDataViewField } from '@kbn/aiops-utils';
 import {
   type LogCategorizationPageUrlState,
@@ -70,7 +71,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   } = useAiopsAppContext();
   const tablePadding = useEuiPaddingSize('xs');
 
-  const { dataView, savedSearch } = input;
+  const { dataView, savedSearch, timeRange: contextTimeRange } = input;
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
@@ -151,10 +152,19 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   );
 
   const { searchQuery } = useSearch(
-    { dataView, savedSearch: savedSearch ?? null },
+    { dataView, savedSearch: savedSearch ?? null, query: input.query },
     stateFromUrl,
     true
   );
+
+  const timeRangeParsed = useMemo(() => {
+    if (contextTimeRange) {
+      const bounds = calculateBounds(contextTimeRange);
+      if (bounds.min && bounds.max) {
+        return { min: bounds.min, max: bounds.max };
+      }
+    }
+  }, [contextTimeRange]);
 
   const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
     dataView,
@@ -164,7 +174,8 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     undefined,
     undefined,
     BAR_TARGET,
-    false
+    false,
+    timeRangeParsed
   );
 
   const onAddFilter = useCallback(
@@ -178,7 +189,9 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
         input.switchToDocumentView().finally(() => {
           filterManager.addFilters([filter]);
         });
+        return;
       }
+      filterManager.addFilters([filter]);
     },
     [dataView.id, filterManager, input]
   );

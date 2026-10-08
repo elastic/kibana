@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, isQuery } from '@kbn/data-plugin/public';
 
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type Query } from '@kbn/es-query';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import {
   isDefaultSearchQuery,
@@ -24,7 +24,12 @@ export const useSearch = (
   {
     dataView,
     savedSearch,
-  }: { dataView: DataView; savedSearch: Pick<SavedSearch, 'searchSource'> | null },
+    query: userQuery,
+  }: {
+    dataView: DataView;
+    savedSearch: Pick<SavedSearch, 'searchSource'> | null;
+    query?: Query;
+  },
   aiopsListState: AiOpsIndexBasedAppState,
   readOnly: boolean = false
 ) => {
@@ -41,9 +46,10 @@ export const useSearch = (
         dataView,
         uiSettings,
         savedSearch,
+        query: userQuery,
         filterManager,
       }),
-    [dataView, uiSettings, savedSearch, filterManager]
+    [dataView, uiSettings, savedSearch, userQuery, filterManager]
   );
 
   return useMemo(() => {

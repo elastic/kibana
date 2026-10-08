@@ -46,6 +46,7 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { isPatternAnalysisMode } from './utils/is_pattern_analysis_mode';
 import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
@@ -203,8 +204,11 @@ export function initializeFetch({
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
         );
-        // Still update search source for field stats mode, but not necessarily fetch data
-        if (isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)) {
+        // These modes fetch their own data from the updated search source.
+        if (
+          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings) ||
+          (discoverServices.aiops && isPatternAnalysisMode(savedSearch, dataView))
+        ) {
           api.fetchContext$.next(fetchContext);
           return;
         }

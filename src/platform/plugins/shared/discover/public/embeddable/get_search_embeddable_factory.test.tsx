@@ -84,6 +84,7 @@ describe('saved search embeddable', () => {
 
   let runtimeState = getInitialRuntimeState();
   const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
+  const defaultAiopsService = discoverServiceMock.aiops;
 
   beforeEach(() => {
     jest.mocked(deserializeState).mockImplementation(async () => runtimeState);
@@ -96,6 +97,7 @@ describe('saved search embeddable', () => {
 
   afterEach(() => {
     discoverServiceMock.profileStateRegistry = defaultProfileStateRegistry;
+    discoverServiceMock.aiops = defaultAiopsService;
   });
 
   const mockServices = {
@@ -259,6 +261,91 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
+    });
+
+    it('should render pattern analysis in PATTERN_LEVEL view mode without fetching documents', async () => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL },
+      });
+
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      const discoverComponent = render(<Component />);
+
+      expect(search).not.toHaveBeenCalled();
+      expect(api.dataLoading$.getValue()).toBe(false);
+      expect(
+        discoverComponent.getByTestId('dscPatternAnalysisEmbeddedContent')
+      ).toBeInTheDocument();
+    });
+
+    it('should pass the dashboard query and the panel time range to pattern analysis', async () => {
+      const { search } = createSearchFnMock(0);
+      const query = { query: 'status:500', language: 'kuery' };
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+      const parentApi = {
+        ...mockedDashboardApi,
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
+      };
+      const patternAnalysisComponent = jest.mocked(
+        discoverServiceMock.aiops!.PatternAnalysisComponent
+      );
+      patternAnalysisComponent.mockClear();
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL, time_range: timeRange },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi,
+      });
+      await waitOneTick();
+
+      render(<Component />);
+
+      const [{ props }] = patternAnalysisComponent.mock.calls[0];
+      expect(props.input).toEqual(
+        expect.objectContaining({ query, timeRange, lastReloadRequestTime: undefined })
+      );
+    });
+
+    it('should fetch documents when the optional aiops plugin is unavailable', async () => {
+      const { search, resolveSearch } = createSearchFnMock(0);
+      discoverServiceMock.aiops = undefined;
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      const discoverComponent = render(<Component />);
+
+      expect(search).toHaveBeenCalled();
+      resolveSearch();
+      await waitOneTick();
+      expect(discoverComponent.queryByTestId('dscPatternAnalysisEmbeddedContent')).toBeNull();
+      expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
     });
 
     it('should defer to the platform blocking panel when the query fails outside inline editing', async () => {
