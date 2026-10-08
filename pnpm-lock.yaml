@@ -1064,6 +1064,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/content-sanitization':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-content-sanitization
       '@kbn/context-engine-agent-builder-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/context_engine_agent_builder
@@ -9050,6 +9053,8 @@ importers:
   x-pack/platform/packages/shared/kbn-classic-stream-flyout: {}
 
   x-pack/platform/packages/shared/kbn-content-packs-schema: {}
+
+  x-pack/platform/packages/shared/kbn-content-sanitization: {}
 
   x-pack/platform/packages/shared/kbn-data-forge: {}
 

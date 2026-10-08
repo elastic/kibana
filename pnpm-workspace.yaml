@@ -1279,6 +1279,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-change-history-ui'
   - 'x-pack/platform/packages/shared/kbn-classic-stream-flyout'
   - 'x-pack/platform/packages/shared/kbn-content-packs-schema'
+  - 'x-pack/platform/packages/shared/kbn-content-sanitization'
   - 'x-pack/platform/packages/shared/kbn-data-forge'
   - 'x-pack/platform/packages/shared/kbn-data-lifecycle-phases'
   - 'x-pack/platform/packages/shared/kbn-dissect-heuristics'

@@ -118,7 +118,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
-  - '@kbn/fs'
+  - '@kbn/content-sanitization'
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/reporting-common'
