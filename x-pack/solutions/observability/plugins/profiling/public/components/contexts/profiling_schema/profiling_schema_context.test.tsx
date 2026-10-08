@@ -46,9 +46,10 @@ describe('ProfilingSchemaContextProvider', () => {
 
   const createProfilingStatus = ({
     isUniversalProfilingAvailable = true,
-  }: { isUniversalProfilingAvailable?: boolean } = {}): ProfilingStatus => ({
+    hasOtelData = true,
+  }: { isUniversalProfilingAvailable?: boolean; hasOtelData?: boolean } = {}): ProfilingStatus => ({
     isEnabled: true,
-    otel: { isAvailable: true, hasData: true },
+    otel: { isAvailable: true, hasData: hasOtelData },
     universalProfiling: {
       isAvailable: isUniversalProfilingAvailable,
       hasSetup: isUniversalProfilingAvailable,
@@ -165,6 +166,30 @@ describe('ProfilingSchemaContextProvider', () => {
       await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.OTEL));
       expect(result.current.schemas).toBeUndefined();
       expect(result.current.error).toEqual(new Error('Request failed'));
+    });
+
+    describe('on a cluster with only Universal Profiling data', () => {
+      const profilingStatus = createProfilingStatus({ hasOtelData: false });
+
+      it('selects Universal Profiling when no schema has data', async () => {
+        mockSchemasWithData([]);
+
+        const { result } = renderProfilingSchema({ profilingStatus });
+
+        await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.ECS));
+      });
+
+      it('selects Universal Profiling when the schemas with data cannot be fetched', async () => {
+        mockedUseTimeRangeAsync.mockReturnValue({
+          status: AsyncStatus.Settled,
+          error: new Error('Request failed'),
+          refresh: jest.fn(),
+        });
+
+        const { result } = renderProfilingSchema({ profilingStatus });
+
+        await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.ECS));
+      });
     });
 
     it('does not select a schema while the schemas with data are loading', () => {

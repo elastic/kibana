@@ -99,9 +99,9 @@ export function ProfilingSchemaContextProvider({
     // A URL without schema gets a default once the schemas with data are known. When they cannot
     // be fetched, the default is still selected so the page can query data.
     if (!schema && !isLoading) {
-      setSchemaInUrl(getDefaultSchema(schemas ?? []), { replace: true });
+      setSchemaInUrl(getDefaultSchema(schemas ?? [], supportedSchemas), { replace: true });
     }
-  }, [schema, isLoading, schemas, setSchemaInUrl]);
+  }, [schema, isLoading, schemas, supportedSchemas, setSchemaInUrl]);
 
   const onSchemaChange = useCallback(
     (nextSchema: ProfilingSchema) => setSchemaInUrl(nextSchema, { replace: false }),

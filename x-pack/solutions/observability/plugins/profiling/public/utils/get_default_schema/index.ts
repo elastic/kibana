@@ -8,5 +8,19 @@
 import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { DEFAULT_PROFILING_SCHEMA } from '@kbn/profiling-utils';
 
-export const getDefaultSchema = (schemasWithData: readonly ProfilingSchema[]): ProfilingSchema =>
-  schemasWithData.length === 1 ? schemasWithData[0] : DEFAULT_PROFILING_SCHEMA;
+export const getDefaultSchema = (
+  schemasWithData: readonly ProfilingSchema[],
+  supportedSchemas: readonly ProfilingSchema[]
+): ProfilingSchema => {
+  if (schemasWithData.length === 1) {
+    return schemasWithData[0];
+  }
+
+  if (supportedSchemas.length > 0) {
+    return supportedSchemas.includes(DEFAULT_PROFILING_SCHEMA)
+      ? DEFAULT_PROFILING_SCHEMA
+      : supportedSchemas[0];
+  }
+
+  return DEFAULT_PROFILING_SCHEMA;
+};
