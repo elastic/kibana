@@ -18,15 +18,48 @@ import { toOperationKey } from './response_engine';
 /** How a cursor-paginated response says there are no more pages. */
 export type PaginationEnd = 'empty_string' | 'null' | 'missing';
 
-/** How a vendor operation pages, as declared in the connector's manifest. */
+/** Where a request carries its pagination parameters; body parameters are paths into it. */
+export type PaginationParameterLocation = 'query' | 'body' | 'header';
+
+export interface CursorRequest {
+  readonly cursorParam: string;
+  readonly sizeParam?: string;
+}
+
+export interface OffsetRequest {
+  readonly offsetParam: string;
+  readonly sizeParam?: string;
+}
+
+export interface PageNumberRequest {
+  readonly pageParam: string;
+  readonly sizeParam?: string;
+  /** The number of the first page; defaults to 1. */
+  readonly firstPage?: number;
+}
+
+/** The query parameter a next-page URL sets to select the page. */
+export type NextUrlRequest = CursorRequest | OffsetRequest | PageNumberRequest;
+
+interface Located {
+  /** Defaults to `query`. */
+  readonly in?: PaginationParameterLocation;
+}
+
+/**
+ * How a vendor operation pages, as declared in the connector's manifest. Paths into bodies use
+ * lodash syntax; keys containing dots are quoted, e.g. `["@odata.nextLink"]`.
+ */
 export type PaginationDescriptor =
   | {
       readonly style: 'cursor';
-      readonly request: { readonly cursorParam: string; readonly sizeParam?: string };
+      readonly request: CursorRequest & Located;
       readonly response: {
+        /** Where the next cursor goes; with `header`, `nextPath` is a header name. */
+        readonly in?: 'body' | 'header';
         readonly itemsPath: string;
         readonly nextPath: string;
-        /** A boolean field that is `true` while more pages follow, e.g. Stripe's `has_more`. */
+        /** A boolean body field that is `true` while more pages follow, e.g. Stripe's `has_more`. */
         readonly hasMorePath?: string;
       };
       readonly end?: PaginationEnd;
@@ -34,19 +67,29 @@ export type PaginationDescriptor =
     }
   | {
       readonly style: 'offset';
-      readonly request: { readonly offsetParam: string; readonly sizeParam?: string };
+      readonly request: OffsetRequest & Located;
       readonly response: { readonly itemsPath: string; readonly totalPath?: string };
       readonly defaultSize?: number;
     }
   | {
       readonly style: 'page';
-      readonly request: {
-        readonly pageParam: string;
-        readonly sizeParam?: string;
-        /** The number of the first page; defaults to 1. */
-        readonly firstPage?: number;
-      };
+      readonly request: PageNumberRequest & Located;
       readonly response: { readonly itemsPath: string; readonly totalPath?: string };
+      readonly defaultSize?: number;
+    }
+  | {
+      /** The next page's URL is in a `Link: <url>; rel="next"` header, as on GitHub. */
+      readonly style: 'link';
+      readonly request: NextUrlRequest;
+      readonly response: { readonly itemsPath: string };
+      readonly defaultSize?: number;
+    }
+  | {
+      /** The next page's URL is in the body, e.g. Microsoft Graph's `@odata.nextLink`. */
+      readonly style: 'next_url';
+      readonly request: NextUrlRequest;
+      readonly response: { readonly itemsPath: string; readonly nextPath: string };
+      readonly end?: 'null' | 'missing';
       readonly defaultSize?: number;
     };
 
@@ -76,11 +119,82 @@ const decodeCursor = (cursor: string): number | undefined => {
     : undefined;
 };
 
-const readNumber = ({ query }: ContractRequest, name: string | undefined): number | undefined => {
-  const value = name === undefined ? undefined : query[name];
-  const number = typeof value === 'string' ? Number(value) : NaN;
+const readParameter = (
+  { query, headers, body }: ContractRequest,
+  location: PaginationParameterLocation,
+  name: string
+): unknown => {
+  if (location === 'body') {
+    return isRecord(body) ? get(body, name) : undefined;
+  }
+  return location === 'header' ? headers[name.toLowerCase()] : query[name];
+};
+
+const toInteger = (value: unknown): number | undefined => {
+  const number =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value !== ''
+      ? Number(value)
+      : NaN;
   return Number.isInteger(number) ? number : undefined;
 };
+
+// The position of the first item the request asks for; undefined for a cursor the mock didn't
+// issue.
+const readStart = (
+  request: NextUrlRequest,
+  read: (name: string) => unknown,
+  size: number
+): number | undefined => {
+  if ('cursorParam' in request) {
+    const cursor = read(request.cursorParam);
+    if (cursor === undefined || cursor === '') {
+      return 0;
+    }
+    return typeof cursor === 'string' ? decodeCursor(cursor) : undefined;
+  }
+  if ('offsetParam' in request) {
+    return Math.max(0, toInteger(read(request.offsetParam)) ?? 0);
+  }
+  const firstPage = request.firstPage ?? 1;
+  return Math.max(0, ((toInteger(read(request.pageParam)) ?? firstPage) - firstPage) * size);
+};
+
+// The request's URL with its page parameter set to ask for the page starting at `start`.
+const toNextUrl = (
+  { url }: ContractRequest,
+  request: NextUrlRequest,
+  start: number,
+  size: number
+): string => {
+  const next = new URL(url);
+  if ('cursorParam' in request) {
+    next.searchParams.set(request.cursorParam, encodeCursor(start));
+  } else if ('offsetParam' in request) {
+    next.searchParams.set(request.offsetParam, String(start));
+  } else {
+    next.searchParams.set(request.pageParam, String(start / size + (request.firstPage ?? 1)));
+  }
+  return next.toString();
+};
+
+const withoutHeader = (
+  headers: Readonly<Record<string, string>> = {},
+  name: string
+): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(headers).filter(([key]) => key.toLowerCase() !== name.toLowerCase())
+  );
+
+const withHeader = (
+  headers: Readonly<Record<string, string>> | undefined,
+  name: string,
+  value: string | undefined
+): Record<string, string> =>
+  value === undefined
+    ? withoutHeader(headers, name)
+    : { ...withoutHeader(headers, name), [name.toLowerCase()]: value };
 
 // Copies of the template item, with distinct `id`s so handlers that dedupe or key by ID see
 // every item.
@@ -101,8 +215,16 @@ const BAD_CURSOR: ContractResponse = {
   body: { title: 'Bad Request', detail: 'The cursor was not issued by this API' },
 };
 
-const setEnd = (body: object, path: string, end: PaginationEnd = 'missing') => {
-  if (end === 'missing') {
+// Writes the next-page value at `path`, or the vendor's end signal when there is none.
+const setNext = (
+  body: object,
+  path: string,
+  next: string | undefined,
+  end: PaginationEnd = 'missing'
+) => {
+  if (next !== undefined) {
+    set(body, path, next);
+  } else if (end === 'missing') {
     unset(body, path);
   } else {
     set(body, path, end === 'null' ? null : '');
@@ -119,50 +241,65 @@ const paginate = (
   if (!isRecord(body) || !Array.isArray(template) || template.length === 0) {
     return response;
   }
+  // Next-page URLs carry their parameters in the query.
+  const location =
+    pagination.style === 'link' || pagination.style === 'next_url'
+      ? 'query'
+      : pagination.request.in ?? 'query';
+  const read = (name: string) => readParameter(request, location, name);
+  const { sizeParam } = pagination.request;
   const size =
-    readNumber(request, pagination.request.sizeParam) ??
+    (sizeParam === undefined ? undefined : toInteger(read(sizeParam))) ??
     pagination.defaultSize ??
     DEFAULT_PAGE_SIZE;
-  let start = 0;
-  if (pagination.style === 'cursor') {
-    const cursor = request.query[pagination.request.cursorParam];
-    const position = typeof cursor === 'string' && cursor !== '' ? decodeCursor(cursor) : 0;
-    if (position === undefined) {
-      return BAD_CURSOR;
-    }
-    start = position;
-  } else if (pagination.style === 'offset') {
-    start = readNumber(request, pagination.request.offsetParam) ?? 0;
-  } else {
-    const firstPage = pagination.request.firstPage ?? 1;
-    start = ((readNumber(request, pagination.request.pageParam) ?? firstPage) - firstPage) * size;
+  const start = readStart(pagination.request, read, size);
+  if (start === undefined) {
+    return BAD_CURSOR;
   }
 
   const collection = buildCollection(template[0], collectionSize);
   const page = cloneDeep(body);
   set(page, pagination.response.itemsPath, collection.slice(start, start + size));
-  const hasMore = start + size < collection.length;
-  if (pagination.style === 'cursor') {
-    const { nextPath, hasMorePath } = pagination.response;
-    if (hasMore) {
-      set(page, nextPath, encodeCursor(start + size));
-    } else {
-      setEnd(page, nextPath, pagination.end);
+  const next = start + size < collection.length ? start + size : undefined;
+  const nextUrl =
+    next === undefined ? undefined : toNextUrl(request, pagination.request, next, size);
+  let { headers } = response;
+
+  switch (pagination.style) {
+    case 'cursor': {
+      const { in: nextIn = 'body', nextPath, hasMorePath } = pagination.response;
+      const cursor = next === undefined ? undefined : encodeCursor(next);
+      if (nextIn === 'body') {
+        setNext(page, nextPath, cursor, pagination.end);
+      } else {
+        const atEnd = pagination.end === 'empty_string' ? '' : undefined;
+        headers = withHeader(headers, nextPath, cursor ?? atEnd);
+      }
+      if (hasMorePath) {
+        set(page, hasMorePath, next !== undefined);
+      }
+      break;
     }
-    if (hasMorePath) {
-      set(page, hasMorePath, hasMore);
-    }
-  } else if (pagination.response.totalPath) {
-    set(page, pagination.response.totalPath, collection.length);
+    case 'link':
+      headers = withHeader(headers, 'link', nextUrl && `<${nextUrl}>; rel="next"`);
+      break;
+    case 'next_url':
+      setNext(page, pagination.response.nextPath, nextUrl, pagination.end);
+      break;
+    default:
+      if (pagination.response.totalPath) {
+        set(page, pagination.response.totalPath, collection.length);
+      }
   }
-  return { ...response, body: page };
+  return { ...response, headers, body: page };
 };
 
 /**
  * Wraps a responder so paginated operations serve pages of a virtual collection, built from
  * the first item of the response the responder would give. Pages are selected by the request's
- * cursor, offset or page number and page size; cursors are opaque positions, and cursors the
- * mock didn't issue get 400, as a vendor would answer.
+ * cursor, offset or page number and page size, read from its query, body or headers; the next
+ * page is signalled by a cursor, a `Link` header or a next-page URL in the body. Cursors are
+ * opaque positions, and cursors the mock didn't issue get 400, as a vendor would answer.
  */
 export const withPagination = (
   operations: readonly ContractOperation[],

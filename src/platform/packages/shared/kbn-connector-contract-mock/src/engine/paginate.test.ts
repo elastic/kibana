@@ -34,7 +34,7 @@ const query = (...names: string[]) =>
   names.map((name) => ({
     name,
     in: 'query',
-    schema: { type: name === 'cursor' ? 'string' : 'integer', maximum: 100 },
+    schema: /cursor|token/.test(name) ? { type: 'string' } : { type: 'integer', maximum: 100 },
   }));
 
 const spec = {
@@ -60,6 +60,40 @@ const spec = {
       },
     },
     '/pages': { get: { parameters: query('page', 'per_page'), responses: listResponse({}) } },
+    '/search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  start_cursor: { type: 'string' },
+                  page_size: { type: 'integer', maximum: 100 },
+                },
+              },
+            },
+          },
+        },
+        responses: listResponse({
+          next_cursor: { type: 'string', nullable: true },
+          has_more: { type: 'boolean' },
+        }),
+      },
+    },
+    '/events': {
+      get: {
+        parameters: [{ name: 'X-Cursor', in: 'header', schema: { type: 'string' } }],
+        responses: listResponse({}),
+      },
+    },
+    '/issues': { get: { parameters: query('page', 'per_page'), responses: listResponse({}) } },
+    '/users': {
+      get: {
+        parameters: query('$top', '$skiptoken'),
+        responses: listResponse({ '@odata.nextLink': { type: 'string' } }),
+      },
+    },
   },
 };
 
@@ -87,6 +121,41 @@ const pagination: PaginatedOperation[] = [
       style: 'page',
       request: { pageParam: 'page', sizeParam: 'per_page' },
       response: { itemsPath: 'channels' },
+    },
+  },
+  {
+    operation: { method: 'POST', path: '/search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'start_cursor', sizeParam: 'page_size' },
+      response: { itemsPath: 'channels', nextPath: 'next_cursor', hasMorePath: 'has_more' },
+      end: 'null',
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/events' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'header', cursorParam: 'X-Cursor' },
+      response: { in: 'header', itemsPath: 'channels', nextPath: 'X-Next-Cursor' },
+      defaultSize: 2,
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/issues' },
+    pagination: {
+      style: 'link',
+      request: { pageParam: 'page', sizeParam: 'per_page' },
+      response: { itemsPath: 'channels' },
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/users' },
+    pagination: {
+      style: 'next_url',
+      request: { cursorParam: '$skiptoken', sizeParam: '$top' },
+      response: { itemsPath: 'channels', nextPath: '["@odata.nextLink"]' },
     },
   },
 ];
@@ -157,5 +226,74 @@ describe('withPagination', () => {
     const { status } = await getJson(createMock(5).fetch, '/conversations.list?limit=500');
 
     expect(status).toBe(422);
+  });
+
+  it('reads cursors and page sizes from a JSON body', async () => {
+    const { fetch, calls } = createMock(3);
+    const search = async (body: object) => {
+      const response = await fetch('https://api.example.com/search', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      return response.json();
+    };
+
+    const first = await search({});
+    const last = await search({ start_cursor: first.next_cursor, page_size: 2 });
+
+    expect([ids(first), first.has_more, ids(last), last.has_more, last.next_cursor]).toEqual([
+      ['C1-1', 'C1-2'],
+      true,
+      ['C1-3'],
+      false,
+      null,
+    ]);
+    expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+  });
+
+  it('reads cursors from a request header and returns the next one in a response header', async () => {
+    const { fetch } = createMock(3);
+
+    const first = await fetch('https://api.example.com/events');
+    const cursor = first.headers.get('x-next-cursor') ?? '';
+    const last = await fetch('https://api.example.com/events', { headers: { 'X-Cursor': cursor } });
+
+    expect(ids(await last.json())).toEqual(['C1-3']);
+    expect(last.headers.has('x-next-cursor')).toBe(false);
+    const bad = await fetch('https://api.example.com/events', { headers: { 'X-Cursor': 'nope' } });
+    expect(bad.status).toBe(400);
+  });
+
+  it('follows Link headers until there is no next page', async () => {
+    const { fetch } = createMock(5);
+    const pages: string[][] = [];
+    let url: string | undefined = 'https://api.example.com/issues?per_page=2';
+    while (url) {
+      const response: Response = await fetch(url);
+      pages.push(ids(await response.json()));
+      url = /<([^>]+)>; rel="next"/.exec(response.headers.get('link') ?? '')?.[1];
+    }
+
+    expect(pages).toEqual([['C1-1', 'C1-2'], ['C1-3', 'C1-4'], ['C1-5']]);
+  });
+
+  it('keeps the request parameters in Link URLs', async () => {
+    const response = await createMock(5).fetch('https://api.example.com/issues?per_page=2');
+
+    expect(response.headers.get('link')).toBe(
+      '<https://api.example.com/issues?per_page=2&page=2>; rel="next"'
+    );
+  });
+
+  it('follows next-page URLs in the body until the field is missing', async () => {
+    const { fetch, calls } = createMock(3);
+
+    const first = await (await fetch('https://api.example.com/users?$top=2')).json();
+    const last = await (await fetch(first['@odata.nextLink'])).json();
+
+    expect([ids(first), ids(last)]).toEqual([['C1-1', 'C1-2'], ['C1-3']]);
+    expect(last).not.toHaveProperty(['@odata.nextLink']);
+    expect(calls.map(({ status }) => status)).toEqual([200, 200]);
   });
 });
