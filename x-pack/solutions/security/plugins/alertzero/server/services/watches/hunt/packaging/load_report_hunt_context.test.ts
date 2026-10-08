@@ -29,6 +29,62 @@ describe('loadReportHuntContext', () => {
     expect(result).toEqual({ title: 'Shadow admin AssumeRole', severity: 'high' });
   });
 
+  describe('extracted fields', () => {
+    const fullSource = {
+      content: { title: 'Sign-in watch bulletin', body_text: 'Failures across eu-central-1.' },
+      severity: { level: 'medium' },
+      extracted: {
+        ttps: { techniques: ['T1110.003', 'T1110'] },
+        iocs: [
+          { type: 'ip', value: '203.0.113.60' },
+          { type: 'ip' },
+          { value: 'orphan' },
+          { type: 'email', value: 'signin-watch@lab-demo.test' },
+        ],
+        vulnerability: { vendor: ' Amazon ', product: 'IAM' },
+      },
+    };
+
+    const load = async (source: Record<string, unknown>) =>
+      loadReportHuntContext({
+        esClient: {
+          search: jest.fn().mockResolvedValue({ hits: { hits: [{ _source: source }] } }),
+        },
+        spaceId: 'default',
+        reportId: 'rpt-1',
+      });
+
+    it('returns the extracted technique ids', async () => {
+      expect((await load(fullSource))?.techniques).toEqual(['T1110.003', 'T1110']);
+    });
+
+    it('returns only the IOCs that carry both a type and a value', async () => {
+      expect((await load(fullSource))?.iocs).toEqual([
+        { type: 'ip', value: '203.0.113.60' },
+        { type: 'email', value: 'signin-watch@lab-demo.test' },
+      ]);
+    });
+
+    it('returns the trimmed vendor', async () => {
+      expect((await load(fullSource))?.vendor).toBe('Amazon');
+    });
+
+    it('returns the product', async () => {
+      expect((await load(fullSource))?.product).toBe('IAM');
+    });
+
+    it('returns the full body text without slicing it', async () => {
+      const bodyText = 'x'.repeat(20_000);
+      expect(
+        (await load({ ...fullSource, content: { title: 't', body_text: bodyText } }))?.bodyText
+      ).toHaveLength(20_000);
+    });
+
+    it('returns a context when the report has body text but no title or severity', async () => {
+      expect((await load({ content: { body_text: 'only a body' } }))?.bodyText).toBe('only a body');
+    });
+  });
+
   it('returns just the title when the report has no severity', async () => {
     const search = jest.fn().mockResolvedValue({
       hits: { hits: [{ _source: { content: { title: 'Shadow admin AssumeRole' } } }] },

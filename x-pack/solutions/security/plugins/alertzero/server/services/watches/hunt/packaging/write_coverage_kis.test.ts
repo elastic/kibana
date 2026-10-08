@@ -215,6 +215,43 @@ describe('createCoverageWriter', () => {
     );
   });
 
+  it('writes the executed query and its status', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    await write([
+      {
+        ...coverageSubject,
+        validatedEsql: 'FROM logs-aws.cloudtrail-* | LIMIT 25',
+        esqlStatus: 'executed_no_rows' as const,
+      },
+    ]);
+
+    expect(index.mock.calls[0][0].document.attributes).toEqual(
+      expect.objectContaining({
+        validated_esql: 'FROM logs-aws.cloudtrail-* | LIMIT 25',
+        esql_status: 'executed_no_rows',
+      })
+    );
+  });
+
+  it('omits the query and its status when the subject has none', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    await write([coverageSubject]);
+
+    expect(index.mock.calls[0][0].document.attributes).not.toHaveProperty('validated_esql');
+  });
+
   it('omits enriched attributes rather than writing them empty when the subject has no value', async () => {
     const index = jest.fn().mockResolvedValue({});
     const write = createCoverageWriter({

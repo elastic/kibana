@@ -141,6 +141,11 @@ export const getPackageReportStepDefinition = ({
           huntStatus: input.huntStatus,
           hasConfirmedHit: input.hasConfirmedHit,
           expectedSseCount: input.expectedSseCount,
+          coordinator: {
+            tier2Targets: input.tier2Targets,
+            actionableIndices: input.actionableIndices,
+            behaviors: input.behaviors,
+          },
           attachments: conversation.attachments,
           deps: {
             listRespondActions,

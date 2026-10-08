@@ -5,37 +5,91 @@
  * 2.0.
  */
 
+import { buildCoverageContent } from './build_coverage_content';
+import {
+  buildCoverageDescription,
+  buildCoverageTitle,
+  findingPhrase,
+} from './build_coverage_title';
+import { buildThreatSummary } from './build_threat_summary';
+import {
+  eventDataSources,
+  reportIntentDataSources,
+  vendorFallbackDataSources,
+} from './coverage_data_sources';
+import { stripFindingTitle } from './coverage_text';
 import { buildCoverageKiId } from './coverage_ki_id';
-import type { CoverageSubject, CurrentRunState } from './types';
+import type { ReportHuntContext } from './load_report_hunt_context';
+import { selectCoverageBehavior, toCoverageBehaviors } from './select_coverage_behavior';
+import type {
+  CoordinatorInputs,
+  CoverageBehavior,
+  CoverageSubject,
+  CurrentRunFinding,
+  CurrentRunState,
+} from './types';
 
 /**
- * The slice of `CurrentRunState` this needs. Narrowed (rather than the full state) so a run
- * with no current-run SSE at all -- a real clean run -- can still derive a report-scoped
- * subject without fabricating fields it has no data for. `corroboratedTechniques` defaults to
- * empty for that same caller: a run with no SSE at all corroborated nothing.
+ * The slice of `CurrentRunState` this needs, plus what the caller resolved before the call.
+ * Narrowed (rather than the full state) so a run with no current-run SSE at all -- a real
+ * clean run -- can still derive subjects without fabricating fields it has no data for.
+ * `findings` and `corroboratedTechniques` default to empty for that same caller: a run with no
+ * SSE at all corroborated nothing.
  *
- * `threatSummary`, `dataSources`, `severity`, and `investigationSummary` are resolved by the
- * caller before this call (SSE-sourced on hit, report-sourced with SSE fallback on no-hit; see
- * `run_package_report.ts`), so this function stays pure and run-scoped: the same resolved
- * values apply to every subject this run derives, there is no per-technique source rule.
+ * `severity` and `investigationSummary` are resolved by the caller (SSE-sourced on a hit,
+ * report-sourced on a clean run; see `run_package_report.ts`) and apply to every subject the
+ * run derives, so this function stays pure and run-scoped.
  */
 export type CoverageSubjectState = Pick<
   CurrentRunState,
   'reportId' | 'techniques' | 'hasConfirmedHit' | 'corroboratedTechniques'
 > &
-  Partial<Pick<CurrentRunState, 'dataSources' | 'severity'>> & {
-    threatSummary?: string;
+  Partial<Pick<CurrentRunState, 'findings' | 'techniqueNames' | 'window' | 'severity'>> & {
     investigationSummary?: string;
+    /** The coordinator result packaging was handed; the only source on a run with no SSE. */
+    coordinator?: CoordinatorInputs;
+    reportContext?: ReportHuntContext;
   };
 
+/** The finding a subject is about: the one that corroborated its technique, else the report-scoped one. */
+const pickFinding = (
+  findings: CurrentRunFinding[],
+  techniqueId: string | undefined
+): CurrentRunFinding | undefined =>
+  techniqueId === undefined
+    ? findings.find((finding) => finding.corroboratedTechniqueId === undefined) ?? findings[0]
+    : findings.find((finding) => finding.corroboratedTechniqueId === techniqueId);
+
+/** Source event indices attributed to a technique, or the report-scoped finding's whole hit set. */
+const hitIndices = ({
+  findings,
+  finding,
+  techniqueId,
+}: {
+  findings: CurrentRunFinding[];
+  finding: CurrentRunFinding;
+  techniqueId: string | undefined;
+}): string[] =>
+  techniqueId === undefined
+    ? [...finding.eventRefs.map((ref) => ref.index), ...finding.tier1Indices]
+    : findings.flatMap((candidate) =>
+        candidate.eventRefs
+          .filter(
+            (ref) =>
+              ref.techniqueId === techniqueId ||
+              (ref.techniqueId === undefined && candidate.corroboratedTechniqueId === techniqueId)
+          )
+          .map((ref) => ref.index)
+      );
+
 /**
- * One coverage subject per technique on the current run; report-scoped when the
- * run named no techniques. Written for every swept report (hit or clean).
+ * One coverage subject per technique on the current run; report-scoped when the run named no
+ * techniques. Written for every swept report (hit or clean).
  *
- * A technique only claims a confirmed hit when it is in `state.corroboratedTechniques`:
- * a technique merely proposed (named on the report-scoped fallback entry's indicator
- * list, never individually corroborated) reads as an uneventful sweep instead, even
- * when `state.hasConfirmedHit` is true for the report as a whole.
+ * A technique only claims a confirmed hit when it is in `state.corroboratedTechniques`: a
+ * technique merely proposed (named on the report-scoped fallback entry's indicator list, never
+ * individually corroborated) reads as an uneventful sweep instead, even when
+ * `state.hasConfirmedHit` is true for the report as a whole.
  */
 export const deriveCoverageSubjects = ({
   spaceId,
@@ -46,31 +100,102 @@ export const deriveCoverageSubjects = ({
   state: CoverageSubjectState;
   investigationConversationId: string;
 }): CoverageSubject[] => {
+  const findings = state.findings ?? [];
+  const behaviors: CoverageBehavior[] = state.coordinator?.behaviors
+    ? toCoverageBehaviors(state.coordinator.behaviors)
+    : findings.flatMap((finding) => finding.behaviors);
+  const tier2Targets =
+    state.coordinator?.tier2Targets ?? findings.flatMap((finding) => finding.tier2Targets);
+  const actionableIndices =
+    state.coordinator?.actionableIndices ??
+    findings.flatMap((finding) => finding.actionableIndices);
   const techniqueIds = state.techniques.length > 0 ? [...new Set(state.techniques)] : [undefined];
 
   return techniqueIds.map((techniqueId) => {
-    const kiId = buildCoverageKiId({
-      spaceId,
-      reportId: state.reportId,
-      techniqueId,
-    });
-    const techniqueLabel = techniqueId ?? 'report';
+    const kiId = buildCoverageKiId({ spaceId, reportId: state.reportId, techniqueId });
     const confirmedHitForSubject =
       techniqueId !== undefined
         ? state.corroboratedTechniques.includes(techniqueId)
         : state.hasConfirmedHit;
+    const finding = confirmedHitForSubject ? pickFinding(findings, techniqueId) : undefined;
+
+    const selectedEsql = selectCoverageBehavior({ behaviors, techniqueId });
+    const techniqueName =
+      selectedEsql.behavior?.techniqueName ??
+      (techniqueId ? state.techniqueNames?.[techniqueId] : undefined);
+    const executedCount =
+      techniqueId === undefined
+        ? behaviors.length
+        : behaviors.filter((behavior) => behavior.techniqueId === techniqueId).length;
+
+    const eventSources = finding
+      ? eventDataSources(hitIndices({ findings, finding, techniqueId }))
+      : [];
+    const reportIntent =
+      eventSources.length > 0
+        ? []
+        : reportIntentDataSources({ tier2Targets, actionableIndices, behaviors });
+    const dataSources =
+      eventSources.length > 0
+        ? eventSources
+        : reportIntent.length > 0
+        ? reportIntent
+        : vendorFallbackDataSources({
+            vendor: state.reportContext?.vendor,
+            product: state.reportContext?.product,
+          });
+
+    const hypothesis = finding?.hypothesis;
+    const evidenceQuote = selectedEsql.behavior?.evidenceQuote;
+    const threatSummary = buildThreatSummary({
+      hasConfirmedHit: confirmedHitForSubject && finding !== undefined,
+      hypothesis,
+      evidenceQuote,
+      report: state.reportContext,
+      techniqueIds: techniqueId ? [techniqueId] : [],
+      fallbackTitle: finding ? stripFindingTitle(finding.title) : undefined,
+    });
+
+    const phrase = finding
+      ? findingPhrase({
+          sseTitle: finding.title,
+          hypothesis: hypothesis ?? evidenceQuote,
+          techniqueId,
+          techniqueName,
+        })
+      : state.reportContext?.title ?? 'Threat report with no environment hit';
+
+    const needsReportBody =
+      !confirmedHitForSubject || finding === undefined || hypothesis === undefined;
+
     return {
       kiId,
       reportId: state.reportId,
       technique: techniqueId,
       investigationConversationId,
-      title: `Coverage: ${techniqueLabel} (${state.reportId})`,
-      description: `Coverage subject ${techniqueLabel} swept by Hunt Watch. Investigation ${investigationConversationId}.`,
-      content: confirmedHitForSubject
-        ? `Hunt confirmed a hit for ${techniqueLabel} on report ${state.reportId}.`
-        : `Hunt swept ${techniqueLabel} on report ${state.reportId} with no confirmed hit.`,
-      threatSummary: state.threatSummary,
-      dataSources: state.dataSources ?? [],
+      title: buildCoverageTitle({ techniqueId, techniqueName, phrase }),
+      description: buildCoverageDescription({
+        hasConfirmedHit: confirmedHitForSubject,
+        techniqueId,
+        techniqueName,
+      }),
+      content: buildCoverageContent({
+        threatSummary,
+        techniqueId,
+        techniqueName,
+        dataSources,
+        severity: state.severity,
+        selectedEsql,
+        executedCount,
+        window: state.window,
+        evidenceLines: finding?.evidenceLines ?? [],
+        reportExcerpt: needsReportBody ? state.reportContext?.bodyText : undefined,
+      }),
+      threatSummary,
+      dataSources,
+      ...(selectedEsql.validatedEsql
+        ? { validatedEsql: selectedEsql.validatedEsql, esqlStatus: selectedEsql.esqlStatus }
+        : {}),
       severity: state.severity,
       investigationSummary: state.investigationSummary,
       hasConfirmedHit: confirmedHitForSubject,

@@ -6,7 +6,8 @@
  */
 
 /**
- * Reads a thin slice of the threat report (title, severity) for the coverage KI's no-hit
+ * Reads a slice of the threat report (title, severity, extracted techniques / IOCs /
+ * vendor / product, body text) for the coverage KI's prose and no-hit
  * `threat_summary` / severity preference. Queries `.kibana-threat-reports*` directly, the same
  * self-contained style `write_coverage_kis.ts` uses for the coverage index, rather than depending
  * on `security_solution`'s threat_intel service: that service's `getThreatReport` is not exposed
@@ -26,9 +27,25 @@ const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
 /** Mirrors `security_solution`'s `GLOBAL_SPACE_ID` sentinel for seeded/global reports. */
 const GLOBAL_SPACE_ID = '*' as const;
 
+/** Most extracted IOCs the loader hands back; callers cap further for display. */
+const MAX_LOADED_IOCS = 50;
+
+export interface ReportIoc {
+  type: string;
+  value: string;
+}
+
 export interface ReportHuntContext {
   title?: string;
   severity?: string;
+  /** `extracted.ttps.techniques` ids, as stored. */
+  techniques?: string[];
+  /** `extracted.iocs` with a type and a value, capped at {@link MAX_LOADED_IOCS}. */
+  iocs?: ReportIoc[];
+  vendor?: string;
+  product?: string;
+  /** Full `content.body_text`; callers slice it for the field they fill. */
+  bodyText?: string;
 }
 
 /** The slice of the ES client this loader uses. */
@@ -39,6 +56,28 @@ export interface EsReportContextClient {
     query: Record<string, unknown>;
   }) => Promise<{ hits: { hits: Array<{ _source?: Record<string, unknown> }> } }>;
 }
+
+const asNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+
+const asStringArray = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+
+const asIocs = (value: unknown): ReportIoc[] =>
+  Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is ReportIoc =>
+            typeof item?.type === 'string' &&
+            item.type.length > 0 &&
+            typeof item?.value === 'string' &&
+            item.value.length > 0
+        )
+        .slice(0, MAX_LOADED_IOCS)
+        .map(({ type, value: iocValue }) => ({ type, value: iocValue }))
+    : [];
 
 /**
  * Best-effort threat report load for the no-hit coverage subject path. Never throws: a report
@@ -79,10 +118,31 @@ export const loadReportHuntContext = async ({
     const severityField = source.severity as Record<string, unknown> | undefined;
     const title = typeof content?.title === 'string' ? content.title : undefined;
     const severity = typeof severityField?.level === 'string' ? severityField.level : undefined;
-    if (title === undefined && severity === undefined) {
+    const bodyText =
+      typeof content?.body_text === 'string' && content.body_text.trim().length > 0
+        ? content.body_text
+        : undefined;
+
+    const extracted = source.extracted as Record<string, unknown> | undefined;
+    const ttps = extracted?.ttps as Record<string, unknown> | undefined;
+    const techniques = asStringArray(ttps?.techniques);
+    const iocs = asIocs(extracted?.iocs);
+    const vulnerability = extracted?.vulnerability as Record<string, unknown> | undefined;
+    const vendor = asNonEmptyString(vulnerability?.vendor);
+    const product = asNonEmptyString(vulnerability?.product);
+
+    if (title === undefined && severity === undefined && bodyText === undefined) {
       return undefined;
     }
-    return { title, severity };
+    return {
+      title,
+      severity,
+      ...(techniques.length > 0 ? { techniques } : {}),
+      ...(iocs.length > 0 ? { iocs } : {}),
+      ...(vendor ? { vendor } : {}),
+      ...(product ? { product } : {}),
+      ...(bodyText ? { bodyText } : {}),
+    };
   } catch {
     return undefined;
   }
