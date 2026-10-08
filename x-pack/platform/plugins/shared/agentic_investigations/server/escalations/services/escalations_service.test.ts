@@ -1423,6 +1423,17 @@ describe('EscalationsService.sync', () => {
     );
   });
 
+  it('copies a replacement attachment even when the counts match', async () => {
+    const { service, attachmentsClient } = setup({
+      escalation: makeEscalation({ attachmentIds: ['inv-1:att-1'] }),
+      summary: makeSummary({ attachmentIds: ['att-2'] }),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 1, failed: 0 });
+    const { attachments } = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(attachments.map((a: { id: string }) => a.id)).toEqual(['inv-1:att-2']);
+  });
+
   it('does nothing when the escalation is up to date', async () => {
     const { service, client, attachmentsClient } = setup({
       escalation: makeEscalation({ attachmentIds: ['inv-1:att-1'] }),

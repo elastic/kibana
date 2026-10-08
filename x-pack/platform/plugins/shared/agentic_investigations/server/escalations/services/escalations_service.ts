@@ -63,6 +63,7 @@ import { filterMetadataToTemplateFields } from './filter_template_metadata';
 import {
   copyInvestigationAttachments,
   isCopyableAttachment,
+  toCopiedAttachmentId,
 } from './copy_investigation_attachments';
 
 /** Agent Builder rejects `addEvents` calls with more events than this. */
@@ -375,11 +376,11 @@ export class EscalationsService {
    * Brings the escalation's attachments up to date with its linked investigations.
    *
    * An investigation needs syncing when it changed after the escalation (`updated_at`) or when
-   * the escalation holds fewer of its copies than it has copyable attachments. The count catches
-   * what the timestamp can miss: escalation edits (assignees, status) also advance the
-   * escalation's `updated_at`. Copied ids are `${investigationId}:${attachmentId}`, so the
-   * per-investigation count is read off the id prefix. Changes to attachments that were already
-   * copied are not propagated.
+   * one of its copyable attachments has no copy in the escalation yet. The id check catches what
+   * the timestamp can miss: escalation edits (assignees, status) also advance the escalation's
+   * `updated_at`. Copies are stored as `${investigationId}:${attachmentId}`. Ids rather than
+   * counts, so a replaced attachment is noticed even when the totals match. Changes to
+   * attachments that were already copied are not propagated.
    *
    * Linked investigations the user cannot access are skipped. Like `addAttachments` it is
    * idempotent and never throws for individual attachment failures.
@@ -400,14 +401,6 @@ export class EscalationsService {
 
     // Includes inactive attachments so a copy the user removed is not written again.
     const existingIds = new Set((escalation.attachments ?? []).map((att) => att.id));
-    const copiedCounts = new Map<string, number>();
-    for (const id of existingIds) {
-      const separator = id.indexOf(':');
-      if (separator > 0) {
-        const investigationId = id.slice(0, separator);
-        copiedCounts.set(investigationId, (copiedCounts.get(investigationId) ?? 0) + 1);
-      }
-    }
 
     // `bulkGet` omits inaccessible / non-existent ids and returns attachment summaries (id and
     // type), which is all the checks below need.
@@ -416,10 +409,11 @@ export class EscalationsService {
     const staleIds = linkedIds.filter((id) => {
       const investigation = resolved.get(id);
       if (!investigation || investigation.template_id !== INVESTIGATION_TEMPLATE_ID) return false;
-      const sourceCount = (investigation.attachments ?? []).filter(isCopyableAttachment).length;
       return (
         Date.parse(investigation.updated_at) > escalationUpdatedAt ||
-        (copiedCounts.get(id) ?? 0) < sourceCount
+        (investigation.attachments ?? []).some(
+          (att) => isCopyableAttachment(att) && !existingIds.has(toCopiedAttachmentId(id, att.id))
+        )
       );
     });
 
