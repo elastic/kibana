@@ -128,12 +128,17 @@ export {
   listEscalationsQuerySchema,
 } from './escalations';
 
+// Only what a browser consumer of the query API needs: every value exported here lands in the
+// page load bundle. The query API's bounds and the tool id stay in `investigations/constants`.
 export {
   INVESTIGATION_ASSIGN_URL,
+  INVESTIGATION_BY_ID_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
+  INVESTIGATION_SEVERITIES,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
+  INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
@@ -141,6 +146,31 @@ export type {
   InvestigationsPrivilegesResponse,
   ReadManagePrivileges,
 } from './investigations/privileges';
+
+export { isInvestigationTitlePending } from './investigations/title';
+
+// Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
+// barrel so the page load bundle does not carry them.
+export type {
+  Investigation,
+  InvestigationFilters,
+  InvestigationFiltersInput,
+  InvestigationHypothesesResponse,
+  InvestigationImpactEntityResponse,
+  InvestigationImpactResponse,
+  InvestigationMetadata,
+  InvestigationMetadataStatus,
+  InvestigationProposalSummary,
+  InvestigationSeverity,
+  InvestigationSeverityCounts,
+  InvestigationSeverityFilterValue,
+  InvestigationsSortField,
+  InvestigationSubjectResponse,
+  InvestigationSummary,
+  ListInvestigationsQuery,
+  ListInvestigationsQueryInput,
+  ListInvestigationsResponse,
+} from './investigations/investigation';
 
 export {
   setInvestigationStatusRequestSchema,

@@ -19,6 +19,7 @@ import {
   OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput, type StructuredOutputResult } from './structured_output';
 
 const VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 type DiamondVertex = (typeof VERTICES)[number];
@@ -276,16 +277,6 @@ const countNonNone = (output: DiamondLlmOutput): number =>
 const NONE_VERTEX: DiamondVertexResult = { signal: 'NONE', summary: '' };
 
 /**
- * The `{ raw, parsed }` shape LangChain returns from
- * `withStructuredOutput(..., { includeRaw: true })`. At module scope so the
- * per-vertex fallback below can reference the same type and tests/tooling can see it.
- */
-interface RawResult<T> {
-  raw: { response_metadata: Record<string, unknown> };
-  parsed: T;
-}
-
-/**
  * Extract Diamond Model fields from a threat report using a single heavy LLM
  * call. On context-overflow or parse failure, falls back to four individual
  * per-vertex calls on the same model (`per_vertex_fallback`). Per-vertex
@@ -311,22 +302,20 @@ export const extractDiamond = async (
   });
   let context = fullArticleContext(text);
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText truncation actually
-  // runs. A parse failure here is caught below and triggers the per-vertex
-  // fallback, same as any other single-call failure.
-  const invokeSingleCall = async (promptText: string): Promise<RawResult<DiamondLlmOutput>> => {
+  const invokeSingleCall = async (
+    promptText: string
+  ): Promise<StructuredOutputResult<DiamondLlmOutput>> => {
     const invoked = (await structured.invoke(
       buildSingleCallPrompt(promptText)
-    )) as RawResult<unknown>;
-    return { raw: invoked.raw, parsed: extractDiamondLlmOutputSchema.parse(invoked.parsed) };
+    )) as StructuredOutputResult<DiamondLlmOutput | null>;
+    return requireParsedStructuredOutput(invoked, 'extract_diamond single call');
   };
 
   // Single heavy call — first with the complete source. Only a confirmed context
   // overflow switches to evenly distributed verbatim windows.
   try {
     const t0 = Date.now();
-    let result: RawResult<DiamondLlmOutput>;
+    let result: StructuredOutputResult<DiamondLlmOutput>;
     try {
       result = await invokeSingleCall(context.text);
     } catch (error) {
@@ -398,11 +387,11 @@ export const extractDiamond = async (
   const invokeVertex = async (
     vertex: DiamondVertex,
     promptText: string
-  ): Promise<RawResult<DiamondVertexResult>> => {
+  ): Promise<StructuredOutputResult<DiamondVertexResult>> => {
     const invoked = (await vertexStructured.invoke(
       buildVertexPrompt(vertex, promptText)
-    )) as RawResult<unknown>;
-    return { raw: invoked.raw, parsed: diamondVertexSchema.parse(invoked.parsed) };
+    )) as StructuredOutputResult<DiamondVertexResult | null>;
+    return requireParsedStructuredOutput(invoked, `extract_diamond ${vertex}`);
   };
   const vertices: Record<DiamondVertex, DiamondVertexResult> = {
     adversary: NONE_VERTEX,
