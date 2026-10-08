@@ -59,6 +59,8 @@ export const getEsqlDocumentCountStats = async ({
     esqlQuery: buildEsqlDocumentCountQuery({ esql, timeFieldName, intervalMs }),
     search,
     signal,
+    // Binds ?_tstart / ?_tend if the user's query references them.
+    timeRange: { from: new Date(earliest).toISOString(), to: new Date(latest).toISOString() },
     filter: {
       bool: {
         filter: [

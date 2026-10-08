@@ -219,7 +219,11 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       from: earliest,
       to: latest,
     };
-    const esTimeRange = timefilter.getTime();
+    // Use the same bounds as the histogram so ?_tstart / ?_tend match earliest / latest.
+    const esTimeRange = {
+      from: new Date(earliest).toISOString(),
+      to: new Date(latest).toISOString(),
+    };
     const timeFilter = {
       bool: {
         filter: [
@@ -341,7 +345,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     isEsqlQuery,
     query,
     search.search,
-    timefilter,
   ]);
 
   useEffect(() => {

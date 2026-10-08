@@ -53,6 +53,11 @@ describe('get_esql_document_stats', () => {
       intervalMs: HALF_HOUR,
     });
 
+    expect(getESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: { from: '2024-01-01T10:12:00.000Z', to: '2024-01-01T11:20:00.000Z' },
+      })
+    );
     expect(totalCount).toBe(11);
     expect(documentCountStats.buckets).toEqual({
       [Date.parse('2024-01-01T10:00:00.000Z')]: 4,
