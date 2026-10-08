@@ -7,11 +7,12 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../new_entities_table';
+// The query module, not the table index: the index also loads the grid components.
 import {
   ANOMALY_RECORD_FILTER,
   ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
-} from '../../new_entities_table';
+} from '../../new_entities_table/common';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
