@@ -19,6 +19,9 @@ import {
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
   PROPOSE_STEP_ID,
+  INFERENCE_SETTINGS_API_VERSION,
+  INFERENCE_SETTINGS_ROUTE,
+  RULE_CREATION_INFERENCE_FEATURE_ID,
 } from './constants';
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
@@ -62,11 +65,6 @@ export const ensureJudgeConnectorAccessible = async ({
  * truth — this pins the contract the suite depends on so renaming a step in the yaml fails setup
  * here instead of surfacing as opaque timeouts in every downstream lookup.
  */
-/**
- * Prompt clauses the scored evaluators depend on. Kept as loose patterns: this asserts the
- * behaviour contract is present, not the exact wording (the wording itself is pinned by
- * workflow_contract.test.ts against the checked-in definition).
- */
 export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID] as const;
 
 /**
@@ -75,7 +73,7 @@ export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID] as const;
  * line moves the cursor to that top-level key, so `- name:` items under `outputs:` or
  * `triggers:` are never collected.
  */
-const parseStepNames = (yaml: string): string[] => {
+export const parseStepNames = (yaml: string): string[] => {
   const names: string[] = [];
   let inSteps = false;
   for (const line of yaml.split('\n')) {
@@ -145,4 +143,80 @@ export const assertWorkflowInstalled = async ({
   }
 
   return workflow;
+};
+
+interface InferenceFeatureSetting {
+  feature_id: string;
+  endpoints: Array<{ id: string }>;
+}
+
+/** Replaces one feature's endpoint pick and keeps every other feature's pick as it was. */
+export const mergeFeatureOverride = (
+  features: readonly InferenceFeatureSetting[],
+  featureId: string,
+  endpointId: string
+): InferenceFeatureSetting[] => [
+  ...features.filter(({ feature_id: id }) => id !== featureId),
+  { feature_id: featureId, endpoints: [{ id: endpointId }] },
+];
+
+/**
+ * Points the workflow's `ai.agent` step at the model under test.
+ *
+ * The step resolves its connector with `connector-id-by-feature: alertzero_reasoning`, not from
+ * the eval connector. Without this, every cell of a multi-model run drafts on the stack's default
+ * model and its scores are attributed to the wrong model. Returns a restore callback. The PUT
+ * replaces the whole settings object, so this reads, merges and writes.
+ */
+export const bindModelUnderTest = async ({
+  fetch,
+  connector,
+  log,
+}: {
+  fetch: HttpHandler;
+  connector: EvalConnector;
+  log: ToolingLog;
+}): Promise<() => Promise<void>> => {
+  const headers = { 'elastic-api-version': INFERENCE_SETTINGS_API_VERSION };
+  const write = (features: readonly InferenceFeatureSetting[]) =>
+    fetch(INFERENCE_SETTINGS_ROUTE, {
+      method: 'PUT',
+      version: INFERENCE_SETTINGS_API_VERSION,
+      headers,
+      body: JSON.stringify({ features }),
+    });
+
+  const { data } = await fetch<{ data: { features: InferenceFeatureSetting[] } }>(
+    INFERENCE_SETTINGS_ROUTE,
+    { method: 'GET', version: INFERENCE_SETTINGS_API_VERSION, headers }
+  );
+  const previous = data.features;
+  log.info(
+    `Binding ${RULE_CREATION_INFERENCE_FEATURE_ID} to the model under test: ${connector.id}`
+  );
+  await write(mergeFeatureOverride(previous, RULE_CREATION_INFERENCE_FEATURE_ID, connector.id));
+  return async () => {
+    await write(previous);
+  };
+};
+
+/**
+ * Fails the run when the draft step did not run on the model under test. The step reports its
+ * connector in `output.metadata.usage.connectorId`. A mismatch means the feature binding did not
+ * take, and every score in the run belongs to a different model.
+ */
+export const assertDraftRanOnModel = ({
+  connectorId,
+  expected,
+}: {
+  connectorId: string | undefined;
+  expected: string;
+}): void => {
+  if (connectorId !== expected) {
+    throw new Error(
+      `draft_creation ran on connector "${connectorId ?? 'unknown'}", not the model under test ` +
+        `"${expected}". The ${RULE_CREATION_INFERENCE_FEATURE_ID} feature binding did not take, so ` +
+        `scores would be attributed to the wrong model.`
+    );
+  }
 };

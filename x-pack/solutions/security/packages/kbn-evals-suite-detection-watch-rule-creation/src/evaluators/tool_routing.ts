@@ -8,6 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { toHashedId } from '@kbn/agent-builder-server';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
@@ -56,7 +57,12 @@ export const extractConversationId = (
   return typeof id === 'string' ? id : undefined;
 };
 
-/** Join clauses tried, in order, to reach a run's agent tool spans. */
+/**
+ * Join clauses tried, in order, to reach a run's agent tool spans.
+ *
+ * Agent Builder exports `gen_ai.conversation.id` hashed unless `agentBuilder:tracing:includeRealIds`
+ * is on (default off), while the step output carries the real id, so both forms are matched.
+ */
 export const toolSpanJoinClauses = ({
   traceId,
   conversationId,
@@ -69,7 +75,9 @@ export const toolSpanJoinClauses = ({
     ? [
         {
           name: 'gen_ai.conversation.id',
-          where: `attributes.gen_ai.conversation.id == "${conversationId}"`,
+          where: `attributes.gen_ai.conversation.id IN ("${conversationId}", "${toHashedId(
+            conversationId
+          )}")`,
         },
       ]
     : []),

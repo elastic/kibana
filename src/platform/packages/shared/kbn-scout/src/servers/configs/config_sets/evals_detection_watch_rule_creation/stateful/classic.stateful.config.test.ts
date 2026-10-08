@@ -46,6 +46,10 @@ describe('evals_detection_watch_rule_creation config set', () => {
         'required plugin of alertzero, defaults false; dropping it cascade-disables alertzero',
       ],
       [
+        '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',
+        'registers the security.rule attachment the workflow\'s attach_draft step writes',
+      ],
+      [
         '--uiSettings.overrides.workflows:ui:enabled=true',
         'the rule-creation workflow is not runnable without the Workflows UI',
       ],

@@ -14,12 +14,25 @@ import { assertToolSpansReachable } from '../src/evaluators/tool_routing';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
 import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
-import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
+import {
+  assertDraftRanOnModel,
+  assertWorkflowInstalled,
+  bindModelUnderTest,
+  ensureJudgeConnectorAccessible,
+} from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 import { canaryDataset } from '../datasets/canary';
 
 evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.complete }, () => {
+  let restoreModelBinding: (() => Promise<void>) | undefined;
+
+  evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
+    await restoreModelBinding?.().catch((error: Error) =>
+      log.warning(`Could not restore inference feature settings: ${error.message}`)
+    );
+  });
+
   evaluate.beforeAll(
     async ({
       fetch,
@@ -36,17 +49,16 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
     }) => {
       await ensureJudgeConnectorAccessible({ fetch, connector, log });
       await assertWorkflowInstalled({ fetch, log });
+      restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
 
       // Trace reachability assertion. A run whose executions carry no traceId — or whose
       // agent tool spans never reach the tracing cluster — silently degrades every
       // trace-based evaluator (Tool Routing, Trajectory: *) to N/A, and N/A is not a failure, so the suite
       // would still report a pass. Probe once here and fail setup loudly instead.
       //
-      // The probe input must be WINNABLE: the managed workflow's quality gate refuses
-      // catch-all gaps and confidence < 0.3 (see rule_creation.yaml), so a deliberately
-      // vague probe would be correctly declined, produce no agent turn, and prove nothing
-      // about tracing. Verified 2026-08-31: the earlier low-confidence probe passed on an
-      // execution that produced no rule at all.
+      // The probe input must be WINNABLE: a vague probe can be correctly declined, produce no
+      // tool call, and prove nothing about tracing. Verified 2026-08-31: an earlier
+      // low-confidence probe passed on an execution that produced no rule at all.
       const probe = await ruleCreationClient.run({
         input: {
           technique: 'T1078.001',
@@ -57,6 +69,8 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
           confidence: 0.9,
         },
       });
+      // Every score below is attributed to `connector`; prove the draft ran on it.
+      assertDraftRanOnModel({ connectorId: probe.connectorId, expected: connector.id });
       if (!probe.traceId) {
         throw new Error(
           'Workflow execution carried no traceId — trace-based evaluators (Tool Routing, Trajectory: *) would ' +

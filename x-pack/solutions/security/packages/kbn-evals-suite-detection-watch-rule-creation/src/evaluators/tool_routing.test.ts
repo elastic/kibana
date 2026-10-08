@@ -88,6 +88,18 @@ describe('toolSpanJoinClauses', () => {
     expect(toolSpanJoinClauses({ conversationId: 'c' })).toHaveLength(1);
     expect(toolSpanJoinClauses({})).toHaveLength(0);
   });
+
+  it('matches the conversation id both raw and in the hashed form spans are exported with', () => {
+    // Agent Builder hashes gen_ai.conversation.id on export unless
+    // agentBuilder:tracing:includeRealIds is on. The hash is hardcoded (sha256, first 16 hex)
+    // so this fails if the join stops hashing, rather than agreeing with whatever it computes.
+    const [clause] = toolSpanJoinClauses({
+      conversationId: '3f2b9a10-1111-4c2d-9e8f-0123456789ab',
+    });
+    expect(clause.where).toBe(
+      'attributes.gen_ai.conversation.id IN ("3f2b9a10-1111-4c2d-9e8f-0123456789ab", "6eef11fb8dd0b621")'
+    );
+  });
 });
 
 describe('createToolRoutingEvaluator', () => {

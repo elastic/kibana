@@ -24,16 +24,29 @@ export { ALERTZERO_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from
  */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
-/**
- * Public Agent Builder API version (`Elastic-Api-Version` header), used to create the
- * investigation conversation the workflow records its proposal on.
- */
-export const AGENT_BUILDER_API_VERSION = '2023-10-31';
-
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
-/** The step that hands the draft to the proposal gate and parks until an analyst decides. */
+/**
+ * The step that raises the draft as a proposal on the investigation and parks on the analyst's
+ * decision. It replaced the inline `review_creation` approval gate: the decision is now taken
+ * through the proposals API, not the inbox respond route.
+ */
 export const PROPOSE_STEP_ID = 'propose_creation';
+
+/** Workflow input naming the investigation the proposal is recorded on. Required by the workflow. */
+export const INVESTIGATION_INPUT = 'investigation_id';
+
+/**
+ * Inference feature the workflow's `ai.agent` step resolves its connector from
+ * (`connector-id-by-feature`). Inlined to match ALERTZERO_REASONING_INFERENCE_FEATURE_ID in
+ * @kbn/alertzero-common, which a test package cannot depend on.
+ */
+export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
+export const INFERENCE_SETTINGS_API_VERSION = '1';
+
+/** Agent Builder public API version, for creating the investigation conversation. */
+export const AGENT_BUILDER_API_VERSION = '2023-10-31';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Consumed by the

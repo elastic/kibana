@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { EvalConnector } from '@kbn/evals';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
-import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
+import type { RuleCreationClient, RuleCreationResult } from '../src/rule_creation_client';
+import {
+  assertDraftRanOnModel,
+  assertWorkflowInstalled,
+  bindModelUnderTest,
+  ensureJudgeConnectorAccessible,
+} from '../src/workflow_fixture';
 
 const WORKFLOW_INPUT = {
   technique: 'T1078.001',
@@ -36,8 +36,8 @@ const escapeKqlPhrase = (value: string): string => value.replace(/([\\"])/g, '\\
 const findRuleByName = async (
   fetch: HttpHandler,
   ruleName: string
-): Promise<{ id: string; name: string } | undefined> => {
-  const { data } = await fetch<{ data: Array<{ id: string; name: string }> }>(
+): Promise<{ id: string; name: string; enabled: boolean } | undefined> => {
+  const { data } = await fetch<{ data: Array<{ id: string; name: string; enabled: boolean }> }>(
     `/api/detection_engine/rules/_find`,
     {
       method: 'GET',
@@ -55,25 +55,38 @@ const deleteRule = async (fetch: HttpHandler, id: string): Promise<void> => {
 };
 
 /**
- * Deletes every rule this spec created (approved runs only). Runs after each test
- * regardless of outcome, so a failure in the approve test cannot leak state into
- * the reject test's non-existence assertion. Errors are logged, not thrown —
- * cleanup must never mask the original failure.
+ * Runs the workflow up to the proposal gate and fails with the reason it did not get there.
+ * WORKFLOW_INPUT is a winnable gap, so a run that never proposes is a real failure: either the
+ * agent declined it (over-refusal), or a step between the draft and the gate broke.
  */
-const sweepCreatedRules = async (
-  fetch: HttpHandler,
-  log: ToolingLog,
-  createdRuleIds: Set<string>
-): Promise<void> => {
-  for (const id of createdRuleIds) {
-    try {
-      await deleteRule(fetch, id);
-      log.info(`Swept rule ${id}`);
-    } catch (err) {
-      log.error(`Failed to sweep rule ${id}: ${err instanceof Error ? err.message : String(err)}`);
+const runToProposal = async ({
+  ruleCreationClient,
+  connector,
+  onRuleName,
+}: {
+  ruleCreationClient: RuleCreationClient;
+  connector: EvalConnector;
+  onRuleName: (name: string | undefined) => void;
+}): Promise<RuleCreationResult & { proposalId: string }> => {
+  const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
+  // Capture the name before deciding: if the decision throws or the test fails
+  // mid-flight, afterEach still knows what to sweep by name.
+  onRuleName(result.rule?.name);
+  assertDraftRanOnModel({ connectorId: result.connectorId, expected: connector.id });
+
+  if (!result.pendingApproval || !result.proposalId) {
+    if (result.skipped) {
+      throw new Error(
+        `The agent declined a winnable gap (${result.skipReason}) so the workflow never ` +
+          `proposed a rule — the draft step is over-refusing.`
+      );
     }
+    throw new Error(
+      `Execution ${result.workflowExecutionId} did not reach the proposal gate ` +
+        `(status: ${result.status}, rule drafted: ${Boolean(result.rule)})`
+    );
   }
-  createdRuleIds.clear();
+  return { ...result, proposalId: result.proposalId };
 };
 
 evaluate.describe(
@@ -83,15 +96,21 @@ evaluate.describe(
     // Rules created by an approved run outlive the test that created them. Inline
     // cleanup only runs on success — a leaked rule from a failed approve test
     // false-fails the reject test's non-existence assertion. afterEach cancels
-    // any still-running execution first (a paused workflow that resumes after the
-    // test body threw can still create a rule mid-sweep), then sweeps on every
-    // path, including assertion failure and timeout.
+    // any still-running execution first (a parked run that resumes after the test
+    // body threw can still create a rule mid-sweep), then sweeps on every path,
+    // including assertion failure and timeout.
     const createdRuleIds = new Set<string>();
     let createdRuleName: string | undefined;
+    let restoreModelBinding: (() => Promise<void>) | undefined;
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
       await ruleCreationClient.cancelPending();
-      await sweepCreatedRules(fetch, log, createdRuleIds);
+      for (const id of createdRuleIds) {
+        await deleteRule(fetch, id).catch((err: Error) =>
+          log.error(`Failed to sweep rule ${id}: ${err.message}`)
+        );
+      }
+      createdRuleIds.clear();
       if (createdRuleName) {
         const name = createdRuleName;
         createdRuleName = undefined;
@@ -111,6 +130,12 @@ evaluate.describe(
       }
     });
 
+    evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
+      await restoreModelBinding?.().catch((error: Error) =>
+        log.warning(`Could not restore inference feature settings: ${error.message}`)
+      );
+    });
+
     evaluate.beforeAll(
       async ({
         fetch,
@@ -123,32 +148,26 @@ evaluate.describe(
       }) => {
         await ensureJudgeConnectorAccessible({ fetch, connector, log });
         await assertWorkflowInstalled({ fetch, log });
+        restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
       }
     );
 
     evaluate(
       'rule is saved in the detection engine when the user approves',
-      async ({ ruleCreationClient, fetch, log }) => {
-        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
+      async ({ ruleCreationClient, fetch, log, connector }) => {
+        const result = await runToProposal({
+          ruleCreationClient,
+          connector,
+          onRuleName: (name) => (createdRuleName = name),
+        });
 
-        // Capture the name before the approval response: if respond() throws or the
-        // test fails mid-flight, afterEach still knows what to sweep by name.
-        createdRuleName = result.rule?.name;
-
-        if (!result.proposalId) {
-          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
-          // winnable gap, so a skip here means the quality gate is over-refusing, not that
-          // the approval plumbing broke.
-          if (result.skipped) {
-            throw new Error(
-              `The quality gate declined a winnable gap (${
-                result.skipReason ?? 'no reason given'
-              }) so the workflow never reached the approval gate — the gate is over-refusing.`
-            );
-          }
-          throw new Error(
-            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the approve path`
-          );
+        // Nothing may exist before the analyst decides: the gate, not the draft, creates.
+        const ruleName = result.rule?.name;
+        if (!ruleName) {
+          throw new Error('draft_creation produced no rule name — cannot verify the approve path');
+        }
+        if (await findRuleByName(fetch, ruleName)) {
+          throw new Error(`Rule "${ruleName}" exists before approval — the gate was bypassed`);
         }
 
         const execution = await ruleCreationClient.respond({
@@ -156,15 +175,15 @@ evaluate.describe(
           proposalId: result.proposalId,
           approved: true,
         });
-
         if (execution.status !== ExecutionStatus.COMPLETED) {
           throw new Error(`Workflow did not complete after approval — status: ${execution.status}`);
         }
 
-        const ruleName = result.rule?.name;
-        if (!ruleName) {
+        const proposal = await ruleCreationClient.getProposal(result.proposalId);
+        if (proposal.decision !== 'approved' || proposal.status !== 'succeeded') {
           throw new Error(
-            'draft_creation produced no rule name — the approval path cannot be verified without it'
+            `Proposal ${result.proposalId} settled as decision=${proposal.decision}, ` +
+              `status=${proposal.status} — expected approved/succeeded`
           );
         }
 
@@ -176,63 +195,52 @@ evaluate.describe(
           );
         }
         createdRuleIds.add(rule.id);
-        log.info(`Confirmed rule "${ruleName}" exists — registered for afterEach sweep`);
+        // The create action always creates the rule disabled; enabling is the analyst's call.
+        if (rule.enabled) {
+          throw new Error(`Rule "${ruleName}" was created enabled — the create action must not`);
+        }
+        log.info(`Confirmed rule "${ruleName}" exists, disabled — registered for afterEach sweep`);
       }
     );
 
     evaluate(
       'rule is not created when the user rejects',
-      async ({ ruleCreationClient, fetch, log }) => {
-        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
-
-        // Capture for the same reason as the approve test: afterEach sweeps by name
-        // if this test dies before its own non-existence check completes.
-        createdRuleName = result.rule?.name;
-
-        if (!result.proposalId) {
-          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
-          // winnable gap, so a skip here means the quality gate is over-refusing, not that
-          // the approval plumbing broke.
-          if (result.skipped) {
-            throw new Error(
-              `The quality gate declined a winnable gap (${
-                result.skipReason ?? 'no reason given'
-              }) so the workflow never reached the approval gate — the gate is over-refusing.`
-            );
-          }
-          throw new Error(
-            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the reject path`
-          );
-        }
+      async ({ ruleCreationClient, fetch, log, connector }) => {
+        const result = await runToProposal({
+          ruleCreationClient,
+          connector,
+          onRuleName: (name) => (createdRuleName = name),
+        });
 
         const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
           proposalId: result.proposalId,
           approved: false,
         });
-
-        // create_rule is if-guarded, not a workflow failure: rejection still completes.
+        // A dismissal settles the gate without running the action; the run still completes.
         if (execution.status !== ExecutionStatus.COMPLETED) {
           throw new Error(
             `Workflow did not complete after rejection — status: ${execution.status}`
           );
         }
 
-        const ruleName = result.rule?.name;
-        if (!ruleName) {
-          log.info('No rule name from draft_creation — skipping detection engine check');
-          return;
-        }
-
-        log.info(`Verifying rule "${ruleName}" was NOT created after rejection`);
-
-        const rule = await findRuleByName(fetch, ruleName);
-        if (rule) {
+        const proposal = await ruleCreationClient.getProposal(result.proposalId);
+        if (proposal.decision !== 'dismissed') {
           throw new Error(
-            `Rule "${ruleName}" was found in the detection engine after rejection — create_rule should not have fired`
+            `Proposal ${result.proposalId} settled as decision=${proposal.decision} — expected dismissed`
           );
         }
 
+        const ruleName = result.rule?.name;
+        if (!ruleName) {
+          throw new Error('draft_creation produced no rule name — cannot verify the reject path');
+        }
+        log.info(`Verifying rule "${ruleName}" was NOT created after rejection`);
+        if (await findRuleByName(fetch, ruleName)) {
+          throw new Error(
+            `Rule "${ruleName}" was found in the detection engine after rejection — the create action should not have run`
+          );
+        }
         log.info(`Confirmed rule "${ruleName}" does not exist after rejection`);
       }
     );
