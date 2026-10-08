@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -18,12 +21,13 @@ import { composeIngestToken } from './ingress_credential';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
+import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { mapIngestResultToResponse } from './map_ingest_result_to_response';
 import {
   INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH,
   truncateInboundIngressDetail,
 } from './log_inbound_ingress_outcome';
-import type { RawAction } from '../types';
+import type { InMemoryConnector, RawAction } from '../types';
 import { encodeApiKey } from './event_identity/encode_api_key';
 import type {
   ConnectorEventEmitParams,
@@ -36,10 +40,13 @@ jest.mock('@kbn/connector-specs', () => {
   return {
     ...actual,
     getConnectorSpec: jest.fn(),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
   };
 });
 
-import { getConnectorSpec } from '@kbn/connector-specs';
+import { connectorTypeIsDual, getConnectorSpec } from '@kbn/connector-specs';
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 
@@ -52,6 +59,10 @@ describe('ingestInboundEvent', () => {
     .mockResolvedValue({ ok: true });
   const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
   const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
+  const elasticsearchClient = elasticsearchClientMock.createClusterClient();
+  const getElasticsearchClient = jest.fn().mockResolvedValue(elasticsearchClient);
+  const getKibanaRequestAccess = jest.fn().mockResolvedValue(true);
+  let rateLimiter: InboundEventRateLimiter;
 
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
@@ -119,6 +130,9 @@ describe('ingestInboundEvent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    );
     emitConnectorEvents.mockResolvedValue({ ok: true });
     getDecryptedConnectorAttributes.mockResolvedValue({
       actionTypeId: '.myConnector',
@@ -138,6 +152,12 @@ describe('ingestInboundEvent', () => {
       }
       return mockConnectorGet() as never;
     });
+    rateLimiter = new InboundEventRateLimiter({
+      enabled: false,
+      maxKeys: 10_000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    });
   });
 
   const run = async (overrides?: {
@@ -146,15 +166,20 @@ describe('ingestInboundEvent', () => {
     maxEmitted?: number;
     maxBodyBytes?: number;
     connectorTypeId?: string;
+    connectorId?: string;
     spaceId?: string;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
+    inMemoryConnectors?: InMemoryConnector[];
+    remoteAddress?: string;
+    omitRemoteAddress?: boolean;
+    rateLimiter?: InboundEventRateLimiter;
   }) => {
     const response = httpServerMock.createResponseFactory();
     const result = await ingestInboundEvent({
       connectorTypeId: overrides?.connectorTypeId ?? 'myConnector',
-      connectorId,
+      connectorId: overrides?.connectorId ?? connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
       requestId: 'req-1',
       headers: overrides?.headers ?? {},
@@ -168,7 +193,13 @@ describe('ingestInboundEvent', () => {
       logger,
       getUnsecuredSavedObjectsClient,
       getDecryptedConnectorAttributes,
-      inMemoryConnectors: [],
+      getElasticsearchClient,
+      getKibanaRequestAccess,
+      inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
+      remoteAddress: overrides?.omitRemoteAddress
+        ? undefined
+        : overrides?.remoteAddress ?? '203.0.113.4',
+      rateLimiter: overrides?.rateLimiter ?? rateLimiter,
     });
     mapIngestResultToResponse(result, response);
     return { response, result };
@@ -202,6 +233,229 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
     expectOutcome('debug', 'no_spec');
+  });
+
+  it('returns 404 when a dual connector is not enabled for inbound events', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'load_miss');
+  });
+
+  it('accepts a dual connector that still has inbound events enabled', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        if (id !== credentialId) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return mockCredentialGet() as never;
+      }
+      return {
+        ...mockConnectorGet(),
+        attributes: {
+          ...mockConnectorGet().attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never;
+    });
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(handleEvents).toHaveBeenCalled();
+  });
+
+  const memoryConnector = (eventsEnabled = false): InMemoryConnector => ({
+    id: connectorId,
+    actionTypeId: '.myConnector',
+    name: 'Memory',
+    config: { other: 'kept' },
+    secrets: {},
+    isMissingSecrets: false,
+    isPreconfigured: true,
+    isSystemAction: false,
+    isDeprecated: false,
+    isConnectorTypeDeprecated: false,
+    isDynamic: true,
+    ...(eventsEnabled ? { isInboundEventsEnabled: true } : {}),
+  });
+
+  it('returns 404 when an in-memory dual connector has events off', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'ApiKey install-key' },
+      inMemoryConnectors: [memoryConnector(false)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('detail=inbound_events_disabled'),
+      expect.anything()
+    );
+  });
+
+  it('emits for an in-memory connector with events enabled and an ApiKey', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const eventId = buildEventId('.myConnector', 'received');
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(handleEvents).toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId,
+        request: expect.objectContaining({
+          headers: expect.objectContaining({ authorization: `ApiKey ${apiKey}` }),
+        }),
+      })
+    );
+  });
+
+  it('returns 404 when Elasticsearch rejects the ApiKey', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const unauthorized = new errors.ResponseError({
+      body: {},
+      statusCode: 401,
+      headers: {},
+      warnings: [],
+      meta: {} as DiagnosticResult['meta'],
+    } as TransportResult);
+    elasticsearchClient
+      .asScoped()
+      .asCurrentUser.security.authenticate.mockRejectedValueOnce(unauthorized);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
+  it('returns 404 when the ApiKey cannot access the request space', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    getKibanaRequestAccess.mockResolvedValueOnce(false);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
+  it('returns 500 when Elasticsearch fails for a reason other than 401', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const unavailable = new errors.ResponseError({
+      body: {},
+      statusCode: 503,
+      headers: {},
+      warnings: [],
+      meta: {} as DiagnosticResult['meta'],
+    } as TransportResult);
+    elasticsearchClient
+      .asScoped()
+      .asCurrentUser.security.authenticate.mockRejectedValueOnce(unavailable);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
+
+  it('returns 404 when events are enabled and the ApiKey is not a Kibana API key', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'ApiKey install-key' },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
+  it('returns 404 when events are enabled and the caller has no ApiKey', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `Bearer ${token}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
+  it('returns 404 when the kibana-auth connector is not registered', async () => {
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('not found'));
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'ApiKey install-key' },
+      inMemoryConnectors: [],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'load_miss');
   });
 
   it('returns 404 when the connector type is disabled in config', async () => {
@@ -800,6 +1054,274 @@ describe('ingestInboundEvent', () => {
       expect.anything()
     );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('es-secret');
+  });
+
+  const windowLimiter = ({
+    enabled = true,
+    remoteAddressLimit = 10,
+    connectorLimit = 300,
+  }: {
+    enabled?: boolean;
+    remoteAddressLimit?: number;
+    connectorLimit?: number;
+  } = {}) =>
+    new InboundEventRateLimiter({
+      enabled,
+      maxKeys: 100,
+      remoteAddress: { limit: remoteAddressLimit, windowMs: 60_000 },
+      connector: { limit: connectorLimit, windowMs: 60_000 },
+    });
+
+  const addressFailureKey = (address: string, id = connectorId) =>
+    `${address}\0${spaceId}\0.myConnector\0${id}`;
+
+  const emptyEmitSpec = () =>
+    createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
+      typeof getConnectorSpec
+    >;
+
+  it('returns 404 before the saved-object read when the address budget is already spent', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { response: res, result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.9',
+    });
+
+    expect(result).toEqual({ status: 'not_found' });
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+    expect(res.notFound).toHaveBeenCalled();
+    expect(res.customError).not.toHaveBeenCalled();
+    expectOutcome('debug', 'rate_limited');
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('203.0.113.9');
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('ingest-token-value');
+  });
+
+  it('does not apply a spent address budget to another connector on the same socket', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.9',
+      connectorId: 'connector-2',
+    });
+
+    expect(result.status).not.toBe('rate_limited');
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalled();
+  });
+
+  it('does not apply a spent address budget to another socket on the same connector', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { result } = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.10',
+    });
+
+    expect(result.status).toBe('accepted');
+  });
+
+  it('counts a rejected token against the address budget and then skips the saved-object read', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 2, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+    const rejected = {
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.10',
+      query: { token: 'wrong' },
+    };
+
+    const first = await run(rejected);
+    const second = await run(rejected);
+    expect(first.result.status).toBe('not_found');
+    expect(second.result.status).toBe('not_found');
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalledTimes(2);
+
+    getUnsecuredSavedObjectsClient.mockClear();
+    const third = await run(rejected);
+    expect(third.result).toEqual({ status: 'not_found' });
+    expect(third.response.notFound).toHaveBeenCalled();
+    expect(third.response.customError).not.toHaveBeenCalled();
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+  });
+
+  it('does not spend the address budget when the connector type or the connector is missing', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(undefined);
+
+    const missingType = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(missingType.result.status).toBe('not_found');
+
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+    unsecuredSavedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', connectorId)
+    );
+    const missingConnector = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(missingConnector.result.status).toBe('not_found');
+
+    const accepted = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(accepted.result.status).toBe('accepted');
+  });
+
+  it('does not spend the address budget on successful ingests', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const first = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.11' });
+    const second = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.11' });
+
+    expect(first.result.status).toBe('accepted');
+    expect(second.result.status).toBe('accepted');
+  });
+
+  it('denies the connector after auth without decrypting, emitting, or spending the address budget', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 1 });
+    limiter.consume('connector', `default\0.myConnector\0${connectorId}`);
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const denied = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.12' });
+    expect(denied.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'rate_limited');
+    expect(JSON.stringify(logger.info.mock.calls)).not.toContain('203.0.113.12');
+
+    getConnectorSpecMock.mockReturnValue(undefined);
+    const followUp = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.12' });
+    expect(followUp.result.status).toBe('not_found');
+  });
+
+  it('does not consume the connector budget when the token is rejected', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 10, connectorLimit: 1 });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const rejected = await run({ rateLimiter: limiter, query: { token: 'wrong' } });
+    expect(rejected.result.status).toBe('not_found');
+
+    const accepted = await run({ rateLimiter: limiter });
+    expect(accepted.result.status).toBe('accepted');
+  });
+
+  it('consumes the connector budget on the ApiKey path and denies the next request before emit', async () => {
+    const limiter = windowLimiter({ connectorLimit: 1 });
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const input = {
+      rateLimiter: limiter,
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    };
+
+    const first = await run(input);
+    expect(first.result.status).toBe('accepted');
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+
+    const second = await run(input);
+    expect(second.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('counts an authenticated handshake against the connector budget', async () => {
+    const limiter = windowLimiter({ connectorLimit: 1 });
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'http',
+      httpResponse: { status: 200, body: { challenge: 'abc' } },
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const first = await run({ rateLimiter: limiter });
+    expect(first.result.status).toBe('spoke_http');
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+
+    const second = await run({ rateLimiter: limiter });
+    expect(second.result).toEqual({
+      status: 'rate_limited',
+      budget: 'connector',
+      retryAfterSeconds: expect.any(Number),
+    });
+    expect(handleEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a tight limit when rate limiting is disabled', async () => {
+    const limiter = windowLimiter({
+      enabled: false,
+      remoteAddressLimit: 1,
+      connectorLimit: 1,
+    });
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const first = await run({ rateLimiter: limiter });
+    const second = await run({ rateLimiter: limiter });
+    expect(first.result.status).toBe('accepted');
+    expect(second.result.status).toBe('accepted');
+  });
+
+  it('shares one unknown address key when the socket address is missing', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    limiter.recordRemoteAddressFailure(addressFailureKey('unknown'));
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const { response: res, result } = await run({ rateLimiter: limiter, omitRemoteAddress: true });
+    expect(result).toEqual({ status: 'not_found' });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(res.customError).not.toHaveBeenCalled();
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+  });
+
+  it('does not spend the address budget on a 500', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const unavailable = new errors.ResponseError({
+      body: {},
+      statusCode: 503,
+      headers: {},
+      warnings: [],
+      meta: {} as DiagnosticResult['meta'],
+    } as TransportResult);
+    elasticsearchClient
+      .asScoped()
+      .asCurrentUser.security.authenticate.mockRejectedValueOnce(unavailable);
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+
+    const failed = await run({
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.13',
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(failed.result.status).toBe('error');
+
+    getConnectorSpecMock.mockReturnValue(undefined);
+    const followUp = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.13' });
+    expect(followUp.result.status).toBe('not_found');
   });
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { agentPolicyService, appContextService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
@@ -23,6 +24,7 @@ import {
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
+  getAgentPoliciesHandler,
   populateAssignedAgentsCount,
 } from './handlers';
 
@@ -30,6 +32,7 @@ jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
+      list: jest.fn(),
       getByIds: jest.fn(),
       copy: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
@@ -199,6 +202,23 @@ describe('Agent policy API handlers', () => {
     });
   });
 
+  describe('getAgentPoliciesHandler', () => {
+    beforeEach(() => {
+      agentPolicyServiceMock.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it.each([true, false])('should pass showAgentless=%s to the service', async (showAgentless) => {
+      const request = httpServerMock.createKibanaRequest({
+        query: { showAgentless },
+      });
+      await getAgentPoliciesHandler(context, request, response);
+      expect(agentPolicyServiceMock.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ showAgentless })
+      );
+    });
+  });
+
   describe('bulkGetAgentPoliciesHandler', () => {
     it('should deduplicate ids', async () => {
       agentPolicyServiceMock.getByIds.mockResolvedValueOnce([]);
@@ -297,6 +317,159 @@ describe('Agent policy API handlers', () => {
     describe('?revision=N branch', () => {
       // Deep-clone per test because redactProxySecretsFromPolicy mutates in place
       const makeStoredDoc = () => ({ data: JSON.parse(JSON.stringify(POLICY_WITH_SECRETS)) });
+
+      beforeEach(() => {
+        agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy-1' } as any);
+      });
+
+      it('returns 404 when policy is not found in the current Space', async () => {
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'space-b-policy-id' },
+          query: { revision: 1 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 on download when policy is not found in the current Space', async () => {
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'space-b-policy-id' },
+          query: { revision: 1 },
+        });
+
+        await downloadFullAgentPolicy(context, request, response);
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
+
+      it('returns revision when agentPolicyId belongs to the current Space', async () => {
+        agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeStoredDoc() as any);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1' },
+          query: { revision: 2 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalled();
+      });
+
+      it('strips version suffix before Space check and returns revision for policy#version ID', async () => {
+        agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeStoredDoc() as any);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1#9.2' },
+          query: { revision: 2 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        // Space check must use the base ID, not the version-suffixed ID
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        // getFleetServerPolicy must receive the original versioned ID
+        expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1#9.2',
+          2
+        );
+        expect(response.ok).toHaveBeenCalled();
+      });
+
+      it('returns 404 for policy#version ID when base policy is not found in the current Space', async () => {
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1#9.2' },
+          query: { revision: 1 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
+
+      it('strips version suffix before Space check and returns YAML for policy#version ID on download', async () => {
+        agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeStoredDoc() as any);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1#9.2' },
+          query: { revision: 2 },
+        });
+
+        await downloadFullAgentPolicy(context, request, response);
+
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1#9.2',
+          2
+        );
+        expect(response.ok).toHaveBeenCalled();
+      });
+
+      it('returns 404 on download for policy#version ID when base policy is not found in the current Space', async () => {
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1#9.2' },
+          query: { revision: 1 },
+        });
+
+        await downloadFullAgentPolicy(context, request, response);
+
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
 
       it('strips proxy secrets from the response when caller lacks fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;

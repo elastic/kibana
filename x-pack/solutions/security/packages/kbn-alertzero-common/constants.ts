@@ -13,6 +13,13 @@ export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
 export const ALERTZERO_APP_ID = 'alertzero' as const;
 export const ALERTZERO_APP_PATH = '/app/alertzero' as const;
 
+/**
+ * Per-space advanced setting gating the AlertZero app, its Security navigation nodes, and its
+ * internal API. Registered by the AlertZero server plugin (`server/ui_settings.ts`), and only when
+ * the `xpack.alertzero.enabled` deployment kill switch is on.
+ */
+export const ALERTZERO_ENABLED_SETTING_ID = 'securitySolution:enableAlertZero' as const;
+
 export const ALERTZERO_INTERNAL_URL = '/internal/alertzero' as const;
 
 export const ALERTZERO_WATCHES_URL = `${ALERTZERO_INTERNAL_URL}/watches` as const;
@@ -20,6 +27,12 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
+
+/** Security's service-account directory. The id is opaque and may contain `/`. */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account' as const;
+
+export const buildServiceAccountUrl = (serviceAccountId: string) =>
+  `${SECURITY_SERVICE_ACCOUNT_URL}/${encodeURIComponent(serviceAccountId)}`;
 
 /** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
@@ -38,12 +51,49 @@ export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposa
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
+
+// --- Hunt services ---
+// Exported here, not just from the alertzero plugin's own common/constants.ts, so the
+// platform-level kbn-workflows managed-definitions tests can assert Hunt Watch's managed
+// YAML never references a route path string that isn't one of these, without reaching into
+// a private solution plugin's server modules.
+
+/** Internal route namespace for the hunt services. */
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
+
+/** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
+export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
+
+/** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
+export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+
+/** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
+export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+
+/** Mints or verifies the Hunt Watch Investigation for a report, called by its own child workflow. */
+export const FIND_OR_CREATE_INVESTIGATION_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
+
+/** Stamps the hunt-once gate on a report after a completed `run_hunt_coordinator` call. */
+export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_evidence` as const;
+
+/** Failed managed scans in the trailing 24 hours, folded onto Workers. */
+export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
+
+export interface ScanFailureWorker {
+  workerId: string;
+  watchId: string;
+}
+
+export interface ScanFailuresResponse {
+  workers: ScanFailureWorker[];
+  unknown: boolean;
+}
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
-
-/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
-export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -56,15 +106,15 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
 export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
-export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+export const SYSTEM_SECURITY_WATCH_FORENSICS_ID = 'system-security-watch-forensics' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
 ] as const;
 
 /**
@@ -91,7 +141,8 @@ export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
- * in would drag Zod into that bundle. Live placeholders take name, colour and lifecycle from here.
+ * in would drag Zod into that bundle. Live placeholders take name and colour from here.
+ * `color` is an EUI token key (`euiColorVisN` or `textAssistance`), resolved at render.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -100,73 +151,82 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
     name: 'Triage Watch',
-    color: '#16b3a6',
+    color: 'euiColorVis0',
   },
   {
     id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     deepLinkId: SecurityPageName.alertZeroWatchOfficer,
     name: 'Watch Officer',
-    color: '#3b82f6',
+    color: 'euiColorVis1',
   },
   {
     id: SYSTEM_SECURITY_WATCH_HUNT_ID,
     deepLinkId: SecurityPageName.alertZeroWatchHunt,
     name: 'Hunt Watch',
-    color: '#f59e0b',
-    isBeta: true,
-  },
-  {
-    id: SYSTEM_SECURITY_WATCH_DEEP_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Forensics Watch',
-    color: '#8b5cf6',
-    isBeta: true,
+    color: 'euiColorVis8',
   },
   {
     id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDetection,
     name: 'Detection Watch',
-    color: '#ec4899',
-    isBeta: true,
+    color: 'textAssistance',
+  },
+  {
+    id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchForensics,
+    name: 'Forensics Watch',
+    color: 'euiColorVis4',
   },
 ] as const;
-
-export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_HUNT_TAG = 'watch-hunt' as const;
-export const WATCH_DEEP_TAG = 'watch-deep' as const;
+export const WATCH_FORENSICS_TAG = 'watch-forensics' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
   WATCH_HUNT_TAG,
-  WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
+  WATCH_FORENSICS_TAG,
 ] as const;
+
+export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 /** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
+  'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
-export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
-  'system-security-detection-rule-creation' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
+  'system-security-detection-rule-coverage' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
+
+/**
+ * Hunt Watch's two feature children (tagged `security` + `continuous-threat-hunt`),
+ * dispatched by the tagged Worker above. `find_or_create_investigation` and the hunt
+ * child itself stay untagged Worker-branch plumbing and have no id here.
+ */
+export const SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID =
+  'system-security-hunt-package-report' as const;
+export const SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID = 'system-security-hunt-proposal-gate' as const;
 
 /**
  * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.
@@ -198,10 +258,16 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_DETECTION_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    name: 'Endpoint Analysis',
+    watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    watchTag: WATCH_FORENSICS_TAG,
   },
 ] as const;
 

@@ -34,7 +34,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       ImportDeclaration(node) {
         if (!node.source || !isPluginModuleSpecifier(node.source.value)) {

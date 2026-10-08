@@ -52,7 +52,10 @@ import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_execut
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  useWorkflowUrlState,
+  type WorkflowUrlUpdateOptions,
+} from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -99,18 +102,20 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
+    updateUrlState,
     setActiveTab: setUrlTab,
     replayExecutionId,
+    replayIsTestRun,
     clearReplayExecutionId,
   } = useWorkflowUrlState();
 
   useEffect(() => {
     if (!canReadWorkflowExecution) {
       if (activeTab === 'executions') {
-        setUrlTab('workflow');
+        setUrlTab('workflow', { replace: true });
       }
       if (selectedExecutionId) {
-        setSelectedExecution(null);
+        setSelectedExecution(null, { replace: true });
       }
     }
   }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
@@ -133,10 +138,17 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [loadConnectors, loadWorkflows]);
 
   // Seed the editor once per create-session: tracks whether the editor was
-  // already seeded so URL-state churn (`history.replace` in
-  // `useWorkflowUrlState` drops `location.state`) and re-renders never
-  // clobber in-progress edits or re-fire telemetry.
+  // already seeded so URL-state churn and re-renders never clobber in-progress
+  // edits or re-fire telemetry.
   const seededRef = useRef(false);
+
+  // A navigation can hand `/create` its initial content through history
+  // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+  // "Remix with AI" passes the rendered template. The state travels on the
+  // history entry, not the URL, so plain `/create` links and shared URLs
+  // fall back to the default YAML. The effect below depends on this value, not
+  // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
+  const { initialYaml } = location.state ?? {};
 
   // Load workflow when id changes
   useEffect(() => {
@@ -150,15 +162,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     seededRef.current = true;
 
-    // A navigation can hand `/create` its initial content through history
-    // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
-    // "Remix with AI" passes the rendered template. The state travels on the
-    // history entry, not the URL, so plain `/create` links and shared URLs
-    // fall back to the default YAML.
-    const { initialYaml } = location.state ?? {};
     dispatch(setYamlString(initialYaml || workflowDefaultYaml));
     telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
-  }, [loadWorkflow, id, dispatch, telemetry, location.state]);
+  }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -179,7 +185,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       return;
     }
 
-    dispatch(setReplayExecutionId(replayExecutionId));
+    dispatch(setReplayExecutionId({ executionId: replayExecutionId, isTestRun: replayIsTestRun }));
     dispatch(setIsTestModalOpen(true));
     clearReplayExecutionId();
   }, [
@@ -189,6 +195,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     id,
     isReady,
     replayExecutionId,
+    replayIsTestRun,
     workflowDefinition,
     workflowId,
   ]);
@@ -214,24 +221,54 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
+  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
+  const clearSelectedExecution = useCallback(
+    (options?: WorkflowUrlUpdateOptions) => {
+      if (isExecutionsViewEnabled) {
+        updateUrlState(
+          {
+            tab: 'workflow',
+            executionId: undefined,
+            stepExecutionId: undefined,
+            stepId: undefined,
+          },
+          options
+        );
+        return;
+      }
+      setSelectedExecution(null, options);
+    },
+    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
+  );
+
+  // Both handlers also close the list, which is local state rather than URL state. They must
+  // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null);
+      clearSelectedExecution({ replace: true });
       return;
     }
     setIsExecutionListOpen(true);
-  }, [isExecutionListOpen, selectedExecutionId, setSelectedExecution]);
+  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    clearSelectedExecution({ replace: true });
+  }, [clearSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    // Push so Back reopens the run.
+    clearSelectedExecution({ replace: false });
+  }, [clearSelectedExecution]);
+
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
 
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
@@ -267,7 +304,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  // The list needs a saved workflow id. The detail flyout only needs the selected
+  // execution, including a test run of a workflow that has not been saved yet.
+  const canShowExecutionUi = isExecutionsViewEnabled && canReadWorkflowExecution;
   const sidebarExecutionList =
     !isExecutionsViewEnabled &&
     id &&
@@ -288,7 +327,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
+          onOpenExecutionList={canShowExecutionUi && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -297,18 +336,23 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         ) : (
           <>
             <WorkflowEditorLayout
-              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
+                />
+              }
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {showExecutionFlyouts && id && isExecutionListOpen && (
+            {canShowExecutionUi && id && isExecutionListOpen && (
               <WorkflowExecutionListFlyout
                 workflowId={id}
                 onClose={onCloseExecutionList}
                 isHidden={Boolean(selectedExecutionId)}
               />
             )}
-            {showExecutionFlyouts && selectedExecutionId && (
+            {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
                 workflowName={workflowName ?? ''}

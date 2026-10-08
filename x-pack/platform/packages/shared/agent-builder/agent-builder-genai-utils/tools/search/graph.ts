@@ -68,6 +68,7 @@ export const createSearchToolGraph = async ({
   events,
   topSnippetsConfig,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
@@ -75,6 +76,7 @@ export const createSearchToolGraph = async ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -85,6 +87,7 @@ export const createSearchToolGraph = async ({
       events,
       logger,
       topSnippetsConfig,
+      includeFrozen,
     });
     const nlSearchTool = createNaturalLanguageSearchTool({
       modelProvider,
@@ -95,6 +98,7 @@ export const createSearchToolGraph = async ({
       customInstructions: state.customInstructions,
       timeRange: state.timeRange,
       includeDatasets,
+      includeFrozen,
     });
     const noMatchTool = createNoMatchingResourceTool();
     return [relevanceTool, nlSearchTool, noMatchTool];
@@ -138,6 +142,7 @@ export const createSearchToolGraph = async ({
     const resources = await gatherResourceDescriptors({
       indexPattern: state.targetPattern ?? '*',
       includeDatasets,
+      includeFrozen,
       esClient,
     });
 
@@ -157,6 +162,14 @@ export const createSearchToolGraph = async ({
         customInstructions: state.customInstructions,
       })
     );
+
+    const resourceNames = new Set(resources.map(({ name }) => name));
+    const hasUnlistedTarget = (response.tool_calls ?? []).some(
+      ({ args }) => args.index !== undefined && !resourceNames.has(args.index)
+    );
+    if (hasUnlistedTarget) {
+      return { error: NO_MATCHING_RESOURCE_ERROR };
+    }
 
     return { messages: [response] };
   };

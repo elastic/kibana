@@ -28,14 +28,12 @@ describe('Attachment Routes', () => {
       (params: { id: string; attachments: VersionedAttachment[] }) => Promise<void>
     >;
     appendEvents: jest.MockedFunction<(params: { id: string }) => Promise<void>>;
+    getAuthor: jest.MockedFunction<() => { id: string; username?: string } | undefined>;
   };
   let mockGetInternalServices: jest.MockedFunction<
     () => {
       conversations: {
         getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
-        getConversationRoundAuthor: jest.MockedFunction<
-          () => Promise<{ id: string; username?: string } | undefined>
-        >;
       };
       attachments: {
         getTypeDefinition: jest.MockedFunction<(type: string) => any>;
@@ -98,14 +96,12 @@ describe('Attachment Routes', () => {
       get: jest.fn(),
       update: jest.fn().mockResolvedValue(undefined),
       appendEvents: jest.fn().mockResolvedValue(undefined),
+      getAuthor: jest.fn().mockReturnValue({ id: 'user-1', username: 'test-user' }),
     };
 
     mockGetInternalServices = jest.fn().mockReturnValue({
       conversations: {
         getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
-        getConversationRoundAuthor: jest
-          .fn()
-          .mockResolvedValue({ id: 'user-1', username: 'test-user' }),
       },
       attachments: {
         getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
@@ -385,7 +381,7 @@ describe('Attachment Routes', () => {
           id: 'conv-1',
           events: [expect.objectContaining({ type: 'attachment_added' })],
         }),
-        { access: 'owner' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -742,7 +738,7 @@ describe('Attachment Routes', () => {
             }),
           ],
         }),
-        { access: 'owner' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -923,6 +919,10 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.success).toBe(true);
       expect(result.body.attachment).toBeDefined();
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {
@@ -982,6 +982,10 @@ describe('Attachment Routes', () => {
       expect(result.body.attachment.description).toBe('New name');
       // Version should not change
       expect(result.body.attachment.current_version).toBe(1);
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -17,37 +17,43 @@ import {
 
 export const AssignAlertStepId = 'security.assignAlert' as const;
 
-const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH));
+const assigneesArraySchema = lazySchema(() => z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)));
 
-const alertIdsBase = z.object({
-  alert_ids: z
-    .union([
-      z.string().min(1).max(MAX_ALERT_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
-    ])
-    .describe('A single alert ID or a list of IDs to support bulk updates'),
-});
+const alertIdsBase = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .union([
+        z.string().min(1).max(MAX_ALERT_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
+      ])
+      .describe('A single alert ID or a list of IDs to support bulk updates'),
+  })
+);
 
 // `z.union` (not `.refine`) so the "at least one assignees array" constraint lowers to JSON Schema
 // `anyOf` and surfaces in the editor — a top-level `.refine` is unwrapped before JSON Schema
 // generation. Follow-up: elastic/security-team#17984.
-export const assignAlertInputSchema = z.union([
-  alertIdsBase.extend({
-    assignees_to_add: assigneesArraySchema.min(1).describe('A list of user IDs to assign'),
-    assignees_to_remove: assigneesArraySchema
-      .default([])
-      .describe('A list of user IDs to unassign'),
-  }),
-  alertIdsBase.extend({
-    assignees_to_add: assigneesArraySchema.default([]).describe('A list of user IDs to assign'),
-    assignees_to_remove: assigneesArraySchema.min(1).describe('A list of user IDs to unassign'),
-  }),
-]);
+export const assignAlertInputSchema = lazySchema(() =>
+  z.union([
+    alertIdsBase.extend({
+      assignees_to_add: assigneesArraySchema.min(1).describe('A list of user IDs to assign'),
+      assignees_to_remove: assigneesArraySchema
+        .default([])
+        .describe('A list of user IDs to unassign'),
+    }),
+    alertIdsBase.extend({
+      assignees_to_add: assigneesArraySchema.default([]).describe('A list of user IDs to assign'),
+      assignees_to_remove: assigneesArraySchema.min(1).describe('A list of user IDs to unassign'),
+    }),
+  ])
+);
 
-export const assignAlertOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const assignAlertOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const assignAlertStepCommonDefinition: BaseStepDefinition<
   typeof assignAlertInputSchema,

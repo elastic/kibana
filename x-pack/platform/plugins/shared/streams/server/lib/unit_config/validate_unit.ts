@@ -5,28 +5,16 @@
  * 2.0.
  */
 
-import { findDuplicateUnitComponentIds, type StreamsUnit } from '@kbn/streams-schema';
-import { StatusError } from '../streams/errors/status_error';
-import type { UnitConfigHooks } from './types';
+import type { StreamsUnit } from '@kbn/streams-schema';
+import type { UnitConfigHooks, UnitValidationResult } from './types';
 
 /**
- * Write-time unit checks that always run in Kibana. Semantic / OTTL / compile
- * validation is delegated to `hooks.validate` (`POST /v1/validate`).
+ * Delegates unit validation to `hooks.validate` (config-distributor
+ * `POST /v1/validate`). Kibana does not schema-check the unit document at all.
  */
 export const validateUnitForWrite = async (
   unit: StreamsUnit.Configuration,
   hooks: UnitConfigHooks = {}
-): Promise<void> => {
-  const duplicateIds = findDuplicateUnitComponentIds(unit);
-
-  if (duplicateIds.length > 0) {
-    const error = new StatusError(
-      `Component ids must be unique within a unit. Duplicates: ${duplicateIds.join(', ')}`,
-      400
-    );
-    error.data = { duplicate_ids: duplicateIds };
-    throw error;
-  }
-
-  await hooks.validate?.(unit);
+): Promise<UnitValidationResult> => {
+  return (await hooks.validate?.(unit)) ?? {};
 };

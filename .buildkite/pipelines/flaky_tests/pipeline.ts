@@ -61,8 +61,9 @@ const MAX_COUNT_PER_CONFIG = 50;
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 /**
- * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
- * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
+ * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
+ * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
+ * uses the agent image default; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;
@@ -71,7 +72,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : 110,
+    diskSizeGb: undefined,
   };
 }
 
@@ -284,7 +285,9 @@ steps.push({
   label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
-  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+  // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
+  // depends_on: build, so skipping it skips those jobs. build_kibana.sh
+  // no-ops when the cached dist type matches.
 });
 
 if (hasScoutSuites) {

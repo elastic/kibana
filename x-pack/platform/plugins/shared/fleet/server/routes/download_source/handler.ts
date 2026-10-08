@@ -202,7 +202,7 @@ export const deleteDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof DeleteDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    await downloadSourceService.delete(request.params.sourceId);
+    await downloadSourceService.delete(request.params.sourceId, { request });
 
     const body: DeleteDownloadSourceResponse = {
       id: request.params.sourceId,

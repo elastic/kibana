@@ -30,13 +30,13 @@ export function ApmDatePicker() {
   const refreshPaused = toBoolean(refreshPausedFromUrl);
   const refreshInterval = toNumber(refreshIntervalFromUrl) ?? DEFAULT_REFRESH_INTERVAL;
 
-  const { incrementTimeRangeId } = useTimeRangeId();
+  const { incrementTimeRangeId, isAutoRefreshPaused } = useTimeRangeId();
 
   return (
     <DatePicker
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
-      refreshPaused={refreshPaused}
+      refreshPaused={refreshPaused || isAutoRefreshPaused}
       refreshInterval={refreshInterval}
       onTimeRangeRefresh={() => {
         incrementTimeRangeId();
