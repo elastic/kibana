@@ -10,6 +10,7 @@ import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../../form/types';
 import { DELAY_MODE } from '../../form/types';
+import { parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -749,5 +750,59 @@ describe('mapYamlFormValuesToComposeFormValues', () => {
     });
 
     expect(result.query).toEqual(signalQuery);
+  });
+});
+
+/**
+ * Deleting a key from the YAML is how the editor says "unset", but PATCH merges leaf by leaf, so a
+ * request that simply omits it would keep what the user just deleted. These walk the save path the
+ * editor takes — parse, map to compose values, build the request — on a rule that has the leaf.
+ */
+describe('saving edited YAML clears the leaves the user deleted', () => {
+  const editedYaml = (body: string) => {
+    const { values, error } = parseYamlToFormValues(body);
+    if (!values) throw new Error(`Fixture YAML did not parse: ${error}`);
+    return composeFormToUpdateRequest(mapYamlFormValuesToComposeFormValues(values));
+  };
+
+  it('nulls the pending leaves left out of the state transition', () => {
+    const request = editedYaml(`
+kind: alert
+metadata:
+  name: Test Rule
+time_field: '@timestamp'
+schedule:
+  every: 5m
+  lookback: 2m
+query:
+  base: ${BASE.split('\n')[0]}
+  breach:
+    segment: ${ALERT_SEGMENT}
+state_transition:
+  pending:
+    count: 2
+`);
+
+    expect(request.state_transition?.pending).toEqual({
+      count: 2,
+      timeframe: null,
+      operator: null,
+    });
+  });
+
+  it('nulls the breach when its segment is deleted', () => {
+    const request = editedYaml(`
+kind: alert
+metadata:
+  name: Test Rule
+time_field: '@timestamp'
+schedule:
+  every: 5m
+  lookback: 2m
+query:
+  base: ${BASE.split('\n')[0]}
+`);
+
+    expect(request.query?.breach).toBeNull();
   });
 });
