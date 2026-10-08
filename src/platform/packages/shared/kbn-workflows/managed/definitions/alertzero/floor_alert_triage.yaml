@@ -13,6 +13,8 @@ tags:
   - watch
   - watch-floor
 
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   - type: alert
   # Keep manual for desk testing without a rule execution.
@@ -51,7 +53,7 @@ consts:
 #   3. attach_alerts             — attach the alert batch
 #   4. classify_alerts           — run the classification sub-workflow
 #   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
-#   6. attach_impact             — entity × verdict summary
+#   6. attach_impact             — record impacted hosts/users (shared Impact)
 #   7. set_az_*_tags             — static AZ classification tags (R5, always), in bulk
 #   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always),
 #                                  written 20 at a time
@@ -100,7 +102,7 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_id that links
+  #    template. Seeds status, severity, and the workflow_execution_ids that link
   #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
@@ -119,7 +121,7 @@ steps:
         description: >-
           Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
           "{{ event.rule.name }}" ({{ event.rule.id }}).
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # ---------------------------------------------------------------------------
   # 3. Attach the analysed alerts to the Investigation in chunks of 20.
@@ -336,23 +338,22 @@ steps:
         {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
 
   # ---------------------------------------------------------------------------
-  # 6. Attach impact summary (entity × verdict breakdown) to the Investigation.
-  #    The sub-workflow caps impacted_entities at MAX_IMPACTED_ENTITIES and sets
-  #    impacted_entities_truncated when it dropped any.
+  # 6. Record the impacted hosts and users on the Investigation through the shared
+  #    investigations.attachImpact step (the landing-page entity pills read it).
+  #    The sub-workflow caps impacted_entities at 100. The step rejects an empty list
+  #    and needs manage_investigations; a failure is not worth failing the run for.
   # ---------------------------------------------------------------------------
-  - name: attach_impact
-    type: ai.attachment.add
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      type: security.impact
-      render_inline: true
-      data:
-        entities: "${{ steps.classify_alerts.output.impacted_entities }}"
-        total_alert_count: "${{ steps.classify_alerts.output.verdicts | size }}"
-        truncated: "{{ steps.classify_alerts.output.impacted_entities_truncated }}"
-      description: "Impacted entities from alert triage"
+  - name: attach_impact_gate
+    type: if
+    condition: "${{ steps.classify_alerts.output.impacted_entities.size > 0 }}"
+    steps:
+      - name: attach_impact
+        type: investigations.attachImpact
+        on-failure:
+          continue: true
+        with:
+          conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+          entities: "${{ steps.classify_alerts.output.impacted_entities }}"
 
   # ---------------------------------------------------------------------------
   # 7. Apply static AZ classification tags to every analysed alert (R5).

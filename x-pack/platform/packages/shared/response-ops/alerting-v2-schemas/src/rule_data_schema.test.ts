@@ -16,6 +16,8 @@ import {
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
   isStateTransitionAllowed,
+  isRoutingTagsAllowedForKind,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -79,6 +81,15 @@ describe('createRuleDataSchema', () => {
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'ignore' },
       });
+    });
+
+    it('accepts builder metadata', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder: { type: 'threshold' } },
+      });
+
+      expect(result.metadata.builder).toEqual({ type: 'threshold' });
     });
 
     it('accepts a full payload with all optional fields', () => {
@@ -243,6 +254,62 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('metadata.routing_tags', () => {
+    it('accepts routing tags on an alert rule', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: ['sre', 'payments'] },
+      });
+
+      expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
+    });
+
+    it('rejects routing tags on a signal rule', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validSignalCreateData,
+        metadata: { name: 'test rule', routing_tags: ['sre'] },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual([
+        expect.objectContaining({
+          path: ['metadata', 'routing_tags'],
+          message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+        }),
+      ]);
+    });
+
+    it('rejects an empty routing tags array', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: [] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects routing tags exceeding 20 items', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          routing_tags: Array.from({ length: 21 }, (_, i) => `route-${i}`),
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a routing tag exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 
@@ -1156,6 +1223,10 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
+  it('rejects schedule set to null (a schedule cannot be cleared)', () => {
+    expect(updateRuleDataSchema.safeParse({ schedule: null }).success).toBe(false);
+  });
+
   it('accepts metadata.tags set to null (clear all tags)', () => {
     const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
     expect(result.metadata?.tags).toBeNull();
@@ -1163,6 +1234,21 @@ describe('updateRuleDataSchema', () => {
 
   it('rejects metadata.tags as an empty array (use null to clear)', () => {
     const result = updateRuleDataSchema.safeParse({ metadata: { tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a non-empty routing tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { routing_tags: ['sre'] } });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('accepts metadata.routing_tags set to null (clear all routing tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { routing_tags: null } });
+    expect(result.metadata?.routing_tags).toBeNull();
+  });
+
+  it('rejects metadata.routing_tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { routing_tags: [] } });
     expect(result.success).toBe(false);
   });
 
@@ -1584,7 +1670,7 @@ describe('updateRuleDataSchema OpenAPI descriptions', () => {
     }).toMatchInlineSnapshot(`
       Object {
         "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
-        "recovery": "When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
+        "recovery": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
         "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. If omitted, the existing value is kept.",
       }
     `);
@@ -1807,44 +1893,44 @@ describe('bulkCreateRulesRequestSchema', () => {
   const validItem = validCreateData;
 
   it('accepts a single item and defaults enabled to true', () => {
-    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0].enabled).toBe(true);
-    expect(result.rules[0].id).toBeUndefined();
+    const result = bulkCreateRulesRequestSchema.parse({ items: [validItem] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].enabled).toBe(true);
+    expect(result.items[0].id).toBeUndefined();
   });
 
   it('accepts client-supplied id and enabled: false', () => {
     const result = bulkCreateRulesRequestSchema.parse({
-      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+      items: [{ ...validItem, id: 'rule-1', enabled: false }],
     });
-    expect(result.rules[0].id).toBe('rule-1');
-    expect(result.rules[0].enabled).toBe(false);
+    expect(result.items[0].id).toBe('rule-1');
+    expect(result.items[0].enabled).toBe(false);
   });
 
   it('accepts up to MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).not.toThrow();
   });
 
-  it('rejects an empty rules array', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  it('rejects an empty items array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [] })).toThrow();
   });
 
   it('rejects more than MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).toThrow();
   });
 
   it('rejects duplicate client-supplied ids', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [
+        items: [
           { ...validItem, id: 'same-id' },
           { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
         ],
@@ -1852,18 +1938,18 @@ describe('bulkCreateRulesRequestSchema', () => {
     ).toThrow();
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [validItem], foo: 'bar' })).toThrow();
   });
 
   it('rejects an item that fails create-rule refinements', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
+        items: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
       })
     ).toThrow();
   });
@@ -1972,6 +2058,27 @@ describe('isStateTransitionAllowed', () => {
   it('rejects state_transition on signal rules', () => {
     expect(
       isStateTransitionAllowed({ kind: 'signal', state_transition: { pending: { count: 1 } } })
+    ).toBe(false);
+  });
+});
+
+describe('isRoutingTagsAllowedForKind', () => {
+  it('allows routing tags on alert rules', () => {
+    expect(
+      isRoutingTagsAllowedForKind({ kind: 'alert', metadata: { routing_tags: ['sre'] } })
+    ).toBe(true);
+  });
+
+  it('allows absent or null routing tags on signal rules', () => {
+    expect(isRoutingTagsAllowedForKind({ kind: 'signal', metadata: {} })).toBe(true);
+    expect(isRoutingTagsAllowedForKind({ kind: 'signal', metadata: { routing_tags: null } })).toBe(
+      true
+    );
+  });
+
+  it('rejects routing tags on signal rules', () => {
+    expect(
+      isRoutingTagsAllowedForKind({ kind: 'signal', metadata: { routing_tags: ['sre'] } })
     ).toBe(false);
   });
 });

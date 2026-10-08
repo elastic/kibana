@@ -21,6 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('discover data grid doc link', function () {
+    // Flaky on MKI, see https://github.com/elastic/kibana/issues/295623
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(

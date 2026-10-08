@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getUpdatedExperimentalFeatures } from './experimental_features';
+import { allowedExperimentalValues, getUpdatedExperimentalFeatures } from './experimental_features';
 
 const defaultFeatures = {
   enableFoo: false,
@@ -103,5 +103,51 @@ describe('getUpdatedExperimentalFeatures', () => {
       enableBar: true, // default
       enableBaz: true, // default
     });
+  });
+});
+
+describe('allowedExperimentalValues', () => {
+  // Frozen list of legacy experimental features. Do NOT add new entries: use a Kibana feature flag instead,
+  // see x-pack/platform/plugins/shared/fleet/dev_docs/feature_flags.md. Entries can only be removed.
+  const legacyExperimentalFeatures = [
+    'showExperimentalShipperOptions',
+    'useSpaceAwareness',
+    'enableAutomaticAgentUpgrades',
+    'enableSyncIntegrationsOnRemote',
+    'enableSSLSecrets',
+    'installedIntegrationsTabularUI',
+    'enabledUpgradeAgentlessDeploymentsTask',
+    'enablePackageRollback',
+    'enableAutoInstallContentPackages',
+    'enableOtelIntegrations',
+    'enableAgentStatusAlerting',
+    'enableAgentPrivilegeLevelChange',
+    'installIntegrationsKnowledge',
+    'enableFleetPolicyRevisionsCleanupTask',
+    'enableFleetOrphanedPolicySweep',
+    'enableAgentRollback',
+    'disableAgentlessLegacyAPI',
+    'enableAgentlessPoliciesUI',
+    'enableEsqlViewInstall',
+    'enableSloTemplates',
+    'newBrowseIntegrationUx',
+    'enableVersionSpecificPolicies',
+    'enableIntegrationInactivityAlerting',
+    'enableSimplifiedAgentlessUX',
+    'enableOpAMP',
+    'enableOTelVerifier',
+    'enableResolveDependencies',
+    'enableOtelUI',
+    'enableIncludeTagsInEvents',
+    'enableOtlpOutput',
+    'enableIntegrationCollectionTiles',
+    'enableIntegrationTileClickToAdd',
+  ];
+
+  it('should not have new experimental features, use a Kibana feature flag instead (see dev_docs/feature_flags.md)', () => {
+    const newKeys = Object.keys(allowedExperimentalValues).filter(
+      (key) => !legacyExperimentalFeatures.includes(key)
+    );
+    expect(newKeys).toEqual([]);
   });
 });

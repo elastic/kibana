@@ -72,8 +72,8 @@ export const SharepointServer: ConnectorSpec = {
       scope: 'read',
       description:
         'Get metadata about the SharePoint site (title, URL, description, locale). Use this as a starting point to confirm the site is reachable and to retrieve the site title before browsing lists or folders.',
-      input: z.object({}).optional(),
-      output: z.any(),
+      input: lazySchema(() => z.object({}).optional()),
+      output: lazySchema(() => z.any()),
       handler: async (ctx) => {
         const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug('SharePoint Server getting web info');
@@ -89,7 +89,7 @@ export const SharepointServer: ConnectorSpec = {
       scope: 'read',
       description:
         "List all lists and document libraries on the SharePoint site. Returns each list's Id, Title, ItemCount, Description, Created, and LastItemModifiedDate. Use the Title field as input to getListItems, and RootFolder.ServerRelativeUrl as the path input to getFolderContents.",
-      input: z.object({}).optional(),
+      input: lazySchema(() => z.object({}).optional()),
       output: ODataCollectionOutputSchema,
       handler: async (ctx) => {
         const { siteUrl } = ctx.config as { siteUrl: string };
@@ -192,7 +192,7 @@ export const SharepointServer: ConnectorSpec = {
       description:
         "Get the content of a SharePoint site page by its integer item ID. To find the page ID, call getListItems with listTitle='Site Pages' and look for the Id field (an integer, not the GUID) on the desired page. Returns the page title and HTML content fields (CanvasContent1, WikiField).",
       input: GetSitePageContentsInputSchema,
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const { pageId } = input as { pageId: number };
         const { siteUrl } = ctx.config as { siteUrl: string };
@@ -216,7 +216,7 @@ export const SharepointServer: ConnectorSpec = {
       description:
         "Search SharePoint site content using Keyword Query Language (KQL). Supports plain keyword search as well as field:value filters. Use 'from' and 'size' for pagination. Example queries: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'.",
       input: SearchInputSchema,
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const { query, from, size } = input as { query: string; from?: number; size?: number };
         const { siteUrl } = ctx.config as { siteUrl: string };
@@ -239,7 +239,7 @@ export const SharepointServer: ConnectorSpec = {
       description:
         "Call any SharePoint Server REST API endpoint directly. Use this for advanced queries not covered by the other actions. The path must start with '_api/' (for example, '_api/web/title' or '_api/web/lists/GetByTitle(\\'Documents\\')/items?$top=5'). Prefer the dedicated actions (getLists, getListItems, getFolderContents, etc.) when they cover your use case.",
       input: CallRestApiInputSchema,
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const { method, path, body } = input as {
           method: 'GET' | 'POST';

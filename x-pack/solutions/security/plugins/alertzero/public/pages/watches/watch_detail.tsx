@@ -48,7 +48,7 @@ export const WatchDetailPage: React.FC = () => {
   const { watchId } = useParams<{ watchId: string }>();
   const currentWatchId = useRef(watchId);
   currentWatchId.current = watchId;
-  const canWrite = useCanWriteAlertZero();
+  const canWriteAlertZero = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
@@ -60,6 +60,10 @@ export const WatchDetailPage: React.FC = () => {
 
   const watch = data?.watch;
   useAlertZeroDocTitle(watch?.name ?? i18n.PAGE_TITLE);
+  // Absent until the workers response arrives. A loaded response without the flag stays editable
+  // only when the field is missing; an explicit false locks the controls.
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
+  const canWrite = canWriteAlertZero && canModifyWorkers;
 
   const members = useMemo(
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),

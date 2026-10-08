@@ -7,6 +7,8 @@ enabled: false
 tags:
   - watch
   - watch-detection
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   - type: scheduled
     with:

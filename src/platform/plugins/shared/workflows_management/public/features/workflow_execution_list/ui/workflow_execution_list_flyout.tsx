@@ -11,7 +11,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiToolTip,
   useEuiTheme,
@@ -90,52 +89,79 @@ export const WorkflowExecutionListFlyout = ({
           style={{ minWidth: '480px', maxWidth: '480px' }}
           data-test-subj="workflowExecutionListFlyout"
         >
-          <EuiFlyoutHeader css={{ padding: 0 }}>
-            <EuiFlexGroup
-              justifyContent="flexEnd"
-              alignItems="center"
-              gutterSize="none"
-              responsive={false}
-              css={{
-                // AppHeader compact: 8px padding + 32px size="s" control = 48px.
-                boxSizing: 'border-box',
-                minHeight: 48,
-                paddingBlock: euiTheme.size.s,
-                paddingInline: euiTheme.size.s,
-                borderBottom: euiTheme.border.thin,
-              }}
-            >
-              <EuiToolTip
-                content={i18n.translate('workflows.executionListFlyout.close', {
-                  defaultMessage: 'Close',
-                })}
-                disableScreenReaderOutput
+          <div css={flyoutColumnStyles}>
+            <EuiFlyoutHeader css={{ padding: 0 }}>
+              <EuiFlexGroup
+                justifyContent="flexEnd"
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                css={{
+                  // AppHeader compact: 8px padding + 32px size="s" control = 48px.
+                  boxSizing: 'border-box',
+                  minHeight: 48,
+                  paddingBlock: euiTheme.size.s,
+                  paddingInline: euiTheme.size.s,
+                  borderBottom: euiTheme.border.thin,
+                }}
               >
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={i18n.translate('workflows.executionListFlyout.close', {
+                <EuiToolTip
+                  content={i18n.translate('workflows.executionListFlyout.close', {
                     defaultMessage: 'Close',
                   })}
-                  color="text"
-                  size="s"
-                  iconSize="m"
-                  onClick={onClose}
-                />
-              </EuiToolTip>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="cross"
+                    aria-label={i18n.translate('workflows.executionListFlyout.close', {
+                      defaultMessage: 'Close',
+                    })}
+                    color="text"
+                    size="s"
+                    iconSize="m"
+                    onClick={onClose}
+                  />
+                </EuiToolTip>
+              </EuiFlexGroup>
+            </EuiFlyoutHeader>
 
-          <EuiFlyoutBody
-            css={css`
-              .euiFlyoutBody__overflowContent {
-                padding: 0;
-              }
-            `}
-          >
-            <div ref={flyoutSlotRef} />
-          </EuiFlyoutBody>
+            {/* Bounded slot: the list scrolls inside it and Cancel all stays pinned underneath. */}
+            <div ref={flyoutSlotRef} css={listSlotStyles} />
+          </div>
         </EuiFlyout>
       )}
     </>
   );
 };
+
+const flyoutColumnStyles = css({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  height: '100%',
+  minHeight: 0,
+  overflow: 'hidden',
+});
+
+const listSlotStyles = css({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
+  // The list is portaled into a host div, so the host fills this slot and
+  // passes that height through to the list.
+  '& > *': {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minHeight: 0,
+    height: '100%',
+    overflow: 'hidden',
+    '& > *': {
+      flex: 1,
+      minHeight: 0,
+      height: '100%',
+    },
+  },
+});

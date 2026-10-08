@@ -3,8 +3,9 @@ name: Hunt Watch - hunt
 description: >
   Runs the two-tier hunt for one report against the environment: searches for
   the report's indicators, then derives and validates behavioral queries from
-  the report text. Stages a finding when something is confirmed and records
-  the run's results. Does not create the Investigation or write the run's
+  the report text. When something is confirmed, stages a finding and records
+  the hosts and users it touched as the Investigation's impact. Records the
+  run's results. Does not create the Investigation or write the run's
   final summary; the Continuous Threat Hunt workflow handles those. Reports a
   partial run rather than failing outright, and skips the hunt entirely if
   the Investigation was never created.
@@ -144,6 +145,37 @@ steps:
               on-failure:
                 continue: true
 
+  # Impact: the hosts and users this run confirmed, recorded on the Investigation
+  # (the landing page's Impact pills read it). The coordinator builds the list from
+  # the same SSE entries attached above, so it only exists on a confirmed hit, and
+  # caps it at 50: every sweep of a report merges onto the same Investigation, whose
+  # impact holds 100.
+  #
+  # The internal impact route, not the `investigations.attachImpact` step: impact
+  # is owner-only, and Agent Builder records the owner of the Investigation
+  # find_or_create minted over HTTP by profile uid, while a step's in-process
+  # request resolves to no profile uid, so the step is refused on every Hunt
+  # Investigation. Over `kibana.request` the identity resolves the same way it did
+  # at creation. The route runs the same attach as the step.
+  #
+  # Nothing below reads impact, so a failure continues; the results message says
+  # whether impact was recorded, or why not.
+  - name: attach_impact
+    type: kibana.request
+    if: "${{ steps.run_hunt_coordinator.output.impacted_entities != nil and steps.run_hunt_coordinator.output.impacted_entities != empty }}"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/investigations/impact"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        entities: "${{ steps.run_hunt_coordinator.output.impacted_entities }}"
+    on-failure:
+      continue: true
+
   # Hunt results write-back: every completed hunt (hit or clean) gets exactly
   # one message here. The narrative is built server-side by the coordinator
   # (`build_hunt_narrative.ts`, returned as `narrative`) so it is deterministic,
@@ -154,6 +186,10 @@ steps:
   # line breaks survive. The SSE count appended here is what the coordinator
   # prepared -- whether each attachment landed is not observable from a
   # foreach's output, and packaging's conclusion reports that.
+  #
+  # The impact line names a failed attach by its HTTP status, never the response
+  # body: an internal failure's message would land in the Investigation, where
+  # every later agent round reads it as user input. The execution keeps the body.
   #
   # Gated on the coordinator having answered at all, not on
   # `completed_successfully`: that flag is false for an `incomplete_retryable`
@@ -172,6 +208,14 @@ steps:
           {{ coordinator.narrative }}
           {% if coordinator.sse != null %}
           _The coordinator prepared {{ coordinator.sse | size }} significant security event attachment{% if coordinator.sse.size != 1 %}s{% endif %} for this Investigation._
+          {%- endif %}
+          {% if steps.attach_impact.output != nil %}
+          _Recorded impact: {{ coordinator.impacted_entities | size }} host(s) and user(s)._
+          {%- elsif steps.attach_impact.error != nil %}
+          {%- assign impact_error = steps.attach_impact.error.message %}
+          _Could not record impact{% if impact_error contains 'HTTP 403:' %}: the Worker's identity lacks the Manage investigations privilege.{% elsif impact_error contains 'HTTP 404:' %}: the Worker's identity does not own this Investigation, or it no longer exists.{% elsif impact_error contains 'HTTP 400:' %}: it was rejected as invalid (an Investigation's impact holds at most 100 hosts and users).{% elsif impact_error contains 'HTTP 409:' %}: another writer updated it at the same time.{% else %}. See hunt execution {{ execution.id }}.{% endif %}_
+          {%- elsif coordinator.sse != null %}
+          _No impact recorded: the confirmed hits name no host or user._
           {%- endif %}
     on-failure:
       continue: true

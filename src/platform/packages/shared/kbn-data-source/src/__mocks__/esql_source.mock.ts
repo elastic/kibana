@@ -10,6 +10,8 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlSource } from '../sources/esql_source';
 import type { Column } from '../types';
+import { registerEsqlSourceInDataViewsCache } from '../cache_adapter';
+import { createMockDataViewsService } from './data_views_service.mock';
 
 type LooseColumn = Omit<Column, 'type'> & { type: string };
 
@@ -33,6 +35,7 @@ export const createMockEsqlSource = (
     resultColumns,
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
+    getFilterableFields: async () => columns as Column[],
     isTimeBased: () => !!timeFieldName,
     isPersisted: () => false,
     isRollup: () => false,
@@ -46,4 +49,16 @@ export const createMockEsqlSource = (
     }),
   } as unknown as EsqlSource;
   return mock;
+};
+
+/** A mock `EsqlSource` with its DataView shim registered, shaped like `resolveEsqlSource`'s result. */
+export const createResolvedMockEsqlSource = async (
+  ...args: Parameters<typeof createMockEsqlSource>
+) => {
+  const esqlSource = createMockEsqlSource(...args);
+  const dataView = await registerEsqlSourceInDataViewsCache(
+    createMockDataViewsService(),
+    esqlSource
+  );
+  return { esqlSource, dataView };
 };

@@ -132,6 +132,19 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
+  it('uses supplied maintenance windows instead of fetching them again', async () => {
+    const id = 'test-id-1';
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
+    const maintenanceWindows: [] = [];
+    const getMaintenanceWindows = syntheticsService.getMaintenanceWindows as jest.Mock;
+    getMaintenanceWindows.mockClear();
+
+    await client.addMonitors([{ monitor, id }], privateLocations, 'test-space', maintenanceWindows);
+
+    expect(getMaintenanceWindows).not.toHaveBeenCalled();
+  });
+
   it('should edit a monitor', async () => {
     locations[1].isServiceManaged = false;
 

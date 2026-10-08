@@ -15,7 +15,7 @@ export const matchRulesBodySchema = z
       .nullable()
       .optional()
       .describe(
-        'The policy scope to match rules against. Only alert rules (`kind: alert`) can match, because signal rules never create alerts. A rule matches when it has at least one of the tags in `matcher.tags`. `matcher.expression` is evaluated against each alert at dispatch time, so it does not narrow down the matching rules. When `matcher` is omitted, `null`, or has no tags, every alert rule matches.'
+        'The policy scope to match rules against. Only alert rules (`kind: alert`) can match, because signal rules never create alerts. A rule matches when its `metadata.routing_tags` include at least one of the tags in `matcher.tags`. `matcher.expression` is evaluated against each alert at dispatch time, so it does not narrow down the matching rules. When `matcher` is omitted, `null`, or has no tags, every alert rule matches.'
       ),
     page: z
       .number()

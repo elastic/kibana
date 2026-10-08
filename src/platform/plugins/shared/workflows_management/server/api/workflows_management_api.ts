@@ -91,6 +91,7 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -380,12 +381,13 @@ export class WorkflowsManagementApi {
     id: string,
     spaceId: string,
     operation: WorkflowAccessOperation,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, operation, request);
+    await access.assertAccess(workflow, operation, request, options);
   }
 
   public async updateAccessControl(
@@ -397,7 +399,6 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     if (input.access_mode === 'private') {
       // Finish earlier public writes before removing their search entries.
@@ -456,8 +457,8 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
     const access = await this.workflowsService.getAccessControl();
-    const result = await access.toDto(workflow, request);
-    return result.permissions.read ? result : null;
+    if (!(await access.checkAccess(workflow, 'read', request))) return null;
+    return access.toDto(workflow, request);
   }
 
   public async getHistoryForWorkflow(
@@ -550,7 +551,9 @@ export class WorkflowsManagementApi {
         workflows.flatMap(({ id }) => (id ? [id] : [])),
         spaceId
       );
-      for (const { id } of existing) await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      for (const { id } of existing) {
+        await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
@@ -661,8 +664,9 @@ export class WorkflowsManagementApi {
         const access = await this.workflowsService.getAccessControl();
         await access.assertAccess(
           workflow,
-          options?.force && workflow.access_control.access_mode === 'private' ? 'manage' : 'edit',
-          request
+          getWorkflowDeleteOperation(workflow, options?.force),
+          request,
+          { allowAdminOverride: options?.force === true }
         );
       }
     }
@@ -967,7 +971,8 @@ export class WorkflowsManagementApi {
         workflowId,
         spaceId,
         workflowYaml ? 'edit' : 'execute',
-        request
+        request,
+        { allowAdminOverride: false }
       );
     }
     let resolvedYaml = workflowYaml;
@@ -1043,7 +1048,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
+    if (workflowId) {
+      await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
+        allowAdminOverride: false,
+      });
+    }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
       spaceId,
@@ -1087,7 +1096,7 @@ export class WorkflowsManagementApi {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
-      if (workflow && !(await access.permissions(workflow, params.request)).read) {
+      if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
         accessControlFilter = { match_none: {} };
       }
     } else {
@@ -1129,7 +1138,7 @@ export class WorkflowsManagementApi {
     });
     if (workflow) {
       const access = await this.workflowsService.getAccessControl();
-      if (!(await access.permissions(workflow, options?.request)).read) return null;
+      if (!(await access.checkAccess(workflow, 'read', options?.request))) return null;
     }
     return execution;
   }
