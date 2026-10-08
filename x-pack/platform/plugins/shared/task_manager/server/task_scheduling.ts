@@ -14,6 +14,7 @@ import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   TaskStatus,
+  type TaskPriority,
   type ApiKeyOptions,
   type ConcreteTaskInstance,
   type IntervalSchedule,
@@ -29,6 +30,7 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import {
@@ -66,6 +68,7 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  definitions: TaskTypeDictionary;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
@@ -84,9 +87,17 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+
+export interface BulkUpdateSchedulesOptions extends ApiKeyOptions {
+  /** When true, also update tasks that are currently running or claiming, not just idle ones. */
+  includeRunningTasks?: boolean;
+}
+
 export interface RunSoonOptions {
   /** Run even when the task is already running on another node. */
   force?: boolean;
+  /** Overrides the task priority in the same version-checked write as `runAt`. */
+  priority?: TaskPriority;
   /**
    * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
    * eligible tasks too, so any required delay must be part of a task's eligibility.
@@ -117,6 +128,7 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly definitions: TaskTypeDictionary;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
   private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
@@ -129,6 +141,7 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.definitions = opts.definitions;
     this.taskPolling = opts.taskPollingLifecycle;
     this.claimNudgeService = opts.claimNudgeService;
   }
@@ -293,30 +306,41 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
-   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
-   * the task run finishes.
+   * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
+   * update running/claiming tasks; for those only `schedule` (and API keys) are written, and the
+   * next `runAt` is derived from the new schedule when the current run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
+   * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule | RruleSchedule,
-    options?: ApiKeyOptions
+    options?: BulkUpdateSchedulesOptions
   ): Promise<BulkUpdateTaskResult> {
-    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+    const { includeRunningTasks = false, ...apiKeyOptions } = options ?? {};
+    const shouldRegenerateApiKey = apiKeyOptions.regenerateApiKey === true;
+    const updatableStatuses = includeRunningTasks
+      ? new Set([TaskStatus.Idle, TaskStatus.Running, TaskStatus.Claiming])
+      : new Set([TaskStatus.Idle]);
 
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) =>
-        task.status === TaskStatus.Idle &&
+        updatableStatuses.has(task.status) &&
         (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
         if (isEqual(task.schedule, schedule)) {
           return task;
+        }
+
+        // For a running/claiming task `runAt` is the time the current execution was due; the task
+        // runner computes the next `runAt` from it and the new schedule once the run completes.
+        if (task.status !== TaskStatus.Idle) {
+          return { ...task, schedule };
         }
 
         const newRunAtInMs = calculateNextRunAtFromSchedule({
@@ -332,7 +356,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
-      options,
+      options: apiKeyOptions,
     });
   }
 
@@ -346,12 +370,11 @@ export class TaskScheduling {
   }
 
   /**
-   * Run task.
+   * Makes a task eligible to run now, optionally updating its priority in the same version-checked write.
    *
    * @param taskId - The task being scheduled.
    * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
    * `requestImmediateClaim` to also request a best-effort extra claim cycle.
-   * @returns {Promise<RunSoonResult>}
    */
   public async runSoon(
     taskId: string,
@@ -360,11 +383,16 @@ export class TaskScheduling {
     const options: RunSoonOptions =
       typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
     const force = options.force === true;
+    const { priority } = options;
     // The refresh only serves the nudge, so both are skipped together.
     const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
+
+    if (priority !== undefined && !this.definitions.get(task.taskType)?.allowPriorityOverride) {
+      throw new Error(`Task type "${task.taskType}" does not allow priority overrides`);
+    }
 
     if (task.status === TaskStatus.Unrecognized) {
       throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
@@ -397,6 +425,7 @@ export class TaskScheduling {
           status: TaskStatus.Idle,
           scheduledAt: new Date(),
           runAt: new Date(),
+          ...(priority !== undefined ? { priority } : {}),
         },
         { validate: false, refresh: nudge }
       );

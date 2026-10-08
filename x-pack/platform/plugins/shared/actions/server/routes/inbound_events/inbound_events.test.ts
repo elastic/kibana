@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Socket } from 'node:net';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
@@ -99,6 +101,7 @@ describe('inboundEventsRoute', () => {
       headers: request.headers,
       query: request.query,
       body: request.body,
+      remoteAddress: request.socket.remoteAddress,
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
   });
@@ -130,6 +133,32 @@ describe('inboundEventsRoute', () => {
       })
     );
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+  });
+
+  it('forwards the socket address and ignores X-Forwarded-For', async () => {
+    const ingest = jest.fn().mockResolvedValue({ status: 'accepted', body: { ok: true } });
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+    const socket = new Socket();
+    Object.defineProperty(socket, 'remoteAddress', { get: () => '203.0.113.8' });
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+      headers: { 'x-forwarded-for': '198.51.100.1' },
+      query: {},
+      body: { hello: 'world' },
+      socket,
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['accepted']);
+
+    await handler({}, request, res);
+
+    expect(ingest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        remoteAddress: '203.0.113.8',
+        headers: expect.objectContaining({ 'x-forwarded-for': '198.51.100.1' }),
+      })
+    );
   });
 
   it('maps forbidden ingest results to 403', async () => {

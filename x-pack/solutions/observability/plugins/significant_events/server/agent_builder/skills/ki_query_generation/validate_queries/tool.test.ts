@@ -13,7 +13,11 @@ import {
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+} from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
 jest.mock('@kbn/nightshift-ai', () => ({
@@ -112,6 +116,7 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
     });
 
@@ -263,5 +268,21 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       { type: 'error', data: { message: 'KI storage unavailable' } },
     ]);
+  });
+
+  it('does not validate queries without the Nightshift read privilege', async () => {
+    const tool = createValidateQueriesTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+      logger,
+    });
+
+    const result = await invokeHandler(
+      tool,
+      { target_id: 'logs.test', queries: [] },
+      createMockToolContext()
+    );
+
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });
