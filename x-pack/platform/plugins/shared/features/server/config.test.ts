@@ -150,7 +150,7 @@ describe('config schema', () => {
         { serverless: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, workplaceAI, management"`
+      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, management"`
     );
   });
   it('properly validates sub-feature privilege inclusion override', () => {

@@ -17,8 +17,6 @@
         "@cloud-serverless-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

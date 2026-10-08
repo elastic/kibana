@@ -17,7 +17,6 @@ export const CODE_OWNER_AREAS = [
   'search',
   'observability',
   'security',
-  'workplaceai',
   'vectordb',
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];

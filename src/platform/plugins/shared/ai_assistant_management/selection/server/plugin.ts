@@ -80,44 +80,42 @@ export class AIAssistantManagementSelectionPlugin
       });
     }
 
-    // Register chat experience setting for both stateful and serverless (except workplaceai)
-    if (serverlessProjectType !== 'workplaceai') {
-      // Agent is the default chat experience for Elasticsearch, Security, Observability,
-      // and Kibana Classic solution spaces. Other non-null space solutions (for example
-      // future or specialized views) use Classic unless overridden in config.
-      core.uiSettings.register({
-        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
-          ...chatExperienceSetting,
-          getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
-            try {
-              const [, startServices] = await core.getStartServices();
-              // Avoid security exceptions before login - only check space when authenticated
-              if (startServices.spaces && request?.auth.isAuthenticated) {
-                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
-                  request
-                );
-                const solution = activeSpace?.solution;
-                if (
-                  solution === 'es' ||
-                  solution === 'security' ||
-                  solution === 'oblt' ||
-                  solution === 'classic'
-                ) {
-                  return AIChatExperience.Agent;
-                }
-                if (solution != null) {
-                  return AIChatExperience.Classic;
-                }
+    // Register chat experience setting for both stateful and serverless.
+    // Agent is the default chat experience for Elasticsearch, Security, Observability,
+    // and Kibana Classic solution spaces. Other non-null space solutions (for example
+    // future or specialized views) use Classic unless overridden in config.
+    core.uiSettings.register({
+      [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+        ...chatExperienceSetting,
+        getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+          try {
+            const [, startServices] = await core.getStartServices();
+            // Avoid security exceptions before login - only check space when authenticated
+            if (startServices.spaces && request?.auth.isAuthenticated) {
+              const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                request
+              );
+              const solution = activeSpace?.solution;
+              if (
+                solution === 'es' ||
+                solution === 'security' ||
+                solution === 'oblt' ||
+                solution === 'classic'
+              ) {
+                return AIChatExperience.Agent;
               }
-            } catch (e) {
-              this.logger.error('Error getting active space:');
-              this.logger.error(e);
+              if (solution != null) {
+                return AIChatExperience.Classic;
+              }
             }
-            return this.config.preferredChatExperience ?? AIChatExperience.Agent;
-          },
+          } catch (e) {
+            this.logger.error('Error getting active space:');
+            this.logger.error(e);
+          }
+          return this.config.preferredChatExperience ?? AIChatExperience.Agent;
         },
-      });
-    }
+      },
+    });
   }
 
   public start(core: CoreStart) {

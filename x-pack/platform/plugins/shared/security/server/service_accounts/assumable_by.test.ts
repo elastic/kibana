@@ -27,19 +27,16 @@ describe('buildAssumableBy', () => {
     ]);
   });
 
-  it.each<UiamProjectType>([
-    'elasticsearch',
-    'observability',
-    'security',
-    'vectordb',
-    'workplaceai',
-  ])('passes through the `%s` project type verbatim', (projectType) => {
-    const [entry] = buildAssumableBy({
-      organizationId: 'organization-id',
-      projectId: 'project-id',
-      projectType,
-    });
+  it.each<UiamProjectType>(['elasticsearch', 'observability', 'security', 'vectordb'])(
+    'passes through the `%s` project type verbatim',
+    (projectType) => {
+      const [entry] = buildAssumableBy({
+        organizationId: 'organization-id',
+        projectId: 'project-id',
+        projectType,
+      });
 
-    expect(entry.project_type).toBe(projectType);
-  });
+      expect(entry.project_type).toBe(projectType);
+    }
+  );
 });

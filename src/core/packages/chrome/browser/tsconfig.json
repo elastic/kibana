@@ -26,7 +26,6 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-fleet",
     "@kbn/deeplinks-shared",
-    "@kbn/deeplinks-workplace-ai",
     "@kbn/deeplinks-vectordb",
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",

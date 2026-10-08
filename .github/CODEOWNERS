@@ -525,7 +525,6 @@ src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/deeplinks/shared @elastic/appex-sharedux
 src/platform/packages/shared/deeplinks/vectordb @elastic/search-ml-ux
 src/platform/packages/shared/deeplinks/workflows @elastic/workflows-eng
-src/platform/packages/shared/deeplinks/workplace_ai @elastic/search-ml-ux
 src/platform/packages/shared/esql/kbn-esql-browser @elastic/kibana-discover
 src/platform/packages/shared/esql/kbn-esql-language @elastic/kibana-discover
 src/platform/packages/shared/esql/kbn-esql-server-utils @elastic/kibana-discover
@@ -788,7 +787,6 @@ src/platform/packages/shared/serverless/settings/observability_project @elastic/
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-ml-ux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/vectordb_project @elastic/search-ml-ux
-src/platform/packages/shared/serverless/settings/workplace_ai_project @elastic/search-ml-ux
 src/platform/packages/shared/serverless/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/ai-components @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/avatar/solution @elastic/appex-sharedux
@@ -1495,9 +1493,6 @@ x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defe
 x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding @elastic/search-ml-ux
 x-pack/solutions/vectordb/plugins/serverless_vectordb @elastic/search-ml-ux
 x-pack/solutions/vectordb/test @elastic/search-ml-ux
-x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-ml-ux @elastic/workchat-eng
-x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-ml-ux @elastic/workchat-eng
-x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -2409,7 +2404,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /config/README.md @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-security
 /config/serverless.*.yml @elastic/kibana-security
-/config/serverless.workplaceai.yml @elastic/kibana-security @elastic/search-ml-ux
 /config/serverless.es.yml @elastic/kibana-security @elastic/search-ml-ux
 /config/serverless.vectordb.yml @elastic/kibana-security @elastic/search-ml-ux
 /config/serverless.oblt.yml @elastic/kibana-security @elastic/observability-ui
@@ -2758,9 +2752,6 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 /x-pack/solutions/vectordb/test/serverless/api_integration/configs/config.ts @elastic/search-ml-ux @elastic/appex-qa
 /x-pack/solutions/vectordb/test/serverless/functional/configs/config.ts @elastic/search-ml-ux @elastic/appex-qa
 
-# workplaceai
-/x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts @elastic/appex-qa
-/x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts @elastic/appex-qa
 x-pack/platform/plugins/shared/agent_builder_platform/server/skills/analyze_and_improve @elastic/context-eng
 x-pack/platform/plugins/shared/agent_builder_platform/server/skills/context_engine_signals @elastic/context-eng
 x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_sources @elastic/context-eng

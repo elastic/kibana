@@ -16,7 +16,6 @@ const KNOWN_UIAM_ROLE_IDS = new Set([
   'elasticsearch-application-only',
   'observability-application-only',
   'security-application-only',
-  'workplaceai-application-only',
   'vectordb-application-only',
 ]);
 
@@ -47,7 +46,7 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     });
 
     expect(project).toEqual(
-      ['security', 'elasticsearch', 'observability', 'workplaceai', 'vectordb'].map(
+      ['security', 'elasticsearch', 'observability', 'vectordb'].map(
         (projectType) => ({
           role_id: `${projectType}-application-only`,
           organization_id: organizationId,

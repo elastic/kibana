@@ -714,7 +714,6 @@ packages:
   - 'src/platform/packages/shared/deeplinks/shared'
   - 'src/platform/packages/shared/deeplinks/vectordb'
   - 'src/platform/packages/shared/deeplinks/workflows'
-  - 'src/platform/packages/shared/deeplinks/workplace_ai'
   - 'src/platform/packages/shared/esql/kbn-esql-browser'
   - 'src/platform/packages/shared/esql/kbn-esql-language'
   - 'src/platform/packages/shared/esql/kbn-esql-server-utils'
@@ -977,7 +976,6 @@ packages:
   - 'src/platform/packages/shared/serverless/settings/search_project'
   - 'src/platform/packages/shared/serverless/settings/security_project'
   - 'src/platform/packages/shared/serverless/settings/vectordb_project'
-  - 'src/platform/packages/shared/serverless/settings/workplace_ai_project'
   - 'src/platform/packages/shared/serverless/types'
   - 'src/platform/packages/shared/shared-ux/ai-components'
   - 'src/platform/packages/shared/shared-ux/avatar/solution'
@@ -1684,9 +1682,6 @@ packages:
   - 'x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding'
   - 'x-pack/solutions/vectordb/plugins/serverless_vectordb'
   - 'x-pack/solutions/vectordb/test'
-  - 'x-pack/solutions/workplaceai/plugins/serverless_workplace_ai'
-  - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
-  - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
 
 # Keep a last field entry, because a trailing comment might be removed by some parsers.

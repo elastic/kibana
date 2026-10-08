@@ -56,7 +56,7 @@ const parseJsonArg = <T>(value: unknown): T | undefined => {
  *   `{ name, tier }`); we read the `observability` entry. When the arg is
  *   absent or unparsable, the implicit `complete` tier is returned.
  * - For project types that don't expose a tier today (e.g. `es`,
- *   `workplaceai`), returns `undefined`.
+ *   `vectordb`), returns `undefined`.
  */
 export const getProductTier = (
   kbnServerArgs: string[],

@@ -40,7 +40,6 @@ const configSchema = schema.object({
             schema.literal('security'),
             schema.literal('observability'),
             schema.literal('search'),
-            schema.literal('workplaceai'),
             schema.literal('vectordb'),
           ]),
         })
