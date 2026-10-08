@@ -322,6 +322,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.state).toBe('paused');
       expect(summary.partialFailures).toContainEqual({
+        spaceId: 'default',
         target: expect.stringContaining(
           `execution:${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}@`
         ),

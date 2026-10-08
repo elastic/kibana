@@ -67,15 +67,41 @@ export const normalizeSummary = (
 ): SignificantEventsMaintenanceSummary | undefined =>
   raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
 
+/**
+ * Executions are cancelled best-effort by `cancelAllActiveWorkflowExecutions`, which returns
+ * no count, so every summary reports zero rather than the real number of cancellations.
+ */
+export const EXECUTIONS_CANCELLED_NOT_COUNTED = 0;
+
 /** A summary with every count at zero, for a state with nothing swept yet. */
 export const emptySummary = (
   state: SignificantEventsMaintenanceSummary['state']
 ): SignificantEventsMaintenanceSummary => ({
   state,
-  executionsCancelled: 0,
+  executionsCancelled: EXECUTIONS_CANCELLED_NOT_COUNTED,
   workflowsDisabled: 0,
   rulesDisabled: 0,
   partialFailures: [],
+});
+
+/**
+ * The document that marks a space paused before anything is swept: the existing inventory and
+ * summary are kept so a re-pause never loses what an earlier pause recorded.
+ */
+export const buildPausedIntent = ({
+  existing,
+  actor,
+}: {
+  existing: LoadedMaintenanceState | undefined;
+  actor: string | undefined;
+}): SignificantEventsMaintenanceStateAttributes => ({
+  state: 'paused',
+  updatedAt: new Date().toISOString(),
+  updatedBy: actor,
+  disabledWorkflows: existing?.disabledWorkflows ?? [],
+  disabledRules: existing?.disabledRules ?? [],
+  pausedSettings: existing?.pausedSettings,
+  lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
 });
 
 const isNotFound = (error: unknown): boolean =>
@@ -92,6 +118,41 @@ const brandOwnTargets = (
   spaceId: SpaceId,
   targets: ReadonlyArray<{ id: string }> | undefined
 ): Array<{ id: string; spaceId: SpaceId }> => (targets ?? []).map(({ id }) => ({ id, spaceId }));
+
+/**
+ * The scheduled-discovery restore list of a space's document. The persisted array can name
+ * other spaces, but a document only restores its own space, so the others are dropped.
+ */
+const normalizePausedSettings = (
+  spaceId: SpaceId,
+  raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
+): PausedFeatureSettings | undefined =>
+  raw
+    ? {
+        continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
+        scheduledDiscoveryEnabledSpaceIds: raw.scheduledDiscoveryEnabledSpaceIds
+          .filter((id) => id === spaceId)
+          .map(brandSpaceId),
+      }
+    : undefined;
+
+/**
+ * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
+ * recorded for the pre-per-space continuous onboarding documents of the default
+ * space are dropped: those documents are deleted at startup and would only
+ * produce "not found" failures. The legacy sync document is kept, since startup
+ * only removes it once its per-space replacement is enabled.
+ *
+ * TODO: drop the legacy filter with the legacy default-space cleanup.
+ * https://github.com/elastic/kibana/issues/294271
+ */
+const brandDisabledWorkflows = (
+  spaceId: SpaceId,
+  workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
+): MaintenanceWorkflowTarget[] =>
+  brandOwnTargets(spaceId, workflows).filter(
+    ({ id }) => !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
+  );
 
 /** Reads and writes the maintenance saved object of each space. */
 export interface IMaintenanceStateStore {
@@ -136,37 +197,6 @@ export const createMaintenanceStateStore = (
     });
     return internalClient.asScopedToNamespace(spaceId);
   };
-
-  const normalizePausedSettings = (
-    spaceId: SpaceId,
-    raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
-  ): PausedFeatureSettings | undefined =>
-    raw
-      ? {
-          continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds: raw.scheduledDiscoveryEnabledSpaceIds
-            .filter((id) => id === spaceId)
-            .map(brandSpaceId),
-        }
-      : undefined;
-
-  /**
-   * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
-   * recorded for the pre-per-space continuous onboarding documents of the default
-   * space are dropped: those documents are deleted at startup and would only
-   * produce "not found" failures. The legacy sync document is kept, since startup
-   * only removes it once its per-space replacement is enabled.
-   *
-   * TODO: drop the legacy filter with the legacy default-space cleanup.
-   * https://github.com/elastic/kibana/issues/294271
-   */
-  const brandDisabledWorkflows = (
-    spaceId: SpaceId,
-    workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
-  ): MaintenanceWorkflowTarget[] =>
-    brandOwnTargets(spaceId, workflows).filter(
-      ({ id }) => !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
-    );
 
   const readVersionedState = async (
     spaceId: SpaceId
@@ -213,12 +243,12 @@ export const createMaintenanceStateStore = (
     updatedBy: string;
   }): Promise<LoadedMaintenanceState | undefined> => {
     const claimed: LoadedMaintenanceState = {
-      disabledWorkflows: [],
-      disabledRules: [],
-      ...current?.attributes,
-      state: 'paused',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
+      ...buildPausedIntent({ existing: current?.attributes, actor: updatedBy }),
+      // The builder returns raw SO attributes, whose space ids are plain strings, so the
+      // branded inventory is carried over from the loaded state.
+      disabledWorkflows: current?.attributes.disabledWorkflows ?? [],
+      disabledRules: current?.attributes.disabledRules ?? [],
+      pausedSettings: current?.attributes.pausedSettings,
     };
     try {
       if (current) {

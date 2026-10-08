@@ -192,6 +192,7 @@ export const createFeatureSettingsController = ({
         } catch (error) {
           failures.push({
             target: continuousSettingTarget(spaceId),
+            spaceId,
             error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
           });
           // Uncertain read: prefer restore on resume for this space, same as
@@ -208,6 +209,7 @@ export const createFeatureSettingsController = ({
         } catch (error) {
           failures.push({
             target: scheduledSettingTarget(spaceId),
+            spaceId,
             error: `Failed to read scheduled discovery setting: ${toMessage(error)}`,
           });
           // Uncertain read: prefer restore on resume for this space.
@@ -227,6 +229,7 @@ export const createFeatureSettingsController = ({
           } catch (error) {
             failures.push({
               target: scheduledSettingTarget(spaceId),
+              spaceId,
               error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
             });
           }
@@ -234,6 +237,7 @@ export const createFeatureSettingsController = ({
       } catch (error) {
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -276,6 +280,7 @@ export const createFeatureSettingsController = ({
         remaining.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to resume scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -305,6 +310,7 @@ export const createFeatureSettingsController = ({
     } catch (error) {
       failures.push({
         target: continuousSettingTarget(spaceId),
+        spaceId,
         error: `Failed to resume continuous onboarding setting: ${toMessage(error)}`,
       });
       return false;
@@ -382,6 +388,7 @@ export const createFeatureSettingsController = ({
           }
           failures.push({
             target: continuousSettingTarget(spaceId),
+            spaceId,
             error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
           });
         }
@@ -401,11 +408,110 @@ export const createFeatureSettingsController = ({
         }
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
         });
       }
     }
     return stillOn;
+  };
+
+  /**
+   * The toggles that currently read on in each space, read before Reset turns them off so an
+   * aborted Reset can turn them back on. A toggle that cannot be read counts as off.
+   */
+  const readTogglesOn = async ({
+    request,
+    spaceIds,
+  }: {
+    request: KibanaRequest;
+    spaceIds: SpaceId[];
+  }): Promise<StillOnFeatureSettings> => {
+    const on: StillOnFeatureSettings = {
+      continuousOnboardingWasEnabled: false,
+      continuousOnboardingSpaceIds: [],
+      scheduledDiscoveryEnabledSpaceIds: [],
+    };
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    for (const spaceId of spaceIds) {
+      try {
+        const spaceClient = await uiSettingsClients.space(spaceId);
+        if (await readsOn(spaceClient, OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)) {
+          on.continuousOnboardingSpaceIds.push(spaceId);
+        }
+        if (
+          await readsOn(
+            spaceClient,
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          )
+        ) {
+          on.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
+      } catch {
+        // No settings client for this space: nothing to restore there.
+      }
+    }
+    return on;
+  };
+
+  /**
+   * Turns the given toggles back on. Returns the ones that could not be written, in the same
+   * shape, so the caller can keep them recorded for a later Resume.
+   */
+  const restoreTogglesOn = async ({
+    request,
+    toggles,
+    failures,
+  }: {
+    request: KibanaRequest;
+    toggles: StillOnFeatureSettings;
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<StillOnFeatureSettings> => {
+    const notRestored: StillOnFeatureSettings = {
+      continuousOnboardingWasEnabled: false,
+      continuousOnboardingSpaceIds: [],
+      scheduledDiscoveryEnabledSpaceIds: [],
+    };
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    const restore = async ({
+      spaceId,
+      key,
+      target,
+      onFailure,
+    }: {
+      spaceId: SpaceId;
+      key: string;
+      target: string;
+      onFailure: () => void;
+    }): Promise<void> => {
+      try {
+        await (await uiSettingsClients.space(spaceId)).set(key, true);
+      } catch (error) {
+        onFailure();
+        failures.push({
+          target,
+          spaceId,
+          error: `Failed to restore the setting after reset aborted: ${toMessage(error)}`,
+        });
+      }
+    };
+    for (const spaceId of toggles.continuousOnboardingSpaceIds) {
+      await restore({
+        spaceId,
+        key: OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        target: continuousSettingTarget(spaceId),
+        onFailure: () => notRestored.continuousOnboardingSpaceIds.push(spaceId),
+      });
+    }
+    for (const spaceId of toggles.scheduledDiscoveryEnabledSpaceIds) {
+      await restore({
+        spaceId,
+        key: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        target: scheduledSettingTarget(spaceId),
+        onFailure: () => notRestored.scheduledDiscoveryEnabledSpaceIds.push(spaceId),
+      });
+    }
+    return notRestored;
   };
 
   return {
@@ -414,6 +520,8 @@ export const createFeatureSettingsController = ({
     restoreContinuousOnboarding,
     readFeatureSettingsStatus,
     reassertFeatureSettingsOff,
+    readTogglesOn,
+    restoreTogglesOn,
   };
 };
 

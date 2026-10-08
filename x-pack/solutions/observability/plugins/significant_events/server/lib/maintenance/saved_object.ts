@@ -26,7 +26,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
 
 /**
- * The id intentionally matches the type name: there is only ever one document per space.
+ * The id intentionally matches the type name: there is only ever one document per space, so
+ * the id is fixed and a space's document is found without a lookup.
  */
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID = 'significant-events-maintenance-state';
 
@@ -66,6 +67,7 @@ const maintenanceSummarySchemaV2 = maintenanceSummarySchemaV1.extends({
 
 const disabledWorkflowSchemaV1 = schema.object({
   id: schema.string(),
+  // Kept so the model-version 3 schema stays unchanged. Reads ignore it: a document is per space.
   spaceId: schema.string(),
 });
 
@@ -95,7 +97,7 @@ const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
 });
 
 /** Rules are recorded with the same `{ id, spaceId }` shape as workflows. */
-const disabledRuleSchemaV1 = disabledWorkflowSchemaV1;
+const disabledRuleSchema = disabledWorkflowSchemaV1;
 
 const maintenanceStateAttributesV3 = schema.object({
   state: schema.string(),
@@ -104,7 +106,7 @@ const maintenanceStateAttributesV3 = schema.object({
   disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
-  disabledRules: schema.arrayOf(disabledRuleSchemaV1, {
+  disabledRules: schema.arrayOf(disabledRuleSchema, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),
@@ -116,9 +118,9 @@ export type SignificantEventsMaintenanceStateAttributes = TypeOf<
 >;
 
 /**
- * Rules recorded before version 3 had no space, and the stored ids can't recover it. The old
- * sweep used the triggering request's space, so default is a best guess: a pause started from
- * another space resumes against the wrong space and leaves those rules disabled.
+ * Rules recorded before version 3 had no space, and the stored ids can't recover it, so they
+ * are attributed to the default space. Reads no longer trust the stored `spaceId` anyway: a
+ * document records only its own space's inventory, so the document's space wins.
  */
 export const backfillDisabledRules = (
   attributes: Partial<TypeOf<typeof maintenanceStateAttributesV1>> &

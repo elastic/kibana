@@ -6,10 +6,6 @@
  */
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import {
-  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-} from '@kbn/management-settings-ids';
 import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
@@ -19,6 +15,10 @@ import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
 } from './saved_object';
+import {
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
 import {
   REQUEST,
   cleanupDocumentId,
@@ -531,6 +531,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(resetSummary.state).toBe('enabled');
       expect(resetSummary.workflowsDisabled).toBe(1);
       expect(resetSummary.partialFailures).toContainEqual({
+        spaceId: 'default',
         target: expect.stringContaining(cleanupDocumentId('default')),
         error: expect.stringContaining('enable failed'),
       });
@@ -586,6 +587,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.deleted?.rules).toBe(1);
       expect(summary.partialFailures).toContainEqual({
+        spaceId: 'default',
         target: 'rule:failed-rule',
         error: 'delete failed',
       });
@@ -718,6 +720,30 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('turns the settings it switched off back on when the sweep is rolled back', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient, getInternalSpaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+      });
+      soClient.create
+        .mockResolvedValueOnce({} as never)
+        .mockRejectedValueOnce(new Error('inventory write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('inventory write failed');
+
+      const { set } = getInternalSpaceUiSettingsClient('default');
+      expect(set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+      expect(set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        true
+      );
+    });
+
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
       // A workflow that cannot be restored stays on the document, so the final write is needed.
       const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
@@ -733,7 +759,9 @@ describe('SignificantEventsMaintenanceService', () => {
         .mockResolvedValueOnce({} as never) // swept inventory
         .mockRejectedValueOnce(new Error('reset state write failed'));
 
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'Significant Events reset persist failed in space: "default" (reset state write failed). The data was already deleted and these spaces stay paused; run Reset again to return them to enabled'
+      );
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
         {
           name: DETECTIONS_DATA_STREAM,

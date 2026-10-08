@@ -7,12 +7,16 @@
 
 import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SignificantEventsServer } from '../../types';
+import { toMessage } from './to_message';
 
 const SPACE_SO_TYPE = 'space';
-/** Matches the default `xpack.spaces.maxSpaces`, so a typical deployment is one page. */
+/** Only a page size, not a cap: the point-in-time finder pages through every space. */
 const SPACES_PAGE_SIZE = 1000;
 
-/** Every space id via the internal client, for sweeps without a user request. */
+/**
+ * Every space id via the internal client, for sweeps without a user request. This reads the
+ * Spaces plugin's own `space` saved object type, so it must stay in sync with that plugin.
+ */
 const findAllSpaceIdsInternally = async (server: SignificantEventsServer): Promise<SpaceId[]> => {
   const finder = server.core.savedObjects
     .createInternalRepository([SPACE_SO_TYPE])
@@ -38,5 +42,10 @@ export const requireAllSpaceIds = async (server: SignificantEventsServer): Promi
   if (!server.spaces) {
     return [DEFAULT_SPACE_ID];
   }
-  return [...new Set([DEFAULT_SPACE_ID, ...(await findAllSpaceIdsInternally(server))])];
+  try {
+    // The default space is forced in because it always exists but may not be listed yet.
+    return [...new Set([DEFAULT_SPACE_ID, ...(await findAllSpaceIdsInternally(server))])];
+  } catch (error) {
+    throw new Error(`Could not list spaces: ${toMessage(error)}`, { cause: error });
+  }
 };

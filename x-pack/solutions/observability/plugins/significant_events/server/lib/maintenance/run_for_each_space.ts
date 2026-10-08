@@ -15,9 +15,9 @@ export interface ISpaceFailure {
 }
 
 /**
- * Runs `run` for every space in order and keeps going when one throws, so a failure in
- * one space cannot leave the later spaces unswept. Returns the failures for the caller to
- * report with `throwSpaceFailures`.
+ * Runs `run` for every space and keeps going when one throws, so a failure in one space
+ * cannot leave the later spaces unswept. Returns the failures for the caller to throw with
+ * `throwSpaceFailures`; callers that also want a per-space log line add it themselves.
  */
 export async function runForEachSpace({
   spaceIds,
@@ -27,6 +27,8 @@ export async function runForEachSpace({
   run: (spaceId: SpaceId) => Promise<void>;
 }): Promise<ISpaceFailure[]> {
   const failures: ISpaceFailure[] = [];
+  // Sequential on purpose: each step writes a saved object and calls the workflow API, and a
+  // deployment can have up to `xpack.spaces.maxSpaces` spaces, so fanning out would burst them.
   for (const spaceId of spaceIds) {
     try {
       await run(spaceId);
@@ -37,22 +39,35 @@ export async function runForEachSpace({
   return failures;
 }
 
+const describeFailures = (failures: ISpaceFailure[]): string =>
+  failures.map(({ spaceId, error }) => `"${spaceId}" (${toMessage(error)})`).join(', ');
+
 /**
- * Throws nothing for an empty list, the original error for one failure, and an
- * `AggregateError` naming every failed space otherwise, so no failed space is hidden
- * behind the first one.
+ * Throws nothing for an empty list. Otherwise throws an error that names every failed space,
+ * so the failing space is never lost behind the first error: the original error is the
+ * `cause` for one failure, an `AggregateError` of all of them for several. `hint` tells the
+ * reader what to do about the spaces left behind.
  */
-export function throwSpaceFailures(action: string, failures: ISpaceFailure[]): void {
+export function throwSpaceFailures({
+  action,
+  failures,
+  hint,
+}: {
+  action: string;
+  failures: ISpaceFailure[];
+  hint?: string;
+}): void {
   if (failures.length === 0) {
     return;
   }
+  const message = `${action} failed in ${
+    failures.length === 1 ? 'space' : `${failures.length} spaces`
+  }: ${describeFailures(failures)}${hint ? `. ${hint}` : ''}`;
   if (failures.length === 1) {
-    throw failures[0].error;
+    throw new Error(message, { cause: failures[0].error });
   }
   throw new AggregateError(
     failures.map(({ error }) => error),
-    `${action} failed in ${failures.length} spaces: ${failures
-      .map(({ spaceId, error }) => `"${spaceId}" (${toMessage(error)})`)
-      .join(', ')}`
+    message
   );
 }
