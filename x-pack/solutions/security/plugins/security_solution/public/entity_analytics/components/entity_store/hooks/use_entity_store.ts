@@ -8,7 +8,11 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { EntityType, type GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
+import {
+  EntityType,
+  type EntityType as EntityStoreEntityType,
+  type GetEntityStoreStatusResponse,
+} from '@kbn/entity-store/common';
 import { SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
@@ -98,6 +102,20 @@ export const useInstallEntityStoreMutation = () => {
     },
     {
       mutationKey: INSTALL_ENTITY_STORE_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
+
+export const INSTALL_ENTITY_ENGINE_KEY = ['POST', 'INSTALL_ENTITY_ENGINE'];
+export const useInstallEntityEngineMutation = () => {
+  const queryClient = useQueryClient();
+  const { installEntityStore } = useEntityStoreRoutes();
+
+  return useMutation<unknown, ResponseError, EntityStoreEntityType>(
+    (entityType) => installEntityStore([entityType], ENTITY_STORE_INSTALL_CONTEXT),
+    {
+      mutationKey: INSTALL_ENTITY_ENGINE_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
     }
   );

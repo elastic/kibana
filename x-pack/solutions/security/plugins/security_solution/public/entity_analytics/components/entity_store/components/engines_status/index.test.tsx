@@ -12,11 +12,11 @@ import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
-const mockInstallMutate = jest.fn();
+const mockInstallEngineMutate = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
-  useInstallEntityStoreMutation: () => ({
-    mutate: mockInstallMutate,
+  useInstallEntityEngineMutation: () => ({
+    mutate: mockInstallEngineMutate,
     isLoading: false,
   }),
 }));
@@ -92,7 +92,7 @@ describe('EngineStatus', () => {
     expect(screen.getByText('Download status')).toBeInTheDocument();
   });
 
-  it('does not present an absent service engine as needing installation', () => {
+  it('lists all built-in engines even when some are missing', () => {
     mockUseEntityStore.mockReturnValue({
       data: {
         engines: [
@@ -110,15 +110,19 @@ describe('EngineStatus', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.queryByText('Service Store')).not.toBeInTheDocument();
+    expect(screen.getByText('User Store')).toBeInTheDocument();
+    expect(screen.getByText('Host Store')).toBeInTheDocument();
+    expect(screen.getByText('Service Store')).toBeInTheDocument();
+    expect(screen.getByText('Generic Store')).toBeInTheDocument();
+    expect(screen.getAllByText('Install')).toHaveLength(3);
   });
 
-  it('continues to show an installed service engine', () => {
+  it('installs a missing engine by type from its row', () => {
     mockUseEntityStore.mockReturnValue({
       data: {
         engines: [
           {
-            type: EntityType.service,
+            type: EntityType.user,
             components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
           },
         ],
@@ -131,7 +135,39 @@ describe('EngineStatus', () => {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByText('Service Store')).toBeInTheDocument();
+    const serviceHeading = screen.getByText('Service Store').closest('h4');
+    fireEvent.click(serviceHeading!.querySelector('button')!);
+
+    expect(mockInstallEngineMutate).toHaveBeenCalledWith(EntityType.service);
+    expect(mockInstallEngineMutate).toHaveBeenCalledTimes(1);
+  });
+
+  it('repairs only the selected existing engine', () => {
+    mockUseEntityStore.mockReturnValue({
+      data: {
+        engines: [
+          {
+            type: EntityType.host,
+            components: [{ id: 'entity_engine_id', installed: false, resource: 'entity_engine' }],
+          },
+          {
+            type: EntityType.user,
+            components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
+
+    fireEvent.click(screen.getByText('Reinstall'));
+
+    expect(mockInstallEngineMutate).toHaveBeenCalledWith(EntityType.host);
+    expect(mockInstallEngineMutate).toHaveBeenCalledTimes(1);
   });
 
   it('calls downloadJson when download button is clicked', () => {

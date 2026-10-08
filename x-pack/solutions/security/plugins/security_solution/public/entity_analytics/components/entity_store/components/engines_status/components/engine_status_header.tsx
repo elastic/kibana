@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexItem, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { capitalize } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityType } from '../../../../../../../common/entity_analytics/types';
+import type { EntityType } from '@kbn/entity-store/common';
 
 export const EngineStatusHeader = ({
   entityType,

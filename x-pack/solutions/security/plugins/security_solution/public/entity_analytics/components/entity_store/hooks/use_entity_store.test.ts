@@ -12,6 +12,7 @@ import React from 'react';
 import {
   useEntityStoreStatus,
   useInstallEntityStoreMutation,
+  useInstallEntityEngineMutation,
   useStartEntityStoreMutation,
   useStopEntityStoreMutation,
   useDeleteEntityStoreMutation,
@@ -126,6 +127,33 @@ describe('use_entity_store hooks — execution context wiring', () => {
         contextFor('entity_store_install')
       )
     );
+  });
+
+  it('useInstallEntityEngineMutation posts only the requested type and refetches status', async () => {
+    installEntityStore.mockResolvedValueOnce({});
+
+    const { result } = renderHook(
+      () => ({
+        status: useEntityStoreStatus(),
+        installEngine: useInstallEntityEngineMutation(),
+      }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(getEntityStoreStatus).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      result.current.installEngine.mutate(EntityType.enum.service);
+    });
+
+    await waitFor(() =>
+      expect(installEntityStore).toHaveBeenCalledWith(
+        [EntityType.enum.service],
+        contextFor('entity_store_install')
+      )
+    );
+    await waitFor(() => expect(getEntityStoreStatus).toHaveBeenCalledTimes(2));
+    expect(mockShouldInstallServiceEngine).not.toHaveBeenCalled();
   });
 
   it('useStartEntityStoreMutation threads entity_store_start context to startEntityStore', async () => {
