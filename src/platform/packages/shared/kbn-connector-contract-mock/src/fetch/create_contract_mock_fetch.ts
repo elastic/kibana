@@ -102,12 +102,22 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
 const isDocumentList = (specs: ContractMockOptions['specs']): specs is readonly OpenApiDocument[] =>
   Array.isArray(specs);
 
+// Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
+// as Microsoft Graph, so mocks created from the same document share its operations.
+const loadedSpecs = new WeakMap<OpenApiDocument, Map<string | undefined, ContractOperation[]>>();
+
+const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation[] => {
+  const bySource = loadedSpecs.get(document) ?? new Map();
+  loadedSpecs.set(document, bySource);
+  const operations = bySource.get(source) ?? loadContractOperations(document, source);
+  bySource.set(source, operations);
+  return operations;
+};
+
 const loadSpecs = (specs: ContractMockOptions['specs']): ContractOperation[] =>
   isDocumentList(specs)
-    ? specs.flatMap((document) => loadContractOperations(document))
-    : Object.entries(specs).flatMap(([source, document]) =>
-        loadContractOperations(document, source)
-      );
+    ? specs.flatMap((document) => loadSpec(document))
+    : Object.entries(specs).flatMap(([source, document]) => loadSpec(document, source));
 
 const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
   method,
