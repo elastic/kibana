@@ -41,4 +41,14 @@ describe('UpdatePackageRequestSchema', () => {
       })
     ).toThrow();
   });
+
+  it.each([true, false])('accepts logsdb_columnar: %s', (logsdbColumnar) => {
+    expect(UpdatePackageRequestSchema.body.validate({ logsdb_columnar: logsdbColumnar })).toEqual(
+      expect.objectContaining({ logsdb_columnar: logsdbColumnar })
+    );
+  });
+
+  it('rejects a non-boolean logsdb_columnar', () => {
+    expect(() => UpdatePackageRequestSchema.body.validate({ logsdb_columnar: 'opt_in' })).toThrow();
+  });
 });

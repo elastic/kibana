@@ -45,11 +45,19 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import {
+  getLogsdbColumnarReadiness,
+  isLogsdbColumnarReady,
+} from '../../../../../../../../common/services';
 import { SideBarColumn } from '../../../components/side_bar_column';
 import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 
-import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
+import {
+  ColumnarIndexModeSwitch,
+  KeepPoliciesUpToDateSwitch,
+  NamespaceCustomizationSection,
+} from '../components';
 import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
@@ -420,6 +428,89 @@ export const SettingsPage: React.FC<Props> = memo(
       updatePackageMutation,
     ]);
 
+    // Columnar index mode: one choice per integration, stored on the installation. The toggle is
+    // only offered when at least one logs data stream of the installed package declares
+    // readiness; data streams marked `unsupported` are listed so the user knows why they stay on
+    // LogsDB.
+    const columnarReadyDataStreams = useMemo(
+      () =>
+        (packageInfo.data_streams ?? []).filter((dataStream) =>
+          isLogsdbColumnarReady(getLogsdbColumnarReadiness(packageInfo, dataStream))
+        ),
+      [packageInfo]
+    );
+    const columnarUnsupportedDataStreams = useMemo(
+      () =>
+        (packageInfo.data_streams ?? [])
+          .filter(
+            (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'unsupported'
+          )
+          .map((dataStream) => dataStream.dataset),
+      [packageInfo]
+    );
+    const shouldShowColumnarIndexModeSwitch = Boolean(
+      installationInfo && columnarReadyDataStreams.length > 0
+    );
+    const logsdbColumnarEnabled = installationInfo?.logsdb_columnar_enabled ?? false;
+    const [columnarSwitchValue, setColumnarSwitchValue] = useState<boolean>(logsdbColumnarEnabled);
+
+    useEffect(() => {
+      setColumnarSwitchValue(logsdbColumnarEnabled);
+    }, [logsdbColumnarEnabled]);
+
+    const handleColumnarIndexModeSwitchChange = useCallback(() => {
+      const nextValue = !columnarSwitchValue;
+      setColumnarSwitchValue(nextValue);
+
+      updatePackageMutation.mutate(
+        {
+          pkgName: packageInfo.name,
+          pkgVersion: packageInfo.version,
+          body: { logsdb_columnar: nextValue },
+        },
+        {
+          onSuccess: () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                defaultMessage: 'Integration settings saved',
+              }),
+              text: nextValue
+                ? i18n.translate('xpack.fleet.integrations.columnarIndexModeEnabledSuccess', {
+                    defaultMessage:
+                      'Log data streams for {title} switch to the logsdb_columnar index mode at the next rollover',
+                    values: { title },
+                  })
+                : i18n.translate('xpack.fleet.integrations.columnarIndexModeDisabledSuccess', {
+                    defaultMessage:
+                      'Log data streams for {title} go back to LogsDB at the next rollover',
+                    values: { title },
+                  }),
+            });
+          },
+          onError: (error) => {
+            // Put the switch back where it was: the server rejected the change.
+            setColumnarSwitchValue(!nextValue);
+            notifications.toasts.addError(error, {
+              title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                defaultMessage: 'Error saving integration settings',
+              }),
+              toastMessage: i18n.translate('xpack.fleet.integrations.columnarIndexModeError', {
+                defaultMessage: 'Error saving integration settings for {title}',
+                values: { title },
+              }),
+            });
+          },
+        }
+      );
+    }, [
+      columnarSwitchValue,
+      notifications.toasts,
+      packageInfo.name,
+      packageInfo.version,
+      title,
+      updatePackageMutation,
+    ]);
+
     const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
 
     const updateAvailable =
@@ -503,6 +594,21 @@ export const SettingsPage: React.FC<Props> = memo(
                         checked={keepPoliciesUpToDateSwitchValue}
                         onChange={handleKeepPoliciesUpToDateSwitchChange}
                         disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
+                  {shouldShowColumnarIndexModeSwitch && (
+                    <>
+                      <ColumnarIndexModeSwitch
+                        checked={columnarSwitchValue}
+                        onChange={handleColumnarIndexModeSwitchChange}
+                        disabled={
+                          !authz.integrations.writePackageSettings ||
+                          updatePackageMutation.isLoading
+                        }
+                        unsupportedDataStreams={columnarUnsupportedDataStreams}
                       />
                       <EuiSpacer size="l" />
                     </>

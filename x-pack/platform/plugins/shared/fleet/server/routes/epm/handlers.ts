@@ -415,6 +415,9 @@ export const updatePackageHandler: FleetRequestHandler<
 
   const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
     savedObjectsClient,
+    // Needed to apply a `logsdb_columnar` change to the package's index templates.
+    esClient: (await context.core).elasticsearch.client.asInternalUser,
+    logger: appContextService.getLogger(),
     pkgName,
     ...request.body,
   });

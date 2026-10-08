@@ -49,6 +49,7 @@ import {
   EpmPackagesSchemaV10,
   EpmPackagesSchemaV11,
   EpmPackagesSchemaV12,
+  EpmPackagesSchemaV13,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1763,6 +1764,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV12.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV12,
+          },
+        },
+        '13': {
+          changes: [
+            {
+              // `logsdb_columnar_enabled` is never searched or aggregated on, and the type is
+              // `dynamic: false`, so it only needs to live in `_source`; no mapping is added.
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV13.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV13,
           },
         },
       },

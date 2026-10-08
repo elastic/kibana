@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { ExperimentalIndexingFeature } from '../../../../common/types';
@@ -17,6 +17,11 @@ import { PackageNotFoundError } from '../../../errors';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
+import {
+  applyLogsdbColumnarIndexMode,
+  assertLogsdbColumnarSupported,
+  getInstalledPackageOrThrow,
+} from './update_logsdb_columnar';
 
 export interface NamespaceCustomizationDiff {
   addedNamespaces: string[];
@@ -33,6 +38,9 @@ export async function updatePackage(
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
+    /** Required to apply a `logsdb_columnar` change to the package's index templates. */
+    esClient?: ElasticsearchClient;
+    logger?: Logger;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
 ): Promise<{
   packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
@@ -41,10 +49,13 @@ export async function updatePackage(
 }> {
   const {
     savedObjectsClient,
+    esClient,
+    logger,
     pkgName,
     keepPoliciesUpToDate,
     namespace_customization_enabled_for: newNamespaceCustomization,
     namespace_customization_settings: newNamespaceCustomizationSettings,
+    logsdb_columnar: newLogsdbColumnar,
   } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
@@ -65,6 +76,24 @@ export async function updatePackage(
     removedNamespaces: [],
   };
   const ilmPolicyChanges: IlmPolicyChange[] = [];
+
+  // The user's columnar choice is stored once per installation. Resolve it before anything is
+  // written so an unsupported package is rejected without leaving the saved object and the
+  // Elasticsearch templates out of sync.
+  let installedPackageWithAssets;
+  const isLogsdbColumnarChanged =
+    newLogsdbColumnar !== undefined &&
+    newLogsdbColumnar !== installedPackage.attributes.logsdb_columnar_enabled;
+
+  if (isLogsdbColumnarChanged) {
+    installedPackageWithAssets = await getInstalledPackageOrThrow(savedObjectsClient, pkgName);
+    assertLogsdbColumnarSupported({
+      pkgName,
+      packageInfo: installedPackageWithAssets.packageInfo,
+      enabled: newLogsdbColumnar!,
+    });
+    updateAttrs.logsdb_columnar_enabled = newLogsdbColumnar;
+  }
 
   if (keepPoliciesUpToDate !== undefined) {
     updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;
@@ -153,6 +182,19 @@ export async function updatePackage(
       installedPackage.id,
       updateAttrs
     );
+  }
+
+  // Apply the columnar change to Elasticsearch after the choice has been persisted, so the
+  // stored state always describes what Fleet is applying.
+  if (isLogsdbColumnarChanged && esClient && logger) {
+    await applyLogsdbColumnarIndexMode({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName,
+      enabled: newLogsdbColumnar!,
+      installedPackageWithAssets,
+    });
   }
 
   const packageInfo = await getPackageInfo({

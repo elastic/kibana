@@ -28,6 +28,9 @@ jest.mock('../../services', () => {
     appContextService: {
       getTaskManagerStart: jest.fn().mockReturnValue({}),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+      getLogger: jest
+        .fn()
+        .mockReturnValue({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() }),
     },
   };
 });
