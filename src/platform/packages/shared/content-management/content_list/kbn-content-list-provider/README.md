@@ -159,7 +159,7 @@ The sort a list opens with is resolved once at mount:
 | 2 | `features.sorting.initialSort` |
 | 3 | The default (`title` ascending) |
 
-A saved value that is malformed or no longer offered (a removed field, or a direction a field doesn't allow) is ignored. Persistence only applies when sorting is enabled.
+Saved sorts are validated against the field-and-direction pairs offered by `features.sorting`. This is the same allowlist used to validate the `?sort=` URL parameter. The provider does not know which table columns are sortable, so a table-header sort not included in this configuration is not restored after remounting. In that case, the list falls back to `initialSort` or the default. To persist a table-header sort, include its field in `sorting.fields`. This also exposes those choices in the Sort dropdown.
 
 `initialSort` is therefore the sort for users who haven't chosen one. A `?sort=` URL param overrides the opening sort for that visit and is **not** saved, so following a shared link never overwrites your preference. `sort` is omitted from the URL while it equals the opening sort, which means a URL without `sort` shows each viewer their own opening sort.
 
