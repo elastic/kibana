@@ -7,12 +7,12 @@
 
 import type { DeployGroup } from './deploy_groups';
 import {
-  collectExtensionResults,
-  mergeExtensionResults,
-  newMembersByPolicy,
-  planPolicyReuse,
-} from './reuse_package_policy';
-import type { PolicyExtension } from './reuse_package_policy';
+  collectPolicyUpdateResults,
+  mergePolicyUpdateResults,
+  addedInstanceIdsByPolicy,
+  planPolicyUpdates,
+} from './plan_policy_updates';
+import type { PolicyUpdatePlanItem } from './plan_policy_updates';
 
 function makeGroup(
   groupId: string,
@@ -29,16 +29,18 @@ function makeGroup(
   };
 }
 
-describe('planPolicyReuse', () => {
+describe('planPolicyUpdates', () => {
   it('joins the policy of a tracked member of the same group', () => {
     const full = makeGroup('aws', ['elb', 's3']);
     // Managed integrations list only the untracked members to deploy.
     const toDeploy = makeGroup('aws', ['s3']);
 
-    const { createGroups, extensions } = planPolicyReuse([toDeploy], [full], { elb: 'policy-A' });
+    const { createGroups, policyUpdates } = planPolicyUpdates([toDeploy], [full], {
+      elb: 'policy-A',
+    });
 
     expect(createGroups).toEqual([]);
-    expect(extensions).toEqual([
+    expect(policyUpdates).toEqual([
       {
         policyId: 'policy-A',
         group: toDeploy,
@@ -51,88 +53,88 @@ describe('planPolicyReuse', () => {
   it('keeps already-tracked members in the update when the whole group is passed (agent-based)', () => {
     const full = makeGroup('aws', ['elb', 's3']);
 
-    const { extensions } = planPolicyReuse([full], [full], { elb: 'policy-A' });
+    const { policyUpdates } = planPolicyUpdates([full], [full], { elb: 'policy-A' });
 
-    expect(extensions[0].memberInstanceIds).toEqual(['elb', 's3']);
-    expect(extensions[0].resolvedInstanceIds).toEqual(['elb', 's3']);
+    expect(policyUpdates[0].memberInstanceIds).toEqual(['elb', 's3']);
+    expect(policyUpdates[0].resolvedInstanceIds).toEqual(['elb', 's3']);
   });
 
   it('creates when no member of the group is tracked', () => {
     const group = makeGroup('aws', ['s3']);
 
-    const { createGroups, extensions } = planPolicyReuse([group], [group], {
+    const { createGroups, policyUpdates } = planPolicyUpdates([group], [group], {
       other: 'policy-other',
     });
 
     expect(createGroups).toEqual([group]);
-    expect(extensions).toEqual([]);
+    expect(policyUpdates).toEqual([]);
   });
 
   it('does not join a policy of another namespace', () => {
     const prod = makeGroup('aws__prod', ['s3'], { namespace: 'prod' });
     const dflt = makeGroup('aws', ['elb']);
 
-    const { createGroups } = planPolicyReuse([prod], [prod, dflt], { elb: 'policy-A' });
+    const { createGroups } = planPolicyUpdates([prod], [prod, dflt], { elb: 'policy-A' });
 
     expect(createGroups).toEqual([prod]);
   });
 
-  it('never reuses a policy for a duplicate group', () => {
+  it('always creates a policy for a duplicate group', () => {
     const duplicate = makeGroup('s3-copy', ['s3-copy'], { isDuplicateGroup: true });
 
-    const { createGroups, extensions } = planPolicyReuse([duplicate], [duplicate], {
+    const { createGroups, policyUpdates } = planPolicyUpdates([duplicate], [duplicate], {
       elb: 'policy-A',
       's3-copy': 'policy-D',
     });
 
     expect(createGroups).toEqual([duplicate]);
-    expect(extensions).toEqual([]);
+    expect(policyUpdates).toEqual([]);
   });
 
   it('joins the policy that holds most of the group when an older deployment split it', () => {
     const full = makeGroup('aws', ['a', 'b', 'c', 'new']);
     const toDeploy = makeGroup('aws', ['new']);
 
-    const { extensions } = planPolicyReuse([toDeploy], [full], {
+    const { policyUpdates } = planPolicyUpdates([toDeploy], [full], {
       a: 'policy-1',
       b: 'policy-2',
       c: 'policy-2',
     });
 
-    expect(extensions[0].policyId).toBe('policy-2');
-    expect(extensions[0].memberInstanceIds).toEqual(['b', 'c', 'new']);
+    expect(policyUpdates[0].policyId).toBe('policy-2');
+    expect(policyUpdates[0].memberInstanceIds).toEqual(['b', 'c', 'new']);
   });
 
   it('leaves members tracked on another policy out of the update and its result', () => {
     const full = makeGroup('aws', ['a', 'b', 'c']);
 
-    const { extensions } = planPolicyReuse([full], [full], {
+    const { policyUpdates } = planPolicyUpdates([full], [full], {
       a: 'policy-1',
       b: 'policy-2',
       c: 'policy-2',
     });
 
-    expect(extensions[0].policyId).toBe('policy-2');
-    expect(extensions[0].resolvedInstanceIds).toEqual(['b', 'c']);
+    expect(policyUpdates[0].policyId).toBe('policy-2');
+    expect(policyUpdates[0].resolvedInstanceIds).toEqual(['b', 'c']);
   });
 
   it('splits several groups independently', () => {
     const awsFull = makeGroup('aws', ['elb', 's3']);
     const otherFull = makeGroup('other', ['x']);
 
-    const { createGroups, extensions } = planPolicyReuse(
+    const { createGroups, policyUpdates } = planPolicyUpdates(
       [makeGroup('aws', ['s3']), otherFull],
       [awsFull, otherFull],
       { elb: 'policy-A' }
     );
 
-    expect(extensions.map((e) => e.policyId)).toEqual(['policy-A']);
+    expect(policyUpdates.map((e) => e.policyId)).toEqual(['policy-A']);
     expect(createGroups.map((g) => g.groupId)).toEqual(['other']);
   });
 });
 
-describe('collectExtensionResults', () => {
-  const extensions = [
+describe('collectPolicyUpdateResults', () => {
+  const policyUpdates = [
     {
       policyId: 'policy-A',
       group: makeGroup('aws', ['s3']),
@@ -148,7 +150,7 @@ describe('collectExtensionResults', () => {
   ];
 
   it('maps resolved instances to the updated policy and fails the ones whose update failed', () => {
-    const outcome = collectExtensionResults(extensions, [
+    const outcome = collectPolicyUpdateResults(policyUpdates, [
       { status: 'fulfilled', value: undefined },
       { status: 'rejected', reason: new Error('boom') },
     ]);
@@ -159,12 +161,12 @@ describe('collectExtensionResults', () => {
   });
 });
 
-describe('newMembersByPolicy', () => {
-  const extension = (
+describe('addedInstanceIdsByPolicy', () => {
+  const policyUpdate = (
     policyId: string,
     resolvedInstanceIds: string[],
     memberInstanceIds = resolvedInstanceIds
-  ): PolicyExtension => ({
+  ): PolicyUpdatePlanItem => ({
     policyId,
     group: makeGroup('aws', resolvedInstanceIds),
     memberInstanceIds,
@@ -172,8 +174,8 @@ describe('newMembersByPolicy', () => {
   });
 
   it('lists the instances that are not tracked yet, per policy', () => {
-    const result = newMembersByPolicy(
-      [extension('policy-A', ['elb', 's3']), extension('policy-B', ['x'])],
+    const result = addedInstanceIdsByPolicy(
+      [policyUpdate('policy-A', ['elb', 's3']), policyUpdate('policy-B', ['x'])],
       { elb: 'policy-A' }
     );
 
@@ -181,12 +183,14 @@ describe('newMembersByPolicy', () => {
   });
 
   it('leaves out a policy whose instances are all tracked already', () => {
-    expect(newMembersByPolicy([extension('policy-A', ['elb'])], { elb: 'policy-A' })).toEqual({});
+    expect(
+      addedInstanceIdsByPolicy([policyUpdate('policy-A', ['elb'])], { elb: 'policy-A' })
+    ).toEqual({});
   });
 
-  it('joins the new instances of several extensions of the same policy', () => {
-    const result = newMembersByPolicy(
-      [extension('policy-A', ['a']), extension('policy-A', ['b'])],
+  it('joins the new instances of several policyUpdates of the same policy', () => {
+    const result = addedInstanceIdsByPolicy(
+      [policyUpdate('policy-A', ['a']), policyUpdate('policy-A', ['b'])],
       {}
     );
 
@@ -194,8 +198,8 @@ describe('newMembersByPolicy', () => {
   });
 });
 
-describe('mergeExtensionResults', () => {
-  const extensionFor = (policyId: string): PolicyExtension => ({
+describe('mergePolicyUpdateResults', () => {
+  const policyUpdateFor = (policyId: string): PolicyUpdatePlanItem => ({
     policyId,
     group: makeGroup('aws', [policyId]),
     memberInstanceIds: [policyId],
@@ -203,10 +207,10 @@ describe('mergeExtensionResults', () => {
   });
 
   it('keeps the attempted results in place and treats policies written earlier as succeeded', () => {
-    const [written, failed, ok] = ['written', 'failed', 'ok'].map(extensionFor);
+    const [written, failed, ok] = ['written', 'failed', 'ok'].map(policyUpdateFor);
     const reason = new Error('boom');
 
-    const merged = mergeExtensionResults(
+    const merged = mergePolicyUpdateResults(
       [written, failed, ok],
       [failed, ok],
       [
@@ -223,7 +227,7 @@ describe('mergeExtensionResults', () => {
   });
 
   it('returns only successes when nothing was attempted', () => {
-    const merged = mergeExtensionResults([extensionFor('a'), extensionFor('b')], [], []);
+    const merged = mergePolicyUpdateResults([policyUpdateFor('a'), policyUpdateFor('b')], [], []);
 
     expect(merged.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
   });

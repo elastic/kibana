@@ -28,9 +28,9 @@ export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
   /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
-  extraMembersByPolicy?: Record<string, string[]>;
+  addedInstanceIdsByPolicy?: Record<string, string[]>;
   /** Policies already written this run with the surviving members: counted as updated, not PUT again. */
-  skipUpdatePolicyIds?: ReadonlySet<string>;
+  alreadyUpdatedPolicyIds?: ReadonlySet<string>;
 }
 
 /**
@@ -46,17 +46,17 @@ export async function cleanupManagedIntegrationsPolicies(
     pendingCleanupPolicyIds,
     currentPolicyIdsByInstance,
     authenticateAndDeployStep,
-    extraMembersByPolicy,
-    skipUpdatePolicyIds,
+    addedInstanceIdsByPolicy,
+    alreadyUpdatedPolicyIds,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
   const succeededDeletes: string[] = [];
   const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
   const alreadyUpdated = planned.toUpdate.filter(({ policyId }) =>
-    skipUpdatePolicyIds?.has(policyId)
+    alreadyUpdatedPolicyIds?.has(policyId)
   );
-  const toRun = planned.toUpdate.filter(({ policyId }) => !skipUpdatePolicyIds?.has(policyId));
+  const toRun = planned.toUpdate.filter(({ policyId }) => !alreadyUpdatedPolicyIds?.has(policyId));
 
   const { connectorId, staticKeys, existingSecretRefs } = authenticateAndDeployStep;
   // Typed keys become a new Fleet secret on every policy they are sent to: store them once and
@@ -86,7 +86,7 @@ export async function cleanupManagedIntegrationsPolicies(
     run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
       updateManagedIntegrationsPolicy(
         policyId,
-        [...survivingInstanceIds, ...(extraMembersByPolicy?.[policyId] ?? [])],
+        [...survivingInstanceIds, ...(addedInstanceIdsByPolicy?.[policyId] ?? [])],
         sharedRefs
           ? {
               ...opts,

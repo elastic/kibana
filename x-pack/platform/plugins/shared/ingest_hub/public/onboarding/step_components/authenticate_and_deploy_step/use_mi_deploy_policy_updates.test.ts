@@ -102,7 +102,7 @@ async function runDeploy(params: UseMiDeployParams) {
   });
 }
 
-describe('useMiDeploy — reuse of an existing package policy', () => {
+describe('useMiDeploy — updating an existing package policy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchRefs.mockResolvedValue(STORED_REFS);
@@ -168,7 +168,7 @@ describe('useMiDeploy — reuse of an existing package policy', () => {
     expect(mockDeployGroup.mock.calls[0][0].instanceIds).toEqual(['rds']);
   });
 
-  it('never reuses a policy for a duplicate instance', async () => {
+  it('always creates a policy for a duplicate instance', async () => {
     const duplicate: DeployGroup = {
       groupId: 's3-copy',
       instanceIds: ['s3-copy'],
@@ -201,7 +201,7 @@ describe('useMiDeploy — reuse of an existing package policy', () => {
     );
 
     // The cleanup update carries the added service; no second PUT and no POST.
-    expect(mockCleanup.mock.calls[0][0].extraMembersByPolicy).toEqual({ 'policy-A': ['s3'] });
+    expect(mockCleanup.mock.calls[0][0].addedInstanceIdsByPolicy).toEqual({ 'policy-A': ['s3'] });
     expect(mockUpdate).not.toHaveBeenCalled();
     expect(mockDeployGroup).not.toHaveBeenCalled();
   });
@@ -220,10 +220,10 @@ describe('useMiDeploy — reuse of an existing package policy', () => {
   });
 
   it('writes a policy once when it is changed, pruned and added to in the same run', async () => {
-    mockCleanup.mockImplementation(async (opts: { skipUpdatePolicyIds: Set<string> }) => ({
+    mockCleanup.mockImplementation(async (opts: { alreadyUpdatedPolicyIds: Set<string> }) => ({
       toDelete: [],
       // What the real cleanup reports for a policy a dirty update already wrote.
-      toUpdate: opts.skipUpdatePolicyIds.has('policy-A')
+      toUpdate: opts.alreadyUpdatedPolicyIds.has('policy-A')
         ? [{ policyId: 'policy-A', survivingInstanceIds: ['elb'] }]
         : [],
     }));

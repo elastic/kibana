@@ -645,9 +645,9 @@ describe('useAgentBasedDeploy — incremental deploy filtering', () => {
   });
 });
 
-// ─── useAgentBasedDeploy — reuse of an existing package policy ──────────────
+// ─── useAgentBasedDeploy — updating an existing package policy ──────
 
-describe('useAgentBasedDeploy — reuse of an existing package policy', () => {
+describe('useAgentBasedDeploy — updating an existing package policy', () => {
   // One bundled group of the package: serviceA is deployed, serviceB was just added.
   const bundledGroup = {
     groupId: 'aws',
@@ -784,7 +784,7 @@ describe('useAgentBasedDeploy — reuse of an existing package policy', () => {
       await result.current.handleDeploy();
     });
 
-    expect(mockCleanupAgentBasedPolicies.mock.calls[0][0].extraMembersByPolicy).toEqual({
+    expect(mockCleanupAgentBasedPolicies.mock.calls[0][0].addedInstanceIdsByPolicy).toEqual({
       'pkg-policy-A': ['serviceB'],
     });
     expect(mockUpdateAgentBasedPolicy).not.toHaveBeenCalled();
@@ -826,7 +826,7 @@ describe('useAgentBasedDeploy — reuse of an existing package policy', () => {
     expect(mockDeployToExistingAgentPolicies.mock.calls[0][0][0].instanceIds).toEqual(['serviceB']);
   });
 
-  it('never reuses a policy for a duplicate group', async () => {
+  it('always creates a policy for a duplicate group', async () => {
     const duplicateGroup = { ...bundledGroup, isDuplicateGroup: true };
     makeFlowMock({ policyIdsByInstance: { serviceA: 'pkg-policy-A' } });
     mockBuildAgentBasedTargets.mockReturnValue([duplicateGroup]);

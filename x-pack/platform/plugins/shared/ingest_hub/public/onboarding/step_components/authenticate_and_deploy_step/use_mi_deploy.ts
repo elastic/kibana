@@ -20,12 +20,12 @@ import { toSOServiceVars } from './package_inputs';
 import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import {
-  collectExtensionResults,
-  mergeExtensionResults,
-  newMembersByPolicy,
-  planPolicyReuse,
-} from './reuse_package_policy';
-import type { PolicyExtension } from './reuse_package_policy';
+  collectPolicyUpdateResults,
+  mergePolicyUpdateResults,
+  addedInstanceIdsByPolicy,
+  planPolicyUpdates,
+} from './plan_policy_updates';
+import type { PolicyUpdatePlanItem } from './plan_policy_updates';
 import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import {
@@ -277,16 +277,20 @@ export function useMiDeploy({
       // Groups that join an already deployed package policy are updated (PUT) and read their
       // secret refs from that policy; only the others become new policies.
       let createGroups: DeployGroup[] = [];
-      let extensions: PolicyExtension[] = [];
+      let policyUpdates: PolicyUpdatePlanItem[] = [];
       // Instances joining each policy; written with it by whichever phase updates the policy.
-      let addedMembers: Record<string, string[]> = {};
+      let addedByPolicy: Record<string, string[]> = {};
       // A policy is written once per run, by the first phase that reaches it (dirty update,
-      // cleanup, or the extension below). Every write is built from the current settings and
+      // cleanup, or the policy update below). Every write is built from the current settings and
       // covers the surviving members plus the added ones, so later phases skip it.
-      const claimedPolicyIds = new Set<string>();
+      const updatedPolicyIdsThisRun = new Set<string>();
       const planReuse = (groups: DeployGroup[]) => {
-        ({ createGroups, extensions } = planPolicyReuse(groups, deployGroups, policyIdsByInstance));
-        addedMembers = newMembersByPolicy(extensions, policyIdsByInstance);
+        ({ createGroups, policyUpdates } = planPolicyUpdates(
+          groups,
+          deployGroups,
+          policyIdsByInstance
+        ));
+        addedByPolicy = addedInstanceIdsByPolicy(policyUpdates, policyIdsByInstance);
       };
 
       let groupsToDeploy: DeployGroup[];
@@ -320,7 +324,7 @@ export function useMiDeploy({
             }
           : authenticateAndDeployStep;
       // Refs of the secret this run stored for typed keys (a dirty update, a cleanup update or a
-      // policy extension): every policy written afterwards uses it instead of storing them again.
+      // add-service update): every policy written afterwards uses it instead of storing them again.
       let storedSharedRefs: ExistingSecretRefs | undefined;
       // Override the connector when auth changed or when deploying with static keys.
       // Static keys never use a cloud connector; any connector attached externally after
@@ -365,11 +369,11 @@ export function useMiDeploy({
         // the others use that secret, so a replacement never leaves one secret per policy.
         // Services joining a policy are written with it; policies a cleanup already wrote have
         // everything this update would send.
-        for (const [policyId, ids] of Object.entries(addedMembers)) {
+        for (const [policyId, ids] of Object.entries(addedByPolicy)) {
           byPolicy.get(policyId)?.push(...ids);
         }
         const items = [...byPolicy.entries()].filter(
-          ([policyId]) => !claimedPolicyIds.has(policyId)
+          ([policyId]) => !updatedPolicyIdsThisRun.has(policyId)
         );
         const { results, sharedRefs: storedRefs } = await runWithSharedSecrets({
           items,
@@ -392,7 +396,7 @@ export function useMiDeploy({
         // New policies of this run use the secret just created, not another one.
         storedSharedRefs = storedRefs ?? storedSharedRefs;
         results.forEach((result, i) => {
-          if (result.status === 'fulfilled') claimedPolicyIds.add(items[i][0]);
+          if (result.status === 'fulfilled') updatedPolicyIdsThisRun.add(items[i][0]);
           if (result.status === 'rejected') {
             // eslint-disable-next-line no-console
             console.error(
@@ -518,12 +522,12 @@ export function useMiDeploy({
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
             servicesMap: servicesMap ?? new Map(),
-            extraMembersByPolicy: addedMembers,
-            skipUpdatePolicyIds: claimedPolicyIds,
+            addedInstanceIdsByPolicy: addedByPolicy,
+            alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
-          cleanupOps.toUpdate.forEach(({ policyId }) => claimedPolicyIds.add(policyId));
+          cleanupOps.toUpdate.forEach(({ policyId }) => updatedPolicyIdsThisRun.add(policyId));
           ({ cleanedInstanceIds, remainingPending, cleanupFailed } = reconcileMiCleanupOps(
             cleanupOps,
             plan.liveStalePolicyIds,
@@ -619,12 +623,12 @@ export function useMiDeploy({
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
             servicesMap: servicesMap ?? new Map(),
-            extraMembersByPolicy: addedMembers,
-            skipUpdatePolicyIds: claimedPolicyIds,
+            addedInstanceIdsByPolicy: addedByPolicy,
+            alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
-          cleanupOps.toUpdate.forEach(({ policyId }) => claimedPolicyIds.add(policyId));
+          cleanupOps.toUpdate.forEach(({ policyId }) => updatedPolicyIdsThisRun.add(policyId));
           const retryReconciliation = reconcileMiCleanupOps(
             cleanupOps,
             plan.retryLiveStale,
@@ -712,34 +716,41 @@ export function useMiDeploy({
       // One package policy bundles all services of a package: a service added to a package that
       // already has a policy joins it instead of creating a second one. Policies a dirty update or
       // cleanup already wrote this run took the new services with them.
-      const unwritten = extensions.filter(({ policyId }) => !claimedPolicyIds.has(policyId));
-      const { results: attemptedResults, sharedRefs: extensionRefs } = await runWithSharedSecrets({
-        items: unwritten,
-        hasTypedSecrets,
-        initialRefs: storedSharedRefs,
-        // An update can delete the secret it replaced: finish one before starting the next.
-        sequential: true,
-        run: ({ policyId, memberInstanceIds }, sharedRefs) =>
-          updateManagedIntegrationsPolicy(policyId, memberInstanceIds, {
-            instances: serviceSettings?.instances ?? [],
-            storedServiceVars,
-            globalRegion,
-            namespace,
-            authenticateAndDeployStep: withSharedRefs(sharedRefs),
-            servicesMap: servicesMap ?? new Map(),
-            ...connectorOverride,
-          }),
-        getPolicyId: ({ policyId }) => policyId,
-        fetchRefs: fetchAgentlessSecretRefs,
-      });
-      storedSharedRefs = extensionRefs ?? storedSharedRefs;
-      attemptedResults.forEach((result) => {
+      const pendingPolicyUpdates = policyUpdates.filter(
+        ({ policyId }) => !updatedPolicyIdsThisRun.has(policyId)
+      );
+      const { results: attemptedPolicyUpdateResults, sharedRefs: policyUpdateRefs } =
+        await runWithSharedSecrets({
+          items: pendingPolicyUpdates,
+          hasTypedSecrets,
+          initialRefs: storedSharedRefs,
+          // An update can delete the secret it replaced: finish one before starting the next.
+          sequential: true,
+          run: ({ policyId, memberInstanceIds }, sharedRefs) =>
+            updateManagedIntegrationsPolicy(policyId, memberInstanceIds, {
+              instances: serviceSettings?.instances ?? [],
+              storedServiceVars,
+              globalRegion,
+              namespace,
+              authenticateAndDeployStep: withSharedRefs(sharedRefs),
+              servicesMap: servicesMap ?? new Map(),
+              ...connectorOverride,
+            }),
+          getPolicyId: ({ policyId }) => policyId,
+          fetchRefs: fetchAgentlessSecretRefs,
+        });
+      storedSharedRefs = policyUpdateRefs ?? storedSharedRefs;
+      attemptedPolicyUpdateResults.forEach((result) => {
         if (result.status === 'rejected') {
           // eslint-disable-next-line no-console
           console.error('Failed to add service to managed-integration policy:', result.reason);
         }
       });
-      const extensionResults = mergeExtensionResults(extensions, unwritten, attemptedResults);
+      const policyUpdateResults = mergePolicyUpdateResults(
+        policyUpdates,
+        pendingPolicyUpdates,
+        attemptedPolicyUpdateResults
+      );
 
       // Results are in createGroups order. Typed credentials are stored once (first policy) and
       // shared by the other new policies, or by all of them when an earlier update just stored them.
@@ -762,13 +773,13 @@ export function useMiDeploy({
 
       const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
       const created = collectDeployResults(results, createGroups);
-      const extended = collectExtensionResults(extensions, extensionResults);
+      const updated = collectPolicyUpdateResults(policyUpdates, policyUpdateResults);
       const newPolicyIdsByInstance = {
         ...created.policyIdsByInstance,
-        ...extended.policyIdsByInstance,
+        ...updated.policyIdsByInstance,
       };
-      const newFailed = [...created.failedInstances, ...extended.failedInstances];
-      const errorsByInstance = { ...created.errorsByInstance, ...extended.errorsByInstance };
+      const newFailed = [...created.failedInstances, ...updated.failedInstances];
+      const errorsByInstance = { ...created.errorsByInstance, ...updated.errorsByInstance };
       const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.

@@ -39,7 +39,7 @@ export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
    */
   hasTypedSecrets?: boolean;
   /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
-  extraMembersByPolicy?: Record<string, string[]>;
+  addedInstanceIdsByPolicy?: Record<string, string[]>;
 }
 
 /**
@@ -56,7 +56,7 @@ export async function cleanupAgentBasedPolicies(
     pendingCleanupPolicyIds,
     currentPolicyIdsByInstance,
     hasTypedSecrets,
-    extraMembersByPolicy,
+    addedInstanceIdsByPolicy,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -83,7 +83,7 @@ export async function cleanupAgentBasedPolicies(
     run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
       updateAgentBasedPolicy(
         policyId,
-        [...survivingInstanceIds, ...(extraMembersByPolicy?.[policyId] ?? [])],
+        [...survivingInstanceIds, ...(addedInstanceIdsByPolicy?.[policyId] ?? [])],
         sharedRefs
           ? {
               ...opts,

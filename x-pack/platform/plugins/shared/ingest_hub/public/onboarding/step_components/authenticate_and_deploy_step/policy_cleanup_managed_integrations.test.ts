@@ -430,7 +430,7 @@ describe('cleanupManagedIntegrationsPolicies — one write per policy', () => {
   it('writes the surviving members plus the instances joining the policy', async () => {
     const ops = await cleanupManagedIntegrationsPolicies({
       ...common,
-      extraMembersByPolicy: { 'policy-1': ['inst-new'] },
+      addedInstanceIdsByPolicy: { 'policy-1': ['inst-new'] },
     });
 
     expect(mockUpdateAgentless).toHaveBeenCalledTimes(1);
@@ -443,7 +443,7 @@ describe('cleanupManagedIntegrationsPolicies — one write per policy', () => {
   it('counts a policy written earlier in the run as updated without writing it again', async () => {
     const ops = await cleanupManagedIntegrationsPolicies({
       ...common,
-      skipUpdatePolicyIds: new Set(['policy-1']),
+      alreadyUpdatedPolicyIds: new Set(['policy-1']),
     });
 
     expect(mockUpdateAgentless).not.toHaveBeenCalled();

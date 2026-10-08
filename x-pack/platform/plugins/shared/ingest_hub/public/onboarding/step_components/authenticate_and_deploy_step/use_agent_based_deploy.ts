@@ -34,11 +34,11 @@ import {
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import {
-  collectExtensionResults,
-  mergeExtensionResults,
-  newMembersByPolicy,
-  planPolicyReuse,
-} from './reuse_package_policy';
+  collectPolicyUpdateResults,
+  mergePolicyUpdateResults,
+  addedInstanceIdsByPolicy,
+  planPolicyUpdates,
+} from './plan_policy_updates';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -210,9 +210,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       try {
         // A group whose package already has a package policy joins it (PUT) instead of creating a
         // second one. A new agent policy recreates every package policy, so nothing is reused.
-        const { createGroups, extensions } = isNewPolicyDeploy
-          ? { createGroups: targetsToDeploy, extensions: [] }
-          : planPolicyReuse(
+        const { createGroups, policyUpdates } = isNewPolicyDeploy
+          ? { createGroups: targetsToDeploy, policyUpdates: [] }
+          : planPolicyUpdates(
               targetsToDeploy,
               targets,
               detectAndReviewStep.policyIdsByInstance ?? {}
@@ -255,15 +255,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           refs: ExistingSecretRefs
         ) => creds && withoutCoveredCredentials(creds, refs);
 
-        // Refs of the secret this run stored for typed keys (a cleanup, dirty or extension update):
+        // Refs of the secret this run stored for typed keys (a cleanup, dirty or add-service update):
         // every policy written afterwards uses it instead of storing them again.
         let storedSharedRefs: ExistingSecretRefs | undefined;
         // A policy is written once per run, by the first phase that reaches it (cleanup, dirty
-        // update, or the extension below). Every write is built from the current settings and
+        // update, or the policy update below). Every write is built from the current settings and
         // covers the surviving members plus the added ones, so later phases skip it.
-        const claimedPolicyIds = new Set<string>();
-        const addedMembers = newMembersByPolicy(
-          extensions,
+        const updatedPolicyIdsThisRun = new Set<string>();
+        const addedByPolicy = addedInstanceIdsByPolicy(
+          policyUpdates,
           detectAndReviewStep.policyIdsByInstance ?? {}
         );
 
@@ -306,10 +306,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 : [],
             agentCredentials: credentials,
             hasTypedSecrets: hasTypedKeys,
-            extraMembersByPolicy: addedMembers,
+            addedInstanceIdsByPolicy: addedByPolicy,
           });
           storedSharedRefs = cleanupOps.sharedRefs;
-          cleanupOps.toUpdate.forEach(({ policyId }) => claimedPolicyIds.add(policyId));
+          cleanupOps.toUpdate.forEach(({ policyId }) => updatedPolicyIdsThisRun.add(policyId));
           // Only prune successfully cleaned instances — failures stay in pendingCleanupPolicyIds.
           const succeededIds = new Set([
             ...cleanupOps.toDelete,
@@ -366,11 +366,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
-          for (const [policyId, ids] of Object.entries(addedMembers)) {
+          for (const [policyId, ids] of Object.entries(addedByPolicy)) {
             byPolicy.get(policyId)?.push(...ids);
           }
           const dirtyItems = [...byPolicy.entries()].filter(
-            ([policyId]) => !claimedPolicyIds.has(policyId)
+            ([policyId]) => !updatedPolicyIdsThisRun.has(policyId)
           );
           if (dirtyItems.length > 0) {
             // Typed keys become new Fleet secrets: store them once on the first package policy
@@ -388,7 +388,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             });
             storedSharedRefs = sharedRefs ?? storedSharedRefs;
             redeployResults.forEach((result, i) => {
-              if (result.status === 'fulfilled') claimedPolicyIds.add(dirtyItems[i][0]);
+              if (result.status === 'fulfilled') updatedPolicyIdsThisRun.add(dirtyItems[i][0]);
               if (result.status === 'rejected') {
                 // eslint-disable-next-line no-console
                 console.error(
@@ -538,10 +538,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         // Services joining an existing package policy. Policies a cleanup or dirty update already
         // wrote this run took the new services with them.
-        const unwritten = extensions.filter(({ policyId }) => !claimedPolicyIds.has(policyId));
-        const { results: attemptedResults, sharedRefs: extensionRefs } = await runWithSharedSecrets(
-          {
-            items: unwritten,
+        const pendingPolicyUpdates = policyUpdates.filter(
+          ({ policyId }) => !updatedPolicyIdsThisRun.has(policyId)
+        );
+        const { results: attemptedPolicyUpdateResults, sharedRefs: policyUpdateRefs } =
+          await runWithSharedSecrets({
+            items: pendingPolicyUpdates,
             hasTypedSecrets: hasTypedKeys,
             initialRefs: storedSharedRefs,
             // An update can delete the secret it replaced: finish one before starting the next.
@@ -550,17 +552,20 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               updatePolicyWithRefs(policyId, memberInstanceIds, shared),
             getPolicyId: ({ policyId }) => policyId,
             fetchRefs: fetchPackagePolicySecretRefs,
-          }
-        );
-        storedSharedRefs = extensionRefs ?? storedSharedRefs;
-        attemptedResults.forEach((result) => {
+          });
+        storedSharedRefs = policyUpdateRefs ?? storedSharedRefs;
+        attemptedPolicyUpdateResults.forEach((result) => {
           if (result.status === 'rejected') {
             // eslint-disable-next-line no-console
             console.error('Failed to add service to agent-based package policy:', result.reason);
           }
         });
-        const extensionResults = mergeExtensionResults(extensions, unwritten, attemptedResults);
-        const extended = collectExtensionResults(extensions, extensionResults);
+        const policyUpdateResults = mergePolicyUpdateResults(
+          policyUpdates,
+          pendingPolicyUpdates,
+          attemptedPolicyUpdateResults
+        );
+        const updated = collectPolicyUpdateResults(policyUpdates, policyUpdateResults);
         // New package policies use the secret the updates above stored, not another one.
         if (storedSharedRefs) {
           baseOpts.authenticateAndDeployStep = {
@@ -620,17 +625,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         }
         // A failed update leaves the members already deployed on the policy deployed: only the
         // instances being added (or the ones this Retry asked for) fail.
-        const failedByExtension = extended.failedInstances.filter(
+        const failedByPolicyUpdate = updated.failedInstances.filter(
           (id) =>
             !(id in (detectAndReviewStep.policyIdsByInstance ?? {})) || instanceIds?.includes(id)
         );
-        policyIdsByInstance = { ...policyIdsByInstance, ...extended.policyIdsByInstance };
-        failed = [...failed, ...failedByExtension];
+        policyIdsByInstance = { ...policyIdsByInstance, ...updated.policyIdsByInstance };
+        failed = [...failed, ...failedByPolicyUpdate];
         errorsByInstance = {
           ...errorsByInstance,
           ...Object.fromEntries(
-            Object.entries(extended.errorsByInstance).filter(([id]) =>
-              failedByExtension.includes(id)
+            Object.entries(updated.errorsByInstance).filter(([id]) =>
+              failedByPolicyUpdate.includes(id)
             )
           ),
         };
