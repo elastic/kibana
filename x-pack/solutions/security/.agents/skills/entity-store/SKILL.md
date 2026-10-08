@@ -30,7 +30,8 @@ require `securitySolution` privileges in this phase.
 
 ## v2 Architecture (Active — 9.4.0+)
 
-- **Kibana Task** runs ESQL queries with timestamp-based pagination (~10s batches)
+- **Kibana Task** per entity type (`entity_store:v2:extract_entity_task:{type}`, timeout 59s) runs ESQL extraction. Default cadence: user and host 1m, service 10m, generic 30m (`DEFAULT_CONFIG_BY_TYPE` in `server/domain/config/merge_config.ts`). A sampled timestamp probe splits the window into log slices; entity pages inside a slice use an entity-id cursor. See `server/domain/logs_extraction/PAGINATION.md`.
+- **Dual-process extraction (user only, behind `entityStore.dualProcess.enabled`)**: a second task, `entity_store:v2:extract_entity_non_priority_task:user`, also runs every 1m. Priority (the original task) reads only `event.kind: asset` logs, defers on the volume cap and never samples. Non-priority reads everything else, drops on the cap and uses adaptive ES|QL `SAMPLE`. Each process has its own cursor, status and error on the engine descriptor (`nonPriorityLogExtractionState`, `nonPriorityStatus`, `nonPriorityError`).
 - **Upsert with conflict retry** — never overwrites entire documents
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
 - **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` from `@kbn/entity-store/common/euid_helpers` (there is no `@kbn/entity-store-plugin`). Browser code must not import that synchronously — it pulls in `@kbn/streamlang`; use `loadEuidApi()` / `euid_browser` instead. Also ES stored scripts.
@@ -55,11 +56,12 @@ x-pack/platform/plugins/shared/entity_store/
 │   │   ├── asset_manager/            # Engine lifecycle + legacy index migration
 │   │   ├── resolution/               # Resolution: link/unlink/group
 │   │   ├── crud_client/              # CRUD: create/update/bulk/delete
-│   │   ├── errors/                   # 12 error classes (see references/errors.md)
-│   │   └── logs_extraction/          # ESQL query builders
+│   │   ├── config/merge_config.ts    # Log extraction config layers (getMergedConfig)
+│   │   ├── errors/                   # 14 error classes (see references/errors.md)
+│   │   └── logs_extraction/          # ESQL query builders, sampling.ts, PAGINATION.md
 │   ├── routes/apis/                  # Route handlers (still /api/security/...)
 │   └── tasks/
-│       ├── extract_entity_task.ts    # ESQL extraction (~10s)
+│       ├── extract_entity_task.ts    # ESQL extraction; one task per type, plus non-priority for user
 │       └── entity_maintainers/       # Maintainers framework (plural)
 ```
 
@@ -82,8 +84,8 @@ x-pack/platform/plugins/shared/entity_store/
 
 **Public route base:** `/api/security/entity_store/` — API version `2023-10-31` (use header `elastic-api-version: 2023-10-31`)
 **Internal route base:** `/internal/security/entity_store/` — API version `2` (use header `elastic-api-version: 2`)
-**Public routes:** status, install, uninstall, start, stop, CRUD (entities), resolution (link/unlink/group), check_privileges
-**Internal routes:** entity_maintainers, force_log_extraction, force_history_snapshot, force_ccs_extract_to_updates
+**Public routes:** status, install, update, uninstall, start, stop, history_snapshot (enable/disable), CRUD (entities), resolution (link/unlink/group, rules)
+**Internal routes:** check_privileges, start, stop (per process), `{entityType}` (per-type config), entity_maintainers, force_log_extraction, force_history_snapshot
 **Resolution routes (public):** `resolution/link` (POST), `resolution/unlink` (POST), `resolution/group` (GET)
 **Maintainer routes (internal):** `entity_maintainers` (GET), `entity_maintainers/start/{id}` (PUT), `entity_maintainers/stop/{id}` (PUT), `entity_maintainers/run/{id}` (POST), `entity_maintainers/init` (POST)
 **Resolution field path:** `entity.relationships.resolution.resolved_to` (NOT `entity.resolved_to`)
@@ -101,7 +103,7 @@ x-pack/platform/plugins/shared/entity_store/
 - **`entity.source` ≠ `entity.namespace`** — `entity.source` (array) lists the index names the entity data came from. `entity.namespace` is the identity provider namespace (`active_directory`, `okta`, `entra_id`, `local`). For resolution target selection by IDP priority, use `entity.namespace`.
 - **Document `_id` = SHA-256 hash of EUID** — not the EUID itself. See `hashEuid` in `common/domain/euid/hash_euid.ts` (`HASH_ALG = 'sha256'`).
 - **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
-- **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
+- **CCS indices are part of the main extraction query**. `getLocalAndRemoteIndexPatterns` splits local and `cluster:` patterns, and both go into one ES|QL query. ES|QL views (`$.*`) are excluded on origin and on every remote.
 - **bucket_sort VALUE_NULL** — grouping queries using `bucket_sort` with pagination error if `from` is null. Always coalesce to 0: `from: pageIndex * pageSize || 0`. Manifests as `EsError: [bucket_sort] from doesn't support values of type: VALUE_NULL`.
 - **Never re-export a *value* from `common/index.ts`** — `kibana.jsonc` lists that barrel under `extraPublicDirs`, so the optimizer makes it a bundle entry whose exports are consumed by other plugins at runtime (via `__kbnBundles__`), which means every export must be kept. Nothing there can be tree-shaken, so a value re-export ships its entire source module — plus that module's runtime imports — on every page load, even when the only consumer is server code. Re-exporting `ENTITY_CREATED_BY` from `domain/definitions/common_fields` cost +4.9KB (+46% over the `entityStore` page-load limit) and failed CI. Server-only values belong in a deep import at the call site (e.g. `@kbn/entity-store/common/domain/definitions/common_fields`); `export type` is free. Verify with `node scripts/build_kibana_platform_plugins.js --dist`, then read the `page load bundle size` entry for `entityStore` in `target/public/bundles/metrics.json`.
 - **ES bulk `update` with partial `doc` does NOT run `default_pipeline`** — known upstream bug ([elastic/elasticsearch#105804](https://github.com/elastic/elasticsearch/issues/105804), fix targeted for ES v9.4.0). The latest index has a `dot_expander` pipeline, but it's bypassed by partial updates. Always use `unflattenObject` from `@kbn/object-utils` when writing partial docs with dotted keys (see `bulkUpdateEntityDocs` in `infra/elasticsearch/resolution.ts`).
@@ -115,7 +117,7 @@ x-pack/platform/plugins/shared/entity_store/
 
 ## Feature Gating
 
-**Two separate gates exist — don't confuse them:**
+**Three separate gates exist — don't confuse them:**
 
 1. **UI setting** `securitySolution:entityStoreEnableV2` — runtime toggle for v2 features in the frontend (entity store data source, id-based scoring, dual-write)
    - Frontend: `useUiSetting$<boolean>('securitySolution:entityStoreEnableV2')`
@@ -126,7 +128,12 @@ x-pack/platform/plugins/shared/entity_store/
    - Defaults to `true` in `common/experimental_features.ts`
    - The **risk score maintainer** only registers when this flag is `true` (checked in `plugin.ts` at setup)
 
-A third, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
+3. **Cloud feature flag** `entityStore.dualProcess.enabled` (`FF_DUAL_PROCESS_ENABLED` from `common/index.ts`, default `false`) turns on priority and non-priority extraction for user. Read at runtime, no restart needed.
+   - Both task types are registered and scheduled no matter the flag. With the flag off the non-priority task does nothing on each run, and flag transitions set `nonPriorityStatus` (turning it off also clears the non-priority cursor and error).
+   - With the flag off: internal `start`/`stop` return 404, `force_log_extraction` defaults to `single`, and `GET /status` leaves out the `nonPriority` block.
+   - Enable locally with `feature_flags.overrides.entityStore.dualProcess.enabled: true`.
+
+A fourth, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
 
 ## Risk Score Architecture (v2)
 

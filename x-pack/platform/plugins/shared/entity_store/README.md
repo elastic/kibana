@@ -2,6 +2,39 @@
 
 Central place for Entities management and logs extraction.
 
+## Logs extraction
+
+Each entity type has a Task Manager task that reads source logs with ES|QL and upserts entities into `.entities.v2.latest.{namespace}`.
+
+| Task type | Runs for | Default cadence |
+|---|---|---|
+| `entity_store:v2:extract_entity_task:{type}` | every type | user and host `1m`, service `10m`, generic `30m` |
+| `entity_store:v2:extract_entity_non_priority_task:user` | user; scheduled always, does work only with the dual-process flag on | same as user, `1m` |
+
+### Dual-process extraction
+
+With the Cloud feature flag `entityStore.dualProcess.enabled` (`FF_DUAL_PROCESS_ENABLED`) on, user extraction is split in two processes by a document-level gate (`priorityExtractionGate` in `common/domain/definitions/user.ts`):
+
+- Priority reads only `event.kind: asset` logs. It defers on the volume cap and never samples.
+- Non-priority reads every other log. It drops on the volume cap and uses adaptive ES|QL `SAMPLE` above the volume budget.
+
+Each process keeps its own cursor, status and error on the engine descriptor (`logExtractionState` / `status` / `error` and `nonPriorityLogExtractionState` / `nonPriorityStatus` / `nonPriorityError`). With the flag off, only the first task does work and extraction runs as `single`, which is the same as before the split.
+
+### Configuration layers
+
+`getMergedConfig` (`server/domain/config/merge_config.ts`) builds the config for one type and process. Later layers win:
+
+1. Code defaults (`LATEST_LOG_EXTRACTION_DEFAULTS`)
+2. Per-type code defaults (`DEFAULT_CONFIG_BY_TYPE`)
+3. Per-process defaults (`DEFAULT_CONFIG_BY_MODE`)
+4. Store-wide overrides, set with `logExtraction` on public `install` and `update`
+5. Per-type overrides (`logExtractionConfig`), set with `logExtraction` on internal `PUT /internal/security/entity_store/{entityType}`
+6. Non-priority overrides (`nonPriorityLogExtractionConfig`, incl. `samplingRate`), set with `nonPriorityOverride` on the same route
+
+`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the volume fields (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can.
+
+Pagination, sampling, the volume cap and crash recovery are described in [server/domain/logs_extraction/PAGINATION.md](server/domain/logs_extraction/PAGINATION.md).
+
 ## Entity AI Summary — index privileges
 
 The Entity AI Summary is persisted to the entity **metadata** datastream
