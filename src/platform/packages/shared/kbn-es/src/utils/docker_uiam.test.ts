@@ -8,7 +8,12 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import {
+  getUiamContainers,
+  initializeUiamContainers,
+  runUiamContainer,
+  UIAM_CONTAINERS,
+} from './docker_uiam';
 
 // Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
 jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
@@ -51,6 +56,50 @@ jest.mock('../paths', () => ({
 beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
   jest.resetAllMocks();
+});
+
+describe('#getUiamContainers()', () => {
+  const ephemeralExpirationParam = (container: { params: string[] }) =>
+    container.params.find((param) => param.startsWith('uiam.tokens.ephemeral.expiration='));
+
+  test('leaves the ephemeral token lifetime to UIAM by default', () => {
+    expect(getUiamContainers({ includeOAuth: true }).map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  test('sets the ephemeral token lifetime on the UIAM container only', () => {
+    const containers = getUiamContainers({ includeOAuth: true, ephemeralTokenExpiration: 'PT1M' });
+
+    expect(containers.map(({ name }) => name)).toEqual(['uiam-cosmosdb', 'uiam', 'uiam-oauth']);
+    expect(containers.map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      'uiam.tokens.ephemeral.expiration=PT1M',
+      undefined,
+    ]);
+    expect(containers[1].params.slice(-2)).toEqual([
+      '--env',
+      'uiam.tokens.ephemeral.expiration=PT1M',
+    ]);
+  });
+
+  test.each(['PT1M', 'PT90S', 'PT2M30S', 'PT5M'])('accepts %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).not.toThrow();
+  });
+
+  test.each(['PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])('rejects %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
+      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+    );
+  });
+
+  test('does not change the shared container definitions', () => {
+    getUiamContainers({ ephemeralTokenExpiration: 'PT1M' });
+
+    expect(UIAM_CONTAINERS.map(ephemeralExpirationParam)).toEqual([undefined, undefined]);
+  });
 });
 
 describe(`#runUiamContainer()`, () => {
@@ -207,7 +256,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"org\\".level=INFO",
             "--env",
-            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=INFO",
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
             "--env",

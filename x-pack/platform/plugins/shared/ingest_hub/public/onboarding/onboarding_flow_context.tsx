@@ -18,8 +18,13 @@ import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
+import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
+import { useIsSelfManaged } from './use_is_self_managed';
 
-/** Method used when nothing is persisted. Read and compared against in exactly one place each. */
+/**
+ * Method used when nothing is persisted, on cloud and serverless. Self-managed defaults to
+ * 'agent_based' instead — see `defaultDeploymentMethod` in the provider.
+ */
 const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
 
 /**
@@ -44,6 +49,12 @@ export interface AuthenticateAndDeployStepState {
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   pendingIacTemplate?: PendingIacTemplate;
+  /**
+   * Secret refs already stored on deployed policies, for credentials the user chose to keep.
+   * Never held in the provider: Deploy reads them fresh from Fleet just before it builds a policy
+   * body, so a ref replaced by an earlier deploy is never reused.
+   */
+  existingSecretRefs?: ExistingSecretRefs;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -241,7 +252,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const clearStagedStaticKeys = useCallback(() => {
     setStaticKeysState(undefined);
-  }, []);
+    // The persisted access key id would seed the keys again after a reload.
+    const next = { ...persistedAuthStepRef.current, accessKeyId: undefined };
+    persistedAuthStepRef.current = next;
+    setPersistedAuthenticateAndDeployStep(next);
+  }, [setPersistedAuthenticateAndDeployStep]);
 
   const setAuthMethod = useCallback(
     (method: CloudOnboardingDeploymentAuthMethod) => {
@@ -472,8 +487,18 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     refetch: refetchAwsServiceMatrix,
   } = useAwsServiceMatrix();
 
-  const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+  // Self-managed has no agentless infrastructure, so agent-based is the only usable method there.
+  const isSelfManaged = useIsSelfManaged();
+  const defaultDeploymentMethod: DeploymentMethod = isSelfManaged
+    ? 'agent_based'
+    : DEFAULT_DEPLOYMENT_METHOD;
+
+  // On self-managed the persisted value is ignored rather than defaulted from: a session started
+  // before this restriction (or carried over from a cloud deployment) would otherwise resurrect
+  // 'managed_integration' and send Step 2 and the deploy builders down the agentless path.
+  const deploymentMethod: DeploymentMethod = isSelfManaged
+    ? 'agent_based'
+    : persistedAuthenticateAndDeployStep?.deploymentMethod ?? defaultDeploymentMethod;
 
   // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
   // agent-based needs the package's own vars. Every step reads the matrix through the context, so
@@ -512,10 +537,16 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {
       const prev = persistedAuthStepRef.current;
-      // Compare against the same default the context exposes. An unset persisted field still
-      // reads as 'managed_integration' everywhere else, so comparing the raw undefined would
+      // Compare against the same value the context exposes. An unset persisted field still
+      // reads as the default everywhere else, so comparing the raw undefined would
       // treat the first select of the default method as a change and wipe an in-progress deploy.
-      const current = prev?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+      // On self-managed the context always reports 'agent_based' regardless of what is persisted,
+      // so mirror that here — otherwise a stale persisted 'managed_integration' would make the
+      // auto-force effect's setDeploymentMethod('agent_based') look like a real switch and reset
+      // the deploy state on every mount.
+      const current = isSelfManaged
+        ? 'agent_based'
+        : prev?.deploymentMethod ?? defaultDeploymentMethod;
       if (current === method) return;
 
       // Switching method invalidates every artifact of the previous one: an agent policy is
@@ -542,7 +573,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         isDirty: false,
       });
     },
-    [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
+    [
+      setPersistedAuthenticateAndDeployStep,
+      setDetectAndReviewStep,
+      isSelfManaged,
+      defaultDeploymentMethod,
+    ]
   );
 
   const setServiceSettingsMethod = useCallback(

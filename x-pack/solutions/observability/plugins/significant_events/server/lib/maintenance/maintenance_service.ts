@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -20,6 +21,7 @@ import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/acto
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
+import { ruleIdsFromQueryLinks } from '../knowledge_indicators/rule_ids_from_query_links';
 import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
   createFeatureSettingsController,
@@ -33,7 +35,12 @@ import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
-import { deleteV2Rules, setV2RulesEnabled } from './rules';
+import {
+  deleteV2Rules,
+  runRulesInBatches,
+  setV2RulesEnabled,
+  type RulesToggleResult,
+} from './rules';
 import { getAllSpaceIds } from './spaces';
 import {
   createMaintenanceStateStore,
@@ -55,6 +62,12 @@ import {
  * touching the snapshot, and always runs as the system.
  */
 type PauseRun = { mode: 'pause'; access: MaintenanceAccess } | { mode: 'reassert' };
+
+/** Lists and disables the rules backing KI queries without a user request. */
+export interface InternalRuleBackedRules {
+  listRuleIds: () => Promise<string[]>;
+  bulkDisableRules: InternalRulesClientApi['bulkDisableRules'];
+}
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -86,8 +99,8 @@ export interface SignificantEventsMaintenanceService {
   /**
    * Pause because the Nightshift feature flag was turned off, recorded as
    * `MAINTENANCE_FEATURE_FLAG_ACTOR`. Same sweep and restore snapshot as `pause`,
-   * but without a user: internal clients across every space, and rules keep
-   * running because alerting v2 has no internal rules client. When several Kibana
+   * but without a user: internal clients across every space, and rules are
+   * disabled as the internal Kibana user. When several Kibana
    * nodes call it at once, only the one that claims the paused state sweeps.
    * No-op when already paused.
    */
@@ -113,8 +126,7 @@ export interface SignificantEventsMaintenanceService {
    * deployment is paused, re-apply the pause: disable every managed workflow in
    * every space, cancel their executions, keep the Settings toggles off, and merge
    * any newly disabled workflows into the snapshot. Runs without a user request,
-   * so it uses internal clients and leaves rules alone (alerting v2 has no
-   * internal rules client). No-op when not paused.
+   * so it uses internal clients, rules included. No-op when not paused.
    */
   reassertPause(): Promise<void>;
 }
@@ -123,10 +135,12 @@ export const createSignificantEventsMaintenanceService = ({
   logger,
   server,
   getScopedClients,
+  internalRuleBackedRules,
 }: {
   logger: Logger;
   server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
+  internalRuleBackedRules: InternalRuleBackedRules;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
   const featureSettings = createFeatureSettingsController({ server, getScopedClients });
@@ -185,29 +199,61 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  /** The rule ids backing KI queries and a way to disable them as the caller or the internal user. */
+  const resolveBackedRules = async (
+    request: KibanaRequest,
+    access: MaintenanceAccess
+  ): Promise<{
+    ruleIds: string[];
+    disable: (ids: string[]) => Promise<RulesToggleResult | undefined>;
+  }> => {
+    switch (access) {
+      case 'user': {
+        const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
+          await getScopedClients({ request });
+        const links = await (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks();
+        return {
+          ruleIds: ruleIdsFromQueryLinks(links),
+          disable: async (ids) => {
+            const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+            return alertingV2RulesClient
+              ? setV2RulesEnabled(alertingV2RulesClient, ids, false)
+              : undefined;
+          },
+        };
+      }
+      case 'system':
+        return {
+          ruleIds: await internalRuleBackedRules.listRuleIds(),
+          disable: (ids) =>
+            runRulesInBatches(ids, (chunk) =>
+              internalRuleBackedRules.bulkDisableRules({ ids: chunk })
+            ),
+        };
+      default: {
+        const unhandledAccess: never = access;
+        throw new Error(`Unhandled maintenance access: ${unhandledAccess}`);
+      }
+    }
+  };
+
   const disableBackedRules = async (
     request: KibanaRequest,
+    access: MaintenanceAccess,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<string[]> => {
     try {
-      const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
-        await getScopedClients({ request });
-      const kiClient = await getKnowledgeIndicatorClient();
-      const links = await kiClient.getRuleBackedQueryLinks();
-      const ruleIds = [...new Set(links.map((link) => link.rule_id).filter(Boolean))];
+      const backedRules = await resolveBackedRules(request, access);
+      const ruleIds = [...new Set(backedRules.ruleIds)];
       if (ruleIds.length === 0) {
         return [];
       }
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-      if (!alertingV2RulesClient) {
+      const result = await backedRules.disable(ruleIds);
+      if (!result) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
         return [];
       }
-      const { toggledIds, failures: ruleFailures } = await setV2RulesEnabled(
-        alertingV2RulesClient,
-        ruleIds,
-        false
-      );
+      const { toggledIds, failures: ruleFailures } = result;
       failures.push(...ruleFailures);
       // Record only the rules we actually disabled, so resume re-enables exactly those.
       // Blanket re-enable on resume is intentional: if a user had manually disabled a
@@ -281,10 +327,7 @@ export const createSignificantEventsMaintenanceService = ({
     const spaceIds = await getAllSpaceIds({ server, request, access, failures });
     const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds, request, failures });
 
-    // Alerting v2 only offers request-scoped rules clients, so a system sweep
-    // leaves rules running.
-    const newlyDisabledRuleIds =
-      access === 'user' ? await disableBackedRules(request, failures) : [];
+    const newlyDisabledRuleIds = await disableBackedRules(request, access, failures);
 
     const workflowByKey = new Map<string, MaintenanceWorkflowTarget>();
     for (const workflow of previousWorkflows) {
@@ -562,7 +605,7 @@ export const createSignificantEventsMaintenanceService = ({
 
         logFailures(
           log,
-          `Significant Events paused because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) (rules keep running: no internal rules client), ${sweep.failures.length} failure(s)`,
+          `Significant Events paused because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
           sweep.failures
         );
       });

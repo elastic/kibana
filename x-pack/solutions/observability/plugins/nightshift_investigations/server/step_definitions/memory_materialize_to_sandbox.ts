@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
@@ -23,13 +23,11 @@ const MATERIALIZE_TIMEOUT_MS = 45_000;
 
 export const memoryMaterializeToSandboxStepDefinition = ({
   getSandboxStart,
-  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -137,7 +135,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
           async (signal) =>
             hydrateMemoryWorkspace({
               session,
-              esClient: await getMemoryEsClient(),
+              esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               agentId: trimmedAgentId,
               query: prompt,
