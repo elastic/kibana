@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useLocation } from 'react-router-dom';
 
@@ -59,6 +60,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     dataFormat,
     setDataFormat,
     agentBasedOnlySelected,
+    ecfOnlySelected,
   } = useServicesStep({ onContinue });
 
   const { detectAndReviewStep } = useOnboardingFlow();
@@ -124,6 +126,31 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
               />
             </p>
           </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {ecfOnlySelected.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.ingestHub.servicesStep.ecfOnlyCallout.title', {
+              defaultMessage: 'Some services do not support agent-based deployment',
+            })}
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.ecfOnlyCallout.body"
+                  defaultMessage="{services} can only be deployed through Elastic Cloud Forwarder. If you choose agent-based deployment in a later step, {count, plural, one {it is} other {they are}} removed from your selection."
+                  values={{
+                    count: ecfOnlySelected.length,
+                    services: <strong>{ecfOnlySelected.map((s) => s.name).join(', ')}</strong>,
+                  }}
+                />
+              </p>
+            }
+            data-test-subj="servicesStep-ecfOnlyCallout"
+          />
           <EuiSpacer size="m" />
         </>
       )}

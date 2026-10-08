@@ -102,6 +102,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     [awsServiceMatrix, selectedSet]
   );
 
+  const ecfOnlySelected = useMemo(
+    () => awsServiceMatrix.filter((s) => selectedSet.has(s.id) && s.ecfOnly),
+    [awsServiceMatrix, selectedSet]
+  );
+
   const isReady = selectedServiceIds.length > 0;
 
   const handleToggle = useCallback(
@@ -156,5 +161,6 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     dataFormat,
     setDataFormat,
     agentBasedOnlySelected,
+    ecfOnlySelected,
   };
 }
