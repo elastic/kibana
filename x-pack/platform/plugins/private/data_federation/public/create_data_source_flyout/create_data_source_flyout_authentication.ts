@@ -77,8 +77,6 @@ export const applyAuthenticationModeToDataSource = (
 ): DataSourceWithSecrets => {
   switch (data.type) {
     case 's3': {
-      // Unregistering the last settings field (anonymous S3 has none left) can remove the
-      // settings object from the submitted form values.
       const settings = authFormatSettingsByDataSourceType['s3'][mode as S3AuthenticationMode](data);
 
       return { ...data, settings};
