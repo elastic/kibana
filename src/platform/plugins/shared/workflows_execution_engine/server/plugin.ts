@@ -262,10 +262,9 @@ export class WorkflowsExecutionEnginePlugin
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
 
-    // TEMPORARY: force data-stream + 10m retention for local testing (ignores kibana.yml).
     this.dataClientBundle = createDataClientBundle({
-      source: 'data_stream',
-      dataRetention: '10m',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);

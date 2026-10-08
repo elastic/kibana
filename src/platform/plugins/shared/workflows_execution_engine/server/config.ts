@@ -35,7 +35,13 @@ const configSchema = schema.object({
     source: schema.oneOf([schema.literal('plain_index'), schema.literal('data_stream')], {
       defaultValue: 'plain_index',
     }),
-    dataRetention: schema.string({ defaultValue: '90d' }),
+    dataRetention: schema.string({
+      defaultValue: '90d',
+      validate: (value) =>
+        /^[1-9]\d*(d|h|m|s)$/.test(value)
+          ? undefined
+          : 'must be a positive duration like "90d", "12h", "30m" or "45s"',
+    }),
   }),
   eventDriven: EventTriggersConfigSchema,
   /**

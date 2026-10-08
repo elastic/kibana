@@ -19,6 +19,8 @@ export interface DocumentVersionManagerDeps {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   metadataManager: DataStreamMetadataManager;
+  /** Legacy indexes that may still hold documents; searched after the data stream. */
+  additionalIndexesToQuery?: string[];
 }
 
 export class DocumentVersionManager {
@@ -106,7 +108,7 @@ export class DocumentVersionManager {
 
     if (missing.length > 0) {
       const searchResponse = await this.deps.esClient.search({
-        index: this.deps.dataStreamName,
+        index: [this.deps.dataStreamName, ...(this.deps.additionalIndexesToQuery ?? [])],
         query: { ids: { values: missing } },
         size: missing.length,
         _source: false,

@@ -22,6 +22,7 @@ import type {
   BulkResponse,
   BulkUpdaterItem,
   DataClient,
+  DocumentVersionFields,
   ExecutionsCountRequest,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
@@ -30,6 +31,8 @@ import type {
   GetExecutionsByIdsResponse,
 } from '../../types';
 import { isBulkUpdaterItem } from '../../types';
+
+const DELETE_PAGE_SIZE = 1000;
 
 export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
@@ -58,6 +61,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
       index: this.indexesToQuery,
       ...request,
+      query: this.excludeDeleted(request.query),
       ignore_unavailable: true,
     });
 
@@ -77,6 +81,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     return this.deps.esClient.count({
       index: this.indexesToQuery,
       ...request,
+      query: this.excludeDeleted(request.query),
+      ignore_unavailable: true,
     });
   }
 
@@ -193,33 +199,98 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   public async deleteByQuery(
     _request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
-    const searchResponse = await this.deps.esClient.search({
-      index: this.deps.dataStreamName,
-      query: _request.query,
-      size: 10000,
-      seq_no_primary_term: true,
-      _source: false,
-    });
+    const startedAt = Date.now();
+    let deleted = 0;
+    let batches = 0;
+    let versionConflicts = 0;
+    const failures: estypes.BulkIndexByScrollFailure[] = [];
 
-    const bulkResponse = await this.privateBulk({
-      items: searchResponse.hits.hits.map((hit) => ({
-        operation: 'update',
-        document: { id: hit._id, deleted: true } as unknown as Partial<TExecution> & { id: string },
-        retryOnConflict: 3,
-      })),
-    });
+    // Data stream documents are soft-deleted (deleted: true), page by page. Soft-deleted
+    // documents are filtered out of the next page, so the loop ends on a short page.
+    let hasMore = true;
+    while (hasMore) {
+      const searchResponse = await this.deps.esClient.search({
+        index: this.deps.dataStreamName,
+        query: this.excludeDeleted(_request.query),
+        size: DELETE_PAGE_SIZE,
+        _source: false,
+        ignore_unavailable: true,
+      });
+      const hits = searchResponse.hits.hits;
+      if (hits.length === 0) {
+        break;
+      }
+      batches++;
+
+      const bulkResponse = await this.privateBulk({
+        // Each page must be visible to the next search.
+        refresh: true,
+        items: hits.map((hit) => ({
+          operation: 'update',
+          document: { id: hit._id, deleted: true } as unknown as Partial<TExecution> & {
+            id: string;
+          },
+          index: hit._index,
+          retryOnConflict: 3,
+        })),
+      });
+
+      let pageDeleted = 0;
+      for (const item of bulkResponse.items) {
+        if (!item.error) {
+          pageDeleted++;
+        } else {
+          const isConflict = item.error.type === 'version_conflict_engine_exception';
+          if (isConflict) {
+            versionConflicts++;
+          }
+          failures.push({
+            cause: item.error,
+            id: item.id,
+            index: item.index,
+            status: isConflict ? 409 : 500,
+          });
+        }
+      }
+      deleted += pageDeleted;
+
+      // Stop on a short page, or when nothing in the page could be deleted (no progress).
+      hasMore = hits.length >= DELETE_PAGE_SIZE && pageDeleted > 0;
+    }
+
+    // Legacy plain indexes hold regular documents, which are hard-deleted.
+    if (this.additionalIndexesToQuery.length > 0) {
+      const legacyResponse = await this.deps.esClient.deleteByQuery({
+        ..._request,
+        index: this.additionalIndexesToQuery,
+        ignore_unavailable: true,
+      });
+      deleted += legacyResponse.deleted ?? 0;
+      batches += legacyResponse.batches ?? 0;
+      versionConflicts += legacyResponse.version_conflicts ?? 0;
+      failures.push(...(legacyResponse.failures ?? []));
+    }
+
     return {
-      deleted: bulkResponse.items.filter((item) => !item.error).length,
-      batches: 1,
-      version_conflicts: bulkResponse.items.filter(
-        (item) => item.error?.type === 'version_conflict_engine_exception'
-      ).length,
+      deleted,
+      batches,
+      version_conflicts: versionConflicts,
       noops: 0,
       retries: { bulk: 0, search: 0 },
       timed_out: false,
-      took: 0,
+      took: Date.now() - startedAt,
       task: '',
-      failures: [],
+      failures,
+    };
+  }
+
+  // Soft-deleted documents must not be visible to readers.
+  private excludeDeleted(query?: estypes.QueryDslQueryContainer): estypes.QueryDslQueryContainer {
+    return {
+      bool: {
+        ...(query ? { must: [query] } : {}),
+        must_not: [{ term: { deleted: true } }],
+      },
     };
   }
 
@@ -278,6 +349,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         request: { ...request, items: mergedItems },
         logger: this.deps.logger,
         fallbackIndexes,
+        searchFallbackIndexes: this.indexesToQuery,
       });
 
       bulkResponse.items.forEach((responseItem, idx) => {
@@ -347,12 +419,31 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       request: { ...request, items: conflicted.map(({ item }) => item) },
       logger: this.deps.logger,
       fallbackIndexes,
+      searchFallbackIndexes: this.indexesToQuery,
     });
 
     retryResponse.items.forEach((responseItem, idx) => {
       result[conflicted[idx].requestIndex] = responseItem;
     });
     return result.some((item) => !!item?.error);
+  }
+
+  // A caller-supplied seqNo/primaryTerm is compare-and-set and always wins. Otherwise the cached
+  // version is used as CAS only when the item does not ask for retry_on_conflict, because ES
+  // ignores retry_on_conflict when if_seq_no is present.
+  private resolveWriteTarget(
+    item: BulkPlainItem<TExecution>,
+    version: Required<DocumentVersionFields>
+  ): DocumentVersionFields {
+    const index = item.index ?? version.index;
+
+    if (item.seqNo !== undefined) {
+      return { index, seqNo: item.seqNo, primaryTerm: item.primaryTerm };
+    }
+    if (item.retryOnConflict !== undefined) {
+      return { index };
+    }
+    return { index, seqNo: version.seqNo, primaryTerm: version.primaryTerm };
   }
 
   // Classifies plain items into sendable or preFailed, resolves the backing-index +
@@ -417,7 +508,10 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         if (version) {
           // upsert with a known version becomes an update (document exists).
           const operation = item.operation === 'upsert' ? 'update' : item.operation;
-          sendable.push({ item: { ...item, operation, ...version }, originalIndex: i });
+          sendable.push({
+            item: { ...item, operation, ...this.resolveWriteTarget(item, version) },
+            originalIndex: i,
+          });
         } else {
           // No version found — document does not exist in the data stream.
           // upsert without a version becomes a create; plain update has nothing to update.

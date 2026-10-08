@@ -12,6 +12,8 @@ import { parseDuration } from '@kbn/workflows';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const INITIAL_RETRY_INTERVAL_MS = 5 * 1000;
+const MIN_REFRESH_INTERVAL_MS = 1000;
 
 export interface DataStreamMetadata {
   retentionTime: string | undefined;
@@ -33,7 +35,7 @@ const computeRefreshIntervalMs = (retentionTime: string | undefined): number => 
   try {
     const retentionMs = parseDuration(retentionTime);
     if (retentionMs < THIRTY_DAYS_MS) {
-      return retentionMs / 30;
+      return Math.max(retentionMs / 30, MIN_REFRESH_INTERVAL_MS);
     }
   } catch {
     return DEFAULT_REFRESH_INTERVAL_MS;
@@ -80,8 +82,17 @@ export class DataStreamMetadataManager {
     this.initPromise = undefined;
   }
 
+  // A failed first load must not abort plugin start: log it and keep retrying in the background.
   private async loadAndSchedule(): Promise<void> {
-    this.metadata = await this.fetchMetadata();
+    try {
+      this.metadata = await this.fetchMetadata();
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to load data stream metadata for ${this.deps.dataStreamName}, will retry: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
     this.scheduleNextRefresh();
   }
 
@@ -107,9 +118,13 @@ export class DataStreamMetadataManager {
       clearTimeout(this.refreshTimer);
     }
 
+    const intervalMs = this.metadata
+      ? computeRefreshIntervalMs(this.metadata.retentionTime)
+      : INITIAL_RETRY_INTERVAL_MS;
+
     this.refreshTimer = setTimeout(() => {
       void this.refreshInBackground();
-    }, computeRefreshIntervalMs(this.metadata?.retentionTime));
+    }, intervalMs);
   }
 
   private async fetchMetadata(): Promise<DataStreamMetadata> {

@@ -120,7 +120,8 @@ const refreshWrittenIndexes = async (
 const mgetUpdaterSources = async <TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
   updaterBatch: Array<QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> }>,
-  fallbackIndexes: string[]
+  fallbackIndexes: string[],
+  searchFallbackIndexes: string[]
 ): Promise<Map<string, UpdaterSource<TExecution>>> => {
   const foundById = new Map<string, UpdaterSource<TExecution>>();
   const errorById = new Map<string, estypes.ErrorCause>();
@@ -183,6 +184,43 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
   for (const [id, error] of errorById) {
     if (!foundById.has(id)) {
       throw new Error(`Bulk updater source read failed for ${id}: ${JSON.stringify(error)}`);
+    }
+  }
+
+  // Documents may have rolled out of the indexes mget covered (e.g. older data stream backing
+  // indexes), so look the remaining ids up with a search across the whole target.
+  const missingIds = Array.from(projectionById.keys()).filter((id) => !foundById.has(id));
+  if (searchFallbackIndexes.length > 0 && missingIds.length > 0) {
+    const missingProjections = missingIds.map((id) => projectionById.get(id));
+    // One search for all ids, so use the full source unless every projection is narrow.
+    const includes = missingProjections.some((fields) => !fields)
+      ? undefined
+      : Array.from(new Set(missingProjections.flatMap((fields) => Array.from(fields ?? []))));
+
+    const searchResponse = await esClient.search<TExecution>({
+      index: searchFallbackIndexes,
+      query: { ids: { values: missingIds } },
+      size: missingIds.length,
+      seq_no_primary_term: true,
+      ignore_unavailable: true,
+      ...(includes ? { _source: { includes } } : {}),
+    });
+
+    for (const hit of searchResponse.hits.hits) {
+      if (
+        hit._id &&
+        hit._source &&
+        hit._seq_no !== undefined &&
+        hit._primary_term !== undefined &&
+        !foundById.has(hit._id)
+      ) {
+        foundById.set(hit._id, {
+          source: { ...hit._source, id: hit._id } as TExecution,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+          index: hit._index,
+        });
+      }
     }
   }
 
@@ -311,9 +349,12 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   request: BulkRequestOptions<TExecution>;
   logger: Logger;
   fallbackIndexes: string[];
+  /** When set, updater sources missing from the mget are searched for across these indexes. */
+  searchFallbackIndexes?: string[];
 }): Promise<BulkResponse> {
   const { esClient, request, logger } = params;
   const fallbackIndexes: string[] = params.fallbackIndexes ?? [];
+  const searchFallbackIndexes: string[] = params.searchFallbackIndexes ?? [];
 
   if (request.items.length === 0) {
     return { items: [], errors: false };
@@ -335,7 +376,12 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
       (qi): qi is QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> } =>
         isBulkUpdaterItem(qi.item)
     );
-    const foundById = await mgetUpdaterSources(esClient, updaterBatch, fallbackIndexes);
+    const foundById = await mgetUpdaterSources(
+      esClient,
+      updaterBatch,
+      fallbackIndexes,
+      searchFallbackIndexes
+    );
     const { toSend, settled: resolvedSettled } = resolveBatchToSend(
       batch,
       foundById,
