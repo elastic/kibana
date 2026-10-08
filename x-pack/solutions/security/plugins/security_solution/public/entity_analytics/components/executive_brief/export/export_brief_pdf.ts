@@ -71,7 +71,8 @@ export const exportBriefToPdf = async (job: ExecutiveBriefJob): Promise<void> =>
 
     // Download the PDF
     const pdfBytes = await pdfDoc.save();
-    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+    // Copy into an ArrayBuffer-backed view so it satisfies BlobPart.
+    const pdfBlob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
     downloadBlob(pdfBlob, generateFileName());
   } finally {
     // Restore original state (collapse accordions)
