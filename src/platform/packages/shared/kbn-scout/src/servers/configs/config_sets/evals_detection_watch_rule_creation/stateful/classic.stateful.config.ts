@@ -9,11 +9,14 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
  * managed rule-creation workflow the alertzero plugin installs at start, so alertzero must be
- * enabled. `xpack.alertzero.enabled` defaults to `false` so it is set explicitly below; the
+ * enabled. `xpack.alertzero.enabled` defaults to `false` so it is set explicitly below. Service
+ * accounts are off by default too, and alertzero installs its managed workflows only when they
+ * are enabled, so `serviceAccountsServerArgs` is equally load-bearing. The
  * suite touches no `/internal/alertzero/*` route, so the per-space
  * `securitySolution:enableAlertZero` setting does not need an override. The workflow's ai.agent
  * step additionally requires the Workflows UI and
@@ -32,6 +35,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
