@@ -104,6 +104,16 @@
     }
   },
   {
+    "id": "alertzero-common-layer",
+    "name": "AlertZero Common Layer",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/alertzero-common-layer"
+    }
+  },
+  {
     "id": "contextual-security",
     "name": "Contextual Security",
     "github": {
