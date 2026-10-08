@@ -120,18 +120,16 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   );
 
   const metaDataIcon = (
-    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="info"
-        color="text"
-        data-test-subj="documentMetadataButton"
-        onClick={(e: React.MouseEvent<HTMLElement>) => {
-          e.stopPropagation();
-          setPopoverIsOpen(!popoverIsOpen);
-        }}
-        aria-label={metaDataLabel}
-      />
-    </EuiToolTip>
+    <EuiButtonIcon
+      iconType="info"
+      color="text"
+      data-test-subj="documentMetadataButton"
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setPopoverIsOpen(!popoverIsOpen);
+      }}
+      aria-label={metaDataLabel}
+    />
   );
 
   return (
