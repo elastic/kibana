@@ -17,7 +17,8 @@ export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
-  callbacks?: ICommandCallbacks
+  callbacks?: ICommandCallbacks,
+  query?: string
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
@@ -39,6 +40,7 @@ export const validate = (
   const assignments = getColumnsDefinedInByClause(
     command,
     inputColumns,
+    query,
     context.unmappedFieldsStrategy
   );
 

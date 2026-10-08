@@ -252,6 +252,20 @@ describe('STATS Validation', () => {
             [getNoValidCallSignatureError('sum', ['keyword'])]
           );
         });
+
+        test('resolves a bare expression grouping referenced by its source name', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS m = COUNT(`BUCKET(@timestamp, 1 d)`) BY BUCKET(@timestamp, 1 d)',
+            []
+          );
+        });
+
+        test('a bare expression grouping is referenced by its exact source text', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS m = COUNT(`BUCKET(@timestamp,1 d)`) BY BUCKET(@timestamp, 1 d)',
+            ['Unknown column "BUCKET(@timestamp,1 d)"']
+          );
+        });
       });
 
       describe('constant-only parameters', () => {
