@@ -60,6 +60,7 @@ interface TabsStateInLocalStorage {
   spaceId: string;
   discoverSessionId: string | undefined;
   discoverSessionVersion: string | undefined;
+  draftSessionTitle: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
@@ -69,6 +70,7 @@ const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
   spaceId: '',
   discoverSessionId: undefined,
   discoverSessionVersion: undefined,
+  draftSessionTitle: undefined,
   openTabs: [],
   closedTabs: [],
 };
@@ -90,6 +92,7 @@ export interface TabsStorageManager {
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined,
     discoverSessionVersion?: string
+    draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -112,6 +115,7 @@ export interface TabsStorageManager {
     ) => DiscoverSession;
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
+    draftSessionTitle: string | undefined;
   };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
@@ -353,6 +357,7 @@ export const createTabsStorageManager = ({
       spaceId: storedTabsState?.spaceId || '',
       discoverSessionId: storedTabsState?.discoverSessionId || undefined,
       discoverSessionVersion: storedTabsState?.discoverSessionVersion || undefined,
+      draftSessionTitle: storedTabsState?.draftSessionTitle || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
     };
@@ -405,6 +410,7 @@ export const createTabsStorageManager = ({
     getInternalState,
     discoverSessionId,
     discoverSessionVersion
+    draftSessionTitle
   ) => {
     if (!enabled) {
       return;
@@ -422,6 +428,7 @@ export const createTabsStorageManager = ({
       spaceId: sessionInfo.spaceId,
       discoverSessionId,
       discoverSessionVersion,
+      draftSessionTitle,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -552,6 +559,11 @@ export const createTabsStorageManager = ({
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+    // The draft title belongs to the unsaved session, so only keep it when restoring its open tabs
+    const restoredDraftSessionTitle =
+      !updatedDiscoverSession && !storedTabsState.discoverSessionId
+        ? storedTabsState.draftSessionTitle
+        : undefined;
 
     // restore previously opened tabs
     if (enabled) {
@@ -565,6 +577,7 @@ export const createTabsStorageManager = ({
           allTabs: openTabs,
           selectedTabId,
           updatedDiscoverSession,
+          draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -593,6 +606,7 @@ export const createTabsStorageManager = ({
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
+          draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -614,6 +628,7 @@ export const createTabsStorageManager = ({
             allTabs: restoredTabs,
             selectedTabId,
             updatedDiscoverSession,
+            draftSessionTitle: undefined,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -646,6 +661,7 @@ export const createTabsStorageManager = ({
       allTabs,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
+      draftSessionTitle: undefined,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,

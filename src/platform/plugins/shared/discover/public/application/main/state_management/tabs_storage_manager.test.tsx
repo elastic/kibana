@@ -1623,4 +1623,127 @@ describe('TabsStorageManager', () => {
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
   });
+
+  it('should persist the draft session title to local storage', async () => {
+    const {
+      services: { storage },
+      tabsStorageManager,
+    } = create();
+
+    tabsStorageManager.loadLocally({
+      userId: mockUserId, // register userId and spaceId in tabsStorageManager
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    await tabsStorageManager.persistLocally(
+      { allTabs: [mockTab1], recentlyClosedTabs: [] },
+      mockGetInternalState,
+      undefined,
+      'My draft'
+    );
+
+    expect(storage.get(TABS_LOCAL_STORAGE_KEY)).toEqual({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      draftSessionTitle: 'My draft',
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [],
+    });
+  });
+
+  it('should restore the draft session title with the open tabs of the unsaved session', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      draftSessionTitle: 'My draft',
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab2.id });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps).toEqual({
+      allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
+      selectedTabId: mockTab2.id,
+      recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      draftSessionTitle: 'My draft',
+    });
+  });
+
+  it.each([
+    {
+      scenario: 'starting a new session',
+      urlTabId: mockTab2.id,
+      storedDiscoverSessionId: undefined,
+      loadOptions: { shouldClearAllTabs: true },
+    },
+    {
+      scenario: 'restoring the open tabs of a saved session',
+      urlTabId: mockTab2.id,
+      storedDiscoverSessionId: 'persisted-session',
+      loadOptions: {
+        persistedDiscoverSession: {
+          id: 'persisted-session',
+          title: 'title',
+          description: 'description',
+          managed: false,
+          tabs: [],
+        },
+      },
+    },
+    {
+      scenario: 'reopening recently closed tabs',
+      urlTabId: mockRecentlyClosedTab.id,
+      storedDiscoverSessionId: undefined,
+      loadOptions: {},
+    },
+    {
+      scenario: 'the URL does not point to one of the open tabs',
+      urlTabId: 'unknown-tab',
+      storedDiscoverSessionId: undefined,
+      loadOptions: {},
+    },
+  ])(
+    'should not restore the draft session title when $scenario',
+    ({ urlTabId, storedDiscoverSessionId, loadOptions }) => {
+      const {
+        tabsStorageManager,
+        urlStateStorage,
+        services: { storage },
+      } = create();
+
+      storage.set(TABS_LOCAL_STORAGE_KEY, {
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        discoverSessionId: storedDiscoverSessionId,
+        draftSessionTitle: 'My draft',
+        openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+        closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      });
+
+      urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: urlTabId });
+
+      const loadedProps = tabsStorageManager.loadLocally({
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        defaultTabState: DEFAULT_TAB_STATE,
+        ...loadOptions,
+      });
+
+      expect(loadedProps.draftSessionTitle).toBeUndefined();
+    }
+  );
 });

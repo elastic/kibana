@@ -12,6 +12,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -377,6 +378,22 @@ describe('tab mapping utils', () => {
 
       expect(tabState.attributes.controlGroupState).toBeUndefined();
       expect(tabState.esqlVariables).toEqual([]);
+    });
+
+    it('keeps the existing empty ES|QL variables when the saved tab has no controls', () => {
+      const existingEsqlVariables: ESQLControlVariable[] = [];
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: tab2,
+          services,
+          currentDataView: undefined,
+          tabType: undefined,
+        }),
+        existingTab: { ...tab1, esqlVariables: existingEsqlVariables },
+        profileStateRegistry: services.profileStateRegistry,
+      });
+
+      expect(tabState.esqlVariables).toBe(existingEsqlVariables);
     });
   });
 
