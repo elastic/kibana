@@ -211,6 +211,55 @@ export function OnboardingFirstInvestigationStep({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
+      <EuiPanel hasBorder paddingSize="m">
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.nightshift.onboarding.investigate.customLabel', {
+            defaultMessage: 'Describe what you want investigated, or pick a suggestion below',
+          })}
+        >
+          <EuiTextArea
+            data-test-subj="nightshiftOnboardingCustomPrompt"
+            fullWidth
+            rows={3}
+            resize="vertical"
+            maxLength={MAX_TEXT_LENGTH}
+            disabled={isStarting}
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                submit();
+              }
+            }}
+            placeholder={i18n.translate(
+              'xpack.nightshift.onboarding.investigate.customPlaceholder',
+              { defaultMessage: 'For example: Why did checkout latency spike in the last hour?' }
+            )}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              size="s"
+              iconType="sparkles"
+              isLoading={isStarting}
+              disabled={!trimmedMessage}
+              onClick={submit}
+              data-test-subj="nightshiftOnboardingInvestigateButton"
+            >
+              {i18n.translate('xpack.nightshift.onboarding.investigate.submitButton', {
+                defaultMessage: 'Investigate',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+
       {isRunning && (
         <EuiPanel
           hasBorder
@@ -310,55 +359,6 @@ export function OnboardingFirstInvestigationStep({
           ))}
         </EuiFlexGroup>
       )}
-
-      <EuiSpacer size="l" />
-      <EuiPanel hasBorder paddingSize="m">
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.nightshift.onboarding.investigate.customLabel', {
-            defaultMessage: 'Or describe what you want investigated',
-          })}
-        >
-          <EuiTextArea
-            data-test-subj="nightshiftOnboardingCustomPrompt"
-            fullWidth
-            rows={3}
-            resize="vertical"
-            maxLength={MAX_TEXT_LENGTH}
-            disabled={isStarting}
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault();
-                submit();
-              }
-            }}
-            placeholder={i18n.translate(
-              'xpack.nightshift.onboarding.investigate.customPlaceholder',
-              { defaultMessage: 'For example: Why did checkout latency spike in the last hour?' }
-            )}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              size="s"
-              iconType="sparkles"
-              isLoading={isStarting}
-              disabled={!trimmedMessage}
-              onClick={submit}
-              data-test-subj="nightshiftOnboardingInvestigateButton"
-            >
-              {i18n.translate('xpack.nightshift.onboarding.investigate.submitButton', {
-                defaultMessage: 'Investigate',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
     </div>
   );
 }
