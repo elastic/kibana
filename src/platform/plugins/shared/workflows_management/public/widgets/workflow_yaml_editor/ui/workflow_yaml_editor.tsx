@@ -69,6 +69,7 @@ import {
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
@@ -85,7 +86,7 @@ import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_w
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
+import { useWorkflowEditorReadOnlyReason } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -183,6 +184,11 @@ export interface WorkflowYAMLEditorProps {
    * floating over the editor (e.g. WorkflowDetailBottomBar) can sit above it.
    */
   onValidationPanelHeightChange?: (height: number) => void;
+  /**
+   * Called when an agent proposal arrives while the user views a past
+   * execution. The proposal shows once the parent opens the Workflow tab.
+   */
+  onAgentProposalHeld?: () => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -194,6 +200,7 @@ export const WorkflowYAMLEditor = ({
   onToggleEditorMode,
   hideEditorTools = false,
   onValidationPanelHeightChange,
+  onAgentProposalHeld,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -213,7 +220,8 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isReadOnlyYaml = useWorkflowEditorReadOnly();
+  const readOnlyReason = useWorkflowEditorReadOnlyReason();
+  const isReadOnlyYaml = readOnlyReason !== undefined;
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -369,6 +377,8 @@ export const WorkflowYAMLEditor = ({
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
+  const workflowTabYaml = useSelector(selectYamlString);
+
   // Agent Builder integration for AI-assisted editing
   const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
@@ -376,6 +386,11 @@ export const WorkflowYAMLEditor = ({
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
+    readOnlyReason,
+    // The store catches up with the URL tab one render later, so wait for both.
+    canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
+    onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
+    workflowTabYaml,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
