@@ -177,8 +177,10 @@ export const recordActions = async ({
         } catch (error) {
           errors.push(errorMessage(error));
         }
-        worked ||= mock.calls.length > 0;
-        calls.push(...mock.calls);
+        // Token requests authenticate the run; they aren't vendor operations the action calls.
+        const vendorCalls = mock.calls.filter(({ token }) => !token);
+        worked ||= vendorCalls.length > 0;
+        calls.push(...vendorCalls);
         if (ran.length === 0 && input === inputs[0]) {
           for (const { operation, violations } of mock.rejectedResponses) {
             findings.push({ kind: 'rejected-response', action, operation, violations });
