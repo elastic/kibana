@@ -136,7 +136,7 @@ overrides:
   '@types/mdast>@types/unist': '2.0.3'
   '@types/mdast@^3': '3.0.3'
   '@types/mdast@^4': '4.0.4'
-  '@types/seedrandom': '2.4.28'
+  '@types/seedrandom': '3.0.8'
   '@types/unist@^2': '2.0.3'
   '@types/unist@^3': '3.0.3'
   'colorette': '2.0.20'
