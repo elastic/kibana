@@ -17,6 +17,7 @@ import {
   EpisodeRuleCell,
   EpisodeRuleTagsCell,
   EpisodeSeverityCell,
+  EpisodeSourceCell,
 } from './episodes_table_cell_renderers';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -780,5 +781,36 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByRole('code')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeSourceCell', () => {
+  const renderSourceCell = (fields: Record<string, unknown>) =>
+    renderWithI18n(
+      <EpisodeSourceCell {...baseCellProps} columnId="source" row={makeRow(fields)} />
+    );
+
+  it('renders the connector icon for a known connector', () => {
+    renderSourceCell({ source: 'zabbix' });
+
+    expect(screen.getByTestId('episodeSourceCellIcon')).toBeInTheDocument();
+  });
+
+  it('renders the raw source text when there is no connector icon for it', () => {
+    renderSourceCell({ source: 'my-custom-source' });
+
+    expect(screen.getByText('my-custom-source')).toBeInTheDocument();
+  });
+
+  it('renders the raw text for the internal source of native v2 rules', () => {
+    renderSourceCell({ source: 'internal' });
+
+    expect(screen.getByText('internal')).toBeInTheDocument();
+  });
+
+  it.each([[''], [null], [undefined]])('renders nothing when the source is %p', (source) => {
+    const { container } = renderSourceCell({ source });
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

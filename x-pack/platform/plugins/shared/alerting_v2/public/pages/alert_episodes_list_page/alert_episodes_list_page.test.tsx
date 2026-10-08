@@ -296,6 +296,7 @@ describe('AlertEpisodesListPage', () => {
     expect(lastCall?.columns).toEqual([
       'episode.status',
       'severity',
+      'source',
       '@timestamp',
       'rule.id',
       'duration',
@@ -305,6 +306,18 @@ describe('AlertEpisodesListPage', () => {
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
+  });
+
+  it('passes the source column renderer and unsortable header config to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.source;
+
+    expect(typeof lastCall?.externalCustomRenderers?.source).toBe('function');
+    expect(customize!({ column: { id: 'source', isSortable: true }, headerRowHeight: 1 })).toEqual({
+      id: 'source',
+      displayAsText: 'Source',
+      isSortable: false,
+    });
   });
 
   it.each([

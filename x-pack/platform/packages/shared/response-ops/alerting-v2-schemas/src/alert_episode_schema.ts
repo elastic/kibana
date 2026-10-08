@@ -52,7 +52,7 @@ export const alertEpisodeSchema = z
     episode_data: z.string().nullable().optional(),
     /** Latest top-level `severity` from a breached rule event, when present. */
     severity: z.string().min(1).nullable().optional(),
-    /** External source that originated the alert (e.g. "zabbix", "datadog"). Absent for native Elastic rules. */
+    /** Source that originated the alert (e.g. "zabbix", "datadog"). Native Elastic rules use "internal". */
     source: z.string().min(1).nullable().optional(),
   })
   .strict();
