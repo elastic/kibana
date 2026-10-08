@@ -326,6 +326,16 @@ const createGridQueries = (
 
 // ── hooks ─────────────────────────────────────────────────────────────────────
 
+/**
+ * One page of the grid, in three queries:
+ * 1. Rows (shell): the sort column's rows query (see queries/README.md), one page plus one row.
+ *    Page N starts after the cursor in page N-1's cached response, so a jump ahead fetches the
+ *    first missing page, then the next.
+ * 2. Count: the entities in view. Keyed by its query text, so sorts and pages share it.
+ * 3. Enrich: the page rows' computed columns, after the rows arrive. Keyed on the rows' data
+ *    time, so it runs again when they refetch.
+ * Rows and enrich keep the previous page painted while the next loads (`selectPageRows`).
+ */
 export const useEntityGridData = (options: UseEntityGridDataOptions) => {
   const { sortDirection, pageIndex, pageSize, rowsMode = 'resolved' } = options;
   const { env, http, isAnomalyJobsLoading } = useGridQueryEnv();
