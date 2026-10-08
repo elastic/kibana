@@ -743,7 +743,7 @@ groups:
       - setting: "alerting:v1:showV1ObservabilityAlertsTable"
         id: alerting-v1-showv1observabilityalertstable
         description: |
-          Adds **Alerts (V1)** to the **Alerting** menu in the Observability navigation and to global search. **Alerts (V1)** opens the Observability alerts page, which shows only alerts from rules outside the {{esql}}-based alerting system. Reload {{product.kibana}} to apply the change.
+          Adds **Alerts (V1)** to the **Alerting** menu in the Observability solution navigation and to global search. **Alerts (V1)** opens the Observability alerts page, which shows only alerts from rules outside the {{esql}}-based alerting system. Reload {{product.kibana}} to apply the change.
 
           This setting has an effect only when [`alerting:v2:enabled`](#alerting-v2-enabled) is on.
         datatype: bool
@@ -754,14 +754,13 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          observability: experimental
+          serverless:
+            observability: ga
 
       - setting: "alerting:v2:experimentalFeatures"
         id: alerting-v2-experimentalfeatures
         description: |
-          Turns on the experimental features of the {{esql}}-based alerting system in the current space, such as building rule sequences and creating rules and action policies with Elastic Agent Builder. Reload {{product.kibana}} to apply the change.
-
-          For the features this setting turns on and how to use them, refer to [Set up the {{esql}}-based alerting system](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
+          Turns on the experimental features of the {{esql}}-based alerting system in the current space. These features include building rule sequences, and using Elastic Agent Builder to create rules and action policies. Reload {{product.kibana}} to apply the change.
         datatype: bool
         default: false
         applies_to:
@@ -770,7 +769,11 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: experimental
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            security: ga
+            vectordb: ga
 
   - group: Autocomplete
     id: kibana-autocomplete-settings
