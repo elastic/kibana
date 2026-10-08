@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AlertEpisode, Rule, RuleId } from '../types';
+import type { Alert, Rule, RuleId } from '../types';
 
-/** Rule metadata fetched for the dispatchable episodes, keyed by rule id (FetchRulesStep). */
+/** Rule metadata fetched for the dispatchable alerts, keyed by rule id (FetchRulesStep). */
 export class RuleCatalog {
   private static readonly EMPTY = new RuleCatalog(new Map());
 
@@ -29,17 +29,17 @@ export class RuleCatalog {
     return this.byId.get(id);
   }
 
-  public forEpisode(episode: AlertEpisode): Rule | undefined {
-    return episode.rule_id != null ? this.byId.get(episode.rule_id) : undefined;
+  public forAlert(alert: Alert): Rule | undefined {
+    return alert.rule_id != null ? this.byId.get(alert.rule_id) : undefined;
   }
 
   /**
-   * Internal episode whose rule is absent (deleted or failed to fetch). Such
-   * episodes must never dispatch: catch-all policies would otherwise emit
+   * Internal alert whose rule is absent (deleted or failed to fetch). Such
+   * alerts must never dispatch: catch-all policies would otherwise emit
    * spurious notifications for rules that no longer exist.
    */
-  public isOrphanedInternalEpisode(episode: AlertEpisode): boolean {
-    return episode.rule_id != null && !this.byId.has(episode.rule_id);
+  public isOrphanedInternalAlert(alert: Alert): boolean {
+    return alert.rule_id != null && !this.byId.has(alert.rule_id);
   }
 
   public spaceIdOf(id: RuleId): string | undefined {

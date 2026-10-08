@@ -117,9 +117,9 @@ describe('RelatedEpisodesRuleSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Other episodes for this rule')).toBeInTheDocument();
+    expect(screen.getByText('Other alerts for this rule')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2RelatedEpisodesRuleEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No other related episodes for this rule.')).toBeInTheDocument();
+    expect(screen.getByText('No other related alerts for this rule.')).toBeInTheDocument();
   });
 
   it.each([

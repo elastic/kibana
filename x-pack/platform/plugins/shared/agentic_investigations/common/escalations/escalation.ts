@@ -120,7 +120,13 @@ export type ListEscalationsQuery = z.infer<typeof listEscalationsQuerySchema>;
 /**
  * An escalation as returned by the **list** endpoint.
  */
-export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions;
+export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions & {
+  /**
+   * Union of the entity ids from the Impact of the linked investigations. Absent when none of
+   * them has an Impact document or the impact could not be read.
+   */
+  entity_ids?: string[];
+};
 
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };

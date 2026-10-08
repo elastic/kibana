@@ -13,8 +13,13 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
+import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
+import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
+import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
+import { HYPOTHESES_ATTACHMENT_TYPE, SET_HYPOTHESES_TOOL_ID } from '../common/hypotheses/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
+import { AppendWorkflowExecutionIdStepId } from '../common/workflow_execution/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -54,7 +59,11 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const features = { registerKibanaFeature: jest.fn() };
 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
-  const agentBuilder = { attachments: { registerType: jest.fn() } };
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+    conversationEvents: { register: jest.fn() },
+    tools: { register: jest.fn() },
+  };
 
   plugin.setup(
     coreSetup as never,
@@ -190,10 +199,19 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('registers the impact attachment type and workflow steps during setup', () => {
+    it('registers the readonly investigation attachment types and workflow steps during setup', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
+      for (const id of [
+        IMPACT_ATTACHMENT_TYPE,
+        SUBJECT_ATTACHMENT_TYPE,
+        HYPOTHESES_ATTACHMENT_TYPE,
+      ]) {
+        expect(agentBuilder.attachments.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ id, isReadonly: true })
+        );
+      }
 
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
@@ -202,7 +220,20 @@ describe('AgenticInvestigationsPlugin', () => {
         AttachImpactStepId,
         GetImpactStepId,
         ReopenInvestigationStepId,
+        AppendWorkflowExecutionIdStepId,
       ]);
+    });
+
+    it('registers the set_impact and set_hypotheses agent tools during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
+      );
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_HYPOTHESES_TOOL_ID })
+      );
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {
@@ -218,6 +249,20 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(
         JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
       ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the escalation timeline event types', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['escalation_created_from_investigation', 'escalation_investigation_linked']);
+    });
+
+    it('registers no escalation timeline event types when escalations are disabled', () => {
+      const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
+
+      expect(agentBuilder.conversationEvents.register).not.toHaveBeenCalled();
     });
 
     it('registers the HTTP routes for every entity', () => {
@@ -236,6 +281,8 @@ describe('AgenticInvestigationsPlugin', () => {
       const { contract } = startPlugin(plugin);
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
+      expect(contract.getSubjectsClient).toEqual(expect.any(Function));
+      expect(contract.getInvestigationsClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
     });
 

@@ -17,8 +17,7 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
   title: 'Case',
   createdAt: '2026-09-01T00:00:00.000Z',
   updatedAt: '2026-09-01T00:00:00.000Z',
-  watch_id: '',
-  watch_execution_id: '',
+  worker_execution_ids: [],
   pendingProposalCount: 1,
   assignees: [],
   events: [],
@@ -31,11 +30,7 @@ const pillLabels = () =>
 describe('Impact', () => {
   it('renders nothing when no investigation carries an entity', () => {
     renderWithKibanaRenderContext(
-      <Impact
-        investigations={[investigation()]}
-        entityFilter={null}
-        onEntityFilterChange={jest.fn()}
-      />
+      <Impact items={[investigation()]} entityFilter={null} onEntityFilterChange={jest.fn()} />
     );
 
     expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
@@ -44,7 +39,7 @@ describe('Impact', () => {
   it('renders deduped pills with counts, busiest entity first', () => {
     renderWithKibanaRenderContext(
       <Impact
-        investigations={[
+        items={[
           investigation({ entityIds: ['zeta'] }),
           investigation({ id: 'inv-2', entityIds: ['alpha', 'zeta'] }),
         ]}
@@ -64,7 +59,7 @@ describe('Impact', () => {
 
     const { unmount } = renderWithKibanaRenderContext(
       <Impact
-        investigations={investigations}
+        items={investigations}
         entityFilter={null}
         onEntityFilterChange={onEntityFilterChange}
       />
@@ -75,7 +70,7 @@ describe('Impact', () => {
 
     renderWithKibanaRenderContext(
       <Impact
-        investigations={investigations}
+        items={investigations}
         entityFilter="host-1"
         onEntityFilterChange={onEntityFilterChange}
       />

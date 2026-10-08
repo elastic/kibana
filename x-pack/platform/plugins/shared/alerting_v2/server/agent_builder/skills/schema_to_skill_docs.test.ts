@@ -686,7 +686,7 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('enriches episode_status and severity with schema enum values', () => {
+    it('enriches alert_status and severity with schema enum values', () => {
       const doc = generateMatcherContextDoc();
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');

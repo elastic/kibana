@@ -48,6 +48,7 @@ export const useServicesBootstrap = (
   const { fetchParams, lensVisService, lensVisServiceState } = state;
   const { services, initialState, localStorageKeyPrefix } = props;
   const enableLensVisService = options?.enableLensVisService;
+  const latestFetchIdRef = useRef(0);
   const propsRef = useRef<UseUnifiedHistogramProps>(props);
   propsRef.current = props;
 
@@ -95,6 +96,7 @@ export const useServicesBootstrap = (
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
+      const fetchId = ++latestFetchIdRef.current;
       const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
         params,
         services,
@@ -108,6 +110,12 @@ export const useServicesBootstrap = (
           lensSuggestionsApi: apiHelper.suggestions,
         });
       }
+
+      // An older in-flight fetch must not overwrite the state of a newer one.
+      if (fetchId !== latestFetchIdRef.current) {
+        return;
+      }
+
       let updatedLensVisServiceState: LensVisServiceState | undefined;
       if (updatedLensVisService && enableLensVisService && lensDataView) {
         updatedLensVisServiceState = updatedLensVisService.update({

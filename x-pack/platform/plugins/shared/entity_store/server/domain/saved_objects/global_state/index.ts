@@ -18,28 +18,12 @@ import {
 import { EntityStoreGlobalStateTypeName } from './types';
 import { getLegacyLogExtractionOverrides } from './legacy_defaults';
 import { retryOnConflict, type RetryOnConflictOptions } from '../../../infra/elasticsearch';
+import { applyOverrides } from '../apply_overrides';
 
 const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
   attrs.defaultsVersion === 'latest'
     ? attrs.logsExtraction ?? {}
     : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
-
-/** Applies incoming overrides on top of the stored ones. `undefined` leaves a key alone, `null` deletes it. */
-const applyLogExtractionOverrides = (
-  stored: Partial<LogExtractionConfig>,
-  incoming: LogExtractionOverride = {}
-): Partial<LogExtractionConfig> => {
-  const next: Partial<LogExtractionConfig> = { ...stored };
-  for (const key of Object.keys(incoming) as Array<keyof LogExtractionOverride>) {
-    const value = incoming[key];
-    if (value === null) {
-      delete next[key];
-    } else if (value !== undefined) {
-      (next as Record<string, unknown>)[key] = value;
-    }
-  }
-  return next;
-};
 
 /** Write-path partial for historySnapshot. `undefined` = leave alone; `null` = clear the field. */
 export type HistorySnapshotUpdate = {
@@ -55,22 +39,6 @@ export type GlobalStateOverridesInput = Omit<
   historySnapshot?: HistorySnapshotUpdate;
 };
 
-/** Merges incoming history snapshot fields onto stored state. `undefined` = leave alone; `null` = clear. */
-const applyHistorySnapshotUpdate = (
-  stored: HistorySnapshotState,
-  incoming: HistorySnapshotUpdate = {}
-): HistorySnapshotState => {
-  const next = { ...stored } as Record<string, unknown>;
-  for (const [key, value] of Object.entries(incoming)) {
-    if (value === null) {
-      delete next[key];
-    } else if (value !== undefined) {
-      next[key] = value;
-    }
-  }
-  return next as HistorySnapshotState;
-};
-
 // takes existing config, strips legacy defaults (if exists) and merges with new overrides
 const mergeOverrides = (
   raw: EntityStoreGlobalStateOverrides,
@@ -78,14 +46,18 @@ const mergeOverrides = (
 ): EntityStoreGlobalStateOverrides =>
   EntityStoreGlobalStateOverrides.parse({
     defaultsVersion: 'latest',
-    historySnapshot: applyHistorySnapshotUpdate(
+    historySnapshot: applyOverrides<HistorySnapshotState>(
       HistorySnapshotState.parse(raw.historySnapshot ?? {}),
       overrides.historySnapshot
     ),
-    logsExtraction: applyLogExtractionOverrides(
+    logsExtraction: applyOverrides<Partial<LogExtractionConfig>>(
       getLogsExtractionOverrides(raw),
       overrides.logsExtraction
     ),
+    excludedUserNames:
+      overrides.excludedUserNames !== undefined
+        ? overrides.excludedUserNames
+        : raw.excludedUserNames,
   });
 
 // Read path: stored attributes in, full config out (missing fields get the current defaults).
@@ -93,6 +65,7 @@ const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntitySt
   EntityStoreGlobalState.parse({
     historySnapshot: HistorySnapshotState.parse(state.historySnapshot ?? {}),
     logsExtraction: LogExtractionConfig.parse(getLogsExtractionOverrides(state)),
+    excludedUserNames: state.excludedUserNames ?? [],
   });
 
 export class EntityStoreGlobalStateClient {
@@ -142,7 +115,10 @@ export class EntityStoreGlobalStateClient {
       EntityStoreGlobalStateTypeName,
       EntityStoreGlobalStateOverrides.parse({
         ...initialState,
-        logsExtraction: applyLogExtractionOverrides({}, initialState?.logsExtraction),
+        logsExtraction: applyOverrides<Partial<LogExtractionConfig>>(
+          {},
+          initialState?.logsExtraction
+        ),
         defaultsVersion: 'latest',
       }),
       { id }
