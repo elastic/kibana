@@ -15,18 +15,16 @@ For an exact version, select its tag in the official repository rather than assu
 ## Redux Toolkit APIs and usage
 
 - [Configure Store](https://redux.js.org/toolkit/api/configureStore): default middleware, enhancers, and store typing.
-- [TypeScript usage](https://redux.js.org/toolkit/usage/usage-with-typescript): typed stores, actions, reducers, middleware, and tuples.
 - [Create Slice](https://redux.js.org/toolkit/api/createSlice): reducers, prepared reducers, selectors, and creator callbacks.
 - [Create Entity Adapter](https://redux.js.org/toolkit/api/createEntityAdapter): normalized collection state and generated selectors.
 - [Create Async Thunk](https://redux.js.org/toolkit/api/createAsyncThunk): async lifecycles, cancellation, rejected values, and `unwrap`.
 - [Listener Middleware](https://redux.js.org/toolkit/api/createListenerMiddleware): reactive workflows and typed listeners.
-- [Redux and React-Redux TypeScript setup](https://redux.js.org/usage/usage-with-typescript): pre-typed hooks and application types.
+- [Redux usage with TypeScript](https://redux.js.org/usage/usage-with-typescript): typed stores, actions, reducers, middleware, tuples, pre-typed hooks, and application types.
 
 ## Selectors and rendering
 
 - [Deriving data with selectors](https://redux.js.org/usage/deriving-data-selectors): selector design, memoization, and React rendering behavior.
-- [Reselect best practices](https://redux.js.org/reselect/usage/best-practices/): stable input selectors and result-function responsibilities.
-- [Reselect common mistakes](https://redux.js.org/reselect/usage/best-practices#common-mistakes): identity result functions and ineffective memoization.
+- [Reselect best practices](https://redux.js.org/reselect/usage/best-practices/): stable input selectors, result-function responsibilities, identity result functions, and effective memoization.
 
 ## RTK Query
 
