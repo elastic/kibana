@@ -582,7 +582,13 @@ Inputs are parsed with the action's schema first. Auth secrets the test leaves o
 
 ## Vendor API artifacts
 
-Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema (one without and one with optional properties), and records the vendor operations each one calls.
+Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema, and records the vendor operations each one calls. The inputs are:
+
+- one without optional properties, and one with them;
+- one at the schema's upper bounds: longest strings (`max`, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
+- one per enum value, so every value the schema allows is sent once.
+
+The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
 
 ```sh
 # First run: name each vendor spec; YAML or JSON, external $refs are bundled
@@ -654,7 +660,7 @@ Handler errors and proposed `pagination` descriptors are reported as warnings.
     ]
   },
   "unmatched": {
-    "mute": [{ "method": "post", "path": "/v1/mute", "reason": "Missing from the spec; see #123" }]
+    "mute": [{ "method": "post", "path": "/v1/monitor/{id}/mute", "reason": "Missing from the spec; see #123" }]
   }
 }
 ```
@@ -662,7 +668,7 @@ Handler errors and proposed `pagination` descriptors are reported as warnings.
 - `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-contract-mock` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
-- `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A request that matches nothing and isn't listed fails the script.
+- `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
 
 Keys are sorted at every depth (`serializeManifest`), so regenerating without vendor changes produces no diff. `vendorApiManifestSchema` is the schema.
 

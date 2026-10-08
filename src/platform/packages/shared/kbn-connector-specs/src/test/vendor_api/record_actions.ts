@@ -200,5 +200,9 @@ export const recordActions = async ({
       unmatched[action] = uniqueSorted(notFound, ({ method, path }) => `${path} ${method}`);
     }
   }
-  return { operations, unmatched, findings };
+  return {
+    operations,
+    unmatched,
+    findings: [...new Map(findings.map((finding) => [JSON.stringify(finding), finding])).values()],
+  };
 };

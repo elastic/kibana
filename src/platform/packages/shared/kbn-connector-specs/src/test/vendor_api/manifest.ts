@@ -111,7 +111,10 @@ const operationSchema = z
 const unmatchedSchema = z
   .object({
     method: z.string(),
-    /** The URL path the action requested, which matches no operation of any source. */
+    /**
+     * The URL path the action requested, which matches no operation of any source. A `{name}`
+     * segment matches any value, e.g. `/monitor/{monitor_id}/mute`.
+     */
     path: z.string(),
     /** Why this is expected, e.g. an endpoint the vendor spec omits, with a link to follow up. */
     reason: z.string().min(1),

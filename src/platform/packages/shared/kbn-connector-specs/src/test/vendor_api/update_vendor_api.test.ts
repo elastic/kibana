@@ -215,6 +215,30 @@ describe('updateVendorApi', () => {
     });
   });
 
+  it('acknowledges unmatched requests by path template', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    const legacyItem = { method: 'get', path: '/legacy/{id}', reason: 'Not documented' };
+    const manifest = await readJson('manifest.json');
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({ ...manifest, unmatched: { legacyItem: [legacyItem] } })
+    );
+    const withLegacyItem: ConnectorSpec = {
+      ...connector,
+      actions: {
+        ...connector.actions,
+        legacyItem: {
+          scope: 'read',
+          input: z.object({ id: z.string() }),
+          handler: async ({ client }, { id }) => (await client.get(`${BASE}/legacy/${id}`)).data,
+        },
+      },
+    };
+
+    expect((await update({ connector: withLegacyItem })).problems).toEqual([]);
+    expect((await readJson('manifest.json')).unmatched).toEqual({ legacyItem: [legacyItem] });
+  });
+
   it('proposes pagination for review once, then keeps what the manifest declares', async () => {
     await update({ sources: { main: SPEC_URL } });
     expect(warnings).toEqual([

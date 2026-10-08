@@ -11,8 +11,13 @@ import { sampleJsonSchema } from '@kbn/connector-contract-mock';
 import { z } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../connector_spec';
 
-/** `required` leaves out every optional property; `all` includes them. */
-export type InputVariant = 'required' | 'all';
+/**
+ * `required` leaves out every optional property; `all` includes them. `boundary` includes them
+ * at the schema's upper bounds (longest strings, largest numbers, fullest arrays, last enum
+ * value), and `enum` takes each further enum value once, so the vendor sees every value the
+ * schema allows.
+ */
+export type InputVariant = 'required' | 'all' | 'boundary' | 'enum';
 
 export interface RejectedInput {
   readonly variant: InputVariant;
@@ -27,10 +32,63 @@ export interface GeneratedInputs {
   readonly rejected: readonly RejectedInput[];
 }
 
-const VARIANTS: readonly InputVariant[] = ['required', 'all'];
+type JsonSchema = Parameters<typeof sampleJsonSchema>[0];
+
+interface Sampling {
+  readonly variant: InputVariant;
+  readonly schema: JsonSchema;
+  readonly options: Parameters<typeof sampleJsonSchema>[1];
+}
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** The length of the longest `enum` anywhere in a schema. */
+const widestEnum = (node: unknown): number => {
+  if (Array.isArray(node)) {
+    return Math.max(0, ...node.map(widestEnum));
+  }
+  if (!isPlainObject(node)) {
+    return 0;
+  }
+  const own = Array.isArray(node.enum) ? node.enum.length : 0;
+  return Math.max(own, ...Object.values(node).map(widestEnum));
+};
+
+/**
+ * Narrows every `enum` to its value at `index`, or its last one when it has fewer, dropping the
+ * `default` and `examples` the sampler would prefer.
+ */
+const pickEnumValues = (node: unknown, index: number): unknown => {
+  if (Array.isArray(node)) {
+    return node.map((child) => pickEnumValues(child, index));
+  }
+  if (!isPlainObject(node)) {
+    return node;
+  }
+  const { enum: values, ...rest } = node;
+  const children = Object.fromEntries(
+    Object.entries(rest).map(([key, child]) => [key, pickEnumValues(child, index)])
+  );
+  if (!Array.isArray(values) || values.length === 0) {
+    return values === undefined ? children : { ...children, enum: values };
+  }
+  const narrowed = Object.fromEntries(
+    Object.entries(children).filter(([key]) => key !== 'default' && key !== 'examples')
+  );
+  return { ...narrowed, enum: [values[Math.min(index, values.length - 1)]] };
+};
+
+const samplingsOf = (schema: JsonSchema): Sampling[] => [
+  { variant: 'required', schema, options: { optional: 'required' } },
+  { variant: 'all', schema, options: { optional: 'all' } },
+  { variant: 'boundary', schema, options: { optional: 'all', boundary: true } },
+  ...Array.from({ length: widestEnum(schema) }, (_, index) => ({
+    variant: 'enum' as const,
+    schema: pickEnumValues(schema, index) as JsonSchema,
+    options: { optional: 'all' as const },
+  })),
+];
 
 /** Merges an override into a sampled input: objects key by key, other values replaced. */
 export const mergeInput = (sampled: unknown, override: unknown): unknown => {
@@ -48,8 +106,9 @@ export const mergeInput = (sampled: unknown, override: unknown): unknown => {
 };
 
 /**
- * Generates inputs for an action from its zod `input` schema: one without optional properties
- * and one with them, each with `override` merged in, kept when the schema accepts them.
+ * Generates inputs for an action from its zod `input` schema: without optional properties, with
+ * them, at the schema's upper bounds and with each enum value, each with `override` merged in,
+ * kept when the schema accepts them.
  */
 export const generateActionInputs = async (
   { input: schema }: Pick<ActionDefinition, 'input'>,
@@ -59,8 +118,8 @@ export const generateActionInputs = async (
   const seen = new Set<string>();
   const inputs: unknown[] = [];
   const rejected: RejectedInput[] = [];
-  for (const variant of VARIANTS) {
-    const input = mergeInput(sampleJsonSchema(jsonSchema, { optional: variant }), override);
+  for (const { variant, schema: sampled, options } of samplingsOf(jsonSchema)) {
+    const input = mergeInput(sampleJsonSchema(sampled, options), override);
     const key = JSON.stringify(input);
     if (!seen.has(key)) {
       seen.add(key);
