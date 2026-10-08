@@ -387,6 +387,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   options$={dataViewEditorService.timestampFieldOptions$}
                   isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                   matchedIndices$={dataViewEditorService.matchedIndices$}
+                  optionsError$={dataViewEditorService.timestampFieldsError$}
                   disabled={isManaged}
                 />
               </EuiFlexItem>
