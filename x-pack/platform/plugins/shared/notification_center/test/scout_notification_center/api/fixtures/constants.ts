@@ -20,4 +20,4 @@ export const GET_UNREAD_STATUS_PATH = 'internal/notification_center/notification
 export const MARK_READ_PATH = 'internal/notification_center/notifications/_mark_read';
 export const MARK_ALL_READ_PATH = 'internal/notification_center/notifications/_mark_all_read';
 
-export const NOTIFICATION_DATA_STREAM_NAME = '.kibana-notification-center';
+export const NOTIFICATION_DATA_STREAM_NAME = '.notifications';

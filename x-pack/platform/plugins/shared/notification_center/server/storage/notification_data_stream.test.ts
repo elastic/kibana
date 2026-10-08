@@ -31,7 +31,7 @@ describe('registerNotificationDataStream', () => {
 
     it('uses the canonical data stream name', () => {
       expect(definition.name).toBe(NOTIFICATION_DATA_STREAM_NAME);
-      expect(NOTIFICATION_DATA_STREAM_NAME).toBe('.kibana-notification-center');
+      expect(NOTIFICATION_DATA_STREAM_NAME).toBe('.notifications');
     });
 
     it('is hidden', () => {
