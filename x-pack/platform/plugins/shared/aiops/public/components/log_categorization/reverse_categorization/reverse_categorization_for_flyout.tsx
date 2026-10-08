@@ -33,7 +33,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
+import { buildEmptyFilter, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
@@ -53,6 +53,8 @@ import { MiniHistogram } from '../../mini_histogram';
 import { useDocsForCategory } from './use_docs_for_category';
 import { useCreateFormattedExample } from '../format_category';
 import { PatternCellRenderer } from './pattern_cell_renderer';
+import { findCategoryMatchingFieldValue } from './build_esql_analysis_queries';
+import { runEsqlCategorizeRequest } from './run_esql_categorize_request';
 
 type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
@@ -77,26 +79,31 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     notifications: { toasts },
     data: {
       query: { getState, filterManager },
+      search,
     },
     uiSettings,
   } = useAiopsAppContext();
 
   const { filters, query } = useMemo(() => getState(), [getState]);
+  const isEsqlQuery = isOfAggregateQueryType(query);
   const [matchNotFound, setMatchNotFound] = useState(false);
 
   const mounted = useRef(false);
+  const esqlAbortController = useRef(new AbortController());
   const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
   } = useCategorizeRequest(randomSamplerStorage);
+  // buildEsQuery drops AggregateQuery/ES|QL; for ES|QL keep only filter-bar DSL and
+  // drive categorization/docs from the active ES|QL query instead.
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
       searchQuery: buildEsQuery(
         dataView,
-        query ?? [],
+        isEsqlQuery ? [] : query ?? [],
         filters ?? [],
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       ),
@@ -120,6 +127,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
   const cancelRequest = useCallback(() => {
     cancelCategorizationRequest();
+    esqlAbortController.current.abort();
+    esqlAbortController.current = new AbortController();
   }, [cancelCategorizationRequest]);
 
   useEffect(
@@ -182,7 +191,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       selectedField === undefined ||
       timeField === undefined ||
       earliest === undefined ||
-      latest === undefined
+      latest === undefined ||
+      intervalMs === undefined
     ) {
       return;
     }
@@ -191,33 +201,66 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
     setLoading(true);
     setData(null);
+    setMatchNotFound(false);
 
     const timeRange = {
       from: earliest,
       to: latest,
     };
+    const esTimeRange = timefilter.getTime();
+    const timeFilter = {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timeField]: {
+                gte: earliest,
+                lte: latest,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        ],
+      },
+    };
 
     const runtimeMappings = dataView.getRuntimeMappings();
+    const abortSignal = esqlAbortController.current.signal;
 
     try {
-      const categorizationResult = await runCategorizeRequest(
-        index,
-        selectedField.name,
-        timeField,
-        timeRange,
-        searchQuery,
-        runtimeMappings,
-        undefined,
-        intervalMs,
-        undefined
-      );
+      const categorizationResult =
+        isEsqlQuery && isOfAggregateQueryType(query)
+          ? await runEsqlCategorizeRequest({
+              esql: query.esql,
+              fieldName: selectedField.name,
+              timeFieldName: timeField,
+              earliest,
+              latest,
+              intervalMs,
+              search: search.search,
+              timeRange: esTimeRange,
+              filter: timeFilter,
+              signal: abortSignal,
+            })
+          : await runCategorizeRequest(
+              index,
+              selectedField.name,
+              timeField,
+              timeRange,
+              searchQuery,
+              runtimeMappings,
+              undefined,
+              intervalMs,
+              undefined
+            );
 
       if (mounted.current === true) {
         let docs: { timestamp: string; message: string }[] = [];
 
         if (fieldValue) {
-          const category = categorizationResult.categories.find((c) =>
-            new RegExp(c.regex).test(fieldValue)
+          const category = findCategoryMatchingFieldValue(
+            categorizationResult.categories,
+            fieldValue
           );
           if (!category) {
             setMatchNotFound(true);
@@ -226,8 +269,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
           setSelectedCategory(category);
 
-          // Fetch documents for the matching category
-
+          // Fetch documents for the matching category within the same analysis scope
           const { results, total } = await docsForCategory({
             index,
             field: selectedField.name,
@@ -236,6 +278,10 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
             additionalFilters: filters,
             timeField,
             size: 1000,
+            query: isEsqlQuery ? query : undefined,
+            timeRange: esTimeRange,
+            filter: isEsqlQuery ? timeFilter : undefined,
+            signal: abortSignal,
           });
           docs = results;
 
@@ -254,6 +300,9 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         }
       }
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
           defaultMessage: 'Error loading categories',
@@ -277,6 +326,10 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     docsForCategory,
     filters,
     toasts,
+    isEsqlQuery,
+    query,
+    search.search,
+    timefilter,
   ]);
 
   useEffect(() => {
@@ -370,6 +423,9 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   }, []);
 
   const histogram = eventRate.map(({ key: catKey, docCount }) => {
+    if (data) {
+      // debugger;
+    }
     const term =
       (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
     const newTerm = term > docCount ? docCount : term;
