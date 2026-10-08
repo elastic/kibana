@@ -17,17 +17,30 @@ import type {
 } from '../openapi/types';
 import { sampleSchema } from './sample_schema';
 
+// Ranges such as `3XX` sort after the codes they contain.
 const statusOf = ({ code }: OperationResponse): number =>
-  /^\d{3}$/.test(code) ? Number(code) : /^2xx$/i.test(code) ? 299 : 1000;
+  /^\d{3}$/.test(code) ? Number(code) : /^[1-5]xx$/i.test(code) ? Number(code[0]) * 100 + 99 : 1000;
 
-/** The lowest declared 2xx response, falling back to `2XX` and then `default`. */
-export const selectSuccessResponse = (
+const lowestIn = (responses: readonly OperationResponse[], from: number, to: number) =>
+  responses
+    .filter((response) => statusOf(response) >= from && statusOf(response) < to)
+    .sort((a, b) => statusOf(a) - statusOf(b))[0];
+
+/**
+ * The lowest declared 2xx response, then `2XX`, then `default`. Operations without one, such
+ * as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx,
+ * then their lowest declared response of any status.
+ */
+export const selectResponse = (
   responses: readonly OperationResponse[]
 ): OperationResponse | undefined =>
-  [...responses]
-    .filter((response) => statusOf(response) < 300 && statusOf(response) >= 200)
-    .sort((a, b) => statusOf(a) - statusOf(b))[0] ??
-  responses.find(({ code }) => code === 'default');
+  lowestIn(responses, 200, 300) ??
+  responses.find(({ code }) => code === 'default') ??
+  lowestIn(responses, 300, 400) ??
+  lowestIn(responses, 100, 600);
+
+const toStatusCode = ({ code }: OperationResponse): number =>
+  /^\d{3}$/.test(code) ? Number(code) : /^[1-5]xx$/i.test(code) ? Number(code[0]) * 100 : 200;
 
 const baseType = (mediaType: string): string => mediaType.split(';')[0].trim().toLowerCase();
 const isJson = (mediaType: string): boolean => /[/+]json$/.test(baseType(mediaType));
@@ -87,19 +100,19 @@ const conformingExamples = (operation: ContractOperation, { schema, examples }: 
   );
 
 /**
- * Answers with the operation's success response: the media type's first example that matches
- * its schema, otherwise a deterministic sample of the schema.
+ * Answers with the operation's success response (see `selectResponse`): the media type's first
+ * example that matches its schema, otherwise a deterministic sample of the schema.
  */
 export const sampleResponse: Responder = (operation, { headers: { accept } }) => {
   const {
     responses,
     spec: { document },
   } = operation;
-  const response = selectSuccessResponse(responses);
+  const response = selectResponse(responses);
   if (!response) {
     return { statusCode: 204 };
   }
-  const statusCode = /^\d{3}$/.test(response.code) ? Number(response.code) : 200;
+  const statusCode = toStatusCode(response);
   const conforms = (schema: SpecSchema, value: unknown) =>
     validateValue(operation, schema, value, {
       path: [],
