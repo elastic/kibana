@@ -32,9 +32,3 @@ export const euiIncludeSelectorInFocusTrap = {
   },
   selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
 };
-
-// POC: container queried by EUI breakpoint mixins, gated by the same flag as `KibanaEuiProvider`.
-export const surfaceContainerCss =
-  typeof localStorage !== 'undefined' && localStorage.getItem('kbnSurfacePoc') === 'true'
-    ? 'container-type: inline-size; container-name: euiSurface;'
-    : '';
