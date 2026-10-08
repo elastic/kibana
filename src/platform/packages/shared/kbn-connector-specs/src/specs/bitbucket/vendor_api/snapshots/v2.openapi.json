@@ -1,0 +1,3102 @@
+{
+  "components": {
+    "schemas": {
+      "account": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "links": {
+                "$ref": "#/components/schemas/account_links"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "title": "Account",
+            "type": "object"
+          }
+        ]
+      },
+      "account_links": {
+        "additionalProperties": true,
+        "properties": {
+          "avatar": {
+            "$ref": "#/components/schemas/link"
+          }
+        },
+        "title": "Account Links",
+        "type": "object"
+      },
+      "author": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "raw": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/account"
+              }
+            },
+            "title": "Author",
+            "type": "object"
+          }
+        ]
+      },
+      "base_commit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "author": {
+                "$ref": "#/components/schemas/author"
+              },
+              "committer": {
+                "$ref": "#/components/schemas/committer"
+              },
+              "date": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "hash": {
+                "pattern": "[0-9a-f]{7,}?",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "parents": {
+                "items": {
+                  "$ref": "#/components/schemas/base_commit"
+                },
+                "minItems": 0,
+                "type": "array"
+              },
+              "summary": {
+                "additionalProperties": false,
+                "properties": {
+                  "html": {
+                    "type": "string"
+                  },
+                  "markup": {
+                    "enum": [
+                      "markdown",
+                      "creole",
+                      "plaintext"
+                    ],
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "title": "Base Commit",
+            "type": "object"
+          }
+        ]
+      },
+      "branch": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ref"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "default_merge_strategy": {
+                "type": "string"
+              },
+              "merge_strategies": {
+                "items": {
+                  "enum": [
+                    "merge_commit",
+                    "squash",
+                    "fast_forward",
+                    "squash_fast_forward",
+                    "rebase_fast_forward",
+                    "rebase_merge"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "title": "Branch",
+            "type": "object"
+          }
+        ]
+      },
+      "comment": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "content": {
+                "additionalProperties": false,
+                "properties": {
+                  "html": {
+                    "type": "string"
+                  },
+                  "markup": {
+                    "enum": [
+                      "markdown",
+                      "creole",
+                      "plaintext"
+                    ],
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "deleted": {
+                "type": "boolean"
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "inline": {
+                "additionalProperties": false,
+                "properties": {
+                  "from": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "start_from": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "start_to": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "to": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "type": "object"
+              },
+              "links": {
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "html": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "self": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "parent": {
+                "$ref": "#/components/schemas/comment"
+              },
+              "updated_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/account"
+              }
+            },
+            "title": "Comment",
+            "type": "object"
+          }
+        ]
+      },
+      "comment_resolution": {
+        "additionalProperties": true,
+        "properties": {
+          "created_on": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/account"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Comment Resolution",
+        "type": "object"
+      },
+      "commit": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/base_commit"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "participants": {
+                "items": {
+                  "$ref": "#/components/schemas/participant"
+                },
+                "minItems": 0,
+                "type": "array"
+              },
+              "repository": {
+                "$ref": "#/components/schemas/repository"
+              }
+            },
+            "title": "Commit",
+            "type": "object"
+          }
+        ]
+      },
+      "commitstatus": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "links": {
+                "additionalProperties": false,
+                "properties": {
+                  "commit": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "self": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "name": {
+                "type": "string"
+              },
+              "refname": {
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "FAILED",
+                  "INPROGRESS",
+                  "STOPPED",
+                  "SUCCESSFUL"
+                ],
+                "type": "string"
+              },
+              "updated_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "state"
+            ],
+            "title": "Commit Status",
+            "type": "object"
+          }
+        ]
+      },
+      "committer": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "raw": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/account"
+              }
+            },
+            "title": "Committer",
+            "type": "object"
+          }
+        ]
+      },
+      "error": {
+        "additionalProperties": true,
+        "properties": {
+          "error": {
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "additionalProperties": true,
+                "properties": {},
+                "type": "object"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "link": {
+        "additionalProperties": false,
+        "properties": {
+          "href": {
+            "format": "uri",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "title": "Link",
+        "type": "object"
+      },
+      "object": {
+        "additionalProperties": true,
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "paginated_changeset": {
+        "additionalProperties": false,
+        "properties": {
+          "next": {
+            "format": "uri",
+            "type": "string"
+          },
+          "page": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pagelen": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "previous": {
+            "format": "uri",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/base_commit"
+            },
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "title": "Page",
+        "type": "object"
+      },
+      "paginated_commitstatuses": {
+        "additionalProperties": false,
+        "properties": {
+          "next": {
+            "format": "uri",
+            "type": "string"
+          },
+          "page": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pagelen": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "previous": {
+            "format": "uri",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/commitstatus"
+            },
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "title": "Paginated Commit Statuses",
+        "type": "object"
+      },
+      "paginated_pullrequests": {
+        "additionalProperties": false,
+        "properties": {
+          "next": {
+            "format": "uri",
+            "type": "string"
+          },
+          "page": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pagelen": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "previous": {
+            "format": "uri",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/pullrequest"
+            },
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "title": "Paginated Pull Requests",
+        "type": "object"
+      },
+      "paginated_repositories": {
+        "additionalProperties": false,
+        "properties": {
+          "next": {
+            "format": "uri",
+            "type": "string"
+          },
+          "page": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pagelen": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "previous": {
+            "format": "uri",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/repository"
+            },
+            "minItems": 0,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "title": "Paginated Repositories",
+        "type": "object"
+      },
+      "participant": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "approved": {
+                "type": "boolean"
+              },
+              "participated_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "role": {
+                "enum": [
+                  "PARTICIPANT",
+                  "REVIEWER"
+                ],
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "approved",
+                  "changes_requested",
+                  null
+                ],
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/account"
+              }
+            },
+            "title": "Participant",
+            "type": "object"
+          }
+        ]
+      },
+      "pipeline": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "build_number": {
+                "type": "integer"
+              },
+              "build_seconds_used": {
+                "type": "integer"
+              },
+              "completed_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "configuration_sources": {
+                "items": {
+                  "$ref": "#/components/schemas/pipeline_configuration_source"
+                },
+                "minItems": 0,
+                "type": "array"
+              },
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "creator": {
+                "$ref": "#/components/schemas/account"
+              },
+              "links": {
+                "$ref": "#/components/schemas/pipelines_pipeline_links"
+              },
+              "repository": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "state": {
+                "$ref": "#/components/schemas/pipeline_state"
+              },
+              "target": {
+                "$ref": "#/components/schemas/pipeline_target"
+              },
+              "trigger": {
+                "$ref": "#/components/schemas/pipeline_trigger"
+              },
+              "uuid": {
+                "type": "string"
+              },
+              "variables": {
+                "items": {
+                  "$ref": "#/components/schemas/pipeline_variable"
+                },
+                "minItems": 0,
+                "type": "array"
+              }
+            },
+            "title": "Pipeline",
+            "type": "object"
+          }
+        ]
+      },
+      "pipeline_configuration_source": {
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "uri": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "uri"
+        ],
+        "type": "object"
+      },
+      "pipeline_state": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {},
+            "title": "Pipeline State",
+            "type": "object"
+          }
+        ]
+      },
+      "pipeline_target": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {},
+            "title": "Pipeline Target",
+            "type": "object"
+          }
+        ]
+      },
+      "pipeline_trigger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {},
+            "title": "Pipeline Trigger",
+            "type": "object"
+          }
+        ]
+      },
+      "pipeline_variable": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "secured": {
+                "type": "boolean"
+              },
+              "uuid": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "title": "Pipeline Variable",
+            "type": "object"
+          }
+        ]
+      },
+      "pipelines_links_section_href": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "href": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "title": "Pipeline Links href",
+            "type": "object"
+          }
+        ]
+      },
+      "pipelines_pipeline_links": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "self": {
+                "$ref": "#/components/schemas/pipelines_links_section_href"
+              },
+              "steps": {
+                "$ref": "#/components/schemas/pipelines_links_section_href"
+              }
+            },
+            "title": "Pipeline Links",
+            "type": "object"
+          }
+        ]
+      },
+      "project": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "has_publicly_visible_repos": {
+                "type": "boolean"
+              },
+              "is_private": {
+                "type": "boolean"
+              },
+              "key": {
+                "type": "string"
+              },
+              "links": {
+                "additionalProperties": false,
+                "properties": {
+                  "avatar": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "html": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "name": {
+                "type": "string"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/team"
+              },
+              "updated_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "title": "Project",
+            "type": "object"
+          }
+        ]
+      },
+      "pullrequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "author": {
+                "$ref": "#/components/schemas/account"
+              },
+              "close_source_branch": {
+                "type": "boolean"
+              },
+              "closed_by": {
+                "$ref": "#/components/schemas/account"
+              },
+              "comment_count": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "destination": {
+                "$ref": "#/components/schemas/pullrequest_endpoint"
+              },
+              "draft": {
+                "type": "boolean"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "links": {
+                "additionalProperties": false,
+                "properties": {
+                  "activity": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "approve": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "comments": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "commits": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "decline": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "diff": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "diffstat": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "html": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "merge": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "mergeability_checks": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "self": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "merge_commit": {
+                "additionalProperties": false,
+                "properties": {
+                  "hash": {
+                    "pattern": "[0-9a-f]{7,}?",
+                    "type": "string"
+                  }
+                },
+                "title": "Pull Request Commit",
+                "type": "object"
+              },
+              "participants": {
+                "items": {
+                  "$ref": "#/components/schemas/participant"
+                },
+                "type": "array"
+              },
+              "queued": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "rendered": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "html": {
+                        "type": "string"
+                      },
+                      "markup": {
+                        "enum": [
+                          "markdown",
+                          "creole",
+                          "plaintext"
+                        ],
+                        "type": "string"
+                      },
+                      "raw": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "reason": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "html": {
+                        "type": "string"
+                      },
+                      "markup": {
+                        "enum": [
+                          "markdown",
+                          "creole",
+                          "plaintext"
+                        ],
+                        "type": "string"
+                      },
+                      "raw": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "title": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "html": {
+                        "type": "string"
+                      },
+                      "markup": {
+                        "enum": [
+                          "markdown",
+                          "creole",
+                          "plaintext"
+                        ],
+                        "type": "string"
+                      },
+                      "raw": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "title": "Rendered Pull Request Markup",
+                "type": "object"
+              },
+              "reviewers": {
+                "items": {
+                  "$ref": "#/components/schemas/account"
+                },
+                "type": "array"
+              },
+              "source": {
+                "$ref": "#/components/schemas/pullrequest_endpoint"
+              },
+              "state": {
+                "enum": [
+                  "OPEN",
+                  "MERGED",
+                  "DECLINED",
+                  "SUPERSEDED"
+                ],
+                "type": "string"
+              },
+              "summary": {
+                "additionalProperties": false,
+                "properties": {
+                  "html": {
+                    "type": "string"
+                  },
+                  "markup": {
+                    "enum": [
+                      "markdown",
+                      "creole",
+                      "plaintext"
+                    ],
+                    "type": "string"
+                  },
+                  "raw": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "task_count": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "title": {
+                "type": "string"
+              },
+              "updated_on": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "title": "Pull Request",
+            "type": "object"
+          }
+        ]
+      },
+      "pullrequest_comment": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/comment"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "pending": {
+                "type": "boolean"
+              },
+              "pullrequest": {
+                "$ref": "#/components/schemas/pullrequest"
+              },
+              "resolution": {
+                "$ref": "#/components/schemas/comment_resolution"
+              }
+            },
+            "title": "Pull Request Comment",
+            "type": "object"
+          }
+        ]
+      },
+      "pullrequest_endpoint": {
+        "additionalProperties": false,
+        "properties": {
+          "branch": {
+            "additionalProperties": false,
+            "properties": {
+              "default_merge_strategy": {
+                "type": "string"
+              },
+              "merge_strategies": {
+                "items": {
+                  "enum": [
+                    "merge_commit",
+                    "squash",
+                    "fast_forward",
+                    "squash_fast_forward",
+                    "rebase_fast_forward",
+                    "rebase_merge"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "title": "Pull Request Branch",
+            "type": "object"
+          },
+          "commit": {
+            "additionalProperties": false,
+            "properties": {
+              "hash": {
+                "pattern": "[0-9a-f]{7,}?",
+                "type": "string"
+              }
+            },
+            "title": "Pull Request Commit",
+            "type": "object"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/repository"
+          }
+        },
+        "title": "Pull Request Endpoint",
+        "type": "object"
+      },
+      "pullrequest_merge_parameters": {
+        "additionalProperties": true,
+        "properties": {
+          "close_source_branch": {
+            "type": "boolean"
+          },
+          "merge_strategy": {
+            "default": "merge_commit",
+            "enum": [
+              "merge_commit",
+              "squash",
+              "fast_forward",
+              "squash_fast_forward",
+              "rebase_fast_forward",
+              "rebase_merge"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Pull Request Merge Parameters",
+        "type": "object"
+      },
+      "ref": {
+        "additionalProperties": true,
+        "properties": {
+          "links": {
+            "additionalProperties": false,
+            "properties": {
+              "commits": {
+                "additionalProperties": false,
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "title": "Link",
+                "type": "object"
+              },
+              "html": {
+                "additionalProperties": false,
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "title": "Link",
+                "type": "object"
+              },
+              "self": {
+                "additionalProperties": false,
+                "properties": {
+                  "href": {
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "title": "Link",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/commit"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Ref",
+        "type": "object"
+      },
+      "repository": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/object"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "created_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "fork_policy": {
+                "enum": [
+                  "allow_forks",
+                  "no_public_forks",
+                  "no_forks"
+                ],
+                "type": "string"
+              },
+              "full_name": {
+                "type": "string"
+              },
+              "has_issues": {
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "type": "boolean"
+              },
+              "is_private": {
+                "type": "boolean"
+              },
+              "language": {
+                "type": "string"
+              },
+              "links": {
+                "additionalProperties": false,
+                "properties": {
+                  "avatar": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "clone": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "href": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "title": "Link",
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "commits": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "downloads": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "forks": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "hooks": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "html": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "pullrequests": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "self": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  },
+                  "watchers": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "href": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "Link",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "mainbranch": {
+                "$ref": "#/components/schemas/branch"
+              },
+              "name": {
+                "type": "string"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/account"
+              },
+              "parent": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "project": {
+                "$ref": "#/components/schemas/project"
+              },
+              "scm": {
+                "enum": [
+                  "git"
+                ],
+                "type": "string"
+              },
+              "size": {
+                "type": "integer"
+              },
+              "updated_on": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "title": "Repository",
+            "type": "object"
+          }
+        ]
+      },
+      "team": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/account"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "links": {
+                "$ref": "#/components/schemas/team_links"
+              }
+            },
+            "title": "Team",
+            "type": "object"
+          }
+        ]
+      },
+      "team_links": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/account_links"
+          },
+          {
+            "additionalProperties": true,
+            "properties": {
+              "html": {
+                "$ref": "#/components/schemas/link"
+              },
+              "members": {
+                "$ref": "#/components/schemas/link"
+              },
+              "projects": {
+                "$ref": "#/components/schemas/link"
+              },
+              "repositories": {
+                "$ref": "#/components/schemas/link"
+              },
+              "self": {
+                "$ref": "#/components/schemas/link"
+              }
+            },
+            "title": "Team Links",
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basic": {
+        "scheme": "basic",
+        "type": "http"
+      },
+      "oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://bitbucket.org/site/oauth2/authorize",
+            "scopes": {
+              "account": "Read your account information",
+              "account:write": "Read and modify your account information",
+              "email": "Read your account's primary email address",
+              "issue": "Read your repositories' issues",
+              "issue:write": "Read and modify your repositories' issues",
+              "pipeline": "Access your repositories' build pipelines",
+              "pipeline:variable": "Access your repositories' build pipelines and configure their variables",
+              "pipeline:write": "Access and rerun your repositories' build pipelines",
+              "project": "Read your workspace's project settings and read repositories contained within your workspace's projects",
+              "project:admin": "Read and modify settings for projects in your workspace",
+              "pullrequest": "Read your repositories and their pull requests",
+              "pullrequest:write": "Read and modify your repositories and their pull requests",
+              "repository": "Read your repositories",
+              "repository:admin": "Administer your repositories",
+              "repository:delete": "Delete your repositories",
+              "repository:write": "Read and modify your repositories",
+              "runner": "Access your workspaces/repositories' runners",
+              "runner:write": "Access and edit your workspaces/repositories' runners",
+              "snippet": "Read your snippets",
+              "snippet:write": "Read and modify your snippets",
+              "team": "Read your team membership information",
+              "team:write": "Read and modify your team membership information",
+              "test": "Access your workspaces/repositories' test",
+              "test:write": "Access and edit your workspaces/repositories' test",
+              "webhook": "Read and modify your repositories' webhooks",
+              "wiki": "Read and modify your repositories' wikis"
+            },
+            "tokenUrl": "https://bitbucket.org/site/oauth2/access_token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Bitbucket API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/repositories/{workspace}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "role",
+            "required": false,
+            "schema": {
+              "enum": [
+                "admin",
+                "contributor",
+                "member",
+                "owner"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/paginated_repositories"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/repositories/{workspace}/{repo_slug}/commit/{commit}": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/commit"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "commit",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "refname",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/paginated_commitstatuses"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "commit",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses/build": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "commit",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/commitstatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/commitstatus"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/commits": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/paginated_changeset"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/repositories/{workspace}/{repo_slug}/pipelines": {
+      "post": {
+        "operationId": "createPipelineForRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "repo_slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "merge_defaults",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target_branch_to_create",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pipeline"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}": {
+      "get": {
+        "operationId": "getPipelineForRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "repo_slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pipeline_uuid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pipeline"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/stopPipeline": {
+      "post": {
+        "operationId": "stopPipeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "repo_slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pipeline_uuid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pipeline:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "enum": [
+                "OPEN",
+                "MERGED",
+                "DECLINED",
+                "SUPERSEDED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/paginated_pullrequests"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pullrequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "pull_request_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pullrequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/approve": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "pull_request_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/participant"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/comments": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "pull_request_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pullrequest_comment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest_comment"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/decline": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "pull_request_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest"
+                }
+              }
+            }
+          },
+          "555": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/merge": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "pull_request_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pullrequest_merge_parameters"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pullrequest"
+                }
+              }
+            }
+          },
+          "202": {},
+          "409": {},
+          "555": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "pullrequest:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/refs/branches": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/branch"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/repositories/{workspace}/{repo_slug}/refs/branches/{name}": {
+      "delete": {
+        "responses": {
+          "204": {},
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository:write"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/branch"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "repository"
+            ]
+          },
+          {
+            "basic": []
+          },
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "repo_slug",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "workspace",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.bitbucket.org/2.0"
+    }
+  ]
+}

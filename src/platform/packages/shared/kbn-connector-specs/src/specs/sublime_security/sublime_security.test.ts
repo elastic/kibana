@@ -10,7 +10,7 @@
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { SublimeSecurityConnector } from './sublime_security';
-import { SearchMessageGroupsInputSchema } from './types';
+import { GetMessageInputSchema, GetTaskInputSchema, SearchMessageGroupsInputSchema } from './types';
 import type { SublimeMessageGroupSummary } from './types';
 
 const BASE_URL = 'https://platform.sublime.security';
@@ -162,6 +162,27 @@ describe('SublimeSecurityConnector', () => {
           .success
       ).toBe(true);
       expect(SearchMessageGroupsInputSchema.safeParse(base).success).toBe(true);
+    });
+
+    it('requires ISO 8601 created_at bounds', () => {
+      const base = { limit: 20, offset: 0 };
+
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, createdAtGte: '2024-01-01T00:00:00Z' })
+          .success
+      ).toBe(true);
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, createdAtGte: 'yesterday' }).success
+      ).toBe(false);
+    });
+
+    it('requires UUID message and task ids', () => {
+      const uuid = '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60';
+
+      expect(GetMessageInputSchema.safeParse({ messageId: uuid }).success).toBe(true);
+      expect(GetMessageInputSchema.safeParse({ messageId: 'msg-1' }).success).toBe(false);
+      expect(GetTaskInputSchema.safeParse({ taskId: uuid }).success).toBe(true);
+      expect(GetTaskInputSchema.safeParse({ taskId: 'task-1' }).success).toBe(false);
     });
 
     it('preserves stats_limit_exceeded so callers can page past a lower-bound total', async () => {
