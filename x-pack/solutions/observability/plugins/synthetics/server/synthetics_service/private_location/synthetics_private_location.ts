@@ -46,7 +46,13 @@ import {
   toMonitorPlacements,
 } from './rebalance_writes';
 import { getPrivateLocations } from '../get_private_locations';
-import { agentIdFromCondition, assignAgentById, isEqlSafeLiteral } from './assign_by_condition';
+import {
+  agentIdFromCondition,
+  assignAgentById,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
+import { isCompleteElasticAgent } from './get_agent_info';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
@@ -56,6 +62,8 @@ export interface PrivateConfig {
 
 interface EnrolledAgents {
   agentIds: string[];
+  /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
+  completeAgentIds?: string[];
 }
 
 export interface FailedPolicyUpdate {
@@ -226,19 +234,25 @@ export class SyntheticsPrivateLocation {
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (shardingMode === 'active') {
         const agentIds = conditionHosts?.agentIds ?? [];
+        const isBrowser = config.type === MonitorTypeEnum.BROWSER;
+        // An omitted condition runs the monitor on every agent. Browser monitors
+        // only run on elastic-agent-complete, so they must not use that fallback.
+        const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
         const existingAgentId = agentIdFromCondition(existingCondition);
 
-        if (existingAgentId && agentIds.includes(existingAgentId)) {
+        if (existingAgentId && eligibleAgentIds.includes(existingAgentId)) {
           // Keep a valid existing pin during edits. Health and balancing moves
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
-        } else if (agentIds.length > 0) {
-          const assigned = assignAgentById(config.id, agentIds);
+        } else if (eligibleAgentIds.length > 0) {
+          const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
           }
+        } else if (isBrowser) {
+          newPolicy.condition = UNASSIGNED_CONDITION;
         }
-        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
       } else if (shardingMode === 'unknown') {
         // License unreadable: keep whatever pin exists until it can be read again.
         if (existingCondition) {
@@ -313,6 +327,7 @@ export class SyntheticsPrivateLocation {
    */
   private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
     const agentIds = new Set<string>();
+    const completeAgentIds = new Set<string>();
     const perPage = 1000;
     let page = 1;
 
@@ -327,6 +342,9 @@ export class SyntheticsPrivateLocation {
       for (const agent of agents) {
         if (agent.id && isEqlSafeLiteral(agent.id)) {
           agentIds.add(agent.id);
+          if (isCompleteElasticAgent(agent.local_metadata)) {
+            completeAgentIds.add(agent.id);
+          }
         }
       }
 
@@ -336,7 +354,7 @@ export class SyntheticsPrivateLocation {
       page += 1;
     }
 
-    return { agentIds: [...agentIds] };
+    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds] };
   }
 
   /** Resolves each touched location at most once per monitor batch. */
@@ -809,17 +827,23 @@ export class SyntheticsPrivateLocation {
    * bounce. Failover is independent of that gate: a dead agent's monitors are
    * placed on any of the full `healthyAgentIds`, so they evacuate immediately
    * even when the only currently-live agents aren't stable yet.
+   *
+   * Browser monitors are placed only on `browserAgentIds` (elastic-agent-complete).
+   * An empty list pins them to a sentinel that matches no agent, so they do not
+   * run on the standard image.
    */
   async rebalanceShards({
     location,
     healthyAgentIds,
     recoveryAgentIds,
+    browserAgentIds,
     capacities,
     signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
     healthyAgentIds: string[];
     recoveryAgentIds?: string[];
+    browserAgentIds: string[];
     capacities?: ReadonlyMap<string, number>;
     signal: AbortSignal;
   }): Promise<{ total: number; moved: number }> {
@@ -836,7 +860,11 @@ export class SyntheticsPrivateLocation {
     }
 
     const monitors = toMonitorPlacements(pkgPolicies, location.id);
-    const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, {
+      capacities,
+      recoveryAgentIds,
+      browserAgentIds,
+    });
     const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
 
     let moved = 0;

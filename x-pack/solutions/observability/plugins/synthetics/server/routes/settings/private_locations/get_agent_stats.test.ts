@@ -34,7 +34,7 @@ interface FakeAgent {
   local_metadata?: {
     host?: { name?: string; hostname?: string; memory?: number };
     os?: { platform?: string };
-    elastic?: { agent?: { version?: string } };
+    elastic?: { agent?: { version?: string; complete?: boolean } };
   };
 }
 
@@ -436,5 +436,29 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(result[0].isAgentSharding).toBe(false);
     expect(result[0].agents[0].monitorsAssigned).toBeNull();
     expect(mockListByAgentPolicy).not.toHaveBeenCalled();
+  });
+
+  it('marks only elastic-agent-complete agents as browser-capable', async () => {
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [
+        agent({ id: 'basic' }),
+        agent({
+          id: 'complete',
+          local_metadata: {
+            host: { name: 'host-b' },
+            elastic: { agent: { version: '9.6.0', complete: true } },
+          },
+        }),
+      ],
+      total: 2,
+    });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+
+    const result = await run(routeContext);
+
+    expect(result[0].agents.map(({ agentId, complete }) => [agentId, complete])).toEqual([
+      ['basic', false],
+      ['complete', true],
+    ]);
   });
 });

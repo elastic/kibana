@@ -40,6 +40,7 @@ const assignment = (
   isAgentSharding: false,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
+  hasCompleteAgent: true,
   agents: [
     { agentId: 'agent-1', host: 'host-a', healthy: true, agentVersion: '9.6.0', enrolled: true },
     { agentId: 'agent-2', host: 'host-b', healthy: false, agentVersion: '9.5.0', enrolled: true },
@@ -211,5 +212,28 @@ describe('MonitorAssignedAgents', () => {
     expect(screen.getByText('gone-agent')).toBeInTheDocument();
     expect(screen.queryByText(/not yet assigned/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('syntheticsAssignedAgentMissingFromFleet')).toBeInTheDocument();
+  });
+
+  it('warns when a browser monitor has no elastic-agent-complete agent', () => {
+    mockUseAssignments.mockReturnValue({
+      assignments: [assignment({ isAgentSharding: true, agents: [], hasCompleteAgent: false })],
+      loading: false,
+      error: false,
+    });
+
+    render(
+      <MonitorAssignedAgents
+        configId="mon-1"
+        isBrowserMonitor
+        monitorLocations={[{ id: 'loc-1', label: 'Local Docker PL', isServiceManaged: false }]}
+      />
+    );
+
+    expect(screen.getByTestId('syntheticsBrowserCompleteAgentCallout')).toHaveTextContent(
+      'Local Docker PL'
+    );
+    expect(screen.getByTestId('syntheticsBrowserCompleteAgentCallout')).toHaveTextContent(
+      'elastic-agent-complete'
+    );
   });
 });

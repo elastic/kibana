@@ -40,6 +40,7 @@ export const LocationMonitorsType = lazySchema(() =>
     z.looseObject({
       id: z.string(),
       count: z.number(),
+      browserCount: z.number(),
     })
   )
 );

@@ -47,6 +47,10 @@ export interface AgentStat {
    * of the location's monitors.
    */
   monitorsAssigned: number | null;
+  /**
+   * `elastic-agent-complete` image. Browser monitors run only on these agents.
+   */
+  complete: boolean;
 }
 
 export interface LocationAgentStats {
