@@ -40,7 +40,9 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
-  projectRoutingOverride?: string
+  projectRoutingOverride?: string,
+  /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
+  esqlQuery?: string
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
   const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
@@ -110,7 +112,8 @@ export const useData = (
     selectedSignificantItemStatsRequest,
     lastRefresh,
     changePointsByDefault,
-    projectRoutingOverride
+    projectRoutingOverride,
+    esqlQuery
   );
 
   useEffect(() => {

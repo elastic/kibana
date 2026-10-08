@@ -53,7 +53,10 @@ import { MiniHistogram } from '../../mini_histogram';
 import { useDocsForCategory } from './use_docs_for_category';
 import { useCreateFormattedExample } from '../format_category';
 import { PatternCellRenderer } from './pattern_cell_renderer';
-import { findCategoryMatchingFieldValue } from './build_esql_analysis_queries';
+import {
+  findCategoryMatchingFieldValue,
+  getEsqlDocumentScopeQuery,
+} from './build_esql_analysis_queries';
 import { runEsqlCategorizeRequest } from './run_esql_categorize_request';
 
 type SparkLinesPerCategory = Record<string, Record<number, number>>;
@@ -150,6 +153,11 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
   const { docsForCategory } = useDocsForCategory();
 
+  const esqlDocumentScope = useMemo(
+    () => (isOfAggregateQueryType(query) ? getEsqlDocumentScopeQuery(query.esql) : undefined),
+    [query]
+  );
+
   const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
     dataView,
     'log_categorization',
@@ -157,7 +165,11 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     undefined,
     undefined,
-    BAR_TARGET
+    BAR_TARGET,
+    undefined,
+    undefined,
+    undefined,
+    esqlDocumentScope
   );
 
   const onAddFilter = useCallback(

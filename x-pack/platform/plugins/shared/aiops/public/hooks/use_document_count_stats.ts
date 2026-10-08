@@ -17,6 +17,7 @@ import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getEsqlDocumentCountStats } from '../get_esql_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -59,7 +60,8 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
   changePointsByDefault = true,
-  projectRoutingOverride?: string
+  projectRoutingOverride?: string,
+  esqlQuery?: string
 ): DocumentStats {
   const {
     data,
@@ -77,7 +79,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
   const cacheKey = stringHash(
-    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}_${esqlQuery ?? ''}`
   );
 
   const fetchDocumentCountData = useCallback(async () => {
@@ -90,6 +92,30 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
     try {
       abortCtrl.current = new AbortController();
+
+      if (
+        esqlQuery !== undefined &&
+        searchParams.timeFieldName !== undefined &&
+        searchParams.earliest !== undefined &&
+        searchParams.latest !== undefined &&
+        searchParams.intervalMs !== undefined &&
+        searchParams.intervalMs > 0
+      ) {
+        const { totalCount, documentCountStats } = await getEsqlDocumentCountStats({
+          esql: esqlQuery,
+          search: data.search.search,
+          timeFieldName: searchParams.timeFieldName,
+          earliest: searchParams.earliest,
+          latest: searchParams.latest,
+          intervalMs: searchParams.intervalMs,
+          searchQuery: searchParams.searchQuery,
+          signal: abortCtrl.current.signal,
+        });
+        const esqlStats: DocumentStats = { sampleProbability: 1, documentCountStats, totalCount };
+        setDocumentStats(esqlStats);
+        setDocumentStatsCache({ ...documentStatsCache, [cacheKey]: esqlStats });
+        return;
+      }
 
       const projectRouting = projectRoutingOverride ?? cps?.cpsManager?.getDefaultProjectRouting();
       if (projectRouting) {
