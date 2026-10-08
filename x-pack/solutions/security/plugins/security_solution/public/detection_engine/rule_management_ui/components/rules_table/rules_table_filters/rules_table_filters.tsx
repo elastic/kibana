@@ -15,7 +15,7 @@ import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions'
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../common/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
-import { AllRulesTabs } from '../rules_table_toolbar';
+import { AllRulesTabs } from '../constants';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';

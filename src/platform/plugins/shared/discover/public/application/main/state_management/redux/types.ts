@@ -284,6 +284,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  draftSessionTitle: string | undefined;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

@@ -10,7 +10,10 @@ export { useSpaceId } from './use_space_id';
 export {
   ALERT_SUBTITLE,
   ATTACK_SUBTITLE,
+  IOCS_TITLE,
   RULE_FALLBACK_TITLE,
   RULE_SUBTITLE,
+  TIMELINE_TITLE,
+  ENDPOINT_ANALYSIS_SUBTITLE,
   alertsTitle,
 } from './translations';
