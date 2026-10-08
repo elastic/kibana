@@ -21,11 +21,11 @@ jest.mock('./entity_attachment/query_client', () => ({
 }));
 
 describe('openImpactEntityFlyout', () => {
-  const overlays = { openSystemFlyout: jest.fn() };
+  const overlays = { openFlyoutTemplate: jest.fn() };
   const resolveSecurityCanvasContext = jest.fn();
 
   beforeEach(() => {
-    overlays.openSystemFlyout.mockReset();
+    overlays.openFlyoutTemplate.mockReset();
   });
 
   it('opens the entity overview as a child flyout on the current page', () => {
@@ -35,13 +35,13 @@ describe('openImpactEntityFlyout', () => {
       resolveSecurityCanvasContext,
     });
 
-    expect(overlays.openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(overlays.openFlyoutTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         session: 'inherit',
-        title: 'cfo@corp',
+        flyoutMenuProps: { title: 'cfo@corp' },
         id: 'securityImpactEntityFlyout',
-      })
+      }),
+      expect.any(Function)
     );
   });
 
@@ -52,7 +52,7 @@ describe('openImpactEntityFlyout', () => {
       resolveSecurityCanvasContext,
     });
 
-    expect(overlays.openSystemFlyout).not.toHaveBeenCalled();
+    expect(overlays.openFlyoutTemplate).not.toHaveBeenCalled();
   });
 
   it('does nothing when the entity has no flyout type', () => {
@@ -62,6 +62,6 @@ describe('openImpactEntityFlyout', () => {
       resolveSecurityCanvasContext,
     });
 
-    expect(overlays.openSystemFlyout).not.toHaveBeenCalled();
+    expect(overlays.openFlyoutTemplate).not.toHaveBeenCalled();
   });
 });

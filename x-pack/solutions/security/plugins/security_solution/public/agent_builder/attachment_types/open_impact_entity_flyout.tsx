@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { QueryClientProvider } from '@kbn/react-query';
 import { entityStoreIdType, type ImpactEntityTarget } from '@kbn/agentic-investigations-common';
-import type { OverlaySystemFlyoutStart } from '@kbn/core-overlays-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { EntityCardFlyoutOverviewCanvas } from '../components/entity_card_flyout_overview_canvas';
 import {
   SecurityReduxEmbeddedProvider,
@@ -29,7 +30,7 @@ export const openImpactEntityFlyout = ({
   resolveSecurityCanvasContext,
 }: {
   entity: ImpactEntityTarget;
-  overlays: OverlaySystemFlyoutStart;
+  overlays: Pick<OverlayStart, 'openFlyoutTemplate'>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   const identifierType = flyoutType(entity);
@@ -37,26 +38,35 @@ export const openImpactEntityFlyout = ({
     return;
   }
 
-  overlays.openSystemFlyout(
-    <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
-      <QueryClientProvider client={entityAttachmentQueryClient}>
-        <EntityCardFlyoutOverviewCanvas
-          identifier={{
-            identifierType,
-            identifier: entity.name ?? entity.id,
-            entityStoreId: entity.id,
-          }}
-        />
-      </QueryClientProvider>
-    </SecurityReduxEmbeddedProvider>,
+  const title = entity.name ?? entity.id;
+
+  overlays.openFlyoutTemplate(
     {
       id: 'securityImpactEntityFlyout',
       session: 'inherit',
-      title: entity.name ?? entity.id,
       size: 'm',
       type: 'overlay',
-      paddingSize: 'm',
+      // The entity overview renders its own header, so the history entry is titled here.
+      flyoutMenuProps: { title },
+      'aria-label': title,
       'data-test-subj': 'securityImpactEntityFlyout',
-    }
+    },
+    ({ onClose }) => (
+      <FlyoutTemplate onClose={onClose}>
+        <FlyoutTemplate.Body>
+          <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
+            <QueryClientProvider client={entityAttachmentQueryClient}>
+              <EntityCardFlyoutOverviewCanvas
+                identifier={{
+                  identifierType,
+                  identifier: title,
+                  entityStoreId: entity.id,
+                }}
+              />
+            </QueryClientProvider>
+          </SecurityReduxEmbeddedProvider>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    )
   );
 };
