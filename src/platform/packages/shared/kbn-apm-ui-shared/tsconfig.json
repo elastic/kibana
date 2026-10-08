@@ -25,6 +25,5 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/apm-common",
     "@kbn/shared-ux-markdown",
-    "@kbn/genai-common"
   ]
 }

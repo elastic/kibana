@@ -60,7 +60,6 @@
     "@kbn/ebt-click",
     "@kbn/apm-shared",
     "@kbn/ui-callout",
-    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }
