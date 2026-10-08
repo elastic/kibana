@@ -24,9 +24,24 @@ import { createCliError, isCliError } from './errors';
 import { shouldPreferCachedSnapshot } from './utils/find_local_cached_snapshot';
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
-const PERMANENT_SNAPSHOTS_BASE_URL =
-  'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+const GCS_BASE_URL = 'https://storage.googleapis.com';
+const DAILY_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-daily`;
+const PERMANENT_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-permanent`;
+const ALLOWED_SNAPSHOT_URL_PREFIXES = [
+  `${DAILY_SNAPSHOTS_BASE_URL}/`,
+  `${PERMANENT_SNAPSHOTS_BASE_URL}/`,
+];
+
+/**
+ * Whether a snapshot manifest or archive URL points into the Kibana CI snapshot buckets.
+ */
+export function isAllowedSnapshotUrl(url: string): boolean {
+  if (!URL.canParse(url)) {
+    return false;
+  }
+  const { href } = new URL(url);
+  return ALLOWED_SNAPSHOT_URL_PREFIXES.some((prefix) => href.startsWith(prefix));
+}
 
 type ChecksumType = 'sha512';
 export type ArtifactLicense = 'basic' | 'trial';
@@ -124,7 +139,7 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
 
   const abc = new AbortController();
   const resp = await retry(log, async () => {
-    const response = await fetch(url, { signal: abc.signal });
+    const response = await fetch(url, { signal: abc.signal, redirect: 'error' });
     // node-fetch resolves (does not reject) on 5xx, so a transient server error
     // (e.g. a GCS 500 on the snapshot bucket) would otherwise escape retry and
     // fail immediately. Throw here so retry() catches it and backs off.
@@ -151,6 +166,14 @@ async function getArtifactSpecForSnapshot(
     shouldUseUnverifiedSnapshot() ? '' : '-verified'
   }.json`;
   const secondaryManifestUrl = `${PERMANENT_SNAPSHOTS_BASE_URL}/${desiredVersion}/manifest.json`;
+
+  if (customManifestUrl && !isAllowedSnapshotUrl(customManifestUrl)) {
+    throw createCliError(
+      `ES_SNAPSHOT_MANIFEST must start with ${ALLOWED_SNAPSHOT_URL_PREFIXES.join(
+        ' or '
+      )}, got ${customManifestUrl}. Use KBN_ES_SNAPSHOT_URL to run a custom Elasticsearch build.`
+    );
+  }
 
   let { abc, resp, json } = await fetchSnapshotManifest(
     customManifestUrl || primaryManifestUrl,
@@ -184,6 +207,10 @@ async function getArtifactSpecForSnapshot(
     throw createCliError(
       `Snapshots are available, but couldn't find an artifact in the manifest for [${desiredLicense}, ${platform}, ${arch}]`
     );
+  }
+
+  if (!isAllowedSnapshotUrl(archive.url)) {
+    throw createCliError(`Snapshot manifest points to an unexpected archive url: ${archive.url}`);
   }
 
   if (archive.version !== desiredVersion) {
