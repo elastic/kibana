@@ -535,7 +535,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsHomeHeader />
+      <EntityAnalyticsHomeHeader timeRange={timeRange} />
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           css={css`

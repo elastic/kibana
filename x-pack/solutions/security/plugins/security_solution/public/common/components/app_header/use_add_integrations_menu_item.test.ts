@@ -54,6 +54,16 @@ describe('useAddIntegrationsMenuItem', () => {
     );
   });
 
+  it('returns an inline item when overflow is overridden to false', () => {
+    mockCapabilities({ fleet: { read: true }, [SECURITY_FEATURE_ID]: { configurations: false } });
+
+    const { result } = renderHook(() => useAddIntegrationsMenuItem({ overflow: false }));
+
+    expect(result.current).toEqual(
+      expect.objectContaining({ id: 'addIntegrations', overflow: false })
+    );
+  });
+
   it('returns undefined when the user cannot read fleet', () => {
     mockCapabilities({ fleet: { read: false }, [SECURITY_FEATURE_ID]: { configurations: false } });
 

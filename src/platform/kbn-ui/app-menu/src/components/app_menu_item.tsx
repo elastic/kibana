@@ -10,6 +10,7 @@
 import React, { useRef, type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
+import { AiButton, type AiButtonIconType } from '@kbn/ui-ai-components';
 import { css } from '@emotion/react';
 import {
   createReturnFocus,
@@ -23,6 +24,18 @@ import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
 import { asPlainText } from '../as_plain_text';
 import { getAppMenuItemTestSubj } from '../test_subjects';
+
+const AI_BUTTON_ICONS: readonly string[] = [
+  'addToChat',
+  'sparkles',
+  'productAgent',
+  'aiAssistantLogo',
+];
+
+const toAiButtonIcon = (iconType: unknown): AiButtonIconType =>
+  typeof iconType === 'string' && AI_BUTTON_ICONS.includes(iconType)
+    ? (iconType as AiButtonIconType)
+    : 'productAgent';
 
 type AppMenuItemProps = AppMenuItemType & {
   isPopoverOpen: boolean;
@@ -48,6 +61,7 @@ export const AppMenuItem = ({
   items,
   isPopoverOpen,
   hidden,
+  appearance,
   popoverWidth,
   popoverTestId,
   onPopoverToggle,
@@ -94,26 +108,42 @@ export const AppMenuItem = ({
 
   const buttonComponent = (
     <EuiHideFor sizes={hidden ?? 'none'}>
-      <EuiHeaderLink
-        id={htmlId}
-        data-test-subj={testId || getAppMenuItemTestSubj(id)}
-        {...getAppMenuEbtDomProps(ebt)}
-        iconType={iconType}
-        isDisabled={isDisabled(disableButton)}
-        href={href}
-        target={href ? target : undefined}
-        isLoading={isLoading}
-        size="s"
-        iconSide="left"
-        iconSize="m"
-        color="text"
-        aria-haspopup={hasItems ? 'menu' : undefined}
-        isSelected={showAsSelected}
-        css={buttonCss}
-        {...linkProps}
-      >
-        {itemText}
-      </EuiHeaderLink>
+      {appearance === 'ai' && !hasItems ? (
+        <AiButton
+          id={htmlId}
+          data-test-subj={testId || getAppMenuItemTestSubj(id)}
+          {...getAppMenuEbtDomProps(ebt)}
+          variant="base"
+          size="s"
+          iconType={toAiButtonIcon(iconType)}
+          isDisabled={isDisabled(disableButton)}
+          isLoading={isLoading}
+          onClick={handleClick}
+        >
+          {itemText}
+        </AiButton>
+      ) : (
+        <EuiHeaderLink
+          id={htmlId}
+          data-test-subj={testId || getAppMenuItemTestSubj(id)}
+          {...getAppMenuEbtDomProps(ebt)}
+          iconType={iconType}
+          isDisabled={isDisabled(disableButton)}
+          href={href}
+          target={href ? target : undefined}
+          isLoading={isLoading}
+          size="s"
+          iconSide="left"
+          iconSize="m"
+          color="text"
+          aria-haspopup={hasItems ? 'menu' : undefined}
+          isSelected={showAsSelected}
+          css={buttonCss}
+          {...linkProps}
+        >
+          {itemText}
+        </EuiHeaderLink>
+      )}
     </EuiHideFor>
   );
 

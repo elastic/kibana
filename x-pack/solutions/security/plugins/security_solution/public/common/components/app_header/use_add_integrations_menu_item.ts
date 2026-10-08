@@ -27,7 +27,12 @@ export const ADD_INTEGRATIONS_MENU_ITEM_TEST_ID = 'securityAppHeaderAddIntegrati
  * every migrated page. Returns `undefined` when the current user cannot access Fleet, or the
  * space is a Search AI Lake configuration (mirrors the gating `GlobalHeader` uses today).
  */
-export const useAddIntegrationsMenuItem = (): AppMenuItemType | undefined => {
+export const useAddIntegrationsMenuItem = ({
+  overflow = true,
+}: {
+  /** Render behind the "..." button (default) or inline. Only the Entity Analytics page opts out. */
+  overflow?: boolean;
+} = {}): AppMenuItemType | undefined => {
   const {
     services: { application },
   } = useKibana();
@@ -48,8 +53,8 @@ export const useAddIntegrationsMenuItem = (): AppMenuItemType | undefined => {
       label: ADD_INTEGRATIONS_LABEL,
       iconType: 'indexOpen',
       href,
-      overflow: true,
+      overflow,
       testId: ADD_INTEGRATIONS_MENU_ITEM_TEST_ID,
     };
-  }, [canAddData, href]);
+  }, [canAddData, href, overflow]);
 };
