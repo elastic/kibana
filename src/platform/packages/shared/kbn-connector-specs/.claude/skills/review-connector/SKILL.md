@@ -430,6 +430,7 @@ Report documentation issues alongside code issues.
 
 ### PR Description
 
+- **`## Actions` section**: Present and complete; see "Chosen set" under Tool Design.
 - **`## Validated` table**: The PR description must include a `## Validated` section with a table
   listing every action the spec exposes (plus the connectivity `test` handler, if present) and whether
   it's been observed working — see
@@ -565,6 +566,12 @@ Report documentation issues alongside code issues.
 
 ### Tool Design
 
+- **Chosen set**: The PR description's `## Actions` section (format in
+  `create-connector/reference/pr-validation-table.md`) lists each action with its vendor operation and
+  the question it answers, says whether the user confirmed the set, and gives a reason for each notable
+  operation left out. Flag a PR without it, an action that answers no question a user would ask, a
+  destructive or admin action exposed as a tool without a reason, and a set marked unconfirmed (it needs
+  the user's sign-off before merge). The checks below then judge the set itself.
 - **Discovery / metadata tools**: The tool set should include at least one tool that helps an agent orient itself —
   e.g. `who_am_i`, `get_current_user`, `list_projects`, `get_table_schema`, `list_spaces`. Without these, an agent
   must guess IDs or structure before it can call other tools. Flag if the set has no discovery/metadata tooling.

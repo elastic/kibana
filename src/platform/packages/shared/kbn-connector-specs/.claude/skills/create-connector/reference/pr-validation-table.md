@@ -7,6 +7,21 @@ still need manual verification before merge. It is a checklist, not just a repor
 
 ## Format
 
+An `## Actions` section comes first and says why the connector has these actions:
+
+```markdown
+## Actions
+
+<Whether the user confirmed the set, gave it, or it is the agent's unconfirmed proposal.>
+
+| Action         | Vendor operation(s)          | Scope  | Question it answers                         |
+| -------------- | ---------------------------- | ------ | -------------------------------------------- |
+| <actionName>   | <METHOD /path or MCP tool>   | read   | <e.g. "Which incidents are open for team X?"> |
+
+Left out: <notable operations not built, one line each with the reason (destructive, admin-only,
+deprecated, covered by another action, no agent use case)>.
+```
+
 ```markdown
 ## Validated
 

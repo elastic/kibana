@@ -3,7 +3,7 @@ name: create-connector
 description: Creates a new connector spec for Kibana. Use when asked to create (or add) a new connector, integration, or data source.
 allowed-tools: WebFetch, WebSearch, Read, Grep, Glob, Write, Edit, Bash, Skill
 context: fork
-argument-hint: [3rd-party-service-name]
+argument-hint: [3rd-party-service-name] [actions to build]
 ---
 
 # Create a Connector
@@ -24,6 +24,31 @@ Check if $0 has an official hosted MCP server. If so, creating an MCP-native con
 **No MCP server available?** → Read [reference/custom-connector-setup.md](reference/custom-connector-setup.md) and follow its steps.
 
 Follow only the steps for the chosen path. Do not mix them.
+
+### Choose the actions
+
+Decide which vendor operations become actions before researching any one of them. If the invocation
+lists actions after the service name (`build-connector` passes the list the user confirmed), build those.
+Otherwise propose a set yourself. For a custom connector, list what the spec offers after scaffolding with
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> --grep <area>`; for an
+MCP connector, the server's tools are the candidates (`listTools` and `callTool` reach the rest).
+
+Choose from the questions a user is likely to ask an agent about $0, not from the breadth of the API:
+
+- at least one discovery action (the current user, the projects, spaces or accounts it can see), so the
+  IDs other actions take can be found;
+- for every search or list, a way to open a result; for every write, a way to read the state back;
+- one action with a `type` enum where the vendor has the same operation for several entity types;
+- writes only where a use case needs them; destructive and admin operations left out, or `isTool: false`
+  with the reason;
+- no deprecated operations (the listing marks them).
+
+These are the "Tool Design" checks in `review-connector`, applied before the code exists. A given list
+is only extended where it fails them, and each addition is reported as such.
+
+Record the result in the PR description's `## Actions` section (see
+[reference/pr-validation-table.md](reference/pr-validation-table.md)), and start your report with it,
+so the user can change the set before the connector is tested.
 
 ### Research the vendor API before writing schemas or handlers
 
