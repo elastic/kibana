@@ -60,7 +60,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
           {[
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.jinaModels',
-              { defaultMessage: 'Access premier models from Jina' }
+              { defaultMessage: 'Access the latest Jina models' }
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.topProviders',
