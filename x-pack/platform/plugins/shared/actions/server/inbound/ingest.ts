@@ -270,6 +270,10 @@ export async function ingestInboundEvent({
         spaceId,
         config: stripIngestTokenHash(connector.config),
         rawBody: body,
+        headers: {
+          'x-github-event': headers['x-github-event'],
+          'x-github-delivery': headers['x-github-delivery'],
+        },
         log: logger,
       }),
       { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }

@@ -30,6 +30,8 @@ export interface ConnectorIngressContext {
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
+  /** Allowlisted delivery metadata; authentication headers are not forwarded. */
+  readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
 }
 
 /**
