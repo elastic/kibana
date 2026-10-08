@@ -870,6 +870,7 @@ describe('rule_request_mappers', () => {
         name: 'Test Rule',
         description: null,
         tags: ['tag1', 'tag2'],
+        routing_tags: null,
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
@@ -937,7 +938,34 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.metadata).toEqual({ name: 'Test Rule', description: 'kept', tags: null });
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'kept',
+        tags: null,
+        routing_tags: null,
+      });
+    });
+
+    it('nullifies routing tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toBeNull();
+    });
+
+    it('passes through routing tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toEqual(['sre']);
     });
 
     it('passes through a description and tags the user kept', () => {
@@ -952,6 +980,7 @@ describe('rule_request_mappers', () => {
         name: 'Test Rule',
         description: 'still here',
         tags: ['keep'],
+        routing_tags: null,
       });
     });
 
@@ -977,7 +1006,7 @@ describe('rule_request_mappers', () => {
           metadata: { name: 'Test Rule', enabled: true },
           query: { base: 'FROM logs-*', breach: { segment: '' } },
         } satisfies FormValues,
-        { name: 'Test Rule', description: null, tags: null },
+        { name: 'Test Rule', description: null, tags: null, routing_tags: null },
         { base: 'FROM logs-*', breach: null },
       ],
       [
@@ -987,7 +1016,7 @@ describe('rule_request_mappers', () => {
           metadata: { ...baseFormValues.metadata, description: 'desc', tags: ['a'] },
           query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
         } satisfies FormValues,
-        { name: 'Test Rule', description: 'desc', tags: ['a'] },
+        { name: 'Test Rule', description: 'desc', tags: ['a'], routing_tags: null },
         { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
       ],
     ])(

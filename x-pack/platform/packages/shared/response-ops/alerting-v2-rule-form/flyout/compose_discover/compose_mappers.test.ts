@@ -9,6 +9,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../../form/types';
+import { DELAY_MODE } from '../../form/types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -411,6 +412,38 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery).toEqual({ strategy: 'condition', segment: RECOVERY_SEGMENT });
+  });
+
+  it('nullifies the breach the user removed rather than omitting it', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      query: { base: 'FROM logs-*', breach: { segment: '' } },
+    });
+
+    expect(result.query).toEqual({ base: 'FROM logs-*', breach: null });
+  });
+
+  it('nullifies the description the user cleared rather than omitting it', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, description: undefined },
+    });
+
+    expect(result.metadata?.description).toBeNull();
+  });
+
+  it('spells out the phase leaves dropped by a switch from a duration to a breach count', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      stateTransition: { pendingCount: 3 },
+      stateTransitionAlertDelayMode: DELAY_MODE.breaches,
+    });
+
+    expect(result.state_transition?.pending).toEqual({
+      count: 3,
+      timeframe: null,
+      operator: null,
+    });
   });
 });
 
