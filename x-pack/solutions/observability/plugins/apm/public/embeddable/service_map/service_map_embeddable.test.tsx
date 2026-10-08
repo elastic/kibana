@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +18,8 @@ import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import * as useServiceMapHook from '../../components/app/service_map/use_service_map';
 import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 
 jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
   const actual = jest.requireActual(
@@ -349,6 +351,58 @@ describe('ServiceMapEmbeddable', () => {
         expect.objectContaining({
           start: 'now-2h',
           end: 'now-1h',
+        })
+      );
+    });
+
+    it('re-resolves start and end when a relative range is refreshed', () => {
+      const initialWindow = {
+        start: '2026-10-05T10:00:00.000Z',
+        end: '2026-10-05T10:30:00.000Z',
+      };
+      const refreshedWindow = {
+        start: '2026-10-05T10:05:00.000Z',
+        end: '2026-10-05T10:35:00.000Z',
+      };
+      let currentWindow = initialWindow;
+      mockGetDateRange.mockImplementation(() => currentWindow);
+
+      function RefreshHarness() {
+        const { incrementTimeRangeId } = useTimeRangeId();
+        return (
+          <>
+            <button type="button" onClick={incrementTimeRangeId}>
+              Refresh
+            </button>
+            <ServiceMapEmbeddable {...defaultProps} rangeFrom="now-30m" rangeTo="now" />
+          </>
+        );
+      }
+
+      render(
+        <TimeRangeIdContextProvider>
+          <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-30m" rangeTo="now">
+            <LicenseContext.Provider value={platinumLicense}>
+              <RefreshHarness />
+            </LicenseContext.Provider>
+          </ApmEmbeddableContext>
+        </TimeRangeIdContextProvider>
+      );
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: initialWindow.start,
+          end: initialWindow.end,
+        })
+      );
+
+      currentWindow = refreshedWindow;
+      fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+      expect(mockUseServiceMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          start: refreshedWindow.start,
+          end: refreshedWindow.end,
         })
       );
     });

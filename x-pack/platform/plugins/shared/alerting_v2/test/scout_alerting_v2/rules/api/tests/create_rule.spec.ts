@@ -43,6 +43,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
           name: 'created-rule',
           description: 'a freshly created rule',
           tags: ['cpu', 'production'],
+          routing_tags: ['sre'],
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -242,6 +243,24 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects a signal rule that sets routing tags', async ({ apiClient }) => {
+    const body = buildCreateRuleData({
+      kind: 'signal',
+      state_transition: undefined,
+      recovery: undefined,
+      no_data: undefined,
+      query: { base: 'FROM logs-* | LIMIT 1' },
+      metadata: { name: 'signal-with-routing-tags', routing_tags: ['sre'] },
+    });
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body,
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response.body.message).toContain('metadata.routing_tags');
   });
 
   apiTest(

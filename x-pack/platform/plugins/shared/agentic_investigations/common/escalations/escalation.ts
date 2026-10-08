@@ -65,42 +65,21 @@ export const createEscalationRequestSchema = z.object({
 
 export type CreateEscalationRequest = z.infer<typeof createEscalationRequestSchema>;
 
-export const updateEscalationRequestSchema = z
-  .object({
-    title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
-    /**
-     * Investigation ids to add to the escalation. Append-only — this route cannot unlink.
-     * MVP caveat: the union is computed outside the OCC write callback, so two concurrent
-     * requests could each read the same stale list and one link could be silently lost.
-     * Follow-up: elastic/security-team#19370 (race-safe append).
-     *
-     * Cannot be combined with `title` in a single request: the two fields map to separate
-     * storage writes with no atomic rollback between them. Once agent_builder exposes a
-     * combined OCC-protected mutation, this restriction will be lifted.
-     */
-    [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: z
-      .array(conversationIdSchema)
-      .min(1)
-      .max(MAX_ESCALATION_LINKED_INVESTIGATIONS)
-      .optional(),
-  })
-  .refine(
-    (value) =>
-      value.title !== undefined || value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined,
-    {
-      message: 'at least one of title or linked_investigations must be provided',
-    }
-  )
-  .refine(
-    (value) =>
-      !(value.title !== undefined && value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined),
-    {
-      message:
-        'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',
-    }
-  );
+/**
+ * Request body for the `POST /{id}/_link` endpoint.
+ * Append-only — this endpoint cannot unlink investigations.
+ * MVP caveat: the union is computed outside the OCC write callback, so two concurrent
+ * requests could each read the same stale list and one link could be silently lost.
+ * Follow-up: elastic/security-team#19370 (race-safe append).
+ */
+export const linkEscalationRequestSchema = z.object({
+  [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: z
+    .array(conversationIdSchema)
+    .min(1)
+    .max(MAX_ESCALATION_LINKED_INVESTIGATIONS),
+});
 
-export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSchema>;
+export type LinkEscalationRequest = z.infer<typeof linkEscalationRequestSchema>;
 
 /**
  * Query parameters for the list escalations endpoint.
@@ -141,7 +120,13 @@ export type ListEscalationsQuery = z.infer<typeof listEscalationsQuerySchema>;
 /**
  * An escalation as returned by the **list** endpoint.
  */
-export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions;
+export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions & {
+  /**
+   * Union of the entity ids from the Impact of the linked investigations. Absent when none of
+   * them has an Impact document or the impact could not be read.
+   */
+  entity_ids?: string[];
+};
 
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };

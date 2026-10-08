@@ -21,6 +21,7 @@ import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -213,14 +214,21 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: (agentBuilder?: AgentBuilderPluginStart) => {
+    createService: (
+      agentBuilder?: AgentBuilderPluginStart,
+      getBlockingReasons: GetWorkerBlockingReasons = async () => []
+    ) => {
       const attachmentService = makeAttachmentService();
       return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         { agentBuilder },
-        { getAttachmentService: async () => attachmentService }
+        { getAttachmentService: async () => attachmentService },
+        async (_request, registration, options) => {
+          await install(registration.id, options);
+        },
+        getBlockingReasons
       );
     },
   };
@@ -238,6 +246,144 @@ describe('WorkersService', () => {
           !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
+  });
+
+  it('rejects enabling a worker that has no service account', async () => {
+    const harness = createPersistentHarness();
+    const result = await harness.createService().update(TRIAGE, { enabled: true }, SPACE, request);
+
+    expect(result).toEqual({
+      outcome: 'rejected',
+      what: 'a worker that is enabled without a service account',
+    });
+    expect(harness.install).not.toHaveBeenCalled();
+  });
+
+  describe('an already-enabled worker with no stored account', () => {
+    const installEnabledWithoutAccount = async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      const saved = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '24h' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      if (saved.outcome !== 'updated') throw new Error('Expected the worker to install');
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      if (!document) throw new Error('Expected an installed worker');
+      document.enabled = true;
+      harness.install.mockClear();
+      harness.updateWorkflow.mockClear();
+      return { harness, service, revision: saved.response.worker.settingsRevision };
+    };
+
+    it('rejects a settings save that would leave it on', async () => {
+      const { harness, service, revision } = await installEnabledWithoutAccount();
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '15m' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a save that keeps it enabled', async () => {
+      const { harness, service } = await installEnabledWithoutAccount();
+
+      const result = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('allows turning it off without an account', async () => {
+      const { harness, service } = await installEnabledWithoutAccount();
+
+      const result = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected disable to succeed');
+      expect(result.response.worker.enabled).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+    });
+
+    it('accepts an account at the current revision and resynchronizes the worker', async () => {
+      const { harness, service, revision } = await installEnabledWithoutAccount();
+      const workflowId = reportedWorkflowId(ATTACK_DISCOVERY, SPACE);
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { serviceAccountId: 'sa-1' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.install).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY,
+        expect.objectContaining({
+          values: expect.objectContaining({ serviceAccountId: 'sa-1' }),
+        })
+      );
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        workflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(harness.scheduledTasks.get(workflowId)?.apiKeyId).toEqual(expect.any(String));
+    });
+  });
+
+  it('installs a user save through the request-scoped client', async () => {
+    const harness = createPersistentHarness();
+    const installWorkerForRequest = jest.fn(async (_request, registration, options) => {
+      await harness.managedWorkflows.install(registration.id, options);
+    });
+    const service = new WorkersService(
+      harness.management,
+      Promise.resolve(harness.managedWorkflows),
+      loggingSystemMock.createLogger() as Logger,
+      {},
+      { getAttachmentService: async () => makeAttachmentService() },
+      installWorkerForRequest,
+      async () => []
+    );
+
+    const result = await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    expect(installWorkerForRequest).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({ id: TRIAGE }),
+      expect.objectContaining({
+        spaceId: SPACE,
+        values: expect.objectContaining({ serviceAccountId: 'sa-1' }),
+      })
+    );
   });
 
   it('installs disabled defaults when settings are saved before enablement', async () => {
@@ -336,7 +482,16 @@ describe('WorkersService', () => {
   it('resyncs Task Manager after a settings-only save', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    const enabled = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    const enabled = await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
     harness.updateWorkflow.mockClear();
     harness.scheduledTasks.clear();
@@ -366,7 +521,16 @@ describe('WorkersService', () => {
   it('re-registers the schedule at the new interval after a schedule-only save', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    const enabled = await service.update(
+      ATTACK_DISCOVERY,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
     const storedId = `${ATTACK_DISCOVERY}-${SPACE}`;
     const workflowId = reportedWorkflowId(ATTACK_DISCOVERY, SPACE);
@@ -403,7 +567,16 @@ describe('WorkersService', () => {
   it('treats a schedule-only patch as a settings write that needs its revision', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    const enabled = await service.update(
+      ATTACK_DISCOVERY,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
 
     await expect(
@@ -440,7 +613,16 @@ describe('WorkersService', () => {
   it('projects unavailable when installed settings cannot be read', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockRejectedValueOnce(
       new Error('storage down')
     );
@@ -456,7 +638,16 @@ describe('WorkersService', () => {
   it('projects unavailable when the installed document has no template values', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockResolvedValueOnce({
       workflowId: `${TRIAGE}-${SPACE}`,
       spaceId: SPACE,
@@ -475,7 +666,16 @@ describe('WorkersService', () => {
   it('lists a Worker whose stored settings no longer match the current shape as unavailable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+    await service.update(
+      RULE_TUNING,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
     // A present value outside its bounds is not repaired, so the Worker stays unavailable.
     const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
     if (!document) throw new Error('Expected the Rule Tuning document to be installed');
@@ -511,7 +711,16 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
 
-    await service.update(TRIAGE, { enabled: true }, 'space-a', request);
+    await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      'space-a',
+      request
+    );
     const disabled = await service.update(TRIAGE, { enabled: false }, 'space-a', request);
 
     expect(harness.install).toHaveBeenCalledWith(
@@ -551,7 +760,16 @@ describe('WorkersService', () => {
   it('projects skills from the installed workflow definition when the worker is installed', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    await service.update(
+      TRIAGE,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
 
     const mockDefinition = {
       steps: [
@@ -605,7 +823,16 @@ describe('WorkersService', () => {
     it('reads a document stored before extras existed and keeps its revision', async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
-      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      await service.update(
+        RULE_TUNING,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
       if (!document) throw new Error('Expected the Rule Tuning document to be installed');
       document.values = version4Values;
@@ -627,14 +854,26 @@ describe('WorkersService', () => {
     it('persists default extras when a document stored without them is updated', async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
-      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      await service.update(
+        RULE_TUNING,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
       if (!document) throw new Error('Expected the Rule Tuning document to be installed');
       document.values = version4Values;
 
       const updated = await service.update(
         RULE_TUNING,
-        { settings: { scheduleInterval: '6h' }, settingsRevision: document.version },
+        {
+          settings: { scheduleInterval: '6h', serviceAccountId: 'sa-1' },
+          settingsRevision: document.version,
+        },
         SPACE,
         request
       );
@@ -644,13 +883,23 @@ describe('WorkersService', () => {
         ...version4Values,
         scheduleInterval: '6h',
         extras: RULE_TUNING_DEFAULT_EXTRAS,
+        serviceAccountId: 'sa-1',
       });
     });
 
     const enableRuleTuning = async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
-      const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      const enabled = await service.update(
+        RULE_TUNING,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
       return { harness, service, revision: enabled.response.worker.settingsRevision };
     };
@@ -671,6 +920,7 @@ describe('WorkersService', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
+        serviceAccountId: 'sa-1',
         extras: SAVED_EXTRAS,
       });
       // The saved values are rendered into consts.worker_settings.extras; the sweep inputs
@@ -809,7 +1059,11 @@ describe('WorkersService', () => {
         {
           getAttachmentService: getAttachmentServiceMock,
           isAlertAnalysisRuntimeEnabled,
-        }
+        },
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => []
       );
       return { service, getAttachmentServiceMock };
     };
@@ -848,7 +1102,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService();
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
       expect(harness.management.getWorkflow).toHaveBeenCalledWith(
@@ -868,7 +1131,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService();
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
@@ -878,7 +1150,16 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const { service } = makeService(harness, null);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'ruleAttachmentUnavailable' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
@@ -892,7 +1173,16 @@ describe('WorkersService', () => {
       });
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result.outcome).toBe('updated');
       expect(
@@ -905,7 +1195,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService({ skippedRuleCount: 4 });
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({
         outcome: 'updated',
@@ -918,7 +1217,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService();
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
     });
@@ -929,10 +1237,24 @@ describe('WorkersService', () => {
       attachment.updateRuleAttachments.mockResolvedValue(undefined);
       const { service } = makeService(harness, attachment);
 
-      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
-        'made no progress'
+      await expect(
+        service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('made no progress');
+      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
+        expect.anything(),
+        { enabled: true },
+        SPACE,
+        request
       );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     // The preflight check must not be gated on getAttachmentService being present.
@@ -942,7 +1264,16 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const { service } = makeService(harness, null, async () => false);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
@@ -958,7 +1289,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService();
       const { service } = makeService(harness, attachment, async () => false);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
@@ -974,9 +1314,20 @@ describe('WorkersService', () => {
         throw new Error('uiSettings unavailable');
       });
 
-      expect((await service.update(TRIAGE, { enabled: true }, SPACE, request)).outcome).toBe(
-        'updated'
-      );
+      expect(
+        (
+          await service.update(
+            TRIAGE,
+            {
+              enabled: true,
+              settings: { serviceAccountId: 'sa-1' },
+              settingsRevision: null,
+            },
+            SPACE,
+            request
+          )
+        ).outcome
+      ).toBe('updated');
     });
 
     it('attach-then-enable: passes installed workflow ID (with space suffix) to the attachment service', async () => {
@@ -984,7 +1335,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService();
       const { service, getAttachmentServiceMock } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result.outcome).toBe('updated');
       // The attachment service must receive the ID the install reported, not the bare
@@ -1012,10 +1372,24 @@ describe('WorkersService', () => {
       attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('bulk edit failed'));
       const { service } = makeService(harness, attachment);
 
-      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
-        'bulk edit failed'
+      await expect(
+        service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('bulk edit failed');
+      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
+        expect.anything(),
+        { enabled: true },
+        SPACE,
+        request
       );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     it('attach fails partway through: rolls back only the rules this attempt attached, not rules already attached', async () => {
@@ -1034,11 +1408,25 @@ describe('WorkersService', () => {
         .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'));
       const { service } = makeService(harness, attachment);
 
-      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
-        'bulk edit failed on pass 2'
-      );
+      await expect(
+        service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('bulk edit failed on pass 2');
 
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
+        expect.anything(),
+        { enabled: true },
+        SPACE,
+        request
+      );
       // The compensating rollback detaches only r1, the rule the failed pass's predecessor
       // attached, so no rule this attempt touched is left carrying the action.
       expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
@@ -1065,17 +1453,40 @@ describe('WorkersService', () => {
         .mockRejectedValueOnce(new Error('rollback also failed'));
       const { service } = makeService(harness, attachment);
 
-      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
-        'bulk edit failed on pass 2'
+      await expect(
+        service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('bulk edit failed on pass 2');
+      expect(harness.updateWorkflow).not.toHaveBeenCalledWith(
+        expect.anything(),
+        { enabled: true },
+        SPACE,
+        request
       );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     it('disable: detaches all attached rules after disabling the Worker', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
       const { service } = makeService(harness, attachment);
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       attachment.updateRuleAttachments.mockClear();
       attachment.getRuleAttachmentSelection.mockClear();
 
@@ -1100,7 +1511,16 @@ describe('WorkersService', () => {
         skippedRuleCount: 3,
       });
       const { service } = makeService(harness, attachment);
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
 
@@ -1116,7 +1536,16 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
       const { service } = makeService(harness, attachment);
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
 
@@ -1128,7 +1557,16 @@ describe('WorkersService', () => {
       const attachment = makeAttachmentService({ notAttachedIds: [] });
       const { service } = makeService(harness, attachment);
 
-      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
       expect(result.outcome).toBe('updated');
       expect(attachment.getRuleAttachmentSelection).toHaveBeenCalledWith({
@@ -1142,7 +1580,16 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
       const { service } = makeService(harness, attachment);
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('network error'));
 
       const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
@@ -1159,7 +1606,16 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
       const { service, getAttachmentServiceMock } = makeService(harness, attachment);
-      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
       getAttachmentServiceMock.mockRejectedValueOnce(new Error('failed to build rules client'));
 
       const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
@@ -1167,6 +1623,157 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('updated');
       if (result.outcome !== 'updated') throw new Error();
       expect(result.response.worker.enabled).toBe(false);
+    });
+  });
+
+  describe('no-model block', () => {
+    const createToggleableSpaceModel = (available: boolean) => {
+      const model = { available };
+      const getBlockingReasons: GetWorkerBlockingReasons = jest.fn(async () =>
+        model.available ? [] : ['no_model' as const]
+      );
+      return { model, getBlockingReasons };
+    };
+
+    it('reports no_model on every Worker when the user has no model', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+      const service = createPersistentHarness().createService(undefined, getBlockingReasons);
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.map(({ blockingReasons }) => blockingReasons)).toEqual(
+        WORKERS_WITHOUT_FORENSIC_SKILL.map(() => ['no_model'])
+      );
+      expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual(['no_model']);
+    });
+
+    it('reports no reasons when the user has a model', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(true);
+      const service = createPersistentHarness().createService(undefined, getBlockingReasons);
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.every(({ blockingReasons }) => blockingReasons.length === 0)).toBe(true);
+      expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual([]);
+    });
+
+    it('refuses enabling without installing or writing anything', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+      const harness = createPersistentHarness();
+
+      const result = await harness
+        .createService(undefined, getBlockingReasons)
+        .update(
+          ATTACK_DISCOVERY,
+          { enabled: true, settings: { scheduleInterval: '12h' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'noModel' });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(harness.documents.has(`${ATTACK_DISCOVERY}-${SPACE}`)).toBe(false);
+    });
+
+    it('refuses enabling before checking the settings revision', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+
+      const result = await createPersistentHarness()
+        .createService(undefined, getBlockingReasons)
+        .update(
+          ATTACK_DISCOVERY,
+          { enabled: true, settings: { scheduleInterval: '12h' }, settingsRevision: 999 },
+          SPACE,
+          request
+        );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'noModel' });
+    });
+
+    it('reports a hidden Worker as not found rather than blocked', async () => {
+      const { getBlockingReasons } = createToggleableSpaceModel(false);
+
+      const result = await createPersistentHarness()
+        .createService(agentBuilderWithSkill(false), getBlockingReasons)
+        .update(FORENSICS, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'not-found' });
+    });
+
+    it('still accepts switching a running Worker off and saving its settings while blocked', async () => {
+      const { model, getBlockingReasons } = createToggleableSpaceModel(true);
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, getBlockingReasons);
+      const enabled = await service.update(
+        ATTACK_DISCOVERY,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+      model.available = false;
+
+      const saved = await service.update(
+        ATTACK_DISCOVERY,
+        {
+          settings: { scheduleInterval: '12h' },
+          settingsRevision: enabled.response.worker.settingsRevision,
+        },
+        SPACE,
+        request
+      );
+      expect(saved.outcome).toBe('updated');
+      if (saved.outcome !== 'updated') throw new Error('Expected settings save to succeed');
+      expect(saved.response.worker.blockingReasons).toEqual(['no_model']);
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.yaml).toContain('every: "12h"');
+
+      const disabled = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+      expect(disabled.outcome).toBe('updated');
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+    });
+
+    it('keeps the stored enabled value across the block and accepts enabling once a model exists', async () => {
+      const { model, getBlockingReasons } = createToggleableSpaceModel(true);
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, getBlockingReasons);
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+      model.available = false;
+      const blocked = await service.list(request, SPACE);
+      expect(blocked.workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+        enabled: true,
+        blockingReasons: ['no_model'],
+      });
+      expect(await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'blocked',
+        reason: 'noModel',
+      });
+      expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(true);
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+
+      model.available = true;
+      const reopened = await service.list(request, SPACE);
+      const attackDiscovery = reopened.workers.find(({ id }) => id === ATTACK_DISCOVERY);
+      expect(attackDiscovery).toMatchObject({ enabled: false, blockingReasons: [] });
+      const enabled = await service.update(
+        ATTACK_DISCOVERY,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: attackDiscovery?.settingsRevision ?? null,
+        },
+        SPACE,
+        request
+      );
+      expect(enabled.outcome).toBe('updated');
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(true);
     });
   });
 
@@ -1187,7 +1794,18 @@ describe('WorkersService', () => {
 
       expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
       expect(await service.get(FORENSICS, request, SPACE)).toBeUndefined();
-      expect(await service.update(FORENSICS, { enabled: true }, SPACE, request)).toEqual({
+      expect(
+        await service.update(
+          FORENSICS,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({
         outcome: 'not-found',
       });
       expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);

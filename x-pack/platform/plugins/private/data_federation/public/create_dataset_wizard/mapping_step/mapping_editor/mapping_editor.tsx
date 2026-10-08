@@ -20,7 +20,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../../common';
 import { FieldMappingForm } from './field_mapping_form';
@@ -28,6 +27,7 @@ import type { FieldMappingFormValue } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { emptyMappingEditorValue, TYPE_LABEL_BY_VALUE } from './constants';
 import { DeleteConfirmModal } from './delete_confirm_modal';
+import { MappingValidationCallout } from './mapping_validation_callout';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
 export { validateMappingEditorValue };
@@ -281,36 +281,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
             })
           : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
               defaultMessage:
-                'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+                'Map at least one field to continue. Unmapped fields will not be available to query.',
             })}
       </EuiText>
       <EuiSpacer size="m" />
-
-      {!validation.isValid && shouldShowValidationCallout ? (
-        <>
-          <KbnDangerCallout
-            title={i18n.translate('xpack.dataFederation.mappingEditor.validation.title', {
-              defaultMessage: 'Fix mapping errors',
-            })}
-            text={
-              <ul>
-                {validation.globalErrors.map((e, idx) => (
-                  <li key={idx}>{e}</li>
-                ))}
-                {hasValidatedFieldErrors ? (
-                  <li>
-                    {i18n.translate('xpack.dataFederation.mappingEditor.validation.fieldErrors', {
-                      defaultMessage: 'One or more fields are incomplete or invalid.',
-                    })}
-                  </li>
-                ) : null}
-              </ul>
-            }
-            data-test-subj="dataFederationMappingEditorValidationError"
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
       <EuiSpacer size="s" />
       {value.fields.length > 0 ? (
         <>
@@ -437,6 +411,16 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
               onCancel={closeAddFieldForm}
             />
           </EuiPanel>
+        </>
+      ) : null}
+
+      {!validation.isValid && shouldShowValidationCallout ? (
+        <>
+          <EuiSpacer size="m" />
+          <MappingValidationCallout
+            globalErrors={validation.globalErrors}
+            hasFieldErrors={hasValidatedFieldErrors}
+          />
         </>
       ) : null}
 

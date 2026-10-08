@@ -60,7 +60,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('Nightshift investigation workflow', () => {
   it('persists the shared investigation output without sig-events write-back', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(1);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -69,6 +69,11 @@ describe('Nightshift investigation workflow', () => {
       'emit_investigation_started',
       'investigate',
       'persist_investigation_completed',
+      'render_investigation_canvas',
+      'list_conversation_attachments',
+      'find_investigation_canvas',
+      'update_investigation_canvas',
+      'add_investigation_canvas',
       'persist_investigation_failed',
       'emit_investigation_completed',
       'emit_investigation_failed',
@@ -117,7 +122,8 @@ describe('Nightshift investigation workflow', () => {
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
-      'plugin-id': 'significant_events_investigation',
+      'plugin-id': 'nightshift_investigation',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
@@ -131,5 +137,45 @@ describe('Nightshift investigation workflow', () => {
 
     expect(requestSteps.length).toBeGreaterThan(0);
     expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
+  });
+
+  it('addresses a continued investigation by its id rather than the run', () => {
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
+
+    for (const { with: params } of requestSteps) {
+      expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
+    }
+    expect(requireStep('persist_investigation_started').with?.body).toEqual({
+      execution_id: '{{ execution.id }}',
+    });
+  });
+
+  it('continues the conversation the investigation record names', () => {
+    expect(requireStep('investigate').with).toMatchObject({
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}',
+    });
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('inputs.conversation_id');
+  });
+
+  it('knows nothing about Slack', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
+  });
+
+  it('looks the canvas up, updates it when it is active and adds it when it does not exist', () => {
+    expect(requireStep('render_investigation_canvas').with).toMatchObject({
+      investigation_canvas_id: '{{ inputs.investigation_id | default: execution.id }}',
+    });
+    expect(requireStep('list_conversation_attachments')).toMatchObject({
+      type: 'ai.attachment.list',
+      with: { include_deleted: true },
+    });
+    expect(requireStep('update_investigation_canvas')).toMatchObject({
+      if: '${{ variables.investigation_canvas_matches.first.active == true }}',
+      with: { attachment_id: '{{ variables.investigation_canvas_id }}' },
+    });
+    expect(requireStep('add_investigation_canvas')).toMatchObject({
+      if: '${{ variables.investigation_canvas_matches.size == 0 }}',
+      with: { id: '{{ variables.investigation_canvas_id }}', type: 'text' },
+    });
   });
 });
