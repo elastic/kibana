@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
 import { isValidId } from '@kbn/human-readable-id';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { CONNECTOR_ID_MAX_LENGTH } from '../../common';
 import type { InMemoryConnector, RawAction } from '../types';
 
@@ -99,6 +100,32 @@ export function getInvalidConnectorIdWarnings(
         count: invalidIds.length,
         ids: invalidIds.join(', '),
         maxLength: CONNECTOR_ID_MAX_LENGTH,
+      },
+    })
+  );
+}
+
+/** Connectors whose type publishes keys. Import does not create their signing key. */
+export function getConnectorsThatPublishKeys<T extends SavedObject<RawAction>>(
+  connectors: T[]
+): T[] {
+  return connectors.filter(({ attributes }) => connectorTypePublishesKeys(attributes.actionTypeId));
+}
+
+export function getConnectorsThatPublishKeysWarnings(
+  connectors: Array<SavedObject<RawAction>>
+): SavedObjectsImportWarning[] {
+  const ids = getConnectorsThatPublishKeys(connectors).map((c) => c.id);
+
+  if (ids.length === 0) return [];
+
+  return makeConnectorWarning(
+    i18n.translate('xpack.actions.savedObjects.connectorsThatPublishKeysWarning', {
+      defaultMessage:
+        '{count, plural, one {Connector} other {Connectors}} with {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {uses a signing key that Kibana creates} other {use signing keys that Kibana creates}} and {count, plural, one {was} other {were}} removed. Import does not create signing keys. Create a new connector instead.',
+      values: {
+        count: ids.length,
+        ids: ids.join(', '),
       },
     })
   );
