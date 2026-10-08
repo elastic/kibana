@@ -173,7 +173,10 @@ describe('vega library client', () => {
         options: { references: [] },
       });
 
-      expect(JSON.parse((http.put.mock.calls[0][1] as { body: string }).body).tags).toEqual([]);
+      expect(http.put).toHaveBeenCalledWith(
+        '/api/vega/id',
+        expect.objectContaining({ body: expect.stringContaining('"tags":[]') })
+      );
     });
   });
 });

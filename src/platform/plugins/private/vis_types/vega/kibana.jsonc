@@ -21,6 +21,7 @@
       "dataViews",
       "uiActions",
       "unifiedSearch",
+      "presentationUtil",
       "usageCollection"
     ],
     "optionalPlugins": [

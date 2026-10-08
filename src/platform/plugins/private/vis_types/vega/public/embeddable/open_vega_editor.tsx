@@ -9,7 +9,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const openVegaEditor = ({
@@ -29,12 +30,13 @@ export const openVegaEditor = ({
 }) => {
   let closed = false;
 
-  const flyoutRef = openLazyFlyout({
+  const flyoutRef = openLazySystemFlyout({
     core,
     parentApi,
     returnFocus,
     flyoutProps: {
       focusedPanelId,
+      title: vegaTitleInWizard,
       size: 'm',
       // A stray click would otherwise revert unsaved spec edits.
       outsideClickCloses: false,
@@ -45,7 +47,7 @@ export const openVegaEditor = ({
 
       const content = await api.getEditPanel?.({ ariaLabelledBy, closeFlyout, isNewPanel });
       // Content that resolves after close never mounts, so its unmount revert never runs. Still
-      // return it: a falsy result makes openLazyFlyout close again and warn that loading failed.
+      // return it: a falsy result makes openLazySystemFlyout close again and warn that loading failed.
       if (closed && isNewPanel && apiIsPresentationContainer(parentApi)) {
         parentApi.removePanel(api.uuid);
       }

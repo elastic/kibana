@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/as-code-shared-telemetry'
