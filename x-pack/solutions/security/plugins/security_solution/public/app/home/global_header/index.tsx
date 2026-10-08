@@ -63,7 +63,6 @@ export const GlobalHeader = React.memo(() => {
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
-  // The Rules page app header owns ML job settings and Add integrations, and Figma drops the data view picker.
   const rulesManagementPath = isRulesManagementPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
@@ -73,6 +72,8 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
+    // The Rules page app header renders its own actions (ML job settings, Add integrations),
+    // so clear the global header action menu there to avoid duplicating them.
     if (changesHistoryPath || rulesManagementPath) {
       setHeaderActionMenu(undefined);
       return;
