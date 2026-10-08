@@ -6,11 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
 import { DEFAULT_TIME_FIELD, getDateFieldNames } from './date_fields';
-
-const usesTimeParams = (query: string): boolean =>
-  query.includes('?_tstart') || query.includes('?_tend');
 
 /**
  * Reject a query that ignores the time picker on a source without `@timestamp`.
@@ -26,7 +23,7 @@ export const findMissingTimeFilterError = async (
   esClient: ElasticsearchClient,
   query: string | undefined
 ): Promise<string | undefined> => {
-  if (!query || usesTimeParams(query)) {
+  if (!query || hasStartEndParams(query)) {
     return undefined;
   }
   const index = getIndexPatternFromESQLQuery(query);
