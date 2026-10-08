@@ -9,7 +9,7 @@ import { castArray } from 'lodash';
 import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/genai-common';
 import { getFieldFromSource } from './get_field_from_source';
 
-export const LONG_FIELDS_SOURCE_FALLBACK = [...GEN_AI_LONG_MESSAGE_FIELDS];
+export const LONG_FIELDS_SOURCE_FALLBACK = GEN_AI_LONG_MESSAGE_FIELDS;
 
 /**
  * Returns a copy of the hit's `fields` with the {@link GEN_AI_LONG_MESSAGE_FIELDS}
