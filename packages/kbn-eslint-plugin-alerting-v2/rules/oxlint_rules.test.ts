@@ -10,8 +10,8 @@
 import { execFileSync } from 'child_process';
 import { resolve } from 'path';
 
-it('replays each rule test case with Oxlint', () => {
-  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
+it('passes every rule test case in Oxlint', () => {
+  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_rule_tests.mjs')], {
     cwd: resolve(__dirname, '../../..'),
     stdio: 'inherit',
   });

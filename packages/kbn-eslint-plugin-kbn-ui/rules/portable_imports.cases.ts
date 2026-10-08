@@ -7,21 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import { RuleTester } from 'eslint';
-import { rules } from '..';
-
-// The plugin's `eslintCompatPlugin` gives the rule the `create` method ESLint's RuleTester calls.
-const rule = rules.portable_imports as unknown as Rule.RuleModule;
-
-const tester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2018,
-  },
-});
-
 // Same shape as the kbn-ui allowlist in `.oxlint/kbn_ui.mts`.
 const options = [{ patterns: ['@kbn/*', '!@kbn/i18n', '!@kbn/i18n-react', '!@kbn/ui-callout'] }];
 
@@ -30,7 +15,8 @@ const restricted = (importSource: string) => ({
   data: { importSource },
 });
 
-tester.run('portable_imports', rule, {
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const portableImportsCases = {
   valid: [
     {
       name: 'packages outside the pattern are allowed',
@@ -127,4 +113,4 @@ tester.run('portable_imports', rule, {
       errors: [restricted('@kbn/core'), restricted('@kbn/core-http-browser')],
     },
   ],
-});
+};

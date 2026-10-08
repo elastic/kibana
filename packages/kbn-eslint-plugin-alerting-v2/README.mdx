@@ -10,7 +10,7 @@ Custom lint rules enforcing UI conventions for the `@kbn/alerting-v2-rule-form` 
 
 The rules run in Oxlint and are configured in `.oxlint/alerting_v2.mts`. `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package. The rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/alerting-v2/*` names in disable comments.
 
-Each rule's ESLint `RuleTester` suite in `rules/*.test.ts` also runs through Oxlint's `RuleTester`, from `rules/oxlint_rule_parity.test.ts`.
+Rule test cases live in `rules/*.cases.ts` and run through Oxlint's `RuleTester` from `rules/oxlint_rules.test.ts`.
 
 ## `@kbn/alerting-v2/require_eui_form_compressed`
 

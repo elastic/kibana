@@ -8,9 +8,9 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
 
 `@kbn/eslint-plugin-kbn-ui` is a collection of custom lint rules for `@kbn/ui-` components.
 
-The rules run in Oxlint and are configured in `.oxlint/kbn_ui.mts`. `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package. The rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/kbn-ui/*` names in disable comments.
+The rules run in Oxlint and are configured in `.oxlint/kbn_ui.mts`. `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package. The custom rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/kbn-ui/*` names in disable comments.
 
-Each rule's ESLint `RuleTester` suite in `rules/*.test.ts` also runs through Oxlint's `RuleTester`, from `rules/oxlint_rule_parity.test.ts`.
+Rule test cases live in `rules/*.cases.ts` and run through Oxlint's `RuleTester` from `rules/oxlint_rules.test.ts`.
 
 ## `@kbn/kbn-ui/no_restricted_package_imports`
 
@@ -31,7 +31,7 @@ import { ChromeLayout } from '@kbn/ui-chrome-layout';
 
 ## `@kbn/kbn-ui/portable_imports`
 
-Restricts import sources matching gitignore-style `patterns` (`!` negates a pattern; matching ignores case). It runs the same check as typescript-eslint's `no-restricted-imports` with a `patterns: string[]` option: `import` (type-only included), `export … from`, and `import x = require(…)`. Dynamic `import()` and `require()` calls are not checked. `.oxlint/kbn_ui.mts` configures it with the portability allowlist for kbn-ui packages. A separate rule name keeps the repo-wide `no-restricted-imports` config in effect for those files instead of replacing it.
+typescript-eslint's `no-restricted-imports` (same options as the core rule) under a separate name. `.oxlint/kbn_ui.mts` configures it with the portability allowlist for kbn-ui packages. A separate rule name keeps the repo-wide `no-restricted-imports` config in effect for those files instead of replacing it.
 
 ## `@kbn/kbn-ui/prefer_kbn_ui_callout`
 
