@@ -919,6 +919,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
@@ -940,6 +941,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   # `${{ }}` keeps the score a number; the gate validates the input at creation.
                   risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
                   severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
@@ -979,6 +981,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
                   rule_id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
@@ -1012,6 +1015,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   threshold:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
                     field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
@@ -1034,6 +1038,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
                   from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
                 impact: medium
