@@ -67,18 +67,29 @@ added line belongs to that connector.
 
 Mark task 1 as `in_progress`.
 
-Before generating code, research the vendor's real API docs for the actions you plan to implement —
-specifically update semantics (partial vs. full-replace), array query-param encoding, per-action auth
-scopes, and regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code"
-in `create-connector/reference/custom-connector-setup.md`. Bugs that trace back to skipping this (wrong
+After scaffolding and before writing actions, find the vendor's machine-readable spec and describe the
+operations the planned actions call with `node scripts/connector_vendor_api --inspect --connector <id>`
+(see "Start from the vendor's
+spec" in `create-connector/reference/custom-connector-setup.md`): methods, parameter locations, array
+encoding, bounds and scopes come from it. Then research the vendor's real API docs for what the spec
+doesn't settle — specifically update semantics (partial vs. full-replace), per-action auth scopes, and
+regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code" in the same
+file. Bugs that trace back to skipping this (wrong
 auth scope, 400s on partial updates, 404s on regional domains) are far cheaper to avoid up front than to
 find during Task 7's live chat test or after the PR is open.
 
-Invoke the `create-connector` skill with `$ARGUMENTS` as the argument:
+`create-connector` runs in a forked context and can't ask the user anything, so agree on the actions
+first. Unless the user already named them, propose a set as "Choose the actions" in `create-connector`
+describes, one line per action (name, vendor operation, scope, the question it answers) with the notable
+operations left out, and confirm it with `AskUserQuestion`. When building a batch, confirm every
+connector's set in one round rather than stopping before each. If the user asked not to be interrupted,
+go ahead with the proposals; the PR's `## Actions` section then says they are unconfirmed.
+
+Invoke the `create-connector` skill with `$ARGUMENTS` and the agreed actions:
 
 ```
 Skill: create-connector
-Args: $ARGUMENTS
+Args: $ARGUMENTS actions: <action names, each with its vendor operation>
 ```
 
 This runs in a forked context and will generate:
@@ -356,6 +367,8 @@ Read `create-connector/reference/pr-validation-table.md` for the full format and
 - Above the table, report the vendor API contract result from Task 10: the sources and API versions
   recorded against, whether the contract test passes, and the overlay actions and `unmatched` entries,
   each with its evidence.
+- Put the `## Actions` section from Task 1 before it, updated with any action added or dropped in
+  Tasks 3-9.
 
 Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
 under a `## Validated` heading in the PR description when this connector's PR is opened, whether that

@@ -3,7 +3,7 @@ name: create-connector
 description: Creates a new connector spec for Kibana. Use when asked to create (or add) a new connector, integration, or data source.
 allowed-tools: WebFetch, WebSearch, Read, Grep, Glob, Write, Edit, Bash, Skill
 context: fork
-argument-hint: [3rd-party-service-name]
+argument-hint: [3rd-party-service-name] [actions to build]
 ---
 
 # Create a Connector
@@ -25,10 +25,45 @@ Check if $0 has an official hosted MCP server. If so, creating an MCP-native con
 
 Follow only the steps for the chosen path. Do not mix them.
 
+### Choose the actions
+
+Decide which vendor operations become actions before researching any one of them. If the invocation
+lists actions after the service name (`build-connector` passes the list the user confirmed), build those.
+Otherwise propose a set yourself. For a custom connector, list what the spec offers after scaffolding with
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> --grep <area>`; for an
+MCP connector, the server's tools are the candidates (`listTools` and `callTool` reach the rest).
+
+Choose from the questions a user is likely to ask an agent about $0, not from the breadth of the API:
+
+- at least one discovery action (the current user, the projects, spaces or accounts it can see), so the
+  IDs other actions take can be found;
+- for every search or list, a way to open a result; for every write, a way to read the state back;
+- one action with a `type` enum where the vendor has the same operation for several entity types;
+- writes only where a use case needs them; destructive and admin operations left out, or `isTool: false`
+  with the reason;
+- no deprecated operations (the listing marks them).
+
+These are the "Tool Design" checks in `review-connector`, applied before the code exists. A given list
+is only extended where it fails them, and each addition is reported as such.
+
+Record the result in the PR description's `## Actions` section (see
+[reference/pr-validation-table.md](reference/pr-validation-table.md)), and start your report with it,
+so the user can change the set before the connector is tested.
+
 ### Research the vendor API before writing schemas or handlers
 
-For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
-vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace, including
+For a custom (non-MCP) connector, do this before Step 2. Start from the vendor's own machine-readable
+spec: find its URL, then list and describe the operations your actions will call with
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> [--grep <text> | --operation '<METHOD> <path>']`,
+and write each action's method, parameter locations and zod bounds from that description. The first
+inspection adds the source to the connector's `vendor_api/manifest.json`; leave out `--source` after it. See "Start
+from the vendor's spec" in
+[reference/custom-connector-setup.md](reference/custom-connector-setup.md). The connector is recorded
+and checked against the same spec in Step 4, so code written from it avoids most of what recording
+would report.
+
+Then, for each action, find the vendor's real API docs and verify what the spec doesn't settle — don't
+assume: update semantics (partial vs. full-replace, including
 nested objects sent whole), the HTTP method and body shape of that exact route, how array query params
 are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH` actions belong
 in the query string or the JSON body, the auth scope or cloud role (and the level it is granted at) each
@@ -219,13 +254,15 @@ the contract test fails otherwise. The folder records the vendor operations each
 snapshot of the vendor's spec, so the connector is checked offline against it on every CI run. See
 "Vendor API artifacts" in the package README for the file formats.
 
-1. **Record.** Using the spec URLs from the vendor API research, run:
+1. **Record.** The sources you inspected in Step 1 are already in `manifest.json`, so run:
 
    ```bash
-   node scripts/connector_vendor_api --connector {connector_name} --source v1=https://…/openapi.json
+   node scripts/connector_vendor_api --connector {connector_name}
    ```
 
-   One `--source name=url` per spec. YAML, JSON, Swagger 2.0 and Google Discovery documents all work.
+   It records against the same documents you inspected, kept since then in `data/connector_vendor_api`.
+   A spec you didn't inspect is added with `--source name=url`, one per spec; YAML, JSON, Swagger 2.0
+   and Google Discovery documents all work.
    The script runs every action against a mock built from the spec, under each auth type, with inputs
    generated from its schema: without and with optional properties, at every upper bound, and with each
    enum value. After changing the connector, rerun it without `--source` to record offline against the
