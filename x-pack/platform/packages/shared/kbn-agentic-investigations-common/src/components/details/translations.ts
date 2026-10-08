@@ -53,6 +53,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     proposedActions: i18n.translate('xpack.alertzero.detailsFlyout.sections.proposedActions', {
       defaultMessage: 'Proposed actions',
     }),
+    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
+      defaultMessage: 'Impact',
+    }),
   },
   overview: {
     showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {
