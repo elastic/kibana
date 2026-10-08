@@ -305,6 +305,7 @@ export function CreateDatasetWizardPage({
                       iconType="chevronSingleLeft"
                       onClick={() => goToStep(activeStepIndex - 1)}
                       data-test-subj="backButton"
+                      data-telemetry-id={`dataFederation-datasetWizard-${activeStepId}-backButton`}
                     >
                       {createDatasetWizardStrings.backButton}
                     </EuiButtonEmpty>
@@ -319,6 +320,11 @@ export function CreateDatasetWizardPage({
                     disabled={stepContent.isValid === false}
                     isLoading={isSaving}
                     data-test-subj="nextButton"
+                    data-telemetry-id={
+                      isLastStep
+                        ? 'dataFederation-datasetWizard-saveButton'
+                        : `dataFederation-datasetWizard-${activeStepId}-nextButton`
+                    }
                   >
                     {isLastStep
                       ? isSaving

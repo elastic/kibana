@@ -276,6 +276,10 @@ describe('CreateDatasetWizardPage', () => {
     // Resource help text is rendered via FormattedMessage with an embedded example code snippet,
     // so assert on the input rather than the exact composed help text.
     expect(getByText(createDatasetWizardStrings.resourceLabel)).toBeInTheDocument();
+    expect(getByTestId('nextButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-dataset-nextButton'
+    );
 
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
@@ -290,6 +294,10 @@ describe('CreateDatasetWizardPage', () => {
     // Additional settings is optional, so the stepper can jump over it.
     await clickStep(getByTestId, 'mapping');
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    expect(getByTestId('backButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-mapping-backButton'
+    );
     // Timeseries is on by default and requires a field name before Next is allowed.
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
@@ -303,6 +311,10 @@ describe('CreateDatasetWizardPage', () => {
       createDatasetWizardStrings.addDatasetButton
     );
     expect(getByTestId('nextButton').querySelector('[data-euiicon-type]')).toBeNull();
+    expect(getByTestId('nextButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-saveButton'
+    );
 
     await clickNext(getByTestId);
     await waitFor(() => {

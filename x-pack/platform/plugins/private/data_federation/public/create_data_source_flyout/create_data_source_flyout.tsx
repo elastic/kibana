@@ -370,7 +370,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
+            <EuiButtonEmpty
+              data-test-subj="createDataSourceFlyoutCancel"
+              data-telemetry-id="dataFederation-dataSourceForm-cancelButton"
+              onClick={() => onClose()}
+            >
               {createDataSourceFlyoutStrings.cancelButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -382,6 +386,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
                   type="submit"
                   form="createDataSourceForm"
                   data-test-subj="createDataSourceFlyoutSubmit"
+                  data-telemetry-id="dataFederation-dataSourceForm-saveButton"
                   isLoading={isSaving}
                   disabled={isSaving}
                 >
