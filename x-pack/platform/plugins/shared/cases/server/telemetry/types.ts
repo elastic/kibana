@@ -134,7 +134,7 @@ export type CaseAggregationResult = Record<
     assigneeFilters: AssigneesFilters;
     observables: ObservablesAggregationResult;
     totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
-    restrictedCases: { doc_count: number };
+    restrictedCases?: { doc_count: number };
   }
 > & {
   assigneeFilters: AssigneesFilters;
@@ -148,7 +148,7 @@ export type CaseAggregationResult = Record<
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
   totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
-  restrictedCases: { doc_count: number };
+  restrictedCases?: { doc_count: number };
 };
 
 export interface Assignees {

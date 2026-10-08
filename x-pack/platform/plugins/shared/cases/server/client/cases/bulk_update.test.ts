@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
+import {
+  CustomFieldTypes,
+  CaseStatuses,
+  CaseSeverity,
+  CaseAccessMode,
+  AttachmentType,
+} from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
 import {
   MAX_CATEGORY_LENGTH,
@@ -4213,11 +4219,19 @@ describe('update', () => {
     const buildAlertComment = (caseId: string) => ({
       id: 'alert-comment-id',
       type: 'cases-comments',
+      score: 0,
       attributes: {
-        type: 'alert',
+        type: AttachmentType.alert as const,
         alertId: ['alert-id-1'],
         index: ['alert-index-1'],
+        rule: { id: 'rule-id-1', name: 'rule-name-1' },
         owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2023-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
       },
       references: [{ type: 'cases', id: caseId, name: 'associated-cases' }],
     });
@@ -4258,7 +4272,7 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              access: { mode: 'restricted' as const },
+              access: { mode: CaseAccessMode.RESTRICTED },
             },
           ],
         },
@@ -4268,7 +4282,7 @@ describe('update', () => {
 
       const updatedAttributes =
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
-      expect(updatedAttributes.access).toEqual({ mode: 'restricted' });
+      expect(updatedAttributes.access).toEqual({ mode: CaseAccessMode.RESTRICTED });
       expect(updatedAttributes.assignees).toEqual([
         { uid: 'someone-else' },
         { uid: actorUid },
@@ -4286,7 +4300,7 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                access: { mode: 'restricted' as const },
+                access: { mode: CaseAccessMode.RESTRICTED },
               },
             ],
           },
@@ -4309,7 +4323,7 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                access: { mode: 'restricted' as const },
+                access: { mode: CaseAccessMode.RESTRICTED },
               },
             ],
           },
@@ -4329,7 +4343,7 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                access: { mode: 'default' as const },
+                access: { mode: CaseAccessMode.DEFAULT },
               },
             ],
           },
@@ -4354,7 +4368,7 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              access: { mode: 'restricted' as const },
+              access: { mode: CaseAccessMode.RESTRICTED },
             },
           ],
         },
@@ -4389,7 +4403,7 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                access: { mode: 'restricted' as const },
+                access: { mode: CaseAccessMode.RESTRICTED },
               },
             ],
           },
@@ -4404,7 +4418,7 @@ describe('update', () => {
     it('re-adds the case id to attached alerts before persisting an unrestrict', async () => {
       mockLoadedCase(
         buildCaseFixture({
-          access: { mode: 'restricted' as const },
+          access: { mode: CaseAccessMode.RESTRICTED },
           assignees: [{ uid: actorUid }],
         })
       );
@@ -4421,7 +4435,7 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              access: { mode: 'default' as const },
+              access: { mode: CaseAccessMode.DEFAULT },
             },
           ],
         },
@@ -4441,7 +4455,7 @@ describe('update', () => {
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [theCase] });
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [
-          { ...theCase, attributes: { ...theCase.attributes, access: { mode: 'restricted' } } },
+          { ...theCase, attributes: { ...theCase.attributes, access: { mode: CaseAccessMode.RESTRICTED } } },
         ],
       });
 
@@ -4451,7 +4465,7 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              access: { mode: 'restricted' as const },
+              access: { mode: CaseAccessMode.RESTRICTED },
             },
           ],
         },
@@ -4465,7 +4479,7 @@ describe('update', () => {
     it('refuses to remove the last assignee of a restricted case', async () => {
       mockLoadedCase(
         buildCaseFixture({
-          access: { mode: 'restricted' as const },
+          access: { mode: CaseAccessMode.RESTRICTED },
           assignees: [{ uid: actorUid }],
         })
       );
@@ -4490,7 +4504,7 @@ describe('update', () => {
     it('allows a superuser to remove the last assignee of a restricted case', async () => {
       mockLoadedCase(
         buildCaseFixture({
-          access: { mode: 'restricted' as const },
+          access: { mode: CaseAccessMode.RESTRICTED },
           assignees: [{ uid: actorUid }],
         })
       );
@@ -4526,7 +4540,7 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                access: { mode: 'restricted' as const },
+                access: { mode: CaseAccessMode.RESTRICTED },
               },
             ],
           },

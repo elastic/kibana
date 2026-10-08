@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { registerTemplateApplyEvents } from './templates/register_apply_events';
 import {
+  CASE_ACCESS_CONTROL_CLICKED_EVENT_TYPE,
   CASE_ATTACH_EVENTS_EVENT_TYPE,
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
@@ -35,6 +36,33 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description: 'The solution ID (owner) that rendered the Cases page',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASE_ACCESS_CONTROL_CLICKED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) in which the access control was used',
+          optional: false,
+        },
+      },
+      mode: {
+        type: 'keyword',
+        _meta: {
+          description: 'The access mode the user selected (default or restricted)',
+          optional: false,
+        },
+      },
+      location: {
+        type: 'keyword',
+        _meta: {
+          description: 'Where the control was used: the create flow or the case view',
           optional: false,
         },
       },

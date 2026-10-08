@@ -24,6 +24,7 @@ import type {
 } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
+  CaseAccessMode,
   CaseSeverity,
   CaseStatuses,
   UserAction,
@@ -204,6 +205,7 @@ export interface SystemFilterOptions {
   reporters: User[];
   owner: string[];
   category: string[];
+  access: CaseAccessMode[];
 }
 
 export interface ExtendedFieldFilter {
@@ -283,6 +285,7 @@ export type UpdateKey = keyof Pick<
   | 'category'
   | 'customFields'
   | 'extended_fields'
+  | 'access'
 >;
 
 export interface UpdateByKey {

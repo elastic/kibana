@@ -44,14 +44,14 @@ export const getFiles = async (
     });
 
     const { files, total } = await fileService.find({
-      kind: constructFileKindIdByOwner(theCase.attributes.owner as Owner),
+      kind: [constructFileKindIdByOwner(theCase.attributes.owner as Owner)],
       page,
       perPage,
-      ...(searchTerm !== undefined ? { name: `*${searchTerm}*` } : {}),
+      ...(searchTerm !== undefined ? { name: [`*${searchTerm}*`] } : {}),
       meta: { caseIds: [caseId] },
     });
 
-    return { files: files.map((file) => file.toJSON()), total };
+    return { files, total };
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve files for case id: ${caseId}: ${error}`,

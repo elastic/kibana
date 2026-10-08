@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import type { CaseAccess } from '../../common/types/domain';
 import { CaseAccessMode } from '../../common/types/domain';
@@ -52,7 +53,7 @@ export const getRestrictedCaseIds = async (
 
   const restricted = new Set<string>();
   for (const so of caseSOs) {
-    if (so.error != null || so.attributes?.access?.mode === CaseAccessMode.RESTRICTED) {
+    if (isSavedObjectErrorResult(so) || so.attributes?.access?.mode === CaseAccessMode.RESTRICTED) {
       restricted.add(so.id);
     }
   }

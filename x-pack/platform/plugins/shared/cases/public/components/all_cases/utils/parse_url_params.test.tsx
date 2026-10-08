@@ -25,6 +25,7 @@ describe('parseUrlParams', () => {
   it('parses the default filter options and query params correctly', () => {
     expect(parseUrlParams(defaultValuesAsURL)).toMatchInlineSnapshot(`
       Object {
+        "access": Array [],
         "assignees": Array [],
         "category": Array [],
         "customFields": Object {},

@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { CaseSeverity } from '../../../../../../common/types/domain';
-import { CaseStatuses } from '../../../../../../common/types/domain';
+import { CaseAccessMode, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { statuses } from '../../../../status/config';
 import { severities } from '../../../../severity/config';
+import * as i18n from '../../../translations';
 
 interface GetBadgesArgs {
   caseData: CaseUI;
@@ -20,6 +21,11 @@ interface GetBadgesArgs {
   isSeverityMenuDisabled: boolean;
   onStatusChanged: (status: CaseStatuses) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
+  /** Absent when restricted cases are unavailable (flag off or license below Platinum). */
+  access?: {
+    isMenuDisabled: boolean;
+    onAccessChanged: (mode: CaseAccessMode) => void;
+  };
 }
 
 export const getBadges = ({
@@ -28,8 +34,40 @@ export const getBadges = ({
   isSeverityMenuDisabled,
   onStatusChanged,
   onSeverityChanged,
+  access,
 }: GetBadgesArgs): AppHeaderBadge[] => {
   const result: AppHeaderBadge[] = [];
+
+  if (access !== undefined) {
+    const isRestricted = caseData.access?.mode === CaseAccessMode.RESTRICTED;
+    const accessBadge: AppHeaderBadge = {
+      label: isRestricted ? i18n.ACCESS_RESTRICTED : i18n.ACCESS_EVERYONE,
+      color: 'hollow',
+      'data-test-subj': 'case-view-access-badge',
+      renderCustomBadge: ({ badgeText }) => (
+        <EuiBadge color="hollow" data-test-subj="case-view-access-badge">
+          <EuiIcon type={isRestricted ? 'lock' : 'lockOpen'} size="s" aria-hidden={true} />{' '}
+          {badgeText}
+        </EuiBadge>
+      ),
+    };
+
+    if (!access.isMenuDisabled) {
+      accessBadge.items = [
+        {
+          name: i18n.ACCESS_EVERYONE,
+          onClick: () => access.onAccessChanged(CaseAccessMode.DEFAULT),
+          'data-test-subj': 'case-view-access-dropdown-default',
+        },
+        {
+          name: i18n.ACCESS_RESTRICTED,
+          onClick: () => access.onAccessChanged(CaseAccessMode.RESTRICTED),
+          'data-test-subj': 'case-view-access-dropdown-restricted',
+        },
+      ];
+    }
+    result.push(accessBadge);
+  }
 
   const severityConfig = severities[caseData.severity];
   const severityBadge: AppHeaderBadge = {

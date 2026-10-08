@@ -7,7 +7,7 @@
 
 import { isLeft } from 'fp-ts/Either';
 import * as rt from 'io-ts';
-import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
+import { CaseAccessModeRt, CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
 import {
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
@@ -20,6 +20,7 @@ export const AllCasesURLQueryParamsRt = rt.exact(
     search: rt.string,
     severity: rt.array(CaseSeverityRt),
     status: rt.array(CaseStatusRt),
+    access: rt.array(CaseAccessModeRt),
     tags: rt.array(rt.string),
     category: rt.array(rt.string),
     assignees: rt.array(rt.union([rt.string, rt.null])),

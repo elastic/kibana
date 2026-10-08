@@ -10,6 +10,7 @@ import type { CasePostRequest } from '../../../common';
 import { GENERAL_CASES_OWNER } from '../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { ActionConnector } from '../../../common/types/domain';
+import { CaseAccessMode } from '../../../common/types/domain';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import {
   getCaseSettings,
@@ -53,6 +54,7 @@ export const trimUserFormData = (
     | 'customFields'
     | 'templateId'
     | 'templateVersion'
+    | 'restricted'
   >
 ) => {
   let formData = {
@@ -77,6 +79,7 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     connector,
     settings,
     customFields,
+    access,
     [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse,
     ...restData
   } = data;
@@ -87,6 +90,7 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     fields: connector.fields,
     syncAlerts: settings.syncAlerts,
     extractObservables: settings.extractObservables ?? false,
+    restricted: access?.mode === CaseAccessMode.RESTRICTED,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
     ...(extendedFieldsFromResponse != null
       ? { [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse }
@@ -121,6 +125,7 @@ export const createFormSerializer = (
     fields,
     syncAlerts,
     extractObservables,
+    restricted,
     customFields,
     templateId,
     templateVersion,
@@ -153,6 +158,8 @@ export const createFormSerializer = (
     },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
+    // the access field is only sent when restricting — an absent field means default
+    ...(restricted ? { access: { mode: CaseAccessMode.RESTRICTED } } : {}),
     ...(extendedFields != null ? { [CASE_EXTENDED_FIELDS]: extendedFields } : {}),
     ...(templateId && templateVersion
       ? { template: { id: templateId, version: templateVersion } }

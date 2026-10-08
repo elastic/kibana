@@ -104,6 +104,7 @@ export const find = async (
       assignees: paramArgs.assignees,
       category: paramArgs.category,
       customFields: paramArgs.customFields,
+      access: paramArgs.access,
     };
 
     const statusStatsOptions = constructQueryOptions({

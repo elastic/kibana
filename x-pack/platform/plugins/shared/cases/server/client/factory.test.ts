@@ -48,8 +48,8 @@ describe('CasesClientFactory', () => {
       // @ts-expect-error: not all fields are needed
       user: { username: 'my_user' },
     });
+    // @ts-expect-error: not all fields are needed
     args.securityServiceStart.authc.getCurrentUser.mockReturnValueOnce({
-      // @ts-expect-error: not all fields are needed
       roles: ['superuser'],
     });
 

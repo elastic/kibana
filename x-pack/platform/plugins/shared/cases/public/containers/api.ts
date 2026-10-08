@@ -304,6 +304,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    access: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -335,6 +336,7 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...(filterOptions.access.length > 0 ? { access: filterOptions.access } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
@@ -396,6 +398,7 @@ export const patchCase = async ({
     | 'customFields'
     | 'extended_fields'
     | 'template'
+    | 'access'
   >;
   version: string;
   signal?: AbortSignal;

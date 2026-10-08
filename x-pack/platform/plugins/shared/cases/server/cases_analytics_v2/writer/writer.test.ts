@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { CaseAccessMode } from '../../../common/types/domain';
 import { CASE_INDEX_NAME } from '../constants';
 import { makeCase } from '../__test_helpers__';
 import { CasesAnalyticsV2Writer } from '.';
@@ -32,7 +33,7 @@ const makeRestrictedCase = (id: string) => {
   const so = makeCase(id);
   return {
     ...so,
-    attributes: { ...so.attributes, access: { mode: 'restricted' as const } },
+    attributes: { ...so.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
   };
 };
 

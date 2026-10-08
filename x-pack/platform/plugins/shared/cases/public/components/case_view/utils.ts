@@ -114,6 +114,17 @@ const processCustomFields = (
   }
 };
 
+const processAccess = (
+  value: unknown,
+  caseData: CaseUI,
+  callUpdate: ProcessFieldUpdateParams['callUpdate']
+): void => {
+  const accessUpdate = getTypedPayload<CaseUI['access']>(value);
+  if (!deepEqual(caseData.access, value)) {
+    callUpdate('access', accessUpdate);
+  }
+};
+
 const processExtendedFields = (
   value: unknown,
   callUpdate: ProcessFieldUpdateParams['callUpdate']
@@ -152,6 +163,8 @@ export const processFieldUpdate = ({
       return processAssignees(value, caseData, callUpdate);
     case 'customFields':
       return processCustomFields(value, caseData, callUpdate);
+    case 'access':
+      return processAccess(value, caseData, callUpdate);
     case CASE_EXTENDED_FIELDS:
       return processExtendedFields(value, callUpdate);
     default:

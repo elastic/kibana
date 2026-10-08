@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { getCaseSettings } from '../../common/utils/case_settings';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useCasesConfig } from './lib/kibana';
 import { useLicense } from './use_license';
 
 export interface UseCasesFeatures {
@@ -17,6 +18,13 @@ export interface UseCasesFeatures {
   connectorsAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
+  /**
+   * True when restricted (assignee-only) cases are available: the technical
+   * preview flag is on and the license is Platinum or higher. Membership is
+   * the assignees list, which requires user profiles — the same bar as case
+   * assignment.
+   */
+  restrictedCasesAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
   isExtractObservablesEnabled: boolean;
@@ -37,6 +45,7 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
     permissions: { assign },
   } = useCasesContext();
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
+  const { restrictedCasesEnabled } = useCasesConfig();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
   const casesFeatures = useMemo(() => {
@@ -53,6 +62,7 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
       metricsFeatures,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
+      restrictedCasesAuthorized: restrictedCasesEnabled && hasLicenseGreaterThanPlatinum,
       observablesAuthorized,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
       isObservablesFeatureEnabled: observablesEnabled,
@@ -70,6 +80,7 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
     hasLicenseGreaterThanPlatinum,
     assign,
     hasLicenseWithAtLeastGold,
+    restrictedCasesEnabled,
   ]);
 
   return casesFeatures;

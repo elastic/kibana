@@ -205,6 +205,28 @@ export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const RESTRICT_CASE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.access.restrictModalTitle',
+  {
+    defaultMessage: 'Restrict this case?',
+  }
+);
+
+export const RESTRICT_CASE_MODAL_BODY = i18n.translate(
+  'xpack.cases.caseView.access.restrictModalBody',
+  {
+    defaultMessage:
+      'Only assignees will be able to see this case and everything attached to it. You will be added as an assignee so you keep access.',
+  }
+);
+
+export const RESTRICT_CASE_MODAL_CONFIRM = i18n.translate(
+  'xpack.cases.caseView.access.restrictModalConfirm',
+  {
+    defaultMessage: 'Restrict case',
+  }
+);
+
 export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
   defaultMessage: 'No users are assigned',
 });

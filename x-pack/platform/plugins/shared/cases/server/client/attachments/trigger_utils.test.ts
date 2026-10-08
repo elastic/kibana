@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentAttributesV2, Case } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseAccessMode } from '../../../common/types/domain';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { mockCaseComments, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -37,7 +37,7 @@ describe('emitAttachmentsAddedEvent', () => {
       {
         id: 'case-1',
         owner: 'securitySolution',
-        access: { mode: 'restricted' },
+        access: { mode: CaseAccessMode.RESTRICTED },
       } as unknown as Case,
       ['attachment-1'],
       'comment'
@@ -59,7 +59,7 @@ describe('emitAttachmentsDeletedEvents', () => {
 
   it('does not emit for a restricted case', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1', access: { mode: 'restricted' } }, [
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1', access: { mode: CaseAccessMode.RESTRICTED } }, [
       userComment,
     ]);
 

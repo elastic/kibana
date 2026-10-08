@@ -20,7 +20,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes, CaseAccessMode } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -66,10 +66,10 @@ describe('create', () => {
 
       clientArgs.services.caseService.createCase.mockResolvedValue({
         ...caseSO,
-        attributes: { ...caseSO.attributes, access: { mode: 'restricted' } },
+        attributes: { ...caseSO.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
       });
 
-      await create({ ...theCase, access: { mode: 'restricted' } }, clientArgs, casesClientMock);
+      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
 
       expect(clientArgs.casesEventBus.emitCaseCreated).not.toHaveBeenCalled();
     });
@@ -88,13 +88,13 @@ describe('create', () => {
 
     it('persists the access field and auto-assigns the creator', async () => {
       await create(
-        { ...theCase, assignees: [{ uid: 'someone-else' }], access: { mode: 'restricted' } },
+        { ...theCase, assignees: [{ uid: 'someone-else' }], access: { mode: CaseAccessMode.RESTRICTED } },
         clientArgs,
         casesClientMock
       );
 
       const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
-      expect(attributes.access).toEqual({ mode: 'restricted' });
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.RESTRICTED });
       expect(attributes.assignees).toEqual([{ uid: 'someone-else' }, { uid: actorUid }]);
     });
 
@@ -104,7 +104,7 @@ describe('create', () => {
       await expect(
         create(
           // no assignees so the access license gate is the one that fires
-          { ...omit(theCase, 'assignees'), access: { mode: 'restricted' } },
+          { ...omit(theCase, 'assignees'), access: { mode: CaseAccessMode.RESTRICTED } },
           clientArgs,
           casesClientMock
         )
@@ -116,7 +116,7 @@ describe('create', () => {
     it('ignores the access field when the feature is disabled', async () => {
       clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
 
-      await create({ ...theCase, access: { mode: 'restricted' } }, clientArgs, casesClientMock);
+      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
 
       const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
       expect(attributes.access).toBeUndefined();
@@ -124,13 +124,13 @@ describe('create', () => {
 
     it('does not auto-assign the creator for a default access case', async () => {
       await create(
-        { ...theCase, assignees: [], access: { mode: 'default' } },
+        { ...theCase, assignees: [], access: { mode: CaseAccessMode.DEFAULT } },
         clientArgs,
         casesClientMock
       );
 
       const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
-      expect(attributes.access).toEqual({ mode: 'default' });
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.DEFAULT });
       expect(attributes.assignees).toEqual([]);
     });
 
@@ -139,7 +139,7 @@ describe('create', () => {
 
       await expect(
         create(
-          { ...theCase, assignees: [], access: { mode: 'restricted' } },
+          { ...theCase, assignees: [], access: { mode: CaseAccessMode.RESTRICTED } },
           clientArgs,
           casesClientMock
         )

@@ -15,7 +15,7 @@
 
 import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
@@ -3971,7 +3971,7 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue({
           id: persistedSO.id,
           type: CASE_SAVED_OBJECT,
-          attributes: { access: { mode: 'restricted' } },
+          attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
           references: persistedSO.references,
           version: 'WzEsMV0=',
         });
@@ -3980,7 +3980,7 @@ describe('CasesService', () => {
           makeServiceWithMockWriter();
         await svc.patchCase({
           caseId: persistedSO.id,
-          updatedAttributes: { access: { mode: 'restricted' } },
+          updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
           originalCase: externalModelOriginalCase,
           version: 'WzAsMV0=',
           refresh: false,
@@ -3998,13 +3998,13 @@ describe('CasesService', () => {
 
       it('patchCase: upserts normally when the case returns to default access', async () => {
         const persistedSO = createCaseSavedObjectResponse();
-        persistedSO.attributes.access = { mode: 'restricted' };
+        persistedSO.attributes.access = { mode: CaseAccessMode.RESTRICTED };
         const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
 
         unsecuredSavedObjectsClient.update.mockResolvedValue({
           id: persistedSO.id,
           type: CASE_SAVED_OBJECT,
-          attributes: { access: { mode: 'default' } },
+          attributes: { access: { mode: CaseAccessMode.DEFAULT } },
           references: persistedSO.references,
           version: 'WzEsMV0=',
         });
@@ -4012,7 +4012,7 @@ describe('CasesService', () => {
         const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
         await svc.patchCase({
           caseId: persistedSO.id,
-          updatedAttributes: { access: { mode: 'default' } },
+          updatedAttributes: { access: { mode: CaseAccessMode.DEFAULT } },
           originalCase: externalModelOriginalCase,
           version: 'WzAsMV0=',
           refresh: false,
@@ -4021,7 +4021,7 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
         expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.upsertCase.mock.calls[0][0].attributes.access).toEqual({
-          mode: 'default',
+          mode: CaseAccessMode.DEFAULT,
         });
       });
 
@@ -4041,7 +4041,7 @@ describe('CasesService', () => {
             {
               id: 'restricted-case',
               type: CASE_SAVED_OBJECT,
-              attributes: { access: { mode: 'restricted' } },
+              attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
               references: restrictedSO.references,
               version: 'WzEsMV0=',
             },
@@ -4060,7 +4060,7 @@ describe('CasesService', () => {
             },
             {
               caseId: 'restricted-case',
-              updatedAttributes: { access: { mode: 'restricted' } },
+              updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
               originalCase: transformSavedObjectToExternalModel(restrictedSO),
               version: 'WzAsMV0=',
             },

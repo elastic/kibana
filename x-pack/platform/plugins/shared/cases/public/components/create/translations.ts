@@ -38,6 +38,15 @@ export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLa
   defaultMessage: 'Sync alert status with case status',
 });
 
+export const RESTRICTED_LABEL = i18n.translate('xpack.cases.create.restrictedLabel', {
+  defaultMessage: 'Restrict this case to its assignees',
+});
+
+export const RESTRICTED_HELP = i18n.translate('xpack.cases.create.restrictedHelp', {
+  defaultMessage:
+    'Only assignees can see a restricted case. You will be added as an assignee so you keep access.',
+});
+
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
   defaultMessage: 'Assign yourself',
 });

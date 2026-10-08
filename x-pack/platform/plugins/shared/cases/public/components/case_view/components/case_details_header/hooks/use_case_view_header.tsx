@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
+import type {
+  CaseAccessMode,
+  CaseSeverity,
+  CaseStatuses,
+} from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
 import { useAllCasesNavigation } from '../../../../../common/navigation';
@@ -37,6 +41,7 @@ interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
   onStatusChanged: (status: CaseStatuses) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
+  onAccessChanged: (mode: CaseAccessMode) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
@@ -44,10 +49,11 @@ export const useCaseViewHeader = ({
   caseData,
   onStatusChanged,
   onSeverityChanged,
+  onAccessChanged,
   onUpdateField,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
-  const { hasCaseSettings } = useCasesFeatures();
+  const { hasCaseSettings, restrictedCasesAuthorized } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -147,8 +153,20 @@ export const useCaseViewHeader = ({
         isSeverityMenuDisabled,
         onStatusChanged,
         onSeverityChanged,
+        ...(restrictedCasesAuthorized
+          ? { access: { isMenuDisabled: !permissions.update, onAccessChanged } }
+          : {}),
       }),
-    [caseData, isStatusMenuDisabled, isSeverityMenuDisabled, onStatusChanged, onSeverityChanged]
+    [
+      caseData,
+      isStatusMenuDisabled,
+      isSeverityMenuDisabled,
+      onStatusChanged,
+      onSeverityChanged,
+      restrictedCasesAuthorized,
+      permissions.update,
+      onAccessChanged,
+    ]
   );
 
   // Menu
