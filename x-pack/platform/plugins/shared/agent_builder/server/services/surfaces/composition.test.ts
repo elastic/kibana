@@ -5,154 +5,145 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
-import { resolveAttachmentNode, toCompositionNodes } from './composition';
-import type { AttachmentNode } from './pack';
+import { buildComposition } from './composition';
 
-describe('toCompositionNodes', () => {
-  it('converts markdown into a markdown node', () => {
-    expect(toCompositionNodes('There are **3** open alerts.')).toEqual([
-      { type: 'markdown', text: 'There are **3** open alerts.' },
-    ]);
+type ToIsomerComposition = NonNullable<AttachmentTypeDefinition['toIsomerComposition']>;
+
+const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
+  id: 'a1',
+  type: 'text',
+  current_version: 2,
+  versions: [1, 2].map((version) => ({
+    version,
+    data: {},
+    created_at: '2026-10-06T00:00:00.000Z',
+    content_hash: `hash-${version}`,
+  })),
+  ...parts,
+});
+
+/** Renders each attachment as its id and version, so tests can see which one was resolved. */
+const echoAttachment: ToIsomerComposition = (data, { attachment, version }) => ({
+  type: 'view',
+  body: [{ type: 'markdown', text: `[${attachment.id} v${version}]` }],
+});
+
+interface ComposeOptions {
+  attachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  toIsomerComposition?: ToIsomerComposition;
+}
+
+const compose = (
+  message: string,
+  {
+    attachments = [createAttachment()],
+    attachmentRefs,
+    toIsomerComposition = echoAttachment,
+  }: ComposeOptions = {}
+) =>
+  buildComposition({
+    round: {
+      input: { message: 'hello', attachment_refs: attachmentRefs },
+      response: { message },
+    } as ConversationRound,
+    attachments,
+    attachmentsService: {
+      getTypeDefinition: (type: string) => (type === 'text' ? { toIsomerComposition } : undefined),
+    } as unknown as AttachmentServiceStart,
+    logger: loggerMock.create(),
   });
 
-  it('converts tags into attachment nodes at their position', () => {
+/** The texts of the composition's nodes. */
+const build = (message: string, options?: ComposeOptions) =>
+  compose(message, options).body.map((node) => ('text' in node ? node.text : node));
+
+describe('buildComposition', () => {
+  it('converts markdown into a markdown node', () => {
+    expect(build('There are **3** alerts.')).toEqual(['There are **3** alerts.']);
+  });
+
+  it('replaces tags with what their toIsomerComposition returns, in place', () => {
     const message = [
-      'Here is the query:',
-      '<render_attachment id="a1" version="2" />',
-      'And the chart:',
-      '<render_attachment id="a2"/>',
+      'Here is the note:',
+      '<render_attachment id="a1" version="1" />',
+      'Inline: <render_attachment id="a1"/> done',
     ].join('\n\n');
 
-    expect(toCompositionNodes(message)).toEqual([
-      { type: 'markdown', text: 'Here is the query:' },
-      { type: 'attachment', attachmentId: 'a1', version: 2 },
-      { type: 'markdown', text: 'And the chart:' },
-      { type: 'attachment', attachmentId: 'a2' },
+    expect(build(message)).toEqual(['Here is the note:', '[a1 v1]', 'Inline:', '[a1 v2]', 'done']);
+  });
+
+  it('shows the title and subtitle of the attachment composition as a heading', () => {
+    const toIsomerComposition: ToIsomerComposition = () => ({
+      type: 'view',
+      title: 'Note',
+      subtitle: 'v1',
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    expect(build('<render_attachment id="a1" />', { toIsomerComposition })).toEqual([
+      '**Note**\n_v1_',
+      'Content',
     ]);
   });
 
-  it('splits tags inline with prose', () => {
-    expect(toCompositionNodes('Rule: <render_attachment id="a1" version="1"/> done')).toEqual([
-      { type: 'markdown', text: 'Rule:' },
-      { type: 'attachment', attachmentId: 'a1', version: 1 },
-      { type: 'markdown', text: 'done' },
-    ]);
+  it('uses the round ref version of tags without a version', () => {
+    expect(
+      build('<render_attachment id="a1" />', {
+        attachmentRefs: [{ attachment_id: 'a1', version: 1 }],
+      })
+    ).toEqual(['[a1 v1]']);
   });
 
-  it('omits versions that are not positive integers', () => {
-    for (const version of ['latest', '0']) {
-      expect(toCompositionNodes(`<render_attachment id="a1" version="${version}" />`)).toEqual([
-        { type: 'attachment', attachmentId: 'a1' },
-      ]);
-    }
+  it('uses the latest version of tags without a version or a ref', () => {
+    expect(build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
+  });
+
+  it('ignores versions that are not positive integers', () => {
+    expect(build('<render_attachment id="a1" version="latest" />')).toEqual(['[a1 v2]']);
+    expect(build('<render_attachment id="a1" version="0" />')).toEqual(['[a1 v2]']);
   });
 
   it('does not take the id from a longer attribute name', () => {
-    expect(toCompositionNodes('<render_attachment field-id="x" id="a1" />')).toEqual([
-      { type: 'attachment', attachmentId: 'a1' },
-    ]);
+    expect(build('<render_attachment field-id="x" id="a1" />')).toEqual(['[a1 v2]']);
   });
 
   it('drops tags without an id', () => {
-    expect(toCompositionNodes('Hello <render_attachment version="1" />')).toEqual([
-      { type: 'markdown', text: 'Hello' },
+    expect(build('Hello <render_attachment version="1" />')).toEqual(['Hello']);
+  });
+
+  it('leaves out types without a toIsomerComposition', () => {
+    expect(
+      build('Here: <render_attachment id="a1" />', {
+        attachments: [createAttachment({ type: 'case' })],
+      })
+    ).toEqual(['Here:']);
+  });
+
+  it('leaves out missing attachments and versions', () => {
+    expect(build('Here: <render_attachment id="a1" />', { attachments: [] })).toEqual(['Here:']);
+    expect(build('Here: <render_attachment id="a1" version="9" />')).toEqual(['Here:']);
+  });
+
+  it('leaves out attachments whose toIsomerComposition fails', () => {
+    const toIsomerComposition: ToIsomerComposition = () => {
+      throw new Error('boom');
+    };
+
+    expect(build('Here: <render_attachment id="a1" />', { toIsomerComposition })).toEqual([
+      'Here:',
     ]);
   });
 
   it('returns no nodes for an empty message', () => {
-    expect(toCompositionNodes(' \n<render_attachment />\n ')).toEqual([]);
-  });
-});
-
-type ToIsomerComposition = NonNullable<AttachmentTypeDefinition['toIsomerComposition']>;
-
-type ResolveAttachmentNodeOptions = Parameters<typeof resolveAttachmentNode>[1];
-
-describe('resolveAttachmentNode', () => {
-  const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
-    id: 'a1',
-    type: 'text',
-    current_version: 2,
-    versions: [1, 2].map((version) => ({
-      version,
-      data: { content: `v${version}` },
-      created_at: '2026-10-06T00:00:00.000Z',
-      content_hash: `hash-${version}`,
-    })),
-    ...parts,
-  });
-
-  const toText: ToIsomerComposition = (data, { version }) => ({
-    type: 'view',
-    title: `Text v${version}`,
-    body: [{ type: 'markdown', text: (data as { content: string }).content }],
-  });
-
-  const createAttachmentsService = (
-    toIsomerComposition: ToIsomerComposition | undefined = toText
-  ) =>
-    ({
-      getTypeDefinition: (type: string) => (type === 'text' ? { toIsomerComposition } : undefined),
-    } as unknown as AttachmentServiceStart);
-
-  const createOptions = (
-    overrides: Partial<ResolveAttachmentNodeOptions> = {}
-  ): ResolveAttachmentNodeOptions => ({
-    attachments: [createAttachment()],
-    attachmentsService: createAttachmentsService(),
-    logger: loggerMock.create(),
-    ...overrides,
-  });
-
-  const createNode = (version?: number): AttachmentNode => ({
-    type: 'attachment',
-    attachmentId: 'a1',
-    ...(version ? { version } : {}),
-  });
-
-  it('replaces the node with what its toIsomerComposition returns', () => {
-    expect(resolveAttachmentNode(createNode(1), createOptions())).toEqual([
-      { type: 'markdown', text: '**Text v1**' },
-      { type: 'markdown', text: 'v1' },
-    ]);
-  });
-
-  it('uses the round ref version of nodes without a version', () => {
-    const options = createOptions({ attachmentRefs: [{ attachment_id: 'a1', version: 1 }] });
-
-    expect(resolveAttachmentNode(createNode(), options)).toContainEqual({
-      type: 'markdown',
-      text: 'v1',
-    });
-  });
-
-  it('uses the latest version of nodes without a version or a ref', () => {
-    expect(resolveAttachmentNode(createNode(), createOptions())).toContainEqual({
-      type: 'markdown',
-      text: 'v2',
-    });
-  });
-
-  it('leaves out types without a toIsomerComposition', () => {
-    const options = createOptions({ attachments: [createAttachment({ type: 'case' })] });
-
-    expect(resolveAttachmentNode(createNode(), options)).toEqual([]);
-  });
-
-  it('leaves out missing attachments and versions', () => {
-    expect(resolveAttachmentNode(createNode(), createOptions({ attachments: [] }))).toEqual([]);
-    expect(resolveAttachmentNode(createNode(9), createOptions())).toEqual([]);
-  });
-
-  it('leaves out attachments whose toIsomerComposition fails', () => {
-    const attachmentsService = createAttachmentsService(() => {
-      throw new Error('boom');
-    });
-
-    expect(resolveAttachmentNode(createNode(), createOptions({ attachmentsService }))).toEqual([]);
+    expect(build(' \n<render_attachment />\n ')).toEqual([]);
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getVersion,
   resolveAttachmentVersion,
@@ -22,7 +23,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import type { AttachmentNode, CompositionNode } from './pack';
+import type { AttachmentNode, CompositionNode, MessageComposition } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -46,7 +47,7 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
  */
-export const toCompositionNodes = (message: string): CompositionNode[] =>
+const toCompositionNodes = (message: string): CompositionNode[] =>
   splitCustomElements(message, tagName).flatMap((segment): CompositionNode[] => {
     if (segment.type === 'text') {
       return [{ type: 'markdown', text: segment.text.trim() }];
@@ -56,6 +57,12 @@ export const toCompositionNodes = (message: string): CompositionNode[] =>
     return node ? [node] : [];
   });
 
+/**
+ * Keeps the `title` and `subtitle` of an attachment's composition, which would otherwise be lost
+ * when its body is spliced into the message: they become a `markdown` node, with the title in bold
+ * and the subtitle in italics, placed before the body. Returns nothing when the mapping sets
+ * neither, so it's `toIsomerComposition` that decides whether an attachment has a heading.
+ */
 const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): IsomerMarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
@@ -63,9 +70,10 @@ const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): Isomer
 
 /**
  * Replaces an attachment node with what its type's `toIsomerComposition` returns. Attachments
- * that are missing, have no `toIsomerComposition`, or fail to map are left out.
+ * that are missing or have no `toIsomerComposition` are expected, and left out quietly. A
+ * `toIsomerComposition` that fails is a bug in its mapping, so it's left out with a warning.
  */
-export const resolveAttachmentNode = (
+const resolveAttachmentNode = (
   node: AttachmentNode,
   {
     attachments,
@@ -82,8 +90,9 @@ export const resolveAttachmentNode = (
   }
 ): IsomerMarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
+
   if (!attachment) {
-    logger.warn(`Leaving out attachment "${node.attachmentId}": it is not in the conversation`);
+    logger.debug(`Leaving out attachment "${node.attachmentId}": it is not in the conversation`);
     return [];
   }
 
@@ -93,19 +102,23 @@ export const resolveAttachmentNode = (
     attachmentRefs,
     attachment,
   });
+
   const attachmentVersion = version === undefined ? undefined : getVersion(attachment, version);
+
   if (!attachmentVersion) {
-    logger.warn(`Leaving out attachment "${attachment.id}": version ${version} not found`);
+    logger.debug(`Leaving out attachment "${attachment.id}": version ${version} not found`);
     return [];
   }
 
   const toIsomerComposition = attachmentsService.getTypeDefinition(
     attachment.type
   )?.toIsomerComposition;
+
   if (!toIsomerComposition) {
     logger.debug(
       `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toIsomerComposition`
     );
+
     return [];
   }
 
@@ -114,11 +127,43 @@ export const resolveAttachmentNode = (
       attachment,
       version: attachmentVersion.version,
     });
+
     return [...toHeadingNode(composition), ...composition.body];
   } catch (error) {
     logger.warn(
       `Leaving out attachment "${attachment.id}": its toIsomerComposition failed: ${error.message}`
     );
+
     return [];
   }
 };
+
+/**
+ * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
+ * and each `<render_attachment>` tag is replaced, in place, by what its type's
+ * `toIsomerComposition` returns.
+ */
+export const buildComposition = ({
+  round: { response, input },
+  attachments,
+  attachmentsService,
+  logger,
+}: {
+  round: ConversationRound;
+  /** The conversation's attachments, as carried by `round_complete`. */
+  attachments: VersionedAttachment[];
+  attachmentsService: AttachmentServiceStart;
+  logger: Logger;
+}): MessageComposition => ({
+  type: 'view',
+  body: toCompositionNodes(response.message).flatMap((node): CompositionNode[] =>
+    node.type === 'attachment'
+      ? resolveAttachmentNode(node, {
+          attachments,
+          attachmentRefs: input.attachment_refs,
+          attachmentsService,
+          logger,
+        })
+      : [node]
+  ),
+});

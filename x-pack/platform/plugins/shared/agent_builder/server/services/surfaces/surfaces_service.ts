@@ -7,15 +7,12 @@
 
 import type {
   ConversationOriginType,
-  ConversationRound,
   RoundCompleteEvent,
   SurfacePayload,
 } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { resolveAttachmentNode, toCompositionNodes } from './composition';
-import type { CompositionNode, MessageComposition } from './pack';
+import { buildComposition } from './composition';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
 
@@ -61,46 +58,18 @@ export class SurfacesServiceImpl implements SurfacesService {
     }
 
     try {
-      const composition = this.buildComposition(round, attachments);
+      const composition = buildComposition({
+        round,
+        attachments,
+        attachmentsService: this.attachmentsService,
+        logger: this.logger,
+      });
 
-      if (composition.body.length === 0) {
-        this.logger.warn(
-          `Leaving out the ${renderer.id} surface payload: none of the message could be rendered`
-        );
-        return undefined;
-      }
-
-      return renderer.render(composition);
+      return composition.body.length > 0 ? renderer.render(composition) : undefined;
     } catch (error) {
-      this.logger.warn(
-        `Leaving out the ${renderer.id} surface payload: rendering failed: ${error.message}`
-      );
+      this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);
 
       return undefined;
     }
-  }
-
-  /**
-   * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
-   * and each `<render_attachment>` tag is replaced, in place, by what its type's
-   * `toIsomerComposition` returns.
-   */
-  private buildComposition(
-    { response, input }: ConversationRound,
-    attachments: VersionedAttachment[]
-  ): MessageComposition {
-    return {
-      type: 'view',
-      body: toCompositionNodes(response.message).flatMap((node): CompositionNode[] =>
-        node.type === 'attachment'
-          ? resolveAttachmentNode(node, {
-              attachments,
-              attachmentRefs: input.attachment_refs,
-              attachmentsService: this.attachmentsService,
-              logger: this.logger,
-            })
-          : [node]
-      ),
-    };
   }
 }
