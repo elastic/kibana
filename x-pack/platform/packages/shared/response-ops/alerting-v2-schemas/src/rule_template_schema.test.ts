@@ -302,10 +302,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
-                "builder_type": Object {
+                "builder": Object {
+                  "additionalProperties": false,
                   "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
-                  "maxLength": 64,
-                  "type": "string",
+                  "properties": Object {
+                    "type": Object {
+                      "description": "Rule builder type.",
+                      "maxLength": 64,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "type",
+                  ],
+                  "type": "object",
                 },
                 "description": Object {
                   "description": "Human-readable description of the rule.",
@@ -317,6 +327,17 @@ describe('rule template create-rule schema coupling', () => {
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
+                },
+                "routing_tags": Object {
+                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
                 },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",

@@ -278,7 +278,7 @@ describe('bulkDeleteQueriesRoute', () => {
             ]),
           deleteQueries,
         }),
-        getEventClient: () => eventClient,
+        getEventSearchClient: () => eventClient,
         getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
@@ -296,11 +296,10 @@ describe('bulkDeleteQueriesRoute', () => {
     });
     expect(deleteQueries).toHaveBeenCalled();
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
-      eventClient,
+      eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
       alertEventsClient,
-      logger: sigEventsLogger,
     });
   });
 
@@ -330,7 +329,7 @@ describe('bulkDeleteQueriesRoute', () => {
             ]),
           deleteQueries,
         }),
-        getEventClient: () => eventClient,
+        getEventSearchClient: () => eventClient,
         getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
@@ -347,11 +346,10 @@ describe('bulkDeleteQueriesRoute', () => {
       skipped: 0,
     });
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
-      eventClient,
+      eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
       alertEventsClient,
-      logger: sigEventsLogger,
     });
   });
 });

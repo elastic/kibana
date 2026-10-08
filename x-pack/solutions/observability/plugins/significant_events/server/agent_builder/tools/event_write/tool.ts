@@ -196,8 +196,7 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
-    // references and `featureIds` (feature.slug) matches slug-style ones.
+    // `featureIds` matches slug-style references and `id` matches uuid-style references.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
     const streamNames = [
@@ -255,14 +254,25 @@ const enrichCausalFeatures = async (
           item.stream_names
         );
         return feature
-          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          ? {
+              ...causalFeature,
+              feature_id: feature.id,
+              type: feature.type,
+              subtype: feature.subtype,
+            }
           : causalFeature;
       }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature ? { ...entry, subtype: feature.subtype } : entry;
+        return feature
+          ? {
+              ...entry,
+              feature_id: feature.id,
+              subtype: feature.subtype,
+            }
+          : entry;
       }),
     }));
   } catch (error) {
@@ -327,10 +337,10 @@ export function createEventsWriteTool({
       const { request } = context;
       try {
         const {
-          getEventClient,
           getEventSearchClient,
           getKnowledgeIndicatorClient,
           getAlertEventsClient,
+          emitTrigger,
           licensing,
         } = await getScopedClients({
           request,
@@ -344,7 +354,6 @@ export function createEventsWriteTool({
         );
 
         const data = await eventsWriteBulkHandler({
-          eventClient: await getEventClient(),
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
@@ -352,6 +361,7 @@ export function createEventsWriteTool({
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
           alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
           logger,
         });
 

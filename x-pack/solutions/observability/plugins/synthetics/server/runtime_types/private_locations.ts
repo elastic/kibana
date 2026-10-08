@@ -10,4 +10,4 @@ export {
   SyntheticsPrivateLocationsAttributesCodec,
   type PrivateLocationAttributes,
   type SyntheticsPrivateLocationsAttributes,
-} from '../../common/runtime_types/zod/private_location_attributes';
+} from '../../common/runtime_types/schemas/private_location_attributes';
