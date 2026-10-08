@@ -25,6 +25,7 @@ export {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
   defaultThemesResolvers,
+  defineCodeEditorThemes,
   // language definitions
   XJsonLang,
   PainlessLang,
