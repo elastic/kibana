@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerEnableBlocked,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -101,6 +102,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  const isEnableBlocked = isWorkerEnableBlocked(worker.blockingReasons);
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -266,7 +268,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled}
+      disabled={controlsDisabled || (isEnableBlocked && !worker.enabled)}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
