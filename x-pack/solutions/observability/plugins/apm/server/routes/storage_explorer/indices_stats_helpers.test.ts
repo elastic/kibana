@@ -183,4 +183,70 @@ describe('storage explorer with no APM indices', () => {
       filter_path: 'indices.*.phase',
     });
   });
+
+  it('keeps stats requests bounded to configured patterns instead of expanding concrete indices', async () => {
+    const patternedApmEventClient = {
+      indices: {
+        transaction: 'traces-apm-*',
+        span: 'traces-apm-*',
+        metric: 'metrics-apm-*',
+        error: 'logs-apm-*',
+      },
+    } as unknown as APMEventClient;
+
+    const stats = jest.fn(async ({ index }: { index: string }) => ({
+      _all: { total: { store: { size_in_bytes: 1 } } },
+      indices: { [`${index}-000001`]: { total: { store: { size_in_bytes: 1 } } } },
+    }));
+    const context = contextFor({ indices: { stats } });
+
+    await getTotalIndicesStats({ context, apmEventClient: patternedApmEventClient });
+
+    expect(stats).toHaveBeenCalledTimes(3);
+    expect(stats).toHaveBeenNthCalledWith(1, {
+      index: 'traces-apm-*',
+      expand_wildcards: 'all',
+    });
+    expect(stats).toHaveBeenNthCalledWith(2, {
+      index: 'metrics-apm-*',
+      expand_wildcards: 'all',
+    });
+    expect(stats).toHaveBeenNthCalledWith(3, {
+      index: 'logs-apm-*',
+      expand_wildcards: 'all',
+    });
+  });
+
+  it('keeps ILM requests bounded to configured patterns instead of expanding concrete indices', async () => {
+    const patternedApmEventClient = {
+      indices: {
+        transaction: 'traces-apm-*',
+        span: 'traces-apm-*',
+        metric: 'metrics-apm-*',
+        error: 'logs-apm-*',
+      },
+    } as unknown as APMEventClient;
+
+    const explainLifecycle = jest.fn(async ({ index }: { index: string }) => ({
+      indices: { [`${index}-000001`]: { phase: 'hot' } },
+    }));
+    const context = contextFor({ ilm: { explainLifecycle } });
+
+    await getIndicesLifecycleStatus({ context, apmEventClient: patternedApmEventClient });
+
+    expect(explainLifecycle).toHaveBeenCalledTimes(3);
+    expect(explainLifecycle).toHaveBeenNthCalledWith(1, {
+      index: 'traces-apm-*',
+      filter_path: 'indices.*.phase',
+    });
+    expect(explainLifecycle).toHaveBeenNthCalledWith(2, {
+      index: 'metrics-apm-*',
+      filter_path: 'indices.*.phase',
+    });
+    expect(explainLifecycle).toHaveBeenNthCalledWith(3, {
+      index: 'logs-apm-*',
+      filter_path: 'indices.*.phase',
+    });
+  });
+
 });
