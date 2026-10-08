@@ -11,13 +11,5 @@ export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';
-export type {
-  SelectDefaultTimeRangeParams,
-  SelectedTimeRange,
-} from './time_range/select_default_time_range';
 export { buildVegaConfig } from './vega';
 export { generateVisualizationEsql } from './shared/generate_visualization_esql';
-export type {
-  GenerateVisualizationEsqlParams,
-  GeneratedVisualizationEsql,
-} from './shared/generate_visualization_esql';

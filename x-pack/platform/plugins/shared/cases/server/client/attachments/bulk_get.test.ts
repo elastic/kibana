@@ -12,10 +12,6 @@ import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  // The getter is mixed until every attachment type is migrated (see
-  // `toUnifiedAttributes`), so the response tolerates a leftover legacy shape too.
-  // Use a unified fixture for the error-construction tests below, which don't
-  // exercise attachment shape.
   const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
   const legacyAttachmentSO = mockCaseComments[0];
@@ -161,7 +157,7 @@ describe('bulkGet', () => {
     });
   });
 
-  describe('returns a leftover legacy-shaped attachment', () => {
+  describe('returns a legacy attachment as unified', () => {
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
 
@@ -176,7 +172,7 @@ describe('bulkGet', () => {
       });
     });
 
-    it('decodes and returns the legacy attachment instead of throwing', async () => {
+    it('returns a legacy attachment as unified', async () => {
       const res = await bulkGet(
         { savedObjectIds: [legacyAttachmentSO.id], caseID: 'mock-id-1' },
         clientArgs,
@@ -186,8 +182,8 @@ describe('bulkGet', () => {
       expect(res.attachments[0]).toEqual(
         expect.objectContaining({
           id: legacyAttachmentSO.id,
-          type: 'user',
-          comment: 'Wow, good luck catching that bad meanie!',
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
         })
       );
     });

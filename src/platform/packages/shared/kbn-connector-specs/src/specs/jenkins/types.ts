@@ -13,7 +13,7 @@ const MAX_STRING_LENGTH = 2048;
 const MAX_JOB_NAME_LENGTH = 256;
 const MAX_PARAMETERS = 50;
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>

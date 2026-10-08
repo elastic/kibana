@@ -349,6 +349,7 @@ describe('client', () => {
             closure_type: 'close-by-user',
             owner: 'cases',
             templates: [],
+            extractObservables: true,
           },
           version: 'test-version',
         });
@@ -389,6 +390,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         });
 
@@ -450,6 +452,8 @@ describe('client', () => {
               },
             ],
             observableTypes: [],
+            extractObservables: true,
+            workflowTags: [],
           },
           version: 'test-version',
         });
@@ -462,6 +466,7 @@ describe('client', () => {
           references: [],
           attributes: {
             observableTypes: [],
+            workflowTags: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -701,6 +706,7 @@ describe('client', () => {
               templates: [],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -744,6 +750,7 @@ describe('client', () => {
                   type: '.none',
                 },
                 customFields: [],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [],
               },
@@ -820,6 +827,7 @@ describe('client', () => {
               ],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -870,6 +878,7 @@ describe('client', () => {
                   name: 'none',
                   type: '.none',
                 },
+                extractObservables: true,
                 owner: 'cases',
                 customFields: [
                   {
@@ -947,6 +956,7 @@ describe('client', () => {
               templates: [],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -990,6 +1000,7 @@ describe('client', () => {
                   type: '.none',
                 },
                 customFields: [],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [],
               },
@@ -1052,6 +1063,8 @@ describe('client', () => {
               closure_type: 'close-by-user',
               owner: 'cases',
               observableTypes: [],
+              extractObservables: true,
+              workflowTags: [],
             },
             id: 'test-id',
             version: 'test-version',
@@ -1102,6 +1115,7 @@ describe('client', () => {
                     type: 'text',
                   },
                 ],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [
                   {
@@ -1120,6 +1134,7 @@ describe('client', () => {
                   },
                 ],
                 observableTypes: [],
+                workflowTags: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1140,6 +1155,89 @@ describe('client', () => {
               updated_at: expect.anything(),
               updated_by: expect.anything(),
             },
+          });
+        });
+
+        describe('when the request omits templates', () => {
+          const storedTemplate = {
+            key: 'template_1',
+            name: 'template 1',
+            description: 'this is test description',
+            caseFields: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'custom field value 1',
+                },
+              ],
+            },
+          };
+
+          beforeEach(() => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue({
+              attributes: {
+                connector: {
+                  id: 'none',
+                  name: 'none',
+                  type: ConnectorTypes.none,
+                  fields: null,
+                },
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+                templates: [storedTemplate],
+                closure_type: 'close-by-user',
+                owner: 'cases',
+                extractObservables: true,
+              },
+              id: 'test-id',
+              version: 'test-version',
+            } as never);
+          });
+
+          it('does not overwrite the stored templates when customFields are omitted too', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', workflowTags: ['tag-1'] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: {
+                  workflowTags: ['tag-1'],
+                  updated_at: expect.anything(),
+                  updated_by: expect.anything(),
+                },
+              })
+            );
+          });
+
+          it('removes deleted custom fields from the stored templates', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', customFields: [] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: {
+                  customFields: [],
+                  templates: [{ ...storedTemplate, caseFields: { customFields: [] } }],
+                  updated_at: expect.anything(),
+                  updated_by: expect.anything(),
+                },
+              })
+            );
           });
         });
       });
@@ -1238,6 +1336,7 @@ describe('client', () => {
             closure_type: 'close-by-user',
             owner: 'securitySolutionFixture',
             templates: [],
+            extractObservables: true,
           },
           version: 'test-version',
         };
@@ -1271,6 +1370,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         };
 
@@ -1618,6 +1718,8 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  extractObservables: true,
+                  workflowTags: [],
                 },
                 score: 0,
               },
@@ -1644,6 +1746,8 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              extractObservables: true,
+              workflowTags: [],
             },
           });
 
@@ -1883,6 +1987,8 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          extractObservables: true,
+          workflowTags: [],
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
           updated_at: null,

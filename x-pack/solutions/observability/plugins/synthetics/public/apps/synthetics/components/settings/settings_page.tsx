@@ -83,7 +83,7 @@ export const SettingsPage = () => {
         title={SETTINGS_PAGE_TITLE}
         tabs={settingsTabs}
         description={getSettingsAppHeaderDescription(tabId)}
-        menu={{ showSettings: false, showDiagnostics: true, primaryActionItem }}
+        menu={{ showDiagnostics: true, primaryActionItem }}
         paddingSize="m"
       >
         <div>{renderTab()}</div>

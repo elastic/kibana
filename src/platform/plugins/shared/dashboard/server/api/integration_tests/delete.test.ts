@@ -95,7 +95,7 @@ describe(`delete`, () => {
     expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_delete',
-        type: 'deletion',
+        type: ['deletion'],
       },
       message: `User deleted dashboard "title" (id: test-dashboard).`,
       object: {
@@ -140,7 +140,7 @@ describe(`delete`, () => {
     expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_delete',
-        type: 'deletion',
+        type: ['deletion'],
       },
       message: `User deleted dashboard "title" (id: test-dashboard).`,
       object: {

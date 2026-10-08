@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { type Investigation } from '../../types';
-import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
+import { BaseActions, type BaseActionsProps } from '../actions';
+import { createCardLinkClickHandler } from '../actions/card_link_click';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
@@ -19,6 +21,20 @@ export interface ConversationsActionsGroupProps {
   onClickAction: BaseActionsProps['onClickAction'];
   /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
   onOpenChat: () => void;
+  /**
+   * URL the chat control points at, so it behaves as a link. Optional because the caller may not
+   * be able to resolve one; the control still works as a button without it.
+   */
+  chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
+  /**
+   * When true the "Close investigation" action is shown. Should only be true when the
+   * caller supplies a real handler; without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
+  /** Backs the menu's "Copy link" item. The caller owns how the link is built and copied. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
 /**
@@ -27,18 +43,23 @@ export interface ConversationsActionsGroupProps {
  * action, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat }) => {
+  ({
+    investigation,
+    onClickRecommendedAction,
+    onClickAction,
+    onOpenChat,
+    chatHref,
+    canManageEscalations,
+    canCloseInvestigation,
+    onCopyLink,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
 
+    // A fixed control cluster, not page layout: it must stay on one line at every
+    // width, so EUI's responsive stacking is off.
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
-        <EuiFlexItem grow={false}>
-          <ActionButton
-            iconType="productAgent"
-            tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            onClick={onOpenChat}
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} direction="row">
         <span
           aria-hidden="true"
           css={css({
@@ -47,16 +68,28 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             background: euiTheme.colors.backgroundLightText,
             marginLeft: euiTheme.size.s,
             marginRight: euiTheme.size.xs,
-            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-              display: 'none',
-            },
           })}
         />
+        <EuiFlexItem grow={false}>
+          <AiButtonIcon
+            variant="empty"
+            size="s"
+            iconType="productAgent"
+            withToolTip
+            aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
+            href={chatHref}
+            onClick={handleChatClick}
+            data-test-subj="conversationCardOpenInChat"
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BaseActions
             investigation={investigation}
             onClickAction={onClickAction}
             onClickRecommendedAction={onClickRecommendedAction}
+            canManageEscalations={canManageEscalations}
+            canCloseInvestigation={canCloseInvestigation}
+            onCopyLink={onCopyLink}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

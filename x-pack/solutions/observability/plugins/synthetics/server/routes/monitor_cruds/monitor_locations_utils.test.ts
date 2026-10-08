@@ -111,6 +111,21 @@ describe('validateMonitorPrivateLocationSpaces', () => {
     expect(validateMonitorPrivateLocationSpaces(monitor, privateLocations)).toBeNull();
   });
 
+  it('accepts a private-location lookup map', () => {
+    const monitor = makeMonitor(
+      [{ id: 'private-loc-1', label: 'Private Location 1', isServiceManaged: false }],
+      ['space-a']
+    );
+    const privateLocations = makePrivateLocations([
+      { id: 'private-loc-1', label: 'Private Location 1', spaces: ['space-a'] },
+    ]);
+    const privateLocationsById = new Map(
+      privateLocations.map((location) => [location.id, location])
+    );
+
+    expect(validateMonitorPrivateLocationSpaces(monitor, privateLocationsById)).toBeNull();
+  });
+
   it('returns null when private location has * spaces', () => {
     const monitor = makeMonitor(
       [{ id: 'private-loc-1', label: 'Private Location 1', isServiceManaged: false }],

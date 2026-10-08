@@ -190,7 +190,7 @@ Investigate the test failure(s) using the `flaky-test-investigator` skill (path:
 If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, split the skills:
 
 - Investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). **Read `SKILL.md` and the references it requires before Classify, Fix proposal, labels, or the comment.** Listing the folder (`ls`) is not enough. That skill owns the diagnosis and recommended action. If the two skills disagree, the doctor wins.
-- Use the `flaky-test-investigator` skill only for everything else: CI artifact retrieval, pipeline context, this workflow's classification, labels, comment format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance.
+- Use the `flaky-test-investigator` skill only for everything else: CI artifact retrieval, pipeline context, this workflow's classification, labels, comment format, and fix guidelines. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance.
 
 Then apply [Security Cypress: doctor action](#security-cypress-doctor-action) **before** Classify. If you have not named exactly one doctor action, you have not finished the investigation.
 
@@ -212,7 +212,7 @@ Do **not** write `#### Root cause & evidence` or `#### Additional context` in th
 | `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. | Yes — so the fixer can delete. |
 | `move-to-api-or-unit` when a **new** API/unit test would be needed | Same handoff as migrate; name the API/unit destination. | Neither. |
 | `delete` | Delete the case (and unused helpers). | Yes — so the fixer can delete. |
-| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guardrails. | Unchanged (existing Automatic fix request). |
+| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guidelines. | Unchanged (existing Automatic fix request). |
 | `none` (environment / no repo change) | No repo change. | Neither. |
 
 When the doctor action is `migrate`, a new Scout spec, or a new API / unit (including Jest) spec, set `classification` to `test-needs-migration` and apply `failure:test-needs-migration`. Do **not** use `test-needs-update` / `failure:test-needs-update` for that. `test-needs-update` remains for Cypress-layer flakes that are not a migration (`delete`, `@serverlessQA` `cypress-fix`).
@@ -245,15 +245,15 @@ For Security Cypress, skip this section's wait/`file:line` rules and use [Securi
 
 - Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
-- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change. For a race/timeout/stale-element flake, that means naming **the terminal readiness signal the failing assertion reads and the step that actually raced** (often not where the error surfaced); the fix guardrails below cover how to wait on it.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change. For a race/timeout/stale-element flake, that means naming **the terminal readiness signal the failing assertion reads and the step that actually raced** (often not where the error surfaced); the fix guidelines below cover how to wait on it.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
-### Fix guardrails
+### Fix guidelines
 
-Every fix you propose is held to the same guardrails as the fixer and verifier workflows that act on it:
+Every fix you propose is held to the same guidelines as the fixer and verifier workflows that act on it:
 
-{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+{{#import .github/workflows/shared/flaky-fix-guidelines.md}}
 
 ## Labels
 
@@ -447,7 +447,7 @@ State only _what to change_ — the "why" belongs in Root cause & evidence, so d
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
 
-**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
+**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which the fix guidelines discourage.
 
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.

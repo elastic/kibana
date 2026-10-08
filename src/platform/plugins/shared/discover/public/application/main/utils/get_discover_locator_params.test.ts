@@ -12,6 +12,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { Filter } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 import { DataSourceType } from '../../../../common/data_sources';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions } from '../state_management/redux';
@@ -94,6 +95,49 @@ describe('getDiscoverLocatorParams', () => {
     });
     expect(dataSource).toBeUndefined();
   });
+
+  it('carries ES|QL controls from the tab attributes', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const currentTab = toolkit.getCurrentTab();
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAttributes({
+        tabId: currentTab.id,
+        attributes: { controlGroupState: mockControlState },
+      })
+    );
+
+    const params = getDiscoverLocatorParams({
+      currentTab: toolkit.getCurrentTab(),
+      dataView: dataViewMock,
+      persistedDiscoverSession: undefined,
+      filters,
+      timeRange,
+      refreshInterval,
+      profileState,
+    });
+
+    expect(params.esqlControls).toEqual(mockControlState);
+  });
+
+  it('omits ES|QL controls when the tab has none', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const currentTab = toolkit.getCurrentTab();
+
+    const params = getDiscoverLocatorParams({
+      currentTab,
+      dataView: dataViewMock,
+      persistedDiscoverSession: undefined,
+      filters,
+      timeRange,
+      refreshInterval,
+      profileState,
+    });
+
+    expect(params.esqlControls).toBeUndefined();
+  });
 });
 
 describe('toCascadeDocShareLocatorParams', () => {
@@ -138,6 +182,12 @@ describe('toCascadeDocShareLocatorParams', () => {
         expandedDoc,
       })
     );
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAttributes({
+        tabId: currentTab.id,
+        attributes: { controlGroupState: mockControlState },
+      })
+    );
 
     const persistedDiscoverSession = createDiscoverSessionMock({ id: 'session-id' });
     const locatorParams = toCascadeDocShareLocatorParams({
@@ -162,5 +212,6 @@ describe('toCascadeDocShareLocatorParams', () => {
     expect(locatorParams.sort).toBeUndefined();
     expect(locatorParams.timeRange).toEqual(timeRange);
     expect(locatorParams.filters).toEqual(filters);
+    expect(locatorParams.esqlControls).toEqual(mockControlState);
   });
 });

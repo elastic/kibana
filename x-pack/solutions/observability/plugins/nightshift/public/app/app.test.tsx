@@ -9,6 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
@@ -19,6 +20,17 @@ import { useKibana } from '../hooks/use_kibana';
 jest.mock('../hooks/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+
+jest.mock('../investigation/start_investigation_panel', () => ({
+  START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
+  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="nightshiftStartInvestigationPanel">
+      <button onClick={onClose} type="button">
+        Cancel investigation
+      </button>
+    </div>
+  ),
+}));
 
 jest.mock('../investigation/investigation_detail_flyout', () => ({
   InvestigationDetailFlyout: ({
@@ -57,7 +69,7 @@ const criticalInvestigation: ListInvestigationItem = {
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-2', summary: 'Critical checkout outage' },
   summary: 'Checkout is down',
-  severity: '80-critical',
+  severity: 'critical',
 };
 
 const highInvestigation: ListInvestigationItem = {
@@ -67,10 +79,15 @@ const highInvestigation: ListInvestigationItem = {
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-3', summary: 'High latency' },
   summary: 'Latency is high',
-  severity: '60-high',
+  severity: 'high',
 };
 
 const refetchAll = jest.fn();
+
+const manageCapabilities = {
+  [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+  [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+};
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
 const scrollIntoView = jest.fn();
@@ -110,10 +127,10 @@ function setSections({
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts: {
-      '80-critical': sections.find((section) => section.id === '80-critical')?.total ?? 0,
-      '60-high': sections.find((section) => section.id === '60-high')?.total ?? 0,
-      '40-medium': sections.find((section) => section.id === '40-medium')?.total ?? 0,
-      '20-low': sections.find((section) => section.id === '20-low')?.total ?? 0,
+      critical: sections.find((section) => section.id === 'critical')?.total ?? 0,
+      high: sections.find((section) => section.id === 'high')?.total ?? 0,
+      medium: sections.find((section) => section.id === 'medium')?.total ?? 0,
+      low: sections.find((section) => section.id === 'low')?.total ?? 0,
     },
     hasActiveInvestigations,
     isInitialLoading,
@@ -131,10 +148,10 @@ function defaultSections(
 ): InvestigationSectionState[] {
   return [
     makeSection('in-progress', overrides['in-progress']),
-    makeSection('80-critical', overrides['80-critical']),
-    makeSection('60-high', overrides['60-high']),
-    makeSection('40-medium', overrides['40-medium']),
-    makeSection('20-low', overrides['20-low']),
+    makeSection('critical', overrides.critical),
+    makeSection('high', overrides.high),
+    makeSection('medium', overrides.medium),
+    makeSection('low', overrides.low),
     makeSection('failed', overrides.failed),
   ];
 }
@@ -162,6 +179,7 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: { nightshift: manageCapabilities },
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
         nightshiftInvestigations: { investigationsClient: {} },
@@ -199,7 +217,10 @@ describe('NightshiftApp', () => {
   it('shows the unavailable callout and reports ready when the optional plugin is absent', () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp: () => '/app/significant_events/significant_events' },
+        application: {
+          capabilities: { nightshift: manageCapabilities },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
       },
     });
     setSections({ sections: defaultSections() });
@@ -216,10 +237,10 @@ describe('NightshiftApp', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { isInitialLoading: true },
-        '80-critical': { isInitialLoading: true },
-        '60-high': { isInitialLoading: true },
-        '40-medium': { isInitialLoading: true },
-        '20-low': { isInitialLoading: true },
+        critical: { isInitialLoading: true },
+        high: { isInitialLoading: true },
+        medium: { isInitialLoading: true },
+        low: { isInitialLoading: true },
         failed: { isInitialLoading: true },
       }),
       isInitialLoading: true,
@@ -237,10 +258,10 @@ describe('NightshiftApp', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { error },
-        '80-critical': { error },
-        '60-high': { error },
-        '40-medium': { error },
-        '20-low': { error },
+        critical: { error },
+        high: { error },
+        medium: { error },
+        low: { error },
         failed: { error },
       }),
     });
@@ -276,13 +297,13 @@ describe('NightshiftApp', () => {
     const fetchHigh = jest.fn();
     setSections({
       sections: defaultSections({
-        '80-critical': {
+        critical: {
           investigations: [criticalInvestigation],
           total: 11,
           hasMore: true,
           fetchNextPage: fetchCritical,
         },
-        '60-high': {
+        high: {
           investigations: [highInvestigation],
           total: 11,
           hasMore: true,
@@ -293,7 +314,7 @@ describe('NightshiftApp', () => {
 
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical'));
     expect(fetchCritical).toHaveBeenCalledTimes(1);
     expect(fetchHigh).not.toHaveBeenCalled();
   });
@@ -302,9 +323,7 @@ describe('NightshiftApp', () => {
     renderApp();
 
     expect(screen.getByTestId('nightshiftInvestigationSection-in-progress')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSection-80-critical')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-failed')).not.toBeInTheDocument();
   });
 
@@ -324,7 +343,7 @@ describe('NightshiftApp', () => {
   it('does not scroll from a severity tile with no investigations', () => {
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
@@ -332,26 +351,26 @@ describe('NightshiftApp', () => {
   it('scrolls to a severity section from its tile', () => {
     setSections({
       sections: defaultSections({
-        '80-critical': { investigations: [criticalInvestigation], total: 1 },
+        critical: { investigations: [criticalInvestigation], total: 1 },
       }),
     });
 
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=80-critical');
+    expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
     setSections({
-      sections: defaultSections({ '80-critical': { error: new Error('boom') } }),
+      sections: defaultSections({ critical: { error: new Error('boom') } }),
     });
 
     renderApp();
 
-    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
@@ -360,7 +379,7 @@ describe('NightshiftApp', () => {
 
     renderApp();
 
-    expect(screen.queryByTestId('nightshiftSeverityTileCount-80-critical')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).not.toBeInTheDocument();
   });
 
   it('opens and closes the selected investigation from the URL', () => {
@@ -375,5 +394,38 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByText('Flyout: investigation-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
+  });
+
+  it('opens and closes the start investigation panel from the header', () => {
+    renderApp();
+
+    const startButton = screen.getByTestId('o11yNightshiftAppStartInvestigationButton');
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(startButton);
+    expect(screen.getByTestId('nightshiftStartInvestigationPanel')).toBeInTheDocument();
+    expect(startButton).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the start investigation button without the Nightshift manage privilege', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: { nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true } },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
+        nightshiftInvestigations: { investigationsClient: {} },
+      },
+    });
+
+    renderApp();
+
+    expect(
+      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });
