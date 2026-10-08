@@ -44,6 +44,7 @@
     "@kbn/fleet-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
+    "@kbn/flyout-template",
     "@kbn/ui-callout",
     "@kbn/ui-theme",
     "@kbn/synthtrace-client",
