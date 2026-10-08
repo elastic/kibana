@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -827,7 +826,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         isDirty &&
         (deployGroups.length > 0 || agentTargets.length > 0) && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -835,22 +834,23 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                   defaultMessage="Settings changed since last deployment"
                 />
               }
-              color="warning"
-              iconType="warning"
+              text={
+                <p>
+                  {showAgentSection ? (
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                      defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                      defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                    />
+                  )}
+                </p>
+              }
               data-test-subj="authenticateAndDeployStep-driftCallout"
-            >
-              {showAgentSection ? (
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
-                  defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
-                  defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
-                />
-              )}
-            </EuiCallOut>
+            />
             <EuiSpacer size="m" />
           </>
         )}
