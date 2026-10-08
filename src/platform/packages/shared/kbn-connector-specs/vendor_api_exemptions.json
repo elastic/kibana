@@ -1,0 +1,5 @@
+{
+  ".graphql": "Generic connector: the endpoint and schema are whatever the user configures, so there is no vendor spec to pin",
+  ".mongodb": "Talks to MongoDB through its driver's wire protocol, not an HTTP API",
+  ".mysql": "Talks to MySQL through its driver's wire protocol, not an HTTP API"
+}

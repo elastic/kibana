@@ -602,7 +602,20 @@ The folder holds:
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
-The script fails when a `readOnly` action changes state, a response override breaks the spec, or a request matches no operation and isn't listed in `unmatched`. Requests that break the spec and handler errors are reported as warnings.
+Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults.
+
+Connectors without a usable vendor spec, such as database drivers, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. A test checks that each entry is a connector without a `vendor_api` folder.
+
+Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
+
+The script fails when:
+
+- a `read` action sends any other request;
+- a `queries` entry is never needed;
+- a response override breaks the spec;
+- a request matches no operation and isn't listed in `unmatched`.
+
+Requests that break the spec and handler errors are reported as warnings.
 
 ### `manifest.json`
 
@@ -637,8 +650,10 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 {
   "getCard": {
     "input": { "cardId": "5f0c1e2d3b4a596877665544" },
-    "readOnly": true,
     "responses": [{ "method": "GET", "path": "/cards/{id}", "status": 200, "body": { "id": "5f0c1e2d3b4a596877665544" } }]
+  },
+  "searchCards": {
+    "queries": [{ "source": "v1", "method": "POST", "path": "/cards/search" }]
   }
 }
 ```
@@ -646,7 +661,7 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 Per action:
 
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
-- `readOnly`: the action must not change vendor state. Recording reports any request other than `GET`, `HEAD` or `OPTIONS`.
+- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.

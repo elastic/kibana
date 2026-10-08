@@ -1,0 +1,82 @@
+{
+  "operations": {
+    "censEyeCreateAnalysisJob": [
+      {
+        "method": "post",
+        "path": "/v3/threat-hunting/censeye/jobs",
+        "source": "platform"
+      }
+    ],
+    "censEyeJobResult": [
+      {
+        "method": "get",
+        "path": "/v3/threat-hunting/censeye/jobs/{job_id}/results",
+        "source": "platform"
+      }
+    ],
+    "censEyeJobStatus": [
+      {
+        "method": "get",
+        "path": "/v3/threat-hunting/censeye/jobs/{job_id}",
+        "source": "platform"
+      }
+    ],
+    "getCertificate": [
+      {
+        "method": "get",
+        "path": "/v3/global/asset/certificate/{certificate_id}",
+        "source": "platform"
+      }
+    ],
+    "getHost": [
+      {
+        "method": "get",
+        "path": "/v3/global/asset/host/{host_id}",
+        "source": "platform"
+      }
+    ],
+    "getHostEnrichment": [
+      {
+        "method": "get",
+        "path": "/v3/global/asset/enrichment/host/{host_ip}",
+        "source": "platform"
+      }
+    ],
+    "getHostHistory": [
+      {
+        "method": "get",
+        "path": "/v3/global/asset/host/{host_id}/timeline",
+        "source": "platform"
+      }
+    ],
+    "getWebProperty": [
+      {
+        "method": "get",
+        "path": "/v3/global/asset/webproperty/{webproperty_id}",
+        "source": "platform"
+      }
+    ],
+    "rescan": [
+      {
+        "method": "post",
+        "path": "/v3/global/scans/rescan",
+        "source": "platform"
+      }
+    ],
+    "scanStatus": [
+      {
+        "method": "get",
+        "path": "/v3/global/scans/{scan_id}",
+        "source": "platform"
+      }
+    ]
+  },
+  "sources": {
+    "platform": {
+      "apiVersion": "1.0.145",
+      "fetchedAt": "2026-10-07T11:55:54.083Z",
+      "format": "openapi",
+      "url": "https://api.platform.censys.io/openapi.json"
+    }
+  }
+}
