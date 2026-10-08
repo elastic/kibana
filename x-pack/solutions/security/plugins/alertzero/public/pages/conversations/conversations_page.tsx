@@ -67,6 +67,10 @@ import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
+const wrapScanFailureCallout = (callout: JSX.Element) => (
+  <EuiFlexItem grow={false}>{callout}</EuiFlexItem>
+);
+
 export const ConversationsPage: React.FC = () => {
   const {
     services: { application },
@@ -147,7 +151,10 @@ const ConversationsPageContent: React.FC = () => {
   const runningSummary = useRunningSummary();
   // Idle: nothing open and nothing closed in the window, so the queue has no rows at all.
   // Gated on settled queries so a loading or failed count never reads as "nothing to do".
-  const closedTotal = sections.find(({ id }) => id === CLOSED_GROUP_KEY)?.total;
+  const closedTotal = useMemo(
+    () => sections.find(({ id }) => id === CLOSED_GROUP_KEY)?.total,
+    [sections]
+  );
   const isIdle =
     !isLoading && !error && openCount === 0 && closedTotal === 0 && proposalsById.size === 0;
 
@@ -310,12 +317,9 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
-    useCallback(
-      ({ id }) => {
-        setSelectedIdForRecommendedAction(id);
-      },
-      [setSelectedIdForRecommendedAction]
-    );
+    useCallback(({ id }) => {
+      setSelectedIdForRecommendedAction(id);
+    }, []);
 
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
@@ -373,22 +377,29 @@ const ConversationsPageContent: React.FC = () => {
   }, [selectedIdForRecommendedAction]);
 
   const selectedProposalQuery = useProposal(selectedIdForRecommendedAction);
-  const selectedProposal: ProposalItem | undefined =
-    liveSelectedProposal ??
-    (stickySelectedProposal && selectedProposalQuery.data
-      ? { ...stickySelectedProposal, ...selectedProposalQuery.data }
-      : stickySelectedProposal);
+  const { data: selectedProposalData } = selectedProposalQuery;
+  const selectedProposal: ProposalItem | undefined = useMemo(
+    () =>
+      liveSelectedProposal ??
+      (stickySelectedProposal && selectedProposalData
+        ? { ...stickySelectedProposal, ...selectedProposalData }
+        : stickySelectedProposal),
+    [liveSelectedProposal, stickySelectedProposal, selectedProposalData]
+  );
+
+  const pageContentProps = useMemo(
+    () => ({
+      css: css`
+        padding-block: ${euiTheme.size.xxl};
+        align-self: center;
+        max-width: 1000px;
+      `,
+    }),
+    [euiTheme.size.xxl]
+  );
 
   return (
-    <AlertZeroPageSection
-      contentProps={{
-        css: css`
-          padding-block: ${euiTheme.size.xxl};
-          align-self: center;
-          max-width: 1000px;
-        `,
-      }}
-    >
+    <AlertZeroPageSection contentProps={pageContentProps}>
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
@@ -428,9 +439,7 @@ const ConversationsPageContent: React.FC = () => {
             })}
           />
         </EuiFlexItem>
-        <ScanFailureCallout
-          wrapper={(callout) => <EuiFlexItem grow={false}>{callout}</EuiFlexItem>}
-        />
+        <ScanFailureCallout wrapper={wrapScanFailureCallout} />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
         </EuiFlexItem>
