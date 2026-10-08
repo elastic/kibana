@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
+import { truncate } from 'lodash';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
@@ -30,17 +31,25 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
   ({ summary, attachments, groupedAttachments }) => {
     const [expanded, setExpanded] = useState(false);
 
-    const hasAttachments =
-      selectGroupedAttachments(attachments, groupedAttachments, FLYOUT_GROUPED_ATTACHMENTS_ORDER)
-        .length > 0;
+    const hasAttachments = useMemo(
+      () =>
+        selectGroupedAttachments(attachments, groupedAttachments, FLYOUT_GROUPED_ATTACHMENTS_ORDER)
+          .length > 0,
+      [attachments, groupedAttachments]
+    );
+
+    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
+    const displayedSummary = useMemo(
+      () =>
+        isCondensed && !expanded
+          ? truncate(summary, { length: SUMMARY_LIMIT, separator: ' ', omission: '…' })
+          : summary,
+      [isCondensed, expanded, summary]
+    );
 
     if (!summary && !hasAttachments) {
       return null;
     }
-
-    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-    const displayedSummary =
-      isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
 
     return (
       <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
