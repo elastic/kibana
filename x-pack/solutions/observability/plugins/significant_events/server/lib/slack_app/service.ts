@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
@@ -26,7 +25,7 @@ import type {
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../common/feature_flags';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import {
   RELAY_APP_CONNECTION_SO_ID,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -84,21 +83,12 @@ export class SlackAppService {
     this.logger = server.logger.get('slack-app');
   }
 
-  /**
-   * feature flag on + `xpack.actions.relay` configured (the injected singleton client exists) +
-   * agentBuilder available on this deployment.
-   */
   private async getRelayClient(): Promise<RelayClientContract | undefined> {
     const { relayClient, agentBuilder } = this.server;
     if (!relayClient || !agentBuilder) {
       return undefined;
     }
-    const enabled = await firstValueFrom(
-      this.server.core.featureFlags.getBooleanValue$(
-        STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-        false
-      )
-    );
+    const enabled = await isSignificantEventsFeatureFlagEnabled(this.server.core.featureFlags);
     return enabled ? relayClient : undefined;
   }
 

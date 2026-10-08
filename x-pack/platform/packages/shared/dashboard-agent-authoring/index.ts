@@ -24,10 +24,6 @@ export type {
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/operations/panels';
-export {
-  MARKDOWN_EMBEDDABLE_TYPE,
-  markdownPanelConfigSchema,
-} from './src/operations/panels/markdown';
 
 export type {
   ControlFieldCapability,

@@ -178190,7 +178190,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -178262,7 +178261,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -178334,7 +178332,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -180227,7 +180224,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -180263,7 +180259,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -182669,6 +182664,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileRankOperation'
@@ -182721,6 +182717,34 @@ components:
     Kibana_HTTP_APIs_visTermsRankByCustomDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
       description: Sort direction for custom ranking.
+    Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_visTermsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -182739,7 +182763,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -184943,8 +184966,7 @@ components:
             - enum:
                 - stepped
               type: string
-          default: linear
-          description: Curve interpolation method for line and area series
+          description: Curve interpolation method for line and area series. Defaults to linear.
         overlays:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyStylingOverlays'
         points:

@@ -81,27 +81,41 @@ const wait = (ms: number): Promise<void> =>
   });
 
 /**
+ * Runs a read, retrying it after each of {@link TRANSIENT_SEARCH_RETRY_DELAYS_MS} while no shard
+ * could answer it, as for an index the first write of a fresh cluster just created. Other errors,
+ * and the last shard error, are rethrown.
+ */
+export const retryWhileShardUnavailable = async <TResult>(
+  read: () => Promise<TResult>
+): Promise<TResult> => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await read();
+    } catch (error) {
+      const delay = TRANSIENT_SEARCH_RETRY_DELAYS_MS[attempt];
+      if (delay === undefined || !isShardUnavailableError(error)) {
+        throw error;
+      }
+      await wait(delay);
+    }
+  }
+};
+
+/**
  * Wraps an investigation index search for a fresh cluster: a missing index reads as no hits, and
- * a search no shard could answer is retried after each of {@link TRANSIENT_SEARCH_RETRY_DELAYS_MS}
- * before its error is rethrown. Other errors are rethrown at once.
+ * a search no shard could answer is retried (see {@link retryWhileShardUnavailable}).
  */
 export const withTransientSearchRetry =
   <TStored extends StoredInvestigationAttachment>(
     search: InvestigationAttachmentStorage<TStored>['search']
   ): InvestigationAttachmentStorage<TStored>['search'] =>
   async (...args) => {
-    for (let attempt = 0; ; attempt++) {
-      try {
-        return await search(...args);
-      } catch (error) {
-        if (isIndexNotFoundError(error)) {
-          return { hits: { hits: [] } };
-        }
-        const delay = TRANSIENT_SEARCH_RETRY_DELAYS_MS[attempt];
-        if (delay === undefined || !isShardUnavailableError(error)) {
-          throw error;
-        }
-        await wait(delay);
+    try {
+      return await retryWhileShardUnavailable(() => search(...args));
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { hits: { hits: [] } };
       }
+      throw error;
     }
   };
