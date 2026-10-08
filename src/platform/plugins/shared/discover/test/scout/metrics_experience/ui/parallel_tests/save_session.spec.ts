@@ -24,8 +24,8 @@ const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
 const FILTERED_DIMENSION_VALUE = DEFAULT_CONFIG.dimensions[0].values[0];
 const SEARCH_TERM = 'counter_0';
-// The search above matches every counter metric, so sorting descending puts the
-// alphabetically last counter first.
+// Metric search tolerates one-character typos, so `counter_0` also matches the other single-digit
+// counters. Sorting descending therefore puts the alphabetically last counter first.
 const LAST_COUNTER_METRIC = DEFAULT_CONFIG.metrics
   .filter(({ type }) => type === 'counter')
   .map(({ name }) => name)
@@ -125,6 +125,8 @@ spaceTest.describe(
           to: 'Sep 30, 2025 @ 23:59:59.000',
         });
         await discover.waitUntilSearchingHasFinished();
+        // The sort lives in the new session's state, so it must not carry over from the saved one.
+        await expect(metricsExperience.sortDirectionAsc).toHaveAttribute('aria-pressed', 'true');
       });
 
       await spaceTest.step('load the saved search', async () => {
@@ -159,7 +161,6 @@ spaceTest.describe(
 
       await spaceTest.step('grid settings and search should be preserved', async () => {
         await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
-        await metricsExperience.waitForFirstCard(FIRST_CARD_DESC);
         await metricsExperience.gridSettings.open();
         await expect(metricsExperience.gridSettings.counterSelect).toContainText('Maximum');
         await expect(metricsExperience.gridSettings.gaugeSelect).toContainText('Minimum');
@@ -171,7 +172,7 @@ spaceTest.describe(
 
       await spaceTest.step('sort should be preserved', async () => {
         await expect(metricsExperience.sortDirectionDesc).toHaveAttribute('aria-pressed', 'true');
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+        await metricsExperience.waitForFirstCard(FIRST_CARD_DESC);
       });
 
       await spaceTest.step('card count should match the original session', async () => {

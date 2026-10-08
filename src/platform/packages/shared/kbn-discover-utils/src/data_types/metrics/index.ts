@@ -18,8 +18,6 @@ export {
 } from './metrics_grid_settings';
 export {
   METRICS_GRID_SORT_DEFAULTS,
-  METRICS_GRID_SORT_DIRECTIONS,
-  METRICS_GRID_SORT_FIELDS,
   type MetricsGridSort,
   type MetricsGridSortDirection,
   type MetricsGridSortField,
