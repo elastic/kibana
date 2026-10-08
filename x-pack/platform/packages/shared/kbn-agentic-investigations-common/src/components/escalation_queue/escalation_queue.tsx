@@ -10,7 +10,6 @@ import styled from '@emotion/styled';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import { css } from '@emotion/react';
 import type { EscalationQueueItem, EscalationStatus } from './types';
 import { EscalationCard } from './escalation_card';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { ShowMoreFooter } from '../show_more_footer';
 
 interface EscalationQueueProps {
   status: EscalationStatus;
@@ -128,21 +128,11 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     );
 
     const loadMoreButton = showLoadMore ? (
-      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="chevronSingleDown"
-              iconSide="left"
-              size="s"
-              onClick={onLoadMore}
-              data-test-subj={`escalationQueueLoadMore-${status}`}
-            >
-              {ESCALATION_QUEUE_LABELS.showMore(remaining)}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <ShowMoreFooter
+        label={ESCALATION_QUEUE_LABELS.showMore(remaining)}
+        onClick={onLoadMore}
+        data-test-subj={`escalationQueueLoadMore-${status}`}
+      />
     ) : null;
 
     const bodyContent = (() => {

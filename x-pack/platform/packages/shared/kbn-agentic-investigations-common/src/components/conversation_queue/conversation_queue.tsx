@@ -39,6 +39,7 @@ import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { ConversationCardCompact } from '../conversation_card/conversation_card_compact';
 import { type BaseActionsProps } from '../actions';
+import { ShowMoreFooter } from '../show_more_footer';
 
 interface ConversationQueueProps {
   briefingType: RecommendedAction;
@@ -180,46 +181,17 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     // A sibling of the cards in the same group, so the last card is no longer the last
     // child: it keeps its divider and square corners, with no flag passed down.
     const showMoreButton = hasMoreToShow ? (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        responsive={false}
-        gutterSize="none"
-        css={{
-          // The row above draws the divider.
-          // Keeps the hover fill and focus ring off the row's borders.
-          padding: euiTheme.size.xs,
-          cursor: 'default',
-        }}
-      >
-        {/* The rows that did load stay put; only this says the click failed,
-            and the control below it is the retry. */}
-        {hasLoadMoreError ? (
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="xs"
-              color="danger"
-              role="alert"
-              data-test-subj={`conversationQueueLoadMoreError-${briefingType}`}
-            >
-              {CONVERSATION_QUEUE_ERROR.loadMore}
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            color={hasLoadMoreError ? 'danger' : 'text'}
-            iconType={hasLoadMoreError ? 'refresh' : 'chevronSingleDown'}
-            isLoading={isLoadingMore}
-            onClick={onShowMore}
-            aria-label={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
-            data-test-subj={`conversationQueueShowMore-${briefingType}`}
-          >
-            {hasLoadMoreError ? CONVERSATION_QUEUE_ERROR.retry : showMoreLabel(remaining)}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ShowMoreFooter
+        label={showMoreLabel(remaining)}
+        ariaLabel={showMoreAriaLabel(CONVERSATION_QUEUE_LABELS[briefingType], remaining)}
+        onClick={onShowMore}
+        isLoading={isLoadingMore}
+        hasError={hasLoadMoreError}
+        errorMessage={CONVERSATION_QUEUE_ERROR.loadMore}
+        retryLabel={CONVERSATION_QUEUE_ERROR.retry}
+        data-test-subj={`conversationQueueShowMore-${briefingType}`}
+        errorDataTestSubj={`conversationQueueLoadMoreError-${briefingType}`}
+      />
     ) : null;
 
     const rowList = (
