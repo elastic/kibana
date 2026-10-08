@@ -16,6 +16,7 @@ import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
+import type { CycleHookDefinition } from './cycle';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -152,6 +153,10 @@ export interface HooksServiceSetup {
    * Register one or more lifecycle hooks in a single call.
    */
   register(bundle: HookRegistrationsBundle): void;
+  /**
+   * Register a hook that runs at the top of agent-loop cycles.
+   */
+  registerCycleHook(definition: CycleHookDefinition): void;
 }
 
 export interface HooksServiceStart {
@@ -160,6 +165,10 @@ export interface HooksServiceStart {
    * Returns the context as updated by blocking hooks.
    */
   run: <E extends HookLifecycle>(lifecycle: E, context: HookContext<E>) => Promise<HookContext<E>>;
+  /**
+   * The registered cycle hooks, in registration order.
+   */
+  listCycleHooks: () => CycleHookDefinition[];
 }
 
 export interface AgentBuilderHooks {

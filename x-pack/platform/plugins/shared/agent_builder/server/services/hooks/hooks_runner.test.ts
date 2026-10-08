@@ -54,6 +54,7 @@ describe('createHooksRunner', () => {
     return createHooksRunner({
       logger,
       getHooksForLifecycle: () => [],
+      getCycleHooks: () => [],
       ...deps,
     });
   };

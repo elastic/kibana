@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { HookRegistration, HooksServiceSetup } from '@kbn/agent-builder-server';
-import { HookLifecycle } from '@kbn/agent-builder-server';
+import type {
+  CycleHookDefinition,
+  HookRegistration,
+  HooksServiceSetup,
+} from '@kbn/agent-builder-server';
+import { HookLifecycle, MAX_CYCLE_HOOK_TIMEOUT_MS } from '@kbn/agent-builder-server';
 
 type HookRegistrationsBundle = Parameters<HooksServiceSetup['register']>[0];
 
@@ -16,11 +20,36 @@ export function buildHookRegistrationId(bundleId: string, lifecycle: HookLifecyc
 
 export interface HookRegistry {
   register(bundle: HookRegistrationsBundle): void;
+  registerCycleHook(definition: CycleHookDefinition): void;
   getHooksForLifecycle(lifecycle: HookLifecycle): Array<HookRegistration<HookLifecycle>>;
+  getCycleHooks(): CycleHookDefinition[];
 }
+
+const validateCycleHookDefinition = ({ id, when, timeout }: CycleHookDefinition): void => {
+  if (!id) {
+    throw new Error('Cycle hook id must not be empty.');
+  }
+  if (typeof when === 'string') {
+    if (when !== 'first' && when !== 'every_cycle') {
+      throw new Error(`Cycle hook "${id}": unknown trigger "${when}".`);
+    }
+  } else if (when !== undefined) {
+    if (!Number.isInteger(when.everyCycles) || when.everyCycles < 1) {
+      throw new Error(
+        `Cycle hook "${id}": everyCycles must be a positive integer, got ${when.everyCycles}.`
+      );
+    }
+  }
+  if (timeout !== undefined && !(timeout > 0 && timeout <= MAX_CYCLE_HOOK_TIMEOUT_MS)) {
+    throw new Error(
+      `Cycle hook "${id}": timeout must be between 1 and ${MAX_CYCLE_HOOK_TIMEOUT_MS} ms, got ${timeout}.`
+    );
+  }
+};
 
 export function createHookRegistry(): HookRegistry {
   const registrationsByEvent = new Map<HookLifecycle, Array<HookRegistration<HookLifecycle>>>();
+  const cycleHooks: CycleHookDefinition[] = [];
 
   for (const lifecycle of Object.values(HookLifecycle)) {
     registrationsByEvent.set(lifecycle, []);
@@ -50,8 +79,20 @@ export function createHookRegistry(): HookRegistry {
       }
     },
 
+    registerCycleHook(definition: CycleHookDefinition) {
+      validateCycleHookDefinition(definition);
+      if (cycleHooks.some((hook) => hook.id === definition.id)) {
+        throw new Error(`Cycle hook with id "${definition.id}" is already registered.`);
+      }
+      cycleHooks.push(definition);
+    },
+
     getHooksForLifecycle(lifecycle: HookLifecycle) {
       return registrationsByEvent.get(lifecycle) ?? [];
+    },
+
+    getCycleHooks() {
+      return [...cycleHooks];
     },
   };
 }

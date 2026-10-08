@@ -110,6 +110,17 @@ export type {
   AfterExecutionHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export type {
+  CycleContext,
+  CycleHandler,
+  CycleHookApi,
+  CycleHookDefinition,
+  CycleHookExecutionContext,
+  CycleHookRound,
+  CycleTrigger,
+  InjectedContextInput,
+} from './hooks/cycle';
+export { DEFAULT_CYCLE_HOOK_TIMEOUT_MS, MAX_CYCLE_HOOK_TIMEOUT_MS } from './hooks/cycle';
 export {
   applyHookResultByLifecycle,
   applyBeforeAgentResult,
