@@ -219,10 +219,18 @@ export const readCurrentRunState = async ({
     ),
   ];
   const hostNames = entityValues((field) => field === 'host.name' || field === 'host.hostname');
-  // Other allowlisted entity fields (`user.email`, `host.id`, ...) create no subject; the
-  // mapper only ever emits the three `.name` fields.
+  // The deterministic mapper only ever emits the `.name` fields, so `users`/`services` cover
+  // every identity subject today. `user.email`/`user.id`/`service.id` stay allowlisted for an
+  // agent-written SSE, though, and have no subject of their own to be named by -- rather than
+  // going silent on that evidence, `hasUnnamedIdentityEntity` below keeps a generic signal for
+  // it, mirroring how `hasIocIndicator` covers evidence with no subject at all.
   const users = entityValues((field) => field === 'user.name');
   const services = entityValues((field) => field === 'service.name');
+  const hasUnnamedIdentityEntity = currentRun.some((sse) =>
+    sse.entities.some(
+      (e) => e.field === 'user.email' || e.field === 'user.id' || e.field === 'service.id'
+    )
+  );
   const severity: SeverityLevel | undefined = currentRun
     .map((sse) => sse.severity)
     .sort((a, b) => SEVERITY_LEVELS.indexOf(b) - SEVERITY_LEVELS.indexOf(a))[0];
@@ -280,6 +288,7 @@ export const readCurrentRunState = async ({
     severity,
     corroboratedTechniques,
     hasIocIndicator,
+    hasUnnamedIdentityEntity,
     allEventsActionable,
     hasProcessBearingEvent,
     manualRemediation,

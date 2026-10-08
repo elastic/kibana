@@ -311,6 +311,7 @@ const buildRecommendationReasonLines = ({
   services,
   proposedIdentityIds,
   hasIocIndicator,
+  hasUnnamedIdentityEntity,
   evidenceOutsideActionable,
   processUncovered,
 }: {
@@ -321,6 +322,8 @@ const buildRecommendationReasonLines = ({
   /** `<kind>:<value>` of every identity that got an executable proposal this run. */
   proposedIdentityIds: Set<string>;
   hasIocIndicator: boolean;
+  /** An identity named by a field (`user.email`, `user.id`, `service.id`) this run can't act on. */
+  hasUnnamedIdentityEntity: boolean;
   evidenceOutsideActionable: boolean;
   processUncovered: boolean;
 }): string[] => {
@@ -363,7 +366,7 @@ const buildRecommendationReasonLines = ({
       } implicated; a host action does not reach ${unreachedCount === 1 ? 'it' : 'them'}.`
     );
   }
-  if (hasIocIndicator) {
+  if (hasIocIndicator || hasUnnamedIdentityEntity) {
     lines.push(
       'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
     );
@@ -475,7 +478,11 @@ export const decidePackageReport = ({
   const hasExecutable = proposals.length > 0;
   const hasIdentity = state.users.length > 0 || state.services.length > 0;
   const evidenceOutsideActionable = !state.allEventsActionable;
-  const notHostScoped = hasIdentity || state.hasIocIndicator || evidenceOutsideActionable;
+  const notHostScoped =
+    hasIdentity ||
+    state.hasIocIndicator ||
+    state.hasUnnamedIdentityEntity ||
+    evidenceOutsideActionable;
   // Covers both "no process selector was found at all" and "a selector was found but only
   // as a bare pid" (no `entityId`): `canFillRespondAction` above refuses to back an
   // executable action with a bare pid, since PID reuse can point it at the wrong process by
@@ -505,6 +512,7 @@ export const decidePackageReport = ({
         )
       ),
       hasIocIndicator: state.hasIocIndicator,
+      hasUnnamedIdentityEntity: state.hasUnnamedIdentityEntity,
       evidenceOutsideActionable,
       processUncovered,
     });

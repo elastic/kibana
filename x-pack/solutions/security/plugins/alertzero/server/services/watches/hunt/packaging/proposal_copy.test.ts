@@ -94,6 +94,7 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
   users: [],
   services: [],
   hasIocIndicator: false,
+  hasUnnamedIdentityEntity: false,
   allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],

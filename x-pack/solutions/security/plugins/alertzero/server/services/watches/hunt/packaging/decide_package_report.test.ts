@@ -128,6 +128,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   users: [],
   services: [],
   hasIocIndicator: false,
+  hasUnnamedIdentityEntity: false,
   allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],
@@ -330,6 +331,17 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({ hasIocIndicator: true }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('not host-scoped');
+  });
+
+  it('mints executable plus a recommendation when an identity is named by a field this run cannot resolve (trigger: unnamed identity entity)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hasUnnamedIdentityEntity: true }),
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(2);

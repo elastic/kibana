@@ -314,7 +314,7 @@ describe('readCurrentRunState', () => {
     expect(state?.hosts.map((h) => h.name)).toEqual(['host-a']);
   });
 
-  it('ignores other allowlisted entity fields when extracting identities', async () => {
+  it('ignores other allowlisted entity fields when extracting identities, but flags them as unnamed identity evidence', async () => {
     const state = await readCurrentRunState({
       attachments: [
         sseAttachment({
@@ -333,6 +333,67 @@ describe('readCurrentRunState', () => {
 
     expect(state?.users).toEqual([]);
     expect(state?.services).toEqual([]);
+    // user.email can't be named as a subject, but it's still identity evidence -- unlike
+    // host.id, which isn't identity evidence at all and must not flip this flag on its own.
+    expect(state?.hasUnnamedIdentityEntity).toBe(true);
+  });
+
+  it('does not treat host.id as unnamed identity evidence', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'host.id', value: 'h-1' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.hasUnnamedIdentityEntity).toBe(false);
+  });
+
+  it.each(['user.id', 'service.id'] as const)(
+    'flags %s as unnamed identity evidence',
+    async (field) => {
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            entities: [{ field, value: 'some-id' }],
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment,
+        rehydrateProcessSelectors,
+      });
+
+      expect(state?.hasUnnamedIdentityEntity).toBe(true);
+    }
+  );
+
+  it('does not flag unnamed identity evidence when every entity is already named or host-scoped', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.hasUnnamedIdentityEntity).toBe(false);
   });
 
   it('takes the max severity across current-run SSEs', async () => {

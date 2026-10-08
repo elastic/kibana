@@ -179,6 +179,13 @@ export interface CurrentRunState {
   severity?: SeverityLevel;
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
+  /**
+   * True when a current-run SSE entity names an identity by `user.email`, `user.id`, or
+   * `service.id` -- allowlisted fields the deterministic mapper never emits, but an
+   * agent-written SSE could. Not resolvable to a `users`/`services` entry, so this is the
+   * only signal that evidence exists for it at all.
+   */
+  hasUnnamedIdentityEntity: boolean;
   /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */
   allEventsActionable: boolean;
   /** True when a current-run SSE event ref's `source_index` is one of the run's `actionable_indices`. */
