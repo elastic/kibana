@@ -561,7 +561,13 @@ const placeholderFor = (field: StepFormField): unknown => {
     case 'select':
       return field.options?.[0] ?? '';
     case 'code':
-      return field.language === 'json' ? {} : '';
+      // Default to empty (not `{}`) even for JSON-shaped fields: these are
+      // templatable, and a pre-filled `{}` both reads as real content in the
+      // single-line display and blocks starting the value as an expression.
+      // Empty is just as "missing" for required-field validation
+      // (`isEmptyFieldValue`) and shows the same placeholder as any other
+      // unset field.
+      return '';
     case 'switch-cases':
     case 'parallel-branches':
       return [];

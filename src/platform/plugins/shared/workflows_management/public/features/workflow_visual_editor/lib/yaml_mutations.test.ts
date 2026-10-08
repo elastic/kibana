@@ -19,6 +19,8 @@ import {
   getTriggerFragment,
   insertStepAtIndex,
   insertStepAtPath,
+  insertStepIntoBranch,
+  prependStep,
   replaceStepFragment,
   replaceTriggerFragment,
   setStepFallback,
@@ -262,6 +264,69 @@ steps:
     it('suffixes on collision', () => {
       expect(uniqueStepName('a', new Set(['a', 'a_2']))).toBe('a_3');
       expect(uniqueStepName('b', new Set(['a']))).toBe('b');
+    });
+  });
+
+  describe('block style for freshly-populated sequences', () => {
+    // A new workflow starts with `triggers: []` / `steps: []` — the `yaml`
+    // library remembers these were written inline and keeps them on one line
+    // even after splicing in real content, unless the mutation resets the
+    // style. Regression for an unreadable single-line `triggers`/`steps`.
+    const freshWorkflow = `name: demo
+enabled: false
+triggers: []
+steps: []
+`;
+
+    it('appendTrigger renders the triggers array in block style', () => {
+      const r = appendTrigger(freshWorkflow, 'type: manual\n');
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/triggers: \[/);
+      expect(r.yaml).toMatch(/triggers:\n\s+- type: manual/);
+    });
+
+    it('insertStepAtIndex renders the steps array in block style', () => {
+      const r = insertStepAtIndex(freshWorkflow, 'name: first\ntype: console\n', 0);
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/steps: \[/);
+      expect(r.yaml).toMatch(/steps:\n\s+- name: first/);
+    });
+
+    it('prependStep renders the steps array in block style', () => {
+      const r = prependStep(freshWorkflow, 'name: first\ntype: console\n');
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/steps: \[/);
+      expect(r.yaml).toMatch(/steps:\n\s+- name: first/);
+    });
+
+    it('a second insert into an already-populated (previously inline) array stays block style', () => {
+      const once = appendTrigger(freshWorkflow, 'type: manual\n').yaml;
+      const twice = appendTrigger(once, 'type: scheduled\nwith:\n  every: 5m\n');
+      expect(twice.success).toBe(true);
+      expect(twice.yaml).not.toMatch(/triggers: \[/);
+      expect(parse(twice.yaml).triggers).toEqual([
+        { type: 'manual' },
+        { type: 'scheduled', with: { every: '5m' } },
+      ]);
+    });
+
+    it('insertStepIntoBranch renders a freshly-created branch array in block style', () => {
+      const withEmptyElse = `name: demo
+steps:
+  - name: gate
+    type: if
+    condition: x
+    steps:
+      - name: yes
+        type: console
+    else: []
+`;
+      const r = insertStepIntoBranch(withEmptyElse, 'name: no\ntype: console\n', 'gate', {
+        kind: 'else',
+      });
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/else: \[/);
+      expect(r.yaml).toMatch(/else:\n\s+- name: no/);
     });
   });
 });

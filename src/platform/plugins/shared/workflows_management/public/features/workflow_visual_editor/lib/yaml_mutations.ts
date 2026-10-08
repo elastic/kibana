@@ -27,6 +27,20 @@ export interface MutationResult {
 
 const fail = (yaml: string, error: string): MutationResult => ({ success: false, yaml, error });
 
+/**
+ * Forces block style on a step/trigger sequence. A fresh workflow starts with
+ * `triggers: []` / `steps: []` (or a branch starts as `else: []`) — the `yaml`
+ * library remembers that empty collection was written as flow style, and
+ * keeps rendering it on one line even after items are spliced in. Step and
+ * trigger lists are never meant to be single-line; call this on every
+ * sequence a mutation is about to read from or write into so the editor
+ * output stays readable regardless of how the array started out.
+ */
+const asBlockSeq = (seq: YAMLSeq): YAMLSeq => {
+  seq.flow = false;
+  return seq;
+};
+
 const detectIndent = (yaml: string): number => {
   for (const line of yaml.split('\n')) {
     const match = line.match(/^( +)\S/);
@@ -77,7 +91,7 @@ const findStepInNode = (
     for (let index = 0; index < node.items.length; index++) {
       const item = node.items[index];
       if (isMap(item) && item.get('name') === stepName) {
-        return { seq: node, index, node: item, onFailureOwner };
+        return { seq: asBlockSeq(node), index, node: item, onFailureOwner };
       }
       const found = findStepInNode(item, stepName, onFailureOwner);
       if (found) return found;
@@ -141,7 +155,7 @@ const ensureTopLevelSeq = (doc: Document, key: 'steps' | 'triggers'): YAMLSeq =>
   }
   const root = doc.contents as YAMLMap;
   const existing = root.get(key);
-  if (isSeq(existing)) return existing;
+  if (isSeq(existing)) return asBlockSeq(existing);
   const seq = doc.createNode([]) as YAMLSeq;
   root.set(key, seq);
   return seq;
@@ -169,7 +183,7 @@ const ensureNestedSeq = (
     }
     const existing = owner.get(segment.branch);
     if (isSeq(existing)) {
-      seq = existing;
+      seq = asBlockSeq(existing);
       continue;
     }
     const created = doc.createNode([]) as YAMLSeq;
@@ -251,7 +265,7 @@ const resolveBranchSeq = (
 ): { seq?: YAMLSeq; error?: string } => {
   const ensureSeq = (key: string): YAMLSeq => {
     const existing = ownerNode.get(key);
-    if (isSeq(existing)) return existing;
+    if (isSeq(existing)) return asBlockSeq(existing);
     const created = doc.createNode([]) as YAMLSeq;
     ownerNode.set(key, created);
     return created;
@@ -272,7 +286,7 @@ const resolveBranchSeq = (
       const branchWrapper = branches.items[slot.index];
       if (!isMap(branchWrapper)) return { error: `Branch ${slot.index} is not a map` };
       const existing = branchWrapper.get('steps');
-      if (isSeq(existing)) return { seq: existing };
+      if (isSeq(existing)) return { seq: asBlockSeq(existing) };
       const created = doc.createNode([]) as YAMLSeq;
       branchWrapper.set('steps', created);
       return { seq: created };
@@ -284,7 +298,7 @@ const resolveBranchSeq = (
       const caseItem = cases.items[slot.index];
       if (!isMap(caseItem)) return { error: `Case index ${slot.index} not found` };
       const existing = caseItem.get('steps');
-      if (isSeq(existing)) return { seq: existing };
+      if (isSeq(existing)) return { seq: asBlockSeq(existing) };
       const created = doc.createNode([]) as YAMLSeq;
       caseItem.set('steps', created);
       return { seq: created };

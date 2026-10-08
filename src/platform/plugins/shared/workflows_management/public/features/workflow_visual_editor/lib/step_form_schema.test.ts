@@ -405,6 +405,32 @@ describe('step_form_schema', () => {
         with: { message: '', level: 'info' },
       });
     });
+
+    it('defaults a required object/record field to an empty string, not `{}`', () => {
+      // Required `payload` has no explicit schema default and no string-like
+      // shape, so it falls into the JSON/"code" bucket — it must still default
+      // to empty (shows the placeholder) rather than a literal `{}`, which
+      // would read as real content and block starting the value as an
+      // expression.
+      const jsonConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'webhook',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            payload: z.record(z.string(), z.unknown()),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const step = buildDefaultStep('webhook', 'webhook_step', jsonConnectors);
+      expect(step).toEqual({
+        name: 'webhook_step',
+        type: 'webhook',
+        with: { payload: '' },
+      });
+    });
   });
 
   describe('isFieldValueRepresentable', () => {
