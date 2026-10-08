@@ -67,6 +67,20 @@ export const applyRootPackages = ({
 
   const rootNames = new Set(roots.map((r) => r.name));
   const childNames = new Set(roots.flatMap((r) => getRootSchemaChildren(r).map((c) => c.package)));
+  // Also hide the children's own input/content deps (e.g. nginx_otel_input, nginx_otel), but only
+  // when nothing outside the roots' children requires them, so shared ones like filelog_otel stay.
+  const getDepNames = (item: PackageListItem) =>
+    [...(item.requires?.input ?? []), ...(item.requires?.content ?? [])].map((d) => d.package);
+  const eprItems = items.filter(isEprPackage);
+  const depsOfChildren = new Set(
+    eprItems.filter((item) => childNames.has(item.name)).flatMap(getDepNames)
+  );
+  const depsOfOthers = new Set(
+    eprItems.filter((item) => !childNames.has(item.name)).flatMap(getDepNames)
+  );
+  depsOfChildren.forEach((name) => {
+    if (!depsOfOthers.has(name)) childNames.add(name);
+  });
 
   const remainingItems = items.filter(
     (item) => !isEprPackage(item) || (!rootNames.has(item.name) && !childNames.has(item.name))

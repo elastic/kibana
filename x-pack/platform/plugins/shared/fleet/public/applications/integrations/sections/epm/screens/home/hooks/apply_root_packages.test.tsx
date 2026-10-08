@@ -75,6 +75,37 @@ describe('applyRootPackages', () => {
     expect(res.rootCards[0].installStatus).toBeUndefined();
   });
 
+  it("hides children's input/content deps unless something else requires them", () => {
+    const otelChild = pkg('nginx_otel_integ', {
+      requires: {
+        input: [
+          { package: 'nginx_otel_input', version: '0.2.2' },
+          { package: 'filelog_otel', version: '0.2.0' },
+        ],
+        content: [{ package: 'nginx_otel', version: '0.6.1' }],
+      },
+    });
+    const other = pkg('apache_otel', {
+      requires: { input: [{ package: 'filelog_otel', version: '0.2.0' }] },
+    });
+    const res = applyRootPackages({
+      items: [
+        root,
+        pkg('nginx'),
+        otelChild,
+        pkg('nginx_otel_input'),
+        pkg('nginx_otel'),
+        pkg('filelog_otel'),
+        other,
+      ],
+      ...params,
+    });
+    expect(res.remainingItems.map((i) => (i as PackageListItem).name)).toEqual([
+      'filelog_otel',
+      'apache_otel',
+    ]);
+  });
+
   it('derives installed state from children', () => {
     const items = [root, pkg('nginx', installed), pkg('nginx_otel_integ')];
     expect(getInstalledRootSchemas(root, items)).toEqual(['ecs']);
