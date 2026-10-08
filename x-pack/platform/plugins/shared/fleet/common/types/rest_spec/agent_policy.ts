@@ -21,6 +21,7 @@ export interface GetAgentPoliciesRequest {
     noAgentCount?: boolean;
     withAgentCount?: boolean;
     full?: boolean;
+    showAgentless?: boolean;
   };
 }
 

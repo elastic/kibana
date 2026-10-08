@@ -86,12 +86,10 @@ function resolveOwners(entries, files) {
 function buildCommentBody(ownerHandles) {
   const mentions = ownerHandles.join(' ');
   return [
-    `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision.`,
-    '',
-    '**Hints:**',
+    `Hey ${mentions} 👋 this flaky test fix has been open for a while. You own the next steps, the fixer does not follow up on its own:`,
     '',
     '- ✅ Review and merge if it looks good',
-    '- ✏️ Need to make changes to or resolve merge conflicts? Ask `@copilot`',
+    '- ✏️ Need changes or a conflict resolved? Check out the branch locally, or ask `@copilot`',
     '- ❌ Not worth shipping? Just close it (drop a comment to help our workflow improve)',
     '',
     `Questions? Find the Applications DX team in [#kibana-qa](${QA_CHANNEL_URL}).`,
