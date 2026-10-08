@@ -69,6 +69,12 @@ export interface SourceKnowledgeStateClient {
   write<T>(args: {
     sourceId: string;
     expectedRevision?: string;
+    /**
+     * Lets the write through for a disabled source. Only for operations that remove knowledge:
+     * a disabled source keeps its indicators, and users must be able to delete or exclude them
+     * without re-enabling it. The revision check and the lease still apply.
+     */
+    allowDisabled?: boolean;
     run: () => Promise<T>;
   }): Promise<T>;
 }
@@ -150,13 +156,13 @@ export const createSourceKnowledgeStateClient = ({
 
   return {
     runExclusive,
-    write: ({ sourceId, expectedRevision, run }) =>
+    write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
       runExclusive({
         sourceId,
         run: async (state, checkpoint) => {
           const { source } = await sourcesClient.get(sourceId);
           if (
-            !source.enabled ||
+            (!source.enabled && !allowDisabled) ||
             (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) ||
             (state.revision !== undefined && state.revision !== source.esql_updated_at)
           ) {

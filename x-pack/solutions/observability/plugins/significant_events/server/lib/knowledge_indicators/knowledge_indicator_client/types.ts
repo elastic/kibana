@@ -48,6 +48,13 @@ export interface KnowledgeIndicatorClientDeps {
   logger: Logger;
   /** Kibana space every read is filtered by and every write is stamped with. */
   space: string;
-  /** Serializes final source writes with query invalidation. */
-  withSourceWrite?: <T>(sourceId: string, run: () => Promise<T>) => Promise<T>;
+  /**
+   * Serializes final source writes with query invalidation. `allowDisabled` marks writes that only
+   * remove knowledge, which a disabled source still accepts.
+   */
+  withSourceWrite?: <T>(
+    sourceId: string,
+    run: () => Promise<T>,
+    options?: { allowDisabled?: boolean }
+  ) => Promise<T>;
 }

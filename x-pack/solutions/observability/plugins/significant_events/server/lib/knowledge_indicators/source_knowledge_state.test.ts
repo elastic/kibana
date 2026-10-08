@@ -158,6 +158,19 @@ describe('source knowledge write coordination', () => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it('lets a removal through for a disabled source and still rejects an obsolete revision', async () => {
+    const { client, source } = setup();
+    source.enabled = false;
+    const run = jest.fn(async () => 'removed');
+    await expect(client.write({ sourceId: 'source', allowDisabled: true, run })).resolves.toBe(
+      'removed'
+    );
+    await expect(
+      client.write({ sourceId: 'source', allowDisabled: true, expectedRevision: 'old', run })
+    ).rejects.toThrow('has changed');
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
   it('renews a live write lease until the final write completes', async () => {
     jest.useFakeTimers();
     const { client, documents } = setup();

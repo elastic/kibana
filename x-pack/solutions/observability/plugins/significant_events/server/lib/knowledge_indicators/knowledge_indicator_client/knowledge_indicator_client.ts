@@ -93,7 +93,14 @@ export class KnowledgeIndicatorClient {
   }
 
   bulk(sourceId: string, operations: KIBulkOperation[]) {
-    return this.withSourceWrite(sourceId, () => this.writer.bulk(sourceId, operations));
+    // Deleting or excluding must keep working on a disabled source; the guard exists to stop
+    // a stale onboarding run from adding knowledge back, and those runs only index.
+    const removesOnly = operations.every(
+      (operation) => 'delete' in operation || 'exclude' in operation
+    );
+    return this.withSourceWrite(sourceId, () => this.writer.bulk(sourceId, operations), {
+      allowDisabled: removesOnly,
+    });
   }
 
   getDefaultExpiresAt(): string {

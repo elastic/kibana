@@ -34,11 +34,11 @@ const KI_REPLAY_SCRIPT = `
   ctx._source.remove('kibana.space_ids');
   ctx._source.kibana = ['space_ids': [params.space_id]];
   def capturedView = ctx._source.remove('snapshot_source_view');
-  if (ctx._source.query != null) {
-    ctx._source.query.rule_backed = false;
-    if (capturedView != null && ctx._source.query.esql != null) {
-      ctx._source.query.esql = ctx._source.query.esql.replace(capturedView, params.source_view);
-    }
+  // \`rule_backed\` stays as captured: the discovery grounding step searches with \`rule_ids\` and
+  // \`rule_backed: true\`, and search hides unbacked queries by default, so forcing it to false
+  // would make every replayed query invisible to grounding.
+  if (capturedView != null && ctx._source.query != null && ctx._source.query.esql != null) {
+    ctx._source.query.esql = ctx._source.query.esql.replace(capturedView, params.source_view);
   }
 `;
 

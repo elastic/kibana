@@ -54,4 +54,26 @@ describe('knowledge indicator snapshot replay', () => {
     );
     expect(indices.refresh).toHaveBeenCalledWith({ index: KNOWLEDGE_INDICATORS_DATA_STREAM });
   });
+
+  it('keeps the captured rule_backed state so grounding can find replayed queries', async () => {
+    const reindex = jest.fn().mockResolvedValue({ total: 1, created: 1 });
+    const indices = {
+      delete: jest.fn().mockResolvedValue({}),
+      refresh: jest.fn().mockResolvedValue({}),
+    };
+    await replayKnowledgeIndicatorsSnapshot(
+      { reindex, indices } as unknown as Client,
+      new ToolingLog(),
+      'snapshot',
+      { bucket: 'bucket', basePathPrefix: 'prefix' },
+      { sourceId: 'source-uuid', spaceId: 'default', viewName: '$.nightshift.sources.default.eval' }
+    );
+
+    const { script } = reindex.mock.calls[0][0] as { script: { source: string } };
+    // Grounding searches with `rule_backed: true`; assigning the field here would hide every query.
+    expect(script.source).not.toMatch(/rule_backed\s*=/);
+    expect(script.source).toContain(
+      'ctx._source.query.esql.replace(capturedView, params.source_view)'
+    );
+  });
 });

@@ -99,7 +99,7 @@ function createAlertingContext(
   };
 }
 
-function makeClient(): {
+function makeClient(depsOverrides: Partial<KnowledgeIndicatorClientDeps> = {}): {
   client: KnowledgeIndicatorClient;
   create: jest.Mock;
   runEsql: jest.Mock;
@@ -117,6 +117,7 @@ function makeClient(): {
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
     space: SPACE,
+    ...depsOverrides,
   };
   const findSourceIdsWithOwnedRules = jest.fn().mockResolvedValue([]);
   const rulesManagementClient = {
@@ -278,6 +279,52 @@ describe('KnowledgeIndicatorClient.bulk', () => {
 
       expect(result).toEqual({ applied: 0, skipped: 1 });
       expect(create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('disabled source guard', () => {
+    // A plain function keeps the generic `withSourceWrite` signature; the spy records the call.
+    const trackSourceWrite = () => {
+      const spy = jest.fn();
+      const withSourceWrite: NonNullable<KnowledgeIndicatorClientDeps['withSourceWrite']> = (
+        sourceId,
+        run,
+        options
+      ) => {
+        spy(sourceId, run, options);
+        return run();
+      };
+      return { spy, withSourceWrite };
+    };
+
+    it('lets delete and exclude through a disabled source', async () => {
+      const { spy, withSourceWrite } = trackSourceWrite();
+      const { client, runEsql } = makeClient({ withSourceWrite });
+      runEsql.mockResolvedValue({ hits: [] });
+
+      await client.bulk(SOURCE, [
+        { delete: { type: KI_TYPE_FEATURE, id: 'feat-1' } },
+        { exclude: { id: 'feat-2' } },
+      ]);
+
+      expect(spy).toHaveBeenCalledWith(SOURCE, expect.any(Function), {
+        allowDisabled: true,
+      });
+    });
+
+    it('keeps index and restore guarded against a disabled source', async () => {
+      const { spy, withSourceWrite } = trackSourceWrite();
+      const { client, runEsql } = makeClient({ withSourceWrite });
+      runEsql.mockResolvedValue({ hits: [] });
+
+      await client.bulk(SOURCE, [
+        { delete: { type: KI_TYPE_FEATURE, id: 'feat-1' } },
+        { restore: { id: 'feat-2' } },
+      ]);
+
+      expect(spy).toHaveBeenCalledWith(SOURCE, expect.any(Function), {
+        allowDisabled: false,
+      });
     });
   });
 

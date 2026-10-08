@@ -276,9 +276,10 @@ export class SignificantEventsPlugin
           space,
           context,
           config: tuningConfig,
-          withSourceWrite: (sourceId, run) =>
+          withSourceWrite: (sourceId, run, options) =>
             sourceKnowledgeState.write({
               sourceId,
+              allowDisabled: options?.allowDisabled,
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']
