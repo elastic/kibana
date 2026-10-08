@@ -8,3 +8,15 @@
 export { dashboardTools, DASHBOARDS_SKILL_ID, getDashboardsSkillBadge } from './constants';
 export { DASHBOARD_UPDATED_UI_EVENT } from './ui_events';
 export type { DashboardUpdatedUiEventData } from './ui_events';
+export {
+  AI_INSIGHTS_EMBEDDABLE_TYPE,
+  ADD_AI_INSIGHTS_ACTION_ID,
+  AI_INSIGHTS_API_PATH,
+} from './ai_insights/constants';
+export type {
+  AiInsightsResult,
+  AiInsightsStatus,
+  AiInsightsRequestBody,
+  AiInsightsDashboardContext,
+} from './ai_insights/types';
+export { AI_INSIGHTS_STATUS } from './ai_insights/constants';

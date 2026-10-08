@@ -11,6 +11,12 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  ADD_AI_INSIGHTS_ACTION_ID,
+  AI_INSIGHTS_EMBEDDABLE_TYPE,
+} from '../common/ai_insights/constants';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -18,6 +24,7 @@ import type {
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { setAiInsightsServices } from './ai_insights/services';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -37,8 +44,13 @@ export class AgentBuilderDashboardsPlugin
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
-    _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
+    plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
+    plugins.embeddable.registerEmbeddablePublicDefinition(AI_INSIGHTS_EMBEDDABLE_TYPE, async () => {
+      const { aiInsightsEmbeddableFactory } = await import('./ai_insights/ai_insights_embeddable');
+      return aiInsightsEmbeddableFactory;
+    });
+
     return {};
   }
 
@@ -49,6 +61,14 @@ export class AgentBuilderDashboardsPlugin
     const draftAttachmentId = createIdGenerator();
     const canWriteDashboards =
       core.application.capabilities.dashboard_v2?.showWriteControls === true;
+    const canShowAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+
+    setAiInsightsServices({
+      core,
+      openChat: plugins.agentBuilder.openChat,
+      draftAttachmentId,
+      canShowAgentBuilder,
+    });
 
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
@@ -61,7 +81,16 @@ export class AgentBuilderDashboardsPlugin
       draftAttachmentId,
     });
 
-    if (core.application.capabilities.agentBuilder?.show === true) {
+    plugins.uiActions.registerActionAsync<EmbeddableApiContext>(
+      ADD_AI_INSIGHTS_ACTION_ID,
+      async () => {
+        const { getAddAiInsightsAction } = await import('./ai_insights/create_add_panel_action');
+        return getAddAiInsightsAction();
+      }
+    );
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_AI_INSIGHTS_ACTION_ID);
+
+    if (canShowAgentBuilder) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
         const { createOpenDashboardChatAction } = await import(
           './dashboard_empty_screen/open_dashboard_chat_action'
@@ -87,3 +116,4 @@ export class AgentBuilderDashboardsPlugin
     this.cleanupAttachmentUi?.();
   }
 }
+

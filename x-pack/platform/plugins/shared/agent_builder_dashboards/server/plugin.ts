@@ -12,6 +12,8 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { AI_INSIGHTS_EMBEDDABLE_TYPE } from '../common/ai_insights/constants';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -21,6 +23,8 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { aiInsightsEmbeddableSchema } from './embeddable/ai_insights_schema';
+import { registerAiInsightsRoute } from './routes/ai_insights/register_route';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -58,6 +62,20 @@ export class AgentBuilderDashboardsPlugin
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
     registerSkills(setupDeps.agentBuilder);
+
+    setupDeps.embeddable.registerEmbeddableServerDefinition(AI_INSIGHTS_EMBEDDABLE_TYPE, {
+      title: i18n.translate('xpack.agentBuilderDashboards.aiInsights.serverTitle', {
+        defaultMessage: 'AI insights',
+      }),
+      getSchema: () => aiInsightsEmbeddableSchema,
+    });
+
+    const router = coreSetup.http.createRouter();
+    registerAiInsightsRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+    });
 
     return {};
   }
