@@ -10,6 +10,7 @@ import {
   type ScopedRunnerRunAgentParams,
   type RunAgentReturn,
 } from '@kbn/agent-builder-server';
+import { applyAgentApprovals } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
@@ -23,6 +24,7 @@ import {
   createSkillsService,
   createFilesystemServices,
   resolveDeploymentContext,
+  createSubAgentExecutor,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -199,8 +201,22 @@ export const runAgent = async ({
       requestOrigin: agentParams.origin?.type,
     }),
   });
-  const manager = parentManager.createChild(forkedContext);
-  manager.deps.agentConfiguration = effectiveConfiguration;
+
+  // Stored defaults are read from the agent itself, never from runtime overrides.
+  const interactivity = applyAgentApprovals({
+    interactivity: parentManager.deps.interactivity,
+    approvals: agent.configuration.approvals,
+  });
+  const manager = parentManager.createChild(forkedContext, {
+    agentConfiguration: effectiveConfiguration,
+    interactivity,
+    subAgentExecutor: createSubAgentExecutor({
+      request,
+      getExecutionService: parentManager.deps.getExecutionService,
+      projectRouting: parentManager.deps.projectRouting,
+      interactivity,
+    }),
+  });
 
   const agentResult = await withAgentSpan(
     { agent, conversationId: agentParams.conversation?.id, providerName },

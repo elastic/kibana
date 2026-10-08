@@ -93,6 +93,7 @@ export const toInternalDefinition = async ({
     permissions: {
       update_agent: false,
       update_access_control: false,
+      update_approvals: false,
     },
     isAvailable: async (ctx) => {
       if (definition.availability) {
