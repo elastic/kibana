@@ -64,7 +64,7 @@ apiTest.describe(
         expect(isolateHost!.name).toBe('Isolate host');
         expect(isolateHost!.category).toBe('respond');
         expect(isolateHost!.impact).toBe('high');
-        expect(isolateHost!.approvalPolicy).toBe('always-gate');
+        expect(isolateHost!.approvalPolicy).toBe('autonomy-dependent');
         expect(typeof isolateHost!.description).toBe('string');
         expect(isolateHost!.description!.length).toBeGreaterThan(0);
 

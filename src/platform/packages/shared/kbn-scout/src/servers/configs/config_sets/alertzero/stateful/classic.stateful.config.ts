@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Scout server config for tests that need `alertzero` and the plugins it depends on.
@@ -34,6 +35,8 @@ export const servers: ScoutServerConfig = {
       '--xpack.proposals.enabled=true',
       '--xpack.agentBuilder.enabled=true',
       '--workflowsManagement.enabled=true',
+      ...serviceAccountsServerArgs,
+      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
     ],
   },
 };

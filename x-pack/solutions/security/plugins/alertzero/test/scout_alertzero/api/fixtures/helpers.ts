@@ -6,7 +6,17 @@
  */
 
 import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ListActionsResponse } from '@kbn/alertzero-common';
 import { INTERNAL_HEADERS, LIST_ACTIONS_PATH } from './constants';
+
+/**
+ * `ApiClientFixture['get']` is generic over the body type, so deriving the response from
+ * `ReturnType` alone resolves `body` to `unknown`. Pin it to the route's payload; error
+ * responses (400) carry a `message` instead of the catalog.
+ */
+export type ListActionsHttpResponse = Omit<Awaited<ReturnType<ApiClientFixture['get']>>, 'body'> & {
+  body: ListActionsResponse & { message?: string };
+};
 
 /**
  * Calls `GET /internal/alertzero/actions`.
@@ -23,7 +33,7 @@ export const listActions = async (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
   options: { categories?: string[]; rawQuery?: string } = {}
-): Promise<Awaited<ReturnType<ApiClientFixture['get']>>> => {
+): Promise<ListActionsHttpResponse> => {
   const { categories, rawQuery } = options;
   const query =
     rawQuery ??
