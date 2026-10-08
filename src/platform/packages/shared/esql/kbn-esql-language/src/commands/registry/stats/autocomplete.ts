@@ -38,7 +38,7 @@ import {
 } from '../../definitions/utils/autocomplete/functions';
 import { getAllFunctions } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
-import { getPosition, getCommaAndPipe, rightAfterColumn, getAggregationScope } from './utils';
+import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { endsWithComma } from '../../definitions/utils/regex';
 import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
@@ -78,15 +78,9 @@ export async function autocomplete(
   const pos = getPosition(command, innerText);
 
   // Columns defined in the BY clause are in scope for the aggregation expressions and the
-  // per-aggregation WHERE clause, so overlay them onto the context and the suggestions there.
-  const { context: aggregationContext, callbacks: aggregationCallbacks } = getAggregationScope(
-    query,
-    cursorPosition,
-    command,
-    context,
-    callbacks
-  );
-  const aggregationColumnExists = (name: string) => _columnExists(name, aggregationContext);
+  // per-aggregation WHERE clause (but not within the BY clause itself). The autocomplete pipeline
+  // exposes them through the command's `fieldsInScope`, so `context`/`callbacks` already carry
+  // them at those positions — no per-command overlay is needed here.
 
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
@@ -115,8 +109,8 @@ export async function autocomplete(
         command,
         cursorPosition,
         location,
-        context: isInBy ? context : aggregationContext,
-        callbacks: isInBy ? callbacks : aggregationCallbacks,
+        context,
+        callbacks,
         options: {
           getFunctionsToIgnore,
         },
@@ -146,8 +140,8 @@ export async function autocomplete(
         cursorPosition,
         expressionRoot,
         location: Location.STATS,
-        context: aggregationContext,
-        callbacks: aggregationCallbacks,
+        context,
+        callbacks,
         emptySuggestions: [
           ...(!isNewMultipleExpression && !isInlineStats ? [byCompleteItem] : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
@@ -155,7 +149,7 @@ export async function autocomplete(
         afterCompleteSuggestions: [
           whereCompleteItem,
           byCompleteItem,
-          ...getCommaAndPipe(innerText, expressionRoot, aggregationColumnExists),
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
         ],
         suggestColumns: false,
         suggestFunctions: true,
@@ -178,13 +172,13 @@ export async function autocomplete(
         cursorPosition,
         expressionRoot,
         location: Location.STATS,
-        context: aggregationContext,
-        callbacks: aggregationCallbacks,
+        context,
+        callbacks,
         emptySuggestions: [],
         afterCompleteSuggestions: [
           whereCompleteItem,
           byCompleteItem,
-          ...getCommaAndPipe(innerText, expressionRoot, aggregationColumnExists),
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
         ],
         suggestColumns: false,
         suggestFunctions: true,
@@ -209,8 +203,8 @@ export async function autocomplete(
         command,
         cursorPosition,
         location: Location.STATS_WHERE,
-        context: aggregationContext,
-        callbacks: aggregationCallbacks,
+        context,
+        callbacks,
         options: {
           preferredExpressionType: 'boolean',
           allowSubquery: true,
