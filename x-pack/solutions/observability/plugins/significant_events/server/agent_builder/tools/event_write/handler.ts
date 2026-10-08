@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   type SignificantEvent,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
@@ -307,7 +307,7 @@ const resolveDedupSkips = (
   activeEvents: SignificantEvent[],
   results: BulkResults
 ): WriteCandidate[] => {
-  const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+  const activeStatuses = SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS as readonly string[];
   const sortedActiveEvents = activeEvents.toSorted((a, b) => {
     const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
     return timestampOrder !== 0

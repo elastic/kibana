@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import {
   EVENT_CREATED_TRIGGER_ID,
   EVENT_STATUS_CHANGED_TRIGGER_ID,
@@ -18,13 +18,22 @@ type SignificantEventSource = Pick<
   '@timestamp' | 'event_id' | 'title' | 'summary' | 'status' | 'severity' | 'stream_names'
 >;
 
+type TriggerStatus = SignificantEventTriggerBasePayload['status'];
+
+/**
+ * Subscribers see a two-state lifecycle: `recovering` is the engine's internal wind-down of a
+ * still-live event, so it is reported as `active`.
+ */
+const toTriggerStatus = (status: SignificantEventStatus): TriggerStatus =>
+  status === 'recovering' ? 'active' : status;
+
 const baseSignificantEventPayload = (
   significantEvent: SignificantEventSource
 ): SignificantEventTriggerBasePayload => ({
   event_id: significantEvent.event_id,
   title: significantEvent.title,
   summary: significantEvent.summary,
-  status: significantEvent.status,
+  status: toTriggerStatus(significantEvent.status),
   severity: significantEvent.severity,
   stream_names: significantEvent.stream_names,
   occurred_at: significantEvent['@timestamp'],
@@ -44,8 +53,10 @@ const emitBestEffort = (emit: () => void): void => {
 };
 
 /**
- * Emits `eventCreated` (no prior version) or `eventStatusChanged` (prior version with a different
- * status) for a single written event version.
+ * Emits `eventCreated` (no prior version) or `eventStatusChanged` (prior version whose lifecycle
+ * state differs: `active` <-> `inactive`) for a single written event version. Moving between
+ * `active` and `recovering` is not a change subscribers can act on, and emitting it would
+ * re-trigger investigations and automations on an event that was never closed.
  */
 export const emitSignificantEventWriteTriggers = ({
   emitTrigger,
@@ -65,10 +76,11 @@ export const emitSignificantEventWriteTriggers = ({
       return;
     }
 
-    if (priorSignificantEvent.status !== significantEvent.status) {
+    const previousStatus = toTriggerStatus(priorSignificantEvent.status);
+    if (previousStatus !== toTriggerStatus(significantEvent.status)) {
       emitTrigger?.(EVENT_STATUS_CHANGED_TRIGGER_ID, {
         ...baseSignificantEventPayload(significantEvent),
-        previous_status: priorSignificantEvent.status,
+        previous_status: previousStatus,
       });
     }
   });
