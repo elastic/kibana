@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -29,7 +29,6 @@ import {
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type {
-  ExperimentalDataStreamFeature,
   PackageInfo,
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -86,23 +85,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   );
 
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
-
-  // Per-data-stream indexing opt-ins (e.g. columnar index mode) live on `packagePolicy.package`.
-  const experimentalDataStreamFeatures = packagePolicy.package?.experimental_data_stream_features;
-  const onExperimentalDataStreamFeaturesChange = useCallback(
-    (newFeatures: ExperimentalDataStreamFeature[]) => {
-      if (!packagePolicy.package) {
-        return;
-      }
-      updatePackagePolicy({
-        package: {
-          ...packagePolicy.package,
-          experimental_data_stream_features: newFeatures,
-        },
-      });
-    },
-    [packagePolicy.package, updatePackagePolicy]
-  );
 
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
@@ -235,10 +217,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                         isUpgrade={isUpgrade}
                         isAgentless={deploymentMode === 'agentless'}
                         varGroupSelections={varGroupSelections}
-                        experimentalDataStreamFeatures={experimentalDataStreamFeatures}
-                        onExperimentalDataStreamFeaturesChange={
-                          packagePolicy.package ? onExperimentalDataStreamFeaturesChange : undefined
-                        }
                       />
                       <EuiHorizontalRule margin="m" />
                     </EuiFlexItem>

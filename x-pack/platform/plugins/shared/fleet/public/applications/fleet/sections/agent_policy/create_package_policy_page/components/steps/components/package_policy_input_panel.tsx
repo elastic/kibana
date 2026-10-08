@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 
 import type {
-  ExperimentalDataStreamFeature,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackageInfo,
@@ -171,10 +170,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   isUpgrade?: boolean;
   isAgentless?: boolean;
   varGroupSelections?: Record<string, string>;
-  experimentalDataStreamFeatures?: ExperimentalDataStreamFeature[];
-  onExperimentalDataStreamFeaturesChange?: (
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[]
-  ) => void;
 }> = memo(
   ({
     packageInput,
@@ -189,8 +184,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isUpgrade = false,
     isAgentless = false,
     varGroupSelections = {},
-    experimentalDataStreamFeatures,
-    onExperimentalDataStreamFeaturesChange,
   }) => {
     const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
@@ -596,8 +589,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
                     isUpgrade={isUpgrade}
-                    experimentalDataStreamFeatures={experimentalDataStreamFeatures}
-                    onExperimentalDataStreamFeaturesChange={onExperimentalDataStreamFeaturesChange}
                     updatePackagePolicyInputStream={(
                       updatedStream: Partial<PackagePolicyInputStream>
                     ) => {

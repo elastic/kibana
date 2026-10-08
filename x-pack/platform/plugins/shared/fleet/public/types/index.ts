@@ -108,7 +108,6 @@ export type {
   CategoryId,
   CategorySummaryItem,
   CategorySummaryList,
-  ExperimentalDataStreamFeature,
   PackageInfo,
   PackageMetadata,
   RegistrySection,
