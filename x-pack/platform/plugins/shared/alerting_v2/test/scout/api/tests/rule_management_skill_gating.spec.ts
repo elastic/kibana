@@ -28,6 +28,9 @@ const OBSERVABILITY_SOLUTION_SPACE = {
 
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
+// Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
+const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
+
 /*
  * Alerting V2 Agent Builder skills (`rule-management` and
  * `action-policy-management`) are gated behind the Agent Builder
@@ -172,12 +175,19 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       );
       expect(setResponse).toHaveStatusCode(200);
 
-      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).toContain(skillId);
-      }
+      await expect
+        .poll(
+          async () => {
+            const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+            // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+            if (response.statusCode !== 200) {
+              return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+            }
+            return getSkillIds(response.body.results);
+          },
+          { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+        )
+        .toStrictEqual(expect.arrayContaining(ALERTING_V2_SKILL_IDS));
     }
   );
 
