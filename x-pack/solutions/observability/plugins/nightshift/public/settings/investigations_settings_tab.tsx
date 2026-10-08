@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { RunLimitsSection } from './components/run_limits_section';
-import { SettingsNoPermissionCallout } from './components/settings_no_permission_callout';
-import { useCanEditSettings } from './components/use_detection_settings_form';
+import { SettingsSaveBar } from './components/settings_save_bar';
+import { SettingsSection, SettingsSectionRow } from './components/settings_section';
+import { useRunLimitsForm } from './components/use_run_limits_form';
 
-export const InvestigationsSettingsTab = () => {
+const INVESTIGATION_RUN_LIMIT_GROUPS = ['investigation'] as const;
+
+export const InvestigationsSettingsTab = ({
+  onCustomContextClick,
+}: {
+  onCustomContextClick?: () => void;
+}) => {
   const { appParams, application, http, overlays } = useKibana().services;
-  const canEditSettings = useCanEditSettings();
-  const [hasRunLimitChanges, setHasRunLimitChanges] = useState(false);
+  const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasRunLimitChanges,
+    hasUnsavedChanges: runLimits.isDirty,
     http,
     openConfirm: overlays.openConfirm,
     navigateToUrl: application.navigateToUrl,
@@ -26,10 +34,73 @@ export const InvestigationsSettingsTab = () => {
     shouldPromptOnReplace: false,
   });
 
+  const saveRunLimits = async () => {
+    await runLimits.requestSave();
+  };
+
+  const confirmRunLimits = async () => {
+    await runLimits.confirmAndSave();
+  };
+
   return (
     <>
-      {!canEditSettings && <SettingsNoPermissionCallout />}
-      <RunLimitsSection groups={['investigation']} onUnsavedChangesChange={setHasRunLimitChanges} />
+      <SettingsSection
+        title={i18n.translate('xpack.nightshift.settings.investigationProcessTitle', {
+          defaultMessage: 'Investigation process',
+        })}
+        data-test-subj="nightshiftInvestigationProcessSection"
+      >
+        <RunLimitsSection
+          groups={INVESTIGATION_RUN_LIMIT_GROUPS}
+          form={runLimits}
+          description={i18n.translate(
+            'xpack.nightshift.settings.investigationRunLimitsDescription',
+            {
+              defaultMessage:
+                'These limits apply only to scheduled investigation, manual runs are not limited. When a limit is reached, new scheduled runs are blocked until it resets.',
+            }
+          )}
+          onSave={saveRunLimits}
+          onConfirmSave={confirmRunLimits}
+        />
+        {onCustomContextClick && (
+          <>
+            <EuiHorizontalRule margin="l" />
+            <SettingsSectionRow
+              title={i18n.translate('xpack.nightshift.settings.customContextTitle', {
+                defaultMessage: 'Custom context',
+              })}
+              description={
+                <p>
+                  {i18n.translate('xpack.nightshift.settings.customContextDescription', {
+                    defaultMessage:
+                      'Notes that Nightshift adds to its system prompt for every investigation and chat in this space',
+                  })}
+                </p>
+              }
+              data-test-subj="nightshiftCustomContextSection"
+            >
+              <EuiButton
+                size="s"
+                iconType="pencil"
+                onClick={onCustomContextClick}
+                data-test-subj="nightshiftOpenCustomContext"
+              >
+                {i18n.translate('xpack.nightshift.settings.editCustomContextButtonLabel', {
+                  defaultMessage: 'Edit investigation context',
+                })}
+              </EuiButton>
+            </SettingsSectionRow>
+          </>
+        )}
+      </SettingsSection>
+      <SettingsSaveBar
+        hasChanges={runLimits.isDirty}
+        isSaving={runLimits.isSaving}
+        onCancel={runLimits.cancel}
+        onSave={saveRunLimits}
+        isSaveDisabled={!runLimits.canManage || !runLimits.update}
+      />
     </>
   );
 };

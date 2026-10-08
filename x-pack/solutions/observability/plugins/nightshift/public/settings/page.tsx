@@ -90,7 +90,9 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
       />
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
         {tab === 'general' && <GeneralSettingsTab />}
-        {tab === 'investigations' && <InvestigationsSettingsTab />}
+        {tab === 'investigations' && (
+          <InvestigationsSettingsTab onCustomContextClick={headerProps.onCustomContextClick} />
+        )}
         {tab === 'detections' && <DetectionsSettingsTab />}
       </EuiPageTemplate.Section>
     </>

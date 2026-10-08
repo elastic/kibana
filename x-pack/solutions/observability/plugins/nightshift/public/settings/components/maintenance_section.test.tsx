@@ -64,7 +64,7 @@ describe('MaintenanceSection', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
-  it('shows the pause result as a compact summary below the resume action', () => {
+  it('shows disabled activity counts below the resume action while paused', () => {
     mockUseMaintenanceStatus.mockReturnValue({
       data: {
         state: 'paused',
@@ -87,15 +87,35 @@ describe('MaintenanceSection', () => {
     );
 
     const resumeButton = screen.getByTestId('streams-settings-maintenance-toggle-button');
-    const summary = screen.getByTestId('streams-settings-maintenance-paused-status');
+    const summary = screen.getByTestId('streams-settings-maintenance-activity-counts');
     expect(resumeButton).toHaveTextContent('Resume detection engine');
     expect(resumeButton.compareDocumentPosition(summary)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(summary).toHaveTextContent('Detection engine is paused');
-    expect(summary).toHaveTextContent('Paused by elastic.');
-    expect(summary).toHaveTextContent('12 automations paused');
-    expect(summary).toHaveTextContent('28 rules paused');
+    expect(summary).toHaveTextContent('12 automations disabled · 28 rules disabled');
+  });
+
+  it('does not show activity counts while enabled', () => {
+    mockUseMaintenanceStatus.mockReturnValue({
+      data: {
+        state: 'enabled',
+        lastSummary: {
+          workflowsDisabled: 12,
+          rulesDisabled: 28,
+          partialFailures: [],
+        },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    render(
+      <I18nProvider>
+        <MaintenanceSection canManage />
+      </I18nProvider>
+    );
+
     expect(
-      screen.queryByTestId('streams-settings-maintenance-partial-failures')
+      screen.queryByTestId('streams-settings-maintenance-activity-counts')
     ).not.toBeInTheDocument();
   });
 });

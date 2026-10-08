@@ -80,6 +80,13 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export { MAINTENANCE_FEATURE_FLAG_ACTOR } from './maintenance/actors';
+export {
+  getDetectionPausedCalloutBody,
+  getDetectionPausedCalloutTitle,
+  isPausedByFeatureFlag,
+} from './maintenance/paused_callout_copy';
+export { getMaintenanceActivityCounts } from './maintenance/activity_counts';
+export type { MaintenanceActivityCounts } from './maintenance/activity_counts';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
 export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';

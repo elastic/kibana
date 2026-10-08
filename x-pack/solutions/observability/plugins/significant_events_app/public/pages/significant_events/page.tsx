@@ -7,9 +7,12 @@
 
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID, NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import {
+  getNightshiftCapabilities,
+  type NightshiftSettingsLocatorParams,
+} from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -43,6 +46,7 @@ import { useDecisionTreesEnabled } from './components/decision_trees/use_decisio
 import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
+import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
 
 const significantEventsTabs = [
@@ -75,6 +79,9 @@ export function SignificantEventsPage() {
       },
       chrome,
       notifications: { toasts },
+    },
+    dependencies: {
+      start: { share },
     },
   } = useKibana();
 
@@ -123,14 +130,15 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
-  const settingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings' });
-  const detectionSettingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/settings/detections',
-  });
+  const settingsLocator = share.url.locators.get<NightshiftSettingsLocatorParams>(
+    NIGHTSHIFT_SETTINGS_LOCATOR_ID
+  );
+  const settingsHref = settingsLocator?.getRedirectUrl({});
+  const detectionSettingsHref = settingsLocator?.getRedirectUrl({ tab: 'detections' });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
-      canManageAndConfigure
+      canManageAndConfigure && settingsHref
         ? {
             items: [
               {
@@ -317,7 +325,7 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canManageAndConfigure && (
+                {canManageAndConfigure && detectionSettingsHref && (
                   <EuiButton
                     href={detectionSettingsHref}
                     color="danger"
@@ -333,49 +341,13 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {isBlocked && (
+          {isBlocked && maintenanceStatus && (
             <>
-              <EuiCallOut
-                announceOnMount
-                color="warning"
-                iconType="pause"
-                data-test-subj="significantEventsPausedBanner"
-                title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
-                  defaultMessage: 'Significant Events activity is paused',
-                })}
-              >
-                <p>
-                  {canManageAndConfigure
-                    ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
-                        defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                      })
-                    : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
-                        defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
-                      })}
-                </p>
-                {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
-                  <p>
-                    {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
-                      defaultMessage:
-                        'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-                    })}
-                  </p>
-                )}
-                {canManageAndConfigure && (
-                  <EuiButton
-                    href={detectionSettingsHref}
-                    color="warning"
-                    size="s"
-                    data-test-subj="significantEventsPausedBannerSettingsLink"
-                  >
-                    {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
-                      defaultMessage: 'Go to Settings',
-                    })}
-                  </EuiButton>
-                )}
-              </EuiCallOut>
+              <PausedActivityCallout
+                status={maintenanceStatus}
+                canManageAndConfigure={canManageAndConfigure}
+                settingsHref={detectionSettingsHref}
+              />
               <EuiSpacer />
             </>
           )}

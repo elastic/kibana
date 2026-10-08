@@ -37,8 +37,6 @@ const useSettingsPermissions = () => {
   };
 };
 
-export const useCanEditSettings = (): boolean => useSettingsPermissions().canEditSettings;
-
 export const useDetectionSettingsForm = () => {
   const core = useKibana().services;
 
@@ -48,7 +46,7 @@ export const useDetectionSettingsForm = () => {
   // the user never triggers a partial save that 403s halfway through.
   const { canManage, canManageAndConfigure, canSaveAdvancedSettings, canEditSettings } =
     useSettingsPermissions();
-  const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
+  const { isDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -208,7 +206,6 @@ export const useDetectionSettingsForm = () => {
     canManageAndConfigure,
     canSaveAdvancedSettings,
     isDeveloperMode,
-    setDeveloperMode,
     isDeveloperModeSaving,
     isBlocked,
     activityBlockTooltip,

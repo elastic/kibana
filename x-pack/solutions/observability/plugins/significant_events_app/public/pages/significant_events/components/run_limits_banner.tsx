@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -130,7 +131,9 @@ export const RunQuotaExhaustionCallout = ({
 
 export const RunLimitsBanner = () => {
   const {
-    core: { application },
+    dependencies: {
+      start: { share },
+    },
   } = useKibana();
   const { data } = useRunQuotas();
 
@@ -147,6 +150,9 @@ export const RunLimitsBanner = () => {
   if (exhaustedGroups.length === 0) {
     return null;
   }
+  const settingsLocator = share.url.locators.get<NightshiftSettingsLocatorParams>(
+    NIGHTSHIFT_SETTINGS_LOCATOR_ID
+  );
 
   return (
     <>
@@ -155,8 +161,8 @@ export const RunLimitsBanner = () => {
         limits={data.limits}
         counts={data.counts}
         canManage={data.canManage}
-        manageHref={application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-          path: `/settings/${getRunQuotaSettingsTab(exhaustedGroups)}`,
+        manageHref={settingsLocator?.getRedirectUrl({
+          tab: getRunQuotaSettingsTab(exhaustedGroups),
         })}
       />
       <EuiSpacer />

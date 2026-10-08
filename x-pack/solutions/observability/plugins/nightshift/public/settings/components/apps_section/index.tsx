@@ -18,9 +18,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiSplitPanel,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +27,7 @@ import {
   RELAY_APP_CONNECTION_STATUS,
   type RelayAppConnectionStatus,
 } from '@kbn/significant-events-plugin/common';
+import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
 
@@ -49,80 +48,64 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
     disconnect,
   } = useRelayAppConnection();
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (hasStatusRequestError) {
-    return (
-      <>
-        <EuiSpacer />
-        <KbnDangerCallout
-          announceOnMount
-          data-test-subj="nightshiftAppsStatusError"
-          title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
-            defaultMessage: 'Unable to check app availability',
-          })}
-          text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
-            defaultMessage:
-              'Nightshift could not load the current app status. Check the connection and try again.',
-          })}
-          actionProps={{
-            primary: {
-              children: i18n.translate('xpack.nightshift.settings.apps.statusErrorRetry', {
-                defaultMessage: 'Try again',
-              }),
-              iconType: 'refresh',
-              onClick: retryStatusRequest,
-              'data-test-subj': 'nightshiftAppsStatusRetryButton',
-            },
-          }}
-        />
-      </>
-    );
-  }
-
-  if (!available) {
-    return (
-      <>
-        <EuiSpacer />
-        <EuiEmptyPrompt
-          data-test-subj="nightshiftAppsUnavailable"
-          iconType="info"
-          title={
-            <h2>
-              {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
-                defaultMessage: 'Apps are unavailable',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
-                defaultMessage:
-                  'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
-              })}
-            </p>
-          }
-        />
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer />
-      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.nightshift.settings.apps.sectionTitle', {
-                defaultMessage: 'Apps',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
+      <SettingsSection
+        title={i18n.translate('xpack.nightshift.settings.apps.sectionTitle', {
+          defaultMessage: 'Apps',
+        })}
+        data-test-subj="nightshiftAppsSection"
+      >
+        {isLoading && <EuiLoadingSpinner size="m" />}
+
+        {!isLoading && hasStatusRequestError && (
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj="nightshiftAppsStatusError"
+            title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
+              defaultMessage: 'Unable to check app availability',
+            })}
+            text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
+              defaultMessage:
+                'Nightshift could not load the current app status. Check the connection and try again.',
+            })}
+            actionProps={{
+              primary: {
+                children: i18n.translate('xpack.nightshift.settings.apps.statusErrorRetry', {
+                  defaultMessage: 'Try again',
+                }),
+                iconType: 'refresh',
+                onClick: retryStatusRequest,
+                'data-test-subj': 'nightshiftAppsStatusRetryButton',
+              },
+            }}
+          />
+        )}
+
+        {!isLoading && !hasStatusRequestError && !available && (
+          <EuiEmptyPrompt
+            data-test-subj="nightshiftAppsUnavailable"
+            iconType="info"
+            title={
+              <h2>
+                {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
+                  defaultMessage: 'Apps are unavailable',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
+                  defaultMessage:
+                    'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
+                })}
+              </p>
+            }
+          />
+        )}
+
+        {!isLoading && !hasStatusRequestError && available && (
           <EuiFlexGroup gutterSize="l" wrap>
             <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
               <EuiCard
@@ -150,8 +133,8 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
+        )}
+      </SettingsSection>
     </>
   );
 }

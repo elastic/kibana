@@ -7,13 +7,18 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSplitPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+
+const headerPanelStyles = css`
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+`;
+
+const bodyPanelStyles = css`
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+`;
 
 export const SettingsSection = ({
   title,
@@ -26,19 +31,27 @@ export const SettingsSection = ({
   children: ReactNode;
   'data-test-subj'?: string;
 }) => (
-  <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj={dataTestSubject}>
-    <EuiSplitPanel.Inner color="subdued">
+  <EuiPanel
+    hasBorder
+    hasShadow={false}
+    paddingSize="none"
+    grow={false}
+    data-test-subj={dataTestSubject}
+  >
+    <EuiPanel hasShadow={false} color="subdued" paddingSize="m" css={headerPanelStyles}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
+          <EuiText size="s">
             <h3>{title}</h3>
-          </EuiTitle>
+          </EuiText>
         </EuiFlexItem>
         {titleAdornment && <EuiFlexItem grow={false}>{titleAdornment}</EuiFlexItem>}
       </EuiFlexGroup>
-    </EuiSplitPanel.Inner>
-    <EuiSplitPanel.Inner>{children}</EuiSplitPanel.Inner>
-  </EuiSplitPanel.Outer>
+    </EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" css={bodyPanelStyles}>
+      {children}
+    </EuiPanel>
+  </EuiPanel>
 );
 
 export const SettingsSectionRow = ({
@@ -54,25 +67,31 @@ export const SettingsSectionRow = ({
   children: ReactNode;
   'data-test-subj'?: string;
 }) => (
-  <EuiDescribedFormGroup
-    fullWidth
-    ratio="half"
-    title={
-      titleAdornment ? (
+  <EuiFlexGroup alignItems="flexStart" gutterSize="xl" data-test-subj={dataTestSubject}>
+    <EuiFlexItem grow={1}>
+      {titleAdornment ? (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <h4>{title}</h4>
+            <EuiText size="m">
+              <h4>{title}</h4>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{titleAdornment}</EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <h4>{title}</h4>
-      )
-    }
-    titleSize="xxs"
-    description={description}
-    data-test-subj={dataTestSubject}
-  >
-    {children}
-  </EuiDescribedFormGroup>
+        <EuiText size="m">
+          <h4>{title}</h4>
+        </EuiText>
+      )}
+      {description && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            {description}
+          </EuiText>
+        </>
+      )}
+    </EuiFlexItem>
+    <EuiFlexItem grow={1}>{children}</EuiFlexItem>
+  </EuiFlexGroup>
 );

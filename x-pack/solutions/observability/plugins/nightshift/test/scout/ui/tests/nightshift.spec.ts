@@ -64,7 +64,9 @@ test.describe(
 
       await page.testSubj.locator('nightshiftSettingsTab-investigations').click();
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
-      await expect(page.testSubj.locator('nightshiftRunLimitsEnforcementSwitch')).toBeVisible();
+      await expect(
+        page.testSubj.locator('nightshiftRunLimitEnabledSwitch-investigation')
+      ).toBeVisible();
     });
   }
 );
