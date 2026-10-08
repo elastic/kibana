@@ -13,7 +13,6 @@ import {
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
-  nullOnFailure,
 } from '../common';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { buildKeepClause, buildLookupJoinClause, esc, riskScoreIndexOf, toList } from './esql';
@@ -160,8 +159,7 @@ const riskScoreChangeEnricher: PageEnricher = {
     const entityIds = entityIdsOf(pageRows);
     if (!entityIds.length) return new Map();
 
-    const rows = await nullOnFailure(runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds)));
-    if (!rows) return null;
+    const rows = await runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds));
 
     const byId = new Map(
       rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])

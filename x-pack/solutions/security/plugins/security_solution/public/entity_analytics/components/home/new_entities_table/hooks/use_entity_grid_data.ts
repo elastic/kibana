@@ -16,6 +16,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type {
+  EnrichedRows,
   TimeRange,
   RowsMode,
   EntityGridResponse,
@@ -35,6 +36,11 @@ import {
   toSortValue,
 } from '../common';
 import { PAGE_ENRICHERS, findSortQuerySpec } from '../grid_columns';
+
+const ENRICH_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.enrichError',
+  { defaultMessage: 'Some columns of the entities table could not be loaded' }
+);
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -386,8 +392,8 @@ export const useEntityGridData = (options: UseEntityGridDataOptions) => {
       shellUpdatedAt: shellQuery.dataUpdatedAt,
       anomalyJobIdsKey,
     }),
-    async ({ signal }): Promise<Row[]> => {
-      if (!concreteEntityIndexName || !shellRows) return [];
+    async ({ signal }): Promise<EnrichedRows> => {
+      if (!concreteEntityIndexName || !shellRows) return { rows: [], errors: [] };
 
       return enrichEntityRows(
         shellRows,
@@ -414,11 +420,13 @@ export const useEntityGridData = (options: UseEntityGridDataOptions) => {
 
   // Prefer shell (empties the grid), then count / enrich — one toast when several fail together.
   useErrorToast(GRID_QUERY_ERROR_TITLE, shellQuery.error ?? countQuery.error ?? enrichQuery.error);
+  // Columns whose enricher failed show no value; say so, as an empty cell also means none.
+  useErrorToast(ENRICH_ERROR_TITLE, enrichQuery.data?.errors[0]);
 
   const { rows, isEnriching } = selectPageRows({
     shellRows,
     isShellPrevious: shellQuery.isPreviousData,
-    enrichedRows: enrichQuery.data,
+    enrichedRows: enrichQuery.data?.rows,
     isEnrichPrevious: enrichQuery.isPreviousData,
     isEnrichFetching: enrichQuery.isFetching,
   });

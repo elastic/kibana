@@ -14,7 +14,7 @@ import {
   lookbackCutoff,
   toList,
 } from './esql';
-import { entityIdsOf, getEntityId, getNumber, ANOMALY_COUNT_FIELD, nullOnFailure } from '../common';
+import { entityIdsOf, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
 import { buildEntitiesInViewConditions, buildEntitiesInViewCountQuery } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
@@ -93,8 +93,7 @@ const anomalyCountEnricher: PageEnricher = {
     const entityIds = entityIdsOf(pageRows);
     if (!entityIds.length) return new Map();
 
-    const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, pageRows)));
-    if (!rows) return null;
+    const rows = await runQuery(buildAnomalyCountEnrichQuery(args, pageRows));
 
     const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
     return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? 0 }]));

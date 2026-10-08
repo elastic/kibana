@@ -21,7 +21,6 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   LAST_SEEN_ALERT_FIELD,
-  nullOnFailure,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import {
@@ -204,10 +203,7 @@ const alertsEnricher: PageEnricher = {
     if (!entityIds.length) return new Map();
 
     const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
-    const rows = await nullOnFailure(
-      runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity))
-    );
-    if (!rows) return null;
+    const rows = await runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity));
 
     const byId = new Map(rows.map((r) => [getEntityId(r), r]));
     return new Map(

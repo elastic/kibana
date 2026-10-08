@@ -6,7 +6,7 @@
  */
 
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
-import { entityIdsOf, nullOnFailure } from '../common';
+import { entityIdsOf } from '../common';
 import type { RunContext, PageEnricher, ColumnQuerySpec } from '../common';
 
 export const CASE_COUNT_FIELD = 'case_count';
@@ -16,14 +16,12 @@ const batchCaseCounts = async (
   entityIds: readonly string[]
 ): Promise<Map<string, number>> => {
   if (entityIds.length === 0) return new Map();
-  const result = await nullOnFailure(
-    http.post<Record<string, number>>(ENTITY_GRID_CASES_INTERNAL_URL, {
-      body: JSON.stringify({ entity_ids: entityIds }),
-      version: '1',
-      signal,
-    })
-  );
-  return new Map(Object.entries(result ?? {}));
+  const result = await http.post<Record<string, number>>(ENTITY_GRID_CASES_INTERNAL_URL, {
+    body: JSON.stringify({ entity_ids: entityIds }),
+    version: '1',
+    signal,
+  });
+  return new Map(Object.entries(result));
 };
 
 const caseCountEnricher: PageEnricher = {

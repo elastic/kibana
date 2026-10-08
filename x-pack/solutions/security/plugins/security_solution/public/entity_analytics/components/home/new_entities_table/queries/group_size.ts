@@ -13,7 +13,6 @@ import {
   ENTITY_ID_FIELD,
   GROUP_SIZE_FIELD,
   RESOLVED_TO_FIELD,
-  nullOnFailure,
 } from '../common';
 import {
   ENTITY_TYPE_FILTER,
@@ -386,8 +385,7 @@ const groupSizeEnricher: PageEnricher = {
     const entityIds = [...new Set(entityIdsOf(pageRows))];
     if (!entityIds.length) return new Map();
 
-    const rows = await nullOnFailure(runQuery(buildGroupSizeEnrichQuery(args, entityIds)));
-    if (!rows) return null;
+    const rows = await runQuery(buildGroupSizeEnrichQuery(args, entityIds));
 
     const byGroupKey = new Map(
       rows.map((r) => [getString(r, 'group_key'), getNumber(r, GROUP_SIZE_FIELD)])

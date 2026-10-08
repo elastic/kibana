@@ -11,6 +11,7 @@ import { enrichEntityRows } from '../common';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
 import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
 import { alertCountQuerySpec } from './alerts';
+import { anomalyCountQuerySpec } from './anomalies';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
@@ -222,10 +223,14 @@ describe('entities grid query builders', () => {
         },
       ]);
 
-      const enriched = await enrichEntityRows(rows, BASE_ARGS, createRunContext(runQuery), [
-        alertsEnricher,
-      ]);
+      const { rows: enriched, errors } = await enrichEntityRows(
+        rows,
+        BASE_ARGS,
+        createRunContext(runQuery),
+        [alertsEnricher]
+      );
 
+      expect(errors).toEqual([]);
       expect(enriched.map(({ 'entity.id': id, ...rest }) => [id, rest])).toEqual([
         [
           'host:h-1',
@@ -270,16 +275,34 @@ describe('entities grid query builders', () => {
       expect(runQuery).not.toHaveBeenCalled();
     });
 
-    it('leaves the fields of a failed enricher unset', async () => {
-      const runQuery = jest.fn(async (_query: string): Promise<Row[]> => {
-        throw new Error('boom');
+    it('leaves the fields of a failed enricher unset and returns its error', async () => {
+      const error = new Error('boom');
+      const runQuery = jest.fn(async (query: string): Promise<Row[]> => {
+        if (query.includes('alerts-security')) throw error;
+        return [{ 'entity.id': 'host:h-1', anomaly_count: 2 }];
       });
 
-      const enriched = await enrichEntityRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [
-        alertsEnricher,
-      ]);
+      const { rows, errors } = await enrichEntityRows(
+        PAGE_ROWS,
+        BASE_ARGS,
+        createRunContext(runQuery),
+        [alertsEnricher, anomalyCountQuerySpec.enricher]
+      );
 
-      expect(enriched).toEqual(PAGE_ROWS);
+      expect(errors).toEqual([error]);
+      expect(rows[0]).not.toHaveProperty('alert_count');
+      expect(rows[0]).toHaveProperty('anomaly_count', 2);
+    });
+
+    it('rejects when the enrichers are aborted', async () => {
+      const abort = Object.assign(new Error('aborted'), { name: 'AbortError' });
+      const runQuery = jest.fn(async (_query: string): Promise<Row[]> => {
+        throw abort;
+      });
+
+      await expect(
+        enrichEntityRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [alertsEnricher])
+      ).rejects.toBe(abort);
     });
   });
 });

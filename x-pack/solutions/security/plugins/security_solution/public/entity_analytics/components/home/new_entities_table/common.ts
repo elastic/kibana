@@ -117,9 +117,9 @@ export interface RunContext {
 }
 
 /** Fields an enricher read, per entity id; `null` when its query failed. */
-export type EnrichedFields = ReadonlyMap<string, Row> | null;
+export type EnrichedFields = ReadonlyMap<string, Row>;
 
-/** Reads computed fields of the page rows after the sort query. */
+/** Reads computed fields of the page rows after the sort query. It rejects when it fails. */
 export interface PageEnricher {
   /** Row fields it reads. */
   fields: readonly string[];
@@ -232,26 +232,43 @@ export interface EntityGridResponse {
 const lacksFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
   fields.some((field) => rows.some((row) => !(field in row)));
 
+export interface EnrichedRows {
+  rows: Row[];
+  /** Errors of the enrichers that failed. Their fields stay unset, so they read as unknown. */
+  errors: unknown[];
+}
+
 /**
- * Copies of `rows` with the fields of every enricher they lack. A failed enricher leaves its
- * fields unset.
+ * Copies of `rows` with the fields of every enricher they lack. One enricher failing doesn't
+ * fail the page: its error is returned with the rows. An abort still rejects: the query key
+ * changed and the caller drops the result.
  */
 export const enrichEntityRows = async (
   rows: readonly Row[],
   args: QueryArgs,
   ctx: RunContext,
   enrichers: readonly PageEnricher[]
-): Promise<Row[]> => {
-  const results = await Promise.all(
+): Promise<EnrichedRows> => {
+  const settled = await Promise.allSettled(
     enrichers
       .filter((enricher) => lacksFields(rows, enricher))
       .map(({ read }) => read(rows, args, ctx))
   );
-  return rows.map((row) => {
-    const id = getEntityId(row);
-    return results.reduce<Row>(
-      (merged, fields) => ({ ...merged, ...(id != null ? fields?.get(id) : undefined) }),
-      { ...row }
-    );
-  });
+  const results: EnrichedFields[] = [];
+  const errors: unknown[] = [];
+  for (const result of settled) {
+    if (result.status === 'fulfilled') results.push(result.value);
+    else if (isAbortError(result.reason)) throw result.reason;
+    else errors.push(result.reason);
+  }
+  return {
+    rows: rows.map((row) => {
+      const id = getEntityId(row);
+      return results.reduce<Row>(
+        (merged, fields) => ({ ...merged, ...(id != null ? fields.get(id) : undefined) }),
+        { ...row }
+      );
+    }),
+    errors,
+  };
 };

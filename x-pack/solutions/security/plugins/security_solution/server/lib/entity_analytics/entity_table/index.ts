@@ -45,9 +45,10 @@ export const registerEntityGridCasesRoute = ({
         try {
           const [coreStart] = await getStartServices();
           const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
-          const counts = await batchCaseCounts(logger, soClient, request.body.entity_ids);
+          const counts = await batchCaseCounts(soClient, request.body.entity_ids);
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {
+          logger.error(`Failed to count cases of entities: ${err}`);
           const error = transformError(err);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
