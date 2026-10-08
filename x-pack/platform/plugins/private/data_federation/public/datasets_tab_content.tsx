@@ -52,6 +52,17 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
 
   const dataSourceNames = useMemo(() => dataSources.map((ds) => ds.name).sort(), [dataSources]);
 
+  const refreshDataSets = useCallback(async () => {
+    try {
+      await loadDataSets();
+    } catch (e) {
+      toasts.addDanger({
+        title: mainTranslations.refreshDataSetsErrorTitle,
+        text: getFlyoutSaveErrorMessage(e),
+      });
+    }
+  }, [loadDataSets, toasts]);
+
   const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
     setPendingDeleteDataSet(item);
     setDeleteDataSetError(null);
@@ -88,7 +99,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       await datasetsClient.delete(pendingDeleteDataSet.name);
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
-      void loadDataSets();
+      void refreshDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetError(message);
@@ -99,7 +110,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [datasetsClient, loadDataSets, pendingDeleteDataSet, toasts]);
+  }, [datasetsClient, pendingDeleteDataSet, refreshDataSets, toasts]);
 
   const confirmDeleteDataSets = useCallback(async () => {
     if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
@@ -112,7 +123,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
       setSelectedDataSets([]);
       setPendingDeleteDataSets(null);
-      void loadDataSets();
+      void refreshDataSets();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSetsError(message);
@@ -123,7 +134,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSets(false);
     }
-  }, [datasetsClient, loadDataSets, pendingDeleteDataSets, toasts]);
+  }, [datasetsClient, pendingDeleteDataSets, refreshDataSets, toasts]);
 
   return (
     <>
