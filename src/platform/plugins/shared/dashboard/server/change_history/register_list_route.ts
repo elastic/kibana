@@ -94,14 +94,10 @@ export const registerHistoryListRoute = (
       }
       const spaceId = spacesService?.getSpaceId(req) ?? 'default';
 
-      const { total, items } = await client.getHistory(
-        spaceId,
-        'dashboard',
-        req.params.id
-        // {
-        // additionalFilters: [{ term: { 'event.action': 'dashboard_update' } }],
-        // }
-      );
+      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
+        size: req.query.per_page,
+        from: req.query.page,
+      });
 
       const [coreStart] = await coreSetup.getStartServices();
       const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
