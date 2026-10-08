@@ -168,6 +168,7 @@ function makeEcfReturn(
     hasAnyEcf: overrides.hasAnyEcf ?? false,
     isDone: overrides.isDone ?? false,
     ecfServiceIds: new Set(),
+    stackArns: overrides.stackArns ?? {},
     sectionProps: {
       ecfUnifiedConfigs: [],
       ecfOtelConfigs: [],
