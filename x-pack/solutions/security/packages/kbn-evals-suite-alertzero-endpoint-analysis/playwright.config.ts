@@ -6,4 +6,8 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
-export default createPlaywrightEvalsConfig({ testDir: './evals' });
+export default createPlaywrightEvalsConfig({
+  testDir: './evals',
+  // L3 waits up to 17 minutes for the child workflow; the 5 minute default aborts it first.
+  timeout: 30 * 60_000,
+});

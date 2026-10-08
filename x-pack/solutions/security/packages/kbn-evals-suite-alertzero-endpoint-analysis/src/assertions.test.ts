@@ -14,7 +14,11 @@ import { analysisInputValidator, assertAlertZeroContracts, workerWorkflowId } fr
 import { getCompleteWorkerSettingsSchema } from '@kbn/alertzero-common';
 import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 
-const expected = { host: 'AZ-EVAL-01', eventIds: ['az-1', 'az-2'], command: 'EncodedCommand' };
+const expected = {
+  host: 'AZ-EVAL-01',
+  eventIds: ['az-1', 'az-2'],
+  command: 'powershell.exe -EncodedCommand SQBFAFgA',
+};
 const findings = () => ({
   propose: false,
   rationale: 'Encoded PowerShell follows a document process.',
@@ -40,7 +44,7 @@ const findings = () => ({
     shas: [],
     ips: [],
     file_paths: [],
-    malicious_commands: [{ value: 'powershell -EncodedCommand AAA' }],
+    malicious_commands: [{ value: expected.command }],
     affected_hosts: [{ value: expected.host }],
     ransom_notes: [],
     encryption_markers: [],
@@ -111,19 +115,27 @@ describe('AlertZero L2 deterministic evidence', () => {
       )
     ).toThrow();
   });
-  it.each(['fabricated', 'empty', 'unordered', 'invalid_date', 'wrong_host', 'wrong_command'])(
-    'rejects %s evidence',
-    (mutation) => {
-      const value = findings();
-      if (mutation === 'fabricated') value.timeline.events[0].host = 'made-up';
-      if (mutation === 'empty') value.timeline.events = [];
-      if (mutation === 'unordered') value.timeline.events.reverse();
-      if (mutation === 'invalid_date') value.timeline.events[0].timestamp = 'not-a-date';
-      if (mutation === 'wrong_host') value.iocs.affected_hosts = [{ value: 'another-host' }];
-      if (mutation === 'wrong_command') value.iocs.malicious_commands = [{ value: 'benign' }];
-      expect(() => assertStructuredEvidence(value, expected)).toThrow();
+  it.each([
+    'fabricated',
+    'empty',
+    'unordered',
+    'invalid_date',
+    'wrong_host',
+    'wrong_command',
+    'token_only_command',
+  ])('rejects %s evidence', (mutation) => {
+    const value = findings();
+    if (mutation === 'fabricated') value.timeline.events[0].host = 'made-up';
+    if (mutation === 'empty') value.timeline.events = [];
+    if (mutation === 'unordered') value.timeline.events.reverse();
+    if (mutation === 'invalid_date') value.timeline.events[0].timestamp = 'not-a-date';
+    if (mutation === 'wrong_host') value.iocs.affected_hosts = [{ value: 'another-host' }];
+    if (mutation === 'wrong_command') value.iocs.malicious_commands = [{ value: 'benign' }];
+    if (mutation === 'token_only_command') {
+      value.iocs.malicious_commands = [{ value: 'fabricated -EncodedCommand AAAA' }];
     }
-  );
+    expect(() => assertStructuredEvidence(value, expected)).toThrow();
+  });
   it('rejects missing, failed and synthetic agent execution output', () => {
     expect(() => assertAnalysisExecution([], expected)).toThrow();
     const step: WorkflowStepExecutionDto = {

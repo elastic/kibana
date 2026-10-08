@@ -13,7 +13,7 @@ import {
   extractAgentConversationIds,
   readAgentToolCallsFromTraces,
 } from '@kbn/security-evals-workflow-traces';
-import { AlertZeroRuntime, seedAlertZeroEndpoint } from '../src/runtime';
+import { AlertZeroRuntime, pinAgenticConnector, seedAlertZeroEndpoint } from '../src/runtime';
 import { assertAnalysisExecution, assertPersistedProposal } from '../src/assertions';
 import { analysisWorkflowId, proposalWorkflowId, workerWorkflowId } from '../src/contracts';
 
@@ -51,11 +51,14 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
 
   evaluate(
     'L2 structured worker output and L3 real sweep composition',
-    async ({ esClient, traceEsClient, fetch, log }) => {
+    async ({ esClient, traceEsClient, fetch, log, connector }) => {
       const runtime = new AlertZeroRuntime(fetch);
       await runtime.assertInstalled();
-      const fixture = await seedAlertZeroEndpoint(esClient, fetch);
+      const restoreInference = await pinAgenticConnector(fetch, connector.id);
+      let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
       try {
+        const fixture = await seedAlertZeroEndpoint(esClient, fetch);
+        seededFixture = fixture;
         const seeded = await esClient.search<{ event: { id: string } }>({
           index: fixture.index,
           query: { term: { 'host.name': fixture.host } },
@@ -102,11 +105,19 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             (entry) => entry.conversationId
           ),
           log,
+          includeFailures: true,
         });
         assert(
           !calls.unavailable &&
             calls.toolCallIds.some((toolId) => toolId.startsWith('security.endpoint_forensic.')),
-          'No successful endpoint analysis agent tool trace'
+          'No endpoint analysis agent tool trace'
+        );
+        assert.deepEqual(
+          (calls.failedToolCallIds ?? []).filter((toolId) =>
+            toolId.startsWith('security.endpoint_forensic.')
+          ),
+          [],
+          'Endpoint forensic tool calls failed'
         );
         const attachments = await fetch<{ attachments: Array<{ id: string }> }>(
           `/api/agent_builder/conversations/${encodeURIComponent(
@@ -126,7 +137,8 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         );
       } finally {
         await runtime.cancelAll();
-        await fixture.cleanup();
+        await seededFixture?.cleanup();
+        await restoreInference();
       }
     }
   );
@@ -149,7 +161,6 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         category: 'endpoint_analysis',
         impact: 'medium',
         confidence: 'high',
-        waitForDecision: true,
         autoApprove: false,
         expiresIn: '1h',
       });

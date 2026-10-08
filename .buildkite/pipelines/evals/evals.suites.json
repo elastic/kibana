@@ -450,7 +450,8 @@
       ],
       "ciLabels": [
         "evals:alertzero-endpoint-analysis"
-      ]
+      ],
+      "serverConfigSet": "evals_alertzero_endpoint_analysis"
     },
     {
       "id": "agent-builder-dashboards",
