@@ -23,6 +23,7 @@ import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
 import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
+import { toServiceAccountGrantError } from '../service_account_grant_error';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -103,7 +104,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      throw toServiceAccountGrantError(e, this.getCurrentUser(request)) ?? e;
     }
 
     return result;

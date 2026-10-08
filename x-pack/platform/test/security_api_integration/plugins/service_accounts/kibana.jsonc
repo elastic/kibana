@@ -10,6 +10,9 @@
     "browser": false,
     "requiredPlugins": [
       "security"
+    ],
+    "optionalPlugins": [
+      "taskManager"
     ]
   }
 }
