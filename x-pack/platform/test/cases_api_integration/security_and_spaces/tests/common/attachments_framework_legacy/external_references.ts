@@ -17,9 +17,11 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import {
   defaultUser,
   postCaseReq,
-  postCommentUserReq,
   postExternalReferenceESReq,
   postExternalReferenceSOReq,
+  getUnifiedFilesAttachmentReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
 } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
@@ -35,11 +37,11 @@ import {
 
 /**
  * Legacy externalReference wire-shape coverage, ported from the former `.test`-based
- * `external_references.ts` onto real migrated types: `.files` (SO-backed) and `indicator`
+ * `external_references.ts` onto real mapped types: `.files` (SO-backed) and `indicator`
  * (ES-doc). Both are routed through `EXTERNAL_REFERENCE_TYPE_MAP` to the unified validator and
  * stored byte-clean, so the legacy round-trip stays lossless.
  *
- * Not ported (premise no longer holds for typed migrated subtypes): the arbitrary-metadata
+ * Not ported (premise no longer holds for typed mapped subtypes): the arbitrary-metadata
  * test (unified schemas are strict), the so<->doc update-restriction pair (`.files` and
  * `indicator` are distinct types, not one type toggling storage), and the registered-types
  * hash snapshot (the fixture registry-hash route was removed; unified snapshots cover it).
@@ -243,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceSOReq],
+        params: [postUnifiedCommentReq, getUnifiedFilesAttachmentReq()],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -286,7 +288,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceESReq],
+        params: [postUnifiedCommentReq, postUnifiedIndicatorReq],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -396,14 +398,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('400s when bulk creating a non registered external reference attachment type', async () => {
+    it('400s when bulk creating a non registered attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
         params: [
-          postExternalReferenceSOReq,
-          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+          getUnifiedFilesAttachmentReq(),
+          { ...getUnifiedFilesAttachmentReq(), type: 'not-exists' },
         ],
         expectedHttpCode: 400,
       });

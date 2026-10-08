@@ -20,7 +20,7 @@ const buildEvent = ({
   policyId,
   ruleIds = [],
   workflowIds = [],
-  episodeCount = 1,
+  alertCount = 1,
   actionGroupCount = 1,
   action = ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
   timestamp = '2026-05-05T10:00:00.000Z',
@@ -28,7 +28,7 @@ const buildEvent = ({
   policyId: string;
   ruleIds?: string[];
   workflowIds?: string[];
-  episodeCount?: number;
+  alertCount?: number;
   actionGroupCount?: number;
   action?: 'dispatched' | 'throttled';
   timestamp?: string;
@@ -42,7 +42,7 @@ const buildEvent = ({
     ],
     alerting_v2: {
       dispatcher: {
-        episode_count: episodeCount,
+        alert_count: alertCount,
         action_group_count: actionGroupCount,
         workflow_ids: workflowIds,
       },
@@ -74,8 +74,10 @@ const createMocks = () => {
   const rulesClient = {
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
   } as unknown as jest.Mocked<RulesClient>;
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
   const workflowsManagement = {
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIds,
+    getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
   const spaces = {
     spacesService: {
@@ -191,6 +193,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'my-space');
     });
 
@@ -212,6 +215,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1000,
       });
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
     });
 
@@ -223,6 +227,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: [] });
       expect(rulesClient.findRules).not.toHaveBeenCalled();
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default');
     });
 
@@ -299,26 +304,26 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
     });
 
-    describe('episodeIds filter', () => {
-      it('forwards the episodeIds through to the event log service', async () => {
+    describe('alertIds filter', () => {
+      it('forwards the alertIds through to the event log service', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1', 'ep-2'] });
+        await client.listExecutionHistory({ request, alertIds: ['ep-1', 'ep-2'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+          expect.objectContaining({ alertIds: ['ep-1', 'ep-2'] })
         );
       });
 
-      it('forwards episodeIds as undefined when not provided', async () => {
+      it('forwards alertIds as undefined when not provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: undefined })
+          expect.objectContaining({ alertIds: undefined })
         );
       });
     });
@@ -329,10 +334,10 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const request = httpServerMock.createKibanaRequest();
         const from = '2026-01-01T00:00:00.000Z';
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], from });
+        await client.listExecutionHistory({ request, alertIds: ['ep-1'], from });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ startDate: from, episodeIds: ['ep-1'] })
+          expect.objectContaining({ startDate: from, alertIds: ['ep-1'] })
         );
       });
 

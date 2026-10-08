@@ -12,11 +12,18 @@ tags:
 settings:
   # This run parks in WAITING_FOR_CHILD for as long as the proposal gate holds
   # the decision, and the engine's default 6h workflow timeout would cancel the
-  # review out from under the analyst. So this has to stay above the gate's own
-  # ceiling, which is `168h`: a 72h decision window, plus a second full 72h for
-  # a proposal re-parked just before its deadline, plus margin. A test pins the
-  # relationship, so raising the gate's ceiling fails here rather than silently
-  # cancelling reviews.
+  # review out from under the analyst. So this has to stay above the gate's
+  # default decision window: a 72h `expiresIn` that every re-park is bounded by,
+  # plus margin for an action approved just before it. A test pins the
+  # relationship against that deadline (not the gate's `settings.timeout`
+  # sentinel of `52w`), so raising a caller's `expiresIn` past this ceiling
+  # fails here rather than silently cancelling reviews.
+  #
+  # Sized for one gate. When the analyst approves the entry gate, a manual run
+  # waits for a second gate, and both together can take longer than this. Left at
+  # `176h` deliberately — it does not cover that path, but the ceiling runs no
+  # handler when it fires, so the margin is worth more here than arithmetic that
+  # matches a single gate exactly.
   timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: alerts are only tagged after the gate resolves,
@@ -118,6 +125,9 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
+  # list. The attachment shows the first 20 ids. The proposal text does not.
+  alerts_per_attachment: 20
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
   # the harvested alerts: a rule deleted and recreated under the same signature 404s
@@ -154,11 +164,13 @@ steps:
       metadata:
         status: open
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
-  # By-reference security.rule attachment: the framework resolves the rule once
-  # from its rule_id and snapshots it, recording the rule as it was when this
-  # review started. The fixed attachment id makes the refresh below deterministic.
+  # A snapshot of the rule as it was when this review started. The rule card reads
+  # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
+  # and `origin` survives the agent's edits to the card while the ids in `text` do
+  # not. The content is passed by value because resolving by origin looks the rule
+  # up by rule_id. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -166,8 +178,29 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       id: "tuned-rule"
       type: security.rule
-      origin: "{{ steps.fetch_rule.output.rule_id }}"
+      origin: "{{ inputs.rule_uuid }}"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
       description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # By value: the first 20 harvested false-positive ids. The schema rejects a
+  # longer list. A fixed id makes a retry of this run 409 instead of appending
+  # a second copy.
+  - name: attach_alerts
+    type: ai.attachment.add
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: fp-alerts
+      type: security.alerts
+      data:
+        alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
+      description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
@@ -176,83 +209,95 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      investigation_line: "**Investigation:** [Rule tuning: {{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
       fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
-      sample_alerts: "{% for alert_id in inputs.alert_ids limit: 5 %}[{{ alert_id }}](/s/{{ workflow.spaceId }}/app/security/alerts/redirect/{{ alert_id }}?index=.alerts-security.alerts-{{ workflow.spaceId }}){% unless forloop.last %}, {% endunless %}{% endfor %}"
 
-  # Manual autonomy entry gate: the sweep's findings are reported and nothing else
-  # happens until an analyst approves the review. No action, so approval is the whole
-  # lifecycle; a dismissal ends the run below. Assisted runs skip straight to
-  # diagnosis and meet only the proposal gate.
-  - name: propose_entry
-    type: workflow.execute
-    if: >-
+  # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
+  # mode skips this step and goes directly to diagnosis.
+  - name: entry_gate
+    type: if
+    condition: >-
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
-    with:
-      workflow-id: system-create-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: |-
-          **Review rule for tuning?**
+    steps:
+      - name: propose_entry
+        type: workflow.execute
+        with:
+          workflow-id: system-create-alertzero-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            # Raised before any diagnosis, so the comment's own heading is the only
+            # name this proposal has.
+            title: Review rule for tuning
+            comment: |-
+              **Review rule for tuning?**
 
-          {{ steps.compose_evidence.output.rule_line }}
-          {{ steps.compose_evidence.output.investigation_line }}
+              {{ steps.compose_evidence.output.rule_line }}
 
-          **Why this rule was picked**
-          {{ steps.compose_evidence.output.fp_summary }}
+              **Why this rule was picked**
+              {{ steps.compose_evidence.output.fp_summary }}
 
-          **Sample alerts**
-          {{ steps.compose_evidence.output.sample_alerts }}
+              **On approval**
+              The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
+            impact: low
+            # No action, so no inherited category, and the queue drops an
+            # uncategorised proposal. Grouped with the tuning proposal that follows.
+            category: configure
 
-          **On approval**
-          The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
-        impact: low
-        # No action, so no inherited category, and the queue drops an
-        # uncategorised proposal. Grouped with the tuning proposal that follows.
-        category: configure
+      # Only an approval continues to diagnosis. Approval has no case (a case must
+      # contain steps), so it goes to the next step. An expired proposal returns an
+      # empty decision, so the expression maps it to `expired`.
+      - name: entry_decision
+        type: switch
+        expression: "{% if steps.propose_entry.output.decision == 'dismissed' %}dismissed{% elsif steps.propose_entry.output.decision != 'approved' %}expired{% endif %}"
+        cases:
+          - match: dismissed
+            steps:
+              # A declined review still retires its alerts, or the next sweep would
+              # open the same entry gate for the same alerts again.
+              - name: mark_alerts_declined
+                type: security.setAlertTags
+                with:
+                  alert_ids: "${{ inputs.alert_ids }}"
+                  tags_to_add:
+                    - "{{ consts.reviewed_tag }}"
+                    - "{{ consts.dismissed_tag }}"
 
-  - name: record_entry
-    type: data.set
-    with:
-      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
+              - name: close_investigation_declined
+                type: ai.conversation.metadata.patch
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  updates:
+                    status: closed
+                    close_reason: other
+                    verdict: "Analyst declined the tuning review."
+                on-failure:
+                  continue: true
 
-  # A declined review still retires its alerts, or the next sweep would open the
-  # same entry gate for the same alerts again.
-  - name: mark_alerts_declined
-    type: security.setAlertTags
-    if: "${{ steps.record_entry.output.declined == true }}"
-    with:
-      alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add:
-        - "{{ consts.reviewed_tag }}"
-        - "{{ consts.dismissed_tag }}"
+              # workflow.output terminates the run, so no later step needs to check
+              # the entry decision.
+              - name: stop_declined
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  approved: false
+                  applied: false
 
-  - name: close_investigation_declined
-    type: ai.conversation.metadata.patch
-    if: "${{ steps.record_entry.output.declined == true }}"
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      updates:
-        status: closed
-        close_reason: other
-        verdict: "Analyst declined the tuning review."
-    on-failure:
-      continue: true
-
-  # workflow.output terminates the run, so no later step needs to check the entry
-  # decision.
-  - name: stop_declined
-    type: workflow.output
-    if: "${{ steps.record_entry.output.declined == true }}"
-    status: completed
-    with:
-      rule_uuid: "{{ inputs.rule_uuid }}"
-      approved: false
-      applied: false
+          # No answer. Stop the run. The alerts stay untagged and the investigation
+          # stays open, so the next sweep asks again.
+          - match: expired
+            steps:
+              - name: stop_expired
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  approved: false
+                  applied: false
 
   - name: diagnose_rule
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_agentic
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -264,6 +309,13 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids:
+          - investigate-rule
       # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
       # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
@@ -532,8 +584,29 @@ steps:
                 enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
+  # Turns a proposed exception into a filters array (the rule's own filters plus one
+  # excluding matching alerts) instead of creating the exception itself, so the change
+  # can be backtested the same way a query change is below. Only the entries matter here;
+  # eligibility to actually run the backtest is decided by can_preview_query_change, same
+  # gate the query arm uses, since both reuse the same preview mechanism.
+  - name: build_exception_filter
+    type: security.buildExceptionEntriesFilter
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+    on-failure:
+      continue: true
+
   # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query auto-apply is restricted.
+  # the preview API cannot conditionally omit, so query and exception auto-apply is
+  # restricted the same way (both reuse this same preview mechanism below). The type
+  # check alone excludes saved-query rules, which carry no inline query. The exception arm additionally
+  # requires its filter to have been built: falling back to the rule's own filters
+  # would backtest the unchanged rule and present it as the exception's result.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
@@ -542,7 +615,10 @@ steps:
         and steps.fetch_rule.output.enabled == true }}
     with:
       supported: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.build_exception_filter.error == null
+              and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
@@ -588,10 +664,19 @@ steps:
           type: query
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
-          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          # Only the query arm changes the query itself; the exception arm backtests via
+          # filters instead, so it previews the rule's own unchanged query.
+          query: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
-          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          # build_exception_filter's output (the rule's filters plus the negated exception
+          # clause) takes precedence when it ran; otherwise this previews unchanged, same
+          # as the query arm.
+          filters: >-
+            ${{ steps.build_exception_filter.output.filters
+              | default: steps.fetch_rule.output.filters
+              | default: consts.no_items }}
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
           severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
@@ -629,15 +714,92 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
+  # Diagnosis notes go to the investigation rather than into the proposal, which
+  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
+  # without running the investigation agent. Called directly rather than through the
+  # journal note workflow, because this run allows one synchronous child per wake-up
+  # cycle and the proposal gate below is that child. User messages render as plain
+  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
+  # analyst still sees it.
+  - name: post_fp_pattern
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          False positive pattern for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
+  - name: post_reasoning
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.reasoning != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.reasoning }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
+  # A risk score change has no backtest, so this note explains what approving does.
+  - name: post_risk_score_note
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+
+          A risk score change does not change which alerts fire. Approving re-labels the rule's future alerts from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}; existing alerts keep their current severity. The false positive count in the proposal is the evidence for this change.
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
+      # The same expression the comment's heading uses, lifted out so the
+      # proposal carries it as a field the queue can render as plain text.
+      # Truncated because the diagnosis schema does not bound its title and the
+      # proposal step rejects anything longer; the comment below keeps it whole.
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
       comment: |-
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}Manual change, no automated action{% endcase %}
-        {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
         {{ steps.compose_evidence.output.fp_summary }}
@@ -647,15 +809,16 @@ steps:
 
         **Summary**
         {{ steps.diagnose_rule.output.structured_output.summary }}
+        {% if steps.post_fp_pattern.error %}
 
         **False positive pattern**
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        {% endif %}
+        {% if steps.post_reasoning.error %}
 
         **Reasoning**
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
-
-        **Sample alerts**
-        {{ steps.compose_evidence.output.sample_alerts }}
+        {% endif %}
 
         **Proposed change**
         {% case steps.diagnose_rule.output.structured_output.change_type %}
@@ -676,10 +839,8 @@ steps:
         {% endfor %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
         {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
@@ -703,7 +864,8 @@ steps:
         Apply the recommended change in the Detection Rules UI.
         {% endcase %}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query"
+          or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
@@ -713,15 +875,16 @@ steps:
         current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
         proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
-        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
+        Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
-        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a query rule, or uses a data view, timestamp
-        override, or alert suppression, which the preview API cannot reproduce.
-        Approving still applies the proposed query, so judge it on the query itself
+        No backtest: this rule is not a plain query rule (saved query, data view,
+        timestamp override, or alert suppression are not supported by the preview),
+        or the proposed exception could not be converted into a preview filter.
+        Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
         {% endif %}
         {% endif %}
@@ -742,9 +905,10 @@ steps:
           - name: propose_query
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -761,9 +925,10 @@ steps:
           - name: propose_risk_score
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -778,12 +943,30 @@ steps:
       # Not a rule edit: an exception item has its own action.
       - match: exception
         steps:
+          # The proposed item as its own card, laid out the way the Detection Rules
+          # UI lays out an exception. Its name and entries must match the action
+          # input below, so the card shows exactly what approving creates.
+          - name: attach_exception
+            type: ai.attachment.add
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              id: "proposed-exception"
+              type: security.exception
+              data:
+                name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
+                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+              description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
+              render_inline: true
+            on-failure:
+              continue: true
           - name: propose_exception
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -812,9 +995,10 @@ steps:
           - name: propose_threshold
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -832,9 +1016,10 @@ steps:
           - name: propose_schedule
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -852,9 +1037,10 @@ steps:
       - name: propose_manual
         type: workflow.execute
         with:
-          workflow-id: system-create-proposal
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: "{{ steps.compose_proposal.output.title }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.
@@ -916,9 +1102,9 @@ steps:
     on-failure:
       continue: true
 
-  # security.rule attachments resolve once and never refresh, so after the patch
-  # the snapshot would silently show the pre-tuning rule. This writes the patched
-  # rule as version 2; version 1 keeps the before state in the attachment history.
+  # The rule attachment is a snapshot and never refreshes, so after the patch it
+  # would silently show the pre-tuning rule. This writes the patched rule as
+  # version 2; version 1 keeps the before state in the attachment history.
   - name: refresh_rule_attachment
     type: ai.attachment.update
     if: >-
@@ -932,6 +1118,7 @@ steps:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"
       description: "Rule after applied tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 

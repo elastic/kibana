@@ -5,54 +5,69 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import { impactSchema, type Impact, type ImpactEntity } from '../../../common/impact/impact';
+import {
+  defineInvestigationAttachment,
+  formatEvidenceForAgent,
+} from '../../investigation_attachments';
+import {
+  impactStorageSettings,
+  type ImpactDocument,
+  type ImpactStorageSettings,
+} from '../storage/impact_storage';
+
+const indent = (text: string): string =>
+  text
+    .split('\n')
+    .map((line) => `  ${line}`)
+    .join('\n');
 
 const formatEntity = (entity: ImpactEntity): string => {
   const details = [entity.name, entity.type].filter(
     (value): value is string => value !== undefined
   );
-  return details.length > 0 ? `${entity.id} (${details.join(', ')})` : entity.id;
+  const label = details.length > 0 ? `${entity.id} (${details.join(', ')})` : entity.id;
+  return entity.evidence
+    ? `- ${label}\n${indent(formatEvidenceForAgent(entity.evidence))}`
+    : `- ${label}`;
 };
 
-const formatImpactForAgent = (data: Impact): string => {
-  const lines = [
-    '## Investigation impact',
-    `Conversation: ${data.conversationId}`,
-    `Entities: ${data.entities.map(formatEntity).join(', ')}`,
-  ];
+export const formatImpactForAgent = (data: Impact): string => {
+  const entities = data.entities ?? [];
+  const lines = ['## Investigation impact', `Conversation: ${data.conversationId}`];
+  if (data.summary) {
+    lines.push(`Summary: ${data.summary}`);
+  }
+  if (data.evidence) {
+    lines.push(`Evidence:\n${indent(formatEvidenceForAgent(data.evidence))}`);
+  }
+  if (entities.length > 0) {
+    lines.push(`Entities:\n${entities.map(formatEntity).join('\n')}`);
+  }
   return lines.join('\n');
 };
 
 /**
- * Server-side attachment type for investigation impact.
- *
- * `isReadonly: true` prevents the agent from creating or updating these with
- * `attachment_add` / `attachment_update`. Producers persist the Impact document;
- * nothing in this plugin stamps the attachment onto a conversation yet.
+ * `investigation_impact`: one document per space and conversation in
+ * `.kibana-investigation-impact`. Origin and attachment id are the document id.
  */
-export const impactAttachmentType: AttachmentTypeDefinition<typeof IMPACT_ATTACHMENT_TYPE, Impact> =
-  {
-    id: IMPACT_ATTACHMENT_TYPE,
-    isReadonly: true,
-    validate: (input) => {
-      const result = impactSchema.safeParse(input);
-      if (result.success) {
-        return { valid: true, data: result.data };
-      }
-      return { valid: false, error: result.error.message };
-    },
-    format: (attachment) => ({
-      getRepresentation: () => ({
-        type: 'text',
-        value: formatImpactForAgent(attachment.data),
-      }),
-    }),
-    getAgentDescription: () =>
-      'Investigation impact is the set of entities (users, hosts, services) an investigation is about.\n\n' +
-      'Rules:\n' +
-      '- Treat entity ids as opaque; do not invent labels or additional entities.\n' +
-      '- Whenever you mention impact in your response, render it inline with ' +
-      '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id).',
-  };
+export const impactAttachment = defineInvestigationAttachment<
+  typeof IMPACT_ATTACHMENT_TYPE,
+  ImpactStorageSettings,
+  ImpactDocument
+>({
+  type: IMPACT_ATTACHMENT_TYPE,
+  storageSettings: impactStorageSettings,
+  // Impact documents were stored before the factory, under ids without the type.
+  legacyUntypedDocumentIds: true,
+  schema: impactSchema,
+  // The investigation overview shows impact; the chat does not.
+  hiddenInConversation: true,
+  format: formatImpactForAgent,
+  agentDescription:
+    'Investigation impact is what an investigation found was affected: a summary, its evidence, and the entities (users, hosts, services) involved.\n\n' +
+    'Rules:\n' +
+    '- Treat entity ids as opaque; do not invent labels or additional entities.\n' +
+    "- The investigation's overview shows the impact, not the chat; do not render it inline.",
+});

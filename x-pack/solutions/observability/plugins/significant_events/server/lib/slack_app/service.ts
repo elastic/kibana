@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/server';
 import {
   RelayRequestError,
   type InMemoryConnector,
@@ -22,7 +25,7 @@ import type {
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../common/feature_flags';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import {
   RELAY_APP_CONNECTION_SO_ID,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -55,6 +58,8 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
+  // Events are on for this connector.
+  isInboundEventsEnabled: true,
 });
 
 /** Pagination options for a single page of connected channels. */
@@ -78,21 +83,12 @@ export class SlackAppService {
     this.logger = server.logger.get('slack-app');
   }
 
-  /**
-   * feature flag on + `xpack.actions.relay` configured (the injected singleton client exists) +
-   * agentBuilder available on this deployment.
-   */
   private async getRelayClient(): Promise<RelayClientContract | undefined> {
     const { relayClient, agentBuilder } = this.server;
     if (!relayClient || !agentBuilder) {
       return undefined;
     }
-    const enabled = await firstValueFrom(
-      this.server.core.featureFlags.getBooleanValue$(
-        STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-        false
-      )
-    );
+    const enabled = await isSignificantEventsFeatureFlagEnabled(this.server.core.featureFlags);
     return enabled ? relayClient : undefined;
   }
 
@@ -217,6 +213,44 @@ export class SlackAppService {
     return error instanceof Error ? error.message : String(error);
   }
 
+  /**
+   * Relay posts every turn to `kibana_url`, which has no space prefix, so turns run in the default
+   * space whatever space Connect was clicked from. Agent Builder accepts an unknown agent id and
+   * only fails the run, so the agent is declared only when it exists and is available, checked with the minted key
+   * because that is the credential Relay presents.
+   */
+  private async resolveSlackAgentId(encodedApiKey: string): Promise<string | undefined> {
+    const { agentBuilder } = this.server;
+    if (!agentBuilder) {
+      return undefined;
+    }
+    const request = kibanaRequestFactory({
+      headers: { authorization: `ApiKey ${encodedApiKey}` },
+      path: '/',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    try {
+      const registry = await agentBuilder.agents.getRegistry({ request });
+      // `get` rather than `has`: only `get` runs the agent's availability gate, which rejects runs
+      // the same way Relay's turns would be rejected.
+      await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      return NIGHTSHIFT_INVESTIGATION_AGENT_ID;
+    } catch (error) {
+      if (isAgentNotFoundError(error) || isAgentUnavailableError(error)) {
+        this.logger.debug(
+          `${NIGHTSHIFT_INVESTIGATION_AGENT_ID} is not installed in the default space, Slack turns will use the default agent`
+        );
+        return undefined;
+      }
+      this.logger.warn(
+        `Failed to look up ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}, Slack turns will use the default agent: ${this.toErrorMessage(
+          error
+        )}`
+      );
+    }
+    return undefined;
+  }
+
   async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
     const relayClient = await this.getRelayClient();
     if (!relayClient) {
@@ -294,6 +328,8 @@ export class SlackAppService {
     // has a valid LicenseType value.
     const license = await this.server.licensing.getLicense();
 
+    const agentId = await this.resolveSlackAgentId(encodedApiKey);
+
     // The key is the caller-supplied `kibana_api_key` (relay-service#78): the Relay
     // stores it encrypted against the binding and presents it to Agent Builder. It is
     // never returned by any Relay endpoint, so Kibana stores no secret at all.
@@ -305,6 +341,7 @@ export class SlackAppService {
         kibana_version: this.server.kibanaVersion,
         license_info: license.type ?? 'basic',
         ...(username ? { created_by_user_key: username } : {}),
+        ...(agentId ? { agent_id: agentId } : {}),
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);

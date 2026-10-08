@@ -35,11 +35,11 @@ interface YamlStep {
   if?: string;
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
-  // `ai.agent` step keys (coverage_review / rule_tuning_review pattern).
+  'agent-id'?: string;
   'connector-id-by-feature'?: string;
+  'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
-  'create-conversation'?: boolean;
   timeout?: string;
 }
 
@@ -116,11 +116,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(Object.keys(properties).sort()).toEqual(['attack_discovery_id', 'investigation_id']);
     });
 
-    it('requires both', () => {
-      expect((trigger?.inputs?.required ?? []).slice().sort()).toEqual([
-        'attack_discovery_id',
-        'investigation_id',
-      ]);
+    it('requires the attack and accepts a run with no Investigation', () => {
+      expect(trigger?.inputs?.required).toEqual(['attack_discovery_id']);
     });
 
     it('rejects anything else the caller sends', () => {
@@ -182,8 +179,14 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(JSON.stringify(stepIn('emit_result')?.with)).not.toContain('failed');
     });
 
-    it('never sets failed as a classification anywhere in the workflow', () => {
-      expect(JSON.stringify(stepIn('analyze')?.with)).not.toContain('failed');
+    // The prompt says "query failed", so the agent's message is the wrong place to
+    // scan for the classification. The enum the agent is allowed to return is.
+    it('does not let the agent return the review-derived failed state', () => {
+      const schema = stepIn('analyze')?.with?.schema as {
+        properties?: { verdict?: { enum?: string[] } };
+      };
+
+      expect(schema?.properties?.verdict?.enum).not.toContain('failed');
     });
 
     // The only terminal step, so the failure path cannot reach it: a failed run
@@ -197,7 +200,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // `## Rationale` section.
     it('keeps an absent rationale absent rather than empty', () => {
       expect(stepIn('emit_result')?.with?.rationale_markdown).toBe(
-        '${{ steps.resolve_analysis.output.rationale_markdown }}'
+        "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
       );
     });
 
@@ -300,7 +303,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
       const payloadValid = evaluate(stepIn('check_payload')?.with?.payload_valid, {
         consts: analysis.consts,
-        steps: { resolve_analysis: { output: { verdict, summary_markdown: summaryMarkdown } } },
+        steps: {
+          analyze: {
+            output: { structured_output: { verdict, summary_markdown: summaryMarkdown } },
+          },
+        },
       });
 
       return evaluate(guard?.if, {
@@ -369,9 +376,6 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('reads it from the space-scoped discovery index the data_generator route writes', () => {
-      // The data_generator route indexes each discovery behind the
-      // `.alerts-security.attack.discovery.alerts-<space>` alias; the `.adhoc…`
-      // alias is a different, empty backfill index.
       expect(loadAttack?.with?.index).toBe(
         '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
@@ -389,20 +393,34 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_investigation')?.type).toBe('ai.conversation.metadata.read');
     });
 
-    // A metadata READ plus, since the real analysis, one `ai.agent` call — but on
-    // the agent's OWN backing conversation, never this one: reading is fine,
-    // posting or waking the Investigation agent is not.
-    it('never targets the Investigation conversation', () => {
-      const touchingInvestigation = steps.filter(
-        (step) =>
-          step.name !== 'load_investigation' &&
-          JSON.stringify(step.with ?? {}).includes('inputs.investigation_id')
-      );
+    // A test can start from the attack alone. The review still passes the id when
+    // it opened a conversation, and that read stays a required source.
+    it.each([
+      ['reads the Investigation when the caller names one', 'inv-1', true],
+      ['skips the Investigation when the caller names none', undefined, false],
+      ['skips the Investigation when the caller names a blank one', '', false],
+    ] as const)('%s', (_label, investigationId, reads) => {
+      const condition = String(stepIn('load_investigation')?.if)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
 
-      expect(touchingInvestigation).toEqual([]);
-      expect(stepIn('load_investigation')?.with?.conversation_id).toBe(
-        '{{ inputs.investigation_id }}'
-      );
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(condition, {
+          inputs: { investigation_id: investigationId },
+        })
+      ).toBe(reads);
+    });
+
+    // A metadata READ of the Investigation, and the analysis agent on its own
+    // conversation. Posting to the Investigation, or running `ai.agent` against it,
+    // wakes the Investigation agent.
+    it('does not post to the Investigation', () => {
+      expect(
+        steps
+          .filter((step) => step.type.startsWith('ai.') && step.name !== 'load_investigation')
+          .map((step) => step.name)
+      ).toEqual(['analyze']);
     });
 
     // A required source, so a failure fails the run. Guessing a classification from
@@ -469,7 +487,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('bounds how long an analysis may run', () => {
-      expect(analysis.settings?.timeout).toBeDefined();
+      expect(analysis.settings?.timeout).toBe('10m');
     });
 
     // A dropped run hands its synchronous caller an empty output, which the review
@@ -480,174 +498,296 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
   });
 
-  // The real analysis body: bounded evidence, one tool-less `ai.agent` call on its
-  // own conversation, and structured output read back through `resolve_analysis`.
   describe('the analysis body', () => {
     const analyze = stepIn('analyze');
-    const schema = analyze?.with?.schema as
-      | {
-          type?: string;
-          properties?: Record<
-            string,
-            {
-              type?: string;
-              enum?: string[];
-              maxLength?: number;
-              minimum?: number;
-              maximum?: number;
-            }
-          >;
-          required?: string[];
-        }
-      | undefined;
 
-    it('classifies with one agent call', () => {
-      expect(analyze?.type).toBe('ai.agent');
+    it('is not a console stub', () => {
+      expect(steps.filter((step) => step.type === 'console')).toEqual([]);
     });
 
-    it('routes through the AlertZero agentic connector', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_agentic');
+    it('gathers the cited alerts before the agent runs', () => {
+      expect(stepNames.indexOf('require_cited_alerts')).toBeLessThan(stepNames.indexOf('analyze'));
     });
 
-    it('attributes cost to this workflow under the AlertZero parent', () => {
-      expect(analyze?.['plugin-id']).toBe('alertzero_attack_discovery_fp_tp');
-      expect(analyze?.['aggregate-by']).toBe('alertzero_parent');
+    it('fails the run when a cited alert is missing', () => {
+      expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
     });
 
-    // Its own backing conversation: against the Investigation's it would wake the
-    // Investigation agent.
-    it('runs on its own backing conversation', () => {
-      expect(analyze?.['create-conversation']).toBe(true);
-      expect(analyze?.with?.conversation_id).toBeUndefined();
-    });
-
-    // The evidence is pre-built and bounded, so the tool belt is dead weight and
-    // prompt cost (the #292579 batching rationale).
-    it('strips the tool belt the pre-built evidence does not need', () => {
-      expect(analyze?.with?.configuration_overrides).toEqual({
-        enable_elastic_capabilities: false,
-        tools: [],
-        skill_ids: [],
-      });
-    });
-
-    it('bounds how long one agent call may run', () => {
-      expect(analyze?.timeout).toBe('10m');
-    });
-
-    // An agent failure after the workflow retries degrades to `inconclusive` in
-    // `resolve_analysis` rather than failing the run.
-    it('continues past a failed agent call', () => {
-      expect(analyze?.['on-failure']?.continue).toBe(true);
-    });
-
-    it('asks for a bounded structured verdict', () => {
-      expect(schema?.type).toBe('object');
-      expect(schema?.properties?.verdict?.enum).toEqual([...CLASSIFICATIONS]);
-      expect(schema?.properties?.confidence?.minimum).toBe(0);
-      expect(schema?.properties?.confidence?.maximum).toBe(1);
-      expect(schema?.properties?.summary_markdown?.maxLength).toBe(8000);
-      expect(schema?.properties?.rationale_markdown?.maxLength).toBe(50000);
-      expect(schema?.required).toEqual(['verdict', 'summary_markdown']);
-    });
-
-    it('feeds the agent from the loaded document, not from caller input', () => {
-      expect(JSON.stringify(stepIn('prepare_evidence')?.with)).not.toContain(
-        'inputs.attack_discovery_id'
-      );
-    });
-
-    // The persisted AD document carries its data under the dot-prefixed
-    // `kibana.alert.attack_discovery.*` fields (transformToBaseAlertDocument;
-    // kbn-attack-discovery-schedules-common field_names.ts) — not under flat
-    // `attack_title`/`attack_summary`/`related_entities` names, which nothing
-    // writes.
-    it('reads the persisted kibana.alert.attack_discovery.* fields', () => {
-      const with_ = JSON.stringify(stepIn('prepare_evidence')?.with);
-      for (const field of [
-        'kibana.alert.attack_discovery.title',
-        'kibana.alert.attack_discovery.summary_markdown',
-        'kibana.alert.attack_discovery.details_markdown',
-        'kibana.alert.attack_discovery.entity_summary_markdown',
-        'kibana.alert.attack_discovery.alert_ids',
-      ]) {
-        expect(with_).toContain(field);
+    it.each(['load_entities', 'load_events'] as const)(
+      'continues when optional source %s fails',
+      (name) => {
+        expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
       }
-      expect(with_).not.toContain('_source.attack_title');
-      expect(with_).not.toContain('_source.attack_summary');
-      expect(with_).not.toContain('related_entities');
+    );
+
+    it('runs the agent on its own conversation', () => {
+      expect(analyze?.['create-conversation']).toBe(true);
     });
 
-    // Same bounded-evidence style as before: absent fields degrade to defaults,
-    // and summaries stay inside the agent prompt's bounds.
-    it('keeps defaults and truncation on the document-sourced evidence', () => {
-      const with_ = stepIn('prepare_evidence')?.with ?? {};
-      expect(String(with_.attack_title)).toContain("| default: ''");
-      expect(String(with_.attack_summary)).toContain('truncate: 8000');
-      expect(String(with_.entity_summary_markdown)).toContain('truncate: 8000');
-      expect(String(with_.alert_ids)).toContain('default: consts.no_items');
+    it('does not point the agent at the Investigation', () => {
+      expect(JSON.stringify(analyze?.with)).not.toContain('investigation_id');
     });
 
-    it('gathers its evidence after both loads', () => {
-      expect(stepNames.indexOf('prepare_evidence')).toBeGreaterThan(
-        Math.max(
-          stepNames.indexOf('load_attack_discovery'),
-          stepNames.indexOf('load_investigation')
-        )
+    it('gives the agent no tools', () => {
+      const overrides = analyze?.with?.configuration_overrides as { tools?: unknown[] };
+
+      expect(overrides?.tools).toEqual([]);
+    });
+
+    it('routes the agent through the AlertZero reasoning feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_reasoning');
+    });
+
+    it('uses the thin agent', () => {
+      expect(analyze?.['agent-id']).toBe('alertzero-thin-agent');
+    });
+
+    it('finishes the agent inside the workflow timeout', () => {
+      expect(analyze?.timeout).toBe('8m');
+    });
+
+    // The eval suite's verdict_rules.test.ts locks this block to FP_TP_VERDICT_RULES.
+    it('keeps the managed verdict rules', () => {
+      const message = String(analyze?.with?.message);
+      const [, rules = ''] =
+        /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(message) ?? [];
+
+      expect(rules.replace(/\s+/g, ' ').trim()).toBe(
+        `
+        1. inconclusive — world checks both support and contradict; or you cannot cite
+           an id from the hits below.
+        2. false_positive — at least one world check contradicts, none supports, and
+           both the entity store and the raw events have hits. Missing evidence cannot
+           clear an alert: if either source is empty or its query failed, the verdict
+           is inconclusive.
+        3. true_positive — process_parent or network_destination supports and no world
+           check contradicts. An empty or failed entity store does not block this.
+           entity_role and alert_linkage corroborate but are never enough on their own.
+        4. inconclusive — anything else: every world check is skipped or neutral, or
+           only entity_role or alert_linkage supports.
+        `
+          .replace(/\s+/g, ' ')
+          .trim()
       );
     });
 
-    // `resolve_analysis` is the one place the agent result is interpreted.
-    const resolve = stepIn('resolve_analysis');
-
-    // An absent structured output IS `inconclusive`: the review cannot tell a
-    // degradation from a classification, and `inconclusive` asserts nothing.
-    it('degrades an absent structured output to inconclusive', async () => {
-      await expect(
-        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.verdict), {
-          consts: analysis.consts,
-          steps: { analyze: { output: { structured_output: {} } } },
-        })
-      ).resolves.toBe('inconclusive');
+    it('tells the agent a truncated entity or event list cannot clear the attack', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A truncated entity or raw-event list is missing evidence and cannot clear an attack.'
+      );
     });
 
-    it('passes a real verdict straight through', async () => {
-      await expect(
-        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.verdict), {
-          consts: analysis.consts,
-          steps: { analyze: { output: { structured_output: { verdict: 'false_positive' } } } },
-        })
-      ).resolves.toBe('false_positive');
+    it('judges every network destination instead of one callout', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'One known-good callout does not cancel the rest.'
+      );
     });
 
-    it('substitutes an honest summary when the agent returned none', async () => {
-      await expect(
-        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.summary_markdown), {
-          consts: analysis.consts,
-          steps: { analyze: { output: { structured_output: {} } } },
-        })
-      ).resolves.toContain('could not reach a classification');
+    it('does not treat a management role as a contradiction by itself', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A management server, MDM, jump box, or service account is neutral, not contradicts'
+      );
     });
 
-    it('emits the agent summary when it has one', async () => {
-      await expect(
-        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.summary_markdown), {
-          consts: analysis.consts,
-          steps: {
-            analyze: {
-              output: { structured_output: { summary_markdown: 'The correlation holds.' } },
+    it('weighs the process parent with the cited alert severity', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A risk score or severity on a cited alert weighs how strong that parent is.'
+      );
+    });
+
+    it('accepts a path of pivots as alert linkage', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'Report the strongest pivot; it does not decide the verdict.'
+      );
+    });
+
+    it('allows agent.id and source.ip on the alert-link claim', () => {
+      const schema = analyze?.with?.schema as {
+        properties: {
+          claims: {
+            properties: { alert_link: { properties: { field: { enum: string[] } } } };
+          };
+        };
+      };
+
+      expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
+        'user.name',
+        'user.id',
+        'host.id',
+        'host.name',
+        'process.entity_id',
+        'process.pid',
+        'agent.id',
+        'source.ip',
+      ]);
+    });
+  });
+
+  describe('the truncation clear', () => {
+    const contextFor = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ) => ({
+      steps: {
+        ...(events === undefined
+          ? {}
+          : { load_events: { output: { hits: { total: { value: events } } } } }),
+        ...(entities === undefined
+          ? {}
+          : { load_entities: { output: { hits: { total: { value: entities } } } } }),
+        analyze: { output: { structured_output: { verdict, summary_markdown: summary } } },
+      },
+    });
+
+    const render = (
+      field: string,
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('block_truncated_clear')?.with?.[field]),
+        contextFor(events, entities, verdict, summary)
+      );
+
+    const evaluate = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string
+    ): unknown => {
+      const expression = String(stepIn('block_truncated_clear')?.with?.downgraded)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(
+        expression,
+        contextFor(events, entities, verdict, 'Cleared.')
+      );
+    };
+
+    it('returns inconclusive when a truncated event page would clear the attack', () => {
+      expect(render('verdict', 51, 10, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('returns inconclusive when a truncated entity page would clear the attack', () => {
+      expect(render('verdict', 10, 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('keeps false_positive when every matched event and entity is shown', () => {
+      expect(render('verdict', 50, 50, 'false_positive', 'Cleared.')).toBe('false_positive');
+    });
+
+    it('keeps true_positive when the event page is truncated', () => {
+      expect(render('verdict', 51, 10, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps true_positive when the entity page is truncated', () => {
+      expect(render('verdict', 10, 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps false_positive when the entity query failed', () => {
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.verdict),
+          {
+            steps: {
+              load_events: { output: { hits: { total: { value: 10 } } } },
+              load_entities: { error: { message: 'failed' } },
+              analyze: {
+                output: {
+                  structured_output: { verdict: 'false_positive', summary_markdown: 'Cleared.' },
+                },
+              },
             },
+          }
+        )
+      ).toBe('false_positive');
+    });
+
+    it('marks a truncated clear as downgraded', () => {
+      expect(evaluate(10, 51, 'false_positive')).toBe(true);
+    });
+
+    it('does not mark a complete clear as downgraded', () => {
+      expect(evaluate(50, 50, 'false_positive')).toBe(false);
+    });
+
+    it('replaces the summary when truncation blocks a clear', () => {
+      expect(render('summary_markdown', 51, 10, 'false_positive', 'Cleared.')).toBe(
+        'Evidence was truncated, so this cannot be cleared as a false positive.'
+      );
+    });
+
+    it('keeps the model summary when the clear stands', () => {
+      expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
+    });
+
+    it('runs after the payload guard and before emit', () => {
+      expect(
+        stepNames.slice(
+          stepNames.indexOf('require_supported_verdict'),
+          stepNames.indexOf('emit_result') + 1
+        )
+      ).toEqual([
+        'require_supported_verdict',
+        'block_truncated_clear',
+        'keep_model_writeup',
+        'emit_result',
+      ]);
+    });
+
+    const writeup = (keep: boolean, rationale: string | undefined) => ({
+      steps: {
+        keep_model_writeup: {
+          output: {
+            rows: [
+              {
+                keep,
+                ...(rationale === undefined ? {} : { rationale_markdown: rationale }),
+                checks: [{ name: 'process_parent', result: 'contradicts' }],
+                claims: { world: [{ id: 'event-1' }] },
+              },
+            ],
           },
-        })
-      ).resolves.toBe('The correlation holds.');
+        },
+      },
     });
 
-    it('returns a classification the analysis is allowed to return', () => {
-      expect(CLASSIFICATIONS).toContain('inconclusive');
+    const emitted = (field: string, keep: boolean, rationale?: string): unknown => {
+      const expression = String(stepIn('emit_result')?.with?.[field])
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(expression, writeup(keep, rationale));
+    };
+
+    it('emits the model rationale when the clear stands', () => {
+      expect(emitted('rationale_markdown', true, 'Parent is a scheduler.')).toBe(
+        'Parent is a scheduler.'
+      );
     });
 
-    it('stays inside the summary cap', () => {
-      expect(String(resolve?.with?.summary_markdown).length).toBeLessThanOrEqual(8000);
+    it('omits the rationale when the clear was downgraded', () => {
+      expect(emitted('rationale_markdown', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits checks when the clear was downgraded', () => {
+      expect(emitted('checks', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits claims when the clear was downgraded', () => {
+      expect(emitted('claims', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits the payload rationale on the same path as the attachment', () => {
+      const payload = stepIn('emit_result')?.with?.payload as { rationale_markdown?: string };
+
+      expect(payload.rationale_markdown).toBe(stepIn('emit_result')?.with?.rationale_markdown);
     });
   });
 });

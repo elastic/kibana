@@ -86,7 +86,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText emotion-euiText-s"
         >
           <p>
             Your license key is a JSON file with a signature attached.
@@ -163,7 +163,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="uploadLicenseButton"
                 type="button"
               >
@@ -268,7 +268,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText emotion-euiText-s"
         >
           <p>
             Your license key is a JSON file with a signature attached.
@@ -290,7 +290,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -389,7 +388,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="uploadLicenseButton"
                 type="button"
               >
@@ -494,7 +493,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText emotion-euiText-s"
         >
           <p>
             Your license key is a JSON file with a signature attached.
@@ -516,7 +515,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -615,7 +613,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="uploadLicenseButton"
                 type="button"
               >
@@ -720,7 +718,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText emotion-euiText-s"
         >
           <p>
             Your license key is a JSON file with a signature attached.
@@ -742,7 +740,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -841,7 +838,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="uploadLicenseButton"
                 type="button"
               >
@@ -946,7 +943,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText emotion-euiText-s"
         >
           <p>
             Your license key is a JSON file with a signature attached.
@@ -968,7 +965,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -1067,7 +1063,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="uploadLicenseButton"
                 type="button"
               >

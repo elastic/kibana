@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isSchemaValuedAdditionalProperties } from './schema/common/json_model_shape_schema';
 import { TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
@@ -170,6 +171,7 @@ export const LiquidSettingsSchema = z.object({
 export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
+  run_as: z.string().min(1).max(1024).optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
@@ -312,12 +314,7 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
-export const WaitForApprovalSlackChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+const hitlChannelMessageField = {
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -325,9 +322,17 @@ export const WaitForApprovalSlackChannelSchema = z.object({
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
     ),
+};
+
+export const HitlSlackChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
 });
 
-export const WaitForApprovalSlackApiChannelSchema = z.object({
+export const HitlSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -345,28 +350,63 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .describe(
       'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
     ),
-  message: z
+});
+
+export const HitlSlack2ChannelSchema = z.object({
+  'connector-id': z
     .string()
-    .max(MAX_HITL_MESSAGE_LENGTH)
-    .optional()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack (v2) connector saved object id or name'),
+  channels: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe(
+          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+        )
+    )
+    .min(1)
     .describe(
-      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
     ),
 });
 
-export const WaitForApprovalChannelsSchema = z
+const hitlChannelDescriptions = {
+  slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
+  slack_api:
+    'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
+  slack2:
+    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+} as const;
+
+export const WaitForInputChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional().describe(
-      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
-    ),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
-      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
-    ),
+    slack: HitlSlackChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack2),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
-export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: HitlSlackChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+  })
+  .optional()
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
 export const WaitForInputStepInputSchema = z
   .object({
@@ -378,13 +418,15 @@ export const WaitForInputStepInputSchema = z
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
-    channels: HitlExternalChannelsSchema,
+    channels: WaitForInputChannelsSchema,
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -413,7 +455,9 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -428,7 +472,14 @@ export const DataSetStepSchema = BaseStepSchema.extend({
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
-export const FetcherConfigSchema = z
+export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
+  'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+
+/** Editor schema copy. Unlike the warning above, this is shown while the self client is still off. */
+const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
+  'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
+
+const FetcherConfigObjectSchema = z
   .object({
     skip_ssl_verification: z
       .boolean()
@@ -447,8 +498,15 @@ export const FetcherConfigSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
-  .optional();
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
+
+export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+
+export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
+  $id: 'kibanaFetcher',
+  deprecated: true,
+  description: KIBANA_FETCHER_SCHEMA_DESCRIPTION,
+}).optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
 // valid values). Reused by the connector schema (editor + validation) and the runtime guard so
@@ -516,7 +574,7 @@ export const KibanaStepInputSchema = z.union([
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
     }),
-    fetcher: FetcherConfigSchema,
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   // Sugar syntax for common Kibana operations
@@ -538,7 +596,7 @@ export const KibanaStepInputSchema = z.union([
       page: z.number().optional(),
       perPage: z.number().optional(),
       status: z.string().optional(),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
@@ -960,7 +1018,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
@@ -1086,6 +1144,16 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
   if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
     return value as z.infer<typeof JsonModelSchema>;
   }
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'additionalProperties' in value &&
+    isSchemaValuedAdditionalProperties(
+      (value as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
   if (Array.isArray(value)) {
     return convertLegacyFieldsToJsonSchema(value);
   }
@@ -1207,6 +1275,9 @@ export const WorkflowExecutionContextSchema = z.object({
   startedAt: z.date(),
   url: z.string(),
   executedBy: z.string().optional(),
+  effectiveIdentity: z
+    .object({ type: z.literal('service_account'), id: z.string().max(1024) })
+    .optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });

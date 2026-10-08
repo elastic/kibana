@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
+import type { KibanaRequest } from '@kbn/core/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -16,11 +18,38 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
 
-const UpdateWorkerRequestParams = z.object({
-  workerId: z.string().min(1).max(128),
-});
+const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
+  alertAnalysisWorkflowDisabled: () =>
+    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
+      defaultMessage:
+        'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
+    }),
+  alertAnalysisRuntimeDisabled: () =>
+    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisRuntimeDisabledErrorMessage', {
+      defaultMessage:
+        'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
+    }),
+  ruleAttachmentUnavailable: () =>
+    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
+      defaultMessage:
+        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
+    }),
+};
+
+const UpdateWorkerRequestParams = lazySchema(() =>
+  z.object({
+    workerId: z.string().min(1).max(128),
+  })
+);
+
+const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
+  WorkflowsManagementOperationPrivileges.updateManaged.every(
+    (privilege) => request.authzResult?.[privilege] === true
+  );
 
 export const registerUpdateWorkerRoute = ({
   router,
@@ -35,6 +64,7 @@ export const registerUpdateWorkerRoute = ({
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
+          extendedPrivileges: [...WorkflowsManagementOperationPrivileges.updateManaged],
         },
       },
       summary: 'Update a AlertZero worker and its settings',
@@ -49,8 +79,30 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
+          if (!(await hasManageSecurity(context))) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerModifyForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Modifying a worker requires the manage_security cluster privilege',
+                }),
+              },
+            });
+          }
+
+          if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerEnableForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Enabling or disabling a worker requires update access to managed workflows',
+                }),
+              },
+            });
+          }
+
           const { workerId } = request.params;
           const result = await getWorkersService().update(
             workerId,
@@ -79,6 +131,10 @@ export const registerUpdateWorkerRoute = ({
                     values: { setting: result.what, workerId },
                   }),
                 },
+              });
+            case 'blocked':
+              return response.badRequest({
+                body: { message: ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES[result.reason]() },
               });
             case 'invalid':
               return response.badRequest({

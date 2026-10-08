@@ -17,6 +17,7 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
 
 const DATE_FORMAT_TZ_SETTING = 'dateFormat:tz';
+const QUERY_ERROR_STATUS_CODES = new Set([400, 404]);
 
 const esqlVariableValueSchema = schema.oneOf([
   schema.string({ maxLength: 10000 }),
@@ -113,13 +114,16 @@ export const registerGetSourceInfoRoute = (
             settings: { column_metadata: true },
           })) as unknown as ESQLSearchResponse;
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
-            tags: ['esql', 'source_info'],
-            error: {
-              stack_trace: error instanceof Error ? error.stack : undefined,
-            },
-          });
+          // Invalid or partial queries (e.g. while typing) are client errors, not worth an error log.
+          if (getErrorStatusCode(error) >= 500) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
+              tags: ['esql', 'source_info'],
+              error: {
+                stack_trace: error instanceof Error ? error.stack : undefined,
+              },
+            });
+          }
           throw error;
         }
 
@@ -140,12 +144,21 @@ export const registerGetSourceInfoRoute = (
         });
         return response.ok({ body: { columns } });
       } catch (error) {
+        const statusCode = getErrorStatusCode(error);
+        const message = error instanceof Error ? error.message : String(error);
+        // Errors in the query text (invalid or partial query, unknown index) are expected while
+        // typing: answer 200 with no columns and the error, which clients treat as a failure.
+        const isQueryError = QUERY_ERROR_STATUS_CODES.has(statusCode);
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',
           outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
+          'http.response.status_code': isQueryError ? 200 : statusCode,
+          'error.type': String(statusCode),
         });
-        throw error;
+        if (isQueryError) {
+          return response.ok({ body: { columns: [], error: { statusCode, message } } });
+        }
+        return response.customError({ statusCode, body: { message } });
       }
     }
   );

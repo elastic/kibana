@@ -158,9 +158,9 @@ it('accepts full payload evidence for the investigation conversation', () => {
 });
 
 it('checks executed progress arguments after schema ordering without losing the raw model call', () => {
-  const low = { title: 'Low priority gap', description: 'Missing low signal', confidence: 0.2 };
-  const high = { title: 'High priority gap', description: 'Missing high signal', confidence: 0.9 };
-  const params = { summary: 'Investigating', hypotheses: [], blind_spots: [low, high] };
+  const low = { title: 'Low priority step', description: 'Low impact step', confidence: 0.2 };
+  const high = { title: 'High priority step', description: 'High impact step', confidence: 0.9 };
+  const params = { summary: 'Investigating', hypotheses: [], recommendations: [low, high] };
   const progressCall = {
     ...toolCall,
     tool_id: 'platform.streams.investigation_progress_report',
@@ -170,7 +170,7 @@ it('checks executed progress arguments after schema ordering without losing the 
     {
       ...attributes[0],
       'gen_ai.tool.name': progressCall.tool_id,
-      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high, low] }),
+      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, recommendations: [high, low] }),
       'gen_ai.output.messages': JSON.stringify([
         {
           role: 'assistant',
@@ -196,7 +196,7 @@ it('checks executed progress arguments after schema ordering without losing the 
       [
         {
           ...spans[0],
-          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high] }),
+          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, recommendations: [high] }),
         },
       ],
       progressExpected
@@ -208,7 +208,7 @@ it('checks executed progress arguments after schema ordering without losing the 
         {
           ...spans[0],
           'gen_ai.output.messages': spans[0]['gen_ai.output.messages'].replace(
-            'Low priority gap',
+            'Low priority step',
             'Redacted'
           ),
         },

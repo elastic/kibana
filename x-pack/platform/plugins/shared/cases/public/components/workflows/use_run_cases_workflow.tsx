@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CasesUI } from '../../containers/types';
-import {
-  NO_WORKFLOW_TAGS,
-  createCaseWorkflowFilter,
-  createCaseWorkflowComparator,
-  useCanRunCaseWorkflow,
-} from './use_run_case_workflow';
+import { useCaseWorkflowFilters, useCanRunCaseWorkflow } from './use_run_case_workflow';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
 
 interface UseRunCasesWorkflowResult {
@@ -32,11 +27,6 @@ interface UseRunCasesWorkflowResult {
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator prioritising tagged then context-relevant workflows. */
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
-  /**
-   * When true the panel should suppress its own success toast because the
-   * executor will handle multi-case toasting itself.
-   */
-  showSuccessToast: boolean;
 }
 
 /**
@@ -47,6 +37,7 @@ interface UseRunCasesWorkflowResult {
  */
 export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   const canRunWorkflow = useCanRunCaseWorkflow();
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
@@ -63,14 +54,6 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
 
   const runWorkflow = useRunWorkflowOnCases({ cases: selectedCases });
 
-  // No tag override at the list level — use the empty stable default.
-  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(NO_WORKFLOW_TAGS), []);
-  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(NO_WORKFLOW_TAGS), []);
-
-  // The executor always handles the success toast itself so the "View execution"
-  // button is placed consistently (actionProps.primary) for both N=1 and N>1.
-  const showSuccessToast = false;
-
   return {
     canRunWorkflow,
     isModalOpen,
@@ -80,6 +63,5 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
     runWorkflow,
     filterWorkflow,
     sortWorkflow,
-    showSuccessToast,
   };
 };

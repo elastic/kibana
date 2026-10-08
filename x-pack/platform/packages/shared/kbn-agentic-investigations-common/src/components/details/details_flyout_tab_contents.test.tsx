@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
+import {
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+} from '../grouped_attachments';
 import { OverviewTab } from './details_flyout_tab_contents';
 
 const investigation = {
@@ -18,8 +21,7 @@ const investigation = {
   title: 'Impossible travel',
   createdAt: '2026-09-01T10:00:00.000Z',
   updatedAt: '2026-09-01T10:00:00.000Z',
-  watch_id: '',
-  watch_execution_id: '',
+  worker_execution_ids: [],
   pendingProposalCount: 0,
   assignees: [],
   summary: 'A second sign-in replayed the same session cookie.',
@@ -36,29 +38,52 @@ const attachment: VersionedAttachment = {
   current_version: 1,
 };
 
-const attachmentsService = {
-  getAttachmentUiDefinition: () => ({
-    getLabel: () => 'Session cookie replayed',
-    getIcon: () => 'bell',
-  }),
-} as unknown as AttachmentServiceStartContract;
+const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+groupedAttachments.register(FlyoutGroupedAttachments.ALERTS, ['security.alert'], () => (
+  <li>Session cookie replayed</li>
+));
 
 const renderTab = ({
   attachments,
   investigationOverrides,
+  proposedActionsContent,
+  proposedActionsCount,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
+  proposedActionsContent?: React.ReactNode;
+  proposedActionsCount?: React.ReactNode;
 } = {}) =>
   render(
     <OverviewTab
       investigation={{ ...investigation, ...investigationOverrides }}
       attachments={attachments}
-      attachmentsService={attachmentsService}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
     />
   );
 
 describe('OverviewTab', () => {
+  it('shows the host-supplied count of proposals beside the "Proposed actions" heading', () => {
+    renderTab({
+      proposedActionsContent: <div>Rows</div>,
+      proposedActionsCount: <span data-test-subj="count">3</span>,
+    });
+
+    const heading = screen.getByRole('heading', { name: 'Proposed actions' });
+    expect(heading.closest('[class*="euiFlexGroup"]')).toContainElement(
+      screen.getByTestId('count')
+    );
+  });
+
+  it('renders the heading without a count when the host supplies none', () => {
+    renderTab({ proposedActionsContent: <div>Rows</div> });
+
+    expect(screen.getByRole('heading', { name: 'Proposed actions' })).toBeInTheDocument();
+    expect(screen.queryByTestId('count')).not.toBeInTheDocument();
+  });
+
   it('no longer renders the Impact table', () => {
     renderTab({ attachments: [attachment] });
 
@@ -68,26 +93,26 @@ describe('OverviewTab', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('puts the attachment summary under the narrative', () => {
+  it('puts the grouped attachments under the narrative, inside "What\'s happened"', () => {
     renderTab({ attachments: [attachment] });
 
-    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
-
-    expect(headings).toEqual(["What's happened", 'Attachment summary']);
+    expect(screen.getAllByRole('heading').map(({ textContent }) => textContent)).toEqual([
+      "What's happened",
+    ]);
     expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
   });
 
-  it('omits the attachment summary when nothing is attached', () => {
+  it('omits the card when nothing is attached', () => {
     renderTab({ attachments: [] });
 
-    expect(screen.queryByText('Attachment summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupedAttachmentsSection')).not.toBeInTheDocument();
     expect(screen.getByText("What's happened")).toBeInTheDocument();
   });
 
-  it('renders the attachment summary on its own when there is no narrative', () => {
+  it('renders the card on its own when there is no narrative', () => {
     renderTab({ attachments: [attachment], investigationOverrides: { summary: undefined } });
 
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
-    expect(screen.getByText('Attachment summary')).toBeInTheDocument();
+    expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
   });
 });

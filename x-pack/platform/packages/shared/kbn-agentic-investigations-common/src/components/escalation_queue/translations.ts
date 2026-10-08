@@ -17,6 +17,9 @@ export const ESCALATION_QUEUE_LABELS = Object.freeze({
   emptyQueue: i18n.translate('xpack.alertzero.escalationQueue.emptyQueue', {
     defaultMessage: 'No escalations',
   }),
+  emptyQueueWithFilter: i18n.translate('xpack.alertzero.escalationQueue.emptyQueueWithFilter', {
+    defaultMessage: 'No escalations match the current filter.',
+  }),
   nothingAttached: i18n.translate('xpack.alertzero.escalationQueue.nothingAttached', {
     defaultMessage: 'Nothing attached',
   }),
@@ -34,6 +37,9 @@ export const ESCALATION_QUEUE_LABELS = Object.freeze({
   }),
   loadError: i18n.translate('xpack.alertzero.escalationQueue.loadError', {
     defaultMessage: 'Failed to load escalations',
+  }),
+  retry: i18n.translate('xpack.alertzero.escalationQueue.retry', {
+    defaultMessage: 'Retry',
   }),
   updatingAssignees: i18n.translate('xpack.alertzero.escalationQueue.updatingAssignees', {
     defaultMessage: 'Updating assignees…',
