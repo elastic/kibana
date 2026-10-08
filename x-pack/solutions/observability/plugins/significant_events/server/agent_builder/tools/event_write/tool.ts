@@ -40,30 +40,31 @@ import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-export const eventsWriteItemSchema = significantEventSchema
-  .pick({
-    event_id: true,
-    status: true,
-    stream_names: true,
-    title: true,
-    symptom_hypothesis: true,
-    summary: true,
-    severity: true,
-    confidence: true,
-    assessment_note: true,
-    signals: true,
-    causal_features: true,
-    blast_radius: true,
-    workflow_execution_id: true,
-    conversation_id: true,
-  })
-  .extend({
-    event_id: z
-      .string()
-      .optional()
-      .transform((v) => (v === '' ? undefined : v))
-      .describe(
-        dedent`
+export const eventsWriteItemSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      event_id: true,
+      status: true,
+      stream_names: true,
+      title: true,
+      symptom_hypothesis: true,
+      summary: true,
+      severity: true,
+      confidence: true,
+      assessment_note: true,
+      signals: true,
+      causal_features: true,
+      blast_radius: true,
+      workflow_execution_id: true,
+      conversation_id: true,
+    })
+    .extend({
+      event_id: z
+        .string()
+        .optional()
+        .transform((v) => (v === '' ? undefined : v))
+        .describe(
+          dedent`
           ID of an existing event to append a new version to (continuation/snapshot mode).
           Never compose, shorten or guess an event_id. For Discovery, copy it
           character-for-character from an active event returned by event_search in this run. The
@@ -77,66 +78,67 @@ export const eventsWriteItemSchema = significantEventSchema
           reason: existing_active_event). Otherwise a new event is created with a generated
           event_id.
         `
-      ),
-  })
-  .partial({ event_id: true })
-  .refine(
-    (item) =>
-      (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
-    {
-      message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
-    }
-  )
-  .refine(
-    (item) =>
-      item.symptom_hypothesis === undefined ||
-      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-    {
-      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
-    }
-  )
-  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
-    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
-  })
-  .refine(
-    (item) =>
-      item.assessment_note === undefined ||
-      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
-    {
-      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
-    }
-  )
-  .superRefine((item, ctx) => {
-    const signals = item.signals ?? [];
-    const grounded = signals.filter((s) => s.evidence != null);
-    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-    const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
-    const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
+        ),
+    })
+    .partial({ event_id: true })
+    .refine(
+      (item) =>
+        (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
+      {
+        message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
+      }
+    )
+    .refine(
+      (item) =>
+        item.symptom_hypothesis === undefined ||
+        item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+      {
+        message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+      }
+    )
+    .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+      message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+    })
+    .refine(
+      (item) =>
+        item.assessment_note === undefined ||
+        item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+      {
+        message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
+      }
+    )
+    .superRefine((item, ctx) => {
+      const signals = item.signals ?? [];
+      const grounded = signals.filter((s) => s.evidence != null);
+      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-    if (hasConfirms && hasNotChecked) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
-      });
-    }
-    // Continuations inherit prior severity; this cycle's signals may be
-    // inconclusive (telemetry gap, errored query) without a new confirms.
-    if (
-      item.event_id === undefined &&
-      item.status === 'active' &&
-      (item.severity === 'high' || item.severity === 'critical') &&
-      grounded.length > 0 &&
-      !hasConfirms &&
-      !hasOffTopicObservedError
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
-      });
-    }
-  });
+      if (hasConfirms && hasNotChecked) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+        });
+      }
+      // Continuations inherit prior severity; this cycle's signals may be
+      // inconclusive (telemetry gap, errored query) without a new confirms.
+      if (
+        item.event_id === undefined &&
+        item.status === 'active' &&
+        (item.severity === 'high' || item.severity === 'critical') &&
+        grounded.length > 0 &&
+        !hasConfirms &&
+        !hasOffTopicObservedError
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
+        });
+      }
+    })
+);
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 

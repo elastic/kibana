@@ -27,16 +27,18 @@ import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID =
   platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
-const queryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: z.string().max(MAX_ID_LENGTH).optional(),
-  expires_at: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
-        'Omit to create a durable KI with no expiry.'
-    ),
-});
+const queryInputSchema = lazySchema(() =>
+  upsertStreamQueryRequestSchema.extend({
+    id: z.string().max(MAX_ID_LENGTH).optional(),
+    expires_at: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+          'Omit to create a durable KI with no expiry.'
+      ),
+  })
+);
 
 const createQueryKnowledgeIndicatorSchema = lazySchema(() =>
   z
