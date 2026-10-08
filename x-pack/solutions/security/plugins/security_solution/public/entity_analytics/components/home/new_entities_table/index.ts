@@ -9,14 +9,14 @@ export {
   EMPTY_ENTITY_FILTERS,
   TIME_RANGE_OPTIONS,
   useEntityAnalyticsUrlState,
-} from './use_entity_analytics_url_state';
+} from './hooks/use_entity_analytics_url_state';
 export type {
   TimeRange,
   RowsMode,
   EntityFilters,
   EntityAnalyticsUrlState,
   EntityAnalyticsUrlStateResult,
-} from './use_entity_analytics_url_state';
+} from './hooks/use_entity_analytics_url_state';
 export { EntitiesGrid } from './entities_grid';
 export type { EntitiesGridProps } from './entities_grid';
 export { EntitiesGroups } from './entities_groups';
@@ -40,4 +40,4 @@ export {
   buildEntityFiltersExpression,
   buildEntityFiltersQuery,
   useEntityGridFilters,
-} from './use_entity_grid_filters';
+} from './hooks/use_entity_grid_filters';

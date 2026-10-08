@@ -11,7 +11,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
 import { act, renderHook } from '@testing-library/react';
-import { EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   MAX_EXPANDED_ENTITY_IDS,
   useEntityAnalyticsUrlState,

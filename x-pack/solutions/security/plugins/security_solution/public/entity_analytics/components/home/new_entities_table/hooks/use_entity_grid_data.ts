@@ -7,11 +7,11 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type {
   TimeRange,
   RowsMode,
@@ -20,7 +20,7 @@ import type {
   Row,
   PageCursor,
   SortDir,
-} from './common';
+} from '../common';
 import {
   entityIdsOf,
   getEntityId,
@@ -30,8 +30,8 @@ import {
   createEsqlRunner,
   nullOnFailure,
   toSortValue,
-} from './common';
-import { PAGE_ENRICHERS, findSortQuerySpec } from './grid_columns';
+} from '../common';
+import { PAGE_ENRICHERS, findSortQuerySpec } from '../grid_columns';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',

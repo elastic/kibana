@@ -9,10 +9,10 @@ import { useCallback, useMemo } from 'react';
 import { useQueries, useQueryClient, type QueryFunctionContext } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import {
   entityAliasOf,
@@ -25,9 +25,9 @@ import {
   enrichEntityRows,
   createEsqlRunner,
   esc,
-} from './common';
-import type { QueryArgs, Row } from './common';
-import { PAGE_ENRICHERS } from './grid_columns';
+} from '../common';
+import type { QueryArgs, Row } from '../common';
+import { PAGE_ENRICHERS } from '../grid_columns';
 
 /** `[entityId, shell dataUpdatedAt, enrich dataUpdatedAt]` of one expanded entity. */
 type ChildDataVersion = [string, number, number];

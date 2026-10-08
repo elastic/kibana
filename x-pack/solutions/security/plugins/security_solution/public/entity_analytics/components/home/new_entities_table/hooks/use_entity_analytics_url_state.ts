@@ -7,20 +7,20 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { SEVERITY_UI_SORT_ORDER } from '../../../common/utils';
-import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_analytics/utils';
+import type { RiskSeverity } from '../../../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../../../common/utils';
+import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import {
   GROUP_SIZE_FIELD,
   RISK_SCORE_NORM_FIELD,
   PAGE_SIZE_OPTIONS,
   TIME_RANGE_OPTIONS,
-} from './common';
-import type { RowsMode, SortDir, TimeRange } from './common';
-import { findSortQuerySpec } from './grid_columns';
-import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
+} from '../common';
+import type { RowsMode, SortDir, TimeRange } from '../common';
+import { findSortQuerySpec } from '../grid_columns';
+import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
 export type { TimeRange, RowsMode };

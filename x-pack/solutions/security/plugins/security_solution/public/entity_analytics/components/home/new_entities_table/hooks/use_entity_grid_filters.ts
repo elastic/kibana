@@ -9,12 +9,12 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { convertFiltersToESQLExpression, convertQueryToESQLExpression } from '@kbn/esql-utils';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
-import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { inputsActions, inputsSelectors } from '../../../../../common/store/inputs';
+import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useEntityAnalyticsUrlState, type EntityFilters } from './use_entity_analytics_url_state';
-import { buildFilterClause, esc, joinAnd, toList } from './common';
+import { buildFilterClause, esc, joinAnd, toList } from '../common';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
 const buildMvContainsExpression = (field: string, values: string[]): string => {

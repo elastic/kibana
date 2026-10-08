@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useResetEntityGridFilters } from './use_entity_grid_filters';
-import { useEntityGridData } from './use_entity_grid_data';
-import { useEntityChildren } from './use_entity_children';
+import { useResetEntityGridFilters } from './hooks/use_entity_grid_filters';
+import { useEntityGridData } from './hooks/use_entity_grid_data';
+import { useEntityChildren } from './hooks/use_entity_children';
 import { GROUP_SIZE_FIELD, PAGE_SIZE_OPTIONS, entityIdsOf, getEntityId, getNumber } from './common';
 import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityRow } from './entities_expanded_row';
@@ -38,8 +38,8 @@ import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
 import { isGridColumnId } from './grid_columns';
-import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
-import type { TimeRange } from './use_entity_analytics_url_state';
+import { useEntityAnalyticsUrlState } from './hooks/use_entity_analytics_url_state';
+import type { TimeRange } from './hooks/use_entity_analytics_url_state';
 import type { Row, RowsMode, SortDir } from './common';
 
 const GRID_ARIA_LABEL = i18n.translate(
