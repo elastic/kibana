@@ -940,14 +940,21 @@ describe('ActionPolicyClient', () => {
         expect(res.matcher).toBeUndefined();
       });
 
-      it('sets one throttle leaf and keeps its sibling', async () => {
-        const res = await patch({ throttle: { interval: '10m' } });
+      it('replaces the throttle whole rather than merging its leaves', async () => {
+        const res = await patch({ throttle: { strategy: 'per_status_interval', interval: '10m' } });
 
         expect(storedByUpdate().throttle).toEqual({
           strategy: 'per_status_interval',
           interval: '10m',
         });
         expect(res.throttle).toEqual({ strategy: 'per_status_interval', interval: '10m' });
+      });
+
+      it('replaces the throttle even when the new strategy has fewer keys', async () => {
+        const res = await patch({ throttle: { strategy: 'every_time' } });
+
+        expect(storedByUpdate().throttle).toStrictEqual({ strategy: 'every_time' });
+        expect(res.throttle).toEqual({ strategy: 'every_time' });
       });
 
       it('replaces an array wholesale rather than merging its elements', async () => {
@@ -972,7 +979,9 @@ describe('ActionPolicyClient', () => {
 
       it('rejects a patch whose merged document breaks a cross-field invariant', async () => {
         // `time_interval` is aggregate-only, and the stored policy groups per alert.
-        await expect(patch({ throttle: { strategy: 'time_interval' } })).rejects.toMatchObject({
+        await expect(
+          patch({ throttle: { strategy: 'time_interval', interval: '5m' } })
+        ).rejects.toMatchObject({
           output: { statusCode: 400 },
           data: { code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA },
         });
@@ -1043,7 +1052,7 @@ describe('ActionPolicyClient', () => {
       expect(res.snoozed_until).toBeUndefined();
     });
 
-    it('drops throttle.interval when transitioning to an intervalless strategy', async () => {
+    it('leaves no interval on disk when switching to an intervalless strategy', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'transition-policy',
         description: 'transition-policy description',

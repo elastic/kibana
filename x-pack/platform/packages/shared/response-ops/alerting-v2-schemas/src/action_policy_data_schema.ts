@@ -65,43 +65,28 @@ export const groupingModeSchema = z
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
+const THROTTLE_STRATEGY_COPY = {
+  on_status_change: 'notify only on alert status transitions (default for `per_alert`).',
+  per_status_interval: 'notify on transitions and at regular intervals.',
+  time_interval:
+    'notify at regular intervals regardless of status (default for `all`/`per_field`).',
+  every_time: 'notify on every evaluation cycle (high volume).',
+} as const;
+
 export const throttleStrategySchema = z
   .union([
-    z
-      .literal('on_status_change')
-      .describe('notify only on alert status transitions (default for `per_alert`).'),
-    z.literal('per_status_interval').describe('notify on transitions and at regular intervals.'),
-    z
-      .literal('time_interval')
-      .describe(
-        'notify at regular intervals regardless of status (default for `all`/`per_field`).'
-      ),
-    z.literal('every_time').describe('notify on every evaluation cycle (high volume).'),
+    z.literal('on_status_change').describe(THROTTLE_STRATEGY_COPY.on_status_change),
+    z.literal('per_status_interval').describe(THROTTLE_STRATEGY_COPY.per_status_interval),
+    z.literal('time_interval').describe(THROTTLE_STRATEGY_COPY.time_interval),
+    z.literal('every_time').describe(THROTTLE_STRATEGY_COPY.every_time),
   ])
   .describe('The throttle strategy that controls how often notifications are sent.');
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
-const THROTTLE_STRATEGY_DESCRIPTION =
-  'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.';
-const THROTTLE_INTERVAL_DESCRIPTION =
-  'The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.';
-
-const throttleSchema = z
-  .object({
-    strategy: throttleStrategySchema.describe(THROTTLE_STRATEGY_DESCRIPTION),
-    interval: durationSchema.optional().describe(THROTTLE_INTERVAL_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_action_policy_throttle' });
-
-const throttlePatchSchema = z
-  .object({
-    strategy: throttleStrategySchema.optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
-    interval: durationSchema.nullable().optional().describe(THROTTLE_INTERVAL_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_action_policy_throttle_patch' });
+/** The strategies that notify on a schedule, and so carry the `interval` that sets it. */
+export const INTERVAL_THROTTLE_STRATEGIES = ['per_status_interval', 'time_interval'] as const;
+export type IntervalThrottleStrategy = (typeof INTERVAL_THROTTLE_STRATEGIES)[number];
 
 export const PER_ALERT_STRATEGIES = new Set<string>([
   'on_status_change',
@@ -109,18 +94,56 @@ export const PER_ALERT_STRATEGIES = new Set<string>([
   'every_time',
 ]);
 export const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
-export const STRATEGIES_REQUIRING_INTERVAL = new Set<string>([
-  'per_status_interval',
-  'time_interval',
-]);
+export const STRATEGIES_REQUIRING_INTERVAL: ReadonlySet<string> = new Set(
+  INTERVAL_THROTTLE_STRATEGIES
+);
 
-export const needsInterval = (strategy: string | undefined): boolean =>
+/** Narrows to the strategies whose throttle variant carries an `interval`. */
+export const needsInterval = (strategy: string | undefined): strategy is IntervalThrottleStrategy =>
   strategy != null && STRATEGIES_REQUIRING_INTERVAL.has(strategy);
+
+const THROTTLE_INTERVAL_DESCRIPTION =
+  'The throttle interval duration (e.g. 5m, 1h) that sets the notification cadence.';
+
+const intervalThrottleSchema = <S extends IntervalThrottleStrategy>(strategy: S) =>
+  z
+    .object({
+      strategy: z.literal(strategy),
+      interval: durationSchema.describe(THROTTLE_INTERVAL_DESCRIPTION),
+    })
+    .strict()
+    .describe(THROTTLE_STRATEGY_COPY[strategy])
+    .meta({ id: `alerting_action_policy_throttle_${strategy}` });
+
+const intervallessThrottleSchema = <S extends Exclude<ThrottleStrategy, IntervalThrottleStrategy>>(
+  strategy: S
+) =>
+  z
+    .object({ strategy: z.literal(strategy) })
+    .strict()
+    .describe(THROTTLE_STRATEGY_COPY[strategy])
+    .meta({ id: `alerting_action_policy_throttle_${strategy}` });
+
+/**
+ * The strategy decides which keys the throttle has, so each one is its own variant: an `interval`
+ * is required by the scheduled strategies and is not a key the others accept. Replaced whole on
+ * PATCH, like every union — a partial variant could never validate.
+ */
+export const throttleSchema = z
+  .discriminatedUnion('strategy', [
+    intervallessThrottleSchema('on_status_change'),
+    intervalThrottleSchema('per_status_interval'),
+    intervalThrottleSchema('time_interval'),
+    intervallessThrottleSchema('every_time'),
+  ])
+  .meta({ id: 'alerting_action_policy_throttle' });
+
+export type Throttle = z.infer<typeof throttleSchema>;
 
 export interface ValidationPayload {
   value: {
     grouping_mode?: string | null;
-    throttle?: { strategy: string; interval?: string } | null;
+    throttle?: { strategy: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
 }
@@ -129,7 +152,7 @@ const validateGroupingModeAndStrategy = ({ value: data, issues }: ValidationPayl
   if (data.throttle == null) return;
 
   const mode = data.grouping_mode ?? 'per_alert';
-  const { strategy, interval } = data.throttle;
+  const { strategy } = data.throttle;
   const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
 
   if (!allowed.has(strategy)) {
@@ -137,15 +160,6 @@ const validateGroupingModeAndStrategy = ({ value: data, issues }: ValidationPayl
       code: 'custom',
       message: `Strategy "${strategy}" is not valid for grouping mode "${mode}"`,
       path: ['throttle', 'strategy'],
-      input: data,
-    });
-  }
-
-  if (needsInterval(strategy) && !interval) {
-    issues.push({
-      code: 'custom',
-      message: `Strategy "${strategy}" requires an interval to be defined`,
-      path: ['throttle', 'interval'],
       input: data,
     });
   }
@@ -197,7 +211,7 @@ const GROUPING_MODE_DESCRIPTION =
   'The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.';
 
 const THROTTLE_DESCRIPTION =
-  'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.';
+  'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.';
 
 const actionPolicyDescriptionSchema = z
   .string()
@@ -271,7 +285,7 @@ export const updateActionPolicyDataSchema = z
       .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
     group_by: actionPolicyGroupBySchema.nullable().optional(),
     grouping_mode: groupingModeSchema.nullable().optional().describe(GROUPING_MODE_DESCRIPTION),
-    throttle: throttlePatchSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
+    throttle: throttleSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
   })
   .strict()
   .meta({ id: 'alerting_update_action_policy' });

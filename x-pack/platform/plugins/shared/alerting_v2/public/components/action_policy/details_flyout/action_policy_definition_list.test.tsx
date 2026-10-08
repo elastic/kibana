@@ -58,7 +58,7 @@ const defaultProps: ActionPolicyDefinitionListProps = {
       { type: 'workflow', id: 'wf-1' },
       { type: 'workflow', id: 'wf-2' },
     ],
-    throttle: { strategy: 'on_status_change', interval: '5m' },
+    throttle: { strategy: 'on_status_change' },
   },
 };
 

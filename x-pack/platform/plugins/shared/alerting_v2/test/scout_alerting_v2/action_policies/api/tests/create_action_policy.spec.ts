@@ -454,7 +454,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         ...buildCreateActionPolicyData({}),
-        throttle: { strategy: 'on_status_change', interval: null },
+        throttle: { strategy: 'per_status_interval', interval: null },
       },
     });
 
@@ -465,10 +465,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
+      body: {
+        ...buildCreateActionPolicyData({ grouping_mode: 'all' }),
         throttle: { strategy: 'time_interval' },
-      }),
+      },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -480,16 +480,37 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     async ({ apiClient }) => {
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: buildCreateActionPolicyData({
-          grouping_mode: 'per_alert',
+        body: {
+          ...buildCreateActionPolicyData({ grouping_mode: 'per_alert' }),
           throttle: { strategy: 'per_status_interval' },
-        }),
+        },
       });
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
+
+  for (const [groupingMode, strategy] of [
+    ['all', 'every_time'],
+    ['per_alert', 'on_status_change'],
+  ] as const) {
+    apiTest(
+      `validation: rejects an interval on the ${strategy} strategy`,
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+          body: {
+            ...buildCreateActionPolicyData({ grouping_mode: groupingMode }),
+            throttle: { strategy, interval: '5m' },
+          },
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    );
+  }
 
   apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {

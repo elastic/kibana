@@ -125,7 +125,7 @@ describe('action policy form utils', () => {
         grouping_mode: 'per_alert',
         matcher: null,
         group_by: null,
-        throttle: { strategy: 'on_status_change', interval: null },
+        throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -213,6 +213,17 @@ describe('action policy form utils', () => {
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
       });
+    });
+
+    it('leaves the interval blank for a strategy that does not take one', () => {
+      const formState = toFormState({
+        ...baseResponse,
+        grouping_mode: 'all',
+        throttle: { strategy: 'every_time' },
+      });
+
+      expect(formState.throttleStrategy).toBe('every_time');
+      expect(formState.throttleInterval).toBe('');
     });
   });
 });

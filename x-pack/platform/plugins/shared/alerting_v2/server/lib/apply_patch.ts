@@ -35,8 +35,8 @@ const unwrap = (schema: z.ZodType): z.ZodType => {
  * absent keys preserve it. The result never contains `null`, so cleared keys are simply gone.
  *
  * An object left with no keys is cleared along with them, innermost first, because `{}` is not a
- * value the create schemas accept: clearing the last leaf of a matcher or a throttle clears the
- * whole block rather than failing validation.
+ * value the create schemas accept: clearing the last leaf of a matcher clears the whole block
+ * rather than failing validation.
  *
  * Shared by the rules and action policy clients so the two resources cannot disagree about what a
  * PATCH means. The result is a candidate document, not a validated one — parse it with the create

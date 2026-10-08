@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyAttachmentData, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import {
   actionPolicyDestinationSchema,
   createActionPolicyDataSchema,
@@ -14,6 +14,7 @@ import {
   throttleStrategySchema,
   durationSchema,
   policyMatcherSchema,
+  needsInterval,
   PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -75,7 +76,11 @@ export const setThrottleOperationSchema = z
   .object({
     operation: z.literal('set_throttle'),
     strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-    interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
+    interval: durationSchema
+      .optional()
+      .describe(
+        'The throttle interval (e.g. 5m, 1h). Required by `per_status_interval` and `time_interval`, and rejected by the other strategies, which do not notify on a schedule.'
+      ),
   })
   .describe(
     'Use `set_throttle` to limit how often notifications fire so the user is not flooded by repeat alerts.'
@@ -115,8 +120,7 @@ export class ActionPolicyOperationValidationError extends Error {
 
 function validateThrottleGroupingCompat(
   groupingMode: string | undefined | null,
-  strategy: string | undefined,
-  interval: string | null | undefined
+  strategy: string | undefined
 ): void {
   if (!strategy) return;
 
@@ -128,12 +132,40 @@ function validateThrottleGroupingCompat(
         `Allowed strategies: ${[...allowed].join(', ')}`
     );
   }
+}
 
-  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !interval) {
+type ThrottleDraft = NonNullable<ActionPolicyAttachmentData['throttle']>;
+
+/**
+ * Builds the throttle variant the strategy names. An interval carries over only to a strategy that
+ * uses one, so switching to an intervalless strategy needs no extra operation; one the agent spells
+ * out for such a strategy is an error rather than a value the server would have to discard.
+ */
+function buildThrottleDraft(
+  strategy: ThrottleStrategy,
+  explicitInterval: string | undefined,
+  stored: ThrottleDraft | undefined
+): ThrottleDraft {
+  if (!needsInterval(strategy)) {
+    if (explicitInterval !== undefined) {
+      throw new ActionPolicyOperationValidationError(
+        `Throttle strategy "${strategy}" does not take an interval. Omit it, or use one of: ` +
+          `${[...STRATEGIES_REQUIRING_INTERVAL].join(', ')}.`
+      );
+    }
+    return { strategy };
+  }
+
+  const interval =
+    explicitInterval ?? (stored && 'interval' in stored ? stored.interval : undefined);
+
+  if (!interval) {
     throw new ActionPolicyOperationValidationError(
       `Throttle strategy "${strategy}" requires an interval to be defined.`
     );
   }
+
+  return { strategy, interval };
 }
 
 // ─── Execution ────────────────────────────────────────────────────────────────
@@ -188,10 +220,7 @@ export const executeActionPolicyOperations = (
         }
         next = {
           ...next,
-          throttle: {
-            strategy,
-            ...(op.interval !== undefined ? { interval: op.interval } : {}),
-          },
+          throttle: buildThrottleDraft(strategy, op.interval, next.throttle),
         };
         break;
       }
@@ -218,11 +247,7 @@ export const executeActionPolicyOperations = (
     );
   }
 
-  validateThrottleGroupingCompat(
-    next.grouping_mode,
-    next.throttle?.strategy,
-    next.throttle?.interval
-  );
+  validateThrottleGroupingCompat(next.grouping_mode, next.throttle?.strategy);
 
   return next;
 };

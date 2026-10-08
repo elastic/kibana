@@ -498,7 +498,7 @@ describe('schema_to_skill_docs', () => {
         '| `grouping` | object | optional | Grouping configuration. |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `throttle` | object | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. |'
+        '| `throttle` | { strategy: "on_status_change", ... } \\| { strategy: "per_status_interval", ... } \\| { strategy: "time_interval", ... } \\| { strategy: "every_time", ... } | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field. |'
       );
     });
 

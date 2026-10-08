@@ -177,4 +177,56 @@ describe('executeActionPolicyOperations', () => {
       expect(() => executeActionPolicyOperations({}, ops)).toThrow('requires an interval');
     });
   });
+
+  describe('set_throttle builds the variant the strategy names', () => {
+    it('drops the stored interval when switching to a strategy without one', () => {
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_throttle', strategy: 'every_time' }];
+
+      const result = executeActionPolicyOperations(
+        { grouping_mode: 'all', throttle: { strategy: 'time_interval', interval: '5m' } },
+        ops
+      );
+
+      expect(result.throttle).toEqual({ strategy: 'every_time' });
+    });
+
+    it('carries the stored interval over to another strategy that takes one', () => {
+      const ops: ActionPolicyOperation[] = [
+        { operation: 'set_throttle', strategy: 'per_status_interval' },
+      ];
+
+      const result = executeActionPolicyOperations(
+        { grouping_mode: 'per_alert', throttle: { strategy: 'time_interval', interval: '5m' } },
+        ops
+      );
+
+      expect(result.throttle).toEqual({ strategy: 'per_status_interval', interval: '5m' });
+    });
+
+    // An interval the strategy never reads is an error, not a value the server quietly discards.
+    it.each(['every_time', 'on_status_change'] as const)(
+      'throws when an interval is spelled out for %s',
+      (strategy) => {
+        const ops: ActionPolicyOperation[] = [
+          { operation: 'set_throttle', strategy, interval: '5m' },
+        ];
+
+        expect(() => executeActionPolicyOperations({}, ops)).toThrow('does not take an interval');
+      }
+    );
+
+    it('keeps the stored strategy when only the interval is set', () => {
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_throttle', interval: '10m' }];
+
+      const result = executeActionPolicyOperations(
+        {
+          grouping_mode: 'per_alert',
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        },
+        ops
+      );
+
+      expect(result.throttle).toEqual({ strategy: 'per_status_interval', interval: '10m' });
+    });
+  });
 });

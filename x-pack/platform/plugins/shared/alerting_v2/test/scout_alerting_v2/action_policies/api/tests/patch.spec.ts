@@ -15,6 +15,7 @@ import {
   apiTest,
   buildCreateActionPolicyData,
   findNullPaths,
+  getActionPolicyUrl,
   testData,
 } from '../fixtures';
 
@@ -124,8 +125,8 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     await actionPolicies.patch(created.id, { throttle: { strategy: 'on_status_change' } });
 
     const after = await actionPolicySavedObject.getAttributes(created.id);
-    // Throttle leaves merge independently, so the stale interval survives the merge and is only
-    // dropped on the way to disk. It must not linger for a reader of the raw document.
+    // The strategy decides the rest of the block, so a patch replaces it whole. The interval the
+    // previous strategy used must not linger for a reader of the raw document.
     expect(after.throttle).toStrictEqual({ strategy: 'on_status_change' });
   });
 
@@ -145,23 +146,36 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     expect(Object.keys(fetched)).not.toContain('description');
   });
 
-  apiTest('treats an empty throttle patch as a no-op merge', async ({ apiServices }) => {
-    const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
-    const created = await actionPolicies.create(
-      buildCreateActionPolicyData({
-        name: 'patch-throttle-noop',
-        grouping_mode: 'all',
-        throttle: { strategy: 'time_interval', interval: '5m' },
-      })
-    );
+  apiTest(
+    'rejects an empty throttle patch and leaves the stored throttle alone',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
+      const created = await actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'patch-throttle-empty',
+          grouping_mode: 'all',
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        })
+      );
 
-    // Unlike create, where `{}` configures nothing and is rejected, a patch merges leaf by leaf:
-    // an empty object names no leaf, so the stored throttle survives untouched.
-    await actionPolicies.patch(created.id, { throttle: {} });
+      // `{}` is not a throttle the typed client can express, so this one body goes over the wire.
+      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
+      );
+      // A matcher patch names leaves, so `{}` there names none of them. A throttle is replaced
+      // whole, so `{}` is a throttle with no strategy rather than an empty selection.
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+        body: { throttle: {} },
+      });
 
-    const after = await actionPolicySavedObject.getAttributes(created.id);
-    expect(after.throttle).toStrictEqual({ strategy: 'time_interval', interval: '5m' });
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+
+      const after = await actionPolicySavedObject.getAttributes(created.id);
+      expect(after.throttle).toStrictEqual({ strategy: 'time_interval', interval: '5m' });
+    }
+  );
 
   apiTest(
     'clears the matcher when its last leaf goes, leaving a catch-all policy',

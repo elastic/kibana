@@ -109,10 +109,6 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle?.strategy).toBe('every_time');
     });
 
-    it('rejects an empty throttle object', () => {
-      expect(createActionPolicyDataSchema.safeParse({ ...base, throttle: {} }).success).toBe(false);
-    });
-
     it('accepts no grouping_mode with per_alert-compatible strategy', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
@@ -201,7 +197,7 @@ describe('createActionPolicyDataSchema', () => {
           grouping_mode: 'per_alert',
           throttle: { strategy: 'per_status_interval' },
         })
-      ).toThrow('requires an interval');
+      ).toThrow();
     });
 
     it('rejects time_interval without interval', () => {
@@ -211,7 +207,30 @@ describe('createActionPolicyDataSchema', () => {
           grouping_mode: 'all',
           throttle: { strategy: 'time_interval' },
         })
-      ).toThrow('requires an interval');
+      ).toThrow();
+    });
+
+    it('rejects a null interval on a strategy that takes one', () => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({
+          ...base,
+          grouping_mode: 'per_alert',
+          throttle: { strategy: 'per_status_interval', interval: null },
+        })
+      ).toThrow();
+    });
+
+    it.each([
+      ['per_alert', 'on_status_change'],
+      ['per_alert', 'every_time'],
+    ])('rejects an interval on %s + %s', (groupingMode, strategy) => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({
+          ...base,
+          grouping_mode: groupingMode,
+          throttle: { strategy, interval: '5m' },
+        })
+      ).toThrow();
     });
 
     it('rejects omitted grouping_mode with time_interval (defaults to per_alert)', () => {
@@ -258,6 +277,18 @@ describe('createActionPolicyDataSchema', () => {
         })
       ).toThrow();
     });
+  });
+});
+
+describe('an empty throttle object names no variant', () => {
+  const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
+
+  it.each([
+    ['create', createActionPolicyDataSchema, { ...base, throttle: {} }],
+    ['put', putActionPolicyDataSchema, { ...base, throttle: {} }],
+    ['patch', updateActionPolicyDataSchema, { throttle: {} }],
+  ])('rejects it on %s', (_label, schema, body) => {
+    expect(schema.safeParse(body).success).toBe(false);
   });
 });
 
@@ -391,10 +422,10 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.matcher).toEqual({ expression: null });
     });
 
-    it('accepts clearing a single throttle sub-field', () => {
-      const result = updateActionPolicyDataSchema.parse({ throttle: { interval: null } });
+    it('accepts replacing the throttle with a variant that has fewer keys', () => {
+      const result = updateActionPolicyDataSchema.parse({ throttle: { strategy: 'every_time' } });
 
-      expect(result.throttle).toEqual({ interval: null });
+      expect(result.throttle).toEqual({ strategy: 'every_time' });
     });
 
     it('accepts setting group_by to null', () => {
@@ -434,9 +465,9 @@ describe('updateActionPolicyDataSchema', () => {
   });
 
   /**
-   * A PATCH body is a sparse delta, so a cross-field rule cannot be judged from it alone: a
-   * strategy that needs an interval may be inheriting one from the stored policy. These bodies are
-   * therefore accepted here and validated after the merge, by `ActionPolicyClient`.
+   * A PATCH body is a sparse delta, so a cross-field rule cannot be judged from it alone: the
+   * grouping mode a strategy is checked against may be the stored one. These bodies are therefore
+   * accepted here and validated after the merge, by `ActionPolicyClient`.
    */
   describe('cross-field invariants deferred to the merged document', () => {
     it.each([
@@ -449,20 +480,35 @@ describe('updateActionPolicyDataSchema', () => {
         { grouping_mode: null, throttle: { strategy: 'time_interval', interval: '5m' } },
       ],
       [
-        'a strategy that requires an interval, without one',
-        { grouping_mode: 'all', throttle: { strategy: 'time_interval' } },
-      ],
-      [
         'per_field with on_status_change',
         { grouping_mode: 'per_field', throttle: { strategy: 'on_status_change' } },
       ],
+    ])('accepts %s', (_label, body) => {
+      expect(updateActionPolicyDataSchema.safeParse(body).success).toBe(true);
+    });
+  });
+
+  /**
+   * The strategy decides which keys the throttle has, so the shape is judged from the body alone:
+   * nothing here could become valid by merging onto a stored policy.
+   */
+  describe('throttle shape judged without the stored document', () => {
+    it.each([
       [
         'per_status_interval without an interval',
         { throttle: { strategy: 'per_status_interval' } },
       ],
       ['time_interval without an interval', { throttle: { strategy: 'time_interval' } }],
-    ])('accepts %s', (_label, body) => {
-      expect(updateActionPolicyDataSchema.safeParse(body).success).toBe(true);
+      ['an interval on every_time', { throttle: { strategy: 'every_time', interval: '5m' } }],
+      [
+        'an interval on on_status_change',
+        { throttle: { strategy: 'on_status_change', interval: '5m' } },
+      ],
+      ['an interval with no strategy to belong to', { throttle: { interval: '10m' } }],
+      ['a null interval', { throttle: { strategy: 'time_interval', interval: null } }],
+      ['a null strategy', { throttle: { strategy: null, interval: '5m' } }],
+    ])('rejects %s', (_label, body) => {
+      expect(updateActionPolicyDataSchema.safeParse(body).success).toBe(false);
     });
   });
 });
@@ -526,10 +572,10 @@ describe('action policy optional fields are never empty', () => {
       ).toBe(true);
     });
 
-    it('accepts an interval-only patch, which merges onto the stored strategy', () => {
-      expect(updateActionPolicyDataSchema.parse({ throttle: { interval: '10m' } })).toEqual({
-        throttle: { interval: '10m' },
-      });
+    it('rejects an interval-only patch', () => {
+      expect(
+        updateActionPolicyDataSchema.safeParse({ throttle: { interval: '10m' } }).success
+      ).toBe(false);
     });
 
     // The strategy is what makes a throttle meaningful: clear the block, not the leaf.

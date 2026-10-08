@@ -32,18 +32,19 @@ export function validateDateString(dateString: string): void {
 }
 
 /**
- * The single throttle representation, shared by storage and the API: an interval the strategy
- * cannot use is dropped rather than carried. A strategy is what makes a throttle meaningful, so a
- * legacy document holding `null` or a strategyless block reads the same as no throttle at all.
+ * Projects a stored throttle onto the strategy variant it names. Documents written before the
+ * throttle became a discriminated union may hold keys their strategy never used, or no strategy at
+ * all; neither names a variant, so a stray interval is dropped and a block that cannot form a
+ * variant reads the same as no throttle.
  */
-const normalizeThrottle = (
+const toApiThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
 ): ActionPolicyResponse['throttle'] => {
   const strategy = throttle?.strategy;
   if (strategy == null) return undefined;
+  if (!needsInterval(strategy)) return { strategy };
 
-  const interval = needsInterval(strategy) ? throttle?.interval : undefined;
-  return { strategy, ...(interval ? { interval } : {}) };
+  return throttle?.interval ? { strategy, interval: throttle.interval } : undefined;
 };
 
 const toApiGroupBy = (
@@ -73,7 +74,7 @@ export const toPatchableActionPolicyData = (
   matcher: normalizeMatcher(attributes.matcher),
   group_by: toApiGroupBy(attributes.groupBy),
   grouping_mode: attributes.groupingMode ?? undefined,
-  throttle: normalizeThrottle(attributes.throttle),
+  throttle: toApiThrottle(attributes.throttle),
 });
 
 /**
@@ -90,7 +91,7 @@ const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   matcher: normalizeMatcher(data.matcher),
   groupBy: data.group_by,
   groupingMode: data.grouping_mode,
-  throttle: normalizeThrottle(data.throttle),
+  throttle: data.throttle,
 });
 
 export const buildCreateActionPolicyAttributes = ({
@@ -165,7 +166,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     matcher: normalizeMatcher(attributes.matcher),
     group_by: toApiGroupBy(attributes.groupBy),
     grouping_mode: attributes.groupingMode ?? undefined,
-    throttle: normalizeThrottle(attributes.throttle),
+    throttle: toApiThrottle(attributes.throttle),
     snoozed_until: attributes.snoozedUntil ?? undefined,
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,

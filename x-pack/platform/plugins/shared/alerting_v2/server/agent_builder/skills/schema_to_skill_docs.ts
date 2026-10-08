@@ -608,7 +608,7 @@ export const formatEnumValuesList = (values: readonly string[]): string =>
   values.map((v) => `\`${v}\``).join(', ');
 
 /** Formats a set of strategy values as an inline backtick list. */
-const formatStrategySet = (strategies: Set<string>): string =>
+const formatStrategySet = (strategies: ReadonlySet<string>): string =>
   formatEnumValuesList([...strategies]);
 
 /**

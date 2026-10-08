@@ -127,6 +127,12 @@ describe('reading legacy empty sentinels', () => {
     expect(result.throttle).toStrictEqual({ strategy: 'on_status_change' });
   });
 
+  it('projects a scheduled strategy with no interval as absent', () => {
+    const result = read({ throttle: { strategy: 'time_interval' } });
+    expect(result.throttle).toBeUndefined();
+    expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+  });
+
   it.each([{}, { tags: [] }, { expression: '' }, { tags: [], expression: '' }])(
     'projects a matcher that constrains nothing as absent: %p',
     (matcher) => {

@@ -393,10 +393,24 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
+      body: {
+        ...buildCreateActionPolicyData({ grouping_mode: 'all' }),
         throttle: { strategy: 'time_interval' },
-      }),
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  // An interval the strategy never reads used to be accepted and silently dropped.
+  apiTest('validation: rejects an interval on the every_time strategy', async ({ apiClient }) => {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-stray-interval'), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: {
+        ...buildCreateActionPolicyData({ grouping_mode: 'all' }),
+        throttle: { strategy: 'every_time', interval: '5m' },
+      },
     });
 
     expect(response).toHaveStatusCode(400);

@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { actorSchema, durationSchema, ESTIMATED_COUNT_NOTE } from './common';
+import { actorSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
-  throttleStrategySchema,
+  throttleSchema,
 } from './action_policy_data_schema';
 import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
 
@@ -32,15 +32,7 @@ export const actionPolicyResponseSchema = z
     grouping_mode: groupingModeSchema
       .optional()
       .describe('The grouping mode for alert notifications. Omitted when none is set.'),
-    throttle: z
-      .object({
-        strategy: throttleStrategySchema.describe('The throttle strategy.'),
-        interval: durationSchema
-          .optional()
-          .describe(
-            'The throttle interval duration (e.g. 5m, 1h). Omitted when the strategy is intervalless.'
-          ),
-      })
+    throttle: throttleSchema
       .optional()
       .describe('The throttle configuration for notifications. Omitted when none is set.'),
     snoozed_until: z

@@ -60,7 +60,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         destinations: [{ type: 'workflow', id: 'updated-workflow-id' }],
         matcher: { expression: "env == 'production' && region == 'us-west-2'" },
         group_by: ['service.name', 'environment'],
-        throttle: { interval: '5m' },
+        throttle: { strategy: 'per_status_interval', interval: '5m' },
       },
     });
 
@@ -173,7 +173,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         body: {
           matcher: { expression: "env == 'staging' && region == 'eu-central-1'" },
           group_by: ['service.name', 'host.name'],
-          throttle: { interval: '15m' },
+          throttle: { strategy: 'per_status_interval', interval: '15m' },
         },
       });
 
@@ -476,7 +476,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'merge: patches throttle.interval and preserves throttle.strategy',
+    'merge: replaces the throttle whole and rejects a patch that names one of its keys',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -486,9 +486,18 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+      // The strategy decides whether `interval` is a key at all, so it cannot be patched alone.
+      const partial = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: { throttle: { interval: '30m' } },
+      });
+
+      expect(partial).toHaveStatusCode(400);
+      expect(partial.body.code).toBe('BAD_REQUEST');
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { throttle: { strategy: 'per_status_interval', interval: '30m' } },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -587,7 +596,10 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { matcher: { expression: null }, throttle: { interval: '15m' } },
+        body: {
+          matcher: { expression: null },
+          throttle: { strategy: 'time_interval', interval: '15m' },
+        },
       });
 
       expect(response).toHaveStatusCode(200);

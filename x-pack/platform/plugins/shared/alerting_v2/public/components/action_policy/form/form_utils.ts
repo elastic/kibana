@@ -17,20 +17,18 @@ import type { ActionPolicyFormState } from './types';
 
 export { needsInterval };
 
-/** An interval the strategy cannot use is omitted on create, where `null` is not a clear signal. */
-const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['throttle'] => ({
-  strategy: state.throttleStrategy,
-  ...(needsInterval(state.throttleStrategy) ? { interval: state.throttleInterval } : {}),
-});
-
-/** The form always submits the throttle in full, so an unusable interval is cleared rather than kept. */
-const buildThrottlePatch = (state: ActionPolicyFormState): UpdateActionPolicyData['throttle'] => ({
-  strategy: state.throttleStrategy,
-  interval: needsInterval(state.throttleStrategy) ? state.throttleInterval : null,
-});
+/**
+ * The throttle is one strategy variant, so the interval is sent only by the strategies that have
+ * one. A PATCH replaces the whole block, which is what the form submits either way.
+ */
+const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['throttle'] =>
+  needsInterval(state.throttleStrategy)
+    ? { strategy: state.throttleStrategy, interval: state.throttleInterval }
+    : { strategy: state.throttleStrategy };
 
 export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormState => {
   const groupingMode = response.grouping_mode ?? 'per_alert';
+  const { throttle } = response;
 
   return {
     name: response.name,
@@ -38,8 +36,9 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
     matcher: response.matcher ?? null,
     groupingMode,
     groupBy: response.group_by ?? [],
-    throttleStrategy: response.throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
-    throttleInterval: response.throttle?.interval ?? '',
+    throttleStrategy: throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
+    // The form keeps an interval field for every strategy, so the intervalless variants seed it blank.
+    throttleInterval: throttle && 'interval' in throttle ? throttle.interval : '',
     destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
     inlineActions: [],
   };
@@ -80,7 +79,7 @@ export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolic
     grouping_mode: state.groupingMode,
     matcher: toMatcherPatch(state.matcher),
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
-    throttle: buildThrottlePatch(state),
+    throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
 };
