@@ -6,18 +6,30 @@
  */
 
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlType, Workspace } from '../../types';
+import type { ControlType } from '../../types';
+import {
+  clearNodeSelection,
+  invertNodeSelection,
+  selectAllNodes,
+  selectedNodeIdsSelector,
+  selectNeighborNodes,
+  type GraphDispatch,
+  workspaceNodeCountSelector,
+} from '../../state_management';
 
 interface SelectionToolBarProps {
-  workspace: Workspace;
   onSetControl: (data: ControlType) => void;
 }
 
-export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarProps) => {
-  const haveNodes = workspace.nodes.length === 0;
+export const SelectionToolBar = ({ onSetControl }: SelectionToolBarProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+  const nodeCount = useSelector(workspaceNodeCountSelector);
+  const selectedNodeIds = useSelector(selectedNodeIdsSelector);
+  const haveNodes = nodeCount === 0;
 
   const selectAllButtonMsg = i18n.translate(
     'xpack.graph.sidebar.selections.selectAllButtonTooltip',
@@ -46,23 +58,19 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
 
   const onSelectAllClick = () => {
     onSetControl('none');
-    workspace.selectAll();
-    workspace.changeHandler();
+    dispatch(selectAllNodes());
   };
   const onSelectNoneClick = () => {
     onSetControl('none');
-    workspace.selectNone();
-    workspace.changeHandler();
+    dispatch(clearNodeSelection());
   };
   const onInvertSelectionClick = () => {
     onSetControl('none');
-    workspace.selectInvert();
-    workspace.changeHandler();
+    dispatch(invertNodeSelection());
   };
   const onSelectNeighboursClick = () => {
     onSetControl('none');
-    workspace.selectNeighbours();
-    workspace.changeHandler();
+    dispatch(selectNeighborNodes());
   };
 
   return (
@@ -126,7 +134,7 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
           <EuiButtonEmpty
             data-test-subj="graphLinkedSelection"
             size="s"
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             color="text"
             onClick={onSelectNeighboursClick}
           >

@@ -6,20 +6,22 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Workspace } from '../../types';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { colorSelectedNodes, type GraphDispatch } from '../../state_management';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectStyleProps {
-  workspace: Workspace;
   colors: string[];
 }
 
-export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
+export const SelectStyle = ({ colors }: SelectStyleProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
@@ -31,12 +33,10 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
 
       <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
         {colors.map((c) => {
-          const onSelectColor = () => {
-            workspace.colorSelected(c);
-            workspace.changeHandler();
-          };
+          const onSelectColor = () => dispatch(colorSelectedNodes(c));
           return (
             <EuiIcon
+              key={c}
               type="stopFill"
               color={c}
               css={colorPickerIconStyles}

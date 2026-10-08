@@ -12,14 +12,19 @@ import { i18n } from '@kbn/i18n';
 import type { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 
+export type SelectedNodeView = Pick<
+  WorkspaceNode,
+  'id' | 'label' | 'icon' | 'color' | 'data' | 'numChildren'
+>;
+
 interface SelectedNodeItemProps {
-  node: WorkspaceNode;
+  node: SelectedNodeView;
   isHighlighted: boolean;
-  onDeselectNode: (node: WorkspaceNode) => void;
-  onSelectedFieldClick: (node: WorkspaceNode) => void;
+  onDeselectNode: (node: SelectedNodeView) => void;
+  onSelectedFieldClick: (node: SelectedNodeView) => void;
 }
 
-function fixIconOffset(node: WorkspaceNode) {
+function fixIconOffset(node: SelectedNodeView) {
   const offset = getIconOffset(node.icon) || { x: 0, y: 0 };
   const finalOffset = { x: offset.x / 2, y: offset.y / 2 };
   // Maki icons need to be offset a little bit more on the right (~0.5px)

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
-import type { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { RuntimeGraph, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [
@@ -25,7 +25,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: true,
       kx: 5,
       ky: 5,
       label: '1',
@@ -48,7 +47,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: false,
       kx: 7,
       ky: 9,
       label: '2',
@@ -71,7 +69,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: false,
       kx: 12,
       ky: 2,
       label: '3',
@@ -84,7 +81,6 @@ describe('graph_visualization', () => {
   ];
   const edges: WorkspaceEdge[] = [
     {
-      isSelected: true,
       label: '',
       topSrc: nodes[0],
       topTarget: nodes[1],
@@ -94,7 +90,6 @@ describe('graph_visualization', () => {
       width: 2,
     },
     {
-      isSelected: true,
       label: '',
       topSrc: nodes[1],
       topTarget: nodes[2],
@@ -104,20 +99,18 @@ describe('graph_visualization', () => {
       width: 2.2,
     },
   ];
-  const workspace = {
+  const runtimeGraph = {
     nodes,
     edges,
-    selectNone: () => {},
-    changeHandler: jest.fn(),
-    toggleNodeSelection: jest.fn().mockImplementation((node: WorkspaceNode) => {
-      return !node.isSelected;
-    }),
-    getAllIntersections: jest.fn(),
-    removeEdgeFromSelection: jest.fn(),
-    addEdgeToSelection: jest.fn(),
-    getEdgeSelection: jest.fn().mockImplementation(() => []),
-    clearEdgeSelection: jest.fn(),
-  } as unknown as jest.Mocked<Workspace>;
+  } as unknown as jest.Mocked<RuntimeGraph>;
+
+  const defaultSelectionProps = {
+    selectedNodeIds: ['1'],
+    selectedEdgeIds: ['A..1-B..2', 'B..2-C..3'],
+    onToggleNodeSelection: jest.fn(() => true),
+    onToggleEdgeSelection: jest.fn(() => true),
+    getMergeCandidates: jest.fn().mockResolvedValue([]),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -127,7 +120,8 @@ describe('graph_visualization', () => {
     expect(
       shallow(
         <GraphVisualization
-          workspace={{} as unknown as Workspace}
+          {...defaultSelectionProps}
+          runtimeGraph={{} as unknown as RuntimeGraph}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}
@@ -153,7 +147,8 @@ describe('graph_visualization', () => {
     expect(
       shallow(
         <GraphVisualization
-          workspace={workspace}
+          {...defaultSelectionProps}
+          runtimeGraph={runtimeGraph}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}
@@ -167,7 +162,8 @@ describe('graph_visualization', () => {
 
     const instance = shallow(
       <GraphVisualization
-        workspace={workspace}
+        {...defaultSelectionProps}
+        runtimeGraph={runtimeGraph}
         selectSelected={selectSelectedMock}
         onSetControl={() => {}}
         onSetMergeCandidates={() => {}}
@@ -176,16 +172,17 @@ describe('graph_visualization', () => {
 
     instance.find('.gphNode').last().simulate('click', {});
 
-    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[2]);
-    expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2]);
-    expect(workspace.changeHandler).toHaveBeenCalled();
+    expect(defaultSelectionProps.onToggleNodeSelection).toHaveBeenCalledWith(nodes[2], true);
+    expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2].id);
   });
 
   it('should react to node deselection', () => {
     const onSetControlMock = jest.fn();
     const instance = shallow(
       <GraphVisualization
-        workspace={workspace}
+        {...defaultSelectionProps}
+        onToggleNodeSelection={() => false}
+        runtimeGraph={runtimeGraph}
         selectSelected={() => {}}
         onSetControl={onSetControlMock}
         onSetMergeCandidates={() => {}}
@@ -194,15 +191,14 @@ describe('graph_visualization', () => {
 
     instance.find('.gphNode').first().simulate('click', {});
 
-    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[0]);
     expect(onSetControlMock).toHaveBeenCalledWith('none');
-    expect(workspace.changeHandler).toHaveBeenCalled();
   });
 
   it('should react to edge click', () => {
     const instance = shallow(
       <GraphVisualization
-        workspace={workspace}
+        {...defaultSelectionProps}
+        runtimeGraph={runtimeGraph}
         selectSelected={() => {}}
         onSetControl={() => {}}
         onSetMergeCandidates={() => {}}
@@ -211,9 +207,10 @@ describe('graph_visualization', () => {
 
     instance.find('.gphEdge').at(1).simulate('click');
 
-    expect(workspace.getAllIntersections).toHaveBeenCalled();
-    expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);
-    expect(edges[0].topTarget).toEqual(workspace.getAllIntersections.mock.calls[0][1][1]);
-    expect(workspace.removeEdgeFromSelection).toHaveBeenCalled();
+    expect(defaultSelectionProps.getMergeCandidates).toHaveBeenCalledWith([
+      edges[0].topSrc,
+      edges[0].topTarget,
+    ]);
+    expect(defaultSelectionProps.onToggleEdgeSelection).toHaveBeenCalledWith(edges[0]);
   });
 });

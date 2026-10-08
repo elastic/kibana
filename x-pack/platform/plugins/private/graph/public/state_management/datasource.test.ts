@@ -9,19 +9,20 @@ import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { AdvancedSettings, WorkspaceField } from '../types';
 import { datasourceSelector, requestDatasource } from './datasource';
-import { datasourceSaga } from './datasource.sagas';
+import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
+import { workspaceChanged, workspaceSelector, type WorkspaceSnapshot } from './workspace';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 
-describe('datasource saga', () => {
+describe('datasource listener', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [datasourceSaga],
+      listeners: [registerDatasourceListeners],
       mockedDepsOverwrites: {
         indexPatternProvider: {
           get: jest.fn(() =>
@@ -49,12 +50,91 @@ describe('datasource saga', () => {
     expect(fieldsSelector(resultingState)[0].name).toEqual('field1');
   });
 
+  it('should clear Redux workspace state when switching datasource', async () => {
+    const previousSnapshot: WorkspaceSnapshot = {
+      isInitialized: true,
+      isLayoutRunning: true,
+      nodesById: {
+        node: {
+          id: 'node',
+          x: 1,
+          y: 1,
+          label: 'node',
+          color: 'black',
+          scaledSize: 10,
+          data: { field: 'field', term: 'term' },
+        },
+      },
+      nodeIds: ['node'],
+      edgesById: {
+        edge: {
+          id: 'edge',
+          sourceId: 'node',
+          targetId: 'node',
+          topSourceId: 'node',
+          topTargetId: 'node',
+          label: 'edge',
+          weight: 1,
+          width: 1,
+        },
+      },
+      edgeIds: ['edge'],
+      selectedNodeIds: ['node'],
+      selectedEdgeIds: ['edge'],
+      blocklistedNodesById: {
+        node: {
+          id: 'node',
+          x: 1,
+          y: 1,
+          label: 'node',
+          color: 'black',
+          scaledSize: 10,
+          data: { field: 'field', term: 'term' },
+        },
+      },
+      blocklistedNodeIds: ['node'],
+    };
+    env.store.dispatch(
+      workspaceChanged({
+        ...previousSnapshot,
+        undoHistory: [previousSnapshot],
+        redoHistory: [previousSnapshot],
+      })
+    );
+
+    dispatchRequest();
+    await waitForPromise();
+
+    const workspaceState = workspaceSelector(env.store.getState());
+    expect(workspaceState).toEqual({
+      isInitialized: true,
+      isLayoutRunning: false,
+      nodesById: {},
+      nodeIds: [],
+      edgesById: {},
+      edgeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+    });
+    const runtimeGraph = env.mockedDeps.getRuntimeGraph();
+    expect(new Set(Object.keys(runtimeGraph?.nodesMap ?? {}))).toEqual(
+      new Set(workspaceState.nodeIds)
+    );
+    expect(new Set(Object.keys(runtimeGraph?.edgesMap ?? {}))).toEqual(
+      new Set(workspaceState.edgeIds)
+    );
+  });
+
   it('should initialize workspace with the current advanced settings', async () => {
     const newSettings = { timeoutMillis: 123 } as AdvancedSettings;
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', newSettings);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should not carry over diversity field into new workspace', async () => {
@@ -65,9 +145,39 @@ describe('datasource saga', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', {
-      timeoutMillis: 123,
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
+  });
+
+  it('should discard a stale response when a newer datasource request finishes first', async () => {
+    let resolveFirstRequest: (dataView: DataView) => void = () => {};
+    const firstRequest = new Promise<DataView>((resolve) => {
+      resolveFirstRequest = resolve;
     });
+    const secondDataView = {
+      title: 'second-pattern',
+      getNonScriptedFields: () => [{ name: 'second-field', type: 'string', isMapped: true }],
+    } as DataView;
+    (env.mockedDeps.indexPatternProvider.get as jest.Mock)
+      .mockReturnValueOnce(firstRequest)
+      .mockResolvedValueOnce(secondDataView);
+
+    env.store.dispatch(
+      requestDatasource({ type: 'indexpattern', id: 'first-id', title: 'first-pattern' })
+    );
+    env.store.dispatch(
+      requestDatasource({ type: 'indexpattern', id: 'second-id', title: 'second-pattern' })
+    );
+    await waitForPromise();
+
+    resolveFirstRequest({
+      title: 'first-pattern',
+      getNonScriptedFields: () => [{ name: 'first-field', type: 'string', isMapped: true }],
+    } as DataView);
+    await waitForPromise();
+
+    expect(fieldsSelector(env.store.getState()).map(({ name }) => name)).toEqual(['second-field']);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledTimes(1);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {

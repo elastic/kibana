@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -16,21 +17,19 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlType, TermIntersect, Workspace } from '../../types';
+import type { ControlType, TermIntersect } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { mergeNodes, type GraphDispatch } from '../../state_management';
 
 interface MergeCandidatesProps {
-  workspace: Workspace;
   mergeCandidates: TermIntersect[];
   onSetControl: (control: ControlType) => void;
 }
 
-export const MergeCandidates = ({
-  workspace,
-  mergeCandidates,
-  onSetControl,
-}: MergeCandidatesProps) => {
+export const MergeCandidates = ({ mergeCandidates, onSetControl }: MergeCandidatesProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+
   const performMerge = (parentId: string, childId: string) => {
     const tempMergeCandidates = [...mergeCandidates];
     let found = true;
@@ -46,7 +45,7 @@ export const MergeCandidates = ({
         }
       }
     }
-    workspace.mergeIds(parentId, childId);
+    dispatch(mergeNodes({ parentId, childId }));
     onSetControl('none');
   };
 
@@ -108,7 +107,7 @@ export const MergeCandidates = ({
         const onMergeTerm2ToTerm1Click = () => performMerge(mc.id1, mc.id2);
 
         return (
-          <div>
+          <div key={`${mc.id1}-${mc.id2}`}>
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon

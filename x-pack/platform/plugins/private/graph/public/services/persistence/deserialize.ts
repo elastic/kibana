@@ -17,10 +17,10 @@ import type {
   SerializedWorkspaceState,
   AdvancedSettings,
   GraphData,
-  Workspace,
+  RuntimeGraph,
   SerializedField,
 } from '../../types';
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { getOutlinkEncoder } from '../../helpers/outlink_encoders';
 import { getSuitableIcon, colorChoices, getIcon } from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
@@ -36,14 +36,13 @@ function deserializeUrlTemplate({
   iconClass,
   ...serializableProps
 }: SerializedUrlTemplate) {
-  const encoder = outlinkEncoders.find((outlinkEncoder) => outlinkEncoder.id === encoderID);
-  if (!encoder) {
+  if (!getOutlinkEncoder(encoderID)) {
     return;
   }
 
   const template: UrlTemplate = {
     ...serializableProps,
-    encoder,
+    encoderId: encoderID,
     icon: null,
   };
 
@@ -148,6 +147,7 @@ function getBlocklistedNodes(
   return serializedWorkspaceState.blocklist.map((serializedNode) => {
     const currentField = allFields.find((field) => field.name === serializedNode.field)!;
     return {
+      id: makeNodeId(serializedNode.field, serializedNode.term),
       x: 0,
       y: 0,
       label: serializedNode.label,
@@ -163,7 +163,7 @@ function getBlocklistedNodes(
   });
 }
 
-function resolveGroups(nodes: SerializedNode[], workspaceInstance: Workspace) {
+function resolveGroups(nodes: SerializedNode[], workspaceInstance: RuntimeGraph) {
   nodes.forEach(({ field, term, x, y, parent }) => {
     const nodeId = makeNodeId(field, term);
     const workspaceNode = workspaceInstance.nodesMap[nodeId];
@@ -205,7 +205,8 @@ export function makeNodeId(field: string, term: string) {
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: DataView,
-  workspaceInstance: Workspace
+  workspaceInstance: RuntimeGraph,
+  mergeRuntimeGraph: (runtimeGraph: RuntimeGraph, graph: GraphData) => void
 ): {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;
@@ -223,8 +224,6 @@ export function savedWorkspaceToAppState(
     indexPattern,
     persistedWorkspaceState.selectedFields
   );
-  const selectedFields = allFields.filter((field) => field.selected);
-  workspaceInstance.options.vertex_fields = selectedFields;
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(
@@ -241,11 +240,9 @@ export function savedWorkspaceToAppState(
     );
   }
 
-  workspaceInstance.options.exploreControls = advancedSettings;
-
   // ================== nodes and edges =============================
   const graph = getNodesAndEdges(persistedWorkspaceState, allFields);
-  workspaceInstance.mergeGraph(graph);
+  mergeRuntimeGraph(workspaceInstance, graph);
   resolveGroups(persistedWorkspaceState.vertices, workspaceInstance);
 
   // ================== blocklist =============================

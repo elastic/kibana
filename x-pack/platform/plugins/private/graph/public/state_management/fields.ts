@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { select, takeLatest, takeEvery } from 'redux-saga/effects';
 import { createSelector } from './create_selector';
 import type { WorkspaceField } from '../types';
-import type { GraphState, GraphStoreDependencies } from './store';
+import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
-import type { InferActionType } from './helpers';
-import { matchesOne } from './helpers';
+import type { InferActionType, MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -66,80 +64,35 @@ export const hasFieldsSelector = createSelector(
   (fields) => fields.length > 0
 );
 
-/**
- * Saga making notifying react when fields are selected to re-calculate the state of the save button.
- *
- * Won't be necessary once the workspace is moved to redux
- */
-export const updateSaveButtonSaga = ({ notifyReact }: GraphStoreDependencies) => {
-  function* notify(): IterableIterator<void> {
-    notifyReact();
-  }
-  return function* () {
-    yield takeLatest(matchesOne(selectField, deselectField), notify);
-  };
-};
+export const registerFieldsListeners = (
+  startListening: StartGraphListening,
+  { getRuntimeGraph, notifyReact }: GraphStoreDependencies
+) => {
+  /**
+   * Keep mutable D3 nodes visually aligned with field styles stored in Redux.
+   */
+  startListening({
+    matcher: matchesAction(updateFieldProperties),
+    effect: (action: MatchedAction<InferActionType<typeof updateFieldProperties>>, listenerApi) => {
+      listenerApi.cancelActiveListeners();
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
+        return;
+      }
 
-/**
- * Saga making sure the fields in the store are always synced with the fields
- * known to the workspace.
- *
- * Won't be necessary once the workspace is moved to redux
- */
-export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies): (() => Generator) => {
-  function* syncFields(): Generator<any, any, any> {
-    const workspace = getWorkspace();
-    if (!workspace) {
-      return;
-    }
-
-    const currentState = yield select();
-    workspace.options.vertex_fields = selectedFieldsSelector(currentState);
-  }
-  return function* () {
-    yield takeEvery(
-      matchesOne(loadFields, selectField, deselectField, updateFieldProperties),
-      syncFields
-    );
-  };
-};
-
-/**
- * Saga making sure the field styles (icons and colors) are applied to nodes currently active
- * in the workspace.
- *
- * Won't be necessary once the workspace is moved to redux
- */
-export const syncNodeStyleSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
-  function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
-    const workspace = getWorkspace();
-    if (!workspace) {
-      return;
-    }
-    const newColor = action.payload.fieldProperties.color;
-    if (newColor) {
-      workspace.nodes.forEach(function (node) {
-        if (node.data.field === action.payload.fieldName) {
-          node.color = newColor;
+      const { color, icon } = action.payload.fieldProperties;
+      runtimeGraph.nodes.forEach((node) => {
+        if (node.data.field !== action.payload.fieldName) {
+          return;
+        }
+        if (color) {
+          node.color = color;
+        }
+        if (icon) {
+          node.icon = icon;
         }
       });
-    }
-    const newIcon = action.payload.fieldProperties.icon;
-
-    if (newIcon) {
-      workspace.nodes.forEach(function (node) {
-        if (node.data.field === action.payload.fieldName) {
-          node.icon = newIcon;
-        }
-      });
-    }
-    notifyReact();
-
-    const selectedFields = selectedFieldsSelector(yield select());
-    workspace.options.vertex_fields = selectedFields;
-  }
-
-  return function* () {
-    yield takeLatest(updateFieldProperties.match, syncNodeStyle);
-  };
+      notifyReact();
+    },
+  });
 };

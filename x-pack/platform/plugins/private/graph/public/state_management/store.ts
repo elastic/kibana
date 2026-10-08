@@ -5,45 +5,44 @@
  * 2.0.
  */
 
-import type { SagaMiddleware } from 'redux-saga';
-import createSagaMiddleware from 'redux-saga';
-import type { Store, Action, Dispatch } from 'redux';
+import type { Action, Dispatch } from 'redux';
 import { combineReducers } from 'redux';
-import { configureStore } from '@reduxjs/toolkit';
-import type { ChromeStart } from '@kbn/core/public';
-import type { CoreStart } from '@kbn/core/public';
+import {
+  configureStore,
+  createListenerMiddleware,
+  type TypedStartListening,
+} from '@reduxjs/toolkit';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type { FieldsState } from './fields';
-import { fieldsReducer, syncNodeStyleSaga, syncFieldsSaga, updateSaveButtonSaga } from './fields';
-import type { UrlTemplatesState } from './url_templates';
-import { urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
-import type { AdvancedSettingsState } from './advanced_settings';
-import { advancedSettingsReducer, syncSettingsSaga } from './advanced_settings';
-import type { DatasourceState } from './datasource';
+import { fieldsReducer, registerFieldsListeners } from './fields';
+import { urlTemplatesReducer } from './url_templates';
+import { advancedSettingsReducer } from './advanced_settings';
 import { datasourceReducer } from './datasource';
-import { datasourceSaga } from './datasource.sagas';
-import type { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
-import { loadingSaga, savingSaga } from './persistence';
-import type { MetaDataState } from './meta_data';
-import { metaDataReducer, syncBreadcrumbSaga } from './meta_data';
-import type { WorkspaceState } from './workspace';
-import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer } from './workspace';
+import { registerDatasourceListeners } from './datasource_listeners';
+import type {
+  ExploreRequest,
+  GraphData,
+  ExploreResults,
+  GraphSavePolicy,
+  SearchRequest,
+  SearchResults,
+  IndexPatternProvider,
+  RuntimeGraph,
+  WorkspaceLayoutController,
+} from '../types';
+import { registerPersistenceListeners } from './persistence';
+import { metaDataReducer, registerMetaDataListeners } from './meta_data';
+import { registerWorkspaceListeners, workspaceReducer } from './workspace';
 
-export interface GraphState {
-  fields: FieldsState;
-  urlTemplates: UrlTemplatesState;
-  advancedSettings: AdvancedSettingsState;
-  datasource: DatasourceState;
-  metaData: MetaDataState;
-  workspace: WorkspaceState;
-}
+export type GraphState = ReturnType<ReturnType<typeof createRootReducer>>;
 
 export interface GraphStoreDependencies
   extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
-  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;
-  getWorkspace: () => Workspace | undefined;
+  createRuntimeGraph: () => RuntimeGraph;
+  getRuntimeGraph: () => RuntimeGraph | undefined;
+  getLayoutController: () => WorkspaceLayoutController | undefined;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   contentClient: ContentClient;
@@ -53,7 +52,15 @@ export interface GraphStoreDependencies
   chrome: ChromeStart;
   basePath: string;
   handleSearchQueryError: (err: Error | string) => void;
+  exploreGraph: (index: string, request: ExploreRequest) => Promise<ExploreResults>;
+  searchGraph: (index: string, request: SearchRequest) => Promise<SearchResults>;
+  mergeRuntimeGraph: (runtimeGraph: RuntimeGraph, graph: GraphData) => void;
 }
+
+type GraphAction = Action<string>;
+type GraphListenerDispatch = Dispatch<GraphAction>;
+
+export type StartGraphListening = TypedStartListening<GraphState, GraphListenerDispatch>;
 
 export function createRootReducer(addBasePath: (url: string) => string) {
   return combineReducers({
@@ -66,41 +73,35 @@ export function createRootReducer(addBasePath: (url: string) => string) {
   });
 }
 
-function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreDependencies) {
-  sagaMiddleware.run(datasourceSaga(deps));
-  sagaMiddleware.run(loadingSaga(deps));
-  sagaMiddleware.run(savingSaga(deps));
-  sagaMiddleware.run(syncFieldsSaga(deps));
-  sagaMiddleware.run(syncNodeStyleSaga(deps));
-  sagaMiddleware.run(syncSettingsSaga(deps));
-  sagaMiddleware.run(updateSaveButtonSaga(deps));
-  sagaMiddleware.run(syncBreadcrumbSaga(deps));
-  sagaMiddleware.run(syncTemplatesSaga(deps));
-  sagaMiddleware.run(fillWorkspaceSaga(deps));
-  sagaMiddleware.run(submitSearchSaga(deps));
-}
+export const registerGraphListeners = (
+  startListening: StartGraphListening,
+  deps: GraphStoreDependencies,
+  state: GraphState
+) => {
+  registerDatasourceListeners(startListening, deps);
+  registerPersistenceListeners(startListening, deps);
+  registerFieldsListeners(startListening, deps);
+  registerMetaDataListeners(startListening, deps, state);
+  registerWorkspaceListeners(startListening, deps);
+};
 
-export const createGraphStore = (deps: GraphStoreDependencies): Store => {
-  const sagaMiddleware = createSagaMiddleware();
-
+export const createGraphStore = (deps: GraphStoreDependencies) => {
+  const listenerMiddleware = createListenerMiddleware<GraphState, GraphListenerDispatch>();
   const rootReducer = createRootReducer(deps.addBasePath);
 
   const store = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        // graph uses sagas instead of thunks
+        // graph uses listeners instead of thunks
         thunk: false,
-        // graph state and actions carry non-serializable values (e.g. Workspace instances)
-        serializableCheck: false,
-        immutableCheck: false,
-      }).concat(sagaMiddleware),
+      }).prepend(listenerMiddleware.middleware),
   });
 
-  registerSagas(sagaMiddleware, deps);
+  registerGraphListeners(listenerMiddleware.startListening, deps, store.getState());
 
   return store;
 };
 
-export type GraphStore = Store<GraphState, Action<string>>;
-export type GraphDispatch = Dispatch<Action<string>>;
+export type GraphStore = ReturnType<typeof createGraphStore>;
+export type GraphDispatch = GraphStore['dispatch'];

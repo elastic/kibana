@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../workspace/graph_client_workspace';
+import { createRuntimeGraph } from '../workspace/runtime_graph';
+import { GraphLayoutController } from '../workspace/graph_layout_controller';
+import { mergeRuntimeGraph } from '../workspace/runtime_graph_merge';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
-  let workspace: Workspace;
+  let workspace: RuntimeGraph;
+  let layoutController: GraphLayoutController;
+  let runtimeSequence: number;
 
   beforeEach(() => {
+    runtimeSequence = 0;
     savedWorkspace = {
       title: '',
       description: '',
@@ -112,7 +117,11 @@ describe('deserialize', () => {
         },
       }),
     } as GraphWorkspaceSavedObject;
-    workspace = createWorkspace({});
+    layoutController = new GraphLayoutController({
+      getNodes: () => workspace?.nodes ?? [],
+      getEdges: () => workspace?.edges ?? [],
+    });
+    workspace = createRuntimeGraph();
   });
 
   function callSavedWorkspaceToAppState() {
@@ -125,7 +134,15 @@ describe('deserialize', () => {
           { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
       } as DataView,
-      workspace
+      workspace,
+      (runtimeWorkspace, graph) => {
+        runtimeSequence = mergeRuntimeGraph(
+          runtimeWorkspace,
+          graph,
+          runtimeSequence,
+          layoutController
+        );
+      }
     );
   }
 
@@ -198,13 +215,13 @@ describe('deserialize', () => {
     const { urlTemplates } = callSavedWorkspaceToAppState();
 
     expect(urlTemplates[0].description).toBe('Template');
-    expect(urlTemplates[0].encoder).toBe(outlinkEncoders[0]);
+    expect(urlTemplates[0].encoderId).toBe(outlinkEncoders[0].id);
   });
 
   it('should deserialize nodes and edges', () => {
     callSavedWorkspaceToAppState();
 
-    expect(workspace.blocklistedNodes.length).toEqual(1);
+    expect(workspace.blocklistedNodes).toEqual([expect.objectContaining({ id: 'field1..Z' })]);
     expect(workspace.nodes.length).toEqual(5);
     expect(workspace.edges.length).toEqual(2);
 

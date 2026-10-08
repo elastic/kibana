@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { appStateToSavedWorkspace } from './serialize';
+import { appStateToSavedWorkspace, reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
-  Workspace,
+  RuntimeGraph,
   WorkspaceEdge,
-  UrlTemplate,
+  WorkspaceNode,
   AdvancedSettings,
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { IndexpatternDatasource } from '../../state_management';
+import {
+  createRuntimeGraphState,
+  type IndexpatternDatasource,
+  type UrlTemplateState,
+} from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
-    workspace: Workspace;
-    urlTemplates: UrlTemplate[];
+    workspace: RuntimeGraph;
+    urlTemplates: UrlTemplateState[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
     selectedFields: WorkspaceField[];
@@ -60,8 +64,9 @@ describe('serialize', () => {
       },
       urlTemplates: [
         {
+          id: 'internal-template-id',
           description: 'Template',
-          encoder: outlinkEncoders[0],
+          encoderId: outlinkEncoders[0].id,
           icon: { id: 'd', package: 'eui', label: '', prevName: '' },
           url: 'test-url',
         },
@@ -132,7 +137,7 @@ describe('serialize', () => {
           },
         ],
         edges: [] as WorkspaceEdge[],
-      } as Workspace,
+      } as RuntimeGraph,
     };
 
     // C is parent of B and D
@@ -156,6 +161,35 @@ describe('serialize', () => {
       weight: 5,
       width: 5,
     } as WorkspaceEdge);
+  });
+
+  it('serializes normalized Redux state identically to the legacy workspace', () => {
+    appState.workspace.nodes.forEach((node, index) => {
+      node.id = `node-${index}`;
+    });
+    appState.workspace.blocklistedNodes.forEach((node, index) => {
+      (node as WorkspaceNode).id = `blocked-${index}`;
+    });
+    appState.workspace.edges.forEach((edge, index) => {
+      edge.id = `edge-${index}`;
+      edge.topSrc = edge.source;
+      edge.topTarget = edge.target;
+    });
+
+    const legacySavedWorkspace = {} as GraphWorkspaceSavedObject;
+    const reduxSavedWorkspace = {} as GraphWorkspaceSavedObject;
+    appStateToSavedWorkspace(legacySavedWorkspace, appState, true);
+    reduxStateToSavedWorkspace(
+      reduxSavedWorkspace,
+      { ...appState, workspace: createRuntimeGraphState(appState.workspace) },
+      true
+    );
+
+    expect(JSON.parse(reduxSavedWorkspace.wsState)).toEqual(
+      JSON.parse(legacySavedWorkspace.wsState)
+    );
+    expect(reduxSavedWorkspace.numVertices).toEqual(legacySavedWorkspace.numVertices);
+    expect(reduxSavedWorkspace.numLinks).toEqual(legacySavedWorkspace.numLinks);
   });
 
   it('should serialize given workspace', () => {
