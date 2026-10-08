@@ -32,7 +32,11 @@ export interface ResponseFixture {
 /** A request/response pair captured from the real vendor API. */
 export interface RecordedExchange {
   readonly operation: OperationRef;
-  readonly request?: { readonly query?: Readonly<Record<string, string | string[]>> };
+  readonly request?: {
+    readonly query?: Readonly<Record<string, string | string[]>>;
+    readonly headers?: Readonly<Record<string, string>>;
+    readonly body?: unknown;
+  };
   readonly response: StoredResponse;
 }
 
@@ -59,6 +63,11 @@ export interface ResponseEngineOptions {
 export interface ResponseEngine {
   readonly respond: Responder;
   readonly rejected: readonly RejectedResponse[];
+  /**
+   * The recorded success exchanges that conform to the spec, in recording order; none for
+   * operations with a fixture, which overrides them.
+   */
+  readonly recordedExchanges: (operation: ContractOperation) => readonly RecordedExchange[];
 }
 
 /** Formats an operation reference as `METHOD /path`, the key fixtures and recordings match on. */
@@ -95,12 +104,12 @@ export const createResponseEngine = (
 ): ResponseEngine => {
   const byKey = new Map(operations.map((operation) => [toOperationKey(operation), operation]));
   const served = new Map<ContractOperation, ContractResponse>();
+  const recorded = new Map<ContractOperation, RecordedExchange[]>();
+  const withFixture = new Set<ContractOperation>();
   const rejected: RejectedResponse[] = [];
 
-  const add = (
-    source: RejectedResponse['source'],
-    { operation: ref, response }: ResponseFixture
-  ) => {
+  const add = (source: RejectedResponse['source'], entry: ResponseFixture | RecordedExchange) => {
+    const { operation: ref, response } = entry;
     const key = toOperationKey(ref);
     const operation = byKey.get(key);
     if (!operation) {
@@ -113,6 +122,11 @@ export const createResponseEngine = (
     if (violations.length > 0) {
       rejected.push({ source, operation: key, violations });
       return;
+    }
+    if (source === 'fixture') {
+      withFixture.add(operation);
+    } else if (!withFixture.has(operation)) {
+      recorded.set(operation, [...(recorded.get(operation) ?? []), entry]);
     }
     if (!served.has(operation)) {
       served.set(operation, contractResponse);
@@ -129,5 +143,6 @@ export const createResponseEngine = (
   return {
     respond: (operation, request) => served.get(operation) ?? fallback(operation, request),
     rejected,
+    recordedExchanges: (operation) => recorded.get(operation) ?? [],
   };
 };

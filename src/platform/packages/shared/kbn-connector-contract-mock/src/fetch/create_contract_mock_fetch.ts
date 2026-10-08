@@ -113,7 +113,11 @@ export const createContractMockFetch = ({
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
     operations,
-    withPagination(operations, { pagination, collectionSize }, engine.respond)
+    withPagination(
+      operations,
+      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+      engine.respond
+    )
   );
   const calls: ContractCall[] = [];
 

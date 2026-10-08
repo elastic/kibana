@@ -63,6 +63,8 @@ Operations listed in `pagination` (method, path template and a descriptor from t
 
 Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`.
 
+When an operation has recordings, its collection is the recorded pages joined, in place of copies of one item. Recordings store each exchange's request (`query`, `headers`, `body`) so pages can be placed: a page requested by offset or page number starts there, and a page requested with a vendor cursor starts where the page that returned that cursor ended. Recorded cursors then resolve to their position, so replaying them works, and the mock hands them out for the pages they lead to. `collectionSize` cuts the recorded items or pads them with copies of the last one. A fixture for the operation overrides its recordings.
+
 Page sizes above the vendor's `maximum` already get **422** from request validation.
 
 ## Spec loading
