@@ -214,7 +214,9 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       update((params) => {
         params.set(PARAM.ROWS_MODE, val);
         params.delete(PARAM.EXPANDED);
-        if (val === 'individual' && params.get(PARAM.SORT_FIELD) === GROUP_SIZE_FIELD) {
+        // A sort the new rows mode can't use (Records in individual rows) resets to the default.
+        const currentSortField = params.get(PARAM.SORT_FIELD);
+        if (currentSortField != null && !isValidSortField(currentSortField, val)) {
           params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
           params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
         }
