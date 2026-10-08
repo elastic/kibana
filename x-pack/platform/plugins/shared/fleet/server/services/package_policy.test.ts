@@ -5678,6 +5678,9 @@ describe('Package policy service', () => {
         requestCondition?: string;
       }) => {
         const savedObjectsClient = createSavedObjectClientMock();
+        jest
+          .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+          .mockResolvedValueOnce(undefined);
         const mockPackagePolicy = createPackagePolicyMock();
 
         (getPackageInfo as jest.Mock).mockResolvedValue({
