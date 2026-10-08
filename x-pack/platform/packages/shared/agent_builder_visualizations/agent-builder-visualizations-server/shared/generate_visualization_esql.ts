@@ -13,6 +13,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
+import { findMissingTimeFilterError } from './validate_time_filter';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
 interface GeneratedVisualizationEsql {
@@ -136,7 +137,12 @@ export const generateVisualizationEsql = async ({
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
-  const responseError = response.error ?? findTargetError(response.query, index);
+  // The time filter check runs on the first pass only: the fallback gets one chance to fix
+  // it, and a chart that ignores the time picker beats no chart at all.
+  const responseError =
+    response.error ??
+    findTargetError(response.query, index) ??
+    (await findMissingTimeFilterError(esClient.asCurrentUser, response.query));
 
   if (response.query && !responseError) {
     return { query: response.query, columns: response.results?.columns };

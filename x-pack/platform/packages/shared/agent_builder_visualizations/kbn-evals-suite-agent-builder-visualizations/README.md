@@ -73,7 +73,7 @@ Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.k
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
-- **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
+- **Categorical / metric** golds on `@timestamp` omit the time filter, because Kibana applies the time range to `@timestamp` on its own. Golds on any other date field include it (for example `WHERE order_date >= ?_tstart AND order_date < ?_tend`).
 - **`@timestamp` time-series** golds use `TBUCKET(100, ?_tstart, ?_tend)` and omit the timestamp `WHERE`. The bounds size the buckets; Kibana binds them when the chart renders. An extra `@timestamp` WHERE is still accepted and stripped before equivalence scoring. `BUCKET(@timestamp, <count>, ?_tstart, ?_tend)` remains equivalent.
 - **Other date fields** (for example `order_date`) stay on `BUCKET(<time field>, 100, ?_tstart, ?_tend)`. `TBUCKET` only buckets `@timestamp`.
 

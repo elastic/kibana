@@ -88,8 +88,11 @@ describe('createAuthorVegaSpecPrompt', () => {
 });
 
 describe('vegaEsqlAdditionalInstructions', () => {
-  it('defers to the shared time guidance instead of requiring an extra time filter', () => {
-    expect(vegaEsqlAdditionalInstructions).toContain('add no extra time filter');
+  it('defers to the shared time guidance, keeping the WHERE only on non-@timestamp fields', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain('no time filter on `@timestamp`');
+    expect(vegaEsqlAdditionalInstructions).toContain(
+      'keep the `WHERE` it requires on any other date field'
+    );
     expect(vegaEsqlAdditionalInstructions).not.toContain('?_tstart');
   });
 

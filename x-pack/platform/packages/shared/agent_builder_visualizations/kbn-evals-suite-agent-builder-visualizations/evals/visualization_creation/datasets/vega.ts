@@ -26,7 +26,6 @@ export const VEGA_EXAMPLES: VisualizationDatasetExample[] = [
         data_source: {
           type: 'esql',
           query: `FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Average Bytes\` = AVG(bytes), \`Request Count\` = COUNT(*), \`Unique URLs\` = COUNT_DISTINCT(url.keyword) BY clientip
 | LIMIT 100`,
         },

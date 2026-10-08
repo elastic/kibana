@@ -62,7 +62,13 @@ Any other date field:
 FROM orders | STATS count = COUNT() BY bucket = BUCKET(order_date, 100, ?_tstart, ?_tend)
 \`\`\`
 
-Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
+Charts that do not group by time (metric, gauge, pie, categorical bar, table):
+- On \`@timestamp\`, add no time filter; Kibana applies the time range to \`@timestamp\` automatically.
+- On any other date field, Kibana cannot detect it, so filter it before \`STATS\`:
+
+\`\`\`esql
+FROM orders | WHERE order_date >= ?_tstart AND order_date < ?_tend | STATS count = COUNT()
+\`\`\`
 
 ### TS
 

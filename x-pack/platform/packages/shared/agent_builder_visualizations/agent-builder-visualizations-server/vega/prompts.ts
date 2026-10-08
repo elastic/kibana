@@ -13,7 +13,7 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 export const vegaEsqlAdditionalInstructions = `
 ## Time field for Vega
 
-This query feeds a Vega chart. Its ES|QL data source applies the time picker like Lens does, so follow the time guidance above and add no extra time filter. Kibana applies the time range to the source time field the query filters or buckets on, so never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
+This query feeds a Vega chart. Its ES|QL data source applies the time picker like Lens does, so follow the time guidance above: no time filter on \`@timestamp\` or on top of a time bucket, but keep the \`WHERE\` it requires on any other date field. Kibana applies the time range to the source time field the query filters or buckets on, so never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
 
 ## Field names for Vega
 
