@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
+// Oxlint imports plugins with native Node, which cannot load this TypeScript package; register the
+// same transpiler ESLint runs under (the root `.eslintrc.js` installs it).
+require('@kbn/swc-register').install();
 
-export function safeStat(path: string) {
-  // returns `undefined` for missing paths, which is much cheaper than throwing ENOENT
-  return Fs.statSync(path, { throwIfNoEntry: false });
-}
-
-export function readFileSync(path: string) {
-  return Fs.readFileSync(path, 'utf8');
-}
+module.exports = require('.');

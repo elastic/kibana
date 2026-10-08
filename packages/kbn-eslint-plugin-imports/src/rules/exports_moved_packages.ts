@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule, AST } from 'eslint';
-import type * as T from '@babel/types';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { CreateOnceRule, ESTree, Range, SourceCode, Token } from '@oxlint/plugins';
 
 import type { Importer, SomeNode } from '../helpers/ast';
 import {
   isCallExpression,
   isExportNamedDeclaration,
   isExportSpecifier,
-  isImportCallee,
   isImportDeclaration,
   isImportSpecifier,
   isObjectPattern,
@@ -33,13 +30,7 @@ export interface MovedExportsRule {
 
 interface Imported {
   type: 'require' | 'import expression' | 'export' | 'export type' | 'import' | 'import type';
-  node:
-    | TSESTree.ImportSpecifier
-    | T.ImportSpecifier
-    | TSESTree.Property
-    | T.Property
-    | TSESTree.ExportSpecifier
-    | T.ExportSpecifier;
+  node: ESTree.ImportSpecifier | ESTree.BindingProperty | ESTree.ExportSpecifier;
   name: string;
   id?: string;
 }
@@ -49,16 +40,10 @@ interface BadImport extends Imported {
   newPkg: string;
 }
 
-function getParent(node: T.Node | TSESTree.Node): T.Node | TSESTree.Node | undefined {
-  if ('parent' in node) {
-    return node.parent as any;
-  }
-}
-
-function findDeclaration(node: T.Node | TSESTree.Node) {
-  let cursor: T.Node | TSESTree.Node | undefined = node;
+function findDeclaration(node: SomeNode) {
+  let cursor: SomeNode | null = node;
   while (cursor && !isVariableDeclaration(cursor)) {
-    cursor = getParent(cursor);
+    cursor = cursor.parent;
   }
   return cursor;
 }
@@ -90,7 +75,7 @@ function inspectImports(
   rules: MovedExportsRule[]
 ): undefined | { importCount: number; allBadImports: BadImport[] } {
   // get import names from require() and await import() calls
-  if (isCallExpression(importer) || importer.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
+  if (isCallExpression(importer) || importer.type === 'ImportExpression') {
     const declaration = findDeclaration(importer);
     if (!declaration || !declaration.declarations[0]) {
       return;
@@ -105,26 +90,17 @@ function inspectImports(
       importCount: properties.length,
       allBadImports: getBadImports(
         properties.flatMap((prop): Imported | never[] => {
-          if (
-            prop.type !== TSESTree.AST_NODE_TYPES.Property ||
-            prop.kind !== 'init' ||
-            prop.key.type !== TSESTree.AST_NODE_TYPES.Identifier
-          ) {
+          if (prop.type !== 'Property' || prop.kind !== 'init' || prop.key.type !== 'Identifier') {
             return [];
           }
 
           const name = prop.key.name;
-          const local =
-            prop.value.type === TSESTree.AST_NODE_TYPES.Identifier ? prop.value.name : undefined;
+          const local = prop.value.type === 'Identifier' ? prop.value.name : undefined;
 
           return {
             node: prop,
             name,
-            type:
-              importer.type === TSESTree.AST_NODE_TYPES.ImportExpression ||
-              isImportCallee(importer.callee)
-                ? 'import expression'
-                : 'require',
+            type: importer.type === 'ImportExpression' ? 'import expression' : 'require',
             id: !local ? undefined : name === local ? name : `${name}: ${local}`,
           };
         }),
@@ -186,7 +162,7 @@ function inspectImports(
   }
 }
 
-export const ExportsMovedPackagesRule: Rule.RuleModule = {
+export const ExportsMovedPackagesRule: CreateOnceRule = {
   meta: {
     fixable: 'code',
     schema: [
@@ -216,151 +192,144 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
-    const rules: MovedExportsRule[] = context.options[0];
-    const source = context.getSourceCode();
+  createOnce(context) {
+    let rules: MovedExportsRule[];
+    let source: SourceCode;
 
     // get the range for the entire "import", expanding require()/import() to their
     // entire variable declaration and including the trailing newline if we can
     // idenitify it
-    function getRangeWithNewline(
-      importer: Importer | T.VariableDeclaration | TSESTree.VariableDeclaration
-    ): AST.Range {
-      if (
-        isCallExpression(importer) ||
-        importer.type === TSESTree.AST_NODE_TYPES.ImportExpression
-      ) {
+    function getRangeWithNewline(importer: Importer | ESTree.VariableDeclaration): Range {
+      if (isCallExpression(importer) || importer.type === 'ImportExpression') {
         const declaration = findDeclaration(importer);
         if (declaration) {
           return getRangeWithNewline(declaration);
         }
       }
 
-      const text = source.getText(importer as any, 0, 1);
+      const text = source.getText(importer, 0, 1);
       const range = getRange(importer);
       return text.endsWith('\n') ? [range[0], range[1] + 1] : range;
     }
 
-    function getRange(
-      nodeA: T.Node | TSESTree.Node | AST.Token,
-      nodeB: T.Node | TSESTree.Node | AST.Token = nodeA
-    ): AST.Range {
-      if (!nodeA.loc) {
-        throw new Error('unable to use babel AST nodes without locations');
-      }
-      if (!nodeB.loc) {
-        throw new Error('unable to use babel AST nodes without locations');
-      }
+    function getRange(nodeA: SomeNode | Token, nodeB: SomeNode | Token = nodeA): Range {
       return [source.getIndexFromLoc(nodeA.loc.start), source.getIndexFromLoc(nodeB.loc.end)];
     }
 
-    return visitAllImportStatements((req, { importer }) => {
-      if (!req) {
-        return;
-      }
-
-      const rulesForRightPackage = rules.filter((m) => m.from === req);
-      if (!rulesForRightPackage.length) {
-        return;
-      }
-
-      const { allBadImports, importCount } = inspectImports(importer, rulesForRightPackage) ?? {};
-      if (!allBadImports?.length) {
-        return;
-      }
-
-      const badImportsByNewPkg = new Map<string, typeof allBadImports>();
-      const groupedBadImports = new Map<BadImport['type'], Map<string, typeof allBadImports>>();
-      for (const badProp of allBadImports) {
-        if (!groupedBadImports.has(badProp.type)) {
-          groupedBadImports.set(badProp.type, new Map());
-        }
-        const typeGroup = groupedBadImports.get(badProp.type)!;
-        if (!typeGroup.has(badProp.newPkg)) {
-          typeGroup.set(badProp.newPkg, []);
+    return {
+      before() {
+        // `meta.schema` validates the options, which Oxlint only types as JSON values
+        [rules] = context.options as unknown as ReadonlyArray<MovedExportsRule[]>;
+        source = context.sourceCode;
+      },
+      ...visitAllImportStatements((req, { importer }) => {
+        if (!req) {
+          return;
         }
 
-        typeGroup.get(badProp.newPkg)!.push(badProp);
-
-        const existing = badImportsByNewPkg.get(badProp.newPkg);
-        if (existing) {
-          existing.push(badProp);
-        } else {
-          badImportsByNewPkg.set(badProp.newPkg, [badProp]);
+        const rulesForRightPackage = rules.filter((m) => m.from === req);
+        if (!rulesForRightPackage.length) {
+          return;
         }
-      }
 
-      context.report({
-        node: importer as any,
-        message: Array.from(badImportsByNewPkg)
-          .map(
-            ([pkg, bad]) =>
-              `Export${bad.length === 1 ? '' : 's'} ${bad.map((b) => `"${b.name}"`).join(', ')} ${
-                bad.length === 1 ? 'is' : 'are'
-              } now in package "${pkg}"`
-          )
-          .join('\n'),
-        *fix(fixer) {
-          const importerRange = getRangeWithNewline(importer);
+        const { allBadImports, importCount } = inspectImports(importer, rulesForRightPackage) ?? {};
+        if (!allBadImports?.length) {
+          return;
+        }
 
-          // insert new require() calls
-          for (const [type, badProps] of groupedBadImports) {
-            for (const [pkg, props] of badProps) {
-              switch (type) {
-                case 'require':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `const { ${props.map((b) => b.id).join(', ')} } = require('${pkg}');\n`
-                  );
-                  break;
-                case 'import expression':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `const { ${props.map((b) => b.id).join(', ')} } = await import('${pkg}');\n`
-                  );
-                  break;
-                case 'export':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `export { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
-                  );
-                  break;
-                case 'export type':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `export type { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
-                  );
-                  break;
-                case 'import':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `import { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
-                  );
-                  break;
-                case 'import type':
-                  yield fixer.insertTextAfterRange(
-                    importerRange,
-                    `import type { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
-                  );
-                  break;
-              }
-            }
+        const badImportsByNewPkg = new Map<string, typeof allBadImports>();
+        const groupedBadImports = new Map<BadImport['type'], Map<string, typeof allBadImports>>();
+        for (const badProp of allBadImports) {
+          if (!groupedBadImports.has(badProp.type)) {
+            groupedBadImports.set(badProp.type, new Map());
+          }
+          const typeGroup = groupedBadImports.get(badProp.type)!;
+          if (!typeGroup.has(badProp.newPkg)) {
+            typeGroup.set(badProp.newPkg, []);
           }
 
-          if (importCount === allBadImports.length) {
-            yield fixer.removeRange(importerRange);
+          typeGroup.get(badProp.newPkg)!.push(badProp);
+
+          const existing = badImportsByNewPkg.get(badProp.newPkg);
+          if (existing) {
+            existing.push(badProp);
           } else {
-            for (const bp of allBadImports) {
-              const nextToken = source.getTokenAfter(bp.node as any);
-              if (nextToken?.value === ',') {
-                yield fixer.removeRange(getRange(bp.node, nextToken));
-              } else {
-                yield fixer.removeRange(getRange(bp.node));
+            badImportsByNewPkg.set(badProp.newPkg, [badProp]);
+          }
+        }
+
+        context.report({
+          node: importer,
+          message: Array.from(badImportsByNewPkg)
+            .map(
+              ([pkg, bad]) =>
+                `Export${bad.length === 1 ? '' : 's'} ${bad.map((b) => `"${b.name}"`).join(', ')} ${
+                  bad.length === 1 ? 'is' : 'are'
+                } now in package "${pkg}"`
+            )
+            .join('\n'),
+          *fix(fixer) {
+            const importerRange = getRangeWithNewline(importer);
+
+            // insert new require() calls
+            for (const [type, badProps] of groupedBadImports) {
+              for (const [pkg, props] of badProps) {
+                switch (type) {
+                  case 'require':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `const { ${props.map((b) => b.id).join(', ')} } = require('${pkg}');\n`
+                    );
+                    break;
+                  case 'import expression':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `const { ${props.map((b) => b.id).join(', ')} } = await import('${pkg}');\n`
+                    );
+                    break;
+                  case 'export':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `export { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
+                    );
+                    break;
+                  case 'export type':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `export type { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
+                    );
+                    break;
+                  case 'import':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `import { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
+                    );
+                    break;
+                  case 'import type':
+                    yield fixer.insertTextAfterRange(
+                      importerRange,
+                      `import type { ${props.map((b) => b.id).join(', ')} } from '${pkg}';\n`
+                    );
+                    break;
+                }
               }
             }
-          }
-        },
-      });
-    });
+
+            if (importCount === allBadImports.length) {
+              yield fixer.removeRange(importerRange);
+            } else {
+              for (const bp of allBadImports) {
+                const nextToken = source.getTokenAfter(bp.node);
+                if (nextToken?.value === ',') {
+                  yield fixer.removeRange(getRange(bp.node, nextToken));
+                } else {
+                  yield fixer.removeRange(getRange(bp.node));
+                }
+              }
+            }
+          },
+        });
+      }),
+    };
   },
 };

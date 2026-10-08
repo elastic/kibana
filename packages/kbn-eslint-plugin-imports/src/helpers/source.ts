@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { Context } from '@oxlint/plugins';
 
 /**
  * Get the path of the sourcefile being linted
  */
-export function getSourcePath(context: Rule.RuleContext) {
-  const sourceFilename = context.getPhysicalFilename
-    ? context.getPhysicalFilename()
-    : context.getFilename();
+export function getSourcePath(context: Context) {
+  const sourceFilename = context.physicalFilename;
 
   if (!sourceFilename) {
     throw new Error('unable to determine sourceFilename for file being linted');

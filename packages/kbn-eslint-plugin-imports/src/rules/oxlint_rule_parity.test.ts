@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
+import { execFileSync } from 'child_process';
+import { resolve } from 'path';
 
-export function safeStat(path: string) {
-  // returns `undefined` for missing paths, which is much cheaper than throwing ENOENT
-  return Fs.statSync(path, { throwIfNoEntry: false });
-}
-
-export function readFileSync(path: string) {
-  return Fs.readFileSync(path, 'utf8');
-}
+it('replays every rule test case through Oxlint', () => {
+  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
+    cwd: resolve(__dirname, '../../../..'),
+    stdio: 'inherit',
+  });
+});

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { report } from '../helpers/report';
 
@@ -27,7 +27,7 @@ const INFRA_PATH_PATTERNS = [
   /kbn-rspack-optimizer/,
 ];
 
-export const NoReduxToolkitV2ImportsRule: Rule.RuleModule = {
+export const NoReduxToolkitV2ImportsRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     fixable: 'code',
@@ -42,32 +42,31 @@ export const NoReduxToolkitV2ImportsRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
-    const filename = context.getFilename();
-
-    // Skip bundler infrastructure files that intentionally reference v2
-    if (INFRA_PATH_PATTERNS.some((pattern) => pattern.test(filename))) {
-      return {};
-    }
-
-    return visitAllImportStatements((req, { node }) => {
-      if (!req) {
-        return;
-      }
-
-      // Check for exact match or subpath imports (e.g. '@reduxjs/toolkit/query')
-      for (const [v2Package, v1Alias] of Object.entries(V2_TO_V1_ALIASES)) {
-        if (req === v2Package || req.startsWith(`${v2Package}/`)) {
-          const correctImport = req === v2Package ? v1Alias : req.replace(v2Package, v1Alias);
-
-          report(context, {
-            node,
-            message: `Import from "${v1Alias}" instead of "${v2Package}". See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx for details.`,
-            correctImport,
-          });
+  createOnce(context) {
+    return {
+      before() {
+        // Skip bundler infrastructure files that intentionally reference v2
+        return !INFRA_PATH_PATTERNS.some((pattern) => pattern.test(context.filename));
+      },
+      ...visitAllImportStatements((req, { node }) => {
+        if (!req) {
           return;
         }
-      }
-    });
+
+        // Check for exact match or subpath imports (e.g. '@reduxjs/toolkit/query')
+        for (const [v2Package, v1Alias] of Object.entries(V2_TO_V1_ALIASES)) {
+          if (req === v2Package || req.startsWith(`${v2Package}/`)) {
+            const correctImport = req === v2Package ? v1Alias : req.replace(v2Package, v1Alias);
+
+            report(context, {
+              node,
+              message: `Import from "${v1Alias}" instead of "${v2Package}". See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx for details.`,
+              correctImport,
+            });
+            return;
+          }
+        }
+      }),
+    };
   },
 };

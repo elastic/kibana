@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { report } from '../helpers/report';
 
-export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
+export const NoDirectHandlebarsImportRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     fixable: 'code',
@@ -25,14 +25,14 @@ export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return visitAllImportStatements((req, { node }) => {
       if (!req) {
         return;
       }
 
       // Skip the rule for files within the kbn-handlebars package itself
-      const filename = context.getFilename();
+      const { filename } = context;
       if (filename.includes('/kbn-handlebars/') || filename.includes('\\kbn-handlebars\\')) {
         return;
       }

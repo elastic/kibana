@@ -28,12 +28,22 @@ export class ImportResolver {
   }
 
   private safeStat = memoize(safeStat);
+  private readFileSync = memoize(readFileSync);
+  private readPackageJson = memoize((path: string): Record<string, unknown> | undefined => {
+    const body = this.readFileSync(path);
+    try {
+      return JSON.parse(body);
+    } catch {
+      return undefined;
+    }
+  });
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
-    readFileSync: memoize(readFileSync),
+    // `resolve` reads the closest package.json for every request, so parse each one only once
+    readPackageSync: (_readFileSync, pkgfile) => this.readPackageJson(pkgfile),
     packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
@@ -285,7 +295,7 @@ export class ImportResolver {
     }
 
     const pkgDir = Path.dirname(manifestPath);
-    const pkgJsonRaw = this.baseResolveOpts.readFileSync(manifestPath);
+    const pkgJsonRaw = this.readFileSync(manifestPath);
     if (!pkgJsonRaw) {
       return null;
     }
@@ -321,9 +331,31 @@ export class ImportResolver {
   }
 
   /**
+   * Results of `resolve()`, by dirname and request. Like the file system lookups behind them,
+   * they are kept for the lifetime of this resolver.
+   */
+  private readonly resolveCache = new Map<string, Map<string, ResolveResult | null>>();
+
+  /**
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    let dirCache = this.resolveCache.get(dirname);
+    if (!dirCache) {
+      dirCache = new Map();
+      this.resolveCache.set(dirname, dirCache);
+    }
+
+    let result = dirCache.get(req);
+    if (result === undefined) {
+      result = this.resolveUncached(req, dirname);
+      dirCache.set(req, result);
+    }
+
+    return result;
+  }
+
+  private resolveUncached(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     const quesI = req.lastIndexOf('?');

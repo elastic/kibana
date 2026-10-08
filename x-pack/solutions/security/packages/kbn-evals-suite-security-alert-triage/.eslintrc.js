@@ -13,8 +13,6 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'off',
-        // functional-tests packages intentionally import from test-helper packages (e.g. @kbn/evals, @kbn/scout)
-        '@kbn/imports/no_boundary_crossing': 'off',
       },
     },
   ],

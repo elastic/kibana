@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { Context } from '@oxlint/plugins';
 import type { SomeNode } from './ast';
 
 interface ReportOptions {
@@ -17,17 +17,17 @@ interface ReportOptions {
 }
 
 /**
- * Simple wrapper around context.report so that the types work better with typescript-estree
+ * Report an import request, replacing it with `correctImport` when the fix is applied
  */
-export function report(context: Rule.RuleContext, options: ReportOptions) {
+export function report(context: Context, options: ReportOptions) {
   context.report({
-    node: options.node as any,
+    node: options.node,
     message: options.message,
     fix: options.correctImport
       ? (fixer) => {
-          return fixer.replaceText(options.node as any, `'${options.correctImport}'`);
+          return fixer.replaceText(options.node, `'${options.correctImport}'`);
         }
-      : null,
+      : undefined,
   });
 }
 
