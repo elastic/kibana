@@ -25,6 +25,8 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
     "@kbn/field-utils",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
   ],
   "exclude": ["target/**/*"]
 }

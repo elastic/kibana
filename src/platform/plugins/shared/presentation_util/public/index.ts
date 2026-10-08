@@ -18,6 +18,13 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
+  EmbeddableEditorPreview,
+  ManagedEditorFooter,
+} from './components';
+export type {
+  EmbeddableEditorPreviewProps,
+  ManagedEditorFooterProps,
+  ManagedEditorFooterSaveMenuItem,
 } from './components';
 
 export function plugin() {

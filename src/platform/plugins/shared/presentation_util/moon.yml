@@ -31,11 +31,14 @@ dependsOn:
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - public/**/*
@@ -43,4 +46,6 @@ fileGroups:
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
