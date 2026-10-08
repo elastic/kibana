@@ -9,19 +9,19 @@ This plugin provides an app based on the `LogsExplorer` component from the `logs
 #### FTR Server
 
 ```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
+pnpm test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
 ```
 
 #### FTR Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
 ```
 
 ### Serverless
@@ -29,19 +29,19 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/a
 #### Server
 
 ```
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+pnpm test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
 #### Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/index.ts
+pnpm test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/$1
+pnpm test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/$1
 ```
 
 ### Using dockerized package registry

@@ -91,11 +91,19 @@ export const updateAlertStatusByQuery = async ({
   query,
   status,
   signal,
+  runtimeFields,
+  runtimeMappings,
 }: UpdateAlertStatusByQueryProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     version: '2023-10-31',
     method: 'POST',
-    body: JSON.stringify({ conflicts: 'proceed', status, query }),
+    body: JSON.stringify({
+      conflicts: 'proceed',
+      status,
+      query,
+      runtime_fields: runtimeFields,
+      runtime_mappings: runtimeMappings,
+    }),
     signal,
   });
 

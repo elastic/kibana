@@ -33,50 +33,17 @@ fileGroups:
     - '!src/entry.js'
     - '!**/*.config.js'
     - '!target/**/*'
-    - version_dependencies.txt
 tasks:
-  extract-version-dependencies:
-    command: node
-    args:
-      - scripts/extract_version_dependencies.js
-      - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
-      - '--collect'
-      - '@babel/plugin-transform-numeric-separator'
-      - '--collect'
-      - babel-loader
-      - '--collect'
-      - chroma-js
-      - '--collect'
-      - css-loader
-      - '--collect'
-      - dompurify
-      - '--collect'
-      - mini-css-extract-plugin
-      - '--collect'
-      - monaco-editor
-      - '--collect'
-      - monaco-yaml
-      - '--collect'
-      - react-use
-      - '--collect'
-      - webpack
-      - '--transitive'
-    env:
-      CI_STATS_DISABLED: 'true'
-    inputs:
-      - /package.json
-      - /yarn.lock
-    outputs:
-      - version_dependencies.txt
-    options:
-      runFromWorkspaceRoot: true
   build-webpack:
-    command: yarn
+    command: pnpm
     args:
       - build
     deps:
-      - ~:extract-version-dependencies
       - ^:build-webpack
+    checks:
+      - check: fingerprint
+        script: cd "${MOON_WORKSPACE_ROOT:-$(git rev-parse --show-toplevel)}" && node scripts/shared_deps_fingerprint.js --moon-project src/platform/packages/private/kbn-ui-shared-deps-src --package css-loader
+        hash: stdout
     inputs:
       - '@group(src)'
       - package.json
@@ -105,6 +72,7 @@ tasks:
       - /src/platform/packages/shared/shared-ux/router/impl/**/*.{js,ts,tsx}
       - /src/platform/packages/private/kbn-ui-shared-deps-npm/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}
+      - /src/core/packages/user-profile/browser-context/**/*.{js,ts,tsx}
       - '!/src/**/*.test.{js,ts,tsx}'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
@@ -112,12 +80,11 @@ tasks:
     type: run
     options:
       persistent: true
-    command: yarn
+    command: pnpm
     args:
       - build
       - '--watch'
     deps:
-      - extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'

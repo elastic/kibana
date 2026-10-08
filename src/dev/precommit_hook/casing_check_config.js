@@ -16,6 +16,8 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  'pnpm-workspace.yaml',
+  '**/pnpm-lock.yaml',
   'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',

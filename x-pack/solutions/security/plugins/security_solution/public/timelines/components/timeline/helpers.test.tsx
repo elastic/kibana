@@ -362,7 +362,7 @@ describe('isStringOrNumberArray', () => {
           field: 'nestedField.secondAttributes',
           value: 'text',
         })
-      ).toBe(`nestedField: { secondAttributes${IS_OPERATOR} text }`);
+      ).toBe(`nestedField: { secondAttributes${IS_OPERATOR} \"text\" }`);
     });
   });
 

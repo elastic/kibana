@@ -18,9 +18,11 @@ import type { setupConsoleErrorsProvider as setupErrorsProviderFn } from './cons
 import type { ConsoleParsedRequestsProvider as ParsedProviderCtor } from './console_parsed_requests_provider';
 
 import { monaco } from '../monaco_imports';
+import { createParser } from './parser';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
 
 const mockWorkerSetup = jest.fn<void, []>();
+const mockGetRequests = jest.fn();
 
 const mockSuggest = jest.fn<ReturnType<typeof suggestFn>, Parameters<typeof suggestFn>>();
 const mockWrapAsMonacoSuggestions = jest.fn<ReturnType<typeof wrapFn>, Parameters<typeof wrapFn>>();
@@ -51,6 +53,9 @@ jest.mock('../esql/lib/converters/suggestions', () => ({
 }));
 
 jest.mock('./utils', () => ({
+  // `findRequestLineNumber` owns the backwards request-line scan and its lookback safeguards, which
+  // the lookback tests below exercise for real. Keep the actual implementation.
+  ...jest.requireActual('./utils'),
   checkForTripleQuotesAndEsqlQuery: (
     ...args: Parameters<typeof mockCheckForTripleQuotesAndEsqlQuery>
   ) => mockCheckForTripleQuotesAndEsqlQuery(...args),
@@ -69,6 +74,9 @@ jest.mock('./console_parsed_requests_provider', () => {
   ) {
     mockConsoleParsedRequestsProvider(...args);
   }
+  ConsoleParsedRequestsProvider.prototype.getRequests = (
+    ...args: Parameters<typeof mockGetRequests>
+  ) => mockGetRequests(...args);
   return { ConsoleParsedRequestsProvider };
 });
 
@@ -146,6 +154,8 @@ describe('console language', () => {
     // - clears call history
     // - resets per-test stubbed implementations
     jest.resetAllMocks();
+    // The real getRequests always resolves an array (empty when nothing parses).
+    mockGetRequests.mockResolvedValue([]);
   });
 
   it('exposes triggerCharacters including Console + ES|QL triggers', () => {
@@ -184,16 +194,20 @@ describe('console language', () => {
     const provider = createProvider(undefined, actionsProvider);
     const { token, dispose } = createToken();
 
+    mockCheckForTripleQuotesAndEsqlQuery.mockReturnValue({
+      insideTripleQuotes: false,
+      insideEsqlQuery: false,
+      esqlQueryIndex: -1,
+    });
+
     const model = createModel(['GET _search', '{ "query": { "match_all": {} } }']);
     createdModels.push(model);
-
-    const getValueInRangeSpy = jest.spyOn(model, 'getValueInRange');
 
     await provider.provideCompletionItems!(model, new monaco.Position(2, 5), baseContext, token);
 
     expect(provideCompletionItems).toHaveBeenCalledTimes(1);
-    expect(getValueInRangeSpy).not.toHaveBeenCalled();
-    expect(mockCheckForTripleQuotesAndEsqlQuery).not.toHaveBeenCalled();
+    expect(mockCheckForTripleQuotesAndEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockSuggest).not.toHaveBeenCalled();
 
     dispose();
   });
@@ -203,13 +217,17 @@ describe('console language', () => {
     const provider = createProvider(undefined, actionsProvider);
     const { token, dispose } = createToken();
 
+    mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+    );
+
     const model = createModel(['GET _query', '{ "query": "FROM logs" }']);
     createdModels.push(model);
 
     await provider.provideCompletionItems!(model, new monaco.Position(2, 7), baseContext, token);
 
     expect(provideCompletionItems).toHaveBeenCalledTimes(1);
-    expect(mockCheckForTripleQuotesAndEsqlQuery).not.toHaveBeenCalled();
+    expect(mockSuggest).not.toHaveBeenCalled();
 
     dispose();
   });
@@ -340,13 +358,7 @@ describe('console language', () => {
     const provider = createProvider(esqlCallbacks, actionsProvider);
     const { token, dispose } = createToken();
 
-    const wrapped = [
-      {
-        label: 'FROM',
-        insertText: 'FROM',
-        kind: monaco.languages.CompletionItemKind.Keyword,
-      },
-    ] as unknown as ReturnType<typeof wrapFn>;
+    const wrapped: ReturnType<typeof wrapFn> = [];
     mockWrapAsMonacoSuggestions.mockReturnValue(wrapped);
 
     mockCheckForTripleQuotesAndEsqlQuery.mockReturnValue({
@@ -377,8 +389,6 @@ describe('console language', () => {
     expect(mockWrapAsMonacoSuggestions).toHaveBeenCalledTimes(1);
     expect(provideCompletionItems).not.toHaveBeenCalled();
     expect(result).toEqual({ suggestions: wrapped });
-    expect(result?.suggestions).toBe(wrapped);
-    expect(result?.suggestions?.[0]?.range).toBeUndefined();
     dispose();
   });
 
@@ -406,6 +416,175 @@ describe('console language', () => {
     // The 4th arg is `!insideTripleQuotes` -> false when inside triple quotes.
     expect(mockWrapAsMonacoSuggestions.mock.calls[0][3]).toBe(false);
     dispose();
+  });
+
+  it('keeps ES|QL suggestions when the query text contains a request-like line', async () => {
+    const { actionsProvider, provideCompletionItems } = createActionsProvider();
+    const esqlCallbacks = createEsqlCallbacks();
+    const provider = createProvider(esqlCallbacks, actionsProvider);
+    const { token, dispose } = createToken();
+
+    mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+    );
+    mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
+    mockSuggest.mockResolvedValue([]);
+    mockWrapAsMonacoSuggestions.mockReturnValue([]);
+
+    const model = createModel(['POST _query', '{ "query": """FROM logs', 'GET /part-of-query', '']);
+    createdModels.push(model);
+
+    await provider.provideCompletionItems!(model, new monaco.Position(4, 1), baseContext, token);
+
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
+    expect(provideCompletionItems).not.toHaveBeenCalled();
+    dispose();
+  });
+
+  it('does not activate ES|QL from a request pasted inside a non-query string', async () => {
+    const { actionsProvider, provideCompletionItems } = createActionsProvider();
+    const esqlCallbacks = createEsqlCallbacks();
+    const provider = createProvider(esqlCallbacks, actionsProvider);
+    const { token, dispose } = createToken();
+
+    mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+    );
+
+    const model = createModel([
+      'GET _search',
+      '{ "script": """',
+      'POST _query',
+      '{ "query": "FROM logs',
+      '',
+    ]);
+    createdModels.push(model);
+
+    await provider.provideCompletionItems!(model, new monaco.Position(5, 1), baseContext, token);
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+    expect(provideCompletionItems).toHaveBeenCalledTimes(1);
+    dispose();
+  });
+
+  it('detects ES|QL for POST _query/async requests', async () => {
+    const { actionsProvider, provideCompletionItems } = createActionsProvider();
+    const esqlCallbacks = createEsqlCallbacks();
+    const provider = createProvider(esqlCallbacks, actionsProvider);
+    const { token, dispose } = createToken();
+
+    mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+      jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+    );
+    mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
+    mockSuggest.mockResolvedValue([]);
+    mockWrapAsMonacoSuggestions.mockReturnValue([]);
+
+    const model = createModel(['POST _query/async', '{ "query": "FROM logs', '']);
+    createdModels.push(model);
+
+    await provider.provideCompletionItems!(model, new monaco.Position(2, 22), baseContext, token);
+
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
+    expect(provideCompletionItems).not.toHaveBeenCalled();
+    dispose();
+  });
+
+  describe.each([
+    ['line cap', Array.from({ length: 2000 }, () => '# filler')],
+    ['character cap', [`# ${'x'.repeat(100_000)}`]],
+  ])('WHEN the document prefix exceeds the request lookback %s', (_cap, prefixLines) => {
+    it('SHOULD keep ES|QL suggestions via the parsed-request anchor', async () => {
+      const { actionsProvider, provideCompletionItems } = createActionsProvider();
+      const esqlCallbacks = createEsqlCallbacks();
+      const provider = createProvider(esqlCallbacks, actionsProvider);
+      const { token, dispose } = createToken();
+
+      mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+        jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      );
+      mockUnescapeInvalidChars.mockReturnValue('UNESCAPED_QUERY');
+      mockSuggest.mockResolvedValue([]);
+      mockWrapAsMonacoSuggestions.mockReturnValue([]);
+
+      const lines = [
+        ...prefixLines,
+        'POST _query',
+        '{ "query": """FROM logs',
+        'GET /part-of-query',
+        '',
+      ];
+      mockGetRequests.mockResolvedValue(createParser()(lines.join('\n'))?.requests ?? []);
+      const model = createModel(lines);
+      createdModels.push(model);
+
+      await provider.provideCompletionItems!(
+        model,
+        new monaco.Position(lines.length, 1),
+        baseContext,
+        token
+      );
+
+      expect(mockSuggest).toHaveBeenCalledTimes(1);
+      expect(provideCompletionItems).not.toHaveBeenCalled();
+      dispose();
+    });
+
+    it('SHOULD not activate ES|QL from a request pasted inside a non-query string', async () => {
+      const { actionsProvider, provideCompletionItems } = createActionsProvider();
+      const esqlCallbacks = createEsqlCallbacks();
+      const provider = createProvider(esqlCallbacks, actionsProvider);
+      const { token, dispose } = createToken();
+
+      mockCheckForTripleQuotesAndEsqlQuery.mockImplementation(
+        jest.requireActual('./utils').checkForTripleQuotesAndEsqlQuery
+      );
+
+      const lines = [
+        ...prefixLines,
+        'GET _search',
+        '{ "script": """',
+        'POST _query',
+        '{ "query": "FROM logs',
+        '',
+      ];
+      mockGetRequests.mockResolvedValue(createParser()(lines.join('\n'))?.requests ?? []);
+      const model = createModel(lines);
+      createdModels.push(model);
+
+      await provider.provideCompletionItems!(
+        model,
+        new monaco.Position(lines.length, 1),
+        baseContext,
+        token
+      );
+
+      expect(provideCompletionItems).toHaveBeenCalledTimes(1);
+      expect(mockSuggest).not.toHaveBeenCalled();
+      dispose();
+    });
+
+    it('SHOULD delegate when the parser reports no requests', async () => {
+      const { actionsProvider, provideCompletionItems } = createActionsProvider();
+      const provider = createProvider(createEsqlCallbacks(), actionsProvider);
+      const { token, dispose } = createToken();
+
+      const lines = [...prefixLines, '{ "not": "a request" }'];
+      mockGetRequests.mockResolvedValue([]);
+      const model = createModel(lines);
+      createdModels.push(model);
+
+      await provider.provideCompletionItems!(
+        model,
+        new monaco.Position(lines.length, 1),
+        baseContext,
+        token
+      );
+
+      expect(provideCompletionItems).toHaveBeenCalledTimes(1);
+      expect(mockSuggest).not.toHaveBeenCalled();
+      dispose();
+    });
   });
 
   it('wires parsed request provider', () => {

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { maintenanceWindowCategoryIdsSchema } from './v1';
+export {
+  maintenanceWindowCategoryIdsSchema,
+  maintenanceWindowScopedQuerySchema,
+  maintenanceWindowRRuleRequestSchema,
+} from './v1';

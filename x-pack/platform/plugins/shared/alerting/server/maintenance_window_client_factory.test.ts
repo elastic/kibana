@@ -33,7 +33,8 @@ const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientF
 };
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
+  uiSettings.asScopedToClient.mockReturnValue(uiSettingsServiceMock.createClient());
 });
 
 test('creates a maintenance window client with proper constructor arguments when security is enabled', async () => {
@@ -54,6 +55,8 @@ test('creates a maintenance window client with proper constructor arguments when
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
 });
@@ -76,6 +79,8 @@ test('creates a maintenance window client with proper constructor arguments', as
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
 });
@@ -99,8 +104,23 @@ test('creates an unauthorized maintenance window client', async () => {
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    uiSettings: expect.anything(),
+    notifyChange: undefined,
     getUserName: expect.any(Function),
   });
+});
+
+test('passes notifyChange through to the client', async () => {
+  const notifyChange = jest.fn();
+  const factory = new MaintenanceWindowClientFactory();
+  factory.initialize({ ...maintenanceWindowClientFactoryParams, notifyChange });
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  factory.createWithAuthorization(request);
+
+  const { MaintenanceWindowClient } = jest.requireMock('./maintenance_window_client');
+  expect(MaintenanceWindowClient).toHaveBeenCalledWith(expect.objectContaining({ notifyChange }));
 });
 
 test('getUserName() returns null when security is disabled', async () => {

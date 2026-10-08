@@ -192,5 +192,55 @@ describe('DocumentsDataWriter', () => {
         });
       });
     });
+
+    describe('when filtering documents by user', () => {
+      const globalEntryFilter = {
+        bool: {
+          must_not: {
+            nested: {
+              path: 'users',
+              query: {
+                exists: {
+                  field: 'users',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      it('matches private entries only by profile UID', () => {
+        expect(writer.getFilterByUser(mockUser1)).toEqual({
+          filter: {
+            bool: {
+              should: [
+                globalEntryFilter,
+                {
+                  nested: {
+                    path: 'users',
+                    query: {
+                      bool: {
+                        should: [{ term: { 'users.id': 'my_profile_uid' } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        });
+      });
+
+      it('matches only global entries without a profile UID', () => {
+        expect(writer.getFilterByUser({ ...mockUser1, profile_uid: undefined })).toEqual({
+          filter: {
+            bool: {
+              should: [globalEntryFilter],
+            },
+          },
+        });
+      });
+    });
   });
 });

@@ -11,7 +11,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
 const paramsSchema = schema.object({
-  names: schema.string(),
+  names: schema.string({ maxLength: 10000 }),
 });
 
 export const registerDeleteRoute = ({ router }: RouteDependencies): void => {

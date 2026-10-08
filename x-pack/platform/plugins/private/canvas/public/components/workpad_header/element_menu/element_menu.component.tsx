@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -119,7 +119,7 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+export const ElementMenu: CanvasFunctionComponent<Props> = ({ elements, addElement }) => {
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
@@ -224,7 +224,6 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
 };
 
 ElementMenu.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   elements: PropTypes.object,
   addElement: PropTypes.func.isRequired,
 };

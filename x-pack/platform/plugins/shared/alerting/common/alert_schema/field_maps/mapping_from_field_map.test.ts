@@ -324,6 +324,9 @@ describe('mappingFromFieldMap', () => {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
                 },
+                tracked: {
+                  type: 'boolean',
+                },
                 updated_at: {
                   type: 'date',
                 },

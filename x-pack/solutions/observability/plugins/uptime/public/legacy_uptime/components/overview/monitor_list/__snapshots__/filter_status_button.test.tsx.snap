@@ -110,15 +110,13 @@ exports[`FilterStatusButton shallow renders without errors for valid props 1`] =
       }
     }
   >
-    <CompatRouter>
-      <FilterStatusButton
-        content="Up"
-        dataTestSubj="foo"
-        isActive={true}
-        value="up"
-        withNext={true}
-      />
-    </CompatRouter>
+    <FilterStatusButton
+      content="Up"
+      dataTestSubj="foo"
+      isActive={true}
+      value="up"
+      withNext={true}
+    />
   </ContextProvider>
 </ContextProvider>
 `;

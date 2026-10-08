@@ -12,7 +12,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '../src';
+import { evaluate, getUnquoted, MAX_EXPRESSION_LENGTH, parse } from '../src';
 
 function variableEqual(value) {
   return expect.objectContaining({ type: 'variable', value });
@@ -200,12 +200,12 @@ describe('Parser', () => {
       expect(parse("'foo bar'")).toEqual(variableEqual('foo bar'));
       expect(parse("'foo bar fizz buzz'")).toEqual(variableEqual('foo bar fizz buzz'));
       expect(parse("'foo   bar   baby'")).toEqual(variableEqual('foo   bar   baby'));
-      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
-      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
-      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
-      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
-      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
-      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
+      expect(parse("' foo bar'")).toEqual(variableEqual(' foo bar'));
+      expect(parse("'foo bar '")).toEqual(variableEqual('foo bar '));
+      expect(parse("'0foo'")).toEqual(variableEqual('0foo'));
+      expect(parse("' foo bar'")).toEqual(variableEqual(' foo bar'));
+      expect(parse("'foo bar '")).toEqual(variableEqual('foo bar '));
+      expect(parse("'0foo'")).toEqual(variableEqual('0foo'));
       expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
       expect(parse(`'foo😀\t'`)).toEqual(variableEqual(`foo😀\t`));
       /* eslint-enable prettier/prettier */
@@ -338,6 +338,53 @@ describe('Parser', () => {
 
   it('Not a string', () => {
     expect(() => parse(3)).toThrow('Expression must be a string');
+  });
+
+  it('rejects expressions exceeding max unquoted length', () => {
+    const longExpr = 'a' + ' + a'.repeat(MAX_EXPRESSION_LENGTH);
+    expect(getUnquoted(longExpr).length).toBeGreaterThan(MAX_EXPRESSION_LENGTH);
+    expect(() => parse(longExpr)).toThrow('exceeds maximum length');
+  });
+
+  it('does not count quoted filters toward the expression length limit', () => {
+    const longFilter = 'host.name: server AND status: error AND '.repeat(10) + `foo\\'s`;
+    const formula = Array.from(
+      { length: 100 },
+      (_, i) => `count(lucene='${longFilter} id:${i}')`
+    ).join(' + ');
+
+    expect(formula.length).toBeGreaterThan(MAX_EXPRESSION_LENGTH);
+    expect(getUnquoted(formula).length).toBeLessThanOrEqual(MAX_EXPRESSION_LENGTH);
+    expect(() => parse(formula)).not.toThrow();
+  });
+
+  it('rejects expressions exceeding max nesting depth', () => {
+    const deepExpr = '('.repeat(25) + '1' + ')'.repeat(25);
+    expect(() => parse(deepExpr)).toThrow('exceeds maximum nesting depth');
+  });
+
+  it('allows expressions within nesting depth limit', () => {
+    const okExpr = '('.repeat(15) + '1' + ')'.repeat(15);
+    expect(() => parse(okExpr)).not.toThrow();
+  });
+
+  it('ignores parentheses inside quoted strings for nesting depth', () => {
+    const deepParensInQuotes = `foo(filter='((a or b) and (c or (d or (e or (f)))))')`;
+    expect(() => parse(deepParensInQuotes)).not.toThrow();
+
+    const doubleQuoted = `foo(filter="((((((((((((((((((((nested))))))))))))))))))))")`;
+    expect(() => parse(doubleQuoted)).not.toThrow();
+
+    const withEscapes = `foo(filter='it\\'s (a (b (c)))')`;
+    expect(() => parse(withEscapes)).not.toThrow();
+  });
+
+  it('parses deeply nested parentheses without hanging', () => {
+    const depth = 20;
+    const expr = '('.repeat(depth) + '1' + ')'.repeat(depth);
+    const start = Date.now();
+    expect(parse(expr)).toEqual(1);
+    expect(Date.now() - start).toBeLessThan(1000);
   });
 });
 

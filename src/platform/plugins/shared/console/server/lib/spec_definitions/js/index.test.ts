@@ -78,4 +78,29 @@ describe('console query DSL autocomplete globals', () => {
       });
     });
   });
+
+  // The `put_mapping` rules predate the Elasticsearch 7.x removal of mapping
+  // types, but its nested-object and multi-field scope links still pointed at
+  // the removed `type` level (`put_mapping.type.properties`). That path no
+  // longer exists in the rule tree, so sub-field autocomplete inside
+  // `properties.<field>.properties` and `properties.<field>.fields` resolved
+  // to nothing. The links must target the real top-level `properties` key.
+  describe('put_mapping nested field scope links', () => {
+    it('points nested object properties at the put_mapping properties rules', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        properties: {
+          '*': {
+            properties: { __scope_link: 'put_mapping.properties' },
+            fields: { '*': { __scope_link: 'put_mapping.properties.field' } },
+          },
+        },
+      });
+    });
+
+    it('does not reference the removed mapping `type` level anywhere', () => {
+      expect(JSON.stringify(endpoints.put_mapping.data_autocomplete_rules)).not.toContain(
+        'put_mapping.type'
+      );
+    });
+  });
 });

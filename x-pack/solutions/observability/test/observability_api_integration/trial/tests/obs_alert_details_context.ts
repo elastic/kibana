@@ -70,16 +70,8 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
           });
         });
 
-        it('returns only 1 log category', async () => {
-          expect(response.body.alertContext).to.have.length(1);
-
-          const logCategories = response.body.alertContext.find(
-            ({ key }) => key === 'logCategories'
-          )?.data as LogCategory[];
-
-          expect(
-            logCategories.map(({ errorCategory }: { errorCategory: string }) => errorCategory)
-          ).to.eql(['Error message from container my-container-a']);
+        it('returns nothing', async () => {
+          expect(response.body.alertContext).to.eql([]);
         });
       });
 
@@ -313,13 +305,11 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
           expect(serviceSummary).to.be(undefined);
         });
 
-        it('returns 1 log category', async () => {
+        it('returns no log categories', async () => {
           const logCategories = response.body.alertContext.find(
             ({ key }) => key === 'logCategories'
-          )?.data as LogCategory[];
-          expect(
-            logCategories.map(({ errorCategory }: { errorCategory: string }) => errorCategory)
-          ).to.eql(['Error message from service', 'Error message from container my-container-c']);
+          );
+          expect(logCategories).to.be(undefined);
         });
       });
 

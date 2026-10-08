@@ -16,6 +16,8 @@ import {
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
 } from '../../../common/constants';
 
+import { appContextService } from '../app_context';
+
 import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
@@ -30,6 +32,8 @@ import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
+
+export const PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES = new Set(['monitor']);
 
 export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'auto_configure',
@@ -161,9 +165,18 @@ export function storedPackagePoliciesToAgentPermissions(
 
     let clusterRoleDescriptor = {};
     const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
-    if (cluster.length > 0) {
+    const validCluster = cluster.filter((p) => PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    const invalidCluster = cluster.filter((p) => !PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    if (invalidCluster.length) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring invalid or forbidden cluster privilege(s) in package policy "${packagePolicy.id}": ${invalidCluster}`
+        );
+    }
+    if (validCluster.length > 0) {
       clusterRoleDescriptor = {
-        cluster,
+        cluster: validCluster,
       };
     }
     // namespace is either the package policy's or the agent policy one

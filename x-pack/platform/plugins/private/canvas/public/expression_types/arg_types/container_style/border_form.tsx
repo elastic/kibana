@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -38,7 +38,7 @@ interface Props {
   colors: string[];
 }
 
-export const BorderForm: FunctionComponent<Props> = ({
+export const BorderForm: CanvasFunctionComponent<Props> = ({
   value = '',
   radius = '',
   onChange,
@@ -127,9 +127,7 @@ export const BorderForm: FunctionComponent<Props> = ({
 };
 
 BorderForm.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
-  // @ts-expect-error upgrade typescript v5.9.3
   radius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
   colors: PropTypes.array.isRequired,

@@ -118,6 +118,7 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { registerDeprecations } from './deprecations';
 import { AlertDeletionClient } from './alert_deletion';
+import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -182,6 +183,12 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  /**
+   * Register a Task Manager task instance ID to `runSoon` after maintenance
+   * window mutations (create, update, delete, archive, finish). Returns unsubscribe.
+   * Consumers must keep heavy work inside their own task runner.
+   */
+  registerSyncTask(taskId: string): () => void;
 }
 
 export interface AlertingPluginsSetup {
@@ -225,6 +232,7 @@ export class AlertingPlugin {
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
+  private readonly syncTasks: MaintenanceWindowSyncTasks;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -253,6 +261,7 @@ export class AlertingPlugin {
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
+    this.syncTasks = new MaintenanceWindowSyncTasks(this.logger);
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
@@ -653,11 +662,14 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
+    this.syncTasks.setTaskManager(plugins.taskManager);
+
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityService: core.security,
       uiSettings: core.uiSettings,
+      notifyChange: this.syncTasks.runSoon,
     });
 
     const getRulesClientWithRequest = async (request: KibanaRequest) => {
@@ -752,6 +764,7 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+      registerSyncTask: this.syncTasks.register,
     };
   }
 

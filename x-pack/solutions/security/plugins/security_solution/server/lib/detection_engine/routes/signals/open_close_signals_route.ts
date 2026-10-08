@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -27,6 +28,11 @@ import {
   getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
 } from '../../../telemetry/insights';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  mergeBulkCloseRuntimeMappings,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -99,12 +105,37 @@ export const setSignalsStatusRoute = (
 
             return response.ok({ body });
           } else {
-            const { conflicts, query } = request.body;
+            const {
+              conflicts,
+              query,
+              runtime_fields: runtimeFields,
+              runtime_mappings: passthroughRuntimeMappings,
+            } = request.body;
+
+            // Enforce combined limit since Zod schema doesn't validate maxProperties.
+            const runtimeFieldUnion = new Set([
+              ...Object.keys(runtimeFields ?? {}),
+              ...Object.keys(passthroughRuntimeMappings ?? {}),
+            ]);
+            if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
+              });
+            }
+
+            // Merge runtime_fields (name→type, server synthesises _source reader) and
+            // runtime_mappings (full mapping forwarded verbatim preserving Painless scripts).
+            // Passthrough entries win on key collision.
+            const runtimeMappings = mergeBulkCloseRuntimeMappings(
+              buildRuntimeMappingsFromFieldTypes(runtimeFields),
+              passthroughRuntimeMappings
+            );
 
             const body = await updateSignalsStatusByQuery(
               status,
               query,
-              { conflicts: conflicts ?? 'abort' },
+              { conflicts: conflicts ?? 'abort', runtimeMappings },
               spaceId,
               esClient,
               user
@@ -153,7 +184,7 @@ const updateSignalsStatusByIds = async (
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
   query: object | undefined,
-  options: { conflicts: 'abort' | 'proceed' },
+  options: { conflicts: 'abort' | 'proceed'; runtimeMappings?: estypes.MappingRuntimeFields },
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null
@@ -169,6 +200,7 @@ const updateSignalsStatusByQuery = async (
           filter: query,
         },
       },
+      ...(options.runtimeMappings ? { runtime_mappings: options.runtimeMappings } : {}),
     },
     ignore_unavailable: true,
   });

@@ -330,12 +330,12 @@ export function TrainedModelsTableProvider(
     }
 
     public async deleteModel(modelId: string) {
-      const fromContextMenu = await this.doesModelCollapsedActionsButtonExist(modelId);
-      await mlCommonUI.invokeTableRowAction(
-        this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction',
-        fromContextMenu
+      const row = this.rowSelector(modelId);
+      await this.waitForModelsToLoad();
+      await retry.waitForWithTimeout(`trained model '${modelId}' row to render`, 10000, () =>
+        testSubjects.exists(row)
       );
+      await mlCommonUI.invokeTableRowAction(row, 'mlModelsTableRowDeleteAction', 'auto');
       await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
       await mlCommonUI.waitForRefreshButtonEnabled();
@@ -645,6 +645,17 @@ export function TrainedModelsTableProvider(
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
       await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.waitForModelsToLoad();
+      // The row's action set, and so its collapsed/inline layout, settles only once the state does.
+      await retry.tryForTime(
+        30 * 1000,
+        async () => {
+          await this.assertModelState(modelId, 'Ready to deploy');
+        },
+        async () => {
+          await this.refreshModelsTable();
+        }
+      );
     }
 
     public async openStartDeploymentModal(modelId: string) {

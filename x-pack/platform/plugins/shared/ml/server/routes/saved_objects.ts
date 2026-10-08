@@ -34,7 +34,15 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetTrainedModels'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
+          ],
         },
       },
       summary: 'Get job and trained model saved object status',
@@ -68,9 +76,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canCreateJob',
-            'ml:canCreateDataFrameAnalytics',
-            'ml:canCreateTrainedModels',
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -113,9 +125,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canCreateJob',
-            'ml:canCreateDataFrameAnalytics',
-            'ml:canCreateTrainedModels',
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -156,9 +172,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -197,7 +217,11 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Update what spaces jobs are assigned to',
@@ -278,7 +302,15 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
+          ],
         },
       },
       summary: 'Remove jobs or trained models from the current space',
@@ -344,7 +376,11 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Get all jobs and their spaces',
@@ -407,9 +443,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -458,9 +498,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },

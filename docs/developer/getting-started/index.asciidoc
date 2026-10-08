@@ -38,13 +38,19 @@ you can switch to the correct version when using nvm by running:
 nvm use
 ----
 
-Install the latest version of https://classic.yarnpkg.com/en/docs/install[yarn v1].
+Enable pnpm via corepack (bundled with Node.js) and activate the version pinned in `package.json` `engines.pnpm`:
+
+[source,bash]
+----
+corepack enable
+corepack prepare pnpm@11.27.0 --activate
+----
 
 Bootstrap {kib} and install all the dependencies:
 
 [source,bash]
 ----
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ----
 
 ____
@@ -55,13 +61,13 @@ https://github.com/nodejs/node-gyp#installation[https://github.com/nodejs/node-g
 and follow the guide according your platform.
 ____
 
-In case you don't have an internet connection, the `yarn kbn bootstrap` command will 
+In case you don't have an internet connection, the `pnpm kbn bootstrap` command will 
 fail. As it is likely you have the required node_modules in the 
 offline mirror, you can try to run the step in offline mode by using:
 
 [source,bash]
 ----
-yarn kbn bootstrap --offline
+pnpm kbn bootstrap --offline
 ----
 
 In any other circumstance where you want to force the node_modules install step 
@@ -69,29 +75,29 @@ you can use:
 
 [source,bash]
 ----
-yarn kbn bootstrap --force-install
+pnpm kbn bootstrap --force-install
 ----
 
-You can also run `yarn kbn` to see the other available commands.
+You can also run `pnpm kbn` to see the other available commands.
 
 When switching branches which use different versions of npm packages you
 may need to run:
 
 [source,bash]
 ----
-yarn kbn clean
+pnpm kbn clean
 ----
 
 NOTE: Running this command is only necessary in rare circumstance where you need to recover
 a consistent state when problems arise. If you need to run this command often, complete
 this form to provide feedback: https://ela.st/yarn-kbn-clean
 
-If you have failures during `yarn kbn bootstrap` you may have some
-corrupted packages in your yarn cache which you can clean with:
+If you have failures during `pnpm kbn bootstrap` you may have some
+corrupted packages in your pnpm store which you can clean with:
 
 [source,bash]
 ----
-yarn cache clean
+pnpm store prune
 ----
 
 [discrete]
@@ -115,7 +121,7 @@ Run the latest {es} snapshot. Specify an optional license with the `--license` f
 
 [source,bash]
 ----
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 ----
 
 `trial` will give you access to all capabilities.
@@ -130,10 +136,10 @@ In another terminal window, start up {kib}. Include {kib-repo}tree/{branch}/exam
 
 [source,bash]
 ----
-yarn start --run-examples
+pnpm start --run-examples
 ----
 
-View all available options by running `yarn start --help`
+View all available options by running `pnpm start --help`
 
 Read about more advanced options for <<running-kibana-advanced>>.
 

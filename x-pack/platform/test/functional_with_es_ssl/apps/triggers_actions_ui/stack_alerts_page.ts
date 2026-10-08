@@ -96,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('Loads the page but shows missing permission prompt', async () => {
         await loadAlertsPage();
-        const exists = await testSubjects.exists('noPermissionPrompt');
+        const exists = await testSubjects.waitForExists('noPermissionPrompt');
         expect(exists).to.be(true);
       });
     });

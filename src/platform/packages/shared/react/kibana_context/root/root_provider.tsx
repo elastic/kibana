@@ -13,6 +13,13 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { SharedUXRouterContext } from '@kbn/shared-ux-router';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import type { CoreAuthenticationService } from '@kbn/core-security-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import {
+  CurrentUserProvider,
+  type CurrentUserServices,
+} from '@kbn/core-user-profile-browser-context';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
@@ -29,6 +36,14 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   /** The `ExecutionContextStart` API from `CoreStart`. */
   executionContext?: ExecutionContextStart;
+  /**
+   * Core's authentication service (`coreStart.security.authc`).
+   */
+  authc?: CoreAuthenticationService;
+  /**
+   * User profile service.
+   */
+  userProfile?: Pick<UserProfileService, 'getCurrent' | 'getDataUpdates$' | 'getUserProfile$'>;
 }
 
 /**
@@ -49,13 +64,29 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   children,
   i18n,
   executionContext,
+  authc,
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+  const { userProfile } = props;
+
+  const currentUserServices = React.useMemo<CurrentUserServices | null>(
+    () => (authc && userProfile ? { authc, userProfile } : null),
+    [authc, userProfile]
+  );
+
+  const childrenWithCurrentUser = currentUserServices ? (
+    <CurrentUserProvider {...currentUserServices}>{children}</CurrentUserProvider>
+  ) : (
+    children
+  );
+
   const rootContextProvider = (
-    <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
-      <i18n.Context>{children}</i18n.Context>
-    </SharedUXRouterContext.Provider>
+    <KibanaErrorBoundaryProvider analytics={props.analytics}>
+      <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
+        <i18n.Context>{childrenWithCurrentUser}</i18n.Context>
+      </SharedUXRouterContext.Provider>
+    </KibanaErrorBoundaryProvider>
   );
 
   if (hasEuiProvider) {
@@ -64,7 +95,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
     );
     return rootContextProvider;
   } else {
-    const { theme, userProfile, globalStyles, colorMode, modify } = props;
+    const { theme, globalStyles, colorMode, modify } = props;
     return (
       <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify }}>
         {rootContextProvider}

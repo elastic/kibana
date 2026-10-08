@@ -8,7 +8,6 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import fs from 'fs';
 import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
@@ -16,14 +15,15 @@ jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
 }));
 
-jest.mock('fs');
-
 const mockFindPackageForPath = jest.fn();
 jest.mock('@kbn/repo-packages', () => ({
   findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
 }));
 
-import { markModulesAffectedStatus, readAffectedModules } from './affected_modules';
+import {
+  filterModulesByAffectedConfigs,
+  markModulesAffectedStatusFromSet,
+} from './affected_modules';
 
 /** Path -> @kbn/ module ID mapping used by the findPackageForPath mock */
 const CONFIG_PATH_TO_MODULE_ID: Record<string, string> = {
@@ -36,20 +36,19 @@ const CONFIG_PATH_TO_MODULE_ID: Record<string, string> = {
 const createModule = (
   name: string,
   type: 'plugin' | 'package',
-  configPath: string
+  configPath: string,
+  extraConfigs: string[] = []
 ): ModuleDiscoveryInfo => ({
   name,
   group: 'test-group',
   type,
-  configs: [
-    {
-      path: configPath,
-      hasTests: true,
-      tags: ['@local-stateful-classic'],
-      serverRunFlags: ['--arch stateful --domain classic'],
-      usesParallelWorkers: false,
-    },
-  ],
+  configs: [configPath, ...extraConfigs].map((p) => ({
+    path: p,
+    hasTests: true,
+    tags: ['@local-stateful-classic'],
+    serverRunFlags: ['--arch stateful --domain classic'],
+    usesParallelWorkers: false,
+  })),
 });
 
 const setupFindPackageMock = () => {
@@ -74,50 +73,7 @@ describe('affected_modules', () => {
     jest.clearAllMocks();
   });
 
-  describe('readAffectedModules', () => {
-    it('should read and parse a valid JSON array file', () => {
-      const modules = ['@kbn/scout', '@kbn/discover-plugin'];
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(modules));
-
-      const result = readAffectedModules('/some/path.json', mockLog);
-
-      expect(result).toEqual(new Set(modules));
-    });
-
-    it('should return null for non-array JSON', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({ not: 'an array' }));
-
-      const result = readAffectedModules('/some/path.json', mockLog);
-
-      expect(result).toBeNull();
-      expect(mockLog.warning).toHaveBeenCalledWith(
-        expect.stringContaining('does not contain a JSON array')
-      );
-    });
-
-    it('should return null when file does not exist', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation(() => {
-        throw new Error('ENOENT: no such file or directory');
-      });
-
-      const result = readAffectedModules('/missing/file.json', mockLog);
-
-      expect(result).toBeNull();
-      expect(mockLog.warning).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to read affected modules file')
-      );
-    });
-
-    it('should return null for invalid JSON', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue('not valid json');
-
-      const result = readAffectedModules('/some/path.json', mockLog);
-
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('markModulesAffectedStatus', () => {
+  describe('markModulesAffectedStatusFromSet', () => {
     const modules: ModuleDiscoveryInfo[] = [
       createModule(
         'security_solution',
@@ -136,12 +92,12 @@ describe('affected_modules', () => {
       ),
     ];
 
-    it('should mark affected modules with isAffected: true', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(
-        JSON.stringify(['@kbn/security-solution-plugin', '@kbn/scout'])
+    it('marks affected modules with isAffected: true', () => {
+      const result = markModulesAffectedStatusFromSet(
+        modules,
+        new Set(['@kbn/security-solution-plugin', '@kbn/scout']),
+        mockLog
       );
-
-      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
       expect(result).toHaveLength(3);
       expect(result.find((m) => m.name === 'security_solution')?.isAffected).toBe(true);
@@ -149,18 +105,7 @@ describe('affected_modules', () => {
       expect(result.find((m) => m.name === 'kbn-scout')?.isAffected).toBe(true);
     });
 
-    it('should mark non-affected modules with isAffected: false', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
-
-      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
-
-      expect(result).toHaveLength(3);
-      expect(result.find((m) => m.name === 'security_solution')?.isAffected).toBe(false);
-      expect(result.find((m) => m.name === 'discover')?.isAffected).toBe(false);
-      expect(result.find((m) => m.name === 'kbn-scout')?.isAffected).toBe(true);
-    });
-
-    it('should mark unmapped modules with isAffected: false and warn', () => {
+    it('marks unmapped modules with isAffected: false and warns', () => {
       const modulesWithUnmapped: ModuleDiscoveryInfo[] = [
         ...modules,
         createModule(
@@ -170,9 +115,11 @@ describe('affected_modules', () => {
         ),
       ];
 
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
-
-      const result = markModulesAffectedStatus(modulesWithUnmapped, '/affected.json', mockLog);
+      const result = markModulesAffectedStatusFromSet(
+        modulesWithUnmapped,
+        new Set(['@kbn/scout']),
+        mockLog
+      );
 
       expect(result).toHaveLength(4);
       expect(result.find((m) => m.name === 'unknown_module')?.isAffected).toBe(false);
@@ -184,35 +131,65 @@ describe('affected_modules', () => {
       );
     });
 
-    it('should throw when the affected modules file cannot be read', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation(() => {
-        throw new Error('ENOENT');
-      });
-
-      expect(() => markModulesAffectedStatus(modules, '/missing.json', mockLog)).toThrow(
-        'Selective testing: could not load affected modules file'
-      );
-    });
-
-    it('should mark all as isAffected: false when affected set is empty', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify([]));
-
-      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
+    it('marks all as isAffected: false when affected set is empty', () => {
+      const result = markModulesAffectedStatusFromSet(modules, new Set(), mockLog);
 
       expect(result).toHaveLength(3);
       expect(result.every((m) => m.isAffected === false)).toBe(true);
     });
 
-    it('should log affected and unaffected counts', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(
-        JSON.stringify(['@kbn/security-solution-plugin'])
+    it('logs affected and unaffected counts', () => {
+      markModulesAffectedStatusFromSet(
+        modules,
+        new Set(['@kbn/security-solution-plugin']),
+        mockLog
       );
-
-      markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
       expect(mockLog.info).toHaveBeenCalledWith(
         expect.stringContaining('1 affected, 2 unaffected')
       );
+    });
+  });
+
+  describe('filterModulesByAffectedConfigs', () => {
+    const modules: ModuleDiscoveryInfo[] = [
+      createModule('a', 'plugin', 'a/test/scout/ui/playwright.config.ts', [
+        'a/test/scout/ui/parallel.playwright.config.ts',
+      ]),
+      createModule('b', 'plugin', 'b/test/scout/api/playwright.config.ts'),
+    ];
+
+    it('keeps only configs in the affected set and forces isAffected: true on survivors', () => {
+      const result = filterModulesByAffectedConfigs(
+        modules,
+        new Set(['a/test/scout/ui/playwright.config.ts', 'b/test/scout/api/playwright.config.ts'])
+      );
+
+      expect(result).toHaveLength(2);
+      const a = result.find((m) => m.name === 'a')!;
+      expect(a.configs).toHaveLength(1);
+      expect(a.configs[0].path).toBe('a/test/scout/ui/playwright.config.ts');
+      expect(a.isAffected).toBe(true);
+
+      const b = result.find((m) => m.name === 'b')!;
+      expect(b.configs).toHaveLength(1);
+      expect(b.isAffected).toBe(true);
+    });
+
+    it('drops modules whose configs are entirely filtered out', () => {
+      const result = filterModulesByAffectedConfigs(
+        modules,
+        new Set(['a/test/scout/ui/parallel.playwright.config.ts'])
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('a');
+      expect(result[0].configs[0].path).toBe('a/test/scout/ui/parallel.playwright.config.ts');
+    });
+
+    it('returns an empty array when no config is affected', () => {
+      const result = filterModulesByAffectedConfigs(modules, new Set(['unrelated/config.ts']));
+      expect(result).toEqual([]);
     });
   });
 });

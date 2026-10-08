@@ -26,6 +26,7 @@ import {
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
+  authorizeRuleTypeParams,
 } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -534,6 +535,12 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       rule.attributes.params,
       ruleType.validate.params
     );
+
+    await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+      request: context.request,
+      spaceId: context.spaceId,
+      previousParams: rule.attributes.params,
+    });
 
     const {
       references,

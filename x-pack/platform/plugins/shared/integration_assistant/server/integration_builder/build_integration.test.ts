@@ -13,7 +13,7 @@ import { createFieldMapping } from './fields';
 import { createAgentInput } from './agent';
 import { createPipeline } from './pipeline';
 import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { createReadme } from './readme_files';
 
 const mockedDataPath = 'path';
@@ -267,7 +267,7 @@ describe('renderPackageManifestYAML', () => {
     const manifestContent = renderPackageManifestYAML(integration);
 
     // The manifest content must be parseable as YAML.
-    const manifest = yaml.load(manifestContent) as Record<string, unknown>;
+    const manifest = parse(manifestContent) as Record<string, unknown>;
 
     expect(manifest).toBeDefined();
     expect(manifest.title).toBe(integration.title);

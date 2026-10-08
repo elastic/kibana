@@ -44,6 +44,27 @@ export const fileAlt = schema.maybe(
   })
 );
 
+/** Saved-object style file / share IDs (request params & body). */
+export const fileId = schema.string({
+  minLength: 1,
+  maxLength: 256,
+});
+
+/** MIME type strings (e.g. application/pdf). */
+export const fileMimeType = schema.string({
+  minLength: 1,
+  maxLength: 256,
+});
+
+/**
+ * Public file-share tokens. Generated tokens are 40 chars; 1024 is a generous
+ * DoS ceiling for the request query param.
+ */
+export const fileShareToken = schema.string({
+  minLength: 1,
+  maxLength: 1024,
+});
+
 export const page = schema.number({ min: 1, defaultValue: 1 });
 export const pageSize = schema.number({ min: 1, defaultValue: 100 });
 

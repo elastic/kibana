@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import React, { ReactElement } from 'react';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
   render as reactTestLibRender,
@@ -240,7 +240,7 @@ export const getHistoryFromUrl = (url: Url) => {
   }
 
   return createMemoryHistory({
-    initialEntries: [url.path + stringify(url.queryParams)],
+    initialEntries: [url.path + queryString.stringify(url.queryParams)],
   });
 };
 

@@ -27,6 +27,27 @@ const DUMMY_FILENAME = '__JEST_BABEL_OPTIONS_DUMMY__.js';
 // Include this file contents in the cache key like upstream babel-jest
 const THIS_FILE = fs.readFileSync(__filename);
 
+// `babel-plugin-add-module-exports` (via @kbn/babel-preset) appends this statement to every module
+// whose only export is a default export.
+const ADD_MODULE_EXPORTS_STATEMENT = /^module\.exports = exports\.default;$/gm;
+
+// A default export that is itself an ES module namespace (`import * as ns; export default ns`)
+// stays on exports.default: exposing it through module.exports would make interop helpers
+// treat the namespace as the module and resolve `.default` to undefined.
+const GUARDED_ADD_MODULE_EXPORTS_STATEMENT =
+  'if (!(exports.default && exports.default.__esModule)) module.exports = exports.default;';
+
+function keepNamespaceDefaultExports(result) {
+  if (!result || typeof result.code !== 'string') {
+    return result;
+  }
+
+  return {
+    ...result,
+    code: result.code.replace(ADD_MODULE_EXPORTS_STATEMENT, GUARDED_ADD_MODULE_EXPORTS_STATEMENT),
+  };
+}
+
 /**
  * Materialize Babel options using @babel/core's loadPartialConfig.
  * Returns a stable JSON string of the resolved options.
@@ -101,6 +122,14 @@ function serializeJestTransformBits(cfg) {
 module.exports = {
   // Preserve all base transformer properties
   ...baseTransformer,
+
+  process(...args) {
+    return keepNamespaceDefaultExports(baseTransformer.process(...args));
+  },
+
+  async processAsync(...args) {
+    return keepNamespaceDefaultExports(await baseTransformer.processAsync(...args));
+  },
 
   // Wrap getCacheKey to normalize the config string and rootDir before delegating
   getCacheKey(sourceText, sourcePath, transformOptions) {

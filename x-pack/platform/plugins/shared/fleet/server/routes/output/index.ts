@@ -14,6 +14,7 @@ import {
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
   GetOutputsRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
@@ -27,6 +28,7 @@ import {
   putOutputHandler,
   postLogstashApiKeyHandler,
   getLatestOutputHealth,
+  getOutputAgentPolicyCountHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -71,7 +73,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: (authz) => {
-        return authz.fleet.allSettings || authz.fleet.allAgentPolicies;
+        return authz.fleet.allSettings;
       },
       summary: 'Update output',
       description: 'Update output by ID.',
@@ -162,5 +164,22 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: GetLatestOutputHealthRequestSchema },
       },
       getLatestOutputHealth
+    );
+
+  router.versioned
+    .get({
+      path: OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN,
+      access: 'internal',
+      fleetAuthz: (authz) => {
+        return authz.fleet.readSettings && authz.fleet.readAgentPolicies && authz.fleet.readAgents;
+      },
+      summary: 'Get output agent and policy count',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: GetOutputAgentPolicyCountRequestSchema },
+      },
+      getOutputAgentPolicyCountHandler
     );
 };

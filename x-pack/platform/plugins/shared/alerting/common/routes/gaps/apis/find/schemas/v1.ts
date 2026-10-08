@@ -6,14 +6,15 @@
  */
 import { schema } from '@kbn/config-schema';
 import { gapsResponseSchemaV1 } from '../../../response';
+import { MAX_ID_LENGTH, ISO_DATE_MAX_LENGTH } from '../../../../../constants';
 
 export const findGapsBodySchema = schema.object(
   {
-    end: schema.string(),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-    rule_id: schema.string(),
-    start: schema.string(),
+    rule_id: schema.string({ maxLength: MAX_ID_LENGTH }),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     sort_field: schema.maybe(
       schema.oneOf([
         schema.literal('@timestamp'),
@@ -28,7 +29,8 @@ export const findGapsBodySchema = schema.object(
           schema.literal('partially_filled'),
           schema.literal('unfilled'),
           schema.literal('filled'),
-        ])
+        ]),
+        { maxSize: 3 }
       )
     ),
   },

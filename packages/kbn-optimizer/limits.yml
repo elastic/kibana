@@ -11,10 +11,11 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 180103
   charts: 72940
+  clientApps: 4688
   cloud: 8836
   cloudDataMigration: 5687
   cloudDefend: 24800
-  cloudExperiments: 103984
+  cloudExperiments: 174034
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 21520
@@ -34,7 +35,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 65000
-  dataVisualizer: 29533
+  dataVisualizer: 46365
   devTools: 13451
   discover: 25000
   discoverEnhanced: 10290
@@ -140,7 +141,7 @@ pageLoadAssetSize:
   searchIndices: 10564
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
-  searchNotebooks: 18826
+  searchNotebooks: 35186
   searchPlayground: 10993
   searchprofiler: 18361
   searchQueryRules: 6689

@@ -2261,6 +2261,69 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      datetime_conversion: {
+        default_value: 'DATETIME',
+        depends_on: [],
+        display: DROPDOWN,
+        label: translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionLabel',
+          {
+            defaultMessage: 'Out-of-range date handling',
+          }
+        ),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionRaiseLabel',
+              {
+                defaultMessage: 'Raise an error (legacy)',
+              }
+            ),
+            value: 'DATETIME',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionClampLabel',
+              {
+                defaultMessage: 'Clamp to the min/max date',
+              }
+            ),
+            value: 'DATETIME_CLAMP',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionAutoLabel',
+              {
+                defaultMessage: 'Out-of-range dates as epoch milliseconds',
+              }
+            ),
+            value: 'DATETIME_AUTO',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionMsLabel',
+              {
+                defaultMessage: 'All dates as epoch milliseconds',
+              }
+            ),
+            value: 'DATETIME_MS',
+          },
+        ],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionTooltip',
+          {
+            defaultMessage:
+              "How to handle MongoDB dates outside the supported range (years 1-9999). 'Raise an error' is the legacy behavior; the other options let the sync continue by clamping or storing raw epoch milliseconds.",
+          }
+        ),
+        type: STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'DATETIME',
+      },
     },
     features: {
       [FILTERING_ADVANCED_CONFIG]: true,
@@ -3502,6 +3565,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      sync_all_mail_folders: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.label', {
+          defaultMessage: 'Sync all mail folders',
+        }),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.tooltip',
+          {
+            defaultMessage:
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
@@ -3513,7 +3599,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3534,7 +3620,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -4165,6 +4251,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      expand_role_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersLabel',
+          {
+            defaultMessage: 'Expand role members',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, ServiceNow role members are written individually onto each document's access control list. Disable this for large tenants to store compact role tokens on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
     },
     features: {
       [SYNC_RULES]: {
@@ -4586,6 +4703,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      expand_site_group_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersLabel',
+          {
+            defaultMessage: 'Expand site group members',
+          }
+        ),
+        options: [],
+        order: 17,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, SharePoint site group members are written individually onto each document's access control list. Disable this for large site groups to store a compact site group token on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
           }
         ),
         type: BOOLEAN,

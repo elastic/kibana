@@ -127,7 +127,6 @@ export const createCategorizationRequestParams = ({
             },
           },
           change: {
-            // @ts-expect-error the official types don't support the change_point aggregation
             change_point: {
               buckets_path: 'histogram>_count',
             },

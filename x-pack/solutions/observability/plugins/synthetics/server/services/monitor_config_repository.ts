@@ -6,6 +6,7 @@
  */
 
 import {
+  ISavedObjectsRepository,
   SavedObject,
   type SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
@@ -276,7 +277,7 @@ export class MonitorConfigRepository {
   async find<T>(
     options: Omit<SavedObjectsFindOptions, 'type'>,
     types: string[] = syntheticsMonitorSOTypes,
-    soClient: SavedObjectsClientContract = this.soClient
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;

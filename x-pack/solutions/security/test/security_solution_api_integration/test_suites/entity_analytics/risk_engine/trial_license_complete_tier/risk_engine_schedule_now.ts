@@ -13,7 +13,7 @@ import {
   clearLegacyTransforms,
   createAndSyncRuleAndAlertsFactory,
   riskEngineRouteHelpersFactory,
-  waitForRiskEngineRun,
+  waitForRiskEngineIdle,
   waitForRiskScoresToBePresent,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -67,12 +67,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       // first risk engine run
       await riskEngineRoutes.init();
-      await waitForRiskEngineRun({ log, supertest });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+      await waitForRiskEngineIdle({ log, supertest });
 
       // second risk engine run
       await riskEngineRoutes.scheduleNow();
-      await waitForRiskEngineRun({ log, supertest });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 }); // Should calculate risk score again for the same document
     });
   });

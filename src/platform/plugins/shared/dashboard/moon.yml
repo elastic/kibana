@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/std'
   - '@kbn/scout'
-  - '@kbn/test'
 tags:
   - plugin
   - prod

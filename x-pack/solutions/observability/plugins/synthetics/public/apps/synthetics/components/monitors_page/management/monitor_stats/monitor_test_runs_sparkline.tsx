@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
@@ -27,25 +27,6 @@ export const MonitorTestRunsSparkline = () => {
   const filters = useMonitorFilters({});
   const queryFilter = useMonitorQueryFilters();
 
-  const attributes = useMemo(() => {
-    return [
-      {
-        seriesType: 'area' as const,
-        time: { from, to },
-        reportDefinitions: {
-          'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
-        },
-        dataType: 'synthetics' as const,
-        selectedMetricField: 'total_test_runs',
-        filters,
-        name: labels.TEST_RUNS_LABEL,
-        color: theme.eui.euiColorVis1,
-        operationType: 'count',
-      },
-    ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, theme.eui.euiColorVis1, to]);
-
   return (
     <ExploratoryViewEmbeddable
       id="monitor-test-runs-sparkline"
@@ -53,7 +34,21 @@ export const MonitorTestRunsSparkline = () => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      attributes={attributes}
+      attributes={[
+        {
+          seriesType: 'area',
+          time: { from, to },
+          reportDefinitions: {
+            'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
+          },
+          dataType: 'synthetics',
+          selectedMetricField: 'total_test_runs',
+          filters,
+          name: labels.TEST_RUNS_LABEL,
+          color: theme.eui.euiColorVis1,
+          operationType: 'count',
+        },
+      ]}
       customHeight={'68px'}
       dslFilters={queryFilter}
     />

@@ -1249,6 +1249,7 @@
             "name": "feature_id",
             "required": false,
             "schema": {
+              "maxLength": 100,
               "type": "string"
             }
           }
@@ -8224,6 +8225,7 @@
                       ],
                       "type": "object"
                     },
+                    "maxItems": 1000,
                     "type": "array"
                   },
                   "metadata": {
@@ -8514,6 +8516,7 @@
                             ],
                             "type": "object"
                           },
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "metadata": {

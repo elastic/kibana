@@ -353,6 +353,7 @@ export class CoreSystem {
         i18n,
         theme,
         userProfile,
+        authc: security.authc,
       });
 
       const notifications = this.notifications.start({

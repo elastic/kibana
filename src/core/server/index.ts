@@ -259,6 +259,11 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
+  PluginAppenderConfigType,
+  FileAppenderPluginConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
+  RollingFileAppenderPluginConfig,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';

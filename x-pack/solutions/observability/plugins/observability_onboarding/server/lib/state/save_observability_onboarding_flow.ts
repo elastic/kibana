@@ -29,6 +29,7 @@ export async function saveObservabilityOnboardingFlow({
       savedObjectId,
       {
         type: observabilityOnboardingState.type,
+        createdBy: observabilityOnboardingState.createdBy,
         state: observabilityOnboardingState.state,
         progress: { ...observabilityOnboardingState.progress },
       }

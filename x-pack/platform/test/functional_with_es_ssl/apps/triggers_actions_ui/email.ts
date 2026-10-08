@@ -77,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await testSubjects.click('edit-connector-flyout-close-btn');
-        if (await testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+        if (await testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 2000 })) {
           await testSubjects.click('confirmModalConfirmButton');
         }
       });
@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await testSubjects.click('edit-connector-flyout-close-btn');
-        if (await testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+        if (await testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 2000 })) {
           await testSubjects.click('confirmModalConfirmButton');
         }
       });

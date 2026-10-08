@@ -37,12 +37,17 @@ export type {
 } from './test/ui';
 
 // Worker primitives (for optional packages such as @kbn/scout-synthtrace)
-export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export { coreWorkerFixtures, esArchiverFixture, apiClientFixture } from './fixtures/scope/worker';
 export type { EsArchiverFixture } from './fixtures/scope/worker';
 
 // API services (can be extended with solution specific API services)
 export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+export type {
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
+} from './fixtures/scope/worker/api_client';
 
 // Other worker types
 export type { SamlAuth, RequestAuthFixture } from './fixtures/scope/worker';

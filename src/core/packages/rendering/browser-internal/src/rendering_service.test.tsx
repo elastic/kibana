@@ -31,6 +31,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { RenderingService } from './rendering_service';
@@ -44,6 +45,7 @@ describe('RenderingService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let authc: ReturnType<typeof securityServiceMock.createStart>['authc'];
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
 
@@ -61,6 +63,7 @@ describe('RenderingService', () => {
 
     executionContext = executionContextServiceMock.createStartContract();
     userProfile = userProfileServiceMock.createStart();
+    authc = securityServiceMock.createStart().authc;
     theme = themeServiceMock.createStartContract();
     i18n = i18nServiceMock.createStartContract();
 
@@ -76,6 +79,7 @@ describe('RenderingService', () => {
         executionContext,
         theme,
         userProfile,
+        authc,
       });
     };
 
@@ -148,7 +152,14 @@ describe('RenderingService', () => {
     });
 
     it('renders the React element when dependencies are provided', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile };
+      const deps = {
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        authc,
+      };
       rendering.start(deps);
 
       const TestComponent = rendering.addContext(<div>Test Element</div>);

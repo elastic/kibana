@@ -104,6 +104,10 @@ export function deserializeDataStream(
     hidden,
     lifecycle: {
       ...lifecycle,
+      effective_retention:
+        typeof lifecycle?.effective_retention === 'string'
+          ? lifecycle.effective_retention
+          : undefined,
       globalMaxRetention,
     },
     nextGenerationManagedBy,

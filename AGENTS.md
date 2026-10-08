@@ -1,7 +1,7 @@
 # Kibana
 
 ## Setup
-- Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
+- Run `node scripts/kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
@@ -22,13 +22,13 @@
 ## Testing
 
 ### Jest unit
-`yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
+`pnpm test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
 
 ### Jest integration
-`yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
+`pnpm test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
 
 ### Function Test Runner (FTR)
-`yarn test:ftr [--config <file1> [--config <file2> ...]]`
+`pnpm test:ftr [--config <file1> [--config <file2> ...]]`
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
@@ -38,11 +38,11 @@
 Follow existing patterns in the target area first; below are common defaults.
 
 ### Type check
-`yarn test:type_check [--project path/to/tsconfig.json]`
+`pnpm test:type_check [--project path/to/tsconfig.json]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
-  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+  `pnpm test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
-- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.
@@ -84,3 +84,4 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Only comment exported functions with one concise sentence and non-trivial code paths.

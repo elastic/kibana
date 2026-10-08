@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/257921
+test.describe.skip('StepDetailsPage', { tag: tags.stateful.classic }, () => {
   const configId = 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b';
   const checkGroup = 'ab240846-8d22-11ed-8fac-52bb19a2321e';
 

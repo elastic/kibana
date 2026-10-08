@@ -149,8 +149,8 @@ export function registerMlSnapshotRoutes({
       },
       validate: {
         body: schema.object({
-          snapshotId: schema.string(),
-          jobId: schema.string(),
+          snapshotId: schema.string({ maxLength: 1000 }),
+          jobId: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -205,8 +205,8 @@ export function registerMlSnapshotRoutes({
       },
       validate: {
         params: schema.object({
-          snapshotId: schema.string(),
-          jobId: schema.string(),
+          snapshotId: schema.string({ maxLength: 1000 }),
+          jobId: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -413,8 +413,8 @@ export function registerMlSnapshotRoutes({
       },
       validate: {
         params: schema.object({
-          snapshotId: schema.string(),
-          jobId: schema.string(),
+          snapshotId: schema.string({ maxLength: 1000 }),
+          jobId: schema.string({ maxLength: 1000 }),
         }),
       },
     },

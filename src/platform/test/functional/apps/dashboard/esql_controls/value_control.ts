@@ -62,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
       await retry.waitFor('control flyout to open', async () => {
+        if (await testSubjects.exists('create_esql_control_flyout')) return true;
         await esql.typeEsqlEditorQuery(
           'FROM logstash-* | WHERE geo.dest == ',
           'InlineEditingESQLEditor'
@@ -127,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.setEsqlEditorQuery('FROM logstash-*');
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
-      expect(await testSubjects.exists('esqlMoreThanOneColumnCallout')).to.be(true);
+      await testSubjects.existOrFail('esqlMoreThanOneColumnCallout');
       await testSubjects.click('chooseColumnBtn');
       const searchInput = await testSubjects.find('selectableColumnSearch');
       await searchInput.type('geo.dest');

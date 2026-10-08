@@ -11797,7 +11797,7 @@ Object {
           "x-oas-min-length": 1,
         },
         Object {
-          "x-oas-max-length": 130,
+          "x-oas-max-length": 15000,
         },
       ],
       "rules": Array [

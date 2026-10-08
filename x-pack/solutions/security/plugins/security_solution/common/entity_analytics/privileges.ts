@@ -24,7 +24,7 @@ export const getAllMissingPrivileges = (
   const index = Object.entries(esPrivileges.index ?? {})
     .map(([indexName, indexPrivileges]) => ({
       indexName,
-      privileges: filterUnauthorized(indexPrivileges),
+      privileges: filterUnauthorized(indexPrivileges as Record<string, boolean>),
     }))
     .filter(({ privileges }) => privileges.length > 0);
 

@@ -554,6 +554,9 @@ privilege check warnings in rules for CCS indices.
 [[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
 the security news feed on the Security *Overview* page.
 
+[[security-solution-exclude-cold-frozen-tiers-prevalence]]`securitySolution:excludeColdAndFrozenTiersInPrevalence`::
+Skips cold and frozen tiers in Prevalence queries when activated. Off by default.
+
 [[securitysolution-ipreputationlinks]]`securitySolution:ipReputationLinks`::
 A JSON array containing links for verifying the reputation of an IP address. The
 links are displayed on {security-guide}/network-page-overview.html[IP detail]

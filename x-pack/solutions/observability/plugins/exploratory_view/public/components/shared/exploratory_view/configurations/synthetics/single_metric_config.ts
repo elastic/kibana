@@ -110,6 +110,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary: *' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_successful',
@@ -122,6 +123,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary.down: 0' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_errors',
@@ -151,6 +153,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           language: 'kuery',
           query: 'summary.status: down',
         },
+        emptyAsNull: false,
       },
     ],
     labels: FieldLabels,

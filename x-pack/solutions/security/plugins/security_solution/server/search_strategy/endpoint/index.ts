@@ -8,6 +8,7 @@
 import { map, mergeMap, from } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
@@ -35,6 +36,10 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       }
       return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
         mergeMap((authz) => {
+          if (!authz.canAccessEndpointActionsLogManagement) {
+            throw new KbnServerError('Endpoint authorization failure', 403);
+          }
+
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,

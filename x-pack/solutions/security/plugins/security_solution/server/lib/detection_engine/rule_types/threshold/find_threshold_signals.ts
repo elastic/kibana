@@ -20,6 +20,7 @@ import type {
   TimestampOverride,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { getNoReadableShardsWarning, hasZeroShards } from '../utils/no_readable_shards';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import {
   buildThresholdMultiBucketAggregation,
@@ -112,6 +113,7 @@ export const findThresholdSignals = async ({
         searchResult,
         searchDuration,
         searchErrors,
+        searchWarnings,
         loggedRequests: thresholdLoggedRequests,
       } = await singleSearchAfter({
         searchRequest,
@@ -127,6 +129,7 @@ export const findThresholdSignals = async ({
       });
 
       searchAfterResults.searchDurations.push(searchDuration);
+      warnings.push(...searchWarnings);
       loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
       if (!isEmpty(searchErrors)) {
@@ -138,6 +141,11 @@ export const findThresholdSignals = async ({
         const thresholdTerms = searchResult.aggregations.thresholdTerms;
         sortKeys = thresholdTerms.after_key;
         buckets.push(...thresholdTerms.buckets);
+      } else if (hasZeroShards(searchResult)) {
+        warnings.push(getNoReadableShardsWarning({ inputIndex: inputIndexPattern }));
+        sortKeys = undefined; // this will eject us out of the loop
+      } else if (searchWarnings.length > 0) {
+        sortKeys = undefined; // a skipped cluster explains the missing aggregations
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
@@ -163,6 +171,7 @@ export const findThresholdSignals = async ({
       searchResult,
       searchDuration,
       searchErrors,
+      searchWarnings,
       loggedRequests: thresholdLoggedRequests,
     } = await singleSearchAfter({
       searchRequest,
@@ -178,6 +187,7 @@ export const findThresholdSignals = async ({
 
     searchAfterResults.searchDurations.push(searchDuration);
     searchAfterResults.searchErrors.push(...searchErrors);
+    warnings.push(...searchWarnings);
     loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
     if (searchResult.aggregations != null) {
@@ -196,7 +206,11 @@ export const findThresholdSignals = async ({
           cardinality_count: searchResult.aggregations.cardinality_count,
         });
       }
-    } else {
+    } else if (!isEmpty(searchErrors)) {
+      // shard failures fail the run, nothing else to report
+    } else if (hasZeroShards(searchResult)) {
+      warnings.push(getNoReadableShardsWarning({ inputIndex: inputIndexPattern }));
+    } else if (searchWarnings.length === 0) {
       throw new Error('Aggregations were missing on threshold rule search result');
     }
   }

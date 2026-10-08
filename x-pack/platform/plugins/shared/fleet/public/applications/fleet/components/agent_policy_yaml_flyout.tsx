@@ -25,7 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../hooks';
+import {
+  useGetOneAgentPolicyFull,
+  useGetOneAgentPolicy,
+  useStartServices,
+  useAuthz,
+} from '../hooks';
 
 import { agentPolicyRouteService, getYamlFormatters } from '../services';
 import type { YamlFormatters } from '../../../services/yaml_formatters';
@@ -52,6 +57,8 @@ export const AgentPolicyYamlFlyout = memo<{
   }, []);
 
   const core = useStartServices();
+  const authz = useAuthz();
+  const canReadSettings = authz.fleet.readSettings;
   const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
   const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
@@ -119,6 +126,30 @@ export const AgentPolicyYamlFlyout = memo<{
             )}
           </h2>
         </EuiTitle>
+        {!canReadSettings && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsRedactedTitle"
+                  defaultMessage="Some proxy credentials may not be shown"
+                />
+              }
+              size="m"
+              color="warning"
+              iconType="warning"
+            >
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.secretsRedactedDescription"
+                defaultMessage="Proxy headers and TLS private keys are only visible to users with the {privilege} Kibana privilege for Fleet."
+                values={{
+                  privilege: <strong>{'Fleet > Settings: Read'}</strong>,
+                }}
+              />
+            </EuiCallOut>
+          </>
+        )}
         {packagePoliciesContainSecrets && (
           <>
             <EuiSpacer size="m" />

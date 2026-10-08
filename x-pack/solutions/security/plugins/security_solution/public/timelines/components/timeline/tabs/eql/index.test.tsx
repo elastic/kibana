@@ -95,6 +95,142 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
+describe('EQL partial results callout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useTimelineEventsMock = jest.fn(() => [
+      false,
+      {
+        events: mockTimelineData.slice(0, 1),
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
+    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        return allowedExperimentalValues[feature];
+      }
+    );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+    });
+
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
+  });
+
+  it(
+    'renders the incomplete results callout when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning')).toBeVisible();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'renders shard failure details when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning-details')).toHaveTextContent(
+        'logs-test'
+      );
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'hides the incomplete results callout when the EQL response is complete',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+      await screen.findByTestId('timelineHeader');
+
+      expect(screen.queryByTestId('eql-partial-results-warning')).toBeNull();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+});
+
 describe('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
 
@@ -112,6 +248,9 @@ describe('EQL Tab', () => {
       false,
       {
         events: mockTimelineData.slice(0, 1),
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -186,6 +325,9 @@ describe('EQL Tab', () => {
               activePage: 0,
               totalPages: 10,
             },
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
           },
         ]);
 
@@ -221,6 +363,9 @@ describe('EQL Tab', () => {
              * This helps in testing `sampleSize` and `loadMore`
              */
             totalCount: 50,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadPage: loadPageMock,
           },
         ]);

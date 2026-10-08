@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { render } from '../../../utils/testing/rtl_helpers';
+import { render, makeSyntheticsPermissionsCore } from '../../../utils/testing/rtl_helpers';
 import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
 
 jest.mock('../../../contexts', () => ({
@@ -123,6 +123,7 @@ describe('AlertingCallout', () => {
 
   it('show call out for missing privileges rules', async () => {
     const { getByText } = render(<AlertingCallout />, {
+      core: makeSyntheticsPermissionsCore({ save: false, canManageRules: false }),
       state: {
         defaultAlerting: {
           data: {},
@@ -135,6 +136,23 @@ describe('AlertingCallout', () => {
     await waitFor(() => {
       expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
       expect(getByText(MISSING_RULES_PRIVILEGES_LABEL)).toBeInTheDocument();
+    });
+  });
+
+  it('does not show missing-privileges callout when the user can manage rules', async () => {
+    const { queryByText } = render(<AlertingCallout />, {
+      core: makeSyntheticsPermissionsCore({ save: false, canManageRules: true }),
+      state: {
+        defaultAlerting: {
+          data: {},
+          loading: false,
+          success: true,
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(queryByText(MISSING_RULES_PRIVILEGES_LABEL)).not.toBeInTheDocument();
     });
   });
 });

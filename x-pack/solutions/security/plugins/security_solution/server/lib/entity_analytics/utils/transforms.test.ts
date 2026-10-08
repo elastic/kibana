@@ -113,7 +113,7 @@ describe('transforms utils', () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
 
-      await scheduleTransformNow({ esClient, transformId });
+      await scheduleTransformNow({ esClient, logger, transformId });
 
       expect(esClient.transform.startTransform).toHaveBeenCalled();
     });
@@ -122,7 +122,7 @@ describe('transforms utils', () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(startedTransformsMock);
 
-      await scheduleTransformNow({ esClient, transformId });
+      await scheduleTransformNow({ esClient, logger, transformId });
 
       expect(esClient.transform.scheduleNowTransform).toHaveBeenCalled();
     });

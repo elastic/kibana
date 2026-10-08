@@ -387,6 +387,17 @@ describe('AlertingEventLogger', () => {
         },
       });
     });
+
+    test('should update standard event with rule tags correctly', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ tags: ['tag-1', 'tag-3'] });
+
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        tags: ['tag-1', 'tag-3'],
+      });
+    });
   });
 
   describe('setExecutionSucceeded()', () => {
@@ -1588,6 +1599,7 @@ describe('helper functions', () => {
       type: ruleType,
       consumer: 'test-consumer',
       revision: 0,
+      tags: ['tag-1', 'tag-2'],
     };
     ruleDataWithName = { ...ruleData, name: 'my-super-cool-rule' };
     alertSO = { id: '123', relation: 'primary', type: 'alert', typeId: 'test' };
@@ -1609,6 +1621,7 @@ describe('helper functions', () => {
       expect(record.rule).toBeDefined();
 
       // these fields should be explicitly set
+      expect(record.tags).toEqual(['tag-1', 'tag-2']);
       expect(record.event?.action).toEqual('execute');
       expect(record.event?.kind).toEqual('alert');
       expect(record.event?.category).toEqual([ruleData.type?.producer]);
@@ -2093,6 +2106,14 @@ describe('helper functions', () => {
             },
           },
         },
+      });
+    });
+
+    test('updates event tags if provided', () => {
+      updateEventWithRuleData(event, { ruleTags: ['tag-1', 'tag-2'] });
+      expect(event).toEqual({
+        ...expectedEvent,
+        tags: ['tag-1', 'tag-2'],
       });
     });
 

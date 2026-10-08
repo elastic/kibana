@@ -92,6 +92,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My action type',
             },
           },
@@ -191,6 +192,26 @@ describe('actionTypeRegistry', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
+      );
+    });
+
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['a'.repeat(101)],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-action-type\\" must not exceed 100 characters."`
       );
     });
 

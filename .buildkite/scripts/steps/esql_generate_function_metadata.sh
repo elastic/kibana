@@ -34,13 +34,13 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  pnpm make:defs $PARENT_DIR/elasticsearch
 
   report_main_step "Generate inline function docs"
 
   cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
 
-  yarn make:docs $PARENT_DIR/elasticsearch
+  pnpm make:docs $PARENT_DIR/elasticsearch
 
   report_main_step "Run i18n check"
 
@@ -50,7 +50,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
+  git diff --exit-code --quiet $GIT_SCOPE
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -82,6 +82,9 @@ main () {
   git checkout -b "$BRANCH_NAME"
 
   git add $GIT_SCOPE
+  if [ "$VERSION_BUMPED" == "true" ]; then
+    git add package.json pnpm-lock.yaml
+  fi
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."

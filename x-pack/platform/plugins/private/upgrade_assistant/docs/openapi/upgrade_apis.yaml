@@ -262,7 +262,7 @@ paths:
                     description: >
                       A list of errors that may have occurred preventing the reindex task from being created.
                     items:
-                      - type: object
+                      type: object
               examples:
                 batchStartUpgradeReindexResponseExample1:
                   value: |-

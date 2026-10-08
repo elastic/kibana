@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { alertsFilterQuerySchema } from './schemas/latest';
-export { alertsFilterQuerySchema as alertsFilterQuerySchemaV1 } from './schemas/v1';
+export { alertsFilterQuerySchema, getAlertsFilterQuerySchema } from './schemas/latest';
+export type { AlertsFilterQuerySchemaLimits } from './schemas/latest';
+export {
+  alertsFilterQuerySchema as alertsFilterQuerySchemaV1,
+  getAlertsFilterQuerySchema as getAlertsFilterQuerySchemaV1,
+} from './schemas/v1';

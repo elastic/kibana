@@ -224,6 +224,25 @@ describe('<FollowerIndicesList />', () => {
 
         expect(exists('unfollowLeaderConfirmation')).toBe(true);
       });
+
+      test('should clear the selection after confirming an action', async () => {
+        await actions.selectFollowerIndexAt(0);
+        expect(exists('contextMenuButton')).toBe(true);
+
+        await actions.openContextMenu();
+        await actions.clickContextMenuButtonAt(0); // first button is the "pause" action
+
+        expect(exists('pauseReplicationConfirmation')).toBe(true);
+
+        await act(async () => {
+          find('confirmModalConfirmButton').simulate('click');
+        });
+
+        component.update();
+
+        // The selection is reset, so the bulk manage button is gone.
+        expect(exists('contextMenuButton')).toBe(false);
+      });
     });
 
     describe('table row action menu', () => {

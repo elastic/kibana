@@ -9,13 +9,13 @@ In order to make ongoing maintenance of log collection easy we want to introduce
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
 ### Deployment-agnostic API tests
@@ -97,19 +97,19 @@ unset FLEET_PACKAGE_REGISTRY_PORT
 ##### FTR Server
 
 ```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
+pnpm test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
 ```
 
 ##### FTR Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/index.ts
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/$1
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/$1
 ```
 
 #### Serverless
@@ -117,17 +117,17 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/a
 ##### Server
 
 ```
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+pnpm test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
 ##### Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
+pnpm test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
+pnpm test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```

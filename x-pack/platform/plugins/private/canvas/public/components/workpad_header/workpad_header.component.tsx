@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
@@ -66,7 +66,7 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const WorkpadHeader: FC<Props> = ({
+export const WorkpadHeader: CanvasFunctionComponent<Props> = ({
   isWriteable,
   canUserWrite,
   commit,
@@ -240,14 +240,11 @@ export const WorkpadHeader: FC<Props> = ({
 };
 
 WorkpadHeader.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   isWriteable: PropTypes.bool,
   commit: PropTypes.func.isRequired,
   onSetWriteable: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
   canUserWrite: PropTypes.bool,
   renderEmbedPanel: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   elements: PropTypes.object.isRequired,
   addElement: PropTypes.func.isRequired,
 };

@@ -13,8 +13,9 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys } from 'lodash';
+import { flatMap, get, isEmpty, keys, values } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -38,7 +39,13 @@ import type {
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, DetermineDelayedAlertsOpts, LogAlertsOpts, SearchResult } from './types';
+import type {
+  AlertRule,
+  DetermineDelayedAlertsOpts,
+  LogAlertsOpts,
+  SearchResult,
+  TrackedAADAlerts,
+} from './types';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import type {
   IAlertsClient,
@@ -70,8 +77,8 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
-import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { getRecoveredAlertIdsToStopTracking } from '../lib/flapping/optimize_task_state_for_flapping';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -104,15 +111,7 @@ export class AlertsClient<
   // Query for alerts from the previous execution in order to identify the
   // correct index to use if and when we need to make updates to existing active or
   // recovered alerts
-  private trackedAlerts: {
-    indices: Record<string, string>;
-    active: Record<string, Alert & AlertData>;
-    recovered: Record<string, Alert & AlertData>;
-    seqNo: Record<string, number | undefined>;
-    primaryTerm: Record<string, number | undefined>;
-    get: (uuid: string) => Alert & AlertData;
-    getById: (id: string) => (Alert & AlertData) | undefined;
-  };
+  private trackedAlerts: TrackedAADAlerts<AlertData>;
 
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
@@ -171,8 +170,6 @@ export class AlertsClient<
       try {
         this.trackedAlerts = await getTrackedAlerts<AlertData>({
           ruleId: this.options.rule.id,
-          lookBackWindow: opts.flappingSettings.lookBackWindow,
-          maxAlertLimit: opts.maxAlerts || DEFAULT_MAX_ALERTS,
           activeAlertsFromState: opts.activeAlertsFromState,
           recoveredAlertsFromState: opts.recoveredAlertsFromState,
           search: (queryBody) => this.search(queryBody),
@@ -475,40 +472,82 @@ export class AlertsClient<
       }
     }
 
+    const trackedRecoveredAlerts =
+      this.legacyAlertsClient.getProcessedAlerts('trackedRecoveredAlerts');
+    // Any recovered alert that optimizeTaskStateForFlapping will drop from task
+    // state must be written tracked: false now. Otherwise the AAD query keeps
+    // returning it and nothing will persist it again.
+    const stopTrackingIds = new Set(
+      getRecoveredAlertIdsToStopTracking(
+        trackedRecoveredAlerts,
+        this.legacyAlertsClient.getMaxAlertLimit()
+      )
+    );
+
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
+      const uuid = rawRecoveredAlerts[id].meta?.uuid;
+      const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
+        const alertDoc = recoveredAlerts[id]
+          ? buildRecoveredAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: trackedAlert,
+              legacyAlert: recoveredAlerts[id],
+              rule: this.rule,
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+            })
+          : buildUpdatedRecoveredAlert<AlertData>({
+              alert: trackedAlert,
+              legacyRawAlert: rawRecoveredAlerts[id],
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              rule: this.rule,
+              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+            });
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<
-                AlertData,
-                LegacyState,
-                LegacyContext,
-                ActionGroupIds,
-                RecoveryActionGroupId
-              >({
-                alert: trackedAlert,
-                legacyAlert: recoveredAlerts[id],
-                rule: this.rule,
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                payload: this.reportedAlerts[id],
-                recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
-                kibanaVersion: this.options.kibanaVersion,
-                dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-              })
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                rule: this.rule,
-              })
+          stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
+        );
+      } else {
+        this.options.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
+          this.logTags
         );
       }
+    }
+
+    const keepUuids = new Set<string>();
+    for (const raw of values(rawActiveAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const raw of values(rawRecoveredAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    // Tracked AAD docs that are not in this run's working set will never be
+    // rebuilt. Flip tracked to false so they stop matching the tracked query.
+    // Status and lifecycle fields are left unchanged; status-aware orphan
+    // reconciliation is a follow-up.
+    for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
+      if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
+        continue;
+      }
+      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
     }
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(

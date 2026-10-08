@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/run_prettier_topology_check');
+require('@kbn/dev/run_prettier_topology_check');

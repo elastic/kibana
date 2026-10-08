@@ -98,8 +98,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(resp.upgrade_mode).to.eql(false, 'upgrade_mode should be false');
 
-      // defaults should always be the same
-      expect(resp.defaults).to.eql(expectedDefaults, 'defaults should match expected values');
+      // model_platform_variant was added to the ES ml/info response in newer snapshots and
+      // its value depends on the build architecture (e.g. linux-x86_64 vs linux-aarch64), so
+      // exclude it from the strict comparison of the remaining defaults. When present, only
+      // assert it is a string rather than pinning it to a single architecture.
+      const { model_platform_variant: modelPlatformVariant, ...defaults } = resp.defaults;
+      if (modelPlatformVariant !== undefined) {
+        expect(modelPlatformVariant).to.be.a('string');
+      }
+
+      // the remaining defaults should always be the same
+      expect(defaults).to.eql(expectedDefaults, 'defaults should match expected values');
 
       // native code should always be present but values depend on the build
       expect(resp.native_code).to.not.eql(undefined, 'native_code should be present');

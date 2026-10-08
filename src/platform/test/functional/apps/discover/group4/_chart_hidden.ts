@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const retry = getService('retry');
   const { common, discover, header, timePicker, dashboard } = getPageObjects([
     'common',
     'discover',
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows chart by default', async function () {
-      expect(await discover.isChartVisible()).to.be(true);
+      await retry.waitFor('chart to be visible', () => discover.isChartVisible());
     });
 
     it('hiding the chart persists the setting', async function () {
@@ -70,12 +71,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearchTitle);
 
       await discover.toggleChartVisibility();
-      expect(await discover.isChartVisible()).to.be(true);
+      await retry.waitFor('chart to be visible', () => discover.isChartVisible());
 
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
-      expect(await discover.isChartVisible()).to.be(true);
+      await retry.waitFor('chart to be visible', () => discover.isChartVisible());
 
       await discover.loadSavedSearch(savedSearchTitle);
       expect(await discover.isChartVisible()).to.be(false);

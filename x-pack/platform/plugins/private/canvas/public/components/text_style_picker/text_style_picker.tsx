@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -107,7 +107,7 @@ const styleButtons = [
   },
 ];
 
-export const TextStylePicker: FC<Props> = ({
+export const TextStylePicker: CanvasFunctionComponent<Props> = ({
   align = 'left',
   color,
   colors,
@@ -221,7 +221,6 @@ export const TextStylePicker: FC<Props> = ({
 };
 
 TextStylePicker.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   family: PropTypes.string,
   size: PropTypes.number,
   align: PropTypes.oneOf(['left', 'center', 'right']),

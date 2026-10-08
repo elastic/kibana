@@ -23,6 +23,7 @@ spec:
         ES_SERVERLESS_IMAGE: docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main

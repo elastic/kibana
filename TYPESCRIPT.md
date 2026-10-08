@@ -99,7 +99,7 @@ export { metadata };
 
 1. See if types exist for this module and can be installed, by doing something like:
 
-`yarn add -D @types/markdown-it@8.4.1`
+`pnpm add -Dw @types/markdown-it@8.4.1`
 
 Use the version number that we have installed in package.json. This may not always work, and you might get something like:
 
@@ -107,7 +107,7 @@ Use the version number that we have installed in package.json. This may not alwa
 
 If that happens, just pick the closest one.
 
-If yarn doesn't find the module it may not have types. For example, our `rison_node` package doesn't have types. In this case you have a few options:
+If pnpm doesn't find the module it may not have types. For example, our `rison_node` package doesn't have types. In this case you have a few options:
 
 1. Contribute types into the DefinitelyTyped repo itself, or
 2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/legacy/plugins/infra/types/rison_node.d.ts`. Other code uses it too, so we will need to pull it up. Or,

@@ -40,7 +40,6 @@ tags:
   - prod
   - group-observability
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -50,6 +49,4 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

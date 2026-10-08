@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[1].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
+      const hasDocHit = await testSubjects.waitForExists('doc-hit');
       expect(hasDocHit).to.be(true);
 
       await testSubjects.click('~breadcrumb & ~first');

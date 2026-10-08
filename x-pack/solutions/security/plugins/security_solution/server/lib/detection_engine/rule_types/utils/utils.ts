@@ -568,6 +568,41 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
+ * Given the `_clusters` section of a cross-cluster or cross-project search response this will return
+ * an array of warning strings for conditions that are only reported per cluster, e.g. a remote cluster
+ * with `skip_unavailable: true` being unreachable or a linked project rejecting the search. These are
+ * warnings rather than errors because Elasticsearch still returns the data of the reachable clusters.
+ * Failures already present in `_shards.failures` are omitted.
+ */
+export const createWarningsFromClusters = ({
+  clusters,
+  shardErrors,
+}: {
+  clusters: estypes.ClusterStatistics | undefined;
+  shardErrors: string[];
+}): string[] => {
+  const details = clusters?.details ?? {};
+  const knownShardErrors = new Set(shardErrors);
+
+  return Object.entries(details).flatMap(([alias, detail]) => {
+    const failures = createErrorsFromShard({ errors: detail.failures ?? [] })
+      .filter((failure) => !knownShardErrors.has(failure))
+      .map(
+        (failure) =>
+          `Cluster "${alias}" is "${detail.status}" and its data may be missing from this rule run: ${failure}`
+      );
+
+    if (failures.length === 0 && (detail.status === 'skipped' || detail.status === 'failed')) {
+      return [
+        `Cluster "${alias}" is "${detail.status}" and its data is missing from this rule run (indices: "${detail.indices}").`,
+      ];
+    }
+
+    return failures;
+  });
+};
+
+/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time

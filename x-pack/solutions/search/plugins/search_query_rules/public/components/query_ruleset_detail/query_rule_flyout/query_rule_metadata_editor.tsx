@@ -15,11 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiPanel,
   EuiSelect,
   EuiText,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldError } from 'react-hook-form';
@@ -46,6 +45,21 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
     setMetadataField(criteria?.metadata ?? '');
   }, [criteria]);
 
+  const metadataTooltipContent = i18n.translate(
+    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
+    {
+      defaultMessage:
+        'Metadata is used to match documents based on their query criteria. Metadata is ignored when the type is set to "always".',
+    }
+  );
+  const valuesTooltipContent = i18n.translate(
+    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
+    {
+      defaultMessage:
+        'Values are used to match documents based on their query criteria. Values are ignored when the type is set to "always".',
+    }
+  );
+
   return (
     <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
       <EuiFlexGroup direction="row">
@@ -63,26 +77,13 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
-                      {
-                        defaultMessage:
-                          'Metadata is used to match documents based on their query criteria. Metadata is ignored when the type is set to "always".',
-                      }
-                    )}
-                  >
-                    <EuiIcon
-                      type="questionInCircle"
-                      color="subdued"
-                      aria-label={i18n.translate(
-                        'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
-                        {
-                          defaultMessage: 'Metadata field tooltip',
-                        }
-                      )}
-                    />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={metadataTooltipContent}
+                    type="question"
+                    color="subdued"
+                    aria-label={metadataTooltipContent}
+                    disableScreenReaderOutput
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -246,26 +247,13 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
-                            {
-                              defaultMessage:
-                                'Values are used to match documents based on their query criteria. Values are ignored when the type is set to "always".',
-                            }
-                          )}
-                        >
-                          <EuiIcon
-                            type="questionInCircle"
-                            color="subdued"
-                            aria-label={i18n.translate(
-                              'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
-                              {
-                                defaultMessage: 'Metadata values tooltip',
-                              }
-                            )}
-                          />
-                        </EuiToolTip>
+                        <EuiIconTip
+                          content={valuesTooltipContent}
+                          type="question"
+                          color="subdued"
+                          aria-label={valuesTooltipContent}
+                          disableScreenReaderOutput
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   }
