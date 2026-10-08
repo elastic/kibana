@@ -69,14 +69,17 @@ export const RootSchemaToggle: React.FC<{ rootName: string; currentPackageName?:
           idSelected={selected ?? ''}
           onChange={onChange}
           buttonSize="compressed"
-          options={options.map((o) => ({
-            id: o.schema,
-            label: `${getSchemaLabel(o.schema)}${
-              o.schema === defaultSchema ? ' (recommended)' : ''
-            }`,
-            isDisabled: !o.child,
-            'data-test-subj': `rootSchemaToggle-${o.schema}`,
-          }))}
+          // Default (recommended) schema first
+          options={[...options]
+            .sort((a, b) => Number(b.schema === defaultSchema) - Number(a.schema === defaultSchema))
+            .map((o) => ({
+              id: o.schema,
+              label: `${getSchemaLabel(o.schema)}${
+                o.schema === defaultSchema ? ' (recommended)' : ''
+              }`,
+              isDisabled: !o.child,
+              'data-test-subj': `rootSchemaToggle-${o.schema}`,
+            }))}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
