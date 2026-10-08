@@ -120,7 +120,7 @@ export function NightshiftOnboarding({
       hint:
         step === 'connect'
           ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Slack, credentials and hints are optional',
+              defaultMessage: 'Credentials, Slack and hints are optional',
             })
           : undefined,
     },

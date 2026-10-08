@@ -44,7 +44,7 @@ const SECRET_PRESETS: SandboxSecretPreset[] = [
   },
 ];
 
-/** Step 1: connect Slack, give the sandbox credentials, and optionally describe the system. */
+/** Step 1: give the sandbox credentials, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
   const { significantEventsApp } = useKibana().services;
   const SlackAppCard = significantEventsApp?.SlackAppCard;
@@ -62,26 +62,12 @@ export function OnboardingConnectStep(): React.ReactElement {
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connect.description', {
             defaultMessage:
-              "Nightshift already sees this deployment's telemetry. Everything below is optional: connect Slack to work with Nightshift from your channels, and add credentials for other tools it should look at.",
+              "Nightshift already sees this deployment's telemetry. Everything below is optional: add credentials for other tools it should look at, and connect Slack to work with Nightshift from your channels.",
           })}
         </p>
       </EuiText>
 
-      {SlackAppCard && (
-        <>
-          <EuiSpacer size="m" />
-          <div data-test-subj="nightshiftOnboardingSlack">
-            <SlackAppCard
-              description={i18n.translate('xpack.nightshift.onboarding.connect.slackDescription', {
-                defaultMessage:
-                  'Get investigation updates in Slack and ask Nightshift for help from a channel.',
-              })}
-            />
-          </div>
-        </>
-      )}
-
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <OptionalSectionTitle
         title={i18n.translate('xpack.nightshift.onboarding.secrets.title', {
           defaultMessage: 'Credentials for your tools',
@@ -99,6 +85,20 @@ export function OnboardingConnectStep(): React.ReactElement {
       <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingSecrets">
         <SandboxSecretsPanel presets={SECRET_PRESETS} />
       </EuiPanel>
+
+      {SlackAppCard && (
+        <>
+          <EuiSpacer size="l" />
+          <div data-test-subj="nightshiftOnboardingSlack">
+            <SlackAppCard
+              description={i18n.translate('xpack.nightshift.onboarding.connect.slackDescription', {
+                defaultMessage:
+                  'Get investigation updates in Slack and ask Nightshift for help from a channel.',
+              })}
+            />
+          </div>
+        </>
+      )}
 
       <OnboardingHintsSection />
     </div>
