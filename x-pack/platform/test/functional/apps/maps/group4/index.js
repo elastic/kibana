@@ -60,7 +60,6 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    loadTestFile(require.resolve('./joins'));
     loadTestFile(require.resolve('./mvt_joins'));
     loadTestFile(require.resolve('./mapbox_styles'));
     loadTestFile(require.resolve('./mvt_scaling'));

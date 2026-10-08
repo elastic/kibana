@@ -27,7 +27,6 @@ export class InspectorPage {
     readonly statisticsTab: Locator;
     readonly requestTab: Locator;
     readonly responseTab: Locator;
-    readonly timestamp: Locator;
     readonly codeViewer: Locator;
   };
 
@@ -46,9 +45,9 @@ export class InspectorPage {
       statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
       requestTab: page.testSubj.locator('inspectorRequestDetailRequest'),
       responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
-      timestamp: page.testSubj.locator('inspector.statistics.requestTimestamp'),
       codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
     };
+
   }
 
   /**
@@ -88,9 +87,20 @@ export class InspectorPage {
     await this.panel.waitFor({ state: 'hidden' });
   }
 
-  async getRequestTimestamp(): Promise<string> {
+  /** Reads the inner text of `statLocator` once the inspector panel is visible. */
+  async getStatistic(statLocator: Locator): Promise<string> {
     await this.panel.waitFor({ state: 'visible' });
-    return this.requests.timestamp.innerText();
+    return statLocator.innerText();
+  }
+
+  /** Reads the "Request timestamp" value from the open inspector's statistics tab. */
+  async getRequestTimestamp(): Promise<string> {
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.requestTimestamp'));
+  }
+
+  /** Reads the "Hits" value from the open inspector's statistics tab. */
+  async getHits(): Promise<string> {
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.hits'));
   }
 
   /**

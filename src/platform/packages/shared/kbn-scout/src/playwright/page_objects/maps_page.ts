@@ -10,6 +10,7 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { DatePicker } from './date_picker';
 import { InspectorPage } from './inspector';
 import { QueryBar } from './query_bar';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
@@ -31,6 +32,7 @@ export class MapsPage {
   public readonly exitFullScreenButton;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly datePicker: DatePicker;
   private readonly queryBar: QueryBar;
   private readonly mapContainer;
   private readonly setViewForm;
@@ -53,6 +55,7 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
+    this.datePicker = new DatePicker(this.page);
     this.queryBar = new QueryBar(this.page);
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.mapContainer = this.page.testSubj.locator('mapContainer');
@@ -297,27 +300,46 @@ export class MapsPage {
   }
 
   /**
-   * Opens the inspector, reads the "Hits" value from the request statistics table,
-   * closes the inspector, and returns it as a string.
+   * Opens the inspector, switches to the Requests view, optionally selects `requestName`,
+   * switches to the statistics tab, calls `getStat` to read a value, closes the inspector,
+   * and returns the result.
    */
-  async getHits(): Promise<string> {
+  private async getRequestStat(
+    getStat: () => Promise<string>,
+    requestName?: string
+  ): Promise<string> {
     await this.inspector.open();
     try {
       await this.inspector.openInspectorRequestsView();
-      await this.inspector.openRequestsStatisticsTab();
-
-      const rows = await this.inspector.getTableData();
-      const hitsRow = rows.find((row) => row[0] === 'Hits');
-      const hits = hitsRow?.[1];
-
-      if (!hits) {
-        throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+      if (requestName) {
+        await this.page.components
+          .comboBox('inspectorRequestChooser')
+          .setSelectedOptions([requestName]);
       }
-
-      return hits;
+      await this.inspector.openRequestsStatisticsTab();
+      return await getStat();
     } finally {
       await this.inspector.close();
     }
+  }
+
+  /**
+   * Opens the inspector, reads "Hits" from the statistics tab of the optionally
+   * selected `requestName`, closes the inspector, and returns the value.
+   */
+  async getHits(requestName?: string): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getHits(), requestName);
+  }
+
+  /**
+   * Opens the inspector, reads "Request timestamp" from the statistics tab of the
+   * optionally selected `requestName`, closes the inspector, and returns the value.
+   */
+  async getRequestTimestamp(requestName?: string): Promise<string> {
+    return this.getRequestStat(
+      () => this.inspector.getRequestTimestamp(),
+      requestName
+    );
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
@@ -376,6 +398,78 @@ export class MapsPage {
     await this.getLayerToggleButton(layerName).click();
     await this.page.testSubj.click('fitToBoundsButton');
     await this.waitForMapPanAndZoom(origView);
+  }
+
+  /** Returns the visible text of the layer's TOC details section (legend content). */
+  async getLayerTOCDetails(layerName: string) {
+    const escapedName = layerName.replace(/\s+/g, '_');
+    return this.page.testSubj.locator(`mapLayerTOCDetails${escapedName}`).innerText();
+  }
+
+  /** Opens the settings panel for the given layer. */
+  async openLayerPanel(layerName: string) {
+    const escapedName = layerName.replace(/\s+/g, '_');
+    await this.getLayerToggleButton(layerName).click();
+    await this.page.testSubj
+      .locator(`layerTocActionsPanel${escapedName}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('layerSettingsButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Closes the currently open layer settings panel. */
+  async closeLayerPanel() {
+    await this.page.testSubj.click('layerPanelCancelButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the layer settings panel for `layerName`, sets a join where-clause
+   * to `query`, submits it, and waits for layers to reload.
+   */
+  async setJoinWhereQuery(layerName: string, query: string) {
+    await this.page.testSubj.click('mapJoinWhereExpressionButton');
+    const queryInput = this.page.locator(
+      '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'
+    );
+    await queryInput.click();
+    await queryInput.fill(query);
+    await this.page.testSubj.click('mapWhereFilterEditorSubmitButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Opens the layer panel for `layerName`, clicks Remove, confirms, and waits for the layer to disappear. */
+  async removeLayer(layerName: string) {
+    await this.openLayerPanel(layerName);
+    await this.page.testSubj.click('mapRemoveLayerButton');
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await expect.poll(() => this.doesLayerExist(layerName), { timeout: 10_000 }).toBe(false);
+  }
+
+  /**
+   * Opens the inspector, switches to Requests view, and returns true when the
+   * "no requests" message is visible (i.e. all layers have been removed).
+   */
+  async doesInspectorHaveRequests() {
+    await this.inspector.open();
+    try {
+      await this.inspector.openInspectorRequestsView();
+      return this.page.testSubj.locator('inspectorNoRequestsMessage').isVisible();
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /**
+   * Starts a 1-second auto-refresh cycle, waits for `refreshInterval` + 50 %
+   * so that at least one refresh fires, then pauses auto-refresh and waits for
+   * layers to finish loading.
+   */
+  async triggerSingleRefresh(refreshInterval: number) {
+    await this.datePicker.startAutoRefresh(1);
+    await this.page.waitForTimeout(refreshInterval + Math.ceil(refreshInterval / 2));
+    await this.datePicker.pauseAutoRefresh();
+    await this.waitForLayersToLoad();
   }
 
   /**
