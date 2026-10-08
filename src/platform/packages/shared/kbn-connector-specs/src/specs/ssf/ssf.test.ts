@@ -8,7 +8,7 @@
  */
 
 import axios from 'axios';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionContext } from '../../connector_spec';
 import { SSF } from './ssf';
 
@@ -19,7 +19,7 @@ describe('SSF', () => {
   const signJwt = jest.fn().mockResolvedValue('signed-set');
   const context: ActionContext = {
     client,
-    log: loggingSystemMock.createLogger(),
+    log: loggerMock.create(),
     getClient: async () => {
       throw new Error('No pooled client is used.');
     },

@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/mcp-client'
   - '@kbn/logging-mocks'
   - '@kbn/repo-info'
-  - '@kbn/core-logging-server-mocks'
 tags:
   - shared-common
   - package

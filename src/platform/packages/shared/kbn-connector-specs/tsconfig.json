@@ -26,6 +26,5 @@
     "@kbn/mcp-client",
     "@kbn/logging-mocks",
     "@kbn/repo-info",
-    "@kbn/core-logging-server-mocks",
   ]
 }
