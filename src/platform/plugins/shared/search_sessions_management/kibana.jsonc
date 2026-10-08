@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-sessions-management-plugin",
+  "owner": [
+    "@elastic/kibana-discover"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "UI for search sessions (background search): the management app, the background searches flyout, and completion notifications.",
+  "plugin": {
+    "id": "searchSessionsManagement",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "data",
+      "management",
+      "share"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

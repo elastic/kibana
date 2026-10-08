@@ -13,7 +13,9 @@ import {
   mergeSyntheticsApiHeaders,
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
+import { getPackagePolicyForMonitor } from '../../../common/fixtures/fleet';
 import { getMonitor, listMonitors, saveMonitorInternal } from '../../../common/fixtures/monitors';
+import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
 const NEW_LOCATION_LABEL = 'Barcelona';
@@ -196,6 +198,79 @@ apiTest.describe(
         '[request body.label]: value has length [0] but it must have a minimum length of [1].'
       );
     });
+
+    apiTest(
+      'changing the agent policy moves the monitor package policies in place',
+      async ({ apiClient, apiServices }) => {
+        const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
+        const { id: newPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Scout move target ${uuidv4()}`
+        );
+        const { config_id: monitorId } = await createMonitor(apiClient, {
+          ...httpMonitorFixture,
+          namespace: 'default',
+          name: `Monitor ${uuidv4()}`,
+          locations: [location],
+        });
+
+        const before = await getPackagePolicyForMonitor(
+          apiClient,
+          editorHeaders,
+          monitorId,
+          location.id
+        );
+        expect(before?.policy_ids).toStrictEqual([location.agentPolicyId]);
+
+        const res = await editPrivateLocation(apiClient, location.id, {
+          agentPolicyId: newPolicyId,
+        });
+        expect((res.body as { agentPolicyId: string }).agentPolicyId).toBe(newPolicyId);
+
+        // The move runs in a one-shot Task Manager task, so poll for it.
+        await tryForTime(60_000, async () => {
+          const policy = await getPackagePolicyForMonitor(
+            apiClient,
+            editorHeaders,
+            monitorId,
+            location.id
+          );
+          expect(policy?.policy_ids).toStrictEqual([newPolicyId]);
+        });
+      }
+    );
+
+    apiTest(
+      'rejects an unknown agent policy and leaves the location unchanged',
+      async ({ apiClient, apiServices }) => {
+        const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
+
+        const res = await editPrivateLocation(
+          apiClient,
+          location.id,
+          { agentPolicyId: 'does-not-exist' },
+          { statusCode: 400 }
+        );
+        expect((res.body as { message: string }).message).toContain('does-not-exist');
+
+        const fetched = await getPrivateLocation(apiClient, location.id);
+        expect(fetched.agentPolicyId).toBe(location.agentPolicyId);
+      }
+    );
+
+    apiTest(
+      'changes the agent policy of a location with no monitors',
+      async ({ apiClient, apiServices }) => {
+        const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
+        const { id: newPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Scout empty move target ${uuidv4()}`
+        );
+
+        await editPrivateLocation(apiClient, location.id, { agentPolicyId: newPolicyId });
+
+        const fetched = await getPrivateLocation(apiClient, location.id);
+        expect(fetched.agentPolicyId).toBe(newPolicyId);
+      }
+    );
 
     apiTest(
       'editing the label in one space propagates across all spaces using the location',

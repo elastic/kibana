@@ -153,6 +153,7 @@ dependsOn:
   - '@kbn/files-plugin'
   - '@kbn/ui-callout'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/projects-solutions-groups'
 tags:
   - plugin
   - prod

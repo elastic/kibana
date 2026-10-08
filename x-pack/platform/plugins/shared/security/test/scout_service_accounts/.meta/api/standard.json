@@ -1,5 +1,5 @@
 {
-  "sha1": "b840194f895993f618f8208fd90dbf55e4a3ba0e",
+  "sha1": "202fe99445eebb44c1db6161333973d65fe57f00",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 1
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 14
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 38
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 130,
+        "line": 131,
         "column": 18
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 155,
+        "line": 156,
         "column": 50
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 175,
+        "line": 176,
         "column": 14
       }
     },
@@ -91,8 +91,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 197,
+        "line": 198,
         "column": 15
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-dff63d0b79a2a8c",
+      "title": "Create Elasticsearch service accounts stores a trimmed description with the account and reports it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 225,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-7c2b0ebc8b4b18f",
+      "title": "Create Elasticsearch service accounts creates the account without a description when the one sent is blank",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 247,
+        "column": 39
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-a25dc2231f9d8da",
+      "title": "Create Elasticsearch service accounts refuses a description longer than 1000 characters without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 271,
+        "column": 9
       }
     },
     {
@@ -104,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 224,
+        "line": 294,
         "column": 9
       }
     },
@@ -117,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 245,
-        "column": 21
+        "line": 321,
+        "column": 57
       }
     },
     {
@@ -130,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 282,
-        "column": 55
+        "line": 370,
+        "column": 38
       }
     },
     {
@@ -143,8 +182,164 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 318,
-        "column": 18
+        "line": 404,
+        "column": 23
+      }
+    },
+    {
+      "id": "8787fdb38dae7c3-0dc849e50be6fb9",
+      "title": "Create Serverless service accounts persists the requested name and roles in UIAM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "8787fdb38dae7c3-e7c91c7f25ad75c",
+      "title": "Create Serverless service accounts persists a trimmed description in UIAM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
+        "line": 70,
+        "column": 16
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-313c2fa6cc12914",
+      "title": "Delete Elasticsearch service accounts deletes an unbound account along with the credential Kibana stored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 119,
+        "column": 25
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-4768e64f045b5e6",
+      "title": "Delete Elasticsearch service accounts deletes tokens Kibana did not mint, so the name can be used again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 151,
+        "column": 47
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-0ee0925c13ee04a",
+      "title": "Delete Elasticsearch service accounts refuses to delete a bound account unless forced, and lists what is bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 180,
+        "column": 16
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-16994f72b8a29a1",
+      "title": "Delete Elasticsearch service accounts answers 404 for an account that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 239,
+        "column": 20
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-bdf81e1593290fa",
+      "title": "Delete Elasticsearch service accounts refuses a caller without `manage_security`, and leaves the account in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 245,
+        "column": 28
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-3b374fe665f990c",
+      "title": "Delete Elasticsearch service accounts does not let an account created again under the same name run the old one’s workloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 267,
+        "column": 14
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-9b80c5738fc56d3",
+      "title": "Delete Elasticsearch service accounts deletes the tokens a forced delete left behind, so the name can be used again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 295,
+        "column": 28
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-fd0c5c8cf8c6fcf",
+      "title": "Delete Elasticsearch service accounts stops access tokens issued before the delete from authenticating",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 349,
+        "column": 1
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-c5a2bfc6a2f1a52",
+      "title": "Delete Elasticsearch service accounts invalidates the access tokens of an account deleted straight through Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 362,
+        "column": 97
+      }
+    },
+    {
+      "id": "320b8d0e2550e77-e826d0dd66c01d8",
+      "title": "Delete Elasticsearch service accounts refuses to create an account while tokens are left over from one with the same name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
+        "line": 383,
+        "column": 16
       }
     },
     {
@@ -247,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 1
       }
     },
@@ -260,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 24
       }
     },
@@ -273,7 +468,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 178,
+        "line": 179,
         "column": 7
       }
     },
@@ -286,7 +481,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 184,
+        "line": 185,
+        "column": 22
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-f0c584bc6328dfe",
+      "title": "List and get Elasticsearch service accounts reports the description of an account, whether Kibana or Elasticsearch wrote it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 199,
         "column": 22
       }
     },
@@ -299,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 198,
-        "column": 22
+        "line": 252,
+        "column": 14
       }
     },
     {
@@ -312,8 +520,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 257,
-        "column": 15
+        "line": 316,
+        "column": 25
       }
     },
     {
@@ -325,7 +533,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 272,
+        "line": 325,
         "column": 9
       }
     },
@@ -338,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 281,
-        "column": 18
+        "line": 339,
+        "column": 20
       }
     },
     {
@@ -351,8 +559,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 335,
-        "column": 40
+        "line": 389,
+        "column": 23
       }
     },
     {

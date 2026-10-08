@@ -21,7 +21,7 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alert episodes for v2 alerts',
+      title: 'Failed to fetch alerts for v2 alerts',
     });
   });
 
@@ -32,7 +32,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alert episodes for v1 alerts',
+      title: 'Failed to fetch alerts for v1 alerts',
     });
   });
 
@@ -73,7 +73,7 @@ describe('useToastSourceErrors', () => {
   });
 
   it.each<[EpisodeFetchErrorSurface, string]>([
-    ['list', 'Failed to fetch alert episodes for custom alerts'],
+    ['list', 'Failed to fetch alerts for custom alerts'],
     ['kpis', 'Failed to fetch KPIs for custom alerts'],
     ['histogram', 'Failed to fetch histogram data for custom alerts'],
   ])('names a custom source on the %s surface', (surface, expectedTitle) => {

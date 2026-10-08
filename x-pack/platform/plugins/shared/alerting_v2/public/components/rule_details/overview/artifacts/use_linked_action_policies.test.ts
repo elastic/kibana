@@ -22,7 +22,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `CoreStart(${key})`,
 }));
 
-const RULE_TAGS = ['prod'];
+const ROUTING_TAGS = ['prod'];
 
 const buildItem = (
   category: MatchedActionPolicy['category'],
@@ -36,7 +36,7 @@ const buildItem = (
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
     group_by: null,
-    grouping_mode: 'per_episode',
+    grouping_mode: 'per_alert',
     throttle: null,
     snoozed_until: null,
     created_by: { profile_uid: 'u_user' },
@@ -94,10 +94,13 @@ describe('useLinkedActionPolicies', () => {
     });
   });
 
-  it('delegates to useMatchedActionPolicies with the injected http contract and tags', () => {
-    renderHook(() => useLinkedActionPolicies(RULE_TAGS));
+  it('delegates to useMatchedActionPolicies with the injected http contract and routing tags', () => {
+    renderHook(() => useLinkedActionPolicies(ROUTING_TAGS));
 
-    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
+    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({
+      http: mockHttp,
+      routingTags: ROUTING_TAGS,
+    });
   });
 
   it('returns matched items sorted matching-criteria first', () => {
@@ -113,7 +116,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
+    const { result } = renderHook(() => useLinkedActionPolicies(ROUTING_TAGS));
 
     expect(result.current.items.map((item) => item.action_policy.id)).toEqual([
       'filtered-1',
@@ -134,7 +137,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: true,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
+    const { result } = renderHook(() => useLinkedActionPolicies(ROUTING_TAGS));
 
     expect(result.current.items).toHaveLength(1);
     expect(result.current.evaluatedCount).toBe(2);
@@ -170,7 +173,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
+    const { result } = renderHook(() => useLinkedActionPolicies(ROUTING_TAGS));
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -185,7 +188,7 @@ describe('useLinkedActionPolicies', () => {
       isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
+    const { result } = renderHook(() => useLinkedActionPolicies(ROUTING_TAGS));
 
     expect(result.current.isError).toBe(true);
     expect(result.current.error?.message).toBe('network error');
