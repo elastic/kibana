@@ -8,7 +8,7 @@
 import type { EntitySummaryStalenessEntitySnapshot } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { EntityRiskScore, RiskStats } from '../../../../common/search_strategy';
+import type { EntityRiskScore, RiskSeverity, RiskStats } from '../../../../common/search_strategy';
 import type { EntityStoreRecord } from './hooks/use_entity_from_store';
 
 export function getRiskFromEntityRecord(record: EntityStoreRecord): {
@@ -17,6 +17,38 @@ export function getRiskFromEntityRecord(record: EntityStoreRecord): {
   calculated_score_norm?: number;
 } | null {
   return getRiskFromRecord(record);
+}
+
+/** Resolution-group risk stored on the entity record, when a normalized score is present. */
+export function getResolutionRiskFromEntityRecord(record: EntityStoreRecord): {
+  calculated_level?: string;
+  calculated_score?: number;
+  calculated_score_norm?: number;
+} | null {
+  const resolutionRisk = record.entity?.relationships?.resolution?.risk;
+  if (typeof resolutionRisk?.calculated_score_norm !== 'number') {
+    return null;
+  }
+
+  return {
+    calculated_level: resolutionRisk.calculated_level,
+    calculated_score: resolutionRisk.calculated_score,
+    calculated_score_norm: resolutionRisk.calculated_score_norm,
+  };
+}
+
+/** Header badge level: the resolution-group level when the flag prefers it and a group score exists. */
+export function getHeaderRiskLevel(
+  record: EntityStoreRecord | null | undefined,
+  preferResolutionRisk: boolean
+): RiskSeverity | undefined {
+  if (!record) {
+    return undefined;
+  }
+
+  const resolutionRisk = preferResolutionRisk ? getResolutionRiskFromEntityRecord(record) : null;
+  const risk = resolutionRisk ?? getRiskFromEntityRecord(record);
+  return (risk?.calculated_level ?? 'Unknown') as RiskSeverity;
 }
 
 /** Current entity signals used for AI summary staleness checks. */

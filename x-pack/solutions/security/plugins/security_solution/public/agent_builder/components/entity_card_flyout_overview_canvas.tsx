@@ -24,7 +24,6 @@ import {
   buildUserNamesFilter,
   EntityType as SearchEntityType,
   type EntityRiskScore,
-  type RiskSeverity,
   type RiskStats,
 } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
@@ -34,8 +33,10 @@ import { useObservedHost } from '../../flyout_v2/entity/host/main/hooks/use_obse
 import { EntityType } from '../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
+  getHeaderRiskLevel,
   getRiskFromEntityRecord,
 } from '../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import {
@@ -412,6 +413,9 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = getHeaderRiskLevel(observedHost.entityRecord, isNewEntityAnalyticsPage);
+
   return (
     <>
       <FlyoutHeader>
@@ -421,12 +425,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
           entityId={panelDisplayEntityId}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
-          riskLevel={
-            observedHost.entityRecord
-              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-                  'Unknown') as RiskSeverity)
-              : undefined
-          }
+          riskLevel={headerRiskLevel}
         />
       </FlyoutHeader>
       <FlyoutBody>
@@ -725,6 +724,12 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = getHeaderRiskLevel(
+    entityFromStoreResult.entityRecord,
+    isNewEntityAnalyticsPage
+  );
+
   return (
     <>
       <UserPanelHeader
@@ -734,12 +739,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
         entityId={panelDisplayEntityId}
         identityFields={documentEntityIdentifiers}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={
-          entityFromStoreResult.entityRecord
-            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
+        riskLevel={headerRiskLevel}
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
@@ -984,6 +984,12 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = getHeaderRiskLevel(
+    entityFromStoreResult.entityRecord,
+    isNewEntityAnalyticsPage
+  );
+
   if (observedService.isLoading) {
     return <FlyoutLoading />;
   }
@@ -994,12 +1000,8 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={
-          entityFromStoreResult.entityRecord
-            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
+        entityId={entityStoreEntityId}
+        riskLevel={headerRiskLevel}
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (

@@ -29,6 +29,7 @@ import type { ManagedUserData } from '../../../../flyout/entity_details/shared/h
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { useResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/components/use_resolved_from_record_count';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 
 export interface HeaderProps {
@@ -70,6 +71,7 @@ export const Header = ({
   const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
+  const resolvedFromCount = useResolvedFromRecordCount(entityId);
   const lastSeenDate = useMemo(
     () =>
       max(
@@ -155,6 +157,7 @@ export const Header = ({
                   <EntitySourceBadge
                     isEntityInStore={!!isEntityInStore}
                     hasLastSeenDate={!!observedUserLastSeenDate}
+                    resolvedFromCount={resolvedFromCount}
                     data-test-subj="user-panel-header-observed-badge"
                   />
                 </EuiFlexItem>

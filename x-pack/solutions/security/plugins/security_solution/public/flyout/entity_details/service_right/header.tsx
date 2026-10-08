@@ -18,12 +18,15 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { EntitySourceBadge } from '../shared/components/entity_source_badge';
+import { useResolvedFromRecordCount } from '../shared/components/use_resolved_from_record_count';
 import { RiskLevelBadge } from '../shared/components/risk_level_badge';
 
 interface ServicePanelHeaderProps {
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   isEntityInStore?: boolean;
+  /** Entity Store id used to look up the resolution group. */
+  entityId?: string;
   riskLevel?: RiskSeverity;
   /**
    * Overrides forwarded to the underlying {@link FlyoutHeader} (e.g. `css` / `panelProps` for
@@ -36,9 +39,11 @@ export const ServicePanelHeader = ({
   serviceName,
   observedService,
   isEntityInStore,
+  entityId,
   riskLevel,
   flyoutHeaderProps,
 }: ServicePanelHeaderProps) => {
+  const resolvedFromCount = useResolvedFromRecordCount(entityId);
   const lastSeenDate = useMemo(
     () => observedService.lastSeen.date && new Date(observedService.lastSeen.date),
     [observedService.lastSeen]
@@ -70,6 +75,7 @@ export const ServicePanelHeader = ({
               <EntitySourceBadge
                 isEntityInStore={!!isEntityInStore}
                 hasLastSeenDate={!!observedService.lastSeen.date}
+                resolvedFromCount={resolvedFromCount}
                 data-test-subj="service-panel-header-observed-badge"
               />
             </EuiFlexItem>

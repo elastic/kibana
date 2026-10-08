@@ -17,7 +17,7 @@ import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/ap
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
@@ -36,8 +36,9 @@ import { useManagedUser } from '../../../../flyout/entity_details/shared/hooks/u
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
-  getRiskFromEntityRecord,
+  getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -418,10 +419,8 @@ export const User: FC<UserProps> = memo(function User({
     ]
   );
 
-  const riskLevel = observedUser.entityRecord
-    ? ((getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level ??
-        'Unknown') as RiskSeverity)
-    : undefined;
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, isNewEntityAnalyticsPage);
 
   return (
     <>

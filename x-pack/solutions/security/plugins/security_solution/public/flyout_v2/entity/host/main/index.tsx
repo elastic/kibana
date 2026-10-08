@@ -17,7 +17,7 @@ import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/ap
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -34,8 +34,9 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
-  getRiskFromEntityRecord,
+  getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -399,10 +400,8 @@ export const Host: FC<HostProps> = memo(function Host({
     ]
   );
 
-  const riskLevel = observedHost.entityRecord
-    ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-        'Unknown') as RiskSeverity)
-    : undefined;
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const riskLevel = getHeaderRiskLevel(observedHost.entityRecord, isNewEntityAnalyticsPage);
 
   return (
     <>

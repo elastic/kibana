@@ -12,7 +12,7 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
+import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
@@ -33,7 +33,8 @@ import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../common/utils/execution_context';
-import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
+import { getHeaderRiskLevel } from '../shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
@@ -191,6 +192,12 @@ export const ServicePanel = memo(function ServicePanel({
     />
   ) : undefined;
 
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = getHeaderRiskLevel(
+    entityFromStoreResult.entityRecord,
+    isNewEntityAnalyticsPage
+  );
+
   if (observedService.isLoading) {
     return <FlyoutLoading />;
   }
@@ -207,12 +214,8 @@ export const ServicePanel = memo(function ServicePanel({
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={
-          entityFromStoreResult.entityRecord
-            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
+        entityId={entityStoreEntityId}
+        riskLevel={headerRiskLevel}
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
