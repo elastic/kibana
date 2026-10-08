@@ -117,8 +117,8 @@ const RulesPageContent = () => {
           {isRuleSettingsModalOpen && canAccessRuleSettings && (
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}
-          <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
+          <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           {deprecatedRulesCallout}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
