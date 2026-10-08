@@ -41,6 +41,8 @@ export interface PackageDependency {
 
 export interface PackageRequires {
   content?: PackageDependency[];
+  /** Prototype: typed so root tiles can hide a child's input package deps. */
+  input?: PackageDependency[];
   /** Root packages only (prototype): child integration packages a schema resolves to. */
   integration?: PackageDependency[];
 }
