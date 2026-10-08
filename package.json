@@ -568,6 +568,7 @@
     "@kbn/core-theme-browser": "workspace:*",
     "@kbn/core-theme-browser-internal": "workspace:*",
     "@kbn/core-theme-browser-internal-types": "workspace:*",
+    "@kbn/core-threads-server-internal": "workspace:*",
     "@kbn/core-ui-settings-browser": "workspace:*",
     "@kbn/core-ui-settings-browser-internal": "workspace:*",
     "@kbn/core-ui-settings-common": "workspace:*",

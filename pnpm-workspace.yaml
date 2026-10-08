@@ -523,6 +523,7 @@ packages:
   - 'src/core/packages/theme/browser-internal'
   - 'src/core/packages/theme/browser-internal-types'
   - 'src/core/packages/theme/browser-mocks'
+  - 'src/core/packages/threads/server-internal'
   - 'src/core/packages/ui-settings/browser'
   - 'src/core/packages/ui-settings/browser-internal'
   - 'src/core/packages/ui-settings/browser-mocks'

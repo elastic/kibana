@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  EluTerm,
-  type MetricsServiceSetupDeps,
-  type InternalMetricsServiceStart,
-  type InternalMetricsServiceSetup,
-  MetricsService,
-} from './src/metrics_service';
-export { opsConfig, type OpsConfigType } from './src/ops_config';
-export {
-  EventLoopWatchdogService,
-  EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
-  type EventLoopWatchdogSetupDeps,
-  type EventLoopWatchdogStartDeps,
-} from './src/event_loop_watchdog';
+// Worker threads start without Kibana's require hooks: set up the node env (TS transpilation
+// when running from source) before loading the watchdog worker.
+if (process.env.NODE_ENV !== 'production') {
+  require('@kbn/setup-node-env');
+} else {
+  require('@kbn/setup-node-env/dist');
+}
+
+require('./worker');
