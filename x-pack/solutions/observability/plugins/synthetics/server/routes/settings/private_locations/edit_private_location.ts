@@ -283,8 +283,9 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             ? await getPrivateLocations(savedObjectsClient)
             : [];
 
-        // A redeploy regenerates the package policies with the new label anyway.
-        if (isLabelChanged && !isAgentPolicyChanged) {
+        // Runs before any redeploy: it is the only step that rewrites the label stored
+        // on the monitor saved objects, and a failure here must abort before Fleet is touched.
+        if (isLabelChanged) {
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel,

@@ -321,12 +321,21 @@ describe('editPrivateLocationRoute agent policy change', () => {
     expect(edit).not.toHaveBeenCalled();
   });
 
-  it('skips the in-place label rewrite when the agent policy changes too', async () => {
+  it('rewrites the monitor label before redeploying when label and agent policy change together', async () => {
     const { routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
 
     await editPrivateLocationRoute().handler(routeContext);
 
-    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        newLocationLabel: 'Barcelona',
+        monitorsInLocation: monitors,
+        allPrivateLocations: [
+          expect.objectContaining({ label: 'Barcelona', agentPolicyId: 'ap-1' }),
+        ],
+      })
+    );
     expect(redeployPrivateLocationMonitors).toHaveBeenCalledWith(
       expect.objectContaining({
         allPrivateLocations: [
@@ -334,6 +343,18 @@ describe('editPrivateLocationRoute agent policy change', () => {
         ],
       })
     );
+    expect((updatePrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (redeployPrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not redeploy or persist when the monitor label rewrite throws', async () => {
+    const { edit, routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
+    (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
+
+    await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
+    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(edit).not.toHaveBeenCalled();
   });
 
   it('persists the new agent policy and reports monitors that failed to redeploy', async () => {
