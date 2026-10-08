@@ -9179,6 +9179,9 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
+  '@elastic/kibana-d3-color@2.0.1':
+    resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
+
   '@elastic/makelogs@6.1.1':
     resolution: {integrity: sha512-cmfXFQITwyT4SV+Ryerg/vVbGQ9E2BhYKQ9flG85Ba3blGVmOjkgv7TYQam6xAIvGXFGBBrcyqEwmuw7xZ5ZNQ==}
     hasBin: true
@@ -25003,6 +25006,8 @@ snapshots:
       - react-native
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/kibana-d3-color@2.0.1': {}
 
   '@elastic/makelogs@6.1.1':
     dependencies:
