@@ -11,10 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '@kbn/scout';
 import { GeoFileUploadPage } from '../fixtures/geo_file_upload';
 
-const GEOJSON_FILE = path.join(
-  __dirname,
-  '../fixtures/files/world_countries_v7.geo.json'
-);
+const GEOJSON_FILE = path.join(__dirname, '../fixtures/files/world_countries_v7.geo.json');
 
 test.describe(
   'Maps - geojson file upload',

@@ -36,7 +36,7 @@ test.describe(
       await kbnClient.savedObjects.cleanStandardList();
     });
 
-    test('layer with joins', async ({ browserAuth, page, pageObjects }) => {
+    test('layer with joins', async ({ browserAuth, pageObjects }) => {
       const { maps } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
@@ -74,11 +74,7 @@ test.describe(
 
         mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.forEach(
           ({ properties }: { properties: Record<string, unknown> }) => {
-            if (properties.name === 'tango') {
-              expect(Object.hasOwn(properties, JOIN_PROPERTY_NAME)).toBe(false);
-            } else {
-              expect(Object.hasOwn(properties, JOIN_PROPERTY_NAME)).toBe(true);
-            }
+            expect(Object.hasOwn(properties, JOIN_PROPERTY_NAME)).toBe(properties.name !== 'tango');
             expect(properties[JOIN_PROPERTY_NAME]).toBe(
               EXPECTED_JOIN_VALUES[properties.name as string]
             );
@@ -95,7 +91,7 @@ test.describe(
             feature.properties.__kbn_isvisibleduetojoin__
         );
 
-        expect(visibilitiesOfFeatures).toEqual([
+        expect(visibilitiesOfFeatures).toStrictEqual([
           false,
           true,
           true,
@@ -147,7 +143,7 @@ test.describe(
           (feature: { properties: Record<string, unknown> }) =>
             feature.properties.__kbn_isvisibleduetojoin__
         );
-        expect(visibilitiesOfFeatures).toEqual([
+        expect(visibilitiesOfFeatures).toStrictEqual([
           false,
           true,
           false,
@@ -164,11 +160,8 @@ test.describe(
 
       await test.step('should not contain any elasticsearch request after layer is deleted', async () => {
         await maps.removeLayer('geo_shapes*');
-        await expect
-          .poll(() => maps.doesInspectorHaveRequests(), { timeout: 30_000 })
-          .toBe(true);
+        await expect.poll(() => maps.doesInspectorHaveRequests(), { timeout: 30_000 }).toBe(true);
       });
-
     });
   }
 );

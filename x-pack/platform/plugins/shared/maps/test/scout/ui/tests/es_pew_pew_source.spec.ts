@@ -43,7 +43,7 @@ test.describe(
             const features = mapboxStyle.sources[VECTOR_SOURCE_ID]?.data?.features;
             return { count: features.length, type: features[0]?.geometry.type };
           })
-          .toEqual({ count: 4, type: 'LineString' });
+          .toStrictEqual({ count: 4, type: 'LineString' });
       });
 
       await test.step('should fit to bounds', async () => {
@@ -55,7 +55,7 @@ test.describe(
             const { lat, lon } = await pageObjects.maps.getView();
             return { lat: Math.round(lat), lon: Math.round(lon) };
           })
-          .toEqual({ lat: 41, lon: -70 });
+          .toStrictEqual({ lat: 41, lon: -70 });
       });
     });
   }
