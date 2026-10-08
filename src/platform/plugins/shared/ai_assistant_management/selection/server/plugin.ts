@@ -92,9 +92,7 @@ export class AIAssistantManagementSelectionPlugin
             const [, startServices] = await core.getStartServices();
             // Avoid security exceptions before login - only check space when authenticated
             if (startServices.spaces && request?.auth.isAuthenticated) {
-              const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
-                request
-              );
+              const activeSpace = await startServices.spaces.spacesService.getActiveSpace(request);
               const solution = activeSpace?.solution;
               if (
                 solution === 'es' ||

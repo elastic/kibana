@@ -46,15 +46,13 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     });
 
     expect(project).toEqual(
-      ['security', 'elasticsearch', 'observability', 'vectordb'].map(
-        (projectType) => ({
-          role_id: `${projectType}-application-only`,
-          organization_id: organizationId,
-          project_type: projectType,
-          application_roles: ['viewer', 'editor'],
-          project_scope: { scope: 'all' },
-        })
-      )
+      ['security', 'elasticsearch', 'observability', 'vectordb'].map((projectType) => ({
+        role_id: `${projectType}-application-only`,
+        organization_id: organizationId,
+        project_type: projectType,
+        application_roles: ['viewer', 'editor'],
+        project_scope: { scope: 'all' },
+      }))
     );
   });
 

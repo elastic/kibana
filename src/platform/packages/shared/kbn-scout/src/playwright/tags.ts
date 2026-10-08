@@ -76,12 +76,7 @@ export const tags = {
      * All serverless project types
      */
     get all(): string[] {
-      return [
-        ...this.search,
-        ...this.observability.all,
-        ...this.security.all,
-        ...this.vectordb,
-      ];
+      return [...this.search, ...this.observability.all, ...this.security.all, ...this.vectordb];
     },
   },
 
