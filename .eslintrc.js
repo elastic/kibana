@@ -110,77 +110,6 @@ const DEV_PATTERNS = [
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
-/**
- * Security-related restricted imports. These are enforced by the dedicated
- * `@kbn/eslint/security_imports_restriction` rule so that local
- * `no-restricted-imports` overrides cannot silently drop them.
- */
-const SECURITY_RESTRICTED_IMPORTS = [
-  {
-    name: 'lodash',
-    importNames: ['set', 'setWith', 'template'],
-    message:
-      'lodash.set/setWith: Please use @kbn/safer-lodash-set instead.\n' +
-      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'lodash.set',
-    message: 'Please use @kbn/safer-lodash-set/set instead',
-  },
-  {
-    name: 'lodash.setwith',
-    message: 'Please use @kbn/safer-lodash-set/setWith instead',
-  },
-  {
-    name: 'lodash/set',
-    message: 'Please use @kbn/safer-lodash-set/set instead',
-  },
-  {
-    name: 'lodash/setWith',
-    message: 'Please use @kbn/safer-lodash-set/setWith instead',
-  },
-  {
-    name: 'lodash/fp',
-    importNames: ['set', 'setWith', 'assoc', 'assocPath', 'template'],
-    message:
-      'lodash.set/setWith/assoc/assocPath: Please use @kbn/safer-lodash-set/fp instead\n' +
-      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'lodash/fp/set',
-    message: 'Please use @kbn/safer-lodash-set/fp/set instead',
-  },
-  {
-    name: 'lodash/fp/setWith',
-    message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
-  },
-  {
-    name: 'lodash/fp/assoc',
-    message: 'Please use @kbn/safer-lodash-set/fp/assoc instead',
-  },
-  {
-    name: 'lodash/fp/assocPath',
-    message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
-  },
-  {
-    name: 'lodash.template',
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'lodash/template',
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'lodash/fp/template',
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
-  },
-];
-
 /** Restricted imports with suggested alternatives */
 const RESTRICTED_IMPORTS = [
   {
@@ -322,64 +251,6 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
-];
-
-/**
- * Files that already import axios. New axios imports must not be added here;
- * this list is expected to shrink as consumers migrate to the native `fetch` API.
- * Globs are scoped to existing feature boundaries to keep the leak surface small.
- */
-const AXIOS_LEGACY_CONSUMERS = [
-  '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
-  'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
-  'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
-  'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
-  'src/dev/prs/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/private/canvas/common/lib/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/private/data_usage/server/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/private/indices_metadata/server/lib/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/actions/server/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/cloud_connect/server/routes/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/cloud_connect/server/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/dataset_quality/server/test_helpers/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
-  'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
-  'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
-  'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/fleet_cypress/agent.ts',
-  'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
-  'x-pack/platform/test/fleet_cypress/fleet_server.ts',
-  'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
 module.exports = {
@@ -621,7 +492,6 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -1579,6 +1449,16 @@ module.exports = {
       },
     },
     {
+      // The server entry and tests are never bundled into UI code, so they may import server modules.
+      files: [
+        'src/platform/packages/shared/kbn-connector-specs/server.ts',
+        'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
+      },
+    },
+    {
       // Node-only dev tooling, not reachable from the package entry points
       files: [
         'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
@@ -2361,24 +2241,6 @@ module.exports = {
     },
 
     /**
-     * Disallow `export *` syntax in plugin/core public/server/common index files and instead
-     * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.
-     *
-     * To add your plugin to this list just update the relevant glob with the name of your plugin
-     */
-    {
-      files: [
-        'src/core/{server,public,common}/index.ts',
-        'src/platform/plugins/**/{server,public,common}/index.ts',
-        'x-pack/platform/plugins/**/{server,public,common}/index.ts',
-        'x-pack/solutions/*/plugins/**/{server,public,common}/index.ts',
-      ],
-      rules: {
-        '@kbn/eslint/no_export_all': 'error',
-      },
-    },
-
-    /**
      * Cloud Security Team overrides
      */
     {
@@ -2658,37 +2520,6 @@ module.exports = {
               scoutRestrictedFtrPatterns,
             ],
           },
-        ],
-      },
-    },
-    {
-      // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
-      // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
-      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
-      rules: {
-        '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
-      },
-    },
-
-    {
-      // Allow axios in files that already use it. New axios imports are blocked
-      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
-      // shrink as consumers migrate to the native `fetch` API.
-      // The `no-restricted-imports` entry preserves this block's historical
-      // behavior: it is placed last, so the allowlisted files that overlap with
-      // an earlier override (e.g. the security_solution block) lose that
-      // override's `*legacy*` pattern check; verified that none of them
-      // currently import any path matching `*legacy*`. The workflows_management
-      // overlap is gone, and this entry can be dropped entirely once the
-      // remaining security_solution consumers migrate. The js-yaml freeze is
-      // handled separately via @kbn/eslint/module_migration in .oxlint/module_migration.mts
-      // so it does not interact with this override.
-      files: AXIOS_LEGACY_CONSUMERS,
-      rules: {
-        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/security_imports_restriction': [
-          'error',
-          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

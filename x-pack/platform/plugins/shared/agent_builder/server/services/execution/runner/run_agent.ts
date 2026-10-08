@@ -82,6 +82,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     manager,
     experimentalFeatures,
     workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    persistWorkspace: manager.deps.conversationAccess === 'readWrite',
     spaceId,
   });
 
@@ -140,6 +141,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     executionMode: manager.deps.executionMode,
     interactivity: manager.deps.interactivity,
     parentExecutionId: manager.deps.parentExecutionId,
+    conversationAccess: manager.deps.conversationAccess,
     subAgentExecutor: manager.deps.subAgentExecutor,
     agentRegistry,
     conversationClient,
@@ -160,9 +162,31 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
-  const { agentsService, request } = parentManager.deps;
-  const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
+  const { agentsService, request, modelProvider } = parentManager.deps;
+
+  const resolveAgent = async () => {
+    const agentRegistry = await agentsService.getRegistry({ request });
+    const resolvedAgent = await agentRegistry.get(agentId, { access: 'use' });
+    // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+    const agentWithOverrides = {
+      ...resolvedAgent,
+      configuration: {
+        ...resolvedAgent.configuration,
+        ...(agentParams.configurationOverrides || {}),
+      },
+    };
+    const configuration = await agentsService.resolveAgentConfiguration({
+      agent: agentWithOverrides,
+      request,
+    });
+    return { agent: resolvedAgent, effectiveConfiguration: configuration };
+  };
+
+  const [{ agent, effectiveConfiguration }, { chatModel }] = await Promise.all([
+    resolveAgent(),
+    modelProvider.getDefaultModel(),
+  ]);
+  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
@@ -176,23 +200,7 @@ export const runAgent = async ({
     }),
   });
   const manager = parentManager.createChild(forkedContext);
-
-  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
-  const agentWithOverrides = {
-    ...agent,
-    configuration: {
-      ...agent.configuration,
-      ...(agentParams.configurationOverrides || {}),
-    },
-  };
-  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
-    agent: agentWithOverrides,
-    request,
-  });
   manager.deps.agentConfiguration = effectiveConfiguration;
-
-  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
-  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const agentResult = await withAgentSpan(
     { agent, conversationId: agentParams.conversation?.id, providerName },
