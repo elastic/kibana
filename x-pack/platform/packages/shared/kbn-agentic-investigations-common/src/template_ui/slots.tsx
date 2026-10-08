@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
@@ -15,11 +14,17 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -34,11 +39,7 @@ interface InvestigationSlotProps {
 }
 
 export interface OverviewSlotProps extends InvestigationSlotProps {
-  /**
-   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
-   * attachment registry cannot be reached from ambient context.
-   */
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
@@ -50,14 +51,14 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
 
 export const OverviewSlot = ({
   conversation,
-  attachmentsService,
+  groupedAttachments,
   renderProposedActions,
   renderProposedActionsCount,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
-    attachmentsService={attachmentsService}
+    groupedAttachments={groupedAttachments}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
     proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
   />
@@ -136,12 +137,14 @@ export interface EscalationHeaderSlotProps {
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSyncIndicator,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -173,6 +176,7 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };

@@ -13,7 +13,7 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from './operations/panels/markdown';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
@@ -179,7 +179,7 @@ describe('executeDashboardOperations', () => {
           {
             source: 'config',
             type: 'markdown',
-            config: { content: '### Updated summary' },
+            config: { content: '### Updated summary', settings: { open_links_in_new_tab: true } },
             grid: { x: 0, y: 9, w: 48, h: 5 },
           },
         ],
@@ -279,7 +279,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Summary' },
+              config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -333,7 +333,7 @@ describe('executeDashboardOperations', () => {
     expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Summary' },
+        config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
       }),
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
@@ -463,7 +463,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: 'Summary' },
+              config: { content: 'Summary', settings: { open_links_in_new_tab: true } },
               sectionId: 'overview',
               grid: { x: 0, y: 9, w: 48, h: 5 },
             },
@@ -490,7 +490,10 @@ describe('executeDashboardOperations', () => {
       expect(existing.panels).toEqual([]);
       expect(overview.panels).toEqual([
         topPanel,
-        expect.objectContaining({ type: MARKDOWN_EMBEDDABLE_TYPE, config: { content: 'Summary' } }),
+        expect.objectContaining({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: 'Summary', settings: { open_links_in_new_tab: true } },
+        }),
       ]);
       expect(details.panels).toEqual([
         { ...nestedPanel, grid: { x: 0, y: 2, w: 48, h: 8 } },
@@ -782,7 +785,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Section Summary' },
+              config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -802,7 +805,7 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Section Summary' },
+        config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
       }),
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
@@ -1167,7 +1170,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
-              config: { content: '### Section Summary' },
+              config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
               grid: { x: 0, y: 0, w: 24, h: 4 },
               sectionId: 'section-a',
             },
@@ -1183,7 +1186,7 @@ describe('executeDashboardOperations', () => {
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: '### Section Summary' },
+        config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
         grid: { x: 0, y: 0, w: 24, h: 4 },
       }),
     ]);
@@ -1963,7 +1966,10 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
-                config: { content: '### Updated summary' },
+                config: {
+                  content: '### Updated summary',
+                  settings: { open_links_in_new_tab: true },
+                },
               },
             ],
           },
@@ -1980,7 +1986,7 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           id: 'md-1',
           type: MARKDOWN_EMBEDDABLE_TYPE,
-          config: { content: '### Updated summary' },
+          config: { content: '### Updated summary', settings: { open_links_in_new_tab: true } },
           grid: { x: 0, y: 0, w: 48, h: 5 },
         })
       );
@@ -2006,7 +2012,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'panel-1',
-                config: { content: 'new text' },
+                config: { content: 'new text', settings: { open_links_in_new_tab: true } },
               },
             ],
           },
@@ -2445,7 +2451,7 @@ describe('executeDashboardOperations', () => {
                 source: 'config',
                 type: 'markdown',
                 panelId: 'md-1',
-                config: { content: '### New summary' },
+                config: { content: '### New summary', settings: { open_links_in_new_tab: true } },
               },
               {
                 source: 'request',
@@ -2478,7 +2484,7 @@ describe('executeDashboardOperations', () => {
       expect(topLevelPanels[0]).toEqual(
         expect.objectContaining({
           id: 'md-1',
-          config: { content: '### New summary' },
+          config: { content: '### New summary', settings: { open_links_in_new_tab: true } },
         })
       );
       expect(topLevelPanels[1]).toEqual(
@@ -2502,7 +2508,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'config',
                 type: 'markdown',
-                config: { content: '### Summary' },
+                config: { content: '### Summary', settings: { open_links_in_new_tab: true } },
                 grid: { x: 0, y: 0, w: 48, h: 5 },
                 sectionId: 'nonexistent-section',
               },
