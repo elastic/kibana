@@ -40,6 +40,57 @@ describe('FatalErrorsService', () => {
     fatalErrorsSetup = fatalErrorsService.setup({ analytics, injectedMetadata, i18n, theme });
   });
 
+  describe('unhandled rejections', () => {
+    const dispatchRejection = (reason: unknown) => {
+      // jsdom does not emit `unhandledrejection` for real rejected promises, so the event the
+      // service listens for is dispatched directly.
+      const event = new Event('unhandledrejection', { cancelable: true }) as Event & {
+        reason?: unknown;
+      };
+      event.reason = reason;
+      window.dispatchEvent(event);
+      return event;
+    };
+
+    let consoleLog: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleLog.mockRestore();
+    });
+
+    it('reports an ordinary rejection', () => {
+      const event = dispatchRejection(new Error('something went wrong'));
+
+      expect(consoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Detected an unhandled Promise rejection')
+      );
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it('ignores a cancellation, which is expected control flow rather than a fault', () => {
+      const cancellation = new Error('Canceled');
+      cancellation.name = 'Canceled';
+
+      const event = dispatchRejection(cancellation);
+
+      expect(consoleLog).not.toHaveBeenCalled();
+      // also keeps the browser from printing its own "Uncaught (in promise)"
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('still reports an error that merely mentions cancellation', () => {
+      dispatchRejection(new Error('Canceled'));
+
+      expect(consoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Detected an unhandled Promise rejection')
+      );
+    });
+  });
+
   describe('add', () => {
     it('should call the `stopCoreSystem` param', () => {
       expect(stopCoreSystem).not.toHaveBeenCalled();

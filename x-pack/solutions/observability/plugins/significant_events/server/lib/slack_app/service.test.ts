@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -30,7 +31,6 @@ jest.mock('@kbn/core-http-server-utils', () => ({
 }));
 
 interface HarnessOptions {
-  /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */
   featureFlagEnabled?: boolean;
   /** Whether `server.relayClient` (provided by the Actions plugin) exists. */
   hasRelayClient?: boolean;
@@ -131,10 +131,11 @@ describe('SlackAppService', () => {
 
   describe('connect', () => {
     it('throws when the feature flag is disabled', async () => {
-      const { server } = createHarness({ featureFlagEnabled: false });
+      const { server, getBooleanValue$ } = createHarness({ featureFlagEnabled: false });
       await expect(new SlackAppService(server).connect(request)).rejects.toBeInstanceOf(
         SlackAppUnavailableError
       );
+      expect(getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
     });
 
     it('throws when the relay client is not configured', async () => {
@@ -350,11 +351,12 @@ describe('SlackAppService', () => {
     });
 
     it('reports unavailable when the feature flag is disabled', async () => {
-      const { server } = createHarness({ featureFlagEnabled: false });
+      const { server, getBooleanValue$ } = createHarness({ featureFlagEnabled: false });
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
+      expect(getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
     });
 
     it('reports not_connected when no connection exists', async () => {
@@ -1081,9 +1083,10 @@ describe('SlackAppService', () => {
     });
 
     it('withdraws the connector when the app is no longer available', async () => {
-      const { server, soClient, inMemoryConnectors, unregisterDynamicConnector } = createHarness({
-        featureFlagEnabled: false,
-      });
+      const { server, soClient, inMemoryConnectors, unregisterDynamicConnector, getBooleanValue$ } =
+        createHarness({
+          featureFlagEnabled: false,
+        });
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
@@ -1097,6 +1100,7 @@ describe('SlackAppService', () => {
 
       expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
       expect(soClient.get).not.toHaveBeenCalled();
+      expect(getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
     });
 
     describe('when the connector id is taken by a connector this app does not own', () => {
