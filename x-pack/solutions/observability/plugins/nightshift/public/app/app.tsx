@@ -45,7 +45,6 @@ import {
   setNightshiftSeverityParam,
 } from '../common/url_params';
 import { NightshiftHeader } from './header';
-import { NightshiftOnboarding } from '../onboarding/onboarding';
 
 function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
@@ -190,26 +189,6 @@ export function NightshiftApp(): React.ReactElement {
       description: '[ttfmp_nightshift] The Nightshift landing page has loaded investigations.',
     },
   });
-
-  // First run: a space without investigations onboards first. `?onboarding=1` forces it.
-  const forceOnboarding = new URLSearchParams(search).get('onboarding') === '1';
-  const showOnboarding =
-    isInvestigationsAvailable &&
-    canManage &&
-    (forceOnboarding || (!isInitialLoading && !allFailed && totalCount === 0));
-
-  if (showOnboarding) {
-    return (
-      <NightshiftOnboarding
-        onInvestigationStarted={(investigationId) => {
-          const params = new URLSearchParams(history.location.search);
-          params.delete('onboarding');
-          setNightshiftInvestigationIdParam(params, investigationId);
-          history.replace({ search: params.toString() });
-        }}
-      />
-    );
-  }
 
   if (!isInvestigationsAvailable || allFailed) {
     const fatalError = sections.find((section) => section.error)?.error ?? null;

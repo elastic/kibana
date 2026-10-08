@@ -72,6 +72,8 @@ export interface OnboardingSuggestionsExecution {
   connectors: OnboardingConnectorSummary[];
   /** The suggestions (its outputs), once it succeeded. */
   suggestions?: OnboardingSuggestion[];
+  /** Whether the user's custom context (hints about their system) guided the exploration. */
+  used_custom_context: boolean;
 }
 
 export interface GetOnboardingResponse {

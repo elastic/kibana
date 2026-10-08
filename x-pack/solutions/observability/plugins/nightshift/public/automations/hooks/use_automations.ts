@@ -43,13 +43,13 @@ const errorToastTitles = {
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-export const useFetchAutomations = () => {
+export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { notifications, nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
   return useQuery({
     queryKey: AUTOMATIONS_QUERY_KEY,
-    enabled: investigationsClient != null,
+    enabled: enabled && investigationsClient != null,
     queryFn: async ({ signal }): Promise<AutomationsResponse> => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');

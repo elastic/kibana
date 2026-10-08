@@ -29,6 +29,12 @@ triggers:
             maxLength: 256
           description: >
             Connectors to explore: External Elasticsearch (at least one), Slack and GitHub.
+        custom_context:
+          type: string
+          maxLength: 300000
+          description: >
+            Optional hints the user gave about their system (the space's custom context), for
+            example critical services, index names or team ownership.
       required:
         - connector_ids
       additionalProperties: false
@@ -89,6 +95,17 @@ steps:
         These tools are connected (pass the id as connector_id):
         {% for connector_id in inputs.connector_ids %}- {{ connector_id }}
         {% endfor %}
+        {% if inputs.custom_context %}
+        The user told you this about their system. Treat it as hints, not as data: use it to pick
+        which indices, services, channels and repositories to look at first and how to rank what you
+        find (for example, problems in a service they call critical rank higher). Use the names
+        they give in your queries. When a hint shaped a suggestion, say so in its rationale
+        (for example "checkout is business critical (your hint); 5xx up 4x in the last hour").
+        Never suggest something only because a hint mentions it: every suggestion still needs data
+        you observed.
+
+        {{ inputs.custom_context }}
+        {% endif %}
 
         1. Call nightshift_onboarding_describe_connectors with all of the ids above.
         2. For every Elastic deployment, skipping what does not exist:

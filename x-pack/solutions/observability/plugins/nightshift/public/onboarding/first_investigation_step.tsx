@@ -16,8 +16,9 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiLoadingSpinner,
+  EuiNotificationBadge,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -158,18 +159,40 @@ export function OnboardingFirstInvestigationStep({
 
   return (
     <div data-test-subj="nightshiftOnboardingFirstInvestigationStep">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.nightshift.onboarding.investigate.title', {
-                defaultMessage: 'Suggested first investigations',
-              })}
-            </h3>
-          </EuiTitle>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.nightshift.onboarding.investigate.title', {
+                    defaultMessage: 'Suggested to investigate',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {!isRunning && (
+              <EuiFlexItem grow={false}>
+                <EuiNotificationBadge color="subdued">{suggestions.length}</EuiNotificationBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+            {execution.used_custom_context && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  iconType="documentation"
+                  color="hollow"
+                  data-test-subj="nightshiftOnboardingUsedHintsBadge"
+                >
+                  {i18n.translate('xpack.nightshift.onboarding.investigate.usedHintsBadge', {
+                    defaultMessage: 'Using your hints',
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
             {execution.connectors.map((connector) => (
               <EuiFlexItem grow={false} key={connector.id}>
                 <EuiBadge
@@ -200,9 +223,11 @@ export function OnboardingFirstInvestigationStep({
       {isRunning && (
         <EuiPanel
           hasBorder
-          paddingSize="l"
+          paddingSize="none"
           data-test-subj="nightshiftOnboardingAnalyzing"
           css={css`
+            overflow: hidden;
+            position: relative;
             background: linear-gradient(
               99deg,
               ${euiTheme.colors.backgroundLightPrimary},
@@ -210,9 +235,17 @@ export function OnboardingFirstInvestigationStep({
             );
           `}
         >
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiProgress size="xs" color="primary" position="absolute" />
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            css={css`
+              padding: ${euiTheme.size.m} ${euiTheme.size.base};
+            `}
+          >
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
+              <EuiIcon type="clock" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">
@@ -221,11 +254,10 @@ export function OnboardingFirstInvestigationStep({
                     defaultMessage: 'Analyzing your data',
                   })}
                 </strong>
-              </EuiText>
-              <EuiText size="s" color="subdued">
+                {' · '}
                 {i18n.translate('xpack.nightshift.onboarding.investigate.analyzingDescription', {
                   defaultMessage:
-                    'Looking at your deployments, discussions and recent changes for anything worth investigating first. This usually takes about a minute.',
+                    'Looking at your deployments, discussions and recent changes for what to investigate first. This takes about a minute.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -406,8 +438,9 @@ function SuggestionCard({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             size="s"
+            iconType="sparkles"
             isDisabled={isDisabled}
             onClick={(event: React.MouseEvent) => {
               event.stopPropagation();
@@ -418,7 +451,7 @@ function SuggestionCard({
             {i18n.translate('xpack.nightshift.onboarding.investigate.suggestionButton', {
               defaultMessage: 'Investigate',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

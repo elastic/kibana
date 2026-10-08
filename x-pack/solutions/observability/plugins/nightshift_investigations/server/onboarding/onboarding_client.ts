@@ -76,12 +76,20 @@ const readConnectorIds = (execution: Pick<WorkflowExecutionDto, 'context'>): str
     : [];
 };
 
+const readUsedCustomContext = (execution: Pick<WorkflowExecutionDto, 'context'>): boolean => {
+  const inputs = (execution.context?.inputs ?? {}) as { custom_context?: unknown };
+  return typeof inputs.custom_context === 'string' && inputs.custom_context.trim().length > 0;
+};
+
 /** Creates the client for the per-space Nightshift onboarding state. */
 export const createOnboardingClient = ({
   getDeps,
+  getCustomContextInstructions,
   logger,
 }: {
   getDeps: () => OnboardingClientDeps;
+  /** The space's custom context, formatted for a prompt; the exploration run uses it as hints. */
+  getCustomContextInstructions: (request: KibanaRequest, spaceId: string) => Promise<string>;
   logger: Logger;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
@@ -172,6 +180,7 @@ export const createOnboardingClient = ({
       error: execution.error?.message,
       connectors,
       suggestions: status === 'succeeded' ? parseSuggestions(output) : undefined,
+      used_custom_context: readUsedCustomContext(execution),
     };
   };
 
@@ -231,10 +240,18 @@ export const createOnboardingClient = ({
       if (!workflow?.definition) {
         throw new OnboardingUnavailableError('The onboarding workflow is not installed');
       }
+      const customContext = await getCustomContextInstructions(request, spaceId).catch((error) => {
+        // Hints only sharpen the suggestions; exploring without them still works.
+        logger.warn(`Could not read the custom context for onboarding: ${error.message}`);
+        return '';
+      });
       const executionId = await management.runWorkflow(
         { ...workflow, definition: workflow.definition },
         spaceId,
-        { connector_ids: connectorIds },
+        {
+          connector_ids: connectorIds,
+          ...(customContext ? { custom_context: customContext } : {}),
+        },
         request,
         'nightshift-onboarding'
       );

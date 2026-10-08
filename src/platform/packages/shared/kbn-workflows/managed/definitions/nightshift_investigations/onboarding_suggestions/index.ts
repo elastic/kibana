@@ -21,7 +21,7 @@ export const NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID =
 export const NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW = {
   id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 5,
+  version: 6,
   billable: false,
   yaml: ONBOARDING_SUGGESTIONS_WORKFLOW_YAML,
   management: {

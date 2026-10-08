@@ -68,13 +68,23 @@ const labels = {
   }),
 };
 
+const DEFAULT_SNIPPET_PLACEHOLDER = i18n.translate(
+  'xpack.nightshift.customContext.snippetPlaceholder',
+  {
+    defaultMessage:
+      'For example: While debugging alerts, always rule out a release or config regression first.',
+  }
+);
+
 function SnippetEditor({
   initialText = '',
+  placeholder = DEFAULT_SNIPPET_PLACEHOLDER,
   isSaving,
   onSave,
   onCancel,
 }: {
   initialText?: string;
+  placeholder?: string;
   isSaving: boolean;
   onSave: (text: string) => void;
   onCancel: () => void;
@@ -98,10 +108,7 @@ function SnippetEditor({
         aria-label={i18n.translate('xpack.nightshift.customContext.snippetAriaLabel', {
           defaultMessage: 'Snippet text',
         })}
-        placeholder={i18n.translate('xpack.nightshift.customContext.snippetPlaceholder', {
-          defaultMessage:
-            'For example: While debugging alerts, always rule out a release or config regression first.',
-        })}
+        placeholder={placeholder}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -263,14 +270,22 @@ function SnippetItem({
   );
 }
 
-function CustomContextSnippets({
+/** Lists, adds, edits and deletes the space's custom context snippets. */
+export function CustomContextSnippets({
   snippets,
   version,
   canEdit,
+  addLabel = labels.add,
+  placeholder,
+  showEmptyPrompt = true,
 }: {
   snippets: readonly CustomContextSnippet[];
   version?: string;
   canEdit: boolean;
+  addLabel?: string;
+  placeholder?: string;
+  /** Without it, an empty list only shows the add button. */
+  showEmptyPrompt?: boolean;
 }): React.ReactElement {
   // Either the id of the snippet being edited, NEW_SNIPPET while adding one, or undefined.
   const [editing, setEditing] = useState<string | undefined>();
@@ -295,7 +310,7 @@ function CustomContextSnippets({
   const onDelete = (id: string) =>
     save({ snippets: toInputs(snippets.filter((snippet) => snippet.id !== id)), version });
 
-  if (snippets.length === 0 && editing !== NEW_SNIPPET) {
+  if (showEmptyPrompt && snippets.length === 0 && editing !== NEW_SNIPPET) {
     return (
       <EuiEmptyPrompt
         iconType="documentation"
@@ -340,6 +355,7 @@ function CustomContextSnippets({
           {editing === snippet.id ? (
             <SnippetEditor
               initialText={snippet.text}
+              placeholder={placeholder}
               isSaving={isSaving}
               onSave={(text) => onUpdate(snippet.id, text)}
               onCancel={stopEditing}
@@ -357,7 +373,12 @@ function CustomContextSnippets({
       ))}
       {editing === NEW_SNIPPET && (
         <EuiFlexItem>
-          <SnippetEditor isSaving={isSaving} onSave={onAdd} onCancel={stopEditing} />
+          <SnippetEditor
+            placeholder={placeholder}
+            isSaving={isSaving}
+            onSave={onAdd}
+            onCancel={stopEditing}
+          />
         </EuiFlexItem>
       )}
       {canAdd && editing !== NEW_SNIPPET && (
@@ -372,7 +393,7 @@ function CustomContextSnippets({
               onClick={() => setEditing(NEW_SNIPPET)}
               data-test-subj="nightshiftCustomContextAdd"
             >
-              {labels.add}
+              {addLabel}
             </EuiButtonEmpty>
           </div>
         </EuiFlexItem>

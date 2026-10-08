@@ -199,6 +199,8 @@ export class NightshiftInvestigationsPlugin
         spaces: this.spaces,
         actions: this.actionsStart,
       }),
+      getCustomContextInstructions: (request, spaceId) =>
+        customContextClient.getInstructions(request, spaceId),
       logger: this.logger.get('onboarding'),
     });
 

@@ -30,6 +30,8 @@ export interface NightshiftHeaderProps {
   isStartInvestigationOpen?: boolean;
   /** Replaces the status-derived hero title. */
   title?: string;
+  /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
+  isGreetingInline?: boolean;
 }
 
 const getGreeting = (): string => {
@@ -83,6 +85,7 @@ export function NightshiftHeader({
   onStartInvestigationClick,
   isStartInvestigationOpen = false,
   title: titleOverride,
+  isGreetingInline = false,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
@@ -132,9 +135,11 @@ export function NightshiftHeader({
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color="subdued" size="s" textAlign="left">
-                <p>{getGreeting()}</p>
-              </EuiText>
+              {!isGreetingInline && (
+                <EuiText color="subdued" size="s" textAlign="left">
+                  <p>{getGreeting()}</p>
+                </EuiText>
+              )}
               <EuiTitle
                 size="m"
                 css={css`
@@ -145,7 +150,18 @@ export function NightshiftHeader({
                   white-space: nowrap;
                 `}
               >
-                <h2>{title}</h2>
+                <h2>
+                  {isGreetingInline && (
+                    <span
+                      css={css`
+                        color: ${euiTheme.colors.textSubdued};
+                      `}
+                    >
+                      {`${getGreeting()} `}
+                    </span>
+                  )}
+                  {title}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
