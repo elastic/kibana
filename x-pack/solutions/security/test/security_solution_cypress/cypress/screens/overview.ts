@@ -149,10 +149,5 @@ export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]
 
 export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="siem-landing-page"]';
 
-export const OVERVIEW_CTI_LINKS = '[data-test-subj="cti-dashboard-links"]';
-export const OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL = '[data-test-subj="cti-inner-panel-danger"]';
-export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
-export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
-
 export const OVERVIEW_ALERTS_HISTOGRAM_EMPTY =
   '[data-test-subj="alerts-histogram-panel"] [data-test-subj="emptyPlaceholder"]';

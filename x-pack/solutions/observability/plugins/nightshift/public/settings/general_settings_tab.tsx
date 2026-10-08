@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { AppsSection } from './components/apps_section';
 
 export const GeneralSettingsTab = () => {
   const { application } = useKibana().services;
-  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
-  const canManageSlack = application.capabilities.streams?.manage === true;
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
 
-  return <AppsSection canEdit={canManageSlack} />;
+  return <AppsSection canEdit={canManageAndConfigure} />;
 };
