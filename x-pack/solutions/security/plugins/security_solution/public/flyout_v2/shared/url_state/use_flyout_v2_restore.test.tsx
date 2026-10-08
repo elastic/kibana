@@ -436,7 +436,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
   });
 
-  it('forwards an origin flyout size only for an attack opened as start', () => {
+  it('forwards an origin flyout size for an attack, document, or rule opened as start', () => {
     openDescriptorAsStart(
       { kind: 'attack', attackId: 'atk-1', indexName: '.alerts-*' },
       {},
@@ -444,12 +444,50 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
       { originFlyoutSize: 'm' }
     );
+    openDescriptorAsStart(
+      { kind: 'document', documentId: 'alert-1', indexName: '.alerts-*' },
+      {},
+      mockFlyoutApi,
+      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      { originFlyoutSize: 640 }
+    );
+    openDescriptorAsStart(
+      { kind: 'documentFromPattern', documentId: 'alert-2', indexName: '.alerts-*' },
+      {},
+      mockFlyoutApi,
+      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      { originFlyoutSize: 640 }
+    );
+    openDescriptorAsStart(
+      { kind: 'rule', ruleId: 'rule-1' },
+      {},
+      mockFlyoutApi,
+      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      { originFlyoutSize: 's' }
+    );
 
     expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
       attackId: 'atk-1',
       indexName: '.alerts-*',
       origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
       originFlyoutSize: 'm',
+    });
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
+      documentId: 'alert-1',
+      indexName: '.alerts-*',
+      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      originFlyoutSize: 640,
+    });
+    expect(mockFlyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
+      documentId: 'alert-2',
+      indexName: '.alerts-*',
+      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      originFlyoutSize: 640,
+    });
+    expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-1',
+      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      originFlyoutSize: 's',
     });
   });
 

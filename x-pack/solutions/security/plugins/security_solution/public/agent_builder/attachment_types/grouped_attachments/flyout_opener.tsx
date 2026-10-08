@@ -44,7 +44,7 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
       return;
     }
     hasOpened.current = true;
-    // Attack rows open at the flyout they replace. Other descriptors ignore this and keep their own size.
+    // Attack, alert, and rule rows open at the flyout they replace. Other descriptors ignore this and keep their own size.
     openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY, {
       originFlyoutSize: getOpenConversationFlyoutWidth() ?? 's',
     });

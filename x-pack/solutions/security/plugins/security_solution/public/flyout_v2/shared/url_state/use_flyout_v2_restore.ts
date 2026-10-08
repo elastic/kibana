@@ -170,7 +170,7 @@ const buildShowEntityCallback = (
  */
 export interface OpenDescriptorAsStartOptions {
   /**
-   * Forwarded only when the descriptor is an attack main flyout.
+   * Forwarded to an attack, document, or rule main flyout.
    * Other kinds ignore it, and callers that omit it keep the persisted Security width.
    */
   originFlyoutSize?: EuiFlyoutProps['size'];
@@ -191,12 +191,26 @@ export const openDescriptorAsStart = (
     // --- Document main flyouts ---
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndex({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndex({
+        documentId,
+        indexName,
+        ...originParams,
+        ...(options?.originFlyoutSize !== undefined
+          ? { originFlyoutSize: options.originFlyoutSize }
+          : {}),
+      });
       break;
     }
     case 'documentFromPattern': {
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({
+        documentId,
+        indexName,
+        ...originParams,
+        ...(options?.originFlyoutSize !== undefined
+          ? { originFlyoutSize: options.originFlyoutSize }
+          : {}),
+      });
       break;
     }
 
@@ -571,7 +585,13 @@ export const openDescriptorAsStart = (
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyout({ ruleId, ...originParams });
+      api.openRuleFlyout({
+        ruleId,
+        ...originParams,
+        ...(options?.originFlyoutSize !== undefined
+          ? { originFlyoutSize: options.originFlyoutSize }
+          : {}),
+      });
       break;
     }
 
