@@ -65,6 +65,8 @@ import {
   type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
+  type LogExtractionTypeOverride,
+  type NonPriorityLogExtractionTypeOverride,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
@@ -79,6 +81,9 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   sliceEndTimestamp: null,
   sliceSamplingRate: null,
 };
+
+const hasKeys = (value: object | undefined): boolean =>
+  value !== undefined && Object.keys(value).length > 0;
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -377,6 +382,59 @@ export class LogsExtractionClient {
       ...(excludedUserNames !== undefined ? { excludedUserNames } : {}),
     });
     return state.logsExtraction;
+  }
+
+  /**
+   * Writes the two per entity-type override layers. `logExtraction` reaches both processes (minus
+   * the non-priority-exclusive fields), `nonPriorityOverride` only the non-priority one.
+   *
+   * Each block is handed to the saved object update as-is. `mergeForUpdate` recurses into nested
+   * plain objects, so an omitted field keeps its stored value and an incoming `null` overwrites it
+   * with `null`, which every reader treats as unset. An empty block is skipped: `{}` does not
+   * recurse, so it would replace the whole stored object instead of merging into it.
+   */
+  public async updateTypeConfig(
+    type: EntityType,
+    {
+      logExtraction,
+      nonPriorityOverride,
+    }: {
+      logExtraction?: LogExtractionTypeOverride;
+      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
+    }
+  ): Promise<{
+    logExtractionConfig: LogExtractionTypeOverride;
+    nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride;
+  }> {
+    const patch = {
+      ...(hasKeys(logExtraction) ? { logExtractionConfig: logExtraction } : {}),
+      ...(hasKeys(nonPriorityOverride)
+        ? { nonPriorityLogExtractionConfig: nonPriorityOverride }
+        : {}),
+    };
+
+    if (Object.keys(patch).length > 0) {
+      await this.engineDescriptorClient.update(type, patch);
+    }
+
+    const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+    return {
+      logExtractionConfig: descriptor.logExtractionConfig ?? {},
+      nonPriorityLogExtractionConfig: descriptor.nonPriorityLogExtractionConfig ?? {},
+    };
+  }
+
+  /** Same dependencies, different extraction process. */
+  public withExtractionMode(extractionMode: ExtractionMode): LogsExtractionClient {
+    return new LogsExtractionClient({
+      logger: this.logger,
+      namespace: this.namespace,
+      esClient: this.esClient,
+      dataViewsService: this.dataViewsService,
+      engineDescriptorClient: this.engineDescriptorClient,
+      globalStateClient: this.globalStateClient,
+      extractionMode,
+    });
   }
 
   private async runQueryAndIngestDocs({

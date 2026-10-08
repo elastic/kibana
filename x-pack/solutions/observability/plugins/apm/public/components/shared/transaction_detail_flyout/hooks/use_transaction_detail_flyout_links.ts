@@ -12,17 +12,17 @@ import {
 } from '@kbn/deeplinks-observability';
 import { useCallback, useMemo } from 'react';
 import { getFlyoutDiscoverNavigation } from '../../service_flyout/utils/get_flyout_discover_navigation';
-import { useApmIndices } from '../../service_flyout/hooks/use_apm_indices';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 
 export function useTransactionDetailFlyoutLinks() {
   const {
-    deps: { core, share },
+    deps: { share },
     contextActions,
+    indices,
     filters: { serviceName, transactionName, transactionType, environment, rangeFrom, rangeTo },
   } = useTransactionDetailFlyoutContext();
 
-  const { indices, loading: indicesLoading } = useApmIndices({ http: core.http });
+  const indicesLoading = indices === undefined;
   const openInNewDiscoverTab = contextActions?.openInNewDiscoverTab;
 
   const transactionDetailsHref = useMemo(() => {

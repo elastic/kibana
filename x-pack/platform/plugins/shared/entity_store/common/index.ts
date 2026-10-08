@@ -17,7 +17,7 @@
  * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export { PLUGIN_ID } from './plugin_id';
 export const PLUGIN_NAME = 'Entity Store';
@@ -39,13 +39,9 @@ export {
 } from './privileges';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+export const EntityStoreStatus = lazySchema(() =>
+  z.enum(['not_installed', 'installing', 'running', 'stopped', 'error'])
+);
 
 export const API_VERSIONS = {
   public: {
@@ -83,6 +79,10 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
+    // Literal segments win over `{entityType}` in the router, so START and STOP are unambiguous.
+    START: `${INTERNAL_BASE_ROUTE}/start`,
+    STOP: `${INTERNAL_BASE_ROUTE}/stop`,
+    ENGINE_CONFIG: `${INTERNAL_BASE_ROUTE}/{entityType}`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
@@ -114,7 +114,7 @@ export const getErrorMessage = (error: unknown): string => {
 
 // Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 

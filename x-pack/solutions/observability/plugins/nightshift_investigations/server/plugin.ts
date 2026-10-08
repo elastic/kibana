@@ -49,10 +49,11 @@ import { decisionTreePrepareStepDefinition } from './step_definitions/decision_t
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
+import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { createMemoryService, type MemoryService } from './memory/internal_client';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -125,20 +126,15 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
-  private readonly memoryService: MemoryService;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
-    this.memoryService = createMemoryService({
-      getElasticsearch: () => this.elasticsearch,
-    });
   }
 
   setup(
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
-    // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const telemetry = setupNightshiftTelemetry({
@@ -152,9 +148,10 @@ export class NightshiftInvestigationsPlugin
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
       registerCortexTelemetryEvents(core.analytics);
     }
+    if (this.memoryEnabled) {
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
+    }
 
-    // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
-    // feature only works when Cortex and the sandbox are both configured.
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
@@ -235,7 +232,7 @@ export class NightshiftInvestigationsPlugin
       if (plugins.sandbox?.isAvailable) {
         const sandboxLogger = this.logger.get('sandbox');
 
-        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
@@ -333,9 +330,8 @@ export class NightshiftInvestigationsPlugin
             logger: this.logger.get('resolve_model'),
           })
         );
-        // Obtain + materialize steps are always registered so the combined workflow
-        // can no-op a disabled writer branch instead of failing on an unknown
-        // step type. Obtain runs first and hands sandbox_id to both writers.
+        // Registered even when disabled: the combined workflow no-ops a writer branch instead
+        // of failing on an unknown step type, and obtain runs first to hand both writers a sandbox.
         plugins.workflowsExtensions.registerStepDefinition(
           obtainSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
@@ -353,7 +349,6 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
-            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -389,7 +384,6 @@ export class NightshiftInvestigationsPlugin
             getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
-            getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -450,6 +444,19 @@ export class NightshiftInvestigationsPlugin
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
+          isMemoryEnabled: () => this.memoryEnabled,
+          getMemoryPageStore: (request: KibanaRequest) => {
+            if (!this.elasticsearch) {
+              throw new Error(
+                'elasticsearch is not available — plugin start() has not been called'
+              );
+            }
+            return createMemoryPageStore({
+              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+              logger: this.logger.get('memory'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+            });
+          },
         },
         core,
         logger: this.logger,
@@ -490,13 +497,7 @@ export class NightshiftInvestigationsPlugin
     this.securityStart = plugins.security;
     this.security = coreStart.security;
 
-    if (this.memoryEnabled) {
-      void this.memoryService.initialize(this.logger.get('memory'));
-    }
-
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install exists so the agent is
-    // visible and editable in the Agent Builder UI before the first investigation ever runs.
+    // Installed here so the agent is visible in the Agent Builder UI before the first run.
     if (plugins.agentBuilder) {
       const { agentBuilder } = plugins;
       void installInvestigationAgent({
@@ -544,11 +545,7 @@ export class NightshiftInvestigationsPlugin
     };
   }
 
-  /**
-   * Created once and reused so every `agents.ensure` call for the investigation agent registers the
-   * gate. Dependencies are read lazily because the tool and the workflow step are registered at
-   * setup, while availability is only evaluated once a request arrives.
-   */
+  /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
     this.investigationAvailability ??= createInvestigationAvailability({
       getDeps: () => {
@@ -648,10 +645,6 @@ export class NightshiftInvestigationsPlugin
     });
   };
 
-  /**
-   * Installs the static managed workflows this plugin owns and signals readiness so the
-   * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
-   */
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {
