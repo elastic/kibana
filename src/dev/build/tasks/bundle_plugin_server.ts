@@ -221,10 +221,9 @@ function resolveExisting(resolveDir: string, specifier: string): string | null {
 }
 
 function candidatePaths(resolveDir: string, specifier: string): string[] {
+  // Follow Node's LOAD_AS_FILE order. `Path.extname("./8.9.0")` is `.0`, so a
+  // specifier can look extended and still need `.js` appended.
   const base = Path.resolve(resolveDir, specifier);
-  if (Path.extname(specifier)) {
-    return [base];
-  }
   return [
     base,
     `${base}.js`,

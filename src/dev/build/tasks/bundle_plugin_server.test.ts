@@ -95,6 +95,58 @@ describe('bundlePluginServer', () => {
     expect(typeof loaded.fs.readFileSync).toBe('function');
   });
 
+  it('inlines versioned filenames that participate in a require cycle', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    const monitors = Path.join(server, 'migrations', 'monitors');
+    Fs.mkdirSync(monitors, { recursive: true });
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      '"use strict";\nmodule.exports = require("./migrations/monitors");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(monitors, 'index.js'),
+      [
+        '"use strict";',
+        'Object.defineProperty(exports, "monitorMigrations", {',
+        '  enumerable: true,',
+        '  get: function () { return monitorMigrations; }',
+        '});',
+        'const migration = require("./8.9.0");',
+        'const legacy = require("../legacy");',
+        'const monitorMigrations = { "8.9.0": migration.migration890 };',
+        'exports.legacyType = legacy.TYPE;',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(monitors, '8.9.0.js'),
+      [
+        '"use strict";',
+        'Object.defineProperty(exports, "migration890", {',
+        '  enumerable: true,',
+        '  get: function () { return migration890; }',
+        '});',
+        'const legacy = require("../legacy");',
+        'const migration890 = function migration890() { return legacy.TYPE; };',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'migrations', 'legacy.js'),
+      '"use strict";\nrequire("./monitors");\nexports.TYPE = "single";\n'
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    expect(bundle).not.toContain('require("./migrations/monitors/8.9.0');
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.monitorMigrations['8.9.0']()).toBe('single');
+    expect(loaded.legacyType).toBe('single');
+  });
+
   it('leaves a plugin entry with no local files unchanged', async () => {
     const root = makePlugin();
     const server = Path.join(root, 'server');
