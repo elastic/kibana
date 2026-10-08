@@ -132,15 +132,18 @@ export const recordActions = async ({
       if (fixture.readOnly && !SAFE_METHODS.has(toRequestedPath(call).method)) {
         findings.push({ kind: 'read-only', action, request });
       }
-      const overridden = fixture.responses?.some(
-        ({ source, method, path }) =>
-          matched !== undefined &&
-          (source === undefined || source === matched.source) &&
-          method.toLowerCase() === matched.method &&
-          path === matched.path
-      );
-      if (overridden && responseViolations.length > 0) {
-        const operation = `${matched?.method.toUpperCase()} ${matched?.path}`;
+      if (
+        matched &&
+        'method' in matched &&
+        responseViolations.length > 0 &&
+        fixture.responses?.some(
+          ({ source, method, path }) =>
+            (source === undefined || source === matched.source) &&
+            method.toLowerCase() === matched.method &&
+            path === matched.path
+        )
+      ) {
+        const operation = `${matched.method.toUpperCase()} ${matched.path}`;
         findings.push({
           kind: 'rejected-response',
           action,
@@ -151,7 +154,7 @@ export const recordActions = async ({
     }
     operations[action] = uniqueSorted(
       calls.flatMap(({ matched }) =>
-        matched?.source === undefined
+        matched?.source === undefined || !('method' in matched)
           ? []
           : [{ source: matched.source, method: matched.method, path: matched.path }]
       ),
