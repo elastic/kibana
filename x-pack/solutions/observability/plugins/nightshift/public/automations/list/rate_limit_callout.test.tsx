@@ -19,7 +19,7 @@ describe('RateLimitCallout', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('1 automation reached their daily trigger limit')).toBeInTheDocument();
+    expect(screen.getByText('1 automation reached its daily trigger limit')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
     expect(onShow).toHaveBeenCalled();
   });
