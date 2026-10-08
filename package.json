@@ -792,6 +792,7 @@
     "@kbn/functional-with-es-ssl-cases-test-plugin": "workspace:*",
     "@kbn/gen-ai-settings-plugin": "workspace:*",
     "@kbn/gen-ai-streaming-response-example-plugin": "workspace:*",
+    "@kbn/genai-common": "workspace:*",
     "@kbn/generate-csv": "workspace:*",
     "@kbn/global-redirect-app-links": "workspace:*",
     "@kbn/global-search-bar-plugin": "workspace:*",
