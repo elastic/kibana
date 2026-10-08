@@ -89,7 +89,10 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
         <p>
           {i18n.translate(
             'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.connectDescription',
-            { defaultMessage: 'Connect your cluster to Elastic Cloud to access Elastic Inference Service.' }
+            {
+              defaultMessage:
+                'Connect your cluster to Elastic Cloud to access Elastic Inference Service.',
+            }
           )}
         </p>
       </EuiText>

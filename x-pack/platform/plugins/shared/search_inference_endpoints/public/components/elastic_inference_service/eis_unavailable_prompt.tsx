@@ -37,7 +37,7 @@ export const EisUnavailablePrompt = ({ error, isRetrying, onRetry }: EisUnavaila
         <p>
           {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.unavailable.description', {
             defaultMessage:
-              'We couldn't connect to Elastic Inference Service, so its models and endpoints are unavailable.',
+              "We couldn't connect to Elastic Inference Service, so its models and endpoints are unavailable.",
           })}
         </p>
       }
