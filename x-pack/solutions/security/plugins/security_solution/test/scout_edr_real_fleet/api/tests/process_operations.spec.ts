@@ -13,7 +13,7 @@ import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/commo
 import { startLongRunningSleep } from '../../ui/fixtures/host_sleep';
 import { captureHostVmAgentDiagnostics } from '../fixtures/agent_diagnostics';
 import { killProcess, listRunningProcesses, suspendProcess } from '../fixtures/process_actions';
-import { apiTest, tags } from '../fixtures';
+import { apiTest } from '../fixtures';
 
 // Command the processes action reports for the installed Elastic Defend binary.
 const ENDPOINT_COMMAND = '/opt/Elastic/Endpoint/elastic-endpoint';
@@ -105,7 +105,7 @@ const waitForNewSleepPid = async (
 
 apiTest.describe(
   'Real agent process response actions',
-  { tag: [...tags.stateful.classic, '@local-serverless-security_complete'] },
+  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
   () => {
     apiTest.setTimeout(TEST_TIMEOUT_MS);
 

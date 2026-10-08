@@ -97,7 +97,11 @@ const waitForSuccessfulAction = async <
         latest = response.body.data;
         return latest.isCompleted;
       },
-      { timeout: ACTION_TIMEOUT_MS, intervals: [2_000] }
+      {
+        timeout: ACTION_TIMEOUT_MS,
+        intervals: [2_000],
+        message: `Action ${actionId} did not complete`,
+      }
     )
     .toBe(true);
 

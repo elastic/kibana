@@ -7,6 +7,7 @@
 
 import { mkdir } from 'fs/promises';
 import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 
 /**
@@ -25,6 +26,7 @@ export const captureHostVmAgentDiagnostics = async (
   const vmDiagnosticsFile = `/tmp/${fileName}`;
   const safePrefix = fileNamePrefix.replace(/[><:"/\\|?*'`{} ]/g, '_');
   const localDiagnosticsFile = path.join(
+    REPO_ROOT,
     'target',
     'agent_diagnostics',
     `${safePrefix ? `${safePrefix}-` : ''}${fileName}`
