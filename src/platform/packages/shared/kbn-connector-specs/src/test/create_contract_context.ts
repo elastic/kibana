@@ -12,7 +12,7 @@ import axios from 'axios';
 import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
 import type { Logger } from '@kbn/logging';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
 import type {
   ActionContext,
@@ -52,32 +52,66 @@ const findAuthType = (id: string): NormalizedAuthType => {
   return authType as NormalizedAuthType;
 };
 
-let serviceAccountJson: string | undefined;
+let privateKey: string | undefined;
 
 // A key auth types can sign with, generated once, as the mock accepts any signature.
-const sampleServiceAccountJson = (): string => {
-  serviceAccountJson ??= JSON.stringify({
+const samplePrivateKey = (): string => {
+  privateKey ??= generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+  }).privateKey;
+  return privateKey;
+};
+
+const sampleServiceAccountJson = (): string =>
+  JSON.stringify({
     type: 'service_account',
     project_id: 'contract-mock',
     private_key_id: 'contract-mock',
-    private_key: generateKeyPairSync('rsa', {
-      modulusLength: 2048,
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-    }).privateKey,
+    private_key: samplePrivateKey(),
     client_email: 'contract-mock@contract-mock.iam.gserviceaccount.com',
     client_id: 'contract-mock',
     auth_uri: 'https://accounts.google.com/o/oauth2/auth',
     token_uri: 'https://oauth2.googleapis.com/token',
   });
-  return serviceAccountJson;
+
+const FORM_BOUNDARY = 'contract-mock-boundary';
+
+// The http adapter sends FormData as multipart; axios' fetch adapter would label it
+// form-urlencoded, and the jsdom fetch polyfill can't read it back.
+const toMultipart = async (form: FormData): Promise<Buffer> => {
+  const parts: Buffer[] = [];
+  for (const [name, value] of form) {
+    const header =
+      typeof value === 'string'
+        ? `Content-Disposition: form-data; name="${name}"`
+        : `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
+          `Content-Type: ${value.type || 'application/octet-stream'}`;
+    const content =
+      typeof value === 'string' ? Buffer.from(value) : Buffer.from(await value.arrayBuffer());
+    parts.push(
+      Buffer.from(`--${FORM_BOUNDARY}\r\n${header}\r\n\r\n`),
+      content,
+      Buffer.from('\r\n')
+    );
+  }
+  parts.push(Buffer.from(`--${FORM_BOUNDARY}--\r\n`));
+  return Buffer.concat(parts);
+};
+
+// Secrets whose schema takes any string, but that auth types decode.
+const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
+  serviceAccountJson: sampleServiceAccountJson,
+  accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
 };
 
 const placeholdersFor = (key: string): readonly string[] => [
-  ...(key === 'serviceAccountJson' ? [sampleServiceAccountJson()] : []),
+  ...(key in DECODED_PLACEHOLDERS ? [DECODED_PLACEHOLDERS[key]()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
   'contract-mock@example.com',
+  samplePrivateKey(),
 ];
 
 const toSecrets = (
@@ -94,7 +128,10 @@ const toSecrets = (
       secrets[key] = fallback.data;
       continue;
     }
-    const placeholder = placeholdersFor(key).find((value) => field.safeParse(value).success);
+    const options = field instanceof z.ZodEnum ? field.options : [];
+    const placeholder = [...options, ...placeholdersFor(key)].find(
+      (value) => field.safeParse(value).success
+    );
     if (placeholder !== undefined) {
       secrets[key] = placeholder;
     }
@@ -181,6 +218,14 @@ export const createContractContext = async ({
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
   const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
+  // Registered first, so it runs after the interceptors that connectors add.
+  client.interceptors.request.use(async (requestConfig) => {
+    if (requestConfig.data instanceof FormData) {
+      requestConfig.data = await toMultipart(requestConfig.data);
+      requestConfig.headers.setContentType(`multipart/form-data; boundary=${FORM_BOUNDARY}`);
+    }
+    return requestConfig;
+  });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
@@ -191,7 +236,7 @@ export const createContractContext = async ({
 
   const ctx: ActionContext = {
     client,
-    config: { ...config },
+    config: connector.schema ? await connector.schema.parseAsync(config) : { ...config },
     secrets: authSecrets,
     log: silentLogger,
     getClient: async (clientType) => {

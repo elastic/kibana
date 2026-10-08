@@ -587,7 +587,7 @@ Auth types and handlers that send requests themselves rather than through the ax
 Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema, and records the vendor operations each one calls. The inputs are:
 
 - one without optional properties, and one with them;
-- one at the schema's upper bounds: longest strings (`max`, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
+- one at the schema's upper bounds: longest strings (`max` up to 65,536 characters, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
 - one per enum value, so every value the schema allows is sent once.
 
 The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
@@ -601,12 +601,14 @@ node scripts/connector_vendor_api --connector datadog
 node scripts/connector_vendor_api --connector datadog --refresh
 # CI: write nothing, fail if anything would change
 node scripts/connector_vendor_api --connector datadog --check
+# Specs of tens of megabytes, such as Microsoft Graph's, need a larger heap to fetch
+NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
 
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination` and `x-ms-pageable` are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
@@ -668,7 +670,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-contract-mock` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
@@ -692,7 +694,8 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 Per action:
 
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
-- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec.
+- `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
+- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.

@@ -20,6 +20,8 @@ const sourceSchema = z
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
     fetchedAt: z.iso.datetime(),
+    /** Written by hand, e.g. to explain an unusual source such as a vendor test fixture. */
+    note: z.string().min(1).optional(),
   })
   .strict();
 
@@ -85,7 +87,8 @@ const paginationSchema = z.discriminatedUnion('style', [
   z
     .object({
       style: z.literal('next_url'),
-      request: nextUrlRequestSchema,
+      /** Omitted for opaque URLs that name no page parameter, such as Azure's `nextLink`. */
+      request: nextUrlRequestSchema.optional(),
       response: z.object({ itemsPath, nextPath: z.string().min(1) }).strict(),
       end: z.enum(['null', 'missing']).optional(),
       ...defaultSize,
@@ -142,6 +145,16 @@ export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;
 export const toPaginationDescriptor = (
   pagination: Exclude<ManifestPagination, 'none'>
 ): PaginationDescriptor => pagination;
+
+/** Whether a request path fits a path template, where a `{name}` segment matches any segment. */
+export const matchesPathTemplate = (template: string, requestPath: string): boolean => {
+  const expected = template.split('/');
+  const actual = requestPath.split('/');
+  return (
+    expected.length === actual.length &&
+    expected.every((segment, index) => segment === actual[index] || /^\{[^/{}]+\}$/.test(segment))
+  );
+};
 
 export const parseManifest = (json: string): VendorApiManifest =>
   vendorApiManifestSchema.parse(JSON.parse(json));

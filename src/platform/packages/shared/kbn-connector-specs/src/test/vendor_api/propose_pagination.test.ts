@@ -80,6 +80,9 @@ describe('assessPagination', () => {
       },
     });
     expect(proposalOf({ 'x-ms-pageable': { nextLinkName: null } })?.pagination).toBe('none');
+    expect(
+      proposalOf({ 'x-ms-pageable': { nextLinkName: 'nextLink' }, responses: json({}) })?.pagination
+    ).toEqual({ style: 'next_url', response: { itemsPath: 'value', nextPath: 'nextLink' } });
   });
 
   it('proposes body cursors, skipping next-page URLs under links', () => {

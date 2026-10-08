@@ -341,14 +341,15 @@ const fromMsPageable = (
   if (extension.nextLinkName === null) {
     return 'none';
   }
-  const request = nextUrlRequestOf(byRole(parameters));
-  if (typeof extension.nextLinkName !== 'string' || !request) {
+  if (typeof extension.nextLinkName !== 'string') {
     return undefined;
   }
+  // Azure's next links are opaque: clients follow them without knowing the parameter in them.
+  const request = nextUrlRequestOf(byRole(parameters));
   const itemName = typeof extension.itemName === 'string' ? extension.itemName : 'value';
   return {
     style: 'next_url',
-    request,
+    ...(request ? { request } : {}),
     response: {
       itemsPath: joinPath('', itemName),
       nextPath: joinPath('', extension.nextLinkName),

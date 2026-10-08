@@ -44,6 +44,8 @@ const LITERAL_KEYWORDS = new Set([
   // Pagination extensions, which describe the contract and are read to propose descriptors.
   'x-speakeasy-pagination',
   'x-ms-pageable',
+  // Path parameters whose values span segments, which the mock matches.
+  'x-ms-skip-url-encoding',
 ]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
@@ -128,11 +130,13 @@ const toKeptTokens = (tokens: string[]): string[] =>
  * their path-level parameters and servers, the security schemes they use and every component
  * they reference, directly or through other components. Documentation, examples, `x-`
  * extensions other than pagination ones and `info` other than the title are left out, so the
- * result only changes when the contract does.
+ * result only changes when the contract does. `refs` keeps more components, e.g. those that an
+ * overlay applied to the result references.
  */
 export const projectSpec = (
   source: OpenApiDocument,
-  operations: readonly ProjectedOperation[]
+  operations: readonly ProjectedOperation[],
+  refs: readonly string[] = []
 ): OpenApiDocument => {
   const document = source.swagger === '2.0' ? convertSwagger2(source) : source;
   const { openapi, jsonSchemaDialect, info, servers, security, paths } = document;
@@ -169,13 +173,15 @@ export const projectSpec = (
   }
   [...schemeNames].sort().forEach((name) => keep(['components', 'securitySchemes', name]));
 
+  const keepRef = (ref: string) => {
+    const pointer = localRefToPointer(ref);
+    if (pointer !== undefined) {
+      keep(toKeptTokens(toTokens(pointer)));
+    }
+  };
+  refs.forEach(keepRef);
   while (queue.length > 0) {
-    forEachRef(queue.shift(), (ref) => {
-      const pointer = localRefToPointer(ref);
-      if (pointer !== undefined) {
-        keep(toKeptTokens(toTokens(pointer)));
-      }
-    });
+    forEachRef(queue.shift(), keepRef);
   }
   return projected;
 };

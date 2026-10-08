@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loadContractOperations } from '@kbn/connector-contract-mock';
+import { convertSwagger2, loadContractOperations } from '@kbn/connector-contract-mock';
 import type { LoadDocument } from './bundle_spec';
 import { bundleSpec } from './bundle_spec';
 
@@ -169,6 +169,58 @@ describe('bundleSpec', () => {
     expect(bundled.components).toHaveProperty('schemas.wrapper.items', {
       $ref: '#/components/schemas/Item',
     });
+  });
+
+  it('inlines the external refs of a Swagger 2.0 document into its own sections', async () => {
+    const document = {
+      swagger: '2.0',
+      info: { title: 'Clusters', version: '1' },
+      paths: {
+        '/clusters/{name}': {
+          get: {
+            parameters: [
+              { $ref: 'common/types.json#/parameters/ApiVersion' },
+              { name: 'name', in: 'path', required: true, type: 'string' },
+            ],
+            responses: {
+              '200': { description: 'ok', schema: { $ref: '#/definitions/Cluster' } },
+              default: {
+                description: 'error',
+                schema: { $ref: 'common/types.json#/definitions/Error' },
+              },
+            },
+          },
+        },
+      },
+      definitions: {
+        Cluster: { allOf: [{ $ref: 'common/types.json#/definitions/TrackedResource' }] },
+      },
+    };
+    const load = loaderFor({
+      'https://example.com/api/common/types.json': {
+        parameters: { ApiVersion: { name: 'api-version', in: 'query', type: 'string' } },
+        definitions: {
+          Error: { type: 'object' },
+          TrackedResource: {
+            type: 'object',
+            properties: { error: { $ref: '#/definitions/Error' } },
+          },
+        },
+      },
+    });
+
+    const bundled = await bundleSpec(document, { url: ROOT, load });
+
+    expect(bundled.components).toBeUndefined();
+    expect(bundled.parameters).toEqual({
+      ApiVersion: { name: 'api-version', in: 'query', type: 'string' },
+    });
+    expect(bundled.definitions).toEqual({
+      Cluster: { allOf: [{ $ref: '#/definitions/TrackedResource' }] },
+      Error: { type: 'object' },
+      TrackedResource: { type: 'object', properties: { error: { $ref: '#/definitions/Error' } } },
+    });
+    expect(loadContractOperations(convertSwagger2(bundled))).toHaveLength(1);
   });
 
   it('leaves documents without external refs as they are', async () => {

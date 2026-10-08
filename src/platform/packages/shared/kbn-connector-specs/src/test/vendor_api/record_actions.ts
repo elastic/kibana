@@ -16,6 +16,7 @@ import { toResponseFixtures } from './fixtures';
 import type { RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
 import type { ManifestOperation } from './manifest';
+import { matchesPathTemplate } from './manifest';
 
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
 
@@ -96,6 +97,19 @@ const isOperation = (
 const isUnmatched = ({ matched, operation, status }: ContractCall): boolean =>
   matched === undefined && operation === undefined && (status === 404 || status === 405);
 
+// Requests that match no operation, such as those listed in "unmatched", are compared by path.
+const isQueryCall = (query: QueryOperation, call: ContractCall): boolean => {
+  if (!isUnmatched(call)) {
+    return isOperation(query, call.matched);
+  }
+  const { method, path } = toRequestedPath(call);
+  return (
+    query.source === undefined &&
+    query.method.toLowerCase() === method &&
+    matchesPathTemplate(query.path, path)
+  );
+};
+
 // Required properties only, so optional settings such as custom base URLs keep their defaults.
 const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, unknown>> => {
   if (!schema) {
@@ -132,6 +146,18 @@ export const recordActions = async ({
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
+  const validateConfig = async (candidate: Record<string, unknown>, subject: string) => {
+    const result = await connector.schema?.safeParseAsync(candidate);
+    if (result?.success === false) {
+      throw new Error(`${subject} is invalid: ${result.error.message}`);
+    }
+  };
+  await validateConfig(connectorConfig, 'The connector config');
+  for (const [action, { config: overrides }] of Object.entries(fixtures)) {
+    if (overrides) {
+      await validateConfig({ ...connectorConfig, ...overrides }, `The config of ${action}`);
+    }
+  }
   const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
@@ -162,7 +188,7 @@ export const recordActions = async ({
             ...contextOptions,
             connector,
             authType: id,
-            config: connectorConfig,
+            config: { ...connectorConfig, ...fixture.config },
             specs,
             fixtures: toResponseFixtures(fixture.responses),
           });
@@ -211,7 +237,7 @@ export const recordActions = async ({
     for (const call of calls) {
       const { request, requestViolations, responseViolations, matched } = call;
       if (isRead && !SAFE_METHODS.has(toRequestedPath(call).method)) {
-        const query = queries.find((candidate) => isOperation(candidate, matched));
+        const query = queries.find((candidate) => isQueryCall(candidate, call));
         if (query) {
           usedQueries.add(query);
         } else {
