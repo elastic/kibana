@@ -742,6 +742,7 @@ export class TaskManagerRunner implements TaskRunner {
           attempts = 0,
           shouldDeleteTask,
           shouldDisableTask,
+          priority,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
@@ -753,6 +754,13 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.Idle });
           }
 
+          const allowPriority = this.definition?.allowPriorityOverride === true;
+          if (priority !== undefined && !allowPriority) {
+            this.logger.warn(
+              `Ignoring priority returned by task ${this}: task type does not allow priority overrides`,
+              { tags: [this.taskType] }
+            );
+          }
           // A schedule changed externally during the run takes precedence over the one returned by the task runner.
           const scheduleChangedDuringRun = !isEqual(
             this.instance.task.schedule,
@@ -778,6 +786,7 @@ export class TaskManagerRunner implements TaskRunner {
             runAt: runAt || nextRunAtForSchedule(updatedTaskSchedule),
             state,
             schedule: updatedTaskSchedule,
+            ...(priority !== undefined && allowPriority ? { priority } : {}),
             attempts,
             status: TaskStatus.Idle,
           });
