@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useReducer, useCallback } from 'react';
+import React, { useMemo, useReducer, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ContentListClientState, ContentListStateContextValue } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
-import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
+import type { ContentListFeatures } from '../features';
+import { isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
-import { DEFAULT_INITIAL_SORT } from '../features/sorting';
+import type { SortState } from '../features/sorting';
+import {
+  getAllowedSorts,
+  getInitialSort,
+  getPersistedSort,
+  toSortDirectionsByField,
+} from '../features/sorting';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
@@ -50,6 +57,24 @@ const resolveInitialPageSize = (
 };
 
 /**
+ * Resolve the sort the list opens with.
+ *
+ * Precedence:
+ * 1. Persisted sort for the given `queryKeyScope`, if allowed by the sorting config (user preference).
+ * 2. Configured `sorting.initialSort` (or the default).
+ */
+const resolveInitialSort = (
+  queryKeyScope: string,
+  sorting: ContentListFeatures['sorting']
+): SortState => {
+  const persisted = getPersistedSort(
+    queryKeyScope,
+    toSortDirectionsByField(getAllowedSorts(sorting))
+  );
+  return persisted ?? getInitialSort(sorting);
+};
+
+/**
  * Internal provider component that manages the runtime state of the content list.
  *
  * This provider:
@@ -67,13 +92,8 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   const { features, queryKeyScope } = useContentListConfig();
   const { sorting, pagination, search } = features;
 
-  // Determine initial sort from sorting config (default: title ascending).
-  const initialSort = useMemo(() => {
-    if (isSortingConfig(sorting) && sorting.initialSort) {
-      return sorting.initialSort;
-    }
-    return DEFAULT_INITIAL_SORT;
-  }, [sorting]);
+  // Resolved once at mount so the opening sort stays stable for URL sync.
+  const [initialSort] = useState(() => resolveInitialSort(queryKeyScope, sorting));
 
   // Determine initial page size from pagination config or persisted value.
   const initialPageSize = useMemo(
@@ -160,7 +180,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
 
   return (
     <ContentListStateContext.Provider value={contextValue}>
-      <ContentListUrlSync />
+      <ContentListUrlSync initialSort={initialSort} />
       {children}
     </ContentListStateContext.Provider>
   );
