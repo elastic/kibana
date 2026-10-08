@@ -125,6 +125,9 @@ jest.mock('@kbn/agentic-investigations-common', () => {
 });
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
+jest.mock('../../hooks/use_running_summary', () => ({
+  useRunningSummary: () => ({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 }),
+}));
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
@@ -669,6 +672,41 @@ describe('ConversationsPage decisions', () => {
     // Closed holds rows, but they are not work: the header must not read
     // "0 actions need you" beside them.
     expect(screen.getByText('No events found')).toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage idle state', () => {
+  it('shows the workers-running panel and idle header when nothing is open or closed', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
+      'Your Watches are running. No actions need you'
+    );
+    expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent(
+      '4 Watches are running right now · 6 of 6 Workers are enabled'
+    );
+  });
+
+  it('hides the panel while proposals are open', () => {
+    mockProposals({ investigate: [proposal] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the panel when the window holds only closed proposals', () => {
+    mockProposals({ closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
   });
 });
 

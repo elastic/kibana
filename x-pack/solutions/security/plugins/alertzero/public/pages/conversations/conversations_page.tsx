@@ -48,7 +48,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
-import type { ProposalItem } from '../../../common/proposals/list';
+import { CLOSED_GROUP_KEY, type ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -56,8 +56,10 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
 import { useCopyInvestigationLink } from './use_copy_investigation_link';
-import { COPY_LINK_TOASTS, QUEUE_PAGE_INFO } from './translations';
+import { COPY_LINK_TOASTS, IDLE_HEADER, QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
+import { WorkersRunningPanel } from '../../components/workers_running_panel';
+import { useRunningSummary } from '../../hooks/use_running_summary';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
@@ -142,6 +144,12 @@ const ConversationsPageContent: React.FC = () => {
   // category. Shares the chart row's query key, so it costs no extra request.
   const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
   const openCount = chartsSummary?.currentOpen ?? 0;
+  const runningSummary = useRunningSummary();
+  // Idle: nothing open and nothing closed in the window, so the queue has no rows at all.
+  // Gated on settled queries so a loading or failed count never reads as "nothing to do".
+  const closedTotal = sections.find(({ id }) => id === CLOSED_GROUP_KEY)?.total;
+  const isIdle =
+    !isLoading && !error && openCount === 0 && closedTotal === 0 && proposalsById.size === 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -413,12 +421,24 @@ const ConversationsPageContent: React.FC = () => {
             // beside a populated header.
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
+            {...(isIdle && {
+              greeting: IDLE_HEADER.greeting,
+              title: IDLE_HEADER.title,
+              subtitle: IDLE_HEADER.subtitle(runningSummary),
+            })}
           />
-          <ScanFailureCallout />
         </EuiFlexItem>
+        <ScanFailureCallout
+          wrapper={(callout) => <EuiFlexItem grow={false}>{callout}</EuiFlexItem>}
+        />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
         </EuiFlexItem>
+        {isIdle && (
+          <EuiFlexItem grow={false}>
+            <WorkersRunningPanel />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <Impact
             items={conversations}
@@ -429,25 +449,26 @@ const ConversationsPageContent: React.FC = () => {
 
         {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
             so one disappearing would move the others as the queue drains. */}
-        {sections.map((section) => (
-          <EuiFlexItem key={section.id} grow={false}>
-            <QueueSection
-              section={section}
-              entityFilter={effectiveEntityFilter}
-              selectedConversationId={selectedConversationId}
-              onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
-              onClickAction={onClickAction}
-              onClickCard={onClickCard}
-              onOpenChat={openChatForProposal}
-              getChatHref={getChatHrefForProposal}
-              canManageEscalations={canManageEscalations}
-              canCloseInvestigation={canManageInvestigations}
-              onCopyLink={copyLinkForProposal}
-              renderAssignees={renderAssignees}
-              renderInFlightStatus={renderInFlightStatus}
-            />
-          </EuiFlexItem>
-        ))}
+        {!isIdle &&
+          sections.map((section) => (
+            <EuiFlexItem key={section.id} grow={false}>
+              <QueueSection
+                section={section}
+                entityFilter={effectiveEntityFilter}
+                selectedConversationId={selectedConversationId}
+                onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
+                onClickAction={onClickAction}
+                onClickCard={onClickCard}
+                onOpenChat={openChatForProposal}
+                getChatHref={getChatHrefForProposal}
+                canManageEscalations={canManageEscalations}
+                canCloseInvestigation={canManageInvestigations}
+                onCopyLink={copyLinkForProposal}
+                renderAssignees={renderAssignees}
+                renderInFlightStatus={renderInFlightStatus}
+              />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGroup>
     </AlertZeroPageSection>
   );
