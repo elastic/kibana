@@ -582,12 +582,11 @@ const EmptyCard: React.FC<{
         alignItems="center"
         responsive={false}
         wrap={false}
-        justifyContent="spaceBetween"
         css={css`
           min-height: ${euiTheme.size.xl};
         `}
       >
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
             <p
               css={css`
