@@ -125,6 +125,7 @@ const renderReorderableItems = () => {
   const fields = [createKeywordField('extension'), createKeywordField('machine.os')];
   const reorderGroup: UnifiedFieldListItemReorderGroup = {
     items: fields.map((field) => ({ id: field.name })),
+    itemGap: 2,
     label: 'Selected fields',
     onReorder: jest.fn(),
   };

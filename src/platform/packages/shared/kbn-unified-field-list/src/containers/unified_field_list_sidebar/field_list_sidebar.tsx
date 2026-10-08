@@ -46,6 +46,8 @@ import {
   type SelectedFieldsResult,
 } from './group_fields';
 
+const FIELD_ITEM_GAP = 2; // vertical gap between the field items in px
+
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,
   | 'services'
@@ -316,6 +318,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       canReorderSelectedFields && selectedFieldsGroup
         ? {
             items: selectedFieldsGroup.fields.map((field) => ({ id: field.name })),
+            itemGap: FIELD_ITEM_GAP,
             label: selectedFieldsGroup.title,
             onReorder: onReorderSelectedField,
           }
@@ -610,7 +613,7 @@ const componentStyles = {
       height: '100%',
 
       '.unifiedFieldListItemButton.kbnFieldButton': {
-        marginBottom: `calc(${euiTheme.size.xs} / 2)`,
+        marginBottom: `${FIELD_ITEM_GAP}px`,
         background: 'none',
         boxShadow: 'none',
       },

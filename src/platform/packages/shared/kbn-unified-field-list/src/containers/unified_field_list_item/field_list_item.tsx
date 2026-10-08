@@ -8,8 +8,10 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiSpacer, EuiTitle, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
@@ -121,11 +123,77 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
 
 export interface UnifiedFieldListItemReorderGroup {
   items: Array<{ id: string }>; // in their visual order
+  itemGap: number; // vertical gap between the items in px
   label: string; // for screen reader announcements
   onReorder: (sourceFieldName: string, targetFieldName: string) => void;
 }
 
 const REORDER_DROP_TYPES: DropType[] = ['reorder'];
+
+const DRAG_DROP_ITEM_GAP = 8;
+
+/**
+ * Returns by how many positions the drag and drop library shifts the item while an item of its group is reordered.
+ */
+const getReorderShift = (
+  items: UnifiedFieldListItemReorderGroup['items'],
+  itemId: string,
+  draggingId: string | undefined,
+  hoveredDropTargetId: string | undefined
+): number => {
+  const draggingIndex = items.findIndex((item) => item.id === draggingId);
+  const droppingIndex = items.findIndex((item) => item.id === hoveredDropTargetId);
+
+  if (draggingIndex === -1 || droppingIndex === -1 || draggingIndex === droppingIndex) {
+    return 0;
+  }
+
+  const itemIndex = items.findIndex((item) => item.id === itemId);
+
+  if (itemIndex === draggingIndex) {
+    return droppingIndex - draggingIndex;
+  }
+
+  if (draggingIndex < droppingIndex) {
+    return itemIndex > draggingIndex && itemIndex <= droppingIndex ? -1 : 0;
+  }
+
+  return itemIndex >= droppingIndex && itemIndex < draggingIndex ? 1 : 0;
+};
+
+interface ReorderableFieldWrapperProps {
+  value: DragDropIdentifier;
+  reorderGroup: UnifiedFieldListItemReorderGroup;
+  dataTestSubj: string;
+  children: JSX.Element;
+}
+
+/**
+ * Keeps the field aligned with its position while its group is reordered via keyboard: the drag and drop library
+ * shifts the fields as if they were `DRAG_DROP_ITEM_GAP` apart, so this compensates the difference to the actual gap.
+ * It wraps `Draggable` so that the focus ring of the library stays aligned with the field too.
+ */
+const ReorderableFieldWrapper: React.FC<ReorderableFieldWrapperProps> = memo(
+  ({ value, reorderGroup, dataTestSubj, children }) => {
+    const [{ dragging, hoveredDropTarget, keyboardMode }] = useDragDropContext();
+    const styles = useMemoCss(componentStyles);
+    const { items, itemGap } = reorderGroup;
+    const shift = keyboardMode
+      ? getReorderShift(items, value.id, dragging?.id, hoveredDropTarget?.id)
+      : 0;
+    const offset = shift * (itemGap - DRAG_DROP_ITEM_GAP);
+
+    return (
+      <div
+        data-test-subj={dataTestSubj}
+        css={styles.reorderableFieldWrapper}
+        style={offset ? { transform: `translateY(${offset}px)` } : undefined}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 interface ReorderableFieldDropTargetProps {
   value: DragDropIdentifier;
@@ -136,17 +204,15 @@ interface ReorderableFieldDropTargetProps {
 }
 
 /**
- * Makes a field item a drop target while another item of its group is dragged. It's the only part of the item
- * subscribed to the drag and drop context, so the context updates during a drag don't re-render the whole item.
+ * Makes the field a drop target while another field of its group is dragged.
  */
 const ReorderableFieldDropTarget: React.FC<ReorderableFieldDropTargetProps> = memo(
   ({ value, order, reorderGroup, onDragStart, children }) => {
     const [{ dragging }] = useDragDropContext();
     const { items, onReorder } = reorderGroup;
     const isDragged = dragging?.id === value.id;
-    const isDropTargetActive = Boolean(
-      dragging && !isDragged && items.some((item) => item.id === dragging.id)
-    );
+    const isDropTargetActive =
+      !isDragged && Boolean(dragging && items.some((item) => item.id === dragging.id));
 
     // `Draggable` ignores `onDragStart` of reorderable items
     useEffect(() => {
@@ -169,6 +235,7 @@ const ReorderableFieldDropTarget: React.FC<ReorderableFieldDropTargetProps> = me
         reorderableGroup={items}
         onDrop={onDrop}
       >
+        {/* `Droppable` decorates its child element while the field is an active drop target */}
         <div>{children}</div>
       </Droppable>
     );
@@ -462,33 +529,47 @@ function UnifiedFieldListItemComponent({
     />
   );
 
+  const draggableFieldItemButton = (
+    <Draggable
+      dragType={reorderGroup ? 'move' : 'copy'}
+      dragClassName="unifiedFieldListItemButton__dragging"
+      order={order}
+      value={value}
+      onDragStart={closePopover}
+      isDisabled={isDragDisabled}
+      reorderableGroup={reorderGroup?.items}
+      dataTestSubj={`${dndDataTestSubjPrefix}-${field.name}`}
+    >
+      {reorderGroup ? (
+        <ReorderableFieldDropTarget
+          order={order}
+          value={value}
+          reorderGroup={reorderGroup}
+          onDragStart={closePopover}
+        >
+          {fieldItemButton}
+        </ReorderableFieldDropTarget>
+      ) : (
+        fieldItemButton
+      )}
+    </Draggable>
+  );
+
   return (
     <FieldPopover
       isOpen={infoIsOpen}
       button={
-        <Draggable
-          dragType={reorderGroup ? 'move' : 'copy'}
-          dragClassName="unifiedFieldListItemButton__dragging"
-          order={order}
-          value={value}
-          onDragStart={closePopover}
-          isDisabled={isDragDisabled}
-          reorderableGroup={reorderGroup?.items}
-          dataTestSubj={`${dndDataTestSubjPrefix}-${field.name}`}
-        >
-          {reorderGroup ? (
-            <ReorderableFieldDropTarget
-              order={order}
-              value={value}
-              reorderGroup={reorderGroup}
-              onDragStart={closePopover}
-            >
-              {fieldItemButton}
-            </ReorderableFieldDropTarget>
-          ) : (
-            fieldItemButton
-          )}
-        </Draggable>
+        reorderGroup ? (
+          <ReorderableFieldWrapper
+            value={value}
+            reorderGroup={reorderGroup}
+            dataTestSubj={`${dndDataTestSubjPrefix}-${field.name}-reorderable`}
+          >
+            {draggableFieldItemButton}
+          </ReorderableFieldWrapper>
+        ) : (
+          draggableFieldItemButton
+        )
       }
       closePopover={closePopover}
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
@@ -518,3 +599,9 @@ function UnifiedFieldListItemComponent({
 }
 
 export const UnifiedFieldListItem = memo(UnifiedFieldListItemComponent);
+
+const componentStyles = {
+  // the same transition as `@kbn/dom-drag-drop` uses for shifting the reordered items
+  reorderableFieldWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({ transition: `transform ${euiTheme.animation.fast} ease-in-out` }),
+};
