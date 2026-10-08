@@ -74,11 +74,14 @@ export default ({ getService }: FtrProviderContext) => {
         const resourcesResponse = await migrationResourcesRoutes.getMissingResources({
           migrationId,
         });
-        expect(resourcesResponse.body).toEqual([
-          { type: 'macro', name: 'summariesonly' },
-          { type: 'macro', name: 'drop_dm_object_name(1)' },
-          { type: 'lookup', name: 'malware_tracker' },
-        ]);
+        expect(resourcesResponse.body).toHaveLength(3);
+        expect(resourcesResponse.body).toEqual(
+          expect.arrayContaining([
+            { type: 'macro', name: 'summariesonly' },
+            { type: 'macro', name: 'drop_dm_object_name(1)' },
+            { type: 'lookup', name: 'malware_tracker' },
+          ])
+        );
       });
     });
 
