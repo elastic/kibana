@@ -311,23 +311,39 @@ const ENTITY_PROFILES: Record<
     { host: 'nt-ntp-04', user: 'svc_ntp', ip: '10.70.3.4', process: 'chronyd' },
     { host: 'nt-ntp-04', user: 'svc_ntp', ip: '10.70.3.4', process: 'chronyd' },
   ],
-  // Threshold-labeled fixtures: threshold rules whose count is too low, so a
-  // single host's benign burst trips it. Same benign single-entity shape as the
-  // exception fixtures, but on a `threshold` rule the tightest fix is the count,
-  // and the threshold branch only exists on this rule type.
+  // Threshold-labeled fixtures: threshold rules (grouped by host.name) whose
+  // count is too low. Each alerting host fires exactly 4 times against a
+  // threshold of 3 — just above it — and no host, user, ip or process repeats
+  // across hosts, so the exception and query branches have no common entity to
+  // key on. With every candidate entity unavailable, the prompt's preference
+  // order leaves the threshold count as the only correct label.
   'fp-threshold-bruteforce-burst': [
-    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
-    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
-    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
-    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
-    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+    { host: 'bastion-11', user: 'svc_deploy', ip: '10.80.0.11', process: 'sshd' },
+    { host: 'bastion-11', user: 'svc_deploy', ip: '10.80.0.11', process: 'sshd' },
+    { host: 'bastion-11', user: 'svc_deploy', ip: '10.80.0.11', process: 'sshd' },
+    { host: 'bastion-11', user: 'svc_deploy', ip: '10.80.0.11', process: 'sshd' },
+    { host: 'jump-12', user: 'ansible', ip: '10.80.1.12', process: 'ssh' },
+    { host: 'jump-12', user: 'ansible', ip: '10.80.1.12', process: 'ssh' },
+    { host: 'jump-12', user: 'ansible', ip: '10.80.1.12', process: 'ssh' },
+    { host: 'jump-12', user: 'ansible', ip: '10.80.1.12', process: 'ssh' },
+    { host: 'gw-13', user: 'ops_pki', ip: '10.80.2.13', process: 'openvpn' },
+    { host: 'gw-13', user: 'ops_pki', ip: '10.80.2.13', process: 'openvpn' },
+    { host: 'gw-13', user: 'ops_pki', ip: '10.80.2.13', process: 'openvpn' },
+    { host: 'gw-13', user: 'ops_pki', ip: '10.80.2.13', process: 'openvpn' },
   ],
   'fp-threshold-auditflood': [
-    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
-    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
-    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
-    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
-    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+    { host: 'loghost-21', user: 'svc_rsyslog', ip: '10.80.3.21', process: 'rsyslogd' },
+    { host: 'loghost-21', user: 'svc_rsyslog', ip: '10.80.3.21', process: 'rsyslogd' },
+    { host: 'loghost-21', user: 'svc_rsyslog', ip: '10.80.3.21', process: 'rsyslogd' },
+    { host: 'loghost-21', user: 'svc_rsyslog', ip: '10.80.3.21', process: 'rsyslogd' },
+    { host: 'archive-22', user: 'svc_fluent', ip: '10.80.4.22', process: 'fluentd' },
+    { host: 'archive-22', user: 'svc_fluent', ip: '10.80.4.22', process: 'fluentd' },
+    { host: 'archive-22', user: 'svc_fluent', ip: '10.80.4.22', process: 'fluentd' },
+    { host: 'archive-22', user: 'svc_fluent', ip: '10.80.4.22', process: 'fluentd' },
+    { host: 'relay-23', user: 'svc_logstash', ip: '10.80.5.23', process: 'logstash' },
+    { host: 'relay-23', user: 'svc_logstash', ip: '10.80.5.23', process: 'logstash' },
+    { host: 'relay-23', user: 'svc_logstash', ip: '10.80.5.23', process: 'logstash' },
+    { host: 'relay-23', user: 'svc_logstash', ip: '10.80.5.23', process: 'logstash' },
   ],
   // Schedule-labeled fixtures: the FPs are real-but-stale events a shorter
   // lookback would never see, spread across entities (an exception cannot cover
@@ -406,9 +422,9 @@ const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => 
       };
     case 'threshold':
       // ThresholdRuleRequiredFields: threshold { field[], value, cardinality[] }.
-      // The seeded clusters that target the `threshold` label fire from one benign
-      // host grouping, so the current count (3) is deliberately below what a real
-      // attack needs — the diagnosis worth making is raising it.
+      // Each seeded host fires exactly 4 events — just above this count — so
+      // every alerting host trips the rule, and the diagnosis worth making is
+      // raising the count above the benign ceiling.
       return {
         threshold: {
           field: ['host.name'],
@@ -421,8 +437,8 @@ const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => 
   }
 };
 
-const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: number) => ({
-  '@timestamp': new Date().toISOString(),
+const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: number, at?: Date) => ({
+  '@timestamp': (at ?? new Date()).toISOString(),
   'kibana.alert.rule.uuid': ruleUuid,
   'kibana.alert.rule.name': ruleName,
   'kibana.alert.rule.rule_id': ruleId,
@@ -473,7 +489,11 @@ export const seedRuleAndFpAlerts = async (
       severity: 'medium',
       risk_score: 40,
       interval: '5m',
-      from: 'now-10m',
+      // Schedule fixtures need a window wide enough that their spread-out alert
+      // timestamps (seeded across now-24h) all land inside it: the over-wide
+      // lookback must be visible to the model as the rule's defect. Every other
+      // fixture gets the default now-10m window its burst-shaped cluster implies.
+      from: fixture.id.startsWith('fp-schedule-') ? 'now-24h' : 'now-10m',
       to: 'now',
       // The worker only diagnoses enabled rules (rule_tuning.yaml gates diagnose_rule on
       // `fetch_rule.output.enabled == true`) — a disabled rule produces no FPs, so tuning it
@@ -498,8 +518,16 @@ export const seedRuleAndFpAlerts = async (
   if (entities.length === 0) {
     throw new Error(`No entity profile for fixture ${fixture.id}`);
   }
+  // Schedule fixtures spread their alerts across the rule's wide (now-24h)
+  // lookback: the only visible defect is that the window sweeps in routine
+  // activity from many hours ago, which the timestamps must actually show.
+  // Timestamps are oldest-first so the cluster reads as routine recurrence,
+  // not a burst.
+  const isSchedule = fixture.id.startsWith('fp-schedule-');
+  const alertTime = (i: number): Date | undefined =>
+    isSchedule ? new Date(Date.now() - (entities.length - i) * 5 * 60 * 60 * 1000) : undefined;
   const docs = entities.map((e, i) => ({
-    ...baseAlert(seededUuid, ruleName, ruleId, i),
+    ...baseAlert(seededUuid, ruleName, ruleId, i, alertTime(i)),
     host: { name: e.host },
     user: { name: e.user },
     source: { ip: e.ip },

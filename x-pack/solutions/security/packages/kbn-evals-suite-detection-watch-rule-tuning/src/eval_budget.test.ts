@@ -108,8 +108,8 @@ describe('rule-tuning eval budget', () => {
   });
 
   it('keeps the majority class small enough that a constant answer cannot look competent', () => {
-    // `manual` holds 17/35 = 0.486 — one fixture from the guard, so the next fixture
-    // added must be exception/query/risk_score. If a live-stack run shows the true
+    // `manual` holds 17/39 = 0.436 — one fixture from the guard, so the next fixture
+    // added must be exception/query/risk_score/threshold/schedule. If a live-stack run shows the true
     // distribution skews further, the fix is rebalancing fixtures, not raising the guard.
     const counts = labelCounts();
     const total = [...counts.values()].reduce((sum, n) => sum + n, 0);

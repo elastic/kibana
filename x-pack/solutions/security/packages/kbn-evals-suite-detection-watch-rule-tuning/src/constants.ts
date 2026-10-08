@@ -61,6 +61,9 @@ export type ChangeType = (typeof CHANGE_TYPES)[number];
 /** Values the `risk_score` branch's `proposed_severity` accepts. */
 export const PROPOSED_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
+/** Values the shared `confidence` field accepts on every branch. */
+export const CONFIDENCE_LEVELS = ['low', 'medium', 'high'] as const;
+
 /**
  * `exception` branch operators mapped to the payload field each one requires
  * (see the `exception_entries` item union in rule_tuning_review.yaml). Operators

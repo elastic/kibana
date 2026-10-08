@@ -63,6 +63,10 @@ describe('rule-tuning evaluators', () => {
     const base: RuleTuningVerdict = {
       change_type: 'exception',
       summary: 'FPs are all the build agent running java, not a detection',
+      title: 'Except the CI build agent',
+      fp_pattern: 'The build agent runs java on every build',
+      reasoning: '1. grouped the FPs 2. one host dominates 3. exception is tightest',
+      confidence: 'high',
       exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
       executionId: 'exec-4',
       executionStatus: 'completed' as never,
@@ -313,6 +317,53 @@ describe('rule-tuning evaluators', () => {
       } as never);
       expect(blankSummary.score).toBe(0);
     });
+
+    it('rejects any branch missing one of the shared proposal-card fields', async () => {
+      // Every oneOf branch's required list carries title/fp_pattern/reasoning/confidence
+      // alongside summary — a blank card field is an invalid proposal on ANY change_type.
+      for (const field of ['title', 'fp_pattern', 'reasoning', 'confidence'] as const) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, [field]: undefined },
+        } as never);
+        expect(result.score).toBe(0);
+        expect((result.metadata as { commonFieldsValid: boolean }).commonFieldsValid).toBe(false);
+
+        const blank = await validProposal.evaluate!({
+          output: { ...base, [field]: '   ' },
+        } as never);
+        expect(blank.score).toBe(0);
+      }
+    });
+
+    it('rejects a confidence outside the low/medium/high vocabulary', async () => {
+      for (const bad of ['certain', 'HIGH', 1]) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, confidence: bad },
+        } as never);
+        expect(result.score).toBe(0);
+      }
+    });
+
+    it('accepts every confidence in the low/medium/high vocabulary', async () => {
+      for (const good of ['low', 'medium', 'high']) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, confidence: good },
+        } as never);
+        expect(result.score).toBe(1);
+      }
+    });
+
+    it('rejects a manual branch that drops the shared fields', async () => {
+      const result = await validProposal.evaluate!({
+        output: {
+          ...base,
+          change_type: 'manual',
+          title: undefined,
+          executionId: 'exec-5',
+        },
+      } as never);
+      expect(result.score).toBe(0);
+    });
   });
 
   describe('isAwaitingApproval', () => {
@@ -388,7 +439,7 @@ describe('explainMissingProposal', () => {
 describe('isWaitingStepNotReady', () => {
   // The resume route rejects with this 409 when the execution has reached waiting_for_input but
   // its waiting step row is not queryable yet. Retrying through it is correct; treating it as a
-  // hard failure killed a 35-fixture run on fixture 8.
+  // hard failure killed a 39-fixture run on fixture 8.
   const raceError = new Error(
     'Workflow execution "e1ebcee4" is in status "waiting step not found" but expected "waiting_for_input".'
   );

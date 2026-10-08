@@ -112,6 +112,10 @@ describe('the suite pipeline (real evaluators through the real summary)', () => 
     const proposal = {
       change_type: 'exception',
       summary: 'the FP cluster is one known-good host',
+      title: 'Except the build agent',
+      fp_pattern: 'the build agent runs java on every build',
+      reasoning: '1. grouped the FPs 2. one host dominates 3. exception is tightest',
+      confidence: 'high',
       exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
     };
 

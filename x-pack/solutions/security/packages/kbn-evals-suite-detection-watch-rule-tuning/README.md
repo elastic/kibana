@@ -27,7 +27,7 @@ kbn-evals-suite-detection-watch-rule-tuning/
 │   ├── rule_tuning_approval.spec.ts   # approve/reject arms for the review gate
 │   └── seed_fp_cluster.ts             # seeds one rule + its closed-FP alert cluster
 ├── src/
-│   ├── constants.ts                   # workflow ids, four-branch vocabulary, tag literals
+│   ├── constants.ts                   # workflow ids, six-branch vocabulary, tag literals
 │   ├── evaluators.ts                  # ChangeTypeAccuracy, ValidProposal
 │   ├── evaluators/tool_routing.ts     # trace-based Tool Routing + setup reachability probe
 │   ├── evaluators/run_summary.ts      # per-evaluator mean ± CI95 (n=N), SATURATED flags
@@ -84,7 +84,7 @@ model-quality claim needs at least that.
 
 The workflow's concurrency group is `max: 1, strategy: drop`, so the experiment runs at
 `concurrency: 1` and **wall time scales linearly with the fixture count**: measured ~233s per fixture,
-i.e. ~6.8h for 35 fixtures × 3 repetitions. `playwright.config.ts` therefore sets `timeout: 8h`; the
+i.e. ~6.9h for 39 fixtures × 3 repetitions. `playwright.config.ts` therefore sets `timeout: 8h`; the
 previous 30m budget killed every attempt with `Test timeout of 1800000ms exceeded` regardless of
 model quality. Re-measure both numbers whenever the fixture count or the workflow's step cost moves.
 
@@ -125,9 +125,9 @@ invert `apply_query_tuning.if` in `rule_tuning_review.yaml` and the reject-arm t
 Each dataset run (i.e. each repetition) ends with one line per evaluator:
 
 ```
-📊 security: rule-tuning-workflow-decision | ChangeTypeAccuracy: mean 0.667 ±0.365 (n=35)
-📊 security: rule-tuning-workflow-decision | ValidProposal: mean 1.000 ±0.000 (n=35) [SATURATED(no signal)]
-📊 security: rule-tuning-workflow-decision | Tool Routing: mean 1.000 ±0.000 (n=34) [N/A×1]
+📊 security: rule-tuning-workflow-decision | ChangeTypeAccuracy: mean 0.667 ±0.365 (n=39)
+📊 security: rule-tuning-workflow-decision | ValidProposal: mean 1.000 ±0.000 (n=39) [SATURATED(no signal)]
+📊 security: rule-tuning-workflow-decision | Tool Routing: mean 1.000 ±0.000 (n=38) [N/A×1]
 ```
 
 `n` counts one repetition's examples; the framework's score table aggregates the repetitions for the

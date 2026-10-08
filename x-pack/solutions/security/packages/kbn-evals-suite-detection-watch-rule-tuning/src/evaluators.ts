@@ -8,6 +8,7 @@
 import type { Evaluator } from '@kbn/evals';
 import {
   CHANGE_TYPES,
+  CONFIDENCE_LEVELS,
   EXCEPTION_OPERATOR_PAYLOAD,
   PROPOSED_SEVERITIES,
   type ChangeType,
@@ -75,9 +76,10 @@ export const changeTypeAccuracy: Evaluator = {
 
 /**
  * Guardrail: the structured output must be a well-formed proposal — a `change_type`
- * from the workflow's four-branch union, a summary, and the payload fields that
- * branch's apply gate requires. Catches schema drift and failed executions
- * independently of whether the path was correct.
+ * from the workflow's six-branch union, a summary, the shared proposal-card fields
+ * (title/fp_pattern/reasoning/confidence), and the payload fields that branch's
+ * apply gate requires. Catches schema drift and failed executions independently
+ * of whether the path was correct.
  */
 export const validProposal: Evaluator = {
   name: 'ValidProposal',
@@ -148,17 +150,31 @@ export const validProposal: Evaluator = {
         break;
     }
 
-    // Every branch requires `summary`, and the review_tuning gate opens only when
-    // `structured_output.summary != null` — a summary-less proposal can never
-    // produce an approval decision, whatever its change_type.
-    const summaryValid = typeof proposal.summary === 'string' && proposal.summary.trim() !== '';
+    // Every branch requires `summary` plus the shared proposal-card fields the
+    // gate renders (`title`, `fp_pattern`, `reasoning`, `confidence`), and the
+    // review_tuning gate opens only when `structured_output.summary != null` —
+    // a summary-less proposal can never produce an approval decision, whatever
+    // its change_type.
+    const nonEmptyString = (v: unknown) => typeof v === 'string' && v.trim() !== '';
+    const summaryValid = nonEmptyString(proposal.summary);
+    const commonFieldsValid =
+      nonEmptyString(proposal.title) &&
+      nonEmptyString(proposal.fp_pattern) &&
+      nonEmptyString(proposal.reasoning) &&
+      (CONFIDENCE_LEVELS as readonly string[]).includes(String(proposal.confidence));
 
-    const valid = changeTypeValid && payloadValid && summaryValid;
+    const valid = changeTypeValid && payloadValid && summaryValid && commonFieldsValid;
 
     return {
       score: valid ? 1 : 0,
       label: valid ? 'valid' : 'invalid',
-      metadata: { changeTypeValid, payloadValid, summaryValid, ruleType: ruleType ?? null },
+      metadata: {
+        changeTypeValid,
+        payloadValid,
+        summaryValid,
+        commonFieldsValid,
+        ruleType: ruleType ?? null,
+      },
     };
   },
 };

@@ -70,22 +70,31 @@ const SUMMARY_CRITERIA = [
 /** Golden tuning-path fixtures, one per branch of the review workflow's `oneOf`.
  *
  * LABEL DERIVATION: the review workflow's `diagnose_rule` schema is a root `oneOf` of
- * four const branches — exception (+`exception_entries`), query (+`proposed_query`),
- * risk_score (+`proposed_risk_score`/`proposed_severity`) and manual (summary only) —
+ * six const branches — exception (+`exception_entries`), query (+`proposed_query`),
+ * risk_score (+`proposed_risk_score`/`proposed_severity`), threshold
+ * (+`proposed_threshold_value`/`proposed_threshold_field`/`proposed_threshold_cardinality`),
+ * schedule (+`proposed_interval`/`proposed_from`) and manual (summary only) —
  * and its prompt asks for the branch whose criteria the entity evidence actually meets.
- * Every label here is one of those four, derived from the fixture's own description and
+ * Every label here is one of those six, derived from the fixture's own description and
  * seeded entity profile:
  *
  *   - `exception`: one repeated, known-good entity the rule can be excepted on.
  *   - `query`: FPs spread across unrelated entities sharing an over-broad query term.
  *   - `risk_score`: real detections the description asks to be downgraded.
+ *   - `threshold`: a `threshold` rule whose count sits just under a benign ceiling —
+ *     several distinct hosts each fire just above it, with no entity shared across
+ *     hosts for an exception or query to key on.
+ *   - `schedule`: the FPs are routine events that only land inside the rule because
+ *     its lookback is far wider than the activity needs; the alerts are seeded spread
+ *     across a now-24h window so the over-wide lookback is visible to the model.
  *   - `manual`: no automated branch applies — the pattern is volume rather than
  *     identity, every entity is distinct with no shared key, or the rule type blocks the
- *     only candidate (a query change needs a `query` rule). The workflow's only
- *     automated paths are exception/query/risk_score, so a volume-shaped fix has to be
- *     recommended through the hand-off branch.
+ *     only candidate (a query change needs a `query` rule). The workflow's automated
+ *     paths are exception/query/risk_score/threshold/schedule, so a volume-shaped fix
+ *     has to be recommended through the hand-off branch.
  *
- * Distribution: 6 exception / 6 query / 6 risk_score / 17 manual. Labels are
+ * Distribution: 6 exception / 6 query / 6 risk_score / 2 threshold / 2 schedule / 17
+ * manual (39 total). Labels are
  * PRELIMINARY until validated on the live stack: the first full run is a
  * characterization baseline, and any relabel must go through the golden-label
  * characterization test in the same commit.
@@ -306,13 +315,6 @@ const TUNING_FIXTURES: Array<{
     ruleType: 'query',
     description:
       'Routine archive extraction is benign in this environment - downgrade instead of suppressing',
-  },
-  {
-    id: 'fp-low-value-scripting',
-    expected: 'risk_score',
-    ruleType: 'query',
-    description:
-      'Everyday scripting by platform engineers is expected - lower severity to keep visibility',
   },
   {
     id: 'fp-unfixable-telemetry',

@@ -51,6 +51,12 @@ const goldenLabels = () => {
   if (ids.length !== expected.length) {
     throw new Error(`fixture spec id count (${ids.length}) != expected count (${expected.length})`);
   }
+  // A duplicated fixture id silently overwrites its twin in the Map below: the
+  // later entry's label wins, the earlier one is never graded, and the declared
+  // fixture count (eval budget, run summaries) overcounts what actually runs.
+  if (new Set(ids).size !== ids.length) {
+    throw new Error(`duplicate fixture ids: ${ids.filter((x, i) => ids.indexOf(x) !== i)}`);
+  }
   return new Map(ids.map((id, i) => [id, expected[i]]));
 };
 

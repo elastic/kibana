@@ -55,6 +55,11 @@ export interface ExceptionEntry {
 export interface RuleTuningProposal {
   change_type?: ChangeType;
   summary?: string;
+  /** Shared proposal-card fields the workflow requires on every branch. */
+  title?: string;
+  fp_pattern?: string;
+  reasoning?: string;
+  confidence?: string;
   exception_entries?: ExceptionEntry[];
   proposed_query?: string;
   proposed_risk_score?: number;
