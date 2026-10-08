@@ -17,7 +17,11 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
@@ -241,6 +245,25 @@ describe('WorkersService', () => {
           !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
+  });
+
+  it('projects the Alert Analysis prerequisite reason without changing the Worker state', async () => {
+    const harness = createPersistentHarness();
+    (harness.management.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+    const service = harness.createService();
+
+    const blocked = await service.list(request, SPACE);
+    expect(blocked.workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+      enabled: false,
+      enableBlockedReason: 'alertAnalysisWorkflowDisabled',
+    });
+    expect(
+      blocked.workers.find(({ id }) => id === RULE_TUNING)?.enableBlockedReason
+    ).toBeUndefined();
+
+    (harness.management.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
+    const ready = await service.list(request, SPACE);
+    expect(ready.workers.find(({ id }) => id === TRIAGE)?.enableBlockedReason).toBeUndefined();
   });
 
   it('rejects enabling a worker that has no service account', async () => {
@@ -796,7 +819,14 @@ describe('WorkersService', () => {
     const { workers } = await harness.createService().list(request, SPACE);
     const triage = workers.find((w) => w.id === TRIAGE);
 
-    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
+    // The template is still used for an uninstalled Worker. The only workflow lookup is the
+    // global Alert Analysis prerequisite for Alert Triage.
+    expect(harness.management.getWorkflow).toHaveBeenCalledTimes(1);
+    expect(harness.management.getWorkflow).toHaveBeenCalledWith(
+      SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+      GLOBAL_WORKFLOW_SPACE_ID,
+      request
+    );
     expect(Array.isArray(triage?.skills)).toBe(true);
   });
 

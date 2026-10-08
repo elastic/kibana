@@ -29,6 +29,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkerDependenciesCallout } from '../../../components/worker_dependencies/worker_dependencies_callout';
 import { ServiceAccountField } from './service_account_field';
 import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
@@ -292,6 +293,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   const settingsBody = (
     <>
+      <WorkerDependenciesCallout worker={worker} surface="settings" />
       {settingsLocked ? (
         <EuiText size="s" color="subdued">
           <p>{settingsI18n.WORKER_SETTINGS_UNAVAILABLE}</p>

@@ -126,6 +126,12 @@ components:
           $ref: '#/components/schemas/WorkerRunState'
         stateReason:
           type: string
+        enableBlockedReason:
+          type: string
+          enum: [alertAnalysisWorkflowDisabled, alertAnalysisRuntimeDisabled]
+          description: >-
+            Why Alert Triage cannot be enabled. Omitted for other Workers and when
+            its Alert Analysis prerequisite is available.
         lifecycle:
           $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
         settings:

@@ -35,6 +35,12 @@ export const queryKeys = {
     all: ['alertzero', 'workers'] as const,
     list: () => [...queryKeys.workers.all, 'list'] as const,
   },
+  workerDependencies: {
+    defendPolicies: (spaceBasePath: string) =>
+      ['alertzero', 'workerDependencies', spaceBasePath, 'defendPolicies'] as const,
+    threatReportWorkflows: (spaceBasePath: string) =>
+      ['alertzero', 'workerDependencies', spaceBasePath, 'threatReportWorkflows'] as const,
+  },
   /** Global skill catalog. */
   skills: {
     all: ['alertzero', 'skills'] as const,

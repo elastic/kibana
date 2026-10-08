@@ -130,6 +130,15 @@ export const Worker = lazySchema(() =>
     lastRun: z.string().nullable(),
     state: WorkerRunState,
     stateReason: z.string().optional(),
+    /**
+     * Why Alert Triage cannot be enabled. Omitted for other Workers and when its Alert Analysis prerequisite is available.
+     */
+    enableBlockedReason: z
+      .enum(['alertAnalysisWorkflowDisabled', 'alertAnalysisRuntimeDisabled'])
+      .optional()
+      .describe(
+        'Why Alert Triage cannot be enabled. Omitted for other Workers and when its Alert Analysis prerequisite is available.'
+      ),
     lifecycle: Lifecycle.optional(),
     settings: WorkerSettings,
     /**
