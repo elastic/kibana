@@ -21,11 +21,15 @@ const blastRadiusEntity = (featureId: string): BlastRadiusEntry => ({
   stream_name: 'logs.test',
 });
 
-const dependencyEntry = (featureId: string, source = 'gateway'): BlastRadiusEntry => ({
+const dependencyEntry = (
+  featureId: string,
+  source = 'gateway',
+  target = featureId
+): BlastRadiusEntry => ({
   type: 'dependency',
   feature_id: featureId,
   source,
-  target: featureId,
+  target,
   stream_name: 'logs.test',
 });
 
@@ -62,25 +66,25 @@ describe('computeTopologyFanOut', () => {
     expect(computeTopologyFanOut([blastRadiusEntity('a'), blastRadiusEntity('b')])).toBe(0);
   });
 
-  it('dedupes edges by feature_id within a source', () => {
+  it('dedupes callers within a target', () => {
     expect(computeTopologyFanOut([dependencyEntry('db'), dependencyEntry('db')])).toBe(1);
   });
 
-  it('counts distinct edges from the same source', () => {
+  it('counts distinct callers of the same target', () => {
     expect(
       computeTopologyFanOut([
-        dependencyEntry('db'),
-        dependencyEntry('cache'),
+        dependencyEntry('orders-db', 'orders-api', 'postgres'),
+        dependencyEntry('search-db', 'search', 'postgres'),
         blastRadiusEntity('a'),
       ])
     ).toBe(2);
   });
 
-  it('does not combine unrelated source groups', () => {
+  it('does not combine unrelated targets from the same caller', () => {
     expect(
       computeTopologyFanOut([
-        dependencyEntry('postgres', 'orders-api'),
-        dependencyEntry('redis', 'search'),
+        dependencyEntry('orders-db', 'orders-api', 'postgres'),
+        dependencyEntry('orders-cache', 'orders-api', 'redis'),
       ])
     ).toBe(1);
   });
@@ -101,15 +105,20 @@ describe('hasCascadePath', () => {
     expect(hasCascadePath([blastRadiusEntity('a'), dependencyEntry('checkout')])).toBe(false);
   });
 
-  it('is true when a source fans out to multiple dependency edges', () => {
-    expect(hasCascadePath([dependencyEntry('db'), dependencyEntry('cache')])).toBe(true);
-  });
-
-  it('is false for dependency edges from unrelated sources', () => {
+  it('is true when multiple callers depend on the same target', () => {
     expect(
       hasCascadePath([
-        dependencyEntry('postgres', 'orders-api'),
-        dependencyEntry('redis', 'search'),
+        dependencyEntry('orders-db', 'orders-api', 'postgres'),
+        dependencyEntry('search-db', 'search', 'postgres'),
+      ])
+    ).toBe(true);
+  });
+
+  it('is false for unrelated targets from one caller', () => {
+    expect(
+      hasCascadePath([
+        dependencyEntry('orders-db', 'orders-api', 'postgres'),
+        dependencyEntry('orders-cache', 'orders-api', 'redis'),
       ])
     ).toBe(false);
   });

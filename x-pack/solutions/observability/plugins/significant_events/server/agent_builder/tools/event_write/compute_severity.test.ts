@@ -197,7 +197,7 @@ describe('computeSeverity', () => {
       );
     });
 
-    it('unrelated dependency edges remain high', () => {
+    it('one caller with unrelated targets remains high', () => {
       const dependencies: BlastRadiusEntry[] = [
         {
           type: 'dependency',
@@ -209,9 +209,9 @@ describe('computeSeverity', () => {
         {
           type: 'dependency',
           feature_id: 'redis',
-          source: 'search',
+          source: 'orders-api',
           target: 'redis',
-          stream_name: 'logs.search',
+          stream_name: 'logs.orders',
         },
       ];
 
