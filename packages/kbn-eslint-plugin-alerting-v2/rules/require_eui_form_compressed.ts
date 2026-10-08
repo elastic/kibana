@@ -41,9 +41,7 @@ export const RequireEuiFormCompressed: CreateOnceRule = {
       JSXIdentifier(node) {
         const { name, parent } = node;
         const requirement = COMPRESSED_REQUIREMENTS[name];
-        if (!requirement) return;
-
-        if (parent.type !== 'JSXOpeningElement') return;
+        if (!requirement || parent.type !== 'JSXOpeningElement') return;
 
         const { prop, value } = requirement;
 
