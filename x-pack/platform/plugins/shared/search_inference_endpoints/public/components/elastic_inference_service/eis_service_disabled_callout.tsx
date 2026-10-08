@@ -21,7 +21,7 @@ export const EisServiceDisabledCallout = ({
     announceOnMount={false}
     data-test-subj="eisServiceDisabledCallout"
     title={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.serviceDisabled.title', {
-      defaultMessage: 'Cloud Connected service is disabled.',
+      defaultMessage: 'Cloud Connect is disabled',
     })}
     text={i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.serviceDisabled.description',
