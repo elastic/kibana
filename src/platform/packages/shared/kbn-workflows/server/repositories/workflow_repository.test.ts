@@ -670,44 +670,53 @@ describe('WorkflowRepository.getWorkflowNames', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let repository: WorkflowRepository;
 
-  const searchResponse = (hits: Array<{ id: string; spaceId: string; name: unknown }>) => ({
-    took: 1,
-    timed_out: false,
-    _shards: { total: 1, successful: 1, failed: 0 },
-    hits: {
-      hits: hits.map(({ id, spaceId, name }) => ({
-        _index: WORKFLOW_INDEX_NAME,
-        _id: id,
-        _source: { spaceId, name },
-      })),
-    },
+  interface StoredWorkflow {
+    id: string;
+    spaceId?: string;
+    name?: unknown;
+    deleted_at?: string | null;
+  }
+
+  const mgetResponse = (workflows: Array<StoredWorkflow | { id: string; found: false }>) => ({
+    docs: workflows.map((workflow) =>
+      'found' in workflow
+        ? { _index: WORKFLOW_INDEX_NAME, _id: workflow.id, found: false }
+        : {
+            _index: WORKFLOW_INDEX_NAME,
+            _id: workflow.id,
+            found: true,
+            _source: {
+              spaceId: workflow.spaceId,
+              name: workflow.name,
+              deleted_at: workflow.deleted_at,
+            },
+          }
+    ),
   });
 
-  const searchedIds = (call: number) => {
-    const { query } = esClient.search.mock.calls[call][0] as {
-      query: { bool: { should: Array<{ bool: { must: Array<{ ids?: { values: string[] } }> } }> } };
-    };
-    return query.bool.should.flatMap(({ bool }) =>
-      bool.must.flatMap((clause) => clause.ids?.values ?? [])
-    );
-  };
+  const requestedIds = () =>
+    esClient.mget.mock.calls.map(([params]) => (params as { ids: string[] }).ids);
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
   });
 
-  it('searches nothing for no workflows', async () => {
+  it('reads nothing for no workflows', async () => {
     await expect(repository.getWorkflowNames([])).resolves.toEqual(new Map());
-    expect(esClient.search).not.toHaveBeenCalled();
+    expect(esClient.mget).not.toHaveBeenCalled();
   });
 
-  it('reads the names of live workflows per space in one search', async () => {
+  it('reads the workflows by id and keeps the live ones in the space asked for', async () => {
     const signal = new AbortController().signal;
-    esClient.search.mockResolvedValue(
-      searchResponse([
+    esClient.mget.mockResolvedValue(
+      mgetResponse([
         { id: 'w-1', spaceId: 'default', name: 'Nightly report' },
         { id: 'w-2', spaceId: 'marketing', name: 'Weekly digest' },
+        { id: 'w-3', spaceId: 'other', name: 'In another space' },
+        { id: 'w-4', spaceId: 'default', name: 'Deleted', deleted_at: '2026-10-01T00:00:00Z' },
+        { id: 'w-5', spaceId: 'default', name: undefined },
+        { id: 'missing', found: false },
       ]) as never
     );
 
@@ -716,6 +725,10 @@ describe('WorkflowRepository.getWorkflowNames', () => {
         { workflowId: 'w-1', spaceId: 'default' },
         { workflowId: 'w-2', spaceId: 'marketing' },
         { workflowId: 'w-1', spaceId: 'default' },
+        { workflowId: 'w-2', spaceId: 'default' },
+        { workflowId: 'w-3', spaceId: 'default' },
+        { workflowId: 'w-4', spaceId: 'default' },
+        { workflowId: 'w-5', spaceId: 'default' },
         { workflowId: 'missing', spaceId: 'default' },
       ],
       { signal }
@@ -727,82 +740,37 @@ describe('WorkflowRepository.getWorkflowNames', () => {
         ['marketing:w-2', 'Weekly digest'],
       ])
     );
-    expect(esClient.search).toHaveBeenCalledTimes(1);
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(esClient.mget).toHaveBeenCalledTimes(1);
+    expect(esClient.mget).toHaveBeenCalledWith(
       {
         index: WORKFLOW_INDEX_NAME,
-        _source: ['name', 'spaceId'],
-        allow_partial_search_results: false,
-        size: 3,
-        track_total_hits: false,
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  must: [{ ids: { values: ['w-1', 'missing'] } }, { term: { spaceId: 'default' } }],
-                  must_not: [],
-                },
-              },
-              {
-                bool: {
-                  must: [{ ids: { values: ['w-2'] } }, { term: { spaceId: 'marketing' } }],
-                  must_not: [],
-                },
-              },
-            ],
-            minimum_should_match: 1,
-            must: [],
-            must_not: [{ exists: { field: 'deleted_at' } }],
-          },
-        },
+        ids: ['w-1', 'w-2', 'w-3', 'w-4', 'w-5', 'missing'],
+        _source_includes: ['name', 'spaceId', 'deleted_at'],
       },
       { signal }
     );
   });
 
-  it('ignores hits it did not ask for and hits without a name', async () => {
-    esClient.search.mockResolvedValue(
-      searchResponse([
-        { id: 'w-1', spaceId: 'other', name: 'Wrong space' },
-        { id: 'w-2', spaceId: 'default', name: undefined },
-        { id: 'w-3', spaceId: 'default', name: 'Kept' },
-      ]) as never
-    );
-
-    await expect(
-      repository.getWorkflowNames([
-        { workflowId: 'w-1', spaceId: 'default' },
-        { workflowId: 'w-2', spaceId: 'default' },
-        { workflowId: 'w-3', spaceId: 'default' },
-      ])
-    ).resolves.toEqual(new Map([['default:w-3', 'Kept']]));
-  });
-
-  it('searches in chunks, one after another', async () => {
+  it('reads in chunks, one after another', async () => {
     const refs = Array.from({ length: 2500 }, (_, index) => ({
       workflowId: `w-${index}`,
       spaceId: index % 2 === 0 ? 'default' : 'marketing',
     }));
     let inFlight = 0;
     let maxInFlight = 0;
-    esClient.search.mockImplementation((async () => {
+    esClient.mget.mockImplementation((async () => {
       inFlight++;
       maxInFlight = Math.max(maxInFlight, inFlight);
       await new Promise((resolve) => setTimeout(resolve, 0));
       inFlight--;
-      return searchResponse([]);
+      return mgetResponse([]);
     }) as never);
 
     await repository.getWorkflowNames(refs);
 
     expect(WORKFLOW_NAMES_CHUNK_SIZE).toBe(1000);
-    expect(esClient.search).toHaveBeenCalledTimes(3);
-    expect(esClient.search.mock.calls.map(([params]) => (params as { size: number }).size)).toEqual(
-      [1000, 1000, 500]
-    );
-    expect([0, 1, 2].map((call) => searchedIds(call).length)).toEqual([1000, 1000, 500]);
-    expect(new Set([0, 1, 2].flatMap(searchedIds)).size).toBe(2500);
+    expect(requestedIds().map((ids) => ids.length)).toEqual([1000, 1000, 500]);
+    expect(new Set(requestedIds().flat()).size).toBe(2500);
     expect(maxInFlight).toBe(1);
   });
 
@@ -812,18 +780,18 @@ describe('WorkflowRepository.getWorkflowNames', () => {
       workflowId: `w-${index}`,
       spaceId: 'default',
     }));
-    esClient.search.mockImplementation((async () => {
+    esClient.mget.mockImplementation((async () => {
       controller.abort(new Error('Timed out'));
-      return searchResponse([]);
+      return mgetResponse([]);
     }) as never);
 
     await expect(
       repository.getWorkflowNames(refs, { signal: controller.signal })
     ).rejects.toThrow();
-    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.mget).toHaveBeenCalledTimes(1);
   });
 
-  it('searches nothing when the signal is already aborted', async () => {
+  it('reads nothing when the signal is already aborted', async () => {
     const controller = new AbortController();
     controller.abort(new Error('Timed out'));
 
@@ -832,36 +800,48 @@ describe('WorkflowRepository.getWorkflowNames', () => {
         signal: controller.signal,
       })
     ).rejects.toThrow();
-    expect(esClient.search).not.toHaveBeenCalled();
+    expect(esClient.mget).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { timed_out: true, failed: 0 },
-    { timed_out: false, failed: 1 },
-  ])('rejects incomplete search results: %j', async ({ timed_out, failed }) => {
-    esClient.search.mockResolvedValue({
-      took: 1,
-      timed_out,
-      _shards: { total: 1, successful: 1 - failed, failed },
-      hits: { hits: [] },
-    });
+  it('throws when a workflow cannot be read', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _index: WORKFLOW_INDEX_NAME,
+          _id: 'w-1',
+          error: { type: 'shard_not_available_exception', reason: 'boom' },
+        },
+      ],
+    } as never);
 
     await expect(
       repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
-    ).rejects.toThrow('Could not load workflow names from incomplete search results.');
+    ).rejects.toThrow('Could not load the name of workflow [w-1]: shard_not_available_exception');
   });
 
   it('returns no names when the workflows index does not exist', async () => {
-    esClient.search.mockRejectedValue({ statusCode: 404 });
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _index: WORKFLOW_INDEX_NAME,
+          _id: 'w-1',
+          error: { type: 'index_not_found_exception', reason: 'no such index' },
+        },
+      ],
+    } as never);
+    await expect(
+      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
+    ).resolves.toEqual(new Map());
 
+    esClient.mget.mockRejectedValue({ statusCode: 404 });
     await expect(
       repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
     ).resolves.toEqual(new Map());
   });
 
-  it('propagates any other search failure', async () => {
+  it('propagates any other failure', async () => {
     const error = Object.assign(new Error('boom'), { statusCode: 500 });
-    esClient.search.mockRejectedValue(error);
+    esClient.mget.mockRejectedValue(error);
 
     await expect(
       repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])

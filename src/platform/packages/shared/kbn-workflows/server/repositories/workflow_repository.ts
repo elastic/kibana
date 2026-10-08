@@ -31,7 +31,7 @@ export interface WorkflowLookupOptions {
   managedFilter?: ManagedFilter;
 }
 
-/** How many workflows {@link WorkflowRepository.getWorkflowNames} reads in one search. */
+/** How many workflows {@link WorkflowRepository.getWorkflowNames} reads in one request. */
 export const WORKFLOW_NAMES_CHUNK_SIZE = 1000;
 
 export class WorkflowRepository {
@@ -318,53 +318,35 @@ export class WorkflowRepository {
 
   /**
    * Loads the names of workflows, keyed by `${spaceId}:${workflowId}`. Missing and soft-deleted
-   * workflows are left out. Global workflows are not looked up, since they cannot be bound to a
-   * service account.
+   * workflows are left out, and so is a workflow whose ID exists in another space than the one
+   * asked for. Global workflows are not looked up, since they cannot be bound to a service account.
    *
-   * Searches in chunks of {@link WORKFLOW_NAMES_CHUNK_SIZE}, one after another, and starts no
-   * further chunk once `signal` is aborted. Throws rather than return a partial result when a
-   * search comes back incomplete.
+   * Reads the workflows by ID in chunks of {@link WORKFLOW_NAMES_CHUNK_SIZE}, one after another,
+   * and starts no further chunk once `signal` is aborted. Throws rather than return a partial
+   * result when a document cannot be read.
    */
   async getWorkflowNames(
     refs: ReadonlyArray<{ workflowId: string; spaceId: string }>,
     { signal }: { signal?: AbortSignal } = {}
   ): Promise<Map<string, string>> {
     const result = new Map<string, string>();
-    const unique = new Map<string, { workflowId: string; spaceId: string }>();
-    for (const { workflowId, spaceId } of refs) {
-      unique.set(`${spaceId}:${workflowId}`, { workflowId, spaceId });
-    }
+    const requested = new Set(refs.map(({ workflowId, spaceId }) => `${spaceId}:${workflowId}`));
+    const ids = [...new Set(refs.map(({ workflowId }) => workflowId))];
 
-    const workflows = [...unique.values()];
-    for (let start = 0; start < workflows.length; start += WORKFLOW_NAMES_CHUNK_SIZE) {
+    for (let start = 0; start < ids.length; start += WORKFLOW_NAMES_CHUNK_SIZE) {
       signal?.throwIfAborted();
 
-      const chunk = workflows.slice(start, start + WORKFLOW_NAMES_CHUNK_SIZE);
-      const idsBySpace = new Map<string, string[]>();
-      for (const { workflowId, spaceId } of chunk) {
-        idsBySpace.set(spaceId, [...(idsBySpace.get(spaceId) ?? []), workflowId]);
-      }
-
-      let response: estypes.SearchResponse<Pick<EsWorkflow, 'name'> & { spaceId?: string }>;
+      let response: estypes.MgetResponse<
+        Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
+      >;
       try {
-        response = await this.options.esClient.search<
-          Pick<EsWorkflow, 'name'> & { spaceId?: string }
+        response = await this.options.esClient.mget<
+          Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
         >(
           {
             index: this.options.indexName,
-            _source: ['name', 'spaceId'],
-            allow_partial_search_results: false,
-            size: chunk.length,
-            track_total_hits: false,
-            query: {
-              bool: {
-                should: [...idsBySpace].map(([spaceId, ids]) => ({
-                  bool: buildWorkflowFilters({ ids, space: { id: spaceId, includeGlobal: false } }),
-                })),
-                minimum_should_match: 1,
-                ...buildWorkflowFilters({ deleted: 'not_deleted' }),
-              },
-            },
+            ids: ids.slice(start, start + WORKFLOW_NAMES_CHUNK_SIZE),
+            _source_includes: ['name', 'spaceId', 'deleted_at'],
           },
           { signal }
         );
@@ -375,15 +357,16 @@ export class WorkflowRepository {
         throw error;
       }
 
-      if (response.timed_out || response._shards.failed > 0) {
-        throw new Error('Could not load workflow names from incomplete search results.');
-      }
+      for (const doc of response.docs) {
+        // A missing index means there are no workflows to name, not that the read failed.
+        if ('error' in doc && doc.error.type !== 'index_not_found_exception') {
+          throw new Error(`Could not load the name of workflow [${doc._id}]: ${doc.error.type}`);
+        }
 
-      for (const hit of response.hits.hits) {
-        const key = `${hit._source?.spaceId}:${hit._id}`;
-        const name = hit._source?.name;
-        if (unique.has(key) && typeof name === 'string') {
-          result.set(key, name);
+        const source = 'found' in doc && doc.found ? doc._source : undefined;
+        const key = `${source?.spaceId}:${doc._id}`;
+        if (source && !source.deleted_at && typeof source.name === 'string' && requested.has(key)) {
+          result.set(key, source.name);
         }
       }
     }

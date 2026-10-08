@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Meter } from '@opentelemetry/api';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
@@ -84,7 +85,7 @@ describe('buildWorkloadHref', () => {
     '/app/%',
     // Empty segments before the end.
     '/app//evil.example',
-  ])('refuses the path [%s]', (path) => {
+  ])('refuses the path %j', (path) => {
     expect(buildWorkloadHref('/kbn', 'marketing', path)).toBeUndefined();
   });
 
@@ -113,16 +114,130 @@ describe('buildWorkloadHref', () => {
   });
 });
 
+const DURATION = 'kibana.security.service_accounts.workload_resolution.duration';
+const BATCH_SIZE = 'kibana.security.service_accounts.workload_resolution.batch.size';
+
+/** A meter whose histograms record into jest mocks, keyed by metric name. */
+const createMeterMock = () => {
+  const histograms = new Map<string, { record: jest.Mock }>();
+  const meter = {
+    createHistogram: jest.fn((name: string) => {
+      const histogram = { record: jest.fn() };
+      histograms.set(name, histogram);
+      return histogram;
+    }),
+  };
+  const recorded = (name: string) => histograms.get(name)?.record.mock.calls ?? [];
+  return { meter: meter as unknown as Meter, createHistogram: meter.createHistogram, recorded };
+};
+
 describe('createBoundWorkloadResolver', () => {
   let registry: WorkloadTypeRegistry;
   let logger: MockedLogger;
+  let meterMock: ReturnType<typeof createMeterMock>;
 
   const createResolver = (timeoutMs?: number) =>
-    createBoundWorkloadResolver({ registry, serverBasePath: '', logger, timeoutMs });
+    createBoundWorkloadResolver({
+      registry,
+      serverBasePath: '',
+      logger,
+      timeoutMs,
+      meter: meterMock.meter,
+    });
 
   beforeEach(() => {
     registry = new WorkloadTypeRegistry();
     logger = loggerMock.create();
+    meterMock = createMeterMock();
+  });
+
+  describe('metrics', () => {
+    const workflowAttributes = {
+      'kibana.plugin.id': 'workflows',
+      'kibana.service_account.workload.type': 'workflow',
+    };
+
+    it('creates its histograms once, not on every call', async () => {
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: byId,
+      });
+      const resolve = createResolver();
+
+      await resolve([binding('w-1')]);
+      await resolve([binding('w-2')]);
+
+      expect(meterMock.createHistogram).toHaveBeenCalledTimes(2);
+      expect(meterMock.createHistogram.mock.calls.map(([name]) => name)).toEqual([
+        DURATION,
+        BATCH_SIZE,
+      ]);
+    });
+
+    it('records the batch size and duration of each resolver call by plugin and type', async () => {
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: byId,
+      });
+      registry.register('alerting', { type: 'rule', name: 'Rule', resolveWorkloads: byId });
+
+      await createResolver()([
+        binding('w-1'),
+        binding('w-2', { spaceId: 'marketing' }),
+        binding('r-1', { pluginId: 'alerting', workloadType: 'rule' }),
+      ]);
+
+      const ruleAttributes = {
+        'kibana.plugin.id': 'alerting',
+        'kibana.service_account.workload.type': 'rule',
+      };
+      expect(meterMock.recorded(BATCH_SIZE)).toEqual([
+        [2, workflowAttributes],
+        [1, ruleAttributes],
+      ]);
+      expect(meterMock.recorded(DURATION)).toEqual([
+        [expect.any(Number), workflowAttributes],
+        [expect.any(Number), ruleAttributes],
+      ]);
+      for (const [seconds] of meterMock.recorded(DURATION)) {
+        expect(seconds).toBeGreaterThanOrEqual(0);
+        expect(seconds).toBeLessThan(WORKLOAD_RESOLUTION_TIMEOUT_MS / 1000);
+      }
+    });
+
+    it.each([
+      [
+        'an error',
+        async () => {
+          throw new Error('boom');
+        },
+        '_OTHER',
+      ],
+      ['an unexpected result', async () => [], 'invalid_result'],
+    ])('records the error type when a resolver returns %s', async (_, resolveWorkloads, type) => {
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: resolveWorkloads as ServiceAccountWorkloadResolver,
+      });
+
+      await createResolver()([binding('w-1')]);
+
+      expect(meterMock.recorded(DURATION)).toEqual([
+        [expect.any(Number), { ...workflowAttributes, 'error.type': type }],
+      ]);
+    });
+
+    it('records no call for types without a resolver', async () => {
+      registry.register('alerting', { type: 'rule', name: 'Rule' });
+
+      await createResolver()([binding('r-1', { pluginId: 'alerting', workloadType: 'rule' })]);
+
+      expect(meterMock.recorded(DURATION)).toEqual([]);
+      expect(meterMock.recorded(BATCH_SIZE)).toEqual([]);
+    });
   });
 
   it('calls no resolver for no bindings', async () => {
@@ -292,6 +407,16 @@ describe('createBoundWorkloadResolver', () => {
         'Unable to resolve 1 workload(s) of type [rule] registered by plugin [alerting]: boom',
       ],
       [
+        'rejects with undefined',
+        jest.fn().mockRejectedValue(undefined),
+        'Unable to resolve 1 workload(s) of type [rule] registered by plugin [alerting]: undefined',
+      ],
+      [
+        'rejects with null',
+        jest.fn().mockRejectedValue(null),
+        'Unable to resolve 1 workload(s) of type [rule] registered by plugin [alerting]: null',
+      ],
+      [
         'returns too few entries',
         async () => [],
         'Workload type [rule] registered by plugin [alerting] returned an unexpected result for 1 workload(s), ignoring it.',
@@ -321,6 +446,10 @@ describe('createBoundWorkloadResolver', () => {
 
       afterEach(() => {
         jest.useRealTimers();
+      });
+
+      it('gives up after ten seconds', () => {
+        expect(WORKLOAD_RESOLUTION_TIMEOUT_MS).toBe(10_000);
       });
 
       it('aborts the signal, falls back for that type only, and ignores a late answer', async () => {
@@ -354,6 +483,14 @@ describe('createBoundWorkloadResolver', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           `Unable to resolve 1 workload(s) of type [rule] registered by plugin [alerting]: Timed out after ${WORKLOAD_RESOLUTION_TIMEOUT_MS}ms.`
         );
+        expect(meterMock.recorded(DURATION)).toContainEqual([
+          WORKLOAD_RESOLUTION_TIMEOUT_MS / 1000,
+          {
+            'kibana.plugin.id': 'alerting',
+            'kibana.service_account.workload.type': 'rule',
+            'error.type': 'timeout',
+          },
+        ]);
 
         answer([{ title: 'Late', path: '/app/rules/r-1' }]);
         await jest.advanceTimersByTimeAsync(0);

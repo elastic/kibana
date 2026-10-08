@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Attributes, Histogram, Meter } from '@opentelemetry/api';
+import { metrics, ValueType } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import type {
   CoreSecurityDelegateServiceAccounts,
@@ -21,7 +23,10 @@ import type { WorkloadTypeRegistry } from './workload_type_registry';
 /**
  * How long Core waits for one workload type to resolve its workloads before it gives up on them.
  */
-export const WORKLOAD_RESOLUTION_TIMEOUT_MS = 30_000;
+export const WORKLOAD_RESOLUTION_TIMEOUT_MS = 10_000;
+
+/** Scope of the meter that records how workload types resolve their workloads. */
+export const WORKLOAD_RESOLUTION_METER_NAME = 'kibana.security.service_accounts';
 
 const APP_PATH_PREFIX = '/app/';
 const DUMMY_ORIGIN = 'http://kibana.invalid';
@@ -136,6 +141,39 @@ const toResolvedWorkload = (
   return resolved;
 };
 
+class WorkloadResolutionTimeoutError extends Error {}
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+/**
+ * The instruments that record each resolver call, so the timeout can be tuned from real numbers.
+ */
+interface WorkloadResolutionMetrics {
+  duration: Histogram;
+  batchSize: Histogram;
+}
+
+const createWorkloadResolutionMetrics = (meter: Meter): WorkloadResolutionMetrics => ({
+  duration: meter.createHistogram('kibana.security.service_accounts.workload_resolution.duration', {
+    description: 'Time a workload type took to resolve the bound workloads it was asked for.',
+    unit: 's',
+    valueType: ValueType.DOUBLE,
+    advice: {
+      explicitBucketBoundaries: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 7.5, 10],
+    },
+  }),
+  batchSize: meter.createHistogram(
+    'kibana.security.service_accounts.workload_resolution.batch.size',
+    {
+      description: 'Number of bound workloads a workload type was asked to resolve in one call.',
+      unit: '{workload}',
+      valueType: ValueType.INT,
+      advice: { explicitBucketBoundaries: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500] },
+    }
+  ),
+});
+
 /**
  * Calls a resolver once, giving up after `timeoutMs`. On timeout it aborts the signal it passed
  * in, and whatever the resolver returns later is ignored.
@@ -149,7 +187,7 @@ const callWithTimeout = async (
   let timer: NodeJS.Timeout | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
-      const error = new Error(`Timed out after ${timeoutMs}ms.`);
+      const error = new WorkloadResolutionTimeoutError(`Timed out after ${timeoutMs}ms.`);
       controller.abort(error);
       reject(error);
     }, timeoutMs);
@@ -182,12 +220,16 @@ export const createBoundWorkloadResolver = ({
   serverBasePath,
   logger,
   timeoutMs = WORKLOAD_RESOLUTION_TIMEOUT_MS,
+  meter = metrics.getMeter(WORKLOAD_RESOLUTION_METER_NAME),
 }: {
   registry: WorkloadTypeRegistry;
   serverBasePath: string;
   logger: Logger;
   timeoutMs?: number;
+  meter?: Meter;
 }): CoreSecurityDelegateServiceAccounts['resolveBoundWorkloads'] => {
+  const { duration, batchSize } = createWorkloadResolutionMetrics(meter);
+
   return async (bindings) => {
     const results: ResolvedServiceAccountWorkload[] = bindings.map(() => ({}));
 
@@ -211,22 +253,42 @@ export const createBoundWorkloadResolver = ({
           spaceId: bindings[index].spaceId,
         }));
 
+        const attributes: Attributes = {
+          'kibana.plugin.id': pluginId,
+          'kibana.service_account.workload.type': workloadType,
+        };
+        batchSize.record(workloads.length, attributes);
+        const start = performance.now();
+        const recordDuration = (errorType?: string) =>
+          duration.record((performance.now() - start) / 1000, {
+            ...attributes,
+            ...(errorType && { 'error.type': errorType }),
+          });
+
         let details: unknown;
         try {
           details = await callWithTimeout(resolver, workloads, timeoutMs);
         } catch (error) {
+          recordDuration(error instanceof WorkloadResolutionTimeoutError ? 'timeout' : '_OTHER');
           logger.warn(
-            `Unable to resolve ${workloads.length} workload(s) of type [${workloadType}] registered by plugin [${pluginId}]: ${error.message}`
+            `Unable to resolve ${
+              workloads.length
+            } workload(s) of type [${workloadType}] registered by plugin [${pluginId}]: ${getErrorMessage(
+              error
+            )}`
           );
           return;
         }
 
         if (!Array.isArray(details) || details.length !== workloads.length) {
+          recordDuration('invalid_result');
           logger.warn(
             `Workload type [${workloadType}] registered by plugin [${pluginId}] returned an unexpected result for ${workloads.length} workload(s), ignoring it.`
           );
           return;
         }
+
+        recordDuration();
 
         let rejectedPaths = 0;
         indices.forEach((index, position) => {

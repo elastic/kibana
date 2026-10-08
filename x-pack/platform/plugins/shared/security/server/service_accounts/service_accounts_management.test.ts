@@ -184,6 +184,13 @@ describe('ServiceAccountsManagement', () => {
       expect(logger.warn).toHaveBeenCalledWith('Unable to resolve 2 bound workload(s): boom');
     });
 
+    it('falls back to workload IDs when resolving rejects with something that is not an error', async () => {
+      workloadTypes.resolveBoundWorkloads.mockRejectedValue(undefined);
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toHaveLength(3);
+      expect(logger.warn).toHaveBeenCalledWith('Unable to resolve 2 bound workload(s): undefined');
+    });
+
     it('resolves nothing when no workload is bound', async () => {
       store.findByServiceAccountId.mockResolvedValue([]);
 

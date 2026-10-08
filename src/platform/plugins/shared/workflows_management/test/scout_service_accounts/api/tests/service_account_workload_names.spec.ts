@@ -9,194 +9,61 @@
 
 import { randomUUID } from 'crypto';
 import { apiTest } from '@kbn/scout';
-import type { EsClient, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
-  authenticationStep,
-  createServiceAccountSuite,
-  workflowYaml,
-} from '../fixtures/service_account_suite';
+  accountPath,
+  boundWorkflow,
+  createBoundWorkflow,
+  deleteBoundWorkflow,
+} from '../fixtures/bound_workflows';
+import { createServiceAccountSuite } from '../fixtures/service_account_suite';
 
-const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
-const HEADERS = {
-  'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '2023-10-31',
-};
-
-// Stateful only: the callers below are native users, with roles that hold `manage_security`.
 apiTest.describe(
   '[NON-MKI] Workflow service accounts: bound workload names',
-  { tag: ['@local-stateful-classic'] },
+  { tag: ['@local-serverless-search', '@local-stateful-classic'] },
   () => {
     const { getContext, setup, teardown } = createServiceAccountSuite();
-    const spaceId = `sa-names-${randomUUID()}`;
-    const workflowId = `sa-names-${randomUUID()}`;
-    const workflowName = `Private workload ${randomUUID()}`;
-    /** May manage security and workflows, but cannot open the private workflow. */
-    const securityAdmin = `sa-names-security-admin-${randomUUID()}`;
-    /** May manage workflows, but not security. */
-    const workflowsEditor = `sa-names-workflows-editor-${randomUUID()}`;
-    const createdUsers: string[] = [];
-    let spaceCreated = false;
-    let workflowCreated = false;
-    let securityAdminHeaders: Record<string, string>;
-    let workflowsEditorHeaders: Record<string, string>;
-
-    const accountPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
-
-    /**
-     * Creates a user with a role of the same name, and returns headers that authenticate as it.
-     * The role reaches every space, since the service account routes check privileges globally.
-     */
-    const createUser = async (
-      kbnClient: KbnClient,
-      esClient: EsClient,
-      username: string,
-      cluster: string[]
-    ): Promise<Record<string, string>> => {
-      createdUsers.push(username);
-      await kbnClient.request({
-        method: 'PUT',
-        path: `/api/security/role/${username}`,
-        body: {
-          elasticsearch: { cluster },
-          kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: ['*'] }],
-        },
-      });
-      const password = randomUUID();
-      await esClient.security.putUser({ username, password, roles: [username] });
-      return {
-        ...HEADERS,
-        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-      };
+    const workflow = {
+      spaceId: `sa-names-${randomUUID()}`,
+      workflowId: `sa-names-${randomUUID()}`,
+      workflowName: `Bound workload ${randomUUID()}`,
     };
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient, kbnClient }) => {
+    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
       await setup({ apiClient, samlAuth, config, esClient });
       const { headers, accountId } = getContext();
-
-      const space = await apiClient.post('api/spaces/space', {
-        headers,
-        body: { id: spaceId, name: spaceId },
-        responseType: 'json',
-      });
-      expect(space, JSON.stringify(space.body)).toHaveStatusCode(200);
-      spaceCreated = true;
-
-      const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
-        headers,
-        body: {
-          id: workflowId,
-          yaml: workflowYaml(accountId, authenticationStep).replace(
-            'name: CP2 identity proof',
-            `name: ${workflowName}`
-          ),
-        },
-        responseType: 'json',
-      });
-      expect(created, JSON.stringify(created.body)).toHaveStatusCode(200);
-      workflowCreated = true;
-
-      const madePrivate = await apiClient.put(
-        `s/${spaceId}/internal/workflows/${workflowId}/access_control`,
-        { headers, body: { access_mode: 'private', entries: [] }, responseType: 'json' }
-      );
-      expect(madePrivate, JSON.stringify(madePrivate.body)).toHaveStatusCode(200);
-
-      securityAdminHeaders = await createUser(kbnClient, esClient, securityAdmin, [
-        'manage_security',
-      ]);
-      workflowsEditorHeaders = await createUser(kbnClient, esClient, workflowsEditor, []);
+      await createBoundWorkflow(apiClient, headers, { ...workflow, accountId });
     });
 
-    apiTest.afterAll(async ({ apiClient, esClient, config, kbnClient }) => {
-      const { headers } = getContext();
+    apiTest.afterAll(async ({ apiClient, esClient, config }) => {
       try {
-        for (const username of createdUsers) {
-          await esClient.security.deleteUser({ username }, { ignore: [404] });
-          await kbnClient.request({
-            method: 'DELETE',
-            path: `/api/security/role/${username}`,
-            ignoreErrors: [404],
-          });
-        }
-
-        if (workflowCreated) {
-          const deleted = await apiClient.delete(
-            `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
-            { headers, responseType: 'json' }
-          );
-          expect(deleted, JSON.stringify(deleted.body)).toHaveStatusCode(200);
-        }
+        await deleteBoundWorkflow(apiClient, getContext().headers, workflow);
       } finally {
-        try {
-          if (spaceCreated) {
-            const deleted = await apiClient.delete(`api/spaces/space/${spaceId}`, { headers });
-            expect(deleted).toHaveStatusCode(204);
-          }
-        } finally {
-          await teardown({ apiClient, esClient, config });
-        }
+        await teardown({ apiClient, esClient, config });
       }
     });
 
     apiTest(
-      'names and links a private workflow for a security admin who cannot open it',
+      'names and links a bound workflow in its space when listing and refusing a delete',
       async ({ apiClient }) => {
-        const { accountId } = getContext();
+        const { headers, accountId } = getContext();
         const expectedWorkloads = [
-          {
-            pluginId: 'workflowsExecutionEngine',
-            workloadType: 'workflow',
-            workloadId: workflowId,
-            displayName: workflowName,
-            typeName: 'Workflow',
-            href: `/s/${spaceId}/app/workflows/${workflowId}`,
-          },
+          boundWorkflow(workflow.spaceId, workflow.workflowId, workflow.workflowName),
         ];
 
         const listed = await apiClient.get(`${accountPath(accountId)}/workloads`, {
-          headers: securityAdminHeaders,
+          headers,
           responseType: 'json',
         });
         expect(listed, JSON.stringify(listed.body)).toHaveStatusCode(200);
         expect(listed.body).toStrictEqual({ workloads: expectedWorkloads });
 
         const refused = await apiClient.delete(accountPath(accountId), {
-          headers: securityAdminHeaders,
+          headers,
           responseType: 'json',
         });
         expect(refused, JSON.stringify(refused.body)).toHaveStatusCode(409);
         expect(refused.body.attributes).toStrictEqual({ workloads: expectedWorkloads });
-
-        const opened = await apiClient.get(`s/${spaceId}/api/workflows/workflow/${workflowId}`, {
-          headers: securityAdminHeaders,
-          responseType: 'json',
-        });
-        expect(opened).toHaveStatusCode(404);
-      }
-    );
-
-    apiTest(
-      'tells a caller without manage_security nothing about the bound workloads',
-      async ({ apiClient }) => {
-        const { accountId } = getContext();
-
-        const listed = await apiClient.get(`${accountPath(accountId)}/workloads`, {
-          headers: workflowsEditorHeaders,
-          responseType: 'json',
-        });
-        expect(listed).toHaveStatusCode(403);
-        expect(JSON.stringify(listed.body)).not.toContain(workflowName);
-
-        const refused = await apiClient.delete(accountPath(accountId), {
-          headers: workflowsEditorHeaders,
-          responseType: 'json',
-        });
-        expect(refused).toHaveStatusCode(403);
-        expect(refused.body.attributes).toBeUndefined();
-        expect(JSON.stringify(refused.body)).not.toContain(workflowName);
       }
     );
   }

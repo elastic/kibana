@@ -221,7 +221,11 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       const resolved = await this.workloadTypes.resolveBoundWorkloads(bindings);
       return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
     } catch (e) {
-      this.logger.warn(`Unable to resolve ${bindings.length} bound workload(s): ${e.message}`);
+      this.logger.warn(
+        `Unable to resolve ${bindings.length} bound workload(s): ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
       return new Map();
     }
   }
