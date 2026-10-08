@@ -73,11 +73,13 @@ describe('ActionPoliciesListHeader', () => {
     mockIsLicenseValid = true;
   });
 
-  it('renders the create split button when the user can write and the list is populated', () => {
+  it('renders the create split button when the user can write and the list is populated', async () => {
     renderHeader();
 
-    expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
-    expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('createActionPolicyButton')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('createActionPolicyButton-secondary-button')
+    ).toBeInTheDocument();
   });
 
   it('calls onCreatePolicy when the primary create button is clicked', () => {
