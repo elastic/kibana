@@ -769,7 +769,7 @@ describe('Endpoint analysis run', () => {
 
       expect(rationaleCap).toBe(7900);
       expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
-      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
+      const message = (journal?.with as { body?: { input?: string } })?.body?.input ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
       expect(message).toContain('Rationale for proposed actions');
       expect(message).toContain('Rationale for ending investigation');

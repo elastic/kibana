@@ -287,7 +287,8 @@ steps:
               ${{ steps.resolve_endpoint_telemetry.output.checked == true
                 and steps.resolve_endpoint_telemetry.output.present != true }}
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -1140,7 +1141,8 @@ steps:
     on-failure:
       continue: true
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
