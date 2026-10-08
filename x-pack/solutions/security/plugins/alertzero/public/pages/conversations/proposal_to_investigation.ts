@@ -54,8 +54,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * Data gaps — fields that cannot be faithfully mapped from a ProposalItem:
  *
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
- * - `watch_id`         fabricated `''`; no equivalent on a proposal.
- * - `watch_execution_id` fabricated `''`; no equivalent.
+ * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
  * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
  * - `entityIds`        from the conversation's Impact document; omitted when none.
@@ -107,10 +106,8 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     createdAt: proposal.createdAt,
     // Proposals have no modification timestamp; decidedAt is the closest event.
     updatedAt: proposal.decidedAt ?? proposal.createdAt,
-    // watch_id and watch_execution_id are required by the type but have no
-    // equivalent on a proposal — fabricated as empty strings.
-    watch_id: '',
-    watch_execution_id: '',
+    // Proposals do not carry worker execution IDs.
+    worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
     pendingProposalCount: proposal.decidedAt ? 0 : 1,
     recommendedAction: bucket,

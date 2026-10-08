@@ -101,9 +101,11 @@ export const metadataSchema = z
       .describe(
         'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".'
       ),
-    builder_type: z
-      .string()
-      .max(64)
+    builder: z
+      .object({
+        type: z.string().max(64).describe('Rule builder type.'),
+      })
+      .strict()
       .optional()
       .describe(
         'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
@@ -786,7 +788,11 @@ export const updateRuleDataSchema = z
     metadata: metadataSchema
       .partial()
       .extend({
-        builder_type: z.string().max(64).optional().nullable(),
+        builder: z
+          .object({ type: z.string().max(64).describe('Rule builder type.') })
+          .strict()
+          .optional()
+          .nullable(),
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).
         tags: tagsSchema.min(1).nullable().optional(),
@@ -907,6 +913,28 @@ export const ruleTagsResponseSchema = tagsResponseSchema
   .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
+
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
+  })
+  .strict();
+
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
 
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 

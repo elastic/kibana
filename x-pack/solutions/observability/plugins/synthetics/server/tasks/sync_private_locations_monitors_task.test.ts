@@ -9,8 +9,10 @@ import type { CustomTaskInstance, SyncTaskRunResult } from './sync_private_locat
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
+  runTaskPerPrivateLocation,
   DEFAULT_TASK_SCHEDULE,
 } from './sync_private_locations_monitors_task';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
@@ -21,6 +23,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+
+jest.mock('../synthetics_service/private_location/package_policy_service', () => ({
+  ...jest.requireActual('../synthetics_service/private_location/package_policy_service'),
+  bumpAgentPolicyRevision: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 const mockTaskManager = taskManagerMock.createSetup();
@@ -109,7 +116,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           description:
             'This task syncs private location monitor package policies, handling maintenance window changes.',
           timeout: '10m',
-          maxAttempts: 1,
+          maxAttempts: 2,
           createTaskRunner: expect.any(Function),
         }),
       });
@@ -405,8 +412,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(scheduleOf(result)).toBeUndefined();
     });
 
-    it('should not return a schedule when a per-location sync fails', async () => {
-      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+    it('keeps the location in state when a per-location sync fails so a retry re-runs it', async () => {
+      const taskInstance = getMockTaskInstance({
+        privateLocationId: 'pl-1',
+        previousAgentPolicyId: 'policy-old',
+      });
       (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
         .fn()
         .mockReturnValue(mockSoClient as any);
@@ -428,7 +438,111 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeDefined();
       // a schedule here would convert this one-shot task into a recurring one
       expect(scheduleOf(result)).toBeUndefined();
-      expect(result.state.privateLocationId).toBeUndefined();
+      // a retry with the location cleared would run the maintenance-window sync instead
+      expect(result.state.privateLocationId).toBe('pl-1');
+      expect(result.state.previousAgentPolicyId).toBe('policy-old');
+    });
+
+    it('keeps the location in state and returns no schedule when loading locations fails', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('so down'));
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeDefined();
+      // a schedule here would convert this one-shot task into a recurring one
+      expect(scheduleOf(result)).toBeUndefined();
+      expect(result.state.privateLocationId).toBe('pl-1');
+    });
+
+    it('keeps the location in state when the sync reports failed creates', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([
+          { id: 'pl-1', label: 'L', isServiceManaged: false, agentPolicyId: 'policy-1' },
+        ]);
+      jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+        failedCreatesBySpace: [{ spaceId: 'default', count: 1 }],
+      });
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeDefined();
+      expect(result.state.privateLocationId).toBe('pl-1');
+    });
+
+    describe('previous agent policy', () => {
+      const setupPerLocationRun = (state: Record<string, unknown>) => {
+        (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+          .fn()
+          .mockReturnValue(mockSoClient as any);
+        jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+          {
+            id: 'pl-1',
+            label: 'Private Location 1',
+            isServiceManaged: false,
+            agentPolicyId: 'policy-new',
+          },
+        ]);
+        return getMockTaskInstance({ privateLocationId: 'pl-1', ...state });
+      };
+
+      it('bumps the previous agent policy after the sync and clears it from state', async () => {
+        const taskInstance = setupPerLocationRun({ previousAgentPolicyId: 'policy-old' });
+        const syncSpy = jest
+          .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+          .mockResolvedValue({ failedCreatesBySpace: [] });
+
+        const result = await task.runTask({ taskInstance });
+
+        expect(bumpAgentPolicyRevision).toHaveBeenCalledWith(mockServerSetup, 'policy-old');
+        expect(syncSpy.mock.invocationCallOrder[0]).toBeLessThan(
+          (bumpAgentPolicyRevision as jest.Mock).mock.invocationCallOrder[0]
+        );
+        expect(result.state.previousAgentPolicyId).toBeUndefined();
+      });
+
+      it('still bumps the previous agent policy when some policies failed to move', async () => {
+        const taskInstance = setupPerLocationRun({ previousAgentPolicyId: 'policy-old' });
+        jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+          failedCreatesBySpace: [{ spaceId: 'default', count: 1 }],
+        });
+
+        const result = await task.runTask({ taskInstance });
+
+        expect(result.error).toBeDefined();
+        expect(bumpAgentPolicyRevision).toHaveBeenCalledWith(mockServerSetup, 'policy-old');
+      });
+
+      it('does not bump any agent policy when none was moved away from', async () => {
+        const taskInstance = setupPerLocationRun({});
+        jest
+          .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+          .mockResolvedValue({ failedCreatesBySpace: [] });
+
+        await task.runTask({ taskInstance });
+
+        expect(bumpAgentPolicyRevision).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the run when the bump itself fails', async () => {
+        const taskInstance = setupPerLocationRun({ previousAgentPolicyId: 'policy-old' });
+        jest
+          .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+          .mockResolvedValue({ failedCreatesBySpace: [] });
+        (bumpAgentPolicyRevision as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
+
+        const result = await task.runTask({ taskInstance });
+
+        expect(result.error).toBeUndefined();
+        expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('policy-old'));
+      });
     });
 
     it('should skip MW sync when there are no private locations', async () => {
@@ -727,6 +841,37 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.fetchMonitorMwsIds(mockSoClient as any);
       expect(res).toEqual([]);
     });
+  });
+});
+
+describe('runTaskPerPrivateLocation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('schedules a one-shot task for the location', async () => {
+    await runTaskPerPrivateLocation({ server: mockServerSetup as any, privateLocationId: 'pl-1' });
+
+    expect(mockTaskManagerStart.schedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        taskType: 'Synthetics:Sync-Private-Location-Monitors',
+        state: { privateLocationId: 'pl-1' },
+      })
+    );
+  });
+
+  it('carries the previous agent policy in the task state', async () => {
+    await runTaskPerPrivateLocation({
+      server: mockServerSetup as any,
+      privateLocationId: 'pl-1',
+      previousAgentPolicyId: 'policy-old',
+    });
+
+    expect(mockTaskManagerStart.schedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: { privateLocationId: 'pl-1', previousAgentPolicyId: 'policy-old' },
+      })
+    );
   });
 });
 
