@@ -166,7 +166,7 @@ const getAlertIdsAtLatestPush = (
     ) {
       const alertIds = getAlertIds(userAction.payload.comment);
       if (alertIds !== null) {
-        // Bulk create logs the request before dedupe, so drop ids already on the case.
+        // Older bulk create user actions logged the request before dedupe, so drop ids already on the case.
         const alertIdsOnCase =
           userAction.action === UserActionActions.create
             ? toAlertIdSet(alertIdsByAttachmentId)
