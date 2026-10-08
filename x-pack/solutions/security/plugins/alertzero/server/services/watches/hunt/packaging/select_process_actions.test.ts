@@ -363,7 +363,7 @@ describe('selectHostActions', () => {
     'isolates on confirmed %s even with one process and severity below critical',
     (id) => {
       const decision = selectHostActions({
-        host: host(),
+        host: host(['isolation']),
         state: state(confirmed(id)),
         activeProcessCount: 1,
       });
@@ -375,7 +375,7 @@ describe('selectHostActions', () => {
 
   it('matches an isolate sub-technique on its prefix', () => {
     const decision = selectHostActions({
-      host: host(),
+      host: host(['isolation']),
       state: state(confirmed('T1021.002')),
       activeProcessCount: 0,
     });
@@ -384,7 +384,11 @@ describe('selectHostActions', () => {
   });
 
   it('isolates on two or more suspicious processes', () => {
-    const decision = selectHostActions({ host: host(), state: state(), activeProcessCount: 2 });
+    const decision = selectHostActions({
+      host: host(['isolation']),
+      state: state(),
+      activeProcessCount: 2,
+    });
     expect(decision.rule).toBe('multiple_processes');
     expect(decision.isolate).toBe(true);
     expect(decision.why).toBe(
@@ -394,7 +398,7 @@ describe('selectHostActions', () => {
 
   it('isolates on critical severity with a single process', () => {
     const decision = selectHostActions({
-      host: host(),
+      host: host(['isolation']),
       state: state({ severity: 'critical' }),
       activeProcessCount: 1,
     });
@@ -404,14 +408,14 @@ describe('selectHostActions', () => {
 
   it('orders technique before count before severity', () => {
     const all = selectHostActions({
-      host: host(),
+      host: host(['isolation']),
       state: state({ severity: 'critical', ...confirmed('T1021') }),
       activeProcessCount: 3,
     });
     expect(all.rule).toBe('lateral_or_c2_technique');
 
     const countAndSeverity = selectHostActions({
-      host: host(),
+      host: host(['isolation']),
       state: state({ severity: 'critical' }),
       activeProcessCount: 3,
     });
@@ -420,7 +424,7 @@ describe('selectHostActions', () => {
 
   it('holds isolate back otherwise and says why', () => {
     const decision = selectHostActions({
-      host: host(),
+      host: host(['isolation']),
       state: state({ severity: 'high', ...confirmed('T1059.001') }),
       activeProcessCount: 1,
     });
@@ -432,7 +436,29 @@ describe('selectHostActions', () => {
   });
 
   it('pluralizes the held-back process count', () => {
-    const decision = selectHostActions({ host: host(), state: state(), activeProcessCount: 0 });
+    const decision = selectHostActions({
+      host: host(['isolation']),
+      state: state(),
+      activeProcessCount: 0,
+    });
     expect(decision.heldBack).toContain('0 suspicious processes');
+  });
+
+  it('holds a warranted isolate back when the host does not report isolation', () => {
+    const decision = selectHostActions({
+      host: host(['memdump_process']),
+      state: state(confirmed('T1071')),
+      activeProcessCount: 1,
+    });
+    expect(decision.rule).toBe('isolation_unsupported');
+    expect(decision.isolate).toBe(false);
+    expect(decision.heldBack).toContain('Isolate host WIN-ANALYST01 was not proposed');
+    expect(decision.heldBack).toContain('does not report isolation');
+  });
+
+  it('does not add an isolation hold-back when isolate was not warranted anyway', () => {
+    const decision = selectHostActions({ host: host(), state: state(), activeProcessCount: 1 });
+    expect(decision.rule).toBe('not_warranted');
+    expect(decision.heldBack).not.toContain('isolation');
   });
 });

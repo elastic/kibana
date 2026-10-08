@@ -37,6 +37,7 @@ export type HostRule =
   | 'lateral_or_c2_technique'
   | 'multiple_processes'
   | 'critical_severity'
+  | 'isolation_unsupported'
   | 'not_warranted';
 
 export interface HostDecision {
@@ -73,6 +74,8 @@ export const ISOLATE_TECHNIQUES = ['T1021', 'T1071', 'T1041', 'T1048', 'T1570'] 
 export const STALE_PROCESS_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 export const MIN_PROCESSES_FOR_ISOLATE = 2;
 export const MEMDUMP_PROCESS_CAPABILITY = 'memdump_process';
+/** Endpoint rejects isolate/release on a host that does not report this. */
+export const ISOLATION_CAPABILITY = 'isolation';
 
 const basename = (path: string): string => path.split(/[\\/]/).pop() ?? path;
 
@@ -207,7 +210,7 @@ export const selectProcessActions = ({
  * `activeProcessCount` is the number of selectors on this host whose process decision was not
  * `stale` (protected processes count: a system process being implicated is suspicious).
  */
-export const selectHostActions = ({
+const selectWarrantedHostAction = ({
   host,
   state,
   activeProcessCount,
@@ -248,5 +251,32 @@ export const selectHostActions = ({
     heldBack: `Isolate host ${host.name} was not proposed: ${activeProcessCount} suspicious ${
       activeProcessCount === 1 ? 'process' : 'processes'
     }, no lateral movement, C2, or exfiltration technique confirmed, severity ${state.severity}`,
+  };
+};
+
+/**
+ * Whether isolate host is proposed: warranted by the table above, and supported by the endpoint.
+ * A warranted isolate on a host that does not report `isolation` is held back rather than minted,
+ * since Endpoint would reject it after an analyst approved it.
+ */
+export const selectHostActions = (args: {
+  host: CurrentRunHost;
+  state: CurrentRunState;
+  activeProcessCount: number;
+}): HostDecision => {
+  const decision = selectWarrantedHostAction(args);
+  if (!decision.isolate || args.host.capabilities.includes(ISOLATION_CAPABILITY)) {
+    return decision;
+  }
+  return {
+    rule: 'isolation_unsupported',
+    isolate: false,
+    why: decision.why,
+    heldBack: `Isolate host ${
+      args.host.name
+    } was not proposed: it was warranted (${decision.why.replace(
+      /^Rule: /,
+      ''
+    )}) but the endpoint does not report ${ISOLATION_CAPABILITY}`,
   };
 };

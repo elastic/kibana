@@ -17,6 +17,7 @@ import {
   buildProposalComment,
   buildProposalTitle,
   buildRecommendationComment,
+  describeProcess,
 } from './proposal_copy';
 import {
   DEFEND_ACTION_KINDS,
@@ -32,6 +33,12 @@ import type {
   Subject,
   SubjectKind,
 } from './types';
+
+const PROCESS_ACTION_LABELS: Record<ProcessActionKind, string> = {
+  kill: 'Kill',
+  suspend: 'Suspend',
+  memory_dump: 'Memory dump',
+};
 
 /** Catalog categories packaging may mint from. `configure` entries are never fillable. */
 const PACKAGEABLE_CATEGORIES = ['respond', 'investigate'];
@@ -555,11 +562,17 @@ export const decidePackageReport = ({
           processSelector,
         };
         for (const kind of decision.actions) {
-          // A kind the catalog does not have (e.g. memory dump not installed) is skipped; the
-          // rest of the decision still mints.
+          // A kind the catalog does not have (e.g. memory dump not installed) is not minted but
+          // is held back by name; the rest of the decision still mints.
           const entry = known.get(kind);
           if (entry) {
             mint({ entry, subject, ruleLine: decision.why });
+          } else {
+            heldBackLines.push(
+              `${PROCESS_ACTION_LABELS[kind]} was selected for ${describeProcess(
+                processSelector
+              )} on ${host.name} but that action is not installed`
+            );
           }
         }
       }

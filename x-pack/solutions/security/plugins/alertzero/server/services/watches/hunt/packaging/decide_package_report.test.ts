@@ -172,7 +172,7 @@ const forensicsHandoff: ActionCatalogEntry = {
 const enrolledHost = (
   name: string,
   agentId: string,
-  capabilities: string[] = []
+  capabilities: string[] = ['isolation']
 ): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities });
 
 const selector = (
@@ -878,9 +878,47 @@ describe('decidePackageReport', () => {
       processKey: 'entity:ent-2',
       processName: 'rundll32.exe',
     });
-    const withMemdump = enrolledHost('host-a', 'agent-a', ['memdump_process']);
+    const withMemdump = enrolledHost('host-a', 'agent-a', ['isolation', 'memdump_process']);
     const kinds = (proposals: Array<{ actionWorkflowId?: string }>) =>
       proposals.map((p) => p.actionWorkflowId).sort();
+
+    it('holds back kill by name when the kill action is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: {
+          ok: true,
+          actions: defendCatalog.filter(
+            (a) => a.workflowId !== ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID
+          ),
+        },
+      });
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('Kill was selected for');
+      expect(recommendation?.comment).toContain('that action is not installed');
+    });
+
+    it('holds a warranted isolate back when the host does not report isolation', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'critical',
+          hosts: [enrolledHost('host-a', 'agent-a', [])],
+          processSelectors: [ps1],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+      expect(result.proposals.find((p) => !p.actionWorkflowId)?.comment).toContain(
+        'does not report isolation'
+      );
+    });
 
     it('mints suspend+dump per process and isolate for two processes on a memdump-capable host, never kill', () => {
       const result = decidePackageReport({
