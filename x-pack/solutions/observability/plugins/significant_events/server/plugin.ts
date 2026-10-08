@@ -497,6 +497,20 @@ export class SignificantEventsPlugin
       logger: this.logger,
       server: this.server,
       getScopedClients: this.getScopedClients,
+      internalRuleBackedRules: {
+        listRuleIds: async (spaceId) => {
+          const [coreStart] = await core.getStartServices();
+          return knowledgeIndicatorService.listRuleBackedRuleIds({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            space: spaceId,
+          });
+        },
+        bulkDisableRules: async (params) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const rulesClient = await pluginsStart.alertingVTwo.getUnsafeInternalRulesClient();
+          return rulesClient.bulkDisableRules(params);
+        },
+      },
     });
 
     const sourceReconciliation = plugins.workflowsManagement?.management
