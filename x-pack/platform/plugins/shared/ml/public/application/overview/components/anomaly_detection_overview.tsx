@@ -103,11 +103,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   }, [hasADJobs, canGetJobs, redirectToMultiMetricExplorer, redirectToManageJobs]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState
-      customCss={overviewPageCardCustomCss}
-      iconSize="m"
-      titleSize="xs"
-    />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" titleSize="xs" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}

@@ -43,11 +43,7 @@ export const LinkCard: FC<Props> = ({
     titleElement="h3"
     description={description}
     icon={
-      typeof icon === 'string' ? (
-        <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
-      ) : (
-        icon
-      )
+      typeof icon === 'string' ? <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} /> : icon
     }
     onClick={onClick}
     href={href}
