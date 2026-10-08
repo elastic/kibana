@@ -7,7 +7,7 @@
 
 import { createPublicKey } from 'crypto';
 import jwt from 'jsonwebtoken';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { RawConnectorSigningKey } from './connector_signing_keys';
@@ -35,7 +35,10 @@ const createKey = async (spaceId = 'default'): Promise<RawConnectorSigningKey> =
   return client.create.mock.calls[0][1] as RawConnectorSigningKey;
 };
 
-const signerFor = (attributes: RawConnectorSigningKey | Error) => {
+const signerFor = (
+  attributes: RawConnectorSigningKey | Error,
+  savedObjectsRepository = savedObjectsRepositoryMock.create()
+) => {
   const esoClient = encryptedSavedObjectsMock.createClient();
   if (attributes instanceof Error) {
     esoClient.getDecryptedAsInternalUser.mockRejectedValue(attributes);
@@ -49,6 +52,7 @@ const signerFor = (attributes: RawConnectorSigningKey | Error) => {
   }
   return createConnectorJwtSigner({
     getEncryptedSavedObjectsClient: async () => esoClient,
+    getSavedObjectsRepository: async () => savedObjectsRepository,
     connectorId: 'connector-1',
   });
 };
@@ -83,6 +87,7 @@ describe('connector signing keys', () => {
     });
     expect(attributes).toMatchObject({
       connectorId: 'connector-1',
+      spaceId: 'security',
       issuer: 'https://kibana.example.com/s/security/api/actions/public/.ssf/connector-1',
       publicKey: { kty: 'RSA', alg: 'RS256', use: 'sig' },
       privateKey: expect.stringContaining('BEGIN PRIVATE KEY'),
@@ -136,6 +141,28 @@ describe('connector signing keys', () => {
     );
   });
 
+  it('signs only while the connector exists in the space of the key', async () => {
+    const key = await createKey('security');
+    const savedObjectsRepository = savedObjectsRepositoryMock.create();
+    await signerFor(key, savedObjectsRepository)({});
+    expect(savedObjectsRepository.get).toHaveBeenCalledWith('action', 'connector-1', {
+      namespace: 'security',
+    });
+
+    savedObjectsRepository.get.mockRejectedValueOnce(notFound());
+    await expect(signerFor(key, savedObjectsRepository)({})).rejects.toThrow(
+      NO_SIGNING_KEY_MESSAGE
+    );
+  });
+
+  it('looks up a default space connector without a namespace', async () => {
+    const savedObjectsRepository = savedObjectsRepositoryMock.create();
+    await signerFor(await createKey(), savedObjectsRepository)({});
+    expect(savedObjectsRepository.get).toHaveBeenCalledWith('action', 'connector-1', {
+      namespace: undefined,
+    });
+  });
+
   it('returns only public JWK members and checks key ownership', async () => {
     const key = await createKey();
     const client = savedObjectsClientMock.create();
@@ -146,7 +173,11 @@ describe('connector signing keys', () => {
       attributes: { ...key, publicKey: { ...key.publicKey, d: 'private' } },
     });
     expect(
-      await getConnectorPublicKey({ savedObjectsClient: client, connectorId: 'connector-1' })
+      await getConnectorPublicKey({
+        savedObjectsClient: client,
+        connectorId: 'connector-1',
+        spaceId: 'default',
+      })
     ).toEqual({
       issuer: key.issuer,
       publicKey: key.publicKey,
@@ -159,12 +190,34 @@ describe('connector signing keys', () => {
       attributes: { ...key, connectorId: 'connector-2' },
     });
     expect(
-      await getConnectorPublicKey({ savedObjectsClient: client, connectorId: 'connector-1' })
+      await getConnectorPublicKey({
+        savedObjectsClient: client,
+        connectorId: 'connector-1',
+        spaceId: 'default',
+      })
+    ).toBeUndefined();
+
+    client.get.mockResolvedValueOnce({
+      id: 'connector-1',
+      type: TYPE,
+      references: [],
+      attributes: { ...key, spaceId: 'other-space' },
+    });
+    expect(
+      await getConnectorPublicKey({
+        savedObjectsClient: client,
+        connectorId: 'connector-1',
+        spaceId: 'default',
+      })
     ).toBeUndefined();
 
     client.get.mockRejectedValueOnce(notFound());
     expect(
-      await getConnectorPublicKey({ savedObjectsClient: client, connectorId: 'connector-1' })
+      await getConnectorPublicKey({
+        savedObjectsClient: client,
+        connectorId: 'connector-1',
+        spaceId: 'default',
+      })
     ).toBeUndefined();
   });
 

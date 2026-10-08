@@ -58,6 +58,7 @@ describe('connector public keys', () => {
   });
   const keyObject = savedObject('connector_signing_key', {
     connectorId: 'connector-1',
+    spaceId: 'default',
     issuer,
     publicKey: { ...publicKey, d: 'private' },
     createdAt: '2026-10-04T00:00:00.000Z',
@@ -154,5 +155,19 @@ describe('connector public keys', () => {
     );
     const { response } = await invoke(JWKS_PATH);
     expect(response.notFound).toHaveBeenCalled();
+  });
+
+  it('returns 404 when the key record belongs to a connector in another space', async () => {
+    client.get.mockImplementation(async (type) =>
+      type === 'action'
+        ? actionObject
+        : savedObject('connector_signing_key', {
+            ...keyObject.attributes,
+            spaceId: 'deleted-space',
+          })
+    );
+    const { response } = await invoke(JWKS_PATH);
+    expect(response.notFound).toHaveBeenCalled();
+    expect(response.ok).not.toHaveBeenCalled();
   });
 });

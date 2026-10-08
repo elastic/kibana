@@ -555,6 +555,10 @@ export class ActionsPlugin
               includedHiddenTypes: [CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE],
             });
           },
+          getSavedObjectsRepository: async () => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+          },
           connectorId,
         }),
       getClientLeasePool: () => this.clientLeasePool,

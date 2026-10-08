@@ -63,9 +63,10 @@ export const connectorPublicKeysRoutes = ({
           space_id: explicitSpaceId,
         } = request.params;
         if (!connectorTypePublishesKeys(connectorTypeId)) return response.notFound();
+        const spaceId = explicitSpaceId ?? getSpaceId?.(request) ?? 'default';
         const client = await createUnsecuredInboundSavedObjectsClient({
           getStartServices: core.getStartServices,
-          spaceId: explicitSpaceId ?? getSpaceId?.(request) ?? 'default',
+          spaceId,
           includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE, CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE],
         });
         try {
@@ -75,7 +76,11 @@ export const connectorPublicKeysRoutes = ({
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) return response.notFound();
           throw error;
         }
-        const key = await getConnectorPublicKey({ savedObjectsClient: client, connectorId });
+        const key = await getConnectorPublicKey({
+          savedObjectsClient: client,
+          connectorId,
+          spaceId,
+        });
         if (!key) return response.notFound();
         const { issuer, publicKey } = key;
         return response.ok({

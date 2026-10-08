@@ -11,8 +11,8 @@ import { promisify } from 'util';
 import jwt from 'jsonwebtoken';
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ISavedObjectsRepository, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { buildConnectorPublicKeyUrls } from '../../common';
 import {
@@ -72,6 +72,7 @@ export const createConnectorSigningKey = async ({
     CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
     {
       connectorId,
+      spaceId,
       issuer,
       publicKey: { kty: 'RSA', n, e, kid, alg: 'RS256', use: 'sig' },
       privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
@@ -99,20 +100,25 @@ export const deleteConnectorSigningKey = async ({
   }
 };
 
-/** Loads the public part of a connector's signing key, or undefined when the connector has none. */
+/**
+ * Loads the public part of a connector's signing key, or undefined when the connector has no key
+ * in this space.
+ */
 export const getConnectorPublicKey = async ({
   savedObjectsClient,
   connectorId,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   connectorId: string;
+  spaceId: string;
 }): Promise<Pick<RawConnectorSigningKey, 'issuer' | 'publicKey'> | undefined> => {
   try {
     const { attributes } = await savedObjectsClient.get<RawConnectorSigningKey>(
       CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
       connectorId
     );
-    if (attributes.connectorId !== connectorId) return undefined;
+    if (attributes.connectorId !== connectorId || attributes.spaceId !== spaceId) return undefined;
     const { kty, n, e, kid, alg, use } = attributes.publicKey;
     return { issuer: attributes.issuer, publicKey: { kty, n, e, kid, alg, use } };
   } catch (error) {
@@ -121,13 +127,34 @@ export const getConnectorPublicKey = async ({
   }
 };
 
-/** Signs claims with the connector's key. The key is loaded on each call. */
+const connectorExistsInSpace = async (
+  savedObjectsRepository: ISavedObjectsRepository,
+  connectorId: string,
+  spaceId: string
+): Promise<boolean> => {
+  try {
+    await savedObjectsRepository.get(ACTION_SAVED_OBJECT_TYPE, connectorId, {
+      namespace: SavedObjectsUtils.namespaceStringToId(spaceId),
+    });
+    return true;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) return false;
+    throw error;
+  }
+};
+
+/**
+ * Signs claims with the connector's key. The key is loaded on each call, and is used only while its
+ * connector exists in the key's space, so a key left by a deleted space is never reused.
+ */
 export const createConnectorJwtSigner =
   ({
     getEncryptedSavedObjectsClient,
+    getSavedObjectsRepository,
     connectorId,
   }: {
     getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>;
+    getSavedObjectsRepository: () => Promise<ISavedObjectsRepository>;
     connectorId: string;
   }) =>
   async (claims: Record<string, unknown>): Promise<string> => {
@@ -142,7 +169,10 @@ export const createConnectorJwtSigner =
         throw error;
       });
     if (key?.attributes.connectorId !== connectorId) throw new Error(NO_SIGNING_KEY_MESSAGE);
-    const { issuer, publicKey, privateKey } = key.attributes;
+    const { spaceId, issuer, publicKey, privateKey } = key.attributes;
+    if (!(await connectorExistsInSpace(await getSavedObjectsRepository(), connectorId, spaceId))) {
+      throw new Error(NO_SIGNING_KEY_MESSAGE);
+    }
     return jwt.sign({ ...claims, iss: issuer }, privateKey, {
       algorithm: 'RS256',
       header: { alg: 'RS256', typ: 'secevent+jwt', kid: publicKey.kid },

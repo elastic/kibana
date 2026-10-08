@@ -73,7 +73,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
         "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
-        "connector_signing_key": "4a11be2eb039bd7ea04a0bde015a2d64e4308e49b5bb5f0f0920c316884c46c7",
+        "connector_signing_key": "8e057274baed93aeb5f595f55856a8a1b225000c8d9be5cea78831b93ef9a374",
         "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",

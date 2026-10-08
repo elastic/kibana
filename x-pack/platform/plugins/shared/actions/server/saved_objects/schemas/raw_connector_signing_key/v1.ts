@@ -11,6 +11,7 @@ import { CONNECTOR_ID_MAX_LENGTH } from '../../../../common';
 
 export const rawConnectorSigningKeySchema = schema.object({
   connectorId: schema.string({ maxLength: CONNECTOR_ID_MAX_LENGTH }),
+  spaceId: schema.string({ maxLength: 1024 }),
   issuer: schema.string({ maxLength: 2048 }),
   publicKey: schema.object({
     kty: schema.literal('RSA'),
