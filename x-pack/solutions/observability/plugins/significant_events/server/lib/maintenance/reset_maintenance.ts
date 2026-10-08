@@ -274,42 +274,67 @@ export const createResetRunner = ({
       );
       const remainingWorkflows = mergeTargets(failedWorkflows, withheldWorkflows);
 
-      const stuck = await runForEachSpace({
-        spaceIds: releasedSpaces,
+      // A space a user had paused keeps its pause, but whatever the sweep newly disabled there
+      // has no record yet, so it is added to that space's document for Resume to re-enable.
+      const unrecordedInPausedSpaces = newlyDisabled.filter(
+        ({ spaceId }) => !pausedByReset.has(spaceId)
+      );
+      const unrecorded = await runForEachSpace({
+        spaceIds: new Set(unrecordedInPausedSpaces.map(({ spaceId }) => spaceId)),
         run: async (spaceId) => {
           const previous = existingBySpace.get(spaceId);
-          const spaceWorkflows = mergeTargets(
-            previous?.disabledWorkflows ?? [],
-            remainingWorkflows.filter((workflow) => workflow.spaceId === spaceId)
-          );
-          const scheduledNotRestored =
-            togglesNotRestored.scheduledDiscoveryEnabledSpaceIds.includes(spaceId);
-          const pausedSettings = scheduledNotRestored
-            ? {
-                continuousOnboardingWasEnabled: false,
-                scheduledDiscoveryEnabledSpaceIds: [
-                  ...new Set([
-                    ...(previous?.pausedSettings?.scheduledDiscoveryEnabledSpaceIds ?? []),
-                    spaceId,
-                  ]),
-                ],
-              }
-            : previous?.pausedSettings;
-          if (!previous && spaceWorkflows.length === 0 && !pausedSettings) {
-            await deleteState(spaceId);
+          if (!previous) {
             return;
           }
           await writeState(spaceId, {
-            state: 'enabled',
-            updatedAt: new Date().toISOString(),
-            updatedBy: previous?.updatedBy,
-            disabledWorkflows: spaceWorkflows,
-            disabledRules: previous?.disabledRules ?? [],
-            pausedSettings,
-            lastSummary: normalizeSummary(previous?.lastSummary) ?? emptySummary('enabled'),
+            ...previous,
+            disabledWorkflows: mergeTargets(
+              previous.disabledWorkflows,
+              unrecordedInPausedSpaces.filter((workflow) => workflow.spaceId === spaceId)
+            ),
           });
         },
       });
+
+      const stuck = [
+        ...unrecorded,
+        ...(await runForEachSpace({
+          spaceIds: releasedSpaces,
+          run: async (spaceId) => {
+            const previous = existingBySpace.get(spaceId);
+            const spaceWorkflows = mergeTargets(
+              previous?.disabledWorkflows ?? [],
+              remainingWorkflows.filter((workflow) => workflow.spaceId === spaceId)
+            );
+            const scheduledNotRestored =
+              togglesNotRestored.scheduledDiscoveryEnabledSpaceIds.includes(spaceId);
+            const pausedSettings = scheduledNotRestored
+              ? {
+                  continuousOnboardingWasEnabled: false,
+                  scheduledDiscoveryEnabledSpaceIds: [
+                    ...new Set([
+                      ...(previous?.pausedSettings?.scheduledDiscoveryEnabledSpaceIds ?? []),
+                      spaceId,
+                    ]),
+                  ],
+                }
+              : previous?.pausedSettings;
+            if (!previous && spaceWorkflows.length === 0 && !pausedSettings) {
+              await deleteState(spaceId);
+              return;
+            }
+            await writeState(spaceId, {
+              state: 'enabled',
+              updatedAt: new Date().toISOString(),
+              updatedBy: previous?.updatedBy,
+              disabledWorkflows: spaceWorkflows,
+              disabledRules: previous?.disabledRules ?? [],
+              pausedSettings,
+              lastSummary: normalizeSummary(previous?.lastSummary) ?? emptySummary('enabled'),
+            });
+          },
+        })),
+      ];
       stuck.forEach(({ spaceId, error }) =>
         log.error(
           `Significant Events reset could not release the pause of space "${spaceId}" after aborting: ${toMessage(

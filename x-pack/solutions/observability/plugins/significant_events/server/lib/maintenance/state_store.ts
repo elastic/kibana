@@ -104,6 +104,26 @@ export const buildPausedIntent = ({
   lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
 });
 
+/**
+ * The saved-object schema of a failure only allows `target` and `error`, and rejects unknown
+ * keys, so the in-memory `spaceId` is dropped before the summary is written.
+ */
+const withPersistableFailures = (
+  attributes: SignificantEventsMaintenanceStateAttributes
+): SignificantEventsMaintenanceStateAttributes =>
+  attributes.lastSummary
+    ? {
+        ...attributes,
+        lastSummary: {
+          ...attributes.lastSummary,
+          partialFailures: attributes.lastSummary.partialFailures.map(({ target, error }) => ({
+            target,
+            error,
+          })),
+        },
+      }
+    : attributes;
+
 const isNotFound = (error: unknown): boolean =>
   error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error);
 
@@ -273,7 +293,7 @@ export const createMaintenanceStateStore = (
   ): Promise<void> => {
     await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      attributes,
+      withPersistableFailures(attributes),
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
     );
   };
