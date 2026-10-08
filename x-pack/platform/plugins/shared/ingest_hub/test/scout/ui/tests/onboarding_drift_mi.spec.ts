@@ -190,13 +190,11 @@ test.describe(
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
       // The MI section must auto-open (isDone: true → false when isDirty fires).
-      // The deployment used static keys (no connectorId), so StaticKeysReplaceView is shown.
-      // Fill in both credential fields so isDeployReady becomes true and Deploy enables.
-      await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
-      await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
-      await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
+      // The deployment used static keys (no connectorId) and its policy has no stored secrets here,
+      // so the key form shows plain inputs. Fill in both so isDeployReady becomes true.
+      await page.testSubj.fill('awsStaticKeysForm-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
       await page.testSubj.fill(
-        'staticKeysReplace-secretAccessKey',
+        'awsStaticKeysForm-secretAccessKey',
         'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
       );
       const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
@@ -474,13 +472,10 @@ test.describe(
         },
       });
 
-      // Reveal and fill both credential fields; once both are non-empty the replace view calls
-      // onReadyChange(true) which synchronously sets isDirty=true — no SO fetch needed.
-      await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
-      await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
-      await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
+      // Fill both credential fields; typing marks the step dirty synchronously — no SO fetch needed.
+      await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
       await page.testSubj
-        .locator('staticKeysReplace-secretAccessKey')
+        .locator('awsStaticKeysForm-secretAccessKey')
         .fill('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
       // Callout must appear immediately from form-level isDirty, before the drift-effect SO
@@ -643,11 +638,9 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
-      await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
-      await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
-      await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
+      await page.testSubj.fill('awsStaticKeysForm-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
       await page.testSubj.fill(
-        'staticKeysReplace-secretAccessKey',
+        'awsStaticKeysForm-secretAccessKey',
         'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
       );
 

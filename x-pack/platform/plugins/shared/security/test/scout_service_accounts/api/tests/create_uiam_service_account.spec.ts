@@ -7,17 +7,11 @@
 
 import { randomUUID } from 'crypto';
 
-import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { deleteUiamServiceAccount } from '../fixtures/uiam_service_account_cleanup';
-
-const headers = {
-  'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
-  Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
-};
+import { ORG_ADMIN_HEADERS as headers } from '../fixtures/uiam_service_account_create';
 
 // The local UIAM client certificate identifies an Elasticsearch (Search) project.
 apiTest.describe(
