@@ -539,6 +539,54 @@ describe('AssetManagerClient', () => {
       expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
     });
 
+    describe('getStatus config', () => {
+      beforeEach(() => {
+        mockEngineDescriptorClient.getAll.mockResolvedValue([
+          { type: 'host', status: 'started' },
+          {
+            type: 'user',
+            status: 'started',
+            nonPriorityLogExtractionConfig: { frequency: '5m' },
+          },
+        ]);
+        mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue({
+          maxLogsPerWindow: 500000,
+        });
+      });
+
+      it('resolves priority and non-priority config for dual-process types', async () => {
+        const result = await createDualProcessClient().getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+        const { logsExtractionConfigByType, nonPriorityLogsExtractionConfigByType } = result;
+
+        expect(logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'defer',
+          maxLogsPerWindow: 500000,
+          frequency: '1m',
+        });
+        expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerWindow,
+          frequency: '5m',
+        });
+        expect(logsExtractionConfigByType.host).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+        });
+        expect(nonPriorityLogsExtractionConfigByType.host).toBeUndefined();
+      });
+
+      it('resolves single config only with the flag off', async () => {
+        const result = await client.getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+
+        expect(result.logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+        });
+        expect(result.nonPriorityLogsExtractionConfigByType).toEqual({});
+      });
+    });
+
     it('start rolls the shared task back when the non-priority schedule fails', async () => {
       mockScheduleExtractEntityTask
         .mockResolvedValueOnce(undefined)

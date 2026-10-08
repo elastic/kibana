@@ -129,6 +129,33 @@ apiTest.describe(
       expect((await userEngine(apiClient)).nonPriority?.samplingRate).toBe(0.5);
     });
 
+    apiTest('reports the config each process resolves', async ({ apiClient }) => {
+      const updateGlobal = (logExtraction: Record<string, unknown>) =>
+        apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: publicHeaders,
+          responseType: 'json',
+          body: { logExtraction },
+        });
+
+      expect((await updateGlobal({ maxLogsPerWindow: 500000 })).statusCode).toBe(200);
+      expect(
+        (await setEngineConfig(apiClient, { nonPriorityOverride: { frequency: '5m' } })).statusCode
+      ).toBe(200);
+
+      const engine = await userEngine(apiClient);
+      // Top level is the priority process: it defers on the cap and takes the global volume field.
+      expect(engine.maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(engine.maxLogsPerWindow).toBe(500000);
+      // Non-priority drops on the cap, ignores the global volume field and has its own frequency.
+      expect(engine.nonPriority?.maxLogsPerWindowCapBehavior).toBe('drop');
+      expect(engine.nonPriority?.maxLogsPerWindow).toBe(100000);
+      expect(engine.nonPriority?.frequency).toBe('5m');
+
+      // The store is installed once for the file, so clear both layers for later cases.
+      await updateGlobal({ maxLogsPerWindow: null });
+      await setEngineConfig(apiClient, { nonPriorityOverride: { frequency: null } });
+    });
+
     apiTest('a later global update does not clear the per-type override', async ({ apiClient }) => {
       // Layer 5 would win over the global frequency asserted below, so clear it rather than
       // depending on no earlier case having written one.

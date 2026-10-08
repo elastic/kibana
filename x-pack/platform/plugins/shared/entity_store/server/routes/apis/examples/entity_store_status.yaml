@@ -39,7 +39,7 @@ responses:
                   maxLogsPerPage: 50000
                   maxTimeWindowSize: "15m"
                   maxLogsPerWindow: 100000
-                  maxLogsPerWindowCapBehavior: "drop"
+                  maxLogsPerWindowCapBehavior: "defer"
                   docsPerSecond: -1
                   indexPattern: ""
                   enrichPolicyExecutionInterval: null
@@ -51,6 +51,15 @@ responses:
                     error: null
                     lastExecutionTimestamp: "2026-04-10T08:26:00.000Z"
                     samplingRate: null
+                    delay: "1m"
+                    timeout: "59s"
+                    frequency: "1m"
+                    lookbackPeriod: "3h"
+                    fieldHistoryLength: 10
+                    maxLogsPerPage: 50000
+                    maxTimeWindowSize: "15m"
+                    maxLogsPerWindow: 100000
+                    maxLogsPerWindowCapBehavior: "drop"
                 - type: service
                   status: started
                   filter: ""
