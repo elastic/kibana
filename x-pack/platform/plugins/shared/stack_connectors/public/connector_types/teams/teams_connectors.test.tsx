@@ -18,6 +18,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connect
   checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
 }));
 
+// The connector form provider tree is heavy to mount; give it headroom over the 5s default under parallel CI load.
+jest.setTimeout(30_000);
+
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {
