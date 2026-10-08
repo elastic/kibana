@@ -66,7 +66,7 @@ import {
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
-import { getXYIconAPIName } from './helpers';
+import { getAnnotationIconAPIName } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -281,7 +281,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
     color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
-    icon: getXYIconAPIName(yConfig.icon),
+    icon: getAnnotationIconAPIName(yConfig.icon),
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: resolvedOnAxis(),
@@ -501,7 +501,7 @@ export function buildAPIAnnotationsLayer(
           color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: getXYIconAPIName(annotation.icon) } : {}),
+          ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
           ...(annotation.lineWidth || annotation.lineStyle
             ? {
@@ -538,7 +538,7 @@ export function buildAPIAnnotationsLayer(
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: getXYIconAPIName(annotation.icon) } : {}),
+        ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
         ...(annotation.lineWidth || annotation.lineStyle
           ? {
               line: {

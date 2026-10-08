@@ -82,9 +82,12 @@ export function isLensStateDataLayer(
   return layer.layerType === 'data' || !('layerType' in layer);
 }
 
-type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
+type AnnotationIconAPIName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
 
-export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnotationIcon>([
+export const annotationIconCompat = getReversibleMappings<
+  AnnotationIconAPIName,
+  AvailableAnnotationIcon
+>([
   ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
@@ -102,8 +105,10 @@ export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnota
   ['triangle', 'triangle'],
 ]);
 
-export const getXYIconAPIName = (icon: string | undefined): XYApiIconName | undefined => {
+export const getAnnotationIconAPIName = (
+  icon: string | undefined
+): AnnotationIconAPIName | undefined => {
   const { id } = resolveVisIcon(icon);
   const annotationIcon = Object.values(AvailableAnnotationIcons).find((i) => i === id);
-  return annotationIcon ? xyIconCompat.toAPI(annotationIcon) : undefined;
+  return annotationIcon ? annotationIconCompat.toAPI(annotationIcon) : undefined;
 };
