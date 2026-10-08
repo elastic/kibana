@@ -72,8 +72,7 @@ describe('searchEventsToolHandler', () => {
         event_id: 'checkout-failure',
         symptom_hypothesis: 'Payment calls are failing',
         summary: 'Checkout payment calls fail.',
-        signal_rule_uuids: ['rule-active', 'rule-clear', 'rule-unknown'],
-        unresolved_rule_uuids: ['rule-active', 'rule-unknown'],
+        signal_rule_uuids: ['rule-active'],
         signal_counts: {
           total: 3,
           confirms: 1,
@@ -88,7 +87,27 @@ describe('searchEventsToolHandler', () => {
     expect(result.events[0].symptom_hypothesis).toBe('Payment calls are failing');
   });
 
-  it('does not hide inconclusive signals from closure routing', async () => {
+  it.each<[string, string[]]>([
+    ['active', ['active', 'recovering']],
+    ['recovering', ['recovering']],
+    ['inactive', ['inactive']],
+  ])(
+    'filters status "%s" to %j, so routing sees a recovering event as live',
+    async (status, expected) => {
+      const client = makeClient();
+
+      await searchEventsToolHandler({
+        eventSearchClient: client as never,
+        params: { status: status as never },
+      });
+
+      expect(client.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
+        expect.objectContaining({ status: expected })
+      );
+    }
+  );
+
+  it('does not report an inconclusive signal as a member', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
       params: { event_ids: ['checkout-failure'] },
@@ -96,7 +115,7 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        unresolved_rule_uuids: ['rule-unknown'],
+        signal_rule_uuids: [],
         signal_counts: {
           total: 1,
           confirms: 0,
@@ -109,7 +128,40 @@ describe('searchEventsToolHandler', () => {
     );
   });
 
-  it('reports off-topic rules without making their authored rule unresolved', async () => {
+  it('reports an off-topic rule with an observed error as a member', async () => {
+    const result = await searchEventsToolHandler({
+      eventSearchClient: makeClient([
+        {
+          ...event,
+          signals: [
+            {
+              ...event.signals[0],
+              verdict: 'off_topic',
+              effect: 'degradation',
+              metadata: { rule_uuid: 'rule-off-topic', rule_name: 'Unrelated error' },
+            },
+          ],
+        },
+      ]) as never,
+      params: { event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0]).toEqual(
+      expect.objectContaining({
+        signal_rule_uuids: ['rule-off-topic'],
+        signal_counts: {
+          total: 1,
+          confirms: 0,
+          refutes: 0,
+          off_topic: 1,
+          inconclusive: 0,
+          not_checked: 0,
+        },
+      })
+    );
+  });
+
+  it('does not report a benign off-topic rule as a member', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -128,8 +180,7 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        signal_rule_uuids: ['rule-off-topic'],
-        unresolved_rule_uuids: [],
+        signal_rule_uuids: [],
         signal_counts: {
           total: 1,
           confirms: 0,

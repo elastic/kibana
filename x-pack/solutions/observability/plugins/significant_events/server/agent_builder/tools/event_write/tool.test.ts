@@ -16,6 +16,7 @@ import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
 import { createEventsWriteTool, eventsWriteSchema } from './tool';
+import type { SignalEntry } from '@kbn/significant-events-schema';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
@@ -29,14 +30,28 @@ jest.mock('./handler', () => ({
   eventsWriteBulkHandler: jest.fn(),
 }));
 
+const confirmingSignal: SignalEntry = {
+  type: 'detection',
+  stream_name: 'logs.test',
+  description: 'Found: error. Impact: requests failed.',
+  verdict: 'confirms',
+  evidence: { esql_query: 'FROM logs.test', result: 'found' },
+  metadata: {
+    rule_uuid: 'rule-input',
+    detection_id: 'detection-input',
+    change_point_type: 'spike',
+    p_value: 0.01,
+  },
+};
+
 const input = {
   event_id: 'event-1',
-  status: 'active' as const,
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'high' as const,
   confidence: 0.8,
+  signals: [confirmingSignal],
 };
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
@@ -126,7 +141,7 @@ describe('events_write tool', () => {
     });
   });
 
-  describe('open high-severity confirms invariant', () => {
+  describe('breaching signal invariant', () => {
     const signalWith = (verdict: string) => ({
       type: 'detection' as const,
       stream_name: 'logs.test',
@@ -140,88 +155,83 @@ describe('events_write tool', () => {
         p_value: 0.01,
       },
     });
+    const quiet = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Rule X: no backed query KI matched this detection.',
+      verdict: 'not_checked' as const,
+      metadata: {
+        rule_uuid: 'rule-2',
+        detection_id: 'detection-2',
+        change_point_type: 'spike' as const,
+        p_value: 0.2,
+      },
+    };
+    const { event_id: _omitted, ...newEventInput } = input;
 
-    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
-      const { event_id: _omitted, ...newEventInput } = input;
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
-      });
+    it.each([
+      ['inconclusive evidence', [signalWith('inconclusive')]],
+      ['refuting evidence', [signalWith('refutes')]],
+      ['a quiet not_checked rule', [quiet]],
+      ['no signals at all', []],
+    ])('rejects a new event backed only by %s', (_label, signals) => {
+      const result = eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] });
+
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
+        expect(result.error.issues.at(-1)?.message).toContain('at least one confirms signal');
       }
     });
 
-    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
+    it('rejects a continuation with no breaching signal', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, signals: [signalWith('inconclusive')] }],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts an item backed by a confirms signal, new or continuation', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('inconclusive')] }],
+          items: [{ ...newEventInput, signals: [signalWith('confirms')] }],
         }).success
+      ).toBe(true);
+      expect(
+        eventsWriteSchema.safeParse({ items: [{ ...input, signals: [signalWith('confirms')] }] })
+          .success
       ).toBe(true);
     });
 
-    it('accepts an active high item backed by a confirms signal', () => {
+    it('accepts an item whose only grounded signal is off_topic (observed-error path)', () => {
       expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('confirms')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active medium item with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, severity: 'medium' as const, signals: [signalWith('inconclusive')] }],
-        }).success
+        eventsWriteSchema.safeParse({ items: [{ ...input, signals: [signalWith('off_topic')] }] })
+          .success
       ).toBe(true);
     });
 
     it('rejects mixing confirms and not_checked on the same item', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule Y: no backed query KI matched this detection.',
-        verdict: 'not_checked' as const,
-        metadata: {
-          rule_uuid: 'rule-2',
-          detection_id: 'detection-2',
-          change_point_type: 'spike' as const,
-          p_value: 0.2,
-        },
-      };
       const result = eventsWriteSchema.safeParse({
         items: [{ ...input, signals: [signalWith('confirms'), quiet] }],
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
       }
     });
 
-    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('off_topic')] }],
-        }).success
-      ).toBe(true);
-    });
+    it('rejects a status from the caller instead of dropping it, so an attempt to close fails loudly', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, status: 'inactive' }],
+      });
 
-    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule X: no backed query KI matched this detection.',
-        verdict: 'not_checked',
-        metadata: {
-          rule_uuid: 'rule-1',
-          detection_id: 'detection-1',
-          change_point_type: 'spike' as const,
-          p_value: 0.01,
-        },
-      };
-      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals: [quiet] }] }).success).toBe(
-        true
-      );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.map(({ message }) => message).join(' ')).toContain(
+          'status is not an input'
+        );
+      }
     });
   });
 
@@ -503,6 +513,22 @@ describe('events_write tool', () => {
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
       expect.objectContaining({ success: false, written: false, error_message: 'busy' })
     );
+  });
+
+  it('writes every item as active', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, status: 'inactive' }] },
+      createMockToolContext()
+    );
+
+    const [{ inputs }] = (eventsWriteBulkHandler as jest.Mock).mock.calls[0];
+    expect(inputs).toHaveLength(1);
+    expect(inputs[0]).toMatchObject({ event_id: 'event-1', status: 'active' });
   });
 
   it('does not replace successful results when telemetry throws', async () => {

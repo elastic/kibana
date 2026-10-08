@@ -251,8 +251,8 @@ steps:
                   description: 'Severity of the event as decided by the discovery agent.'
                 status:
                   type: string
-                  enum: [active, inactive]
-                  description: 'Status decision.'
+                  enum: [active, recovering, inactive]
+                  description: 'Echo of the status events_write returned. The agent decides nothing here: every agent write is active, and the status engine owns recovering and inactive.'
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'

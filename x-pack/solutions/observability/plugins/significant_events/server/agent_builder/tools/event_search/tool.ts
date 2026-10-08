@@ -43,7 +43,7 @@ const searchEventsSchema = significantEventSchema
     status: significantEventSchema.shape.status.default('active').describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
         defaultMessage:
-          'Event status to filter by. Defaults to "active". Use "inactive" when intentionally reviewing resolved events.',
+          'Event status to filter by. Defaults to "active", which includes recovering events because they are still live and can be continued. Use "recovering" for only those, or "inactive" when intentionally reviewing resolved events.',
       })
     ),
     query: z
@@ -198,7 +198,7 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
         defaultMessage:
-          'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. Do not close an event while unresolved_rule_uuids is non-empty. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
+          'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. signal_rule_uuids lists the rules whose signal asserts a breach on the event. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
       })}
     `,
     annotations: {
