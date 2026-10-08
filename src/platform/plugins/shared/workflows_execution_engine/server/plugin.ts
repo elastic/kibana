@@ -120,6 +120,7 @@ import {
   getTaskPriority,
   getWorkflowImmediateResumeTaskId,
   getWorkflowWakeTaskId,
+  WORKFLOW_PARKED_RUNNER_DELAY_MS,
   WORKFLOW_WAKE_POLL_INTERVAL_MS,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
@@ -582,7 +583,12 @@ export class WorkflowsExecutionEnginePlugin
                     workflowRunId,
                     spaceId
                   );
-                  if (!execution || isTerminalStatus(execution.status)) return;
+                  if (!execution || isTerminalStatus(execution.status)) {
+                    await new WorkflowTaskManager(
+                      pluginsStart.taskManager
+                    ).removeParkedImmediateResume(workflowRunId);
+                    return;
+                  }
                   isUserInteractive =
                     execution.context?.pendingInteractiveResume === true &&
                     execution.context?.resumeInput != null;
@@ -702,6 +708,13 @@ export class WorkflowsExecutionEnginePlugin
                       outcome,
                     });
                   }
+                }
+                if (execution && !isTerminalStatus(execution.status)) {
+                  // Recreating the runner on the next wake-up would grant a new API key.
+                  return {
+                    runAt: new Date(Date.now() + WORKFLOW_PARKED_RUNNER_DELAY_MS),
+                    state: {},
+                  };
                 }
               } catch (error) {
                 const aborted = taskAbortController.signal.aborted;

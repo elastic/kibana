@@ -69,7 +69,10 @@ describe('AlertActionWorkflowSubscriber', () => {
     it("forwards context.request through WorkflowService to workflowsExtensions, with the binding's triggerId and the mapped payload", async () => {
       subscriber.start();
 
-      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request });
+      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
       expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
@@ -90,7 +93,10 @@ describe('AlertActionWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request })
+        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
@@ -98,7 +104,7 @@ describe('AlertActionWorkflowSubscriber', () => {
         labels: {
           event_type: EPISODE_ASSIGNED_EVENT_TYPE,
           space_id: episodeAssignedEvent.spaceId,
-          episode_id: episodeAssignedEvent.episodeId,
+          alert_id: episodeAssignedEvent.episodeId,
           rule_id: episodeAssignedEvent.ruleId,
           code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         },

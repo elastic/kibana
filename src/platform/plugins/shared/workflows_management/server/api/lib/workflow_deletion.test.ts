@@ -658,8 +658,14 @@ describe('deleteWorkflows', () => {
             ? dataClients.stepExecutionsDataClient.deleteByQuery
             : dataClients.workflowExecutionsDataClient.deleteByQuery
         );
+        const persistentVersionConflict =
+          !(response instanceof Error) &&
+          'version_conflicts' in response &&
+          Boolean(response.version_conflicts);
         if (response instanceof Error) {
           deleteByQuery.mockRejectedValueOnce(response);
+        } else if (persistentVersionConflict) {
+          deleteByQuery.mockResolvedValue(response);
         } else {
           deleteByQuery.mockResolvedValueOnce(response);
         }
@@ -677,6 +683,8 @@ describe('deleteWorkflows', () => {
             getWorkflowExecutions: noopExecutions,
           })
         ).rejects.toThrow(message);
+
+        expect(deleteByQuery).toHaveBeenCalledTimes(persistentVersionConflict ? 3 : 1);
 
         expect(client.delete).not.toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -731,6 +739,114 @@ describe('deleteWorkflows', () => {
           }
         }
       );
+
+      const versionConflictError = () =>
+        Object.assign(new Error('version_conflict_engine_exception'), {
+          statusCode: 409,
+          body: {
+            timed_out: false,
+            version_conflicts: 1,
+            failures: [
+              {
+                cause: {
+                  type: 'version_conflict_engine_exception',
+                  reason: 'version conflict',
+                },
+              },
+            ],
+          },
+        });
+
+      const privateForceDelete = () => {
+        const { client, storage } = makeStorageClient([
+          {
+            _id: 'wf-1',
+            _source: makeWorkflowSource({
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+          },
+        ]);
+        const dataClients = makeExecutionsDataAccess();
+        const deleteByQuery = jest.mocked(
+          target === 'steps'
+            ? dataClients.stepExecutionsDataClient.deleteByQuery
+            : dataClients.workflowExecutionsDataClient.deleteByQuery
+        );
+        const run = () =>
+          deleteWorkflows({
+            ids: ['wf-1'],
+            spaceId: 'default',
+            force: true,
+            acknowledgeAclLoss: true,
+            storage,
+            ...dataClients,
+            taskScheduler: null,
+            logger,
+            getWorkflowExecutions: noopExecutions,
+          });
+        return { client, deleteByQuery, run };
+      };
+
+      it('completes deletion when a version conflict clears on retry', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery
+          .mockResolvedValueOnce({ version_conflicts: 1 })
+          .mockResolvedValueOnce({ deleted: 1 });
+
+        await expect(run()).resolves.toEqual({
+          total: 1,
+          deleted: 1,
+          successfulIds: ['wf-1'],
+          failures: [],
+        });
+        expect(client.delete).toHaveBeenCalledTimes(1);
+        expect(deleteByQuery).toHaveBeenCalledTimes(2);
+      });
+
+      it('completes deletion when a thrown version conflict clears on retry', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery
+          .mockRejectedValueOnce(versionConflictError())
+          .mockResolvedValueOnce({ deleted: 1 });
+
+        await expect(run()).resolves.toEqual({
+          total: 1,
+          deleted: 1,
+          successfulIds: ['wf-1'],
+          failures: [],
+        });
+        expect(client.delete).toHaveBeenCalledTimes(1);
+        expect(deleteByQuery).toHaveBeenCalledTimes(2);
+      });
+
+      it('retains the workflow ACL when a thrown version conflict persists', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery.mockRejectedValue(versionConflictError());
+
+        await expect(run()).rejects.toThrow('version_conflict_engine_exception');
+        expect(deleteByQuery).toHaveBeenCalledTimes(3);
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('does not retry a purge failure that is not only a version conflict', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery.mockResolvedValue({
+          version_conflicts: 1,
+          failures: [
+            {
+              id: 'step-1',
+              index: '.workflows-step-executions',
+              status: 500,
+              cause: { type: 'index_not_found_exception', reason: 'missing' },
+            },
+          ],
+        });
+
+        await expect(run()).rejects.toThrow('failures=1');
+        expect(deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(client.delete).not.toHaveBeenCalled();
+      });
     });
   });
 });
@@ -808,9 +924,10 @@ describe('bound workflow deletion OCC', () => {
       const { client, params, deleteDocument } = setup(true, true);
       const dataClient =
         target === 'steps' ? params.stepExecutionsDataClient : params.workflowExecutionsDataClient;
-      jest.mocked(dataClient.deleteByQuery).mockResolvedValueOnce({ version_conflicts: 1 });
+      jest.mocked(dataClient.deleteByQuery).mockResolvedValue({ version_conflicts: 1 });
 
       await expect(deleteWorkflows(params)).rejects.toThrow('remains soft-deleted');
+      expect(dataClient.deleteByQuery).toHaveBeenCalledTimes(3);
       expect(deleteDocument).not.toHaveBeenCalled();
       expect(client.index).toHaveBeenCalledTimes(1);
       expect(client.index).toHaveBeenCalledWith(

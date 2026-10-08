@@ -659,13 +659,16 @@ export class Plugin {
 
 #### bulkUpdateSchedules
 
-Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status
-(for the tasks which have `running` status, `schedule` and `runAt` will be recalculated after task run finishes).
+Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status.
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
 newRunAt = scheduledAt + newInterval
 ```
+
+By default tasks in `running` or `claiming` status are skipped. Pass `includeRunningTasks: true` in the options to
+update them as well: only `schedule` (and API keys, if requested) is written in place, `runAt` is left untouched and
+the next `runAt` is computed from the new schedule when the current run finishes.
 
 Example:
 
@@ -971,6 +974,8 @@ When a task with an API key is deleted, we mark the API key for invalidation. Be
 re-used between tasks (as in the case of one task queuing up another task), we do not immediately delete the associated API key. Instead, we use the saved object type `api_key_to_invalidate` to store the API key IDs that are marked for invalidation.
 
 We schedule a recurring background task that queries for the existence of any `api_key_to_invalidate` saved objects and then queries to see whether those API key IDs are used by any other tasks. If no other tasks are referencing the API key, we invalidate it. We use a removal delay in the query to avoid race conditions that may happen if a task is scheduled with a re-used API key while the invalidation task is running.
+
+When `regenerateApiKey` replaces the API key of a task that is currently running, that run keeps using the old key. The old key's `api_key_to_invalidate` object records the task id and the run's `startedAt`, and the key is not invalidated while that same run is still in progress (the task is `running` with the same `startedAt` and its `retryAt` hasn't passed).
 
 The default schedule for this task is every `5m`. To change this schedule, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.interval`.
 
