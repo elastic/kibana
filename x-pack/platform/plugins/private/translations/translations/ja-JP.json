@@ -42157,7 +42157,6 @@
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel": "競合する「list_id」で既存の例外リストを上書き",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription": "インポートするルールを選択します。関連付けられたルールアクションと例外を含めることができます。",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle": "{totalRules} {totalRules, plural, =1 {rule} other {件のルール}}を正常にインポートしました",
-    "xpack.securitySolution.detectionEngine.createRule.ariaLabel": "エージェントを使用するか、ルール作成フォームを使用して手動でルールを作成します。",
     "xpack.securitySolution.detectionEngine.createRule.backToRulesButton": "ルール",
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "キャンセル",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "AIルール作成",
