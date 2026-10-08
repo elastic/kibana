@@ -1,9 +1,20 @@
 {
-  "sha1": "",
+  "sha1": "2e0bc83e6ce1b12eb0b18e59589b0d2818aa5f7d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "baabcd329d899dc-8196a1c019af720",
+      "title": "Enable the AlertZero advanced setting",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "8690582d6196782-54de36385c98f53",
       "title": "GET /internal/alertzero/actions — action catalog returns the full installed action catalog when no categories param is sent",
@@ -13,8 +24,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 33,
-        "column": 32
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -26,7 +37,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 65,
+        "line": 70,
         "column": 16
       }
     },
@@ -39,7 +50,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 91,
+        "line": 96,
         "column": 9
       }
     },
@@ -52,8 +63,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 124,
-        "column": 21
+        "line": 129,
+        "column": 16
       }
     },
     {
@@ -65,7 +76,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 138,
+        "line": 143,
         "column": 16
       }
     },
@@ -78,8 +89,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 152,
-        "column": 9
+        "line": 132,
+        "column": 27
       }
     },
     {
@@ -91,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 172,
+        "line": 177,
         "column": 9
       }
     },
@@ -104,8 +115,19 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/list_actions.spec.ts",
-        "line": 175,
-        "column": 16
+        "line": 180,
+        "column": 89
+      }
+    },
+    {
+      "id": "a015847069f002e-bbcaa2fd1dab088",
+      "title": "Revert the AlertZero advanced setting",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

@@ -36,7 +36,6 @@ export const servers: ScoutServerConfig = {
       '--xpack.agentBuilder.enabled=true',
       '--workflowsManagement.enabled=true',
       ...serviceAccountsServerArgs,
-      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
     ],
   },
 };

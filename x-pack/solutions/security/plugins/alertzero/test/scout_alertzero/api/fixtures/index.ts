@@ -16,4 +16,10 @@ export {
   ALERTZERO_READ_ROLE,
   NO_ALERTZERO_PRIVILEGE_ROLE,
 } from './constants';
-export { listActions, waitForActionCatalog } from './helpers';
+export {
+  ACTION_CATALOG_HOOK_TIMEOUT_MS,
+  ACTION_CATALOG_READY_TIMEOUT_MS,
+  listActions,
+  setAlertZeroEnabled,
+  waitForActionCatalog,
+} from './helpers';

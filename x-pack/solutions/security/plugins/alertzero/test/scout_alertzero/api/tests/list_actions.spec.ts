@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-security/api';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import {
+  ACTION_CATALOG_HOOK_TIMEOUT_MS,
   apiTest,
   listActions,
   ACTION_IDS_BY_CATEGORY,
@@ -32,6 +33,8 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+      // The readiness poll below outlasts Playwright's default 60s hook timeout.
+      apiTest.setTimeout(ACTION_CATALOG_HOOK_TIMEOUT_MS);
       ({ cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ROLE));
       // Installation is async after plugin start; assert only against a complete catalog.
       await waitForActionCatalog(apiClient, cookieHeader);

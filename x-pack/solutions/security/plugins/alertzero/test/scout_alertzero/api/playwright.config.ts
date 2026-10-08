@@ -9,4 +9,7 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
   testDir: './tests',
+  // Wires `tests/global.setup.ts` / `tests/global.teardown.ts`, which turn the AlertZero advanced
+  // setting on and back off once per run (the config set is shared with other suites)
+  runGlobalSetup: true,
 });

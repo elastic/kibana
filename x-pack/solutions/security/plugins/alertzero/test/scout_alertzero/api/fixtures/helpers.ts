@@ -7,6 +7,7 @@
 
 import type { ApiClientFixture } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import type { ListActionsResponse } from '@kbn/alertzero-common';
 import { ALL_ACTION_IDS, INTERNAL_HEADERS, LIST_ACTIONS_PATH } from './constants';
 
@@ -49,6 +50,39 @@ export const listActions = async (
   });
 };
 
+/** Upper bound for `waitForActionCatalog`'s readiness poll. */
+export const ACTION_CATALOG_READY_TIMEOUT_MS = 120_000;
+
+/**
+ * Per-hook budget for a `beforeAll` that calls `waitForActionCatalog`. Playwright's default hook
+ * timeout (60s) is shorter than the poll, so it would abort the poll mid-wait; the extra headroom
+ * covers the SAML login that precedes it.
+ */
+export const ACTION_CATALOG_HOOK_TIMEOUT_MS = ACTION_CATALOG_READY_TIMEOUT_MS + 30_000;
+
+/**
+ * Turns the AlertZero advanced setting on / off. `securitySolution:enableAlertZero` defaults to
+ * false and gates every internal AlertZero route (404 otherwise). It is set per run through the
+ * Kibana API instead of a `uiSettings.overrides` server arg so the shared `alertzero` config set
+ * does not force it on for the other suites that boot with it.
+ */
+export const setAlertZeroEnabled = async (
+  kbnClient: {
+    uiSettings: {
+      update: (values: Record<string, boolean>) => Promise<unknown>;
+      unset: (key: string) => Promise<unknown>;
+    };
+  },
+  enabled: boolean
+): Promise<void> => {
+  if (enabled) {
+    await kbnClient.uiSettings.update({ [ALERTZERO_ENABLED_SETTING_ID]: true });
+  } else {
+    // unset (not `false`) so the stored value is removed and the default applies again
+    await kbnClient.uiSettings.unset(ALERTZERO_ENABLED_SETTING_ID);
+  }
+};
+
 /**
  * Managed action workflows are installed asynchronously after plugin start, so on a fresh or
  * slow startup the endpoint can answer 200 with a partial catalog. Polls until every expected
@@ -74,7 +108,7 @@ export const waitForActionCatalog = async (
       },
       {
         message: 'AlertZero managed action workflows were not all installed in time',
-        timeout: 120_000,
+        timeout: ACTION_CATALOG_READY_TIMEOUT_MS,
         intervals: [1_000, 2_000, 5_000],
       }
     )
