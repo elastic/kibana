@@ -8,11 +8,16 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
-import { redeployPrivateLocationMonitors, updatePrivateLocationMonitors } from './helpers';
+import { updatePrivateLocationMonitors } from './helpers';
+import { runTaskPerPrivateLocation } from '../../../tasks/sync_private_locations_monitors_task';
 import {
   getPrivateLocations,
   getPrivateLocationsForNamespaces,
 } from '../../../synthetics_service/get_private_locations';
+
+jest.mock('../../../tasks/sync_private_locations_monitors_task', () => ({
+  runTaskPerPrivateLocation: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocations: jest.fn().mockResolvedValue([]),
@@ -26,7 +31,6 @@ jest.mock('./helpers', () => {
   return {
     ...actual,
     updatePrivateLocationMonitors: jest.fn().mockResolvedValue(undefined),
-    redeployPrivateLocationMonitors: jest.fn().mockResolvedValue({ failedCount: 0 }),
   };
 });
 
@@ -254,27 +258,48 @@ describe('editPrivateLocationRoute agent policy change', () => {
     jest.clearAllMocks();
   });
 
-  it('redeploys monitors onto the new agent policy before persisting it', async () => {
+  it('persists the new agent policy, then schedules the monitors to move to it', async () => {
     const { edit, routeContext } = setup();
 
     await editPrivateLocationRoute().handler(routeContext);
 
-    expect(redeployPrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        locationId: 'loc-1',
-        monitorsInLocation: monitors,
-        allPrivateLocations: [expect.objectContaining({ id: 'loc-1', agentPolicyId: 'ap-2' })],
-      })
-    );
     expect(edit).toHaveBeenCalledWith('loc-1', {
       label: 'Loc',
       tags: ['t'],
       agentPolicyId: 'ap-2',
     });
-    expect((redeployPrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-      edit.mock.invocationCallOrder[0]
+    expect(runTaskPerPrivateLocation).toHaveBeenCalledWith({
+      server: routeContext.server,
+      privateLocationId: 'loc-1',
+      previousAgentPolicyId: 'ap-1',
+    });
+    expect(edit.mock.invocationCallOrder[0]).toBeLessThan(
+      (runTaskPerPrivateLocation as jest.Mock).mock.invocationCallOrder[0]
     );
     expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+  });
+
+  it('reverts the agent policy and rethrows when scheduling the move fails', async () => {
+    const { edit, routeContext } = setup();
+    (runTaskPerPrivateLocation as jest.Mock).mockRejectedValueOnce(new Error('tm down'));
+
+    await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('tm down');
+
+    // A retry would otherwise see no change and never schedule the move.
+    expect(edit).toHaveBeenCalledTimes(2);
+    expect(edit).toHaveBeenLastCalledWith('loc-1', {
+      label: 'Loc',
+      tags: ['t'],
+      agentPolicyId: 'ap-1',
+    });
+  });
+
+  it('does not schedule a move for a tag-only edit', async () => {
+    const { routeContext } = setup({ tags: ['new'] });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
   });
 
   it('rejects an agent policy that is not available in the current space', async () => {
@@ -284,7 +309,7 @@ describe('editPrivateLocationRoute agent policy change', () => {
     const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(result).toEqual(expect.objectContaining({ status: 400 }));
-    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
     expect(edit).not.toHaveBeenCalled();
   });
 
@@ -298,7 +323,7 @@ describe('editPrivateLocationRoute agent policy change', () => {
     const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(result).toEqual(expect.objectContaining({ status: 400 }));
-    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
     expect(edit).not.toHaveBeenCalled();
   });
 
@@ -317,12 +342,12 @@ describe('editPrivateLocationRoute agent policy change', () => {
       expect.anything(),
       existingLocation.namespaces
     );
-    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
     expect(edit).not.toHaveBeenCalled();
   });
 
-  it('rewrites the monitor label before redeploying when label and agent policy change together', async () => {
-    const { routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
+  it('rewrites the monitor label before persisting when label and agent policy change together', async () => {
+    const { edit, routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
 
     await editPrivateLocationRoute().handler(routeContext);
 
@@ -336,44 +361,28 @@ describe('editPrivateLocationRoute agent policy change', () => {
         ],
       })
     );
-    expect(redeployPrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        allPrivateLocations: [
-          expect.objectContaining({ label: 'Barcelona', agentPolicyId: 'ap-2' }),
-        ],
-      })
-    );
     expect((updatePrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-      (redeployPrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]
+      edit.mock.invocationCallOrder[0]
     );
+    expect(runTaskPerPrivateLocation).toHaveBeenCalledTimes(1);
   });
 
-  it('does not redeploy or persist when the monitor label rewrite throws', async () => {
+  it('does not schedule a move or persist when the monitor label rewrite throws', async () => {
     const { edit, routeContext } = setup({ label: 'Barcelona', agentPolicyId: 'ap-2' });
     (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
 
     await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
-    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
     expect(edit).not.toHaveBeenCalled();
   });
 
-  it('persists the new agent policy and reports monitors that failed to redeploy', async () => {
-    const { edit, routeContext } = setup();
-    (redeployPrivateLocationMonitors as jest.Mock).mockResolvedValueOnce({ failedCount: 2 });
-
-    const result = await editPrivateLocationRoute().handler(routeContext);
-
-    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ agentPolicyId: 'ap-2' }));
-    expect(result).toEqual(expect.objectContaining({ statusCode: 500 }));
-  });
-
-  it('skips the redeploy when no monitors use the location', async () => {
+  it('skips scheduling the move when no monitors use the location', async () => {
     const { edit, routeContext } = setup();
     routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([]);
 
     await editPrivateLocationRoute().handler(routeContext);
 
-    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(runTaskPerPrivateLocation).not.toHaveBeenCalled();
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ agentPolicyId: 'ap-2' }));
   });
 });

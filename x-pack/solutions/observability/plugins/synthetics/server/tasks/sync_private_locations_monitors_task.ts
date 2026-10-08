@@ -29,6 +29,7 @@ import type { HeartbeatConfig } from '../../common/runtime_types';
 import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
@@ -39,6 +40,8 @@ export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
   disableAutoSync?: boolean;
   privateLocationId?: string;
+  /** Agent policy the location just moved away from; its revision is bumped after the sync. */
+  previousAgentPolicyId?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -115,7 +118,7 @@ export class SyncPrivateLocationMonitorsTask {
       ]);
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
 
-      const { privateLocationId } = taskInstance.state;
+      const { privateLocationId, previousAgentPolicyId } = taskInstance.state;
       if (privateLocationId) {
         // This instance is one-shot, so never return a schedule: task manager
         // would turn a failed run into a recurring task. A failed recreate is
@@ -123,6 +126,7 @@ export class SyncPrivateLocationMonitorsTask {
         const state = {
           ...taskInstance.state,
           privateLocationId: undefined,
+          previousAgentPolicyId: undefined,
         } as SyncTaskState;
 
         try {
@@ -146,6 +150,16 @@ export class SyncPrivateLocationMonitorsTask {
             `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
           );
           return { error, state };
+        } finally {
+          // Policies written with a sharding condition skip Fleet's own bump, which
+          // would leave agents on the old policy still running the moved monitors.
+          if (previousAgentPolicyId) {
+            await bumpAgentPolicyRevision(this.serverSetup, previousAgentPolicyId).catch((error) =>
+              logger.error(
+                `Failed to bump revision of previous agent policy ${previousAgentPolicyId}: ${error.message}`
+              )
+            );
+          }
         }
 
         return { state };
@@ -421,9 +435,11 @@ export const disableSyncPrivateLocationTask = async ({
 export const runTaskPerPrivateLocation = async ({
   server,
   privateLocationId,
+  previousAgentPolicyId,
 }: {
   server: SyntheticsServerSetup;
   privateLocationId: string;
+  previousAgentPolicyId?: string;
 }) => {
   const {
     pluginsStart: { taskManager },
@@ -440,6 +456,6 @@ export const runTaskPerPrivateLocation = async ({
     params: {},
     taskType: TASK_TYPE,
     runAt: new Date(Date.now() + 3 * 1000),
-    state: { privateLocationId },
+    state: { privateLocationId, ...(previousAgentPolicyId && { previousAgentPolicyId }) },
   });
 };

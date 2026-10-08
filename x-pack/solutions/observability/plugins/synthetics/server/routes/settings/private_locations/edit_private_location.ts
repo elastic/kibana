@@ -21,12 +21,9 @@ import { PrivateLocationRepository } from '../../../repositories/private_locatio
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import {
-  redeployPrivateLocationMonitors,
-  toClientContract,
-  updatePrivateLocationMonitors,
-} from './helpers';
+import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import { getAgentPolicySpaceIds } from './add_private_location';
+import { runTaskPerPrivateLocation } from '../../../tasks/sync_private_locations_monitors_task';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
@@ -65,14 +62,12 @@ const isAgentPolicyIdChanged = (
   return typeof newAgentPolicyId === 'string' && oldAgentPolicyId !== newAgentPolicyId;
 };
 
-const withIntendedAttributes = <T extends { id: string; label?: string; agentPolicyId?: string }>(
+const withIntendedLabel = <T extends { id: string; label?: string }>(
   locations: T[],
   locationId: string,
-  attributes: { label: string; agentPolicyId?: string }
+  label: string
 ): T[] =>
-  locations.map((location) =>
-    location.id === locationId ? { ...location, ...attributes } : location
-  );
+  locations.map((location) => (location.id === locationId ? { ...location, label } : location));
 
 const validateNewAgentPolicy = async ({
   routeContext,
@@ -263,9 +258,6 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           }
         }
 
-        // Rewrite monitors before persisting: generateNewPolicy reads the
-        // in-memory location list, so overlay the new attributes. A failed
-        // rewrite must not leave the SO changed.
         if ((isLabelChanged || isAgentPolicyChanged) && monitorsInLocation.length) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
@@ -278,54 +270,41 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           }
         }
 
-        const storedLocations =
-          isLabelChanged || isAgentPolicyChanged
-            ? await getPrivateLocations(savedObjectsClient)
-            : [];
-
-        // Runs before any redeploy: it is the only step that rewrites the label stored
-        // on the monitor saved objects, and a failure here must abort before Fleet is touched.
+        // The label is stored on each monitor, so rewrite monitors before persisting:
+        // generateNewPolicy reads the in-memory location list, so overlay the new label.
+        // A failed rewrite must not leave the location changed.
         if (isLabelChanged) {
+          const storedLocations = await getPrivateLocations(savedObjectsClient);
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel,
-            allPrivateLocations: withIntendedAttributes(storedLocations, locationId, { label }),
+            allPrivateLocations: withIntendedLabel(storedLocations, locationId, label),
             routeContext,
             monitorsInLocation,
           });
         }
 
-        let failedRedeployCount = 0;
-        if (isAgentPolicyChanged && monitorsInLocation.length) {
-          ({ failedCount: failedRedeployCount } = await redeployPrivateLocationMonitors({
-            locationId,
-            allPrivateLocations: withIntendedAttributes(storedLocations, locationId, {
-              label,
-              agentPolicyId: newAgentPolicyId,
-            }),
-            routeContext,
-            monitorsInLocation,
-          }));
-        }
-
-        // Persisted even on partial failure: the old package policies are already
-        // gone, so "Reset monitors" must recreate the failed ones on the new policy.
+        const tags = newTags || existingLocation.attributes.tags;
         newLocation = await repo.editPrivateLocation(locationId, {
           label,
-          tags: newTags || existingLocation.attributes.tags,
+          tags,
           ...(isAgentPolicyChanged ? { agentPolicyId: newAgentPolicyId } : {}),
         });
 
-        if (failedRedeployCount > 0) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: i18n.translate('xpack.synthetics.editPrivateLocation.redeployFailed', {
-                defaultMessage:
-                  'Agent policy updated, but {count, plural, one {# monitor} other {# monitors}} failed to deploy to it. Use "Reset monitors" on this location to retry.',
-                values: { count: failedRedeployCount },
-              }),
-            },
+        // The task syncs package policies to the saved location, so it must run after the save.
+        if (isAgentPolicyChanged && monitorsInLocation.length) {
+          await runTaskPerPrivateLocation({
+            server: routeContext.server,
+            privateLocationId: locationId,
+            previousAgentPolicyId: existingLocation.attributes.agentPolicyId,
+          }).catch(async (error) => {
+            // Left saved, a retry would see no change and never schedule the move.
+            await repo.editPrivateLocation(locationId, {
+              label,
+              tags,
+              agentPolicyId: existingLocation.attributes.agentPolicyId,
+            });
+            throw error;
           });
         }
       }

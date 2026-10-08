@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
-  MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsPrivateLocations,
@@ -130,46 +129,4 @@ export const updatePrivateLocationMonitors = async ({
     );
   }
   return results;
-};
-
-/**
- * Moves this location's monitors onto the agent policy in `allPrivateLocations` by
- * deleting and recreating their package policies. Returns how many failed to delete or recreate.
- */
-export const redeployPrivateLocationMonitors = async ({
-  locationId,
-  allPrivateLocations,
-  routeContext,
-  monitorsInLocation,
-}: {
-  locationId: string;
-  allPrivateLocations: SyntheticsPrivateLocations;
-  routeContext: RouteContext;
-  monitorsInLocation: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>;
-}): Promise<{ failedCount: number }> => {
-  const monitorsPerSpace = monitorsInLocation.reduce<
-    Record<string, Array<{ monitor: MonitorFields; id: string }>>
-  >((acc, m) => {
-    const spaceId = m.namespaces?.[0] || 'default';
-    const monitor = normalizeSecrets(m).attributes as MonitorFields;
-    return { ...acc, [spaceId]: [...(acc[spaceId] || []), { monitor, id: m.id }] };
-  }, {});
-
-  const results = await Promise.all(
-    Object.entries(monitorsPerSpace).map(([spaceId, monitors]) =>
-      routeContext.syntheticsMonitorClient.redeployPrivateLocation({
-        monitors,
-        locationId,
-        allPrivateLocations,
-        spaceId,
-      })
-    )
-  );
-
-  return {
-    failedCount: results.reduce(
-      (sum, { failed, notDeletedCount }) => sum + failed.length + notDeletedCount,
-      0
-    ),
-  };
 };

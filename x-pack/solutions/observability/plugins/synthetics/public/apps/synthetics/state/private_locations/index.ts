@@ -81,7 +81,7 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     .addCase(editPrivateLocationAction.fail, (state, action) => {
       state.editLoading = false;
       state.error = action.payload;
-      // A 5xx can follow a committed agent policy change (partial redeploy). Close the
+      // A 5xx can follow a partially committed edit (e.g. the revert after a failed schedule). Close the
       // editor and reload so a second save is compared against what was persisted.
       if ((action.payload.body.statusCode ?? 0) >= 500) {
         state.privateLocationToEdit = undefined;
