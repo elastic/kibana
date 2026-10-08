@@ -131,7 +131,6 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
           const value = child[col.id];
           const cell = renderEntityCell(
             col.id,
-            value,
             child,
             watchlistNames,
             euiTheme,

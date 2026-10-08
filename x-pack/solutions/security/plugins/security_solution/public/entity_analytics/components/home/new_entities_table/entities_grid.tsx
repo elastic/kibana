@@ -146,15 +146,7 @@ const RenderEntityGridCell: RenderCellValue = (cellProps) => {
     cellProps as typeof cellProps & EntityGridCellContext;
   const row = rows[rowIndex];
   if (!row) return null;
-  return renderEntityCell(
-    columnId,
-    row[columnId],
-    row,
-    watchlistNames,
-    euiTheme,
-    cellHandlers,
-    isEnriching
-  );
+  return renderEntityCell(columnId, row, watchlistNames, euiTheme, cellHandlers, isEnriching);
 };
 
 const EntityGridExpanderHeader = () => (

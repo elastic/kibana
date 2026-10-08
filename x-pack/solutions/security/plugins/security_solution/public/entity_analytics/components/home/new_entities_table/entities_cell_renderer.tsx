@@ -530,13 +530,13 @@ const renderKnownEntityCell = (
 /** The content of a grid cell: the row's value for the column, rendered for its type. */
 export const renderEntityCell = (
   columnId: string,
-  value: unknown,
   row: Row,
   watchlistNames: Map<string, string>,
   euiTheme: EuiThemeComputed,
   handlers?: CellHandlers,
   isEnriching = false
 ): JSX.Element => {
+  const value = row[columnId];
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
   // means "not loaded yet", not "no value". Show nothing rather than "—".
   if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
