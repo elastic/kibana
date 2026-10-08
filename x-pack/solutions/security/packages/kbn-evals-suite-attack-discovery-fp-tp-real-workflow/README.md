@@ -57,6 +57,26 @@ is intentionally **not** vendored — see the external
   review workflow landing)
 - `corpora/` — the 7 vendored corpora + READMEs
 
+## Cohort selection and the safety metric
+
+`FP_TP_COHORT` picks which corpora a run grades:
+
+| value | corpora | cases |
+| --- | --- | --- |
+| `all` (default) | all 7 | 1,017 |
+| `scored` | everything except `guide-sanity` | 267 |
+| `sanity` | `guide-sanity` only | 750 |
+
+A scored/gating run uses `FP_TP_COHORT=scored`. An unknown value throws rather
+than falling back to `all`. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15; `0` or
+non-numeric means no cap) applies per corpus on top of the cohort.
+
+`UnsafeClose` scores 0 for any case where the verdict is `false_positive` and the
+gold label is anything else. It is the `UnsafeClose` evaluator from
+`@kbn/evals-suite-attack-discovery-fp-tp`, adapted to this suite's output shape.
+It is zero-tolerance and reported on its own: never average it into, or weight
+it against, `VerdictAccuracy`.
+
 ## Tests
 
 `npx jest x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow`

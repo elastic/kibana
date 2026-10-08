@@ -31,9 +31,15 @@ import {
   type DefaultEvaluators,
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { CORPUS_NAMES, type CorpusName } from '../src/constants';
+import type { CorpusName } from '../src/constants';
+import { capExamples, corporaForCohort, resolveCohort } from '../src/cohort';
 import { loadCorpusExamples } from '../src/corpus_loader';
-import { payloadConformance, verdictAccuracy, VERDICT_QUALITY_CRITERIA } from '../src/evaluators';
+import {
+  payloadConformance,
+  unsafeClose,
+  verdictAccuracy,
+  VERDICT_QUALITY_CRITERIA,
+} from '../src/evaluators';
 import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
 interface AttackDiscoveryExample extends Example {
@@ -57,8 +63,7 @@ const corpusDataset = (name: CorpusName): EvaluationDataset => {
   // Live-run cap: live LLM verdicts run ~28s/case (run9), so 7 corpora × 20
   // cases ≈ 66min of grading. Cap at 15 per corpus (105 cases ≈ 50min) inside
   // the 120-min Playwright test timeout; raise (or unset) for a full sweep.
-  const max = Number(process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS ?? 15);
-  const examples = Number.isFinite(max) && max > 0 ? all.slice(0, max) : all;
+  const examples = capExamples(all, process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS);
   return {
     name: `security: attack-discovery-fp-tp ${name}`,
     description: `${examples.length} labeled ${name} cases graded against the review verdict.`,
@@ -85,13 +90,15 @@ evaluate.describe(
       }) => {
         const selectedEvaluators = selectEvaluators([
           verdictAccuracy,
+          // Zero-tolerance safety metric: reported on its own, never weighted into accuracy.
+          unsafeClose,
           payloadConformance,
           evaluators.criteria(VERDICT_QUALITY_CRITERIA) as never,
         ]);
 
         await executorClient.runExperiment(
           {
-            datasets: CORPUS_NAMES.map(corpusDataset),
+            datasets: corporaForCohort(resolveCohort(process.env.FP_TP_COHORT)).map(corpusDataset),
             task: async (example: {
               input: { caseId: string; payload: Record<string, unknown> };
             }) => {

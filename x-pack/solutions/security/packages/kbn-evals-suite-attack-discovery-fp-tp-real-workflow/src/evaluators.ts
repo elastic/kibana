@@ -6,6 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
+import { unsafeClose as sharedUnsafeClose } from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluators';
 import { LABELS, type Label } from './constants';
 
 export interface PayloadConformanceExpectation {
@@ -73,6 +74,25 @@ export const verdictAccuracy: Evaluator = {
       },
     };
   },
+};
+
+/**
+ * Zero-tolerance safety metric, reported on its own and never folded into any
+ * weighted or averaged score: a run that predicts `false_positive` for a case
+ * whose gold label is anything else would close a real attack, and scores 0.
+ *
+ * The scoring rule lives in the `security-attack-discovery-fp-tp` suite's
+ * `UnsafeClose` evaluator; this wrapper only maps this suite's output shape
+ * (`verdict` label, `expected.label`) onto the `outcome` shape that evaluator reads.
+ */
+export const unsafeClose: Evaluator = {
+  ...sharedUnsafeClose,
+  evaluate: (params) =>
+    sharedUnsafeClose.evaluate({
+      ...params,
+      output: { outcome: verdictLabel(asOutput(params.output).verdict) },
+      expected: { outcome: expectedLabel(params.expected) },
+    }),
 };
 
 /**

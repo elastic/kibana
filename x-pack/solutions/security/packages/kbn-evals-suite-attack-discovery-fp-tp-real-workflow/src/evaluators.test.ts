@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { payloadConformance, verdictAccuracy, VERDICT_QUALITY_CRITERIA } from './evaluators';
+import { loadCorpusExamples } from './corpus_loader';
+import { corporaForCohort } from './cohort';
+import {
+  payloadConformance,
+  unsafeClose,
+  verdictAccuracy,
+  VERDICT_QUALITY_CRITERIA,
+} from './evaluators';
 
 const params = (output: unknown, expected: unknown) =>
   ({ output, expected, input: {}, metadata: null } as Parameters<
@@ -196,5 +203,66 @@ describe('verdict quality criteria', () => {
       true
     );
     expect(VERDICT_QUALITY_CRITERIA.join(' ')).toMatch(/does not invent/);
+  });
+});
+
+describe('unsafeClose', () => {
+  const score = async (verdict: unknown, label: string | undefined) =>
+    unsafeClose.evaluate(params({ verdict, executionStatus: 'completed' }, { label }));
+
+  it('is named UnsafeClose so it reports separately from VerdictAccuracy', () => {
+    expect(unsafeClose.name).toBe('UnsafeClose');
+    expect(unsafeClose.name).not.toBe(verdictAccuracy.name);
+  });
+
+  it('scores 0 when a true_positive case is closed as false_positive (string verdict)', async () => {
+    const result = await score('false_positive', 'true_positive');
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('unsafe_close');
+  });
+
+  it('scores 0 when the verdict is the object form', async () => {
+    const result = await score(
+      { verdict: 'false_positive', summary_markdown: 's' },
+      'true_positive'
+    );
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when an inconclusive case is closed as false_positive', async () => {
+    expect((await score('false_positive', 'inconclusive')).score).toBe(0);
+  });
+
+  it('scores 1 for a correct false_positive close', async () => {
+    expect((await score('false_positive', 'false_positive')).score).toBe(1);
+  });
+
+  it.each(['true_positive', 'inconclusive'])(
+    'scores 1 for a %s verdict on a TP case',
+    async (v) => {
+      expect((await score(v, 'true_positive')).score).toBe(1);
+    }
+  );
+
+  it('scores 1 when there is no verdict (a missing verdict closes nothing)', async () => {
+    expect((await score(undefined, 'true_positive')).score).toBe(1);
+  });
+
+  it('on the real scored corpus, closing every case scores 0 exactly on the non-FP cases', async () => {
+    const examples = corporaForCohort('scored').flatMap((name) => loadCorpusExamples(name));
+    const scores = await Promise.all(
+      examples.map(async (example) => ({
+        gold: example.expected.label,
+        score: (await score('false_positive', example.expected.label)).score,
+      }))
+    );
+    expect(examples).toHaveLength(267);
+    expect(scores.filter((s) => s.gold !== 'false_positive').every((s) => s.score === 0)).toBe(
+      true
+    );
+    expect(scores.filter((s) => s.gold === 'false_positive').every((s) => s.score === 1)).toBe(
+      true
+    );
+    expect(scores.some((s) => s.gold === 'true_positive')).toBe(true);
   });
 });
