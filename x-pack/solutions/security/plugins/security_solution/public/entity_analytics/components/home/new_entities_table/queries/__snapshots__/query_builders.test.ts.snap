@@ -246,7 +246,8 @@ exports[`entities grid query builders sort by @timestamp builds the sort and cou
 exports[`entities grid query builders sort by @timestamp builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (@timestamp < 42) OR (@timestamp == 42 AND entity.id > \\"host:h-1\\") OR @timestamp IS NULL
 | SORT @timestamp ASC NULLS LAST, entity.id ASC
@@ -1204,7 +1205,8 @@ exports[`entities grid query builders sort by asset.criticality builds the sort 
 exports[`entities grid query builders sort by asset.criticality builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (asset.criticality < 42) OR (asset.criticality == 42 AND entity.id > \\"host:h-1\\") OR asset.criticality IS NULL
 | SORT asset.criticality ASC NULLS LAST, entity.id ASC
@@ -1266,7 +1268,8 @@ exports[`entities grid query builders sort by entity.EngineMetadata.Type builds 
 exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (entity.EngineMetadata.Type < 42) OR (entity.EngineMetadata.Type == 42 AND entity.id > \\"host:h-1\\") OR entity.EngineMetadata.Type IS NULL
 | SORT entity.EngineMetadata.Type ASC NULLS LAST, entity.id ASC
@@ -1328,7 +1331,8 @@ exports[`entities grid query builders sort by entity.lifecycle.first_seen builds
 exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (entity.lifecycle.first_seen < 42) OR (entity.lifecycle.first_seen == 42 AND entity.id > \\"host:h-1\\") OR entity.lifecycle.first_seen IS NULL
 | SORT entity.lifecycle.first_seen ASC NULLS LAST, entity.id ASC
@@ -1390,7 +1394,8 @@ exports[`entities grid query builders sort by entity.name builds the sort and co
 exports[`entities grid query builders sort by entity.name builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (entity.name < 42) OR (entity.name == 42 AND entity.id > \\"host:h-1\\") OR entity.name IS NULL
 | SORT entity.name ASC NULLS LAST, entity.id ASC
@@ -1452,7 +1457,8 @@ exports[`entities grid query builders sort by entity.risk.calculated_score_norm 
 exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 | WHERE (entity.risk.calculated_score_norm < 42) OR (entity.risk.calculated_score_norm == 42 AND entity.id > \\"host:h-1\\") OR entity.risk.calculated_score_norm IS NULL
 | SORT entity.risk.calculated_score_norm ASC NULLS LAST, entity.id ASC

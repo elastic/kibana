@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import { buildEntitiesInViewCountQuery } from './entities_in_view';
-import {
-  getEntityAlias,
-  buildKeepClause,
-  buildCursorClause,
-  buildResolvedRowsFilter,
-  buildCombinedFilterClause,
-  ENTITY_TYPE_FILTER,
-} from './esql';
+import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
+import { buildKeepClause, buildCursorClause } from './esql';
 import { ENTITY_ID_FIELD } from '../common';
 import type { ColumnQuerySpec, QueryArgs } from '../common';
 
 const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   const {
-    namespace,
     sort: { field, direction: dir },
     cursor,
     pageSize,
-    rowsMode,
-    searchExpression,
-    entityExpression,
   } = args;
   return [
-    `FROM ${getEntityAlias(namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildCombinedFilterClause(searchExpression, entityExpression),
+    ...buildEntitiesInViewSteps(args),
     buildKeepClause(args),
     ...buildCursorClause(cursor),
     `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,

@@ -14,7 +14,6 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
-  RESOLVED_TO_FIELD,
   TIME_RANGE_DAYS,
 } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
@@ -90,9 +89,6 @@ export const buildKeepClause = (
   return `| KEEP ${fields.map(quoteField).join(', ')}`;
 };
 
-export const buildResolvedRowsFilter = (rowsMode: QueryArgs['rowsMode']): string[] =>
-  rowsMode === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : [];
-
 export const buildFilterClause = (filterExpression?: string): string[] =>
   filterExpression ? [`| WHERE ${filterExpression}`] : [];
 
@@ -101,12 +97,6 @@ export const joinAnd = (...parts: Array<string | undefined | null | false>): str
   const filtered = parts.filter((p): p is string => typeof p === 'string' && p.length > 0);
   return filtered.length ? filtered.join(' AND ') : undefined;
 };
-
-/** `| WHERE search AND entity` for native (entity-index) sorts. */
-export const buildCombinedFilterClause = (
-  searchExpression?: string,
-  entityExpression?: string
-): string[] => buildFilterClause(joinAnd(searchExpression, entityExpression));
 
 /**
  * Joins entity docs on `entity.id` only. The search expression must not go in `ON`:
