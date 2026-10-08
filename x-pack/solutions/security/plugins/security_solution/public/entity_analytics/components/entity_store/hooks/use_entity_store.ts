@@ -109,11 +109,18 @@ export const useInstallEntityStoreMutation = () => {
 
 export const INSTALL_ENTITY_ENGINE_KEY = ['POST', 'INSTALL_ENTITY_ENGINE'];
 export const useInstallEntityEngineMutation = () => {
+  const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { installEntityStore } = useEntityStoreRoutes();
 
   return useMutation<unknown, ResponseError, EntityStoreEntityType>(
-    (entityType) => installEntityStore([entityType], ENTITY_STORE_INSTALL_CONTEXT),
+    (entityType) => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEngineInstallClicked, {
+        timestamp: new Date().toISOString(),
+        entityType,
+      });
+      return installEntityStore([entityType], ENTITY_STORE_INSTALL_CONTEXT);
+    },
     {
       mutationKey: INSTALL_ENTITY_ENGINE_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),

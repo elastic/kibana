@@ -42,7 +42,9 @@ describe('useShouldInstallServiceEngine', () => {
     });
     getEntityStoreStatus.mockResolvedValue({ status: 'running', engines: [] });
     search.search.mockImplementation(() => of({ totalCount: 0, rawResponse: {} }));
-    (useKibana as jest.Mock).mockReturnValue({ services: { data, spaces } });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data, spaces, logger: { error: jest.fn() } },
+    });
     (useEntityStoreRoutes as jest.Mock).mockReturnValue({ getEntityStoreStatus });
   });
 
@@ -89,11 +91,16 @@ describe('useShouldInstallServiceEngine', () => {
     await expect(result.current()).resolves.toBe(false);
   });
 
-  it('propagates unexpected search errors', async () => {
+  it('returns true and logs when the check fails for a reason other than a missing index', async () => {
     const error = new Error('search failed');
+    const logger = { error: jest.fn() };
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data, spaces, logger },
+    });
     search.search.mockImplementation(() => throwError(() => error));
     const { result } = renderHook(() => useShouldInstallServiceEngine());
 
-    await expect(result.current()).rejects.toBe(error);
+    await expect(result.current()).resolves.toBe(true);
+    expect(logger.error).toHaveBeenCalled();
   });
 });

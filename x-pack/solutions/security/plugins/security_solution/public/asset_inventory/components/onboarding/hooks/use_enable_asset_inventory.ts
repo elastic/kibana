@@ -17,7 +17,7 @@ import { useOnboardingSuccessCallout } from './use_onboarding_success_callout';
  * Hook with related business logic for enabling Asset Inventory.
  *
  * Asset Inventory now relies entirely on the Entity Store v2 lifecycle. Enabling triggers:
- * 1. POST /api/security/entity_store/install (all 4 entity types via the shared mutation),
+ * 1. POST /api/security/entity_store/install (user, host, and generic via the shared Security mutation),
  * 2. POST /api/asset_inventory/install_data_view (creates the per-space data view and
  *    bootstraps asset criticality resources required by the entity store transforms).
  */

@@ -64,25 +64,33 @@ const hasServiceRiskScores = async ({
 
 /** Keeps service extraction on reinstall when existing engine state or risk scores show that the space used the previous default. */
 export const useShouldInstallServiceEngine = () => {
-  const { data, spaces } = useKibana().services;
+  const { data, spaces, logger } = useKibana().services;
   const { getEntityStoreStatus } = useEntityStoreRoutes();
 
   return useCallback(
     async (executionContext?: KibanaExecutionContext): Promise<boolean> => {
-      const [status, serviceRiskScoresExist] = await Promise.all([
-        getEntityStoreStatus(false, executionContext),
-        hasServiceRiskScores({
-          search: data.search,
-          spaces,
-          executionContext,
-        }),
-      ]);
+      try {
+        const [status, serviceRiskScoresExist] = await Promise.all([
+          getEntityStoreStatus(false, executionContext),
+          hasServiceRiskScores({
+            search: data.search,
+            spaces,
+            executionContext,
+          }),
+        ]);
 
-      return (
-        status.engines.some(({ type }) => type === EntityStoreEntityType.enum.service) ||
-        serviceRiskScoresExist
-      );
+        return (
+          status.engines.some(({ type }) => type === EntityStoreEntityType.enum.service) ||
+          serviceRiskScoresExist
+        );
+      } catch (error) {
+        logger.error(
+          'Failed to determine whether to install the service engine. Including service in the install request.'
+        );
+        logger.error(error instanceof Error ? error : String(error));
+        return true;
+      }
     },
-    [data.search, getEntityStoreStatus, spaces]
+    [data.search, getEntityStoreStatus, logger, spaces]
   );
 };

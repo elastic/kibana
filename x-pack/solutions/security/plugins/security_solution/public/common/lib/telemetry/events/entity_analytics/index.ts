@@ -362,6 +362,26 @@ export const entityStoreEnablementEvent: EntityAnalyticsTelemetryEvent = {
   },
 };
 
+export const entityStoreEngineInstallEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityStoreEngineInstallClicked,
+  schema: {
+    timestamp: {
+      type: 'date',
+      _meta: {
+        description: 'Timestamp of the event',
+        optional: false,
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity type being installed (user, host, service, or generic)',
+        optional: false,
+      },
+    },
+  },
+};
+
 const mlJobUpdateEvent: EntityAnalyticsTelemetryEvent = {
   eventType: EntityEventTypes.MLJobUpdate,
   schema: {
@@ -449,6 +469,7 @@ export const entityTelemetryEvents = [
   privilegedUserMonitoringFileSelectedEvent,
   privilegedUserMonitoringCsvImportedEvent,
   entityStoreEnablementEvent,
+  entityStoreEngineInstallEvent,
   entityStoreInitEvent,
   toggleRiskSummaryClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,

@@ -147,12 +147,22 @@ export class AssetManagerClient {
     excludedUserNames?: string[]
   ) {
     try {
-      const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+      const existingGlobalState = await this.globalStateClient.find();
+      const historySnapshot =
+        existingGlobalState === undefined
+          ? HistorySnapshotState.parse(historySnapshotParams ?? {})
+          : HistorySnapshotState.parse({
+              ...existingGlobalState.historySnapshot,
+              ...historySnapshotParams,
+            });
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
+      // Fresh installs persist snapshot defaults. Per-type installs on an existing
+      // store pass the request partial through so they do not reset retention or status.
       await Promise.all([
         this.globalStateClient.init({
-          historySnapshot,
+          historySnapshot:
+            existingGlobalState === undefined ? historySnapshot : historySnapshotParams,
           logsExtraction: logsExtractionParams,
           excludedUserNames,
         }),

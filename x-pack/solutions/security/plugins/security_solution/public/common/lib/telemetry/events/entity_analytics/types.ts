@@ -13,6 +13,7 @@ export enum EntityEventTypes {
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
   EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreEngineInstallClicked = 'Entity Store Engine Install Clicked',
   EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
   EntityGraphClicked = 'Entity Graph Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
@@ -101,6 +102,11 @@ interface ReportEntityStoreEnablementParams {
   action: 'start' | 'stop';
 }
 
+interface ReportEntityStoreEngineInstallParams {
+  timestamp: string;
+  entityType: string;
+}
+
 interface ReportEntityStoreInitParams {
   timestamp: string;
 }
@@ -125,6 +131,7 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityAlertsClicked]: ReportEntityAlertsClickedParams;
   [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
   [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
+  [EntityEventTypes.EntityStoreEngineInstallClicked]: ReportEntityStoreEngineInstallParams;
   [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
   [EntityEventTypes.EntityGraphClicked]: ReportEntityGraphViewClickedParams;
   [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;

@@ -9,6 +9,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EntityType } from '@kbn/entity-store/common';
 import React from 'react';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import {
   useEntityStoreStatus,
   useInstallEntityStoreMutation,
@@ -52,6 +53,7 @@ describe('use_entity_store hooks — execution context wiring', () => {
   const startEntityStore = jest.fn();
   const stopEntityStore = jest.fn();
   const deleteEntityStore = jest.fn();
+  const reportEvent = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,7 +70,7 @@ describe('use_entity_store hooks — execution context wiring', () => {
     (useShouldInstallServiceEngine as jest.Mock).mockReturnValue(mockShouldInstallServiceEngine);
 
     (useKibana as jest.Mock).mockReturnValue({
-      services: { telemetry: { reportEvent: jest.fn() } },
+      services: { telemetry: { reportEvent } },
     });
   });
 
@@ -154,6 +156,10 @@ describe('use_entity_store hooks — execution context wiring', () => {
     );
     await waitFor(() => expect(getEntityStoreStatus).toHaveBeenCalledTimes(2));
     expect(mockShouldInstallServiceEngine).not.toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(
+      EntityEventTypes.EntityStoreEngineInstallClicked,
+      expect.objectContaining({ entityType: EntityType.enum.service })
+    );
   });
 
   it('useStartEntityStoreMutation threads entity_store_start context to startEntityStore', async () => {
