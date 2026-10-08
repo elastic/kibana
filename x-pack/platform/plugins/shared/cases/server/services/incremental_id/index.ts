@@ -20,6 +20,7 @@ import type {
   CaseIdIncrementerPersistedAttributes,
   CaseIdIncrementerSavedObject,
 } from '../../common/types/id_incrementer';
+import type { CasesAnalyticsV2WriterContract } from '../../cases_analytics_v2/writer';
 
 type GetCasesParameters = Pick<
   SavedObjectsFindOptions,
@@ -38,7 +39,8 @@ export class CasesIncrementalIdService {
 
   constructor(
     private internalSavedObjectsClient: SavedObjectsClientContract,
-    private logger: Logger
+    private logger: Logger,
+    private analyticsV2Writer?: CasesAnalyticsV2WriterContract
   ) {
     this.logger = logger.get('incremental_id_service');
     this.logger.debug('Cases incremental ID service initialized');
@@ -132,6 +134,7 @@ export class CasesIncrementalIdService {
     const incIdSoCache: Map<string, SavedObject<CaseIdIncrementerPersistedAttributes>> = new Map();
 
     let hasAppliedAnId = false;
+    const casesWithAppliedId: Array<{ id: string; namespace: string }> = [];
 
     for (let index = 0; index < casesWithoutIncrementalId.length && !this.isStopped; index++) {
       try {
@@ -172,6 +175,7 @@ export class CasesIncrementalIdService {
           incIdSo.attributes.last_id = newId;
           hasAppliedAnId = true;
           countProcessedCases++;
+          casesWithAppliedId.push({ id: caseSo.id, namespace: namespaceOfCase });
         }
       } catch (error) {
         this.logger.error(`ID incrementing paused due to error: ${error}`);
@@ -188,7 +192,41 @@ export class CasesIncrementalIdService {
       }
     }
 
+    await this.mirrorToAnalyticsV2(casesWithAppliedId);
+
     return countProcessedCases;
+  }
+
+  /**
+   * The id is written with a raw SO update that does not bump the case's
+   * `attributes.updated_at`, so analytics-v2 reconciliation (keyed on that
+   * field) never re-emits the case. Without this push, a case whose analytics
+   * doc was written before the id existed would never get it in `.cases`.
+   *
+   * Re-reads the cases rather than reusing the task's snapshot so a concurrent
+   * user edit isn't overwritten with stale attributes, and a case deleted
+   * mid-run isn't resurrected in `.cases`.
+   */
+  private async mirrorToAnalyticsV2(cases: Array<{ id: string; namespace: string }>) {
+    if (!this.analyticsV2Writer || cases.length === 0) {
+      return;
+    }
+
+    try {
+      const { saved_objects: savedObjects } =
+        await this.internalSavedObjectsClient.bulkGet<CasePersistedAttributes>(
+          cases.map(({ id, namespace }) => ({
+            type: CASE_SAVED_OBJECT,
+            id,
+            namespaces: [namespace],
+          }))
+        );
+      this.analyticsV2Writer.bulkUpsertCases(savedObjects.filter((so) => so.error == null));
+    } catch (error) {
+      this.logger.error(
+        `Unable to mirror ${cases.length} incremental ids to cases analytics: ${error}`
+      );
+    }
   }
 
   getCaseIdIncrementerSo(namespace: string) {

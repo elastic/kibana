@@ -531,6 +531,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
+| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time reset scheduled automatically after upgrade — see "Backfill generations" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
 
@@ -593,6 +594,31 @@ Safety properties (all covered by tests):
   `plugin.ts`; it no-ops when analytics v2 is disabled and swallows its
   own errors (scheduling failures are logged, never propagated), so it
   can never fail or retry the migration task.
+
+### Backfill generations
+
+When a fix lands for a write path that changed case SOs without bumping
+`attributes.updated_at`, docs written before the fix stay stale: the
+incremental cursor never revisits those cases. `CASES_BACKFILL_GENERATION`
+(`reconciliation/index.ts`) repairs them once per release that bumps it.
+
+The reconciliation task persists the last generation it satisfied as
+`cases_backfill_generation` in its state. On a tick where the persisted value
+is behind the constant and a cases cursor exists, the tick schedules the
+`cases.analyticsV2.fullReset` task (same reasoning as the templates coupling
+above) and stamps the new generation. If the cursor is unset, the tick's own
+walk is already full, so it stamps the generation without scheduling a reset.
+Every reset seeds the current generation into the reconciliation state, so a
+reset never triggers another one, and `POST /reset` also satisfies a pending
+generation.
+
+Expect one `/state.active_reset` entry shortly after upgrading to a release
+that bumps the generation. The reset task upserts docs in place; it does not
+drop indices or data views (only the `POST /reset` route does that).
+
+| Generation | Repairs |
+| ---------- | ------- |
+| 1 | `case.incremental_id` missing for cases numbered after their analytics doc was written |
 
 ## Activity surface
 

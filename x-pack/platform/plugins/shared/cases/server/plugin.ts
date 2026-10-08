@@ -204,7 +204,10 @@ export class CasePlugin
           plugins.taskManager,
           this.caseConfig.incrementalId,
           this.logger,
-          plugins.usageCollection
+          plugins.usageCollection,
+          this.caseConfig.analyticsV2.enabled
+            ? this.casesAnalyticsV2Service?.getWriter()
+            : undefined
         );
       }
 
