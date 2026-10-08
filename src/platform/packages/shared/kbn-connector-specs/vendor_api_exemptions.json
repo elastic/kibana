@@ -26,7 +26,6 @@
   ".hubspot": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".inboundWebhook": "Inbound webhook receiver with `actions: {}`. It makes no outbound ctx.client requests to any vendor API.",
   ".jenkins": "Self-hosted Jenkins at a user-configured base URL. Its remote access API (/job/{name}/api/json, /build, /buildWithParameters, /queue/item/{id}/api/json, ...) is documented only in prose (jenkins.io/doc/book/using/remote-access-api). Jenkins publishes no OpenAPI, and the surface depends on installed plugins.",
-  ".jina": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".jira-cloud": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".microsoft-teams": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".monday_com": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
