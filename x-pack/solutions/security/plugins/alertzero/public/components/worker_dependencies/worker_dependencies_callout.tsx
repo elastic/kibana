@@ -101,6 +101,91 @@ interface Props {
   surface: 'onboarding' | 'settings';
 }
 
+interface DependencyRowProps {
+  message: DependencyMessage;
+  onEnable?: () => void;
+  isEnabling: boolean;
+  enableDisabled: boolean;
+  enableFailed: boolean;
+}
+
+const DependencyRow: React.FC<DependencyRowProps> = ({
+  message: { id, status, label, description, destination, linkText },
+  onEnable,
+  isEnabling,
+  enableDisabled,
+  enableFailed,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+
+  return (
+    <li data-test-subj={`alertZeroWorkerDependency-${id}`}>
+      <div data-test-subj={`alertZeroDependencyDescription-${id}`}>
+        {status === 'unknown'
+          ? id === 'threatIngest' || id === 'threatEnrich'
+            ? i18n.unableToVerifyThreatWorkflowDescription(label)
+            : i18n.unableToVerifyDescription(label)
+          : description}
+      </div>
+      {onEnable || (destination && linkText) ? (
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          wrap
+          css={css`
+            margin-top: ${euiTheme.size.xs};
+          `}
+          data-test-subj={`alertZeroDependencyActions-${id}`}
+        >
+          {destination && linkText ? (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={application.getUrlForApp(destination.appId, { path: destination.path })}
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                  if (
+                    event.button !== 0 ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey
+                  ) {
+                    return;
+                  }
+                  event.preventDefault();
+                  void application.navigateToApp(destination.appId, { path: destination.path });
+                }}
+              >
+                {linkText}
+              </EuiLink>
+            </EuiFlexItem>
+          ) : null}
+          {onEnable ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                isLoading={isEnabling}
+                isDisabled={enableDisabled}
+                onClick={onEnable}
+              >
+                {i18n.enableDependencyButtonLabel(label)}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      ) : null}
+      {enableFailed ? (
+        <EuiText size="xs" color="danger">
+          <p role="alert">{i18n.enableDependencyFailedDescription(label)}</p>
+        </EuiText>
+      ) : null}
+    </li>
+  );
+};
+
 const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -108,7 +193,6 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
   } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
   const checks = useWorkerDependencyChecks(worker.id);
-  const dependencyIds = DEPENDENCIES_BY_WORKER[worker.id] ?? [];
 
   const enableDependency = useMutation<void, Error, EnableableDependencyId>({
     mutationFn: async (id) => {
@@ -169,78 +253,89 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
     );
   };
 
-  const messages: DependencyMessage[] = dependencyIds.map((id): DependencyMessage => {
-    switch (id) {
-      case 'contextEngine':
-        return {
-          id,
-          status: checks.contextEngine,
-          label: i18n.CONTEXT_ENGINE_LABEL,
-          description: i18n.contextEngineDescription(worker.id),
-          destination: advancedSettingsDestination('Context Engine'),
-          linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
-        };
-      case 'alertAnalysis':
-        return {
-          id,
-          status: worker.enableBlockedReason ? 'missing' : 'satisfied',
-          label: i18n.ALERT_ANALYSIS_LABEL,
-          description:
-            worker.enableBlockedReason === 'alertAnalysisWorkflowDisabled'
-              ? i18n.ALERT_ANALYSIS_WORKFLOW_DESCRIPTION
-              : i18n.ALERT_ANALYSIS_RUNTIME_DESCRIPTION,
-          destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
-          linkText: i18n.ALERT_ANALYSIS_LINK_TEXT,
-        };
-      case 'attackDiscoveryWorkflows':
-        return {
-          id,
-          status: checks.attackDiscoveryFeatureAvailable
-            ? checks.attackDiscoveryWorkflows
-            : 'missing',
-          label: i18n.ATTACK_DISCOVERY_LABEL,
-          description: checks.attackDiscoveryFeatureAvailable
-            ? i18n.ATTACK_DISCOVERY_DESCRIPTION
-            : i18n.ATTACK_DISCOVERY_DEPLOYMENT_DESCRIPTION,
-          destination: checks.attackDiscoveryFeatureAvailable
-            ? advancedSettingsDestination('Attack Discovery Workflows')
-            : undefined,
-          linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
-        };
-      case 'defend':
-        return {
-          id,
-          status: checks.defend,
-          label: i18n.DEFEND_LABEL,
-          description: i18n.DEFEND_DESCRIPTION,
-          destination: { appId: 'integrations', path: '/detail/endpoint/overview' },
-          linkText: i18n.DEFEND_LINK_TEXT,
-        };
-      case 'threatIngest':
-      case 'threatEnrich': {
-        const workflow = THREAT_REPORT_WORKFLOWS[id === 'threatIngest' ? 0 : 1];
-        const label =
-          id === 'threatIngest' ? i18n.INGEST_WORKFLOW_LABEL : i18n.ENRICH_WORKFLOW_LABEL;
-        const status = id === 'threatIngest' ? checks.threatIngest : checks.threatEnrich;
-        return {
-          id,
-          status,
-          label,
-          description: i18n.THREAT_WORKFLOW_DESCRIPTION(label),
-          // A missing row in the Workflows bulk response may also be unreadable. In that
-          // case take the user to the list rather than linking to a possibly inaccessible ID.
-          destination:
-            status === 'unknown'
-              ? { appId: WORKFLOWS_APP_ID }
-              : { appId: WORKFLOWS_APP_ID, path: `/${encodeURIComponent(workflow.id)}` },
-          linkText:
-            status === 'unknown' ? i18n.WORKFLOWS_LIST_LINK_TEXT : i18n.THREAT_WORKFLOW_LINK_TEXT,
-        };
+  const visible = React.useMemo(() => {
+    const dependencyIds = DEPENDENCIES_BY_WORKER[worker.id] ?? [];
+    const messages: DependencyMessage[] = dependencyIds.map((id): DependencyMessage => {
+      switch (id) {
+        case 'contextEngine':
+          return {
+            id,
+            status: checks.contextEngine,
+            label: i18n.CONTEXT_ENGINE_LABEL,
+            description: i18n.contextEngineDescription(worker.id),
+            destination: advancedSettingsDestination('Context Engine'),
+            linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
+          };
+        case 'alertAnalysis':
+          return {
+            id,
+            status: worker.enableBlockedReason ? 'missing' : 'satisfied',
+            label: i18n.ALERT_ANALYSIS_LABEL,
+            description:
+              worker.enableBlockedReason === 'alertAnalysisWorkflowDisabled'
+                ? i18n.ALERT_ANALYSIS_WORKFLOW_DESCRIPTION
+                : i18n.ALERT_ANALYSIS_RUNTIME_DESCRIPTION,
+            destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
+            linkText: i18n.ALERT_ANALYSIS_LINK_TEXT,
+          };
+        case 'attackDiscoveryWorkflows':
+          return {
+            id,
+            status: checks.attackDiscoveryFeatureAvailable
+              ? checks.attackDiscoveryWorkflows
+              : 'missing',
+            label: i18n.ATTACK_DISCOVERY_LABEL,
+            description: checks.attackDiscoveryFeatureAvailable
+              ? i18n.ATTACK_DISCOVERY_DESCRIPTION
+              : i18n.ATTACK_DISCOVERY_DEPLOYMENT_DESCRIPTION,
+            destination: checks.attackDiscoveryFeatureAvailable
+              ? advancedSettingsDestination('Attack Discovery Workflows')
+              : undefined,
+            linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
+          };
+        case 'defend':
+          return {
+            id,
+            status: checks.defend,
+            label: i18n.DEFEND_LABEL,
+            description: i18n.DEFEND_DESCRIPTION,
+            destination: { appId: 'integrations', path: '/detail/endpoint/overview' },
+            linkText: i18n.DEFEND_LINK_TEXT,
+          };
+        case 'threatIngest':
+        case 'threatEnrich': {
+          const workflow = THREAT_REPORT_WORKFLOWS[id === 'threatIngest' ? 0 : 1];
+          const label =
+            id === 'threatIngest' ? i18n.INGEST_WORKFLOW_LABEL : i18n.ENRICH_WORKFLOW_LABEL;
+          const status = id === 'threatIngest' ? checks.threatIngest : checks.threatEnrich;
+          return {
+            id,
+            status,
+            label,
+            description: i18n.THREAT_WORKFLOW_DESCRIPTION(label),
+            // A missing row in the Workflows bulk response may also be unreadable. In that
+            // case take the user to the list rather than linking to a possibly inaccessible ID.
+            destination:
+              status === 'unknown'
+                ? { appId: WORKFLOWS_APP_ID }
+                : { appId: WORKFLOWS_APP_ID, path: `/${encodeURIComponent(workflow.id)}` },
+            linkText:
+              status === 'unknown' ? i18n.WORKFLOWS_LIST_LINK_TEXT : i18n.THREAT_WORKFLOW_LINK_TEXT,
+          };
+        }
       }
-    }
-  });
-
-  const visible = messages.filter(({ status }) => status === 'missing' || status === 'unknown');
+    });
+    return messages.filter(({ status }) => status === 'missing' || status === 'unknown');
+  }, [
+    worker.id,
+    worker.enableBlockedReason,
+    checks.contextEngine,
+    checks.attackDiscoveryFeatureAvailable,
+    checks.attackDiscoveryWorkflows,
+    checks.defend,
+    checks.threatIngest,
+    checks.threatEnrich,
+  ]);
   if (visible.length === 0) return null;
 
   const hasMissing = visible.some(({ status }) => status === 'missing');
@@ -276,73 +371,22 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             }
           `}
         >
-          {visible.map(({ id, status, label, description, destination, linkText }) => (
-            <li key={id} data-test-subj={`alertZeroWorkerDependency-${id}`}>
-              <div data-test-subj={`alertZeroDependencyDescription-${id}`}>
-                {status === 'unknown'
-                  ? id === 'threatIngest' || id === 'threatEnrich'
-                    ? i18n.unableToVerifyThreatWorkflowDescription(label)
-                    : i18n.unableToVerifyDescription(label)
-                  : description}
-              </div>
-              {canEnableDependency(id, status) || (destination && linkText) ? (
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  wrap
-                  css={css`
-                    margin-top: ${euiTheme.size.xs};
-                  `}
-                  data-test-subj={`alertZeroDependencyActions-${id}`}
-                >
-                  {destination && linkText ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        href={application.getUrlForApp(destination.appId, {
-                          path: destination.path,
-                        })}
-                        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                          if (
-                            event.button !== 0 ||
-                            event.metaKey ||
-                            event.ctrlKey ||
-                            event.shiftKey ||
-                            event.altKey
-                          ) {
-                            return;
-                          }
-                          event.preventDefault();
-                          void application.navigateToApp(destination.appId, {
-                            path: destination.path,
-                          });
-                        }}
-                      >
-                        {linkText}
-                      </EuiLink>
-                    </EuiFlexItem>
-                  ) : null}
-                  {canEnableDependency(id, status) ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        isLoading={enableDependency.isLoading && enableDependency.variables === id}
-                        isDisabled={enableDependency.isLoading}
-                        onClick={() => enableDependency.mutate(id)}
-                      >
-                        {i18n.enableDependencyButtonLabel(label)}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              ) : null}
-              {enableDependency.isError && enableDependency.variables === id ? (
-                <EuiText size="xs" color="danger">
-                  <p role="alert">{i18n.enableDependencyFailedDescription(label)}</p>
-                </EuiText>
-              ) : null}
-            </li>
-          ))}
+          {visible.map((message) => {
+            const { id, status } = message;
+            const onEnable = canEnableDependency(id, status)
+              ? () => enableDependency.mutate(id)
+              : undefined;
+            return (
+              <DependencyRow
+                key={id}
+                message={message}
+                onEnable={onEnable}
+                isEnabling={enableDependency.isLoading && enableDependency.variables === id}
+                enableDisabled={enableDependency.isLoading}
+                enableFailed={enableDependency.isError && enableDependency.variables === id}
+              />
+            );
+          })}
         </ul>
         {hasUnknown ? (
           <EuiButtonEmpty size="xs" onClick={checks.retry}>
