@@ -18,6 +18,7 @@ import type { Investigation } from '../../types';
 import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
+import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
@@ -53,6 +54,10 @@ export interface OverviewTabProps {
 export interface OverviewSections {
   /** What the investigation is about. Shown above the subject attachments. */
   subjects?: React.ReactNode;
+  /**
+   * Replaces the impact read from the conversation's `investigation_impact` attachment, for a
+   * host that reads fresher impact itself. Absent, the tab renders the attachment.
+   */
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
@@ -119,10 +124,12 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {!summary && attachmentsSection}
 
-        {impact && (
+        {impact ? (
           <EuiFlexItem data-test-subj="investigationOverviewImpact">
-            <DetailsBlock title={OVERVIEW_SECTION_LABELS.impact}>{impact}</DetailsBlock>
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{impact}</DetailsBlock>
           </EuiFlexItem>
+        ) : (
+          <ImpactSection attachments={attachments} />
         )}
 
         {conclusion && (

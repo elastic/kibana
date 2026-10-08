@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import {
+  clearImpactEntityOpener,
+  registerImpactEntityOpener,
+} from '@kbn/agentic-investigations-common';
 import type { Impact } from '../../../common/impact/impact';
 import type { InvestigationAttachmentVariant } from '../../investigation_attachments';
 import { ImpactView } from './impact_view';
@@ -44,6 +48,10 @@ const renderView = (document: Impact, variant: InvestigationAttachmentVariant = 
   );
 
 describe('ImpactView', () => {
+  afterEach(() => {
+    clearImpactEntityOpener();
+  });
+
   it('renders the summary as Markdown and the top-level evidence chart', () => {
     renderView({
       ...base,
@@ -59,15 +67,53 @@ describe('ImpactView', () => {
     expect(screen.getByText('Errors rose after the deploy.')).toBeInTheDocument();
   });
 
-  it('renders entity badges for an impact written as entities only', () => {
-    renderView({ ...base, entities: [{ id: 'host-1', name: 'fin-dc-01' }, { id: 'user-1' }] });
+  it('renders an entity list in the details flyout when impact is entities only', () => {
+    renderView({
+      ...base,
+      entities: [
+        { id: 'host-1', name: 'fin-dc-01', type: 'host' },
+        { id: 'user-1', type: 'user' },
+      ],
+    });
 
+    expect(screen.getAllByTestId('investigationImpactEntityRow')).toHaveLength(2);
     expect(screen.getByText('fin-dc-01')).toBeInTheDocument();
+    expect(screen.getByText('· host')).toBeInTheDocument();
     expect(screen.getByText('user-1')).toBeInTheDocument();
+    expect(screen.getByText('· user')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationImpactSummary')).not.toBeInTheDocument();
   });
 
-  it('shows per-entity evidence in the details flyout', () => {
+  it('opens the entity flyout when a row is clicked', () => {
+    const open = jest.fn();
+    registerImpactEntityOpener(open);
+
+    renderView({
+      ...base,
+      entities: [{ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' }],
+    });
+
+    fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
+
+    expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
+  });
+
+  it('leaves a named entity as text when it is not an entity-store id', () => {
+    const open = jest.fn();
+    registerImpactEntityOpener(open);
+
+    renderView({
+      ...base,
+      entities: [{ id: 'checkout-service', name: 'checkout-service', type: 'service' }],
+    });
+
+    expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
+    expect(screen.getByText('· service')).toBeInTheDocument();
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('keeps per-entity evidence collapsed until the row is opened', () => {
     renderView({
       ...base,
       summary: 'Two services degraded',
@@ -77,9 +123,12 @@ describe('ImpactView', () => {
       ],
     });
 
-    expect(screen.getAllByTestId('investigationImpactEntity')).toHaveLength(2);
-    expect(screen.getByTestId('mockEvidenceChart')).toBeInTheDocument();
-    expect(screen.getByText('Latency doubled.')).toBeInTheDocument();
+    expect(screen.getAllByTestId('investigationImpactEntityRow')).toHaveLength(2);
+    expect(screen.queryByText('Latency doubled.')).not.toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: /payments/ }));
+
+    expect(screen.getByText('Latency doubled.')).toBeVisible();
   });
 
   it('keeps the inline render to entity badges', () => {

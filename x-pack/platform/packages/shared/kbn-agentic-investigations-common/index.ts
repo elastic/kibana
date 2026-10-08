@@ -114,6 +114,19 @@ export {
 } from './src/types/queue';
 
 export {
+  clearImpactDetailsRenderer,
+  registerImpactDetailsRenderer,
+  renderImpactDetails,
+} from './src/components/impact/impact_details_renderer';
+export {
+  clearImpactEntityOpener,
+  entityStoreIdType,
+  hasImpactEntityOpener,
+  openImpactEntity,
+  registerImpactEntityOpener,
+  type ImpactEntityTarget,
+} from './src/components/impact/open_impact_entity';
+export {
   Impact,
   impactPills,
   investigationEntityIds,
