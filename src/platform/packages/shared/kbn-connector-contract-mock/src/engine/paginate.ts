@@ -12,7 +12,7 @@ import { cloneDeep, get, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
 import type { ContractOperation } from '../openapi/types';
-import type { OperationRef } from './response_engine';
+import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
 import { toOperationKey } from './response_engine';
 
 /** How a cursor-paginated response says there are no more pages. */
@@ -100,9 +100,22 @@ export interface PaginatedOperation {
 
 export interface PaginationOptions {
   readonly pagination?: readonly PaginatedOperation[];
-  /** The number of items in every paginated operation's virtual collection. */
+  /**
+   * The number of items in every paginated operation's virtual collection. Defaults to the
+   * number of recorded items, or 3 without recordings.
+   */
   readonly collectionSize?: number;
 }
+
+interface RecordedCollection {
+  readonly items: readonly unknown[];
+  /** The position each recorded cursor points at. */
+  readonly positions: ReadonlyMap<string, number>;
+  /** The recorded cursor for each position, issued instead of the mock's own. */
+  readonly cursors: ReadonlyMap<number, string>;
+}
+
+type RequestParameters = Pick<ContractRequest, 'query' | 'headers' | 'body'>;
 
 const DEFAULT_COLLECTION_SIZE = 3;
 const DEFAULT_PAGE_SIZE = 10;
@@ -120,7 +133,7 @@ const decodeCursor = (cursor: string): number | undefined => {
 };
 
 const readParameter = (
-  { query, headers, body }: ContractRequest,
+  { query, headers, body }: RequestParameters,
   location: PaginationParameterLocation,
   name: string
 ): unknown => {
@@ -140,19 +153,40 @@ const toInteger = (value: unknown): number | undefined => {
   return Number.isInteger(number) ? number : undefined;
 };
 
-// The position of the first item the request asks for; undefined for a cursor the mock didn't
-// issue.
+// Next-page URLs carry their parameters in the query.
+const parameterLocation = (pagination: PaginationDescriptor): PaginationParameterLocation =>
+  pagination.style === 'link' || pagination.style === 'next_url'
+    ? 'query'
+    : pagination.request.in ?? 'query';
+
+const readPageSize = (
+  pagination: PaginationDescriptor,
+  read: (name: string) => unknown
+): number => {
+  const { sizeParam } = pagination.request;
+  return (
+    (sizeParam === undefined ? undefined : toInteger(read(sizeParam))) ??
+    pagination.defaultSize ??
+    DEFAULT_PAGE_SIZE
+  );
+};
+
+// The position of the first item the request asks for; undefined for a cursor that neither the
+// mock issued nor a recording contains.
 const readStart = (
   request: NextUrlRequest,
   read: (name: string) => unknown,
-  size: number
+  size: number,
+  recordedPositions?: ReadonlyMap<string, number>
 ): number | undefined => {
   if ('cursorParam' in request) {
     const cursor = read(request.cursorParam);
     if (cursor === undefined || cursor === '') {
       return 0;
     }
-    return typeof cursor === 'string' ? decodeCursor(cursor) : undefined;
+    return typeof cursor === 'string'
+      ? recordedPositions?.get(cursor) ?? decodeCursor(cursor)
+      : undefined;
   }
   if ('offsetParam' in request) {
     return Math.max(0, toInteger(read(request.offsetParam)) ?? 0);
@@ -165,12 +199,11 @@ const readStart = (
 const toNextUrl = (
   { url }: ContractRequest,
   request: NextUrlRequest,
-  start: number,
-  size: number
+  { start, size, cursor }: { start: number; size: number; cursor: string }
 ): string => {
   const next = new URL(url);
   if ('cursorParam' in request) {
-    next.searchParams.set(request.cursorParam, encodeCursor(start));
+    next.searchParams.set(request.cursorParam, cursor);
   } else if ('offsetParam' in request) {
     next.searchParams.set(request.offsetParam, String(start));
   } else {
@@ -209,6 +242,121 @@ const buildCollection = (template: unknown, size: number): unknown[] =>
     return item;
   });
 
+// Recorded items, cut to `size` or padded with copies of the last one.
+const resize = (items: readonly unknown[], size: number | undefined): unknown[] =>
+  size === undefined || size <= items.length
+    ? items.slice(0, size)
+    : [...items, ...buildCollection(items[items.length - 1], size - items.length + 1).slice(1)];
+
+const LINK_NEXT = /<([^>]+)>[^,]*rel="?next"?/;
+
+// The cursor a recorded response hands to the next request, wherever the vendor puts it.
+const readRecordedNext = (
+  pagination: PaginationDescriptor,
+  { headers = {}, body }: StoredResponse
+): unknown => {
+  const header = (name: string) =>
+    Object.entries(headers).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
+  let url: unknown;
+  if (pagination.style === 'cursor') {
+    const { in: nextIn = 'body', nextPath } = pagination.response;
+    return nextIn === 'header'
+      ? header(nextPath)
+      : isRecord(body)
+      ? get(body, nextPath)
+      : undefined;
+  } else if (pagination.style === 'link') {
+    url = LINK_NEXT.exec(header('link') ?? '')?.[1];
+  } else if (pagination.style === 'next_url') {
+    url = isRecord(body) ? get(body, pagination.response.nextPath) : undefined;
+  }
+  if (typeof url !== 'string' || !('cursorParam' in pagination.request)) {
+    return undefined;
+  }
+  try {
+    return new URL(url).searchParams.get(pagination.request.cursorParam) ?? undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+interface RecordedPage {
+  readonly items: readonly unknown[];
+  /** The vendor cursor the page was requested with; its start comes from the page before. */
+  readonly cursor?: string;
+  readonly start?: number;
+  readonly next: unknown;
+}
+
+const readRecordedPage = (
+  pagination: PaginationDescriptor,
+  { request = {}, response }: RecordedExchange
+): RecordedPage[] => {
+  const items = isRecord(response.body) ? get(response.body, pagination.response.itemsPath) : [];
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  const parameters: RequestParameters = {
+    query: request.query ?? {},
+    headers: Object.fromEntries(
+      Object.entries(request.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value])
+    ),
+    body: request.body,
+  };
+  const read = (name: string) => readParameter(parameters, parameterLocation(pagination), name);
+  const cursor = 'cursorParam' in pagination.request ? read(pagination.request.cursorParam) : '';
+  const next = readRecordedNext(pagination, response);
+  return typeof cursor === 'string' && cursor !== ''
+    ? [{ items, cursor, next }]
+    : [{ items, start: readStart(pagination.request, read, readPageSize(pagination, read)), next }];
+};
+
+/**
+ * Joins the recorded pages of an operation into one collection. A page requested with a vendor
+ * cursor starts where the page that returned that cursor ended; pages whose start can't be
+ * placed right after the pages before them are left out.
+ */
+const readRecordedCollection = (
+  pagination: PaginationDescriptor,
+  exchanges: readonly RecordedExchange[]
+): RecordedCollection | undefined => {
+  const pages = exchanges.flatMap((exchange) => readRecordedPage(pagination, exchange));
+  const positions = new Map<string, number>();
+  const starts = new Map<RecordedPage, number>();
+  let placed = true;
+  while (placed) {
+    placed = false;
+    for (const page of pages) {
+      const start =
+        page.start ?? (page.cursor === undefined ? undefined : positions.get(page.cursor));
+      if (start !== undefined && !starts.has(page)) {
+        starts.set(page, start);
+        placed = true;
+        if (typeof page.next === 'string' && page.next !== '' && !positions.has(page.next)) {
+          positions.set(page.next, start + page.items.length);
+        }
+      }
+    }
+  }
+  const items: unknown[] = [];
+  [...starts]
+    .sort(([, a], [, b]) => a - b)
+    .forEach(([page, start]) => {
+      if (start === items.length) {
+        items.push(...page.items);
+      }
+    });
+  if (items.length === 0) {
+    return undefined;
+  }
+  const reachable = [...positions].filter(([, position]) => position <= items.length);
+  return {
+    items,
+    positions: new Map(reachable),
+    cursors: new Map(reachable.reverse().map(([cursor, position]) => [position, cursor])),
+  };
+};
+
 const BAD_CURSOR: ContractResponse = {
   statusCode: 400,
   headers: { 'content-type': 'application/json' },
@@ -232,43 +380,46 @@ const setNext = (
 };
 
 const paginate = (
-  { pagination, collectionSize }: { pagination: PaginationDescriptor; collectionSize: number },
+  {
+    pagination,
+    collectionSize,
+    recorded,
+  }: {
+    pagination: PaginationDescriptor;
+    collectionSize: number | undefined;
+    recorded: RecordedCollection | undefined;
+  },
   request: ContractRequest,
   response: ContractResponse
 ): ContractResponse => {
   const { body } = response;
   const template = isRecord(body) ? get(body, pagination.response.itemsPath) : undefined;
-  if (!isRecord(body) || !Array.isArray(template) || template.length === 0) {
+  if (!isRecord(body) || !Array.isArray(template) || (template.length === 0 && !recorded)) {
     return response;
   }
-  // Next-page URLs carry their parameters in the query.
-  const location =
-    pagination.style === 'link' || pagination.style === 'next_url'
-      ? 'query'
-      : pagination.request.in ?? 'query';
-  const read = (name: string) => readParameter(request, location, name);
-  const { sizeParam } = pagination.request;
-  const size =
-    (sizeParam === undefined ? undefined : toInteger(read(sizeParam))) ??
-    pagination.defaultSize ??
-    DEFAULT_PAGE_SIZE;
-  const start = readStart(pagination.request, read, size);
+  const read = (name: string) => readParameter(request, parameterLocation(pagination), name);
+  const size = readPageSize(pagination, read);
+  const start = readStart(pagination.request, read, size, recorded?.positions);
   if (start === undefined) {
     return BAD_CURSOR;
   }
 
-  const collection = buildCollection(template[0], collectionSize);
+  const collection = recorded
+    ? resize(recorded.items, collectionSize)
+    : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
   const page = cloneDeep(body);
   set(page, pagination.response.itemsPath, collection.slice(start, start + size));
   const next = start + size < collection.length ? start + size : undefined;
+  const cursor = next === undefined ? undefined : recorded?.cursors.get(next) ?? encodeCursor(next);
   const nextUrl =
-    next === undefined ? undefined : toNextUrl(request, pagination.request, next, size);
+    next === undefined || cursor === undefined
+      ? undefined
+      : toNextUrl(request, pagination.request, { start: next, size, cursor });
   let { headers } = response;
 
   switch (pagination.style) {
     case 'cursor': {
       const { in: nextIn = 'body', nextPath, hasMorePath } = pagination.response;
-      const cursor = next === undefined ? undefined : encodeCursor(next);
       if (nextIn === 'body') {
         setNext(page, nextPath, cursor, pagination.end);
       } else {
@@ -295,29 +446,38 @@ const paginate = (
 };
 
 /**
- * Wraps a responder so paginated operations serve pages of a virtual collection, built from
- * the first item of the response the responder would give. Pages are selected by the request's
- * cursor, offset or page number and page size, read from its query, body or headers; the next
- * page is signalled by a cursor, a `Link` header or a next-page URL in the body. Cursors are
- * opaque positions, and cursors the mock didn't issue get 400, as a vendor would answer.
+ * Wraps a responder so paginated operations serve pages of a virtual collection: the recorded
+ * pages joined, or copies of the first item of the response the responder would give. Pages are
+ * selected by the request's cursor, offset or page number and page size, read from its query,
+ * body or headers; the next page is signalled by a cursor, a `Link` header or a next-page URL in
+ * the body. Cursors are opaque positions or recorded vendor cursors; others get 400, as a vendor
+ * would answer.
  */
 export const withPagination = (
   operations: readonly ContractOperation[],
-  { pagination = [], collectionSize = DEFAULT_COLLECTION_SIZE }: PaginationOptions,
+  {
+    pagination = [],
+    collectionSize,
+    recordedExchanges = () => [],
+  }: PaginationOptions & {
+    readonly recordedExchanges?: (operation: ContractOperation) => readonly RecordedExchange[];
+  },
   respond: Responder
 ): Responder => {
   const byKey = new Map(pagination.map((entry) => [toOperationKey(entry.operation), entry]));
-  const descriptors = new Map(
+  const paginated = new Map(
     operations.flatMap((operation) => {
       const entry = byKey.get(toOperationKey(operation));
-      return entry ? [[operation, entry.pagination] as const] : [];
+      if (!entry) {
+        return [];
+      }
+      const recorded = readRecordedCollection(entry.pagination, recordedExchanges(operation));
+      return [[operation, { pagination: entry.pagination, collectionSize, recorded }] as const];
     })
   );
   return (operation, request) => {
     const response = respond(operation, request);
-    const descriptor = descriptors.get(operation);
-    return descriptor && response.statusCode < 300
-      ? paginate({ pagination: descriptor, collectionSize }, request, response)
-      : response;
+    const options = paginated.get(operation);
+    return options && response.statusCode < 300 ? paginate(options, request, response) : response;
   };
 };
