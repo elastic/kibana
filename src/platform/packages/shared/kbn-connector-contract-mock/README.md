@@ -2,21 +2,14 @@
 
 Dev-only contract mock for the connectors in `@kbn/connector-specs`. It validates the requests a connector makes against the vendor's API spec and answers them with responses that conform to that spec, so connector tests run without vendor credentials or network access.
 
-This package is being built in stages (see [#295684](https://github.com/elastic/kibana/issues/295684)). Responses currently come from a `respond` function you provide; a response engine that derives them from the spec follows.
+This package is being built in stages (see [#295684](https://github.com/elastic/kibana/issues/295684)).
 
 ## In-process mock
 
 ```ts
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
 
-const { fetch, calls } = createContractMockFetch({
-  specs: [openApiDocument],
-  respond: (operation, request) => ({
-    statusCode: 200,
-    headers: { 'content-type': 'application/json' },
-    body: [],
-  }),
-});
+const { fetch, calls } = createContractMockFetch({ specs: [openApiDocument] });
 ```
 
 The mock is a standard `fetch`. Connector clients built on axios use it through axios's fetch adapter, `{ adapter: 'fetch', env: { fetch } }`, so axios still builds the URL and serializes parameters exactly as it would against the vendor. The package itself doesn't depend on axios, whose new use Kibana disallows.
@@ -25,7 +18,9 @@ For every request, the mock:
 
 1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong;
 2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
-3. calls `respond`, then validates the response's status code, headers and body against the spec.
+3. builds a response, then validates its status code, headers and body against the spec.
+
+By default, the response is sampled from the spec. The mock picks the lowest declared 2xx response (then `2XX`, then `default`) and the content type that best matches the request's `Accept` header, preferring JSON. It answers **406** when no content type matches. Values come from the schema's first `examples` entry, `example`, `default`, `const` or `enum` value, and otherwise from a placeholder that matches the schema's type, format and bounds. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Pass `respond: (operation, request) => response` to answer differently.
 
 Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract.
 

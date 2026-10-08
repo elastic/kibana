@@ -8,6 +8,7 @@
  */
 
 import type { ContractRequest, ContractResponse, Responder, Violation } from '../contract/types';
+import { sampleResponse } from '../engine/sample_response';
 import type { OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
@@ -26,7 +27,8 @@ export interface ContractCall {
 export interface ContractMockOptions {
   /** The vendor specs the connector targets, e.g. both API versions it calls. */
   readonly specs: readonly OpenApiDocument[];
-  readonly respond: Responder;
+  /** Produces responses to valid requests; defaults to deterministic samples of the spec. */
+  readonly respond?: Responder;
 }
 
 export interface ContractMock {
@@ -84,7 +86,10 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  * get 404 and requests that break the spec get 422 listing the violations; every request is
  * recorded in `calls`. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
-export const createContractMockFetch = ({ specs, respond }: ContractMockOptions): ContractMock => {
+export const createContractMockFetch = ({
+  specs,
+  respond = sampleResponse,
+}: ContractMockOptions): ContractMock => {
   const contract = createOpenApiAdapter(specs.flatMap(loadContractOperations), respond);
   const calls: ContractCall[] = [];
 
