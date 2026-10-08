@@ -277,7 +277,7 @@ export type CallToolInput = z.infer<typeof CallToolInputSchema>;
 export const TriggerIncidentInputSchema = lazySchema(() =>
   z.object({
     from: z
-      .string()
+      .email()
       .max(200)
       .describe(
         'Email address of the PagerDuty user on whose behalf the incident is created. Required by the REST Incidents API when using a service/org-scoped token. Call getUserData to find the current user email.'
@@ -328,7 +328,7 @@ export type TriggerIncidentInput = z.infer<typeof TriggerIncidentInputSchema>;
 export const AcknowledgeIncidentInputSchema = lazySchema(() =>
   z.object({
     from: z
-      .string()
+      .email()
       .max(200)
       .describe(
         'Email address of the PagerDuty user acknowledging the incident. Required for service/org-scoped tokens.'
@@ -345,7 +345,7 @@ export type AcknowledgeIncidentInput = z.infer<typeof AcknowledgeIncidentInputSc
 export const ResolveIncidentInputSchema = lazySchema(() =>
   z.object({
     from: z
-      .string()
+      .email()
       .max(200)
       .describe(
         'Email address of the PagerDuty user resolving the incident. Required for service/org-scoped tokens.'
@@ -363,7 +363,7 @@ export const UpdateIncidentInputSchema = lazySchema(() =>
   z
     .object({
       from: z
-        .string()
+        .email()
         .max(200)
         .describe(
           'Email address of the PagerDuty user making the update. Required for service/org-scoped tokens.'
@@ -420,6 +420,8 @@ export const ListServicesInputSchema = lazySchema(() =>
     team_ids: z
       .array(z.string().max(200))
       .max(25)
+      .refine((ids) => new Set(ids).size === ids.length, { message: 'team_ids must be unique' })
+      .meta({ uniqueItems: true })
       .optional()
       .describe('Filter to services belonging to these team IDs (e.g., ["P123ABC"])'),
   })
@@ -430,7 +432,7 @@ export const AddRespondersInputSchema = lazySchema(() =>
   z
     .object({
       from: z
-        .string()
+        .email()
         .max(200)
         .describe(
           'Email address of the PagerDuty user making the request. Required for service/org-scoped tokens.'
@@ -479,7 +481,7 @@ export type AddRespondersInput = z.infer<typeof AddRespondersInputSchema>;
 export const RunResponsePlayInputSchema = lazySchema(() =>
   z.object({
     from: z
-      .string()
+      .email()
       .max(200)
       .describe(
         'Email address of the PagerDuty user running the response play. Required for service/org-scoped tokens.'

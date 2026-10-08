@@ -10,11 +10,38 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_ID_LENGTH = 200;
+// Page and space IDs are int64 in the Confluence v2 spec: at most 19 digits.
+const NUMERIC_ID_REGEX = /^\d{1,19}$/;
 const MAX_CURSOR_LENGTH = 2048;
-const MAX_TOKEN_LENGTH = 100;
 // Confluence v2 accepts up to 100 `space-id` values on GET /pages, and up to 250 `ids` or `keys` on GET /spaces.
 const MAX_FILTER_VALUES = 100;
 const MAX_SPACE_LOOKUP_VALUES = 250;
+// GET /pages and GET /spaces accept a `limit` of 1 to 250.
+const MAX_LIST_LIMIT = 250;
+
+export const PAGE_STATUSES = ['current', 'archived', 'deleted', 'trashed'] as const;
+export const LIST_PAGES_BODY_FORMATS = ['storage', 'atlas_doc_format'] as const;
+export const GET_PAGE_BODY_FORMATS = [
+  'storage',
+  'atlas_doc_format',
+  'view',
+  'export_view',
+  'anonymous_export_view',
+  'styled_view',
+  'editor',
+] as const;
+export const SPACE_TYPES = [
+  'global',
+  'collaboration',
+  'knowledge_base',
+  'personal',
+  'system',
+  'onboarding',
+  'xflow_sample_space',
+] as const;
+export const SPACE_STATUSES = ['current', 'archived', 'trashed'] as const;
+
+const numericId = () => z.string().trim().regex(NUMERIC_ID_REGEX);
 
 // =============================================================================
 // Action input schemas & inferred types
@@ -24,8 +51,13 @@ export const ListPagesInputSchema = lazySchema(() =>
   z.object({
     limit: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_LIST_LIMIT)
       .default(25)
-      .describe('Maximum number of pages to return per request. Defaults to 25 if omitted.'),
+      .describe(
+        'Maximum number of pages to return per request (1-250). Defaults to 25 if omitted.'
+      ),
     cursor: z
       .string()
       .max(MAX_CURSOR_LENGTH)
@@ -34,10 +66,7 @@ export const ListPagesInputSchema = lazySchema(() =>
         'Opaque pagination cursor returned by a previous listPages response. Pass this to retrieve the next page of results.'
       ),
     spaceId: z
-      .union([
-        z.string().max(MAX_ID_LENGTH),
-        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
-      ])
+      .union([numericId(), z.array(numericId()).max(MAX_FILTER_VALUES)])
       .optional()
       .describe(
         'Numeric space ID or array of space IDs to restrict results to pages in those spaces. Obtain space IDs from listSpaces or getSpace.'
@@ -48,20 +77,16 @@ export const ListPagesInputSchema = lazySchema(() =>
       .optional()
       .describe('Filter pages whose title contains this string (partial, case-insensitive match).'),
     status: z
-      .union([
-        z.string().max(MAX_TOKEN_LENGTH),
-        z.array(z.string().max(MAX_TOKEN_LENGTH)).max(MAX_FILTER_VALUES),
-      ])
+      .union([z.enum(PAGE_STATUSES), z.array(z.enum(PAGE_STATUSES)).max(PAGE_STATUSES.length)])
       .optional()
       .describe(
-        'Filter by page status. Accepted values: "current" (published), "archived", "draft". Accepts a single value or an array.'
+        'Filter by page status: "current" (published), "archived", "deleted" or "trashed". Accepts a single value or an array. Defaults to current and archived.'
       ),
     bodyFormat: z
-      .string()
-      .max(MAX_TOKEN_LENGTH)
+      .enum(LIST_PAGES_BODY_FORMATS)
       .optional()
       .describe(
-        'Format to use for page body content in the response. Common values: "atlas_doc_format" (Atlassian Document Format JSON), "storage" (XML storage format). Omit to exclude body content from the response.'
+        'Format to use for page body content in the response: "atlas_doc_format" (Atlassian Document Format JSON) or "storage" (XML storage format). Omit to exclude body content from the response.'
       ),
   })
 );
@@ -69,20 +94,14 @@ export type ListPagesInput = z.infer<typeof ListPagesInputSchema>;
 
 export const GetPageInputSchema = lazySchema(() =>
   z.object({
-    id: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_ID_LENGTH)
-      .describe(
-        'The numeric ID of the Confluence page to retrieve (for example, "123456"). Obtain this from a listPages call or from the page URL.'
-      ),
+    id: numericId().describe(
+      'The numeric ID of the Confluence page to retrieve (for example, "123456"). Obtain this from a listPages call or from the page URL.'
+    ),
     bodyFormat: z
-      .string()
-      .max(MAX_TOKEN_LENGTH)
+      .enum(GET_PAGE_BODY_FORMATS)
       .optional()
       .describe(
-        'Format to use for page body content in the response. Common values: "atlas_doc_format" (Atlassian Document Format JSON), "storage" (XML storage format). Omit to exclude body content from the response.'
+        'Format to use for page body content in the response. Common values: "atlas_doc_format" (Atlassian Document Format JSON), "storage" (XML storage format), "view" (rendered HTML). Omit to exclude body content from the response.'
       ),
   })
 );
@@ -92,8 +111,13 @@ export const ListSpacesInputSchema = lazySchema(() =>
   z.object({
     limit: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_LIST_LIMIT)
       .default(25)
-      .describe('Maximum number of spaces to return per request. Defaults to 25 if omitted.'),
+      .describe(
+        'Maximum number of spaces to return per request (1-250). Defaults to 25 if omitted.'
+      ),
     cursor: z
       .string()
       .max(MAX_CURSOR_LENGTH)
@@ -102,10 +126,7 @@ export const ListSpacesInputSchema = lazySchema(() =>
         'Opaque pagination cursor returned by a previous listSpaces response. Pass this to retrieve the next page of results.'
       ),
     ids: z
-      .union([
-        z.string().max(MAX_ID_LENGTH),
-        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SPACE_LOOKUP_VALUES),
-      ])
+      .union([numericId(), z.array(numericId()).max(MAX_SPACE_LOOKUP_VALUES)])
       .optional()
       .describe(
         'Numeric space ID or array of space IDs to retrieve specific spaces. Use when you already know the space IDs.'
@@ -120,31 +141,24 @@ export const ListSpacesInputSchema = lazySchema(() =>
         'Space key or array of space keys to filter by (for example, "DEMO" or ["DEMO", "TEAM"]). Space keys are the short uppercase identifiers shown in Confluence URLs.'
       ),
     type: z
-      .string()
-      .max(MAX_TOKEN_LENGTH)
+      .enum(SPACE_TYPES)
       .optional()
       .describe(
-        'Filter spaces by type. Accepted values: "global" (team or project spaces), "personal" (user personal spaces).'
+        'Filter spaces by type, for example "global" (team or project spaces) or "personal" (user personal spaces).'
       ),
     status: z
-      .string()
-      .max(MAX_TOKEN_LENGTH)
+      .enum(SPACE_STATUSES)
       .optional()
-      .describe('Filter spaces by status. Accepted values: "current" (active), "archived".'),
+      .describe('Filter spaces by status: "current" (active), "archived" or "trashed".'),
   })
 );
 export type ListSpacesInput = z.infer<typeof ListSpacesInputSchema>;
 
 export const GetSpaceInputSchema = lazySchema(() =>
   z.object({
-    id: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_ID_LENGTH)
-      .describe(
-        'The numeric ID of the Confluence space to retrieve (for example, "98304"). Obtain this from a listSpaces call or from the space URL.'
-      ),
+    id: numericId().describe(
+      'The numeric ID of the Confluence space to retrieve (for example, "98304"). Obtain this from a listSpaces call or from the space URL.'
+    ),
   })
 );
 export type GetSpaceInput = z.infer<typeof GetSpaceInputSchema>;

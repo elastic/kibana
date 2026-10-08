@@ -32,6 +32,10 @@ const calendarIdSchema = () =>
     )
     .default('primary');
 
+// Google requires RFC3339 timestamps with a time zone offset for timeMin and timeMax.
+const timestampSchema = () =>
+  z.string().max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH).datetime({ offset: true });
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -49,16 +53,12 @@ export const SearchEventsInputSchema = lazySchema(() =>
     calendarId: calendarIdSchema().describe(
       "Calendar ID to search. Use 'primary' for the user's primary calendar, a specific calendar ID from listCalendars, or a person's email address to access their calendar."
     ),
-    timeMin: z
-      .string()
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
+    timeMin: timestampSchema()
       .optional()
       .describe(
         'Lower bound (inclusive) for event start time, as an RFC3339 timestamp. Example: 2024-01-01T00:00:00Z'
       ),
-    timeMax: z
-      .string()
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
+    timeMax: timestampSchema()
       .optional()
       .describe(
         'Upper bound (exclusive) for event start time, as an RFC3339 timestamp. Example: 2024-12-31T23:59:59Z'
@@ -113,16 +113,12 @@ export const ListEventsInputSchema = lazySchema(() =>
     calendarId: calendarIdSchema().describe(
       "Calendar ID to list events from. Use 'primary' for the user's primary calendar, a specific calendar ID from listCalendars, or a person's email address to access their calendar."
     ),
-    timeMin: z
-      .string()
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
+    timeMin: timestampSchema()
       .optional()
       .describe(
         'Lower bound (inclusive) for event start time, as an RFC3339 timestamp. Example: 2024-01-01T00:00:00Z'
       ),
-    timeMax: z
-      .string()
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
+    timeMax: timestampSchema()
       .optional()
       .describe(
         'Upper bound (exclusive) for event start time, as an RFC3339 timestamp. Example: 2024-12-31T23:59:59Z'
@@ -154,20 +150,12 @@ export type ListEventsInput = z.infer<typeof ListEventsInputSchema>;
 
 export const FreeBusyInputSchema = lazySchema(() =>
   z.object({
-    timeMin: z
-      .string()
-      .min(1)
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
-      .describe(
-        'Start of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z'
-      ),
-    timeMax: z
-      .string()
-      .min(1)
-      .max(GOOGLE_CALENDAR_MAX_TIMESTAMP_LENGTH)
-      .describe(
-        'End of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z'
-      ),
+    timeMin: timestampSchema().describe(
+      'Start of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z'
+    ),
+    timeMax: timestampSchema().describe(
+      'End of the time interval to query, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z'
+    ),
     calendarIds: z
       .array(z.string().min(1).max(GOOGLE_CALENDAR_MAX_CALENDAR_ID_LENGTH))
       .min(1)

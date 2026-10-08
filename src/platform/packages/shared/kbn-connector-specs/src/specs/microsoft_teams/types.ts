@@ -15,6 +15,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const MAX_FREEFORM = 10000;
 const MAX_ID = 200;
 const MAX_TITLE = 255;
+// searchRequest.from is an Int32 in the Graph spec.
+export const MAX_SEARCH_FROM = 2147483647;
 
 // =============================================================================
 // Action input schemas & inferred types
@@ -116,6 +118,9 @@ export const SearchMessagesInputSchema = lazySchema(() =>
       .describe('Search query (supports KQL syntax, e.g. "from:bob sent>2024-01-01")'),
     from: z
       .number()
+      .int()
+      .min(0)
+      .max(MAX_SEARCH_FROM)
       .optional()
       .describe(
         'Zero-based offset for pagination (default: 0). Combine with size to page through results.'

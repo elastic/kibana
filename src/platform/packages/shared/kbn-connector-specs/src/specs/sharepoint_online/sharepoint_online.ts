@@ -42,7 +42,7 @@ const GraphCollectionOutputSchema = lazySchema(() =>
 // Graph site IDs are "hostname,siteCollectionId,webId", so they can exceed the
 // usual ID bound when the hostname is long. SharePoint caps KQL query text at
 // 4,096 characters. Pre-authenticated download URLs embed a tempauth token and
-// routinely run past 1,000 characters.
+// routinely run past 1,000 characters. Graph's searchRequest.from is an Int32.
 const SHAREPOINT_MAX_ID_LENGTH = 512;
 const SHAREPOINT_MAX_SEARCH_LENGTH = 2000;
 const SHAREPOINT_MAX_KQL_LENGTH = 4096;
@@ -50,6 +50,7 @@ const SHAREPOINT_MAX_PATH_LENGTH = 1024;
 const SHAREPOINT_MAX_URL_LENGTH = 2048;
 const SHAREPOINT_MAX_DOWNLOAD_URL_LENGTH = 8192;
 const SHAREPOINT_MAX_QUERY_PARAM_KEY_LENGTH = 200;
+const SHAREPOINT_MAX_SEARCH_FROM = 2147483647;
 const SHAREPOINT_ENTITY_TYPES = ['site', 'list', 'listItem', 'drive', 'driveItem'] as const;
 
 const APP_ONLY_AUTH_TYPES = new Set([
@@ -234,7 +235,7 @@ export const SharepointOnline: ConnectorSpec = {
         if (isAppOnlyAuth(ctx)) {
           ctx.log.debug('SharePoint listing all sites (app-only auth)');
           const response = await ctx.client.get(
-            'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+            'https://graph.microsoft.com/v1.0/sites/getAllSites',
             {
               params: {
                 $select: 'id,displayName,webUrl,siteCollection',
@@ -285,7 +286,7 @@ export const SharepointOnline: ConnectorSpec = {
         }
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`,
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages`,
           {
             params: {
               $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
@@ -431,7 +432,7 @@ export const SharepointOnline: ConnectorSpec = {
         }
         ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`,
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives`,
           {
             params: {
               $select:
@@ -473,7 +474,7 @@ export const SharepointOnline: ConnectorSpec = {
         }
         ctx.log.debug(`SharePoint getting all lists of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/`,
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists`,
           {
             params: {
               $select:
@@ -527,7 +528,7 @@ export const SharepointOnline: ConnectorSpec = {
           `SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`
         );
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items/`,
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items`,
           {
             params: {
               $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
@@ -778,6 +779,9 @@ export const SharepointOnline: ConnectorSpec = {
             ),
           from: z
             .number()
+            .int()
+            .min(0)
+            .max(SHAREPOINT_MAX_SEARCH_FROM)
             .default(0)
             .describe('Zero-based pagination offset (number of results to skip). Defaults to 0.'),
           size: z

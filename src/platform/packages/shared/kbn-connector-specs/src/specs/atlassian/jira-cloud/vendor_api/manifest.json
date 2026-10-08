@@ -1,0 +1,207 @@
+{
+  "operations": {
+    "addAttachment": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/attachments",
+        "source": "v3"
+      }
+    ],
+    "addComment": [
+      {
+        "method": "post",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/comment",
+        "source": "v3"
+      }
+    ],
+    "addWatcher": [
+      {
+        "method": "post",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/watchers",
+        "source": "v3"
+      }
+    ],
+    "assignIssue": [
+      {
+        "method": "put",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/assignee",
+        "source": "v3"
+      }
+    ],
+    "createIssue": [
+      {
+        "method": "post",
+        "path": "/rest/api/3/issue",
+        "source": "v3"
+      }
+    ],
+    "deleteIssue": [
+      {
+        "method": "delete",
+        "path": "/rest/api/3/issue/{issueIdOrKey}",
+        "source": "v3"
+      }
+    ],
+    "getAttachment": [
+      {
+        "method": "get",
+        "path": "/rest/api/3/attachment/content/{id}",
+        "source": "v3"
+      }
+    ],
+    "getCreateMetadata": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "offsetParam": "startAt",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "fields",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}",
+        "source": "v3"
+      }
+    ],
+    "getIssue": [
+      {
+        "method": "get",
+        "path": "/rest/api/3/issue/{issueIdOrKey}",
+        "source": "v3"
+      }
+    ],
+    "getIssueTypes": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "offsetParam": "startAt",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "issueTypes",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes",
+        "source": "v3"
+      }
+    ],
+    "getProject": [
+      {
+        "method": "get",
+        "path": "/rest/api/3/project/{projectIdOrKey}",
+        "source": "v3"
+      }
+    ],
+    "getProjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "offsetParam": "startAt",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "values",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/rest/api/3/project/search",
+        "source": "v3"
+      }
+    ],
+    "getTransitions": [
+      {
+        "method": "get",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/transitions",
+        "source": "v3"
+      }
+    ],
+    "linkIssues": [
+      {
+        "method": "post",
+        "path": "/rest/api/3/issueLink",
+        "source": "v3"
+      }
+    ],
+    "removeWatcher": [
+      {
+        "method": "delete",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/watchers",
+        "source": "v3"
+      }
+    ],
+    "searchIssuesWithJql": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 50,
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextPageToken",
+            "in": "body",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "issues",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/rest/api/3/search/jql",
+        "source": "v3"
+      }
+    ],
+    "searchUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "offsetParam": "startAt",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "offset"
+        },
+        "path": "/rest/api/3/user/search",
+        "source": "v3"
+      }
+    ],
+    "transitionIssue": [
+      {
+        "method": "post",
+        "path": "/rest/api/3/issue/{issueIdOrKey}/transitions",
+        "source": "v3"
+      }
+    ],
+    "updateIssue": [
+      {
+        "method": "put",
+        "path": "/rest/api/3/issue/{issueIdOrKey}",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "1001.0.0-SNAPSHOT-075425bbde28f069e4778bc256e773dd780217cf",
+      "fetchedAt": "2026-10-07T20:48:51.637Z",
+      "format": "openapi",
+      "url": "https://developer.atlassian.com/cloud/jira/platform/swagger-v3.v3.json"
+    }
+  }
+}

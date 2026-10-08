@@ -1,0 +1,98 @@
+{
+  "getEscalationPolicy": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getIncident": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getSchedule": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getTeam": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getUserData": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listEscalationPolicies": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listIncidents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listOncalls": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listSchedules": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listTeams": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listTools": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listUsers": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  }
+}
