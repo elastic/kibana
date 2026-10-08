@@ -16,8 +16,9 @@ import { generateLogsData, generateMetricsData, generateRulesData } from '../fix
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 
+// Keeps the plain Alerts navigation link and the Rules page heading tabs, which change when alerting v2 is on.
 globalSetupHook(
-  'Disable alerting v2 for the classic navigation and rules page specs',
+  'Disable alerting v2',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ kbnClient, log }) => {
     log.debug('[setup] resetting alerting v2 nav settings and disabling alerting v2');

@@ -8,8 +8,9 @@
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 
+// Keeps the plain Alerts navigation link, which alerting v2 replaces with a panel.
 globalSetupHook(
-  'Disable alerting v2 for the plain Alerts navigation link',
+  'Disable alerting v2',
   {
     tag: [
       ...tags.serverless.observability.complete,

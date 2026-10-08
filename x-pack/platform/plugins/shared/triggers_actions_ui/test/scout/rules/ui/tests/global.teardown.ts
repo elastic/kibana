@@ -10,7 +10,7 @@ import { resetAlertingV2Enabled } from '../../../common/ui/fixtures/alerting_v2_
 
 globalTeardownHook(
   'Restore the default alerting v2 setting',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   async ({ kbnClient, log }) => {
     log.debug('[teardown] restoring the default alerting v2 setting');
     await resetAlertingV2Enabled(kbnClient);

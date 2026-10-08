@@ -7,25 +7,29 @@
 
 import type { KbnClient } from '@kbn/scout';
 
-/*
- * `alerting:v2:enabled` is a global advanced setting that defaults to on. Write it through the
- * global-settings endpoint, because the regular `uiSettings` fixture writes to the per-space store.
- */
-const ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH = '/api/kibana/global_settings/alerting:v2:enabled';
+const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 
-export const setAlertingV2Enabled = (kbnClient: KbnClient, enabled: boolean) =>
-  kbnClient.request({
-    method: 'POST',
-    path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-    headers: { 'kbn-xsrf': 'scout' },
-    body: { value: enabled },
-  });
+/*
+ * `alerting:v2:enabled` is a global advanced setting that defaults to on. Serverless disables the
+ * public `/api/kibana/global_settings` API, so write through `updateGlobal` and the internal route,
+ * which exist on stateful and serverless.
+ */
+const ALERTING_V2_ENABLED_INTERNAL_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
+  ALERTING_V2_ENABLED_SETTING_ID
+)}`;
+
+export const setAlertingV2Enabled = async (kbnClient: KbnClient, enabled: boolean) => {
+  await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: enabled });
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
+};
 
 /** Deleting the user value restores the registered default, which is on. */
-export const resetAlertingV2Enabled = (kbnClient: KbnClient) =>
-  kbnClient.request({
+export const resetAlertingV2Enabled = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    description: `unset ${ALERTING_V2_ENABLED_SETTING_ID}`,
+    path: ALERTING_V2_ENABLED_INTERNAL_PATH,
     method: 'DELETE',
-    path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-    headers: { 'kbn-xsrf': 'scout' },
     ignoreErrors: [404],
   });
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
+};

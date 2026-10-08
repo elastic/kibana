@@ -8,8 +8,9 @@
 import { globalSetupHook, tags } from '@kbn/scout';
 import { setAlertingV2Enabled } from '../../../common/ui/fixtures/alerting_v2_setting';
 
+// Keeps the classic Rules and Logs heading tabs, which hide when alerting v2 is on.
 globalSetupHook(
-  'Disable alerting v2 for the classic Rules page',
+  'Disable alerting v2',
   { tag: tags.stateful.classic },
   async ({ kbnClient, log }) => {
     log.debug('[setup] disabling alerting v2');
