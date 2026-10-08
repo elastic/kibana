@@ -12,11 +12,13 @@
     "@kbn/agent-builder-plugin",
     "@kbn/app-header",
     "@kbn/charts-plugin",
+    "@kbn/code-editor",
     "@kbn/core",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-http-browser",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/date-range-picker",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-observability",
     "@kbn/dev-cli-runner",
@@ -31,6 +33,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/llm-trace-waterfall",
+    "@kbn/management-settings-ids",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/nightshift-shared",
     "@kbn/observability-shared-plugin",
@@ -47,6 +50,7 @@
     "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
     "@kbn/ui-callout",
-    "@kbn/unified-search-plugin"
+    "@kbn/unified-search-plugin",
+    "@kbn/unsaved-changes-prompt"
   ]
 }
