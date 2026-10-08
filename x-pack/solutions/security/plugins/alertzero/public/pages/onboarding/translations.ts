@@ -95,13 +95,6 @@ export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
   defaultMessage: 'Back',
 });
 
-export const ATTACK_DISCOVERY_WORKFLOWS_NOTE = i18n.translate(
-  'xpack.alertzero.onboarding.attackDiscoveryWorkflowsNote',
-  {
-    defaultMessage: 'Turning this on also enables the Attack Discovery workflows in Settings.',
-  }
-);
-
 export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
   'xpack.alertzero.onboarding.modifyForbiddenCallout',
   {
