@@ -22,6 +22,9 @@
  * euid.getEuidFromObject(getBuiltInEntityDefinition('host'), doc);
  * // Any definition, for example one read from the registry on the server:
  * const definition = await entityStore.getEntityDefinitionsClientForSpace(space).get('k8s.pod');
+ * if (!definition) {
+ *   return; // not registered in this Kibana
+ * }
  * euid.getEuidFromObject(definition, doc);
  * euid.esql.getEuidEvaluation(definition, 'entity.id');
  */

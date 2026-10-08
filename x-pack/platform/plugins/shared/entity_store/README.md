@@ -154,6 +154,9 @@ Every function of the `euid` helper (`@kbn/entity-store/common/euid_helpers`) ou
 ```ts
 const definitions = entityStore.getEntityDefinitionsClientForSpace(spaceId);
 const definition = await definitions.get('k8s.pod');
+if (!definition) {
+  return; // not registered in this Kibana
+}
 const esql = euid.esql.getEuidEvaluation(definition, 'entity.id');
 ```
 
