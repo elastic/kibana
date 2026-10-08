@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, type Subscription } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type {
+  BasicVisualizationClient,
+  VisTypeOnCreate,
+  VisualizationsSetup,
+} from '@kbn/visualizations-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -23,6 +28,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -45,8 +51,15 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { getVegaVisualizationClient } from './library/vega_library_client';
+import { vegaTitleInWizard } from './vega_icon';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -75,6 +88,7 @@ export interface VegaPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   usageCollection: UsageCollectionStart;
   inspector: InspectorStart;
 }
@@ -106,6 +120,26 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
+    // Resolves when the editor closes.
+    const openLibraryEditor = async (id?: string) => {
+      const [[coreStart, startDeps], { openVegaLibraryEditor }] = await Promise.all([
+        core.getStartServices(),
+        import('./library/open_vega_library_editor'),
+      ]);
+      await openVegaLibraryEditor({ core: coreStart, deps: startDeps, id });
+    };
+
+    // Opens the library editor instead of the legacy Visualize editor while the library API is on.
+    const onCreate: VisTypeOnCreate = async ({ onEditorClose }) => {
+      const [coreStart] = await core.getStartServices();
+      const isLibraryApiEnabled = await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)
+      );
+      if (!isLibraryApiEnabled) return false;
+      openLibraryEditor().finally(onEditorClose);
+      return true;
+    };
+
     visualizations.createBaseVisualizationAsync('vega', async () => {
       const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
         await Promise.all([core.getStartServices(), import('./async_module')]);
@@ -113,7 +147,39 @@ export class VegaPlugin implements Plugin<void, void> {
         expressions.registerFunction(() => createVegaFn(visualizationDependencies));
         expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
       }
-      return vegaVisType;
+      return { ...vegaVisType, onCreate };
+    });
+
+    // Lists Vega library items in the Visualize library next to legacy Vega visualizations. Creating
+    // goes through the Vega visualization type above, so the alias is hidden from create UIs.
+    visualizations.registerAlias({
+      name: 'vegaLibrary',
+      title: vegaTitleInWizard,
+      icon: 'visualizeApp',
+      description: i18n.translate('visTypeVega.libraryAlias.description', {
+        defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
+        description: 'Vega and Vega-Lite are product names and should not be translated',
+      }),
+      stage: 'production',
+      disableCreate: true,
+      appExtensions: {
+        visualizations: {
+          docTypes: [VEGA_SAVED_OBJECT_TYPE],
+          searchFields: ['title^3', 'description'],
+          client: (_contentManagement, http) =>
+            getVegaVisualizationClient(http) as BasicVisualizationClient,
+          toListItem: ({ id, type, attributes }) => ({
+            id,
+            title: attributes.title,
+            description: attributes.description,
+            icon: 'visualizeApp',
+            typeTitle: vegaTitleInWizard,
+            stage: 'production',
+            savedObjectType: type,
+            editor: { onEdit: openLibraryEditor },
+          }),
+        },
+      },
     });
 
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {

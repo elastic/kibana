@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ManagedEditorFooter } from './managed_editor_footer';
 import type { ManagedEditorFooterProps } from './managed_editor_footer';
@@ -95,7 +95,8 @@ describe('ManagedEditorFooter', () => {
       });
 
       await userEvent.click(screen.getByTestId('saveMenu'));
-      await userEvent.click(await screen.findByTestId('as'));
+      // The menu's popover ignores pointer events while it animates in.
+      fireEvent.click(await screen.findByTestId('as'));
 
       expect(onMenuItemClick).toHaveBeenCalledTimes(1);
       expect(onSave).not.toHaveBeenCalled();

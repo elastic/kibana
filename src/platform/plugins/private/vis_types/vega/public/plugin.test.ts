@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
@@ -23,10 +24,16 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import type { VisTypeOnCreate } from '@kbn/visualizations-plugin/public';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
+const mockOpenVegaLibraryEditor = jest.fn();
 const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
 const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
@@ -38,6 +45,10 @@ jest.mock('./add_vega_panel_action', () => ({
 
 jest.mock('./embeddable/add_vega_embeddable_action', () => ({
   getAddVegaEmbeddableAction: () => mockGetAddVegaEmbeddableAction(),
+}));
+
+jest.mock('./library/open_vega_library_editor', () => ({
+  openVegaLibraryEditor: (params: unknown) => mockOpenVegaLibraryEditor(params),
 }));
 
 jest.mock('./async_module', () => ({
@@ -72,7 +83,7 @@ describe('VegaPlugin', () => {
       data: dataPluginMock.createSetupContract(),
     });
 
-    return { embeddable, expressions, plugin, visualizations };
+    return { core, embeddable, expressions, plugin, startCore, startDeps, visualizations };
   };
 
   it('registers the Vega embeddable definition', async () => {
@@ -96,6 +107,93 @@ describe('VegaPlugin', () => {
 
     expect(expressions.registerFunction).toHaveBeenCalledTimes(1);
     expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Vega library', () => {
+    const getOnCreate = async (isLibraryApiEnabled: boolean) => {
+      const { startCore, startDeps, visualizations } = setup();
+      startCore.featureFlags.getBooleanValue$ = jest
+        .fn()
+        .mockReturnValue(new BehaviorSubject(isLibraryApiEnabled));
+      const legacyLoader = jest.mocked(visualizations.createBaseVisualizationAsync).mock
+        .calls[0][1];
+      const { onCreate } = (await legacyLoader()) as { onCreate: VisTypeOnCreate };
+      return { onCreate, startCore, startDeps, visualizations };
+    };
+
+    beforeEach(() => {
+      mockOpenVegaLibraryEditor.mockReset().mockResolvedValue(undefined);
+    });
+
+    it('opens the library editor from the create wizard when the library API is enabled', async () => {
+      const { onCreate, startCore, startDeps } = await getOnCreate(true);
+      const onEditorClose = jest.fn();
+
+      await expect(onCreate({ onEditorClose })).resolves.toBe(true);
+
+      expect(startCore.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        VEGA_API_ENABLED_FLAG,
+        false
+      );
+      await waitFor(() => expect(onEditorClose).toHaveBeenCalledTimes(1));
+      expect(mockOpenVegaLibraryEditor).toHaveBeenCalledWith({
+        core: startCore,
+        deps: startDeps,
+        id: undefined,
+      });
+    });
+
+    it('leaves creating to the legacy editor when the library API is disabled', async () => {
+      const { onCreate } = await getOnCreate(false);
+      const onEditorClose = jest.fn();
+
+      await expect(onCreate({ onEditorClose })).resolves.toBe(false);
+
+      expect(mockOpenVegaLibraryEditor).not.toHaveBeenCalled();
+      expect(onEditorClose).not.toHaveBeenCalled();
+    });
+
+    it('lists library items next to legacy ones, but hides them from create menus', () => {
+      const { visualizations } = setup();
+
+      expect(visualizations.registerAlias).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'vegaLibrary',
+          disableCreate: true,
+          appExtensions: {
+            visualizations: expect.objectContaining({ docTypes: [VEGA_SAVED_OBJECT_TYPE] }),
+          },
+        })
+      );
+    });
+
+    it('opens the library editor for a listed item', async () => {
+      const { startCore, startDeps, visualizations } = setup();
+      const { visualizations: extension } = jest.mocked(visualizations.registerAlias).mock
+        .calls[0][0].appExtensions!;
+
+      const listItem = extension.toListItem({
+        id: 'item-1',
+        type: VEGA_SAVED_OBJECT_TYPE,
+        attributes: { title: 'My chart', description: 'A chart' },
+        references: [],
+      } as unknown as Parameters<typeof extension.toListItem>[0]);
+
+      expect(listItem).toEqual(
+        expect.objectContaining({
+          id: 'item-1',
+          title: 'My chart',
+          description: 'A chart',
+          savedObjectType: VEGA_SAVED_OBJECT_TYPE,
+        })
+      );
+      await (listItem.editor as { onEdit: (id: string) => Promise<void> }).onEdit('item-1');
+      expect(mockOpenVegaLibraryEditor).toHaveBeenCalledWith({
+        core: startCore,
+        deps: startDeps,
+        id: 'item-1',
+      });
+    });
   });
 
   describe('Vega add action feature flag', () => {

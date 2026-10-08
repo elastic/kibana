@@ -10,7 +10,7 @@
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
@@ -32,13 +32,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import {
-  FilterStateStore,
-  isOfQueryType,
-  type AggregateQuery,
-  type Filter,
-  type Query,
-} from '@kbn/es-query';
+import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -79,6 +73,7 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { toPanelFilters } from '../lib/library_draft';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
@@ -133,12 +128,6 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
       isNewPanel?: boolean;
     }) => Promise<JSX.Element | undefined>;
   };
-
-// `toStoredFilters` drops `$state`, and the filter editor ignores edits to filters without one.
-const toPanelFilters = (filters: VegaByValueState['filters']): Filter[] | undefined =>
-  (toStoredFilters(filters) as Filter[] | undefined)?.map((filter) =>
-    filter.$state?.store ? filter : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
-  );
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
