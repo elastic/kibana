@@ -62,19 +62,6 @@ export interface ObservablesAddedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
- * Event: observables deleted
- *
- * Observable values are deliberately excluded — same privacy rationale as observablesAdded.
- */
-export interface ObservablesDeletedEventPayload extends BaseCaseEventPayload {
-  readonly caseId: string;
-  /** IDs of the observables that were removed. */
-  readonly observableIds: string[];
-  /** Type keys for the removed observables, index-aligned with observableIds. */
-  readonly observableTypeKeys: string[];
-}
-
-/**
  * Event: alert status changed (emitted by Cases when it updates alert workflow statuses)
  */
 export interface AlertStatusChangedEventPayload {
@@ -96,7 +83,6 @@ interface CasesDomainEventPayloadByType {
   readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
   readonly observablesAdded: ObservablesAddedEventPayload;
-  readonly observablesDeleted: ObservablesDeletedEventPayload;
   readonly alertStatusChanged: AlertStatusChangedEventPayload;
 }
 

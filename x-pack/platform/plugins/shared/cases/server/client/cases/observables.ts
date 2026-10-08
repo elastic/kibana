@@ -36,7 +36,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
-import { emitObservablesAddedEvent, emitObservablesDeletedEvent } from './trigger_utils';
+import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -467,7 +467,7 @@ export const bulkDeleteObservables = async (
 
   const idsToDelete = new Set(paramArgs.observableIds);
   const currentObservables = retrievedCase.attributes.observables ?? [];
-  const currentIdSet = new Set(currentObservables.map((o) => o.id));
+  const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
   const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
   if (missingIds.length > 0) {
@@ -516,6 +516,5 @@ export const bulkDeleteObservables = async (
   });
 
   const result = decodeOrThrow(CaseRt)(res);
-  emitObservablesDeletedEvent(clientArgs, retrievedCase, removedObservables);
   return result;
 };

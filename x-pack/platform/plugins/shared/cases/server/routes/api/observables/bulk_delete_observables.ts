@@ -10,6 +10,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
   MAX_CASE_ID_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
+  MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -26,7 +27,7 @@ export const bulkDeleteObservablesRoute = createCasesRoute({
     }),
     body: schema.object({
       observableIds: schema.arrayOf(schema.string({ maxLength: OBSERVABLE_ID_MAX_LENGTH }), {
-        minSize: 1,
+        minSize: MIN_BULK_DELETE_OBSERVABLE_IDS,
         maxSize: MAX_OBSERVABLES_PER_CASE,
       }),
     }),

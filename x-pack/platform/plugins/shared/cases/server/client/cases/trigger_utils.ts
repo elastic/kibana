@@ -7,10 +7,7 @@
 
 import type { Owner } from '../../../common/constants/types';
 import type { Observable } from '../../../common/types/domain';
-import type {
-  ObservablesAddedEventPayload,
-  ObservablesDeletedEventPayload,
-} from '../../events/types';
+import type { ObservablesAddedEventPayload } from '../../events/types';
 import type { CasesClientArgs } from '..';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -28,19 +25,4 @@ export const emitObservablesAddedEvent = (
     observableTypeKeys: observables.map(({ typeKey }) => typeKey),
   };
   clientArgs.casesEventBus?.emitObservablesAdded(clientArgs.request, payload);
-};
-
-/** Emits the `cases.observablesDeleted` event for the given removed observables. */
-export const emitObservablesDeletedEvent = (
-  clientArgs: CasesClientArgs,
-  theCase: CaseSavedObjectTransformed,
-  removedObservables: Observable[]
-): void => {
-  const payload: ObservablesDeletedEventPayload = {
-    caseId: theCase.id,
-    owner: theCase.attributes.owner as Owner,
-    observableIds: removedObservables.map(({ id }) => id),
-    observableTypeKeys: removedObservables.map(({ typeKey }) => typeKey),
-  };
-  clientArgs.casesEventBus?.emitObservablesDeleted(clientArgs.request, payload);
 };

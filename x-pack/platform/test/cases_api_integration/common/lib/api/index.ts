@@ -940,18 +940,18 @@ export const deleteObservable = async ({
 export const bulkDeleteObservables = async ({
   supertest,
   caseId,
-  ids,
+  observableIds,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
   headers = {},
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  ids: string[];
+  observableIds: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, string | string[]>;
-}): Promise<Case> => {
+}): Promise<Case | { message: string }> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${getCaseBulkDeleteObservablesUrl(caseId)}`
   );
@@ -961,7 +961,7 @@ export const bulkDeleteObservables = async ({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .set(headers)
-    .send({ observableIds: ids })
+    .send({ observableIds })
     .expect(expectedHttpCode);
 
   return updatedCase;

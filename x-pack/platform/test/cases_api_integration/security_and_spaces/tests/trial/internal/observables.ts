@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import type { Case } from '@kbn/cases-plugin/common';
 import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../../../../common/lib/authentication/types';
@@ -189,10 +190,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const updatedCase = await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids: [observableId1, observableId2],
+          observableIds: [observableId1, observableId2],
         });
 
-        expect(updatedCase.observables.length).to.be(1);
+        expect((updatedCase as Case).observables.length).to.be(1);
         expect(updatedCase.observables[0].value).to.be('127.0.0.3');
       });
 
@@ -203,13 +204,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const body = await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids: [observableId, 'missing-observable-id'],
+          observableIds: [observableId, 'missing-observable-id'],
           expectedHttpCode: 404,
         });
 
-        expect((body as unknown as { message: string }).message).to.contain(
-          'missing-observable-id'
-        );
+        expect((body as { message: string }).message).to.contain('missing-observable-id');
       });
 
       it('returns 404 when none of the requested ids exist', async () => {
@@ -219,11 +218,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const body = await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids: ['missing-id-1', 'missing-id-2'],
+          observableIds: ['missing-id-1', 'missing-id-2'],
           expectedHttpCode: 404,
         });
 
-        const message = (body as unknown as { message: string }).message;
+        const message = (body as { message: string }).message;
         expect(message).to.contain('missing-id-1');
         expect(message).to.contain('missing-id-2');
       });
@@ -234,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids: [],
+          observableIds: [],
           expectedHttpCode: 400,
         });
       });
@@ -248,7 +247,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids,
+          observableIds: ids,
           expectedHttpCode: 400,
         });
       });
@@ -261,7 +260,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteObservables({
           supertest,
           caseId: postedCase.id,
-          ids: [observableId1, observableId2],
+          observableIds: [observableId1, observableId2],
         });
 
         const { userActions } = await findCaseUserActions({
@@ -290,7 +289,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteObservables({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          ids: [observableId],
+          observableIds: [observableId],
           auth: { user: secOnly, space: null },
           expectedHttpCode: 403,
         });
@@ -305,7 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteObservables({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          ids: [observableId],
+          observableIds: [observableId],
           auth: { user: secOnlyRead, space: 'space1' },
           expectedHttpCode: 403,
         });
