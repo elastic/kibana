@@ -347,7 +347,10 @@ export class GraphPage {
 
   async openDrilldown(title: string) {
     const popupPromise = this.page.waitForEvent('popup');
-    await this.page.getByRole('button', { name: title, exact: true }).click();
+    await this.page
+      .getByTestId('graphDrilldowns')
+      .getByRole('button', { name: title, exact: true })
+      .click();
     const popup = await popupPromise;
     await popup.waitForURL((url) => url.toString() !== 'about:blank');
     await popup.getByTestId('discoverDocTable').waitFor({ state: 'visible' });

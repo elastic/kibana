@@ -27,7 +27,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
         })}
       </div>
 
-      <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarPanelStyles} data-test-subj="graphDrilldowns">
         {urlTemplates.length === 0 && (
           <p className="help-block">
             {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {
