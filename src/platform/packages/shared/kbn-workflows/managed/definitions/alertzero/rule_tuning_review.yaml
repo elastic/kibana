@@ -621,11 +621,47 @@ steps:
         ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
             or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.build_exception_filter.error == null
-              and steps.build_exception_filter.output.filters != null))
-          and steps.fetch_rule.output.type == 'query'
+              and steps.build_exception_filter.output.filters != null)
+            or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+            or steps.diagnose_rule.output.structured_output.change_type == 'schedule')
+          and (steps.fetch_rule.output.type == 'query'
+            or (steps.fetch_rule.output.type == 'threshold'
+              and (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+                or steps.diagnose_rule.output.structured_output.change_type == 'schedule')))
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
+
+  # The diagnosis reports the proposed threshold as three fields; the preview body
+  # and the apply action take one object. Skipped for every other arm, so the
+  # proposed body falls back to the rule's own threshold.
+  - name: compose_proposed_threshold
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'threshold' }}"
+    with:
+      threshold:
+        value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
+        field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
+        cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: consts.no_items }}"
+
+  # A schedule change alters how much history each simulated run covers, so the
+  # proposed run count is scaled to keep both previews over the same period:
+  # period = runs x current interval; proposed runs = ceil(period / proposed interval),
+  # at least 1. Intervals are date-math strings (30s, 5m, 1h, 2d), parsed on their unit.
+  - name: compute_schedule_preview_runs
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'schedule' }}"
+    with:
+      proposed_invocation_count: >-
+        {%- assign ci = steps.fetch_rule.output.interval -%}
+        {%- assign pi = steps.diagnose_rule.output.structured_output.proposed_interval -%}
+        {%- assign cn = ci | remove: "d" | remove: "h" | remove: "m" | remove: "s" | plus: 0 -%}
+        {%- assign pn = pi | remove: "d" | remove: "h" | remove: "m" | remove: "s" | plus: 0 -%}
+        {%- if ci contains "d" %}{% assign cs = cn | times: 86400 %}{% elsif ci contains "h" %}{% assign cs = cn | times: 3600 %}{% elsif ci contains "m" %}{% assign cs = cn | times: 60 %}{% else %}{% assign cs = cn %}{% endif -%}
+        {%- if pi contains "d" %}{% assign ps = pn | times: 86400 %}{% elsif pi contains "h" %}{% assign ps = pn | times: 3600 %}{% elsif pi contains "m" %}{% assign ps = pn | times: 60 %}{% else %}{% assign ps = pn %}{% endif -%}
+        {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
+        {%- assign period = cs | times: runs -%}
+        {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -641,7 +677,7 @@ steps:
       inputs:
         space_id: "{{ workflow.spaceId }}"
         preview_body:
-          type: query
+          type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
           query: "{{ steps.fetch_rule.output.query }}"
@@ -662,16 +698,17 @@ steps:
           interval: "{{ steps.fetch_rule.output.interval }}"
           from: "{{ steps.fetch_rule.output.from }}"
           to: "{{ steps.fetch_rule.output.to }}"
+          threshold: "${{ steps.fetch_rule.output.threshold }}"
           invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
           timeframeEnd: "{{ inputs.last_fp_at }}"
         proposed_body:
-          type: query
+          type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
-          # Only the query arm changes the query itself; the exception arm backtests via
-          # filters instead, so it previews the rule's own unchanged query.
+          # Only the query arm changes the query itself; every other arm (exception via
+          # filters, threshold, schedule) previews the rule's own unchanged query.
           query: >-
-            {% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% else %}{{ steps.fetch_rule.output.query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
           # build_exception_filter's output (the rule's filters plus the negated exception
@@ -692,10 +729,22 @@ steps:
           author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
           false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
           references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
-          interval: "{{ steps.fetch_rule.output.interval }}"
-          from: "{{ steps.fetch_rule.output.from }}"
+          # Schedule arm: use proposed interval/from; all other arms keep the rule's own.
+          interval: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{{ steps.diagnose_rule.output.structured_output.proposed_interval }}{% else %}{{ steps.fetch_rule.output.interval }}{% endif %}
+          from: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{{ steps.diagnose_rule.output.structured_output.proposed_from }}{% else %}{{ steps.fetch_rule.output.from }}{% endif %}
           to: "{{ steps.fetch_rule.output.to }}"
-          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+          # Threshold arm: the proposed threshold object; every other arm keeps the rule's own.
+          threshold: >-
+            ${{ steps.compose_proposed_threshold.output.threshold
+              | default: steps.fetch_rule.output.threshold }}
+          # Schedule arm: run count scaled so both previews cover the same period.
+          invocationCount: >-
+            ${{ steps.compute_schedule_preview_runs.output.proposed_invocation_count
+              | default: inputs.preview_invocation_count
+              | default: consts.preview_invocation_count
+              | plus: 0 }}
           timeframeEnd: "{{ inputs.last_fp_at }}"
     on-failure:
       continue: true
@@ -869,13 +918,18 @@ steps:
         {% endcase %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query"
-          or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+          or steps.diagnose_rule.output.structured_output.change_type == "exception"
+          or steps.diagnose_rule.output.structured_output.change_type == "threshold"
+          or steps.diagnose_rule.output.structured_output.change_type == "schedule" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
         The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
         and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
         This time span is usually much shorter than the span of the false positives.
+        {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}
+        The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
+        {% endif %}
 
         Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
         Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}

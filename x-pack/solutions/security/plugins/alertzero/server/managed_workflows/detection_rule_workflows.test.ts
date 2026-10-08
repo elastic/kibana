@@ -1110,13 +1110,13 @@ describe('detection rule workflows', () => {
         expect(previewBody.filters).toBe(
           '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        // The query arm previews the proposed query; the exception arm keeps the rule's
-        // own query and differs only in the filters the exception step built.
+        // Only the query arm previews the proposed query; exception, threshold and
+        // schedule keep the rule's own query and change filters, threshold or schedule.
         expect(proposedBody.query).toContain(
-          "{% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}"
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         );
         expect(proposedBody.query).toContain(
-          '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
+          '{% else %}{{ steps.fetch_rule.output.query }}{% endif %}'
         );
         expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
         expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
