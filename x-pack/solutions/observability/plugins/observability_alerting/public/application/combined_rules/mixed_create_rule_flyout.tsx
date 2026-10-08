@@ -68,31 +68,43 @@ const producerLabel = (producer: string): string => PRODUCER_DISPLAY_NAMES[produ
 
 const optionCardStyles = {
   panel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      minWidth: 0,
-      boxSizing: 'border-box',
-      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-      textAlign: 'left',
-      cursor: 'pointer',
-    }),
+    euiTheme
+      ? css({
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+          textAlign: 'left',
+          cursor: 'pointer',
+        })
+      : // required for unit tests to pass
+        undefined,
   textColumn: css({
     minWidth: 0,
   }),
   title: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textParagraph,
-    }),
+    euiTheme
+      ? css({
+          color: euiTheme.colors.textParagraph,
+        })
+      : // required for unit tests to pass
+        undefined,
   description: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginTop: euiTheme.size.xs,
-    }),
+    euiTheme
+      ? css({
+          marginTop: euiTheme.size.xs,
+        })
+      : // required for unit tests to pass
+        undefined,
   stack: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: euiTheme.size.s,
-    }),
+    euiTheme
+      ? css({
+          display: 'flex',
+          flexDirection: 'column',
+          gap: euiTheme.size.s,
+        })
+      : // required for unit tests to pass
+        undefined,
 };
 
 const FeaturedOptionCard = ({
@@ -179,17 +191,20 @@ const LargeOptionCard = ({
 
 const classicContinueCardStyles = {
   panel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      minWidth: 0,
-      boxSizing: 'border-box',
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      textAlign: 'left',
-      cursor: 'pointer',
-      // Match EuiFlyoutFooter background
-      backgroundColor: euiTheme.components.flyoutFooterBackground,
-      borderColor: euiTheme.colors.borderBasePlain,
-    }),
+    euiTheme
+      ? css({
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
+          textAlign: 'left',
+          cursor: 'pointer',
+          // Match EuiFlyoutFooter background
+          backgroundColor: euiTheme.components.flyoutFooterBackground,
+          borderColor: euiTheme.colors.borderBasePlain,
+        })
+      : // required for unit tests to pass
+        undefined,
   textColumn: css({
     minWidth: 0,
   }),
@@ -957,54 +972,62 @@ const inferDataDomain = (text: string): DataDomain | null => {
 
 const measureSearchStyles = {
   /** Matches Discover "Query with AI" sparkle twinkle on hover/focus. */
-  aiButtonSparkleHover: ({ euiTheme }: UseEuiTheme) => css`
-    overflow: visible;
+  aiButtonSparkleHover: ({ euiTheme }: UseEuiTheme) =>
+    euiTheme
+      ? css`
+          overflow: visible;
 
-    &::after {
-      content: none;
-    }
+          &::after {
+            content: none;
+          }
 
-    @keyframes mixedCreateSparkleTwinkle {
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.45;
-        transform: scale(0.85);
-      }
-    }
+          @keyframes mixedCreateSparkleTwinkle {
+            0%,
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.45;
+              transform: scale(0.85);
+            }
+          }
 
-    ${euiCanAnimate} {
-      &:hover svg path,
-      &:focus-visible svg path {
-        transform-box: fill-box;
-        transform-origin: center;
-        animation-name: mixedCreateSparkleTwinkle;
-        animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
-        animation-timing-function: ease-in-out;
-        animation-iteration-count: infinite;
-      }
+          ${euiCanAnimate} {
+            &:hover svg path,
+            &:focus-visible svg path {
+              transform-box: fill-box;
+              transform-origin: center;
+              animation-name: mixedCreateSparkleTwinkle;
+              animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+              animation-timing-function: ease-in-out;
+              animation-iteration-count: infinite;
+            }
 
-      &:hover svg path:nth-of-type(2),
-      &:focus-visible svg path:nth-of-type(2) {
-        animation-delay: ${euiTheme.animation.slow};
-      }
+            &:hover svg path:nth-of-type(2),
+            &:focus-visible svg path:nth-of-type(2) {
+              animation-delay: ${euiTheme.animation.slow};
+            }
 
-      &:hover svg path:nth-of-type(3),
-      &:focus-visible svg path:nth-of-type(3) {
-        animation-delay: ${euiTheme.animation.extraSlow};
-      }
-    }
-  `,
-  aiButtonSelected: ({ euiTheme }: UseEuiTheme) => css`
-    background: linear-gradient(
-      180deg,
-      ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-      ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-    ) !important;
-  `,
+            &:hover svg path:nth-of-type(3),
+            &:focus-visible svg path:nth-of-type(3) {
+              animation-delay: ${euiTheme.animation.extraSlow};
+            }
+          }
+        `
+      : // required for unit tests to pass
+        undefined,
+  aiButtonSelected: ({ euiTheme }: UseEuiTheme) =>
+    euiTheme
+      ? css`
+          background: linear-gradient(
+            180deg,
+            ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+            ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+          ) !important;
+        `
+      : // required for unit tests to pass
+        undefined,
 };
 
 const V2OptionsBody = ({
