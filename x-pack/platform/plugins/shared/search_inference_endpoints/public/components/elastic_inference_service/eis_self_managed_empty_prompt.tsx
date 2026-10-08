@@ -68,7 +68,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.regionRestriction',
-              { defaultMessage: 'Restrict inference traffic per region' }
+              { defaultMessage: 'Restrict inference traffic by region' }
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.readyEndpoints',
