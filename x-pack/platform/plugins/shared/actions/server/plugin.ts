@@ -635,7 +635,7 @@ export class ActionsPlugin
     }: {
       request: KibanaRequest;
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
-      spaceId?: string;
+      spaceId?: SpaceId;
     }) => {
       return new ActionsClient({
         logger,

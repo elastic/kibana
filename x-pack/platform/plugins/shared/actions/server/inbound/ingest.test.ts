@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -67,7 +68,7 @@ describe('ingestInboundEvent', () => {
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
   const token = composeIngestToken(credentialId, 'ingest-token-value');
-  const spaceId = 'default';
+  const spaceId = DEFAULT_SPACE_ID;
   const ingestTokenHash = computeIngestTokenHash({
     connectorId,
     spaceId,
@@ -167,7 +168,7 @@ describe('ingestInboundEvent', () => {
     maxBodyBytes?: number;
     connectorTypeId?: string;
     connectorId?: string;
-    spaceId?: string;
+    spaceId?: SpaceId;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;

@@ -65,7 +65,7 @@ const executeUnsecuredParams = {
   actionExecutionId: ACTION_EXECUTION_ID,
   actionId: CONNECTOR_ID,
   params: ACTION_PARAMS,
-  spaceId: 'some-namespace',
+  spaceId: asSpaceId('some-namespace'),
 };
 
 const executeParams = {
@@ -2682,7 +2682,7 @@ describe('execute() - spaceId override', () => {
 
     await actionExecutor.execute({
       ...executeParams,
-      spaceId: 'override-space',
+      spaceId: asSpaceId('override-space'),
     });
 
     // spacesMock.getSpaceId should not be called when spaceId is provided

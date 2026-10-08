@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -1323,7 +1324,7 @@ describe('create()', () => {
     const securityService = securityServiceMock.createStart();
     const inboundContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       securityService,
     };
 
@@ -1473,7 +1474,7 @@ describe('create()', () => {
     const securityService = securityServiceMock.createStart();
     const dualContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       securityService,
     };
 

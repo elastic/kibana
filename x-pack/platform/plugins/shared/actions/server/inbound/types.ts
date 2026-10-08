@@ -6,11 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 export interface ConnectorEventEmitParams {
   eventId: string;
   payload: Record<string, unknown>;
-  spaceId: string;
+  spaceId: SpaceId;
   connectorId: string;
   connectorTypeId: string;
   correlationKey?: string;

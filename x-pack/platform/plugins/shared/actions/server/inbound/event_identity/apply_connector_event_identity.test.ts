@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
 
@@ -87,7 +88,7 @@ describe('loadPreviousConnectorEventIdentity', () => {
     } as never);
 
     const identity = await loadPreviousConnectorEventIdentity(
-      createContext({ encryptedSavedObjectsClient, spaceId: 'default' }),
+      createContext({ encryptedSavedObjectsClient, spaceId: DEFAULT_SPACE_ID }),
       'c1'
     );
 
@@ -142,7 +143,7 @@ describe('invalidateInboundConnectorEventIdentity', () => {
     } as never);
 
     await invalidateInboundConnectorEventIdentity(
-      createContext({ securityService, encryptedSavedObjectsClient, spaceId: 'default' }),
+      createContext({ securityService, encryptedSavedObjectsClient, spaceId: DEFAULT_SPACE_ID }),
       'c1',
       '.inboundWebhook'
     );
