@@ -1016,6 +1016,21 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
+  'allowed-workflow-ids': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow IDs must be literal IDs')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal child workflow IDs permitted to receive the parent service account. Required for a templated workflow-id with inherit or override; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
   'run-as-mode': WorkflowRunAsModeSchema.optional()
     .describe(

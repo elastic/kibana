@@ -23,6 +23,7 @@ const executionContexts = new WeakMap<
 >();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
+  'allowed-workflow-ids': true,
   'run-as-mode': true,
 });
 
@@ -82,13 +83,21 @@ export const resolveInheritedWorkflowIdentity = (
   const mode = identityChoice?.success
     ? identityChoice.data['run-as-mode'] ?? 'default'
     : 'default';
+  if (!identityChoice?.success || mode === 'default') {
+    throw Boom.forbidden(
+      'Service account inheritance requires a literal identity choice and, when specified, literal allowed-workflow-ids in the parent workflow.'
+    );
+  }
+  const configuredId = identityChoice.data['workflow-id'];
+  const allowedIds = identityChoice.data['allowed-workflow-ids'];
+  const dynamicId = configuredId.includes('{{') || configuredId.includes('{%');
+  // Read delegation limits from the saved definition, never from rendered step inputs.
   if (
-    !identityChoice?.success ||
-    mode === 'default' ||
-    identityChoice.data['workflow-id'] !== workflow.id
+    (dynamicId ? !allowedIds : configuredId !== workflow.id) ||
+    (allowedIds && !allowedIds.includes(workflow.id))
   ) {
     throw Boom.forbidden(
-      'Service account inheritance requires a literal workflow-id and identity choice in the parent workflow.'
+      'The child workflow is not approved to inherit the parent service account. Templated workflow-id requires literal allowed-workflow-ids containing the resolved child ID.'
     );
   }
   if (workflow.managed !== true) {

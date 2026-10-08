@@ -1520,3 +1520,36 @@ describe('dynamic timeout schema', () => {
     expect(encoded).toContain('{{');
   });
 });
+
+describe('workflow child identity allowlist', () => {
+  it.each([WorkflowExecuteStepSchema, WorkflowExecuteAsyncStepSchema])(
+    'requires bounded literal IDs',
+    (schema) => {
+      const step = {
+        name: 'child',
+        type: schema.shape.type.value,
+        with: {
+          'workflow-id': '{{ variables.action_workflow_id }}',
+          'run-as-mode': 'inherit',
+          'allowed-workflow-ids': ['approved-child'],
+        },
+      };
+      expect(schema.safeParse(step).success).toBe(true);
+      for (const allowedIds of [
+        [],
+        [''],
+        ['a'.repeat(1025)],
+        Array.from({ length: 101 }, (_, index) => `child-${index}`),
+        ['{{ variables.child }}'],
+        ['${{ variables.child }}'],
+        ['{% if true %}child{% endif %}'],
+        ['child\n{{ variables.suffix }}'],
+      ]) {
+        expect(
+          schema.safeParse({ ...step, with: { ...step.with, 'allowed-workflow-ids': allowedIds } })
+            .success
+        ).toBe(false);
+      }
+    }
+  );
+});

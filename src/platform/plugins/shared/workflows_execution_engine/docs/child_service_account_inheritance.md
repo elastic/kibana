@@ -16,9 +16,22 @@
 | `inherit` | Parent's SA; rejects a child with its own `settings.run_as`. |
 | `override` | Parent's SA for this execution, even when the child has its own SA. Its saved binding is unchanged. |
 
-The child ID and identity mode must be literal values in the saved parent definition, including calls in workflow-level `settings.on-failure.fallback` steps. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
+The identity mode must be literal in the saved parent definition, including calls in workflow-level `settings.on-failure.fallback` steps. A literal child ID needs no allowlist. A templated child ID requires an explicit literal `allowed-workflow-ids` list:
 
-The YAML editor does not suggest `run-as-mode`: managed workflows are read-only, and editable unmanaged workflows cannot inherit identities. The schema still accepts the field in managed definitions. Editor validation rejects inheritance on unmanaged parents. The engine validates child eligibility and literal IDs. Managed definitions remain read-only in the editor and are configured by their publisher. Whether a child already has its own SA is checked at execution time.
+```yaml
+- name: approved_action
+  type: workflow.execute
+  with:
+    workflow-id: '{{ variables.action_workflow_id }}'
+    run-as-mode: inherit
+    allowed-workflow-ids:
+      - alertzero-isolate-host
+      - alertzero-kill-process
+```
+
+The resolver checks the resolved child ID against the **saved**, unrendered allowlist before scheduling. The list accepts 1–100 IDs of at most 1,024 characters each, with no Liquid expressions or tags. An unlisted target fails the calling step without starting a child. If specified for a literal target, the list restricts that target too. The same rules apply to `workflow.executeAsync` and `override`; omission/default retains existing identity behavior. Plugin ownership does not implicitly authorize additional targets. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
+
+The YAML editor does not suggest `run-as-mode` or `allowed-workflow-ids`: managed workflows are read-only, and editable unmanaged workflows cannot inherit identities. The schema still accepts the field in managed definitions. Editor validation rejects inheritance on unmanaged parents. The engine validates child eligibility and the saved target authorization. Managed definitions remain read-only in the editor and are configured by their publisher. Whether a child already has its own SA is checked at execution time.
 
 ## Authorization and lifetime
 
