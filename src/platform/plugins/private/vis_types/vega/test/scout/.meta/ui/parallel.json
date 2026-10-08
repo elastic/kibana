@@ -5,14 +5,25 @@
   ],
   "tests": [
     {
+      "id": "fb6a28fdbf970dc-090d26c549810de",
+      "title": "Enable the Vega API feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 16
+      }
+    },
+    {
       "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
       "title": "Setup Vega tests data",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 8,
-        "column": 1
+        "line": 20,
+        "column": 16
       }
     },
     {
@@ -24,8 +35,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
-        "line": 31,
-        "column": 35
+        "line": 39,
+        "column": 14
       }
     },
     {
@@ -37,8 +48,84 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "7b072b0731322c3-276f14ac4f3e03d",
+      "title": "Vega library editor creates an item from the create wizard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b072b0731322c3-0fb51082617176b",
+      "title": "Vega library editor saves changes to an existing item in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b072b0731322c3-ff733218948dadc",
+      "title": "Vega library editor saves a copy and leaves the original unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b072b0731322c3-762274f3cb1fcb4",
+      "title": "Vega library editor asks before discarding changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b072b0731322c3-658cbadaeb2b5e3",
+      "title": "Vega library editor opens a read only editor that cannot be saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 155,
+        "column": 12
+      }
+    },
+    {
+      "id": "824a1c0d9b29284-00ccb12b7f74919",
+      "title": "Disable the Vega API feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 12,
+        "column": 19
       }
     }
   ]
