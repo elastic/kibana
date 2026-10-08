@@ -8,6 +8,7 @@
  */
 
 import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { sampleBoundaryResponse } from './sample_response';
 
 const spec = {
   openapi: '3.0.3',
@@ -145,6 +146,52 @@ describe('sampleResponse', () => {
 
     expect(statuses).toEqual([302, 410, 400, 301]);
     expect(statusCalls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+  });
+
+  it('answers at the schema bounds with sampleBoundaryResponse', async () => {
+    const { fetch: boundaryFetch, calls: boundaryCalls } = createContractMockFetch({
+      specs: [
+        {
+          ...spec,
+          paths: {
+            '/monitors': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: {
+                      'application/json': {
+                        example: [{ name: 'cpu' }],
+                        schema: {
+                          type: 'array',
+                          maxItems: 2,
+                          items: {
+                            type: 'object',
+                            properties: {
+                              name: { type: 'string', maxLength: 5 },
+                              priority: { type: 'integer', minimum: 1, maximum: 5 },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+      respond: sampleBoundaryResponse,
+    });
+
+    const response = await boundaryFetch('https://api.example.com/monitors');
+
+    expect(await response.json()).toEqual([
+      { name: 'strin', priority: 5 },
+      { name: 'strin', priority: 5 },
+    ]);
+    expect(boundaryCalls[0].responseViolations).toEqual([]);
   });
 
   it('serves the first media type example that matches the schema, following refs', async () => {

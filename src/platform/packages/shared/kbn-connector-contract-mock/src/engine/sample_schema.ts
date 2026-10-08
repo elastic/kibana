@@ -32,15 +32,34 @@ const FORMAT_PLACEHOLDERS: Readonly<Record<string, string>> = {
   byte: 'AA==',
 };
 
+// Boundary samples of unbounded strings and arrays; bounded arrays are capped at
+// BOUNDARY_MAX_ITEMS so that nested `maxItems` don't multiply into huge responses.
+const BOUNDARY_STRING_LENGTH = 1024;
+const BOUNDARY_ITEMS = 3;
+const BOUNDARY_MAX_ITEMS = 100;
+
+const FORMAT_MAXIMUMS: Readonly<Record<string, number>> = {
+  int32: 2147483647,
+  int64: Number.MAX_SAFE_INTEGER,
+  float: 3.4028234663852886e38,
+};
+
 const numberOrUndefined = (value: unknown): number | undefined =>
   typeof value === 'number' ? value : undefined;
 
-const fitLength = (value: string, { minLength, maxLength }: SchemaNode, padding = 'x'): string => {
-  const padded = value.padEnd(numberOrUndefined(minLength) ?? 0, padding);
-  return padded.slice(0, numberOrUndefined(maxLength) ?? padded.length);
+const fitLength = (
+  value: string,
+  { minLength, maxLength }: SchemaNode,
+  padding: string,
+  boundary: boolean
+): string => {
+  const max = numberOrUndefined(maxLength);
+  const target = boundary ? max ?? BOUNDARY_STRING_LENGTH : numberOrUndefined(minLength) ?? 0;
+  const padded = value.padEnd(target, padding);
+  return padded.slice(0, max ?? padded.length);
 };
 
-const placeholderString = (schema: SchemaNode): string => {
+const placeholderString = (schema: SchemaNode, boundary: boolean): string => {
   const { format, pattern } = schema;
   const formatted = typeof format === 'string' ? FORMAT_PLACEHOLDERS[format] : undefined;
   if (formatted) {
@@ -48,17 +67,17 @@ const placeholderString = (schema: SchemaNode): string => {
   }
   const sampled = typeof pattern === 'string' ? samplePattern(pattern) : undefined;
   if (typeof pattern !== 'string' || sampled === undefined) {
-    return fitLength('string', schema);
+    return fitLength('string', schema, 'x', boundary);
   }
   // Repeating the last character extends a trailing `+` or `*`, as in `^[A-Z]{2}-\d+$`.
   const matcher = new RegExp(pattern, 'u');
   const fitted = [sampled.slice(-1) || 'x', 'x']
-    .map((padding) => fitLength(sampled, schema, padding))
+    .map((padding) => fitLength(sampled, schema, padding, boundary))
     .find((value) => matcher.test(value));
   return fitted ?? sampled;
 };
 
-const placeholderNumber = (schema: SchemaNode, integer: boolean): number => {
+const placeholderNumber = (schema: SchemaNode, integer: boolean, boundary: boolean): number => {
   const step = integer ? 1 : 0.5;
   const exclusiveMinimum = numberOrUndefined(schema.exclusiveMinimum);
   const exclusiveMaximum = numberOrUndefined(schema.exclusiveMaximum);
@@ -69,9 +88,20 @@ const placeholderNumber = (schema: SchemaNode, integer: boolean): number => {
   const upper =
     numberOrUndefined(schema.maximum) ??
     (exclusiveMaximum === undefined ? undefined : exclusiveMaximum - step);
+  const steps = multipleOf && multipleOf > 0 ? multipleOf : undefined;
+  if (boundary) {
+    const formatMaximum =
+      typeof schema.format === 'string' ? FORMAT_MAXIMUMS[schema.format] : undefined;
+    const max = upper ?? formatMaximum ?? (integer ? Number.MAX_SAFE_INTEGER : Number.MAX_VALUE);
+    const rounded = integer ? Math.floor(max) : max;
+    const value = steps ? Math.floor(rounded / steps) * steps : rounded;
+    if (Number.isFinite(value) && (lower === undefined || value >= lower)) {
+      return value;
+    }
+  }
   const value = lower ?? (upper !== undefined && upper < 0 ? upper : 0);
   const rounded = integer ? Math.ceil(value) : value;
-  return multipleOf && multipleOf > 0 ? Math.ceil(rounded / multipleOf) * multipleOf : rounded;
+  return steps ? Math.ceil(rounded / steps) * steps : rounded;
 };
 
 const firstType = ({ type, properties, items }: SchemaNode): unknown => {
@@ -131,6 +161,11 @@ export interface SampleOptions {
    * skipped, since vendors' examples sometimes contradict their own schemas.
    */
   readonly conforms?: (schema: SpecSchema, value: unknown) => boolean;
+  /**
+   * Samples at the schema's upper bounds instead: longest strings, largest numbers, fullest
+   * arrays and the last `enum` value, ignoring examples and defaults.
+   */
+  readonly boundary?: boolean;
 }
 
 /**
@@ -141,7 +176,7 @@ export interface SampleOptions {
 export const sampleSchema = (
   schema: unknown,
   document: OpenApiDocument,
-  { pointer, conforms }: SampleOptions = {}
+  { pointer, conforms, boundary = false }: SampleOptions = {}
 ): unknown => {
   // `at` is the node's pointer; nodes merged from allOf parts have none, and their examples
   // are used unchecked.
@@ -152,11 +187,11 @@ export const sampleSchema = (
     if (typeof node.$ref === 'string') {
       return sample(resolve(node, document), refToPointer(node.$ref), depth + 1);
     }
-    const candidates = [
-      ...(Array.isArray(node.examples) ? node.examples : []),
-      node.example,
-      node.default,
-    ].filter((value) => value !== undefined);
+    const candidates = boundary
+      ? []
+      : [...(Array.isArray(node.examples) ? node.examples : []), node.example, node.default].filter(
+          (value) => value !== undefined
+        );
     const example = candidates.find(
       (value) => at === undefined || !conforms || conforms({ pointer: at, schema: node }, value)
     );
@@ -167,22 +202,35 @@ export const sampleSchema = (
       return node.const;
     }
     if (Array.isArray(node.enum) && node.enum.length > 0) {
-      return node.enum[0];
+      // The last value, unless it is the `null` that nullable enums end with.
+      return boundary
+        ? [...node.enum].reverse().find((value) => value !== null) ?? null
+        : node.enum[0];
     }
+    const pointerTo = (...tokens: Array<string | number>) =>
+      at === undefined ? undefined : appendPointer(at, ...tokens);
     const child = (value: unknown, ...tokens: Array<string | number>) =>
-      sample(value, at === undefined ? undefined : appendPointer(at, ...tokens), depth + 1);
+      sample(value, pointerTo(...tokens), depth + 1);
+    const expands = depth < SHALLOW_DEPTH;
 
     const keyword = Array.isArray(node.oneOf) ? 'oneOf' : 'anyOf';
     const variants = node[keyword];
     if (Array.isArray(variants) && variants.length > 0) {
       // Non-null variants first. A sample of one oneOf variant can match another one too, so
-      // with a pointer the first sample the whole node accepts wins.
+      // with a pointer the first sample the whole node accepts wins. Picking a variant isn't a
+      // level of nesting: variants are often told apart by optional properties.
       const order = variants
         .map((variant, index) => ({ index, isNull: isRecord(variant) && variant.type === 'null' }))
         .sort((a, b) => Number(a.isNull) - Number(b.isNull));
+      // Properties next to the variants, as in an `allOf` of common fields and an `anyOf`,
+      // apply to every variant.
+      const { [keyword]: _variants, ...rest } = node;
+      const shared = rest.properties !== undefined || rest.required !== undefined;
       let first: unknown;
       for (const [position, { index }] of order.entries()) {
-        const value = child(variants[index], keyword, index);
+        const value = shared
+          ? sample(mergeAllOf([rest, variants[index]], document), undefined, depth)
+          : sample(variants[index], pointerTo(keyword, index), depth);
         if (at === undefined || !conforms || conforms({ pointer: at, schema: node }, value)) {
           return value;
         }
@@ -200,7 +248,7 @@ export const sampleSchema = (
         const required = new Set(Array.isArray(node.required) ? node.required : []);
         const properties = isRecord(node.properties) ? node.properties : {};
         const sampled = Object.entries(properties).flatMap(([name, property]) => {
-          if (depth >= SHALLOW_DEPTH && !required.has(name)) {
+          if (!expands && !required.has(name)) {
             return [];
           }
           const value = child(property, 'properties', name);
@@ -228,18 +276,27 @@ export const sampleSchema = (
       case 'array': {
         const minItems = numberOrUndefined(node.minItems) ?? 0;
         const maxItems = numberOrUndefined(node.maxItems) ?? Infinity;
-        const count = Math.min(depth >= SHALLOW_DEPTH ? minItems : Math.max(minItems, 1), maxItems);
+        const typical = expands ? Math.max(minItems, 1) : minItems;
+        // Items are copies of one sample, so only `uniqueItems` arrays of one item stay valid.
+        const fullest =
+          boundary && expands && node.uniqueItems !== true
+            ? Math.max(
+                Number.isFinite(maxItems) ? Math.min(maxItems, BOUNDARY_MAX_ITEMS) : BOUNDARY_ITEMS,
+                typical
+              )
+            : typical;
+        const count = Math.min(fullest, maxItems);
         if (Array.isArray(node.items)) {
           return node.items.map((item, index) => child(item, 'items', index));
         }
         return Array.from({ length: count }, () => child(node.items, 'items'));
       }
       case 'string':
-        return placeholderString(node);
+        return placeholderString(node, boundary);
       case 'integer':
-        return placeholderNumber(node, true);
+        return placeholderNumber(node, true, boundary);
       case 'number':
-        return placeholderNumber(node, false);
+        return placeholderNumber(node, false, boundary);
       case 'boolean':
         return true;
       case 'null':

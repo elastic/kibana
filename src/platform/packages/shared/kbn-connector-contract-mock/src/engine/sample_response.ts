@@ -99,51 +99,65 @@ const conformingExamples = (operation: ContractOperation, { schema, examples }: 
       }).length === 0
   );
 
+const createSampleResponder =
+  (boundary: boolean): Responder =>
+  (operation, { headers: { accept } }) => {
+    const {
+      responses,
+      spec: { document },
+    } = operation;
+    const response = selectResponse(responses);
+    if (!response) {
+      return { statusCode: 204 };
+    }
+    const statusCode = toStatusCode(response);
+    const conforms = (schema: SpecSchema, value: unknown) =>
+      validateValue(operation, schema, value, {
+        path: [],
+        subject: 'Example',
+        direction: 'response',
+      }).length === 0;
+    const sample = (schema: SpecSchema | undefined, atBoundary = false) =>
+      sampleSchema(schema?.schema, document, {
+        pointer: schema?.pointer,
+        conforms,
+        boundary: atBoundary,
+      });
+    const headers: Record<string, string> = {};
+    for (const { name, required, schema } of response.headers) {
+      if (required) {
+        headers[name.toLowerCase()] = String(sample(schema));
+      }
+    }
+    const { contents } = response;
+    if (contents.length === 0) {
+      return { statusCode, headers };
+    }
+    const content = negotiateContent(contents, accept);
+    if (!content) {
+      const detail = `Accept ${accept} matches none of ${contents
+        .map(({ mediaType }) => mediaType)
+        .join(', ')}`;
+      return {
+        statusCode: 406,
+        headers: { 'content-type': 'application/json' },
+        body: { title: 'Not Acceptable', detail },
+      };
+    }
+    headers['content-type'] = content.mediaType;
+    const examples = boundary ? [] : conformingExamples(operation, content);
+    const body = examples.length > 0 ? examples[0] : sample(content.schema, boundary);
+    return { statusCode, headers, body };
+  };
+
 /**
  * Answers with the operation's success response (see `selectResponse`): the media type's first
  * example that matches its schema, otherwise a deterministic sample of the schema.
  */
-export const sampleResponse: Responder = (operation, { headers: { accept } }) => {
-  const {
-    responses,
-    spec: { document },
-  } = operation;
-  const response = selectResponse(responses);
-  if (!response) {
-    return { statusCode: 204 };
-  }
-  const statusCode = toStatusCode(response);
-  const conforms = (schema: SpecSchema, value: unknown) =>
-    validateValue(operation, schema, value, {
-      path: [],
-      subject: 'Example',
-      direction: 'response',
-    }).length === 0;
-  const sample = (schema: SpecSchema | undefined) =>
-    sampleSchema(schema?.schema, document, { pointer: schema?.pointer, conforms });
-  const headers: Record<string, string> = {};
-  for (const { name, required, schema } of response.headers) {
-    if (required) {
-      headers[name.toLowerCase()] = String(sample(schema));
-    }
-  }
-  const { contents } = response;
-  if (contents.length === 0) {
-    return { statusCode, headers };
-  }
-  const content = negotiateContent(contents, accept);
-  if (!content) {
-    const detail = `Accept ${accept} matches none of ${contents
-      .map(({ mediaType }) => mediaType)
-      .join(', ')}`;
-    return {
-      statusCode: 406,
-      headers: { 'content-type': 'application/json' },
-      body: { title: 'Not Acceptable', detail },
-    };
-  }
-  headers['content-type'] = content.mediaType;
-  const examples = conformingExamples(operation, content);
-  const body = examples.length > 0 ? examples[0] : sample(content.schema);
-  return { statusCode, headers, body };
-};
+export const sampleResponse: Responder = createSampleResponder(false);
+
+/**
+ * Answers like `sampleResponse`, but with a body sampled at the schema's upper bounds (longest
+ * strings, largest numbers, fullest arrays), to test how connectors handle extreme responses.
+ */
+export const sampleBoundaryResponse: Responder = createSampleResponder(true);
