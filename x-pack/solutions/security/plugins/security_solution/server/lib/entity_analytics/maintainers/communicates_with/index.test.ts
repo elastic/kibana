@@ -50,8 +50,8 @@ describe('communicatesWithMaintainer', () => {
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push(
-            { id: 'okta', scanned: 5, qualified: 4, outcome: 'producing' },
-            { id: 'aws_cloudtrail', scanned: 2, qualified: 2, outcome: 'producing' }
+            { id: 'okta', scanned: 5, qualified: 4, outcome: 'producing', applied: 4 },
+            { id: 'aws_cloudtrail', scanned: 2, qualified: 2, outcome: 'producing', applied: 2 }
           );
           // communicates_with is a single rel type — collector accumulates it,
           // but the maintainer intentionally does not emit breakdown.
@@ -93,8 +93,8 @@ describe('communicatesWithMaintainer', () => {
     });
 
     expect(payload.sources).toEqual([
-      { id: 'okta', scanned: 5, qualified: 4, outcome: 'producing' },
-      { id: 'aws_cloudtrail', scanned: 2, qualified: 2, outcome: 'producing' },
+      { id: 'okta', scanned: 5, qualified: 4, outcome: 'producing', applied: 4 },
+      { id: 'aws_cloudtrail', scanned: 2, qualified: 2, outcome: 'producing', applied: 2 },
     ]);
 
     expect(payload).not.toHaveProperty('breakdown');

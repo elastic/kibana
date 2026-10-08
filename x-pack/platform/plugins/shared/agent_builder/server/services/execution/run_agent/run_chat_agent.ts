@@ -14,6 +14,7 @@ import type {
   ChatAgentEvent,
   ConversationRoundStep,
   MetadataFieldValue,
+  PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
   TodosStep,
@@ -31,7 +32,6 @@ import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-bu
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
-import { createResultTransformer } from './utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -40,9 +40,6 @@ import {
   selectTools,
   getPendingTurn,
   createPreExecutionSteps,
-  estimatePerRoundTokens,
-  estimateFailedEntryTokens,
-  survivingFailedEntryTokens,
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
@@ -54,14 +51,16 @@ import {
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
-import type { CompactedConversation } from './utils/conversation_compactor';
-import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
-import { compactConversation } from './utils/conversation_compactor';
+import { legacyEligibleRoundIds } from './utils/compaction_coverage';
+import { historyView, translateLegacySummary } from './utils/context_coverage';
+import type { PreviousRoundInfo } from './utils/context_management';
+import { createSummarizationTransformer } from './utils/tool_summarization';
+import { sourceEvents } from '../../conversation/client/source_events';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunTracker } from './run_tracker';
-import { applyStepUpdates, stepUpdates } from './step_state';
 import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
 import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
@@ -74,8 +73,11 @@ import type { StateUpdate } from './state';
 import {
   eventsForContext,
   groupTimelineEntries,
+  isTimelineCustomEvent,
   isTimelineRound,
+  lastExecutionTerminal,
   roundResponse,
+  type ProcessedTimelineEvent,
 } from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -135,15 +137,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
     renderers,
     conversationClient,
+    conversationAccess,
   } = context;
+  const storesConversation = conversationAccess === 'readWrite';
 
   // The context is built from the normalized event timeline (legacy conversations serialized
   // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  ensureValidInput({ input: nextInput, timeline });
+  ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
-  const pendingTurn = conversation ? getPendingTurn(conversation) : undefined;
+  const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
@@ -158,26 +162,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
     subAgentExecutor: context.subAgentExecutor,
-    initialState: conversation?.state?.background_executions,
+    initialState: storesConversation ? conversation?.state?.background_executions : undefined,
   });
 
-  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
-
-  const model = await modelProvider.getDefaultModel();
-  const resolvedConfiguration = await resolveConfiguration(agentConfiguration, {
-    aiIndicesEnabled: experimentalFeatures.aiIndices,
-    request,
-    resolver: context.aiIndexResolver,
-    logger,
-  });
+  const subagentTracker = new SubagentTracker(
+    storesConversation ? conversation?.state?.subagents : undefined
+  );
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const relevantSkillsEnabled =
-    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
-
-  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
+    modelProvider.getDefaultModel(),
+    resolveConfiguration(agentConfiguration, {
+      aiIndicesEnabled: experimentalFeatures.aiIndices,
+      request,
+      resolver: context.aiIndexResolver,
+      logger,
+    }),
+    experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
+    context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
+  ]);
   const skillIdsOverride = configurationOverrides?.skill_ids;
   const filteredPluginSkillIds =
     skillIdsOverride !== undefined
@@ -206,7 +211,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
-  let processedConversation = await prepareConversation({
+  const processedConversation = await prepareConversation({
     nextInput,
     timeline,
     nextInputAuthor: pendingTurn?.compatRound.author ?? author,
@@ -214,6 +219,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
   });
+  processedConversation.resumedRoundId = pendingTurn?.id;
   // Everything in the log at this point came from the incoming message's attachments; anything
   // recorded from here on is made by tools during the round.
   const chatInputChanges = context.attachmentStateManager.drainChanges();
@@ -224,8 +230,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
+    conversationAccess,
+    // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
+    // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
+    roundExecutionIndex: pendingTurn
+      ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
+      : 0,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  // Only the first execution owns the round's workflow context step.
+  const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
+    ? undefined
+    : beforeHookResult.preExecutionWorkflow;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn
@@ -234,11 +250,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineEntries(processedConversation.timeline).map((entry) =>
-                isTimelineRound(entry)
-                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
-                  : { input: entry.userMessage.data }
-              )
+              groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
+                // Custom events carry no user input to match skills against.
+                if (isTimelineCustomEvent(entry)) {
+                  return [];
+                }
+                return isTimelineRound(entry)
+                  ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
+                  : [{ input: entry.userMessage.data }];
+              })
             ),
           },
           modelProvider,
@@ -254,6 +274,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skills,
     toolProvider,
     agentConfiguration,
+    aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
     aiIndicesEnabled: experimentalFeatures.aiIndices,
     attachmentsService: attachments,
     request,
@@ -276,9 +297,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const conversationId = conversation?.id;
   const updateConversationMetadata =
-    conversationId && conversation?.template_id
+    storesConversation && conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
-          conversationClient.patchMetadata(conversationId, updates)
+          conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
       : undefined;
 
   const conversationTemplate = conversation?.template_id
@@ -315,48 +336,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.timeline, {
-    toolManager,
-    toolRegistry,
-  });
-  const failedEntryTokenCounts = estimateFailedEntryTokens(processedConversation.timeline);
-  const conversationTokenEstimate =
-    perRoundTokenCounts.reduce((sum, count) => sum + count, 0) +
-    survivingFailedEntryTokens(processedConversation.timeline, 0, failedEntryTokenCounts);
+  // Tool-specific summarization of history tool results; substitution marks are layered on top
+  // when the context is rendered.
+  const resultTransformer = createSummarizationTransformer({ toolManager, toolRegistry });
 
-  // Create unified result transformer for tool result optimization
-  const resultTransformer = createResultTransformer({
-    toolRegistry,
-    toolManager,
-    resultStore: context.resultStore,
-    conversationTokenEstimate,
-  });
+  // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
+  // hidden at render time; the graph replaces it when it compacts.
+  const storedSummary = conversation?.state?.compaction_summary;
+  const compactionSummary =
+    conversation && storedSummary
+      ? translateLegacySummary({
+          summary: storedSummary,
+          entries: historyView(processedConversation).entries,
+          legacyEligibleIds: legacyEligibleRoundIds(sourceEvents(conversation)),
+        })
+      : undefined;
+  const previousRound = getPreviousRoundInfo(processedConversation.timeline);
 
-  // Context-aware compaction: check if conversation history exceeds the
-  // model's context window budget and apply hybrid compaction if needed.
-  // We pass events.emit directly (not the manualEvents$-based eventEmitter)
-  // so compaction events reach the SSE stream immediately during the await,
-  // rather than being buffered in the ReplaySubject and replayed after.
-  const contextBudget = computeContextBudget(model.connector);
-  const compactionResult = await compactConversation({
-    processedConversation,
-    chatModel: model.chatModel,
-    contextBudget,
-    perRoundTokenCounts,
-    failedEntryTokenCounts,
-    existingSummary: conversation?.state?.compaction_summary,
-    logger,
-    abortSignal,
-    eventEmitter: events.emit,
-  });
-
-  // Reassign to the (possibly compacted) conversation for prompt construction.
-  // Re-propagate conversation-level fields that compaction does not touch.
-  processedConversation = {
-    ...compactionResult.processedConversation,
-    metadata: conversation?.metadata,
-    template_id: conversation?.template_id,
-  };
   processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   // On a resume the selection is already persisted as a `relevant_skills` step of the paused turn.
@@ -373,10 +369,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     spaceId: context.spaceId,
+    deployment: context.deployment,
     skills: filteredSkills,
     processedConversation,
     toolManager,
     resultTransformer,
+    resultStore: context.resultStore,
+    logger,
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
@@ -384,6 +383,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     renderers: renderers?.getRegisteredRenderers() ?? [],
     imageResolver,
     conversationTemplates: context.conversationTemplates,
+    conversationMetadataWritable: updateConversationMetadata !== undefined,
   });
 
   const agentGraph = createAgentGraph({
@@ -403,6 +403,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     roundId,
     sessionId: conversation?.id ?? executionId,
     cacheControl: { type: 'ephemeral', ttl: '5m' },
+    contextManagement: {
+      connector: model.connector,
+      abortSignal,
+      previousRound,
+      resultStore: context.resultStore,
+      resultTransformer,
+      logger,
+    },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -410,12 +418,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       pendingTurn,
+      roundId,
       cycleLimit: CYCLE_LIMIT,
       toolManager,
       promptManager,
       eventEmitter,
       tracker,
-      compactionResult,
+      compactionSummary,
+      previousRound,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     }),
@@ -431,12 +442,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
-      // prevent LangGraph from inheriting the parent graph's
-      // abort signals via the __pregel_abort_signals configurable key. Without this,
-      // the parent graph's cleanup abort cascades to the standalone execution.
-      ...(context.executionMode === AgentExecutionMode.standalone
-        ? { configurable: { __pregel_abort_signals: undefined } }
-        : {}),
+      configurable: {
+        checkpoint_ns: '',
+        // prevent LangGraph from inheriting the parent graph's
+        // abort signals via the __pregel_abort_signals configurable key. Without this,
+        // the parent graph's cleanup abort cascades to the standalone execution.
+        ...(context.executionMode === AgentExecutionMode.standalone
+          ? { __pregel_abort_signals: undefined }
+          : {}),
+      },
     }
   );
 
@@ -504,7 +518,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         getConversationState({
           promptManager,
           toolManager,
-          compactionSummary: compactionResult.summary,
+          compactionSummary: tracker.finalState().compactionSummary,
           backgroundExecutionService,
           todoStateManager,
           subagents: subagentTracker.snapshot(),
@@ -550,6 +564,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      conversationAccess,
+      connectorId: model.connector.connectorId,
       agentConfiguration,
     });
   } catch (err) {
@@ -589,15 +605,15 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: compaction / relevant-skills bookkeeping, then the todos
+ * The steps a fresh run starts with: workflow / relevant-skills bookkeeping, then the todos
  * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
-  compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
-  compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
@@ -607,40 +623,51 @@ const buildPreExecutionSteps = ({
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
   return [
-    ...createPreExecutionSteps({ compactionResult, relevantSkillsSelection }),
+    ...createPreExecutionSteps({ preExecutionWorkflow, relevantSkillsSelection }),
     ...carriedStep,
   ];
 };
 
 const createInitializerCommand = ({
   pendingTurn,
+  roundId,
   cycleLimit,
   toolManager,
   promptManager,
   eventEmitter,
   tracker,
-  compactionResult,
+  compactionSummary,
+  previousRound,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
   pendingTurn?: PendingTurn;
+  roundId: string;
   cycleLimit: number;
   toolManager: ToolManager;
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
   tracker: RunTracker;
-  compactionResult?: CompactedConversation;
+  compactionSummary?: CompactionSummary;
+  previousRound?: PreviousRoundInfo;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
-      compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     });
-    tracker.seed({ steps: preExecutionSteps });
-    const update: StateUpdate = { cycleLimit, steps: new Overwrite(preExecutionSteps) };
+    tracker.seed({ steps: preExecutionSteps, compactionSummary });
+    const update: StateUpdate = {
+      cycleLimit,
+      roundId,
+      steps: new Overwrite(preExecutionSteps),
+      compactionSummary,
+    };
     return new Command({ update, goto: steps.init });
   }
 
@@ -654,34 +681,55 @@ const createInitializerCommand = ({
   for (const id of init.consumedPromptIds) {
     promptManager.delete(id);
   }
-  // The graph starts from the inherited steps plus this execution's own bookkeeping (a compaction
-  // step, if compaction ran); only the inherited ones are excluded from the resume execution's
+  // The graph starts from the inherited steps; they are excluded from the resume execution's
   // persisted steps. The paused turn already carries its relevant-skills and todos steps.
-  const ownUpdates = createPreExecutionSteps({ compactionResult }).map((step) =>
-    stepUpdates.append(step)
-  );
-  const initialSteps = applyStepUpdates(init.steps, ownUpdates);
   tracker.seed({
-    steps: initialSteps,
+    steps: init.steps,
     toolRenderState: init.toolRenderState,
+    compactionSummary,
     inherited: { steps: init.steps, pendingToolCallIds: init.pendingToolCallIds },
   });
+  const lastCallInputTokens = previousRound?.lastCallInputTokens;
   const update: StateUpdate = {
     cycleLimit,
-    steps: new Overwrite(initialSteps),
+    // a resume execution mints its own round id, but its steps are persisted to the paused round
+    roundId: pendingTurn.id,
+    steps: new Overwrite(init.steps),
     pendingToolCallIds: init.pendingToolCallIds,
     researchOutcome: init.researchOutcome,
     toolRenderState: init.toolRenderState,
     currentCycle: init.currentCycle,
     errorCount: init.errorCount,
+    compactionSummary,
+    // the paused execution's last call is what the resumed context starts from
+    ...(lastCallInputTokens !== undefined
+      ? { lastCallUsage: { inputTokens: lastCallInputTokens } }
+      : {}),
   };
-  // A pending tool call must be (re-)executed; an ask-only pause goes straight back to the agent loop.
-  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.researchAgent;
+  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop,
+  // through context management.
+  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.contextManagement;
   return new Command({ update, goto });
+};
+
+/** Cache and usage hints from the last execution of the conversation. */
+const getPreviousRoundInfo = (
+  timeline: ProcessedTimelineEvent[]
+): PreviousRoundInfo | undefined => {
+  const terminal = lastExecutionTerminal(timeline);
+  if (!terminal) {
+    return undefined;
+  }
+  const modelUsage = terminal.data.model_usage;
+  return {
+    terminatedAt: terminal.created_at,
+    connectorId: modelUsage?.connector_id,
+    lastCallInputTokens: modelUsage?.last_call_input_tokens,
+  };
 };
 
 const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // in practice we have three steps per cycle (agent node + tool call node + background work), and then a few other steps (prepare + answering), and some extra buffer
-  return Math.ceil(cycleLimit * 3.5 + 20);
+  // in practice we have four steps per cycle (agent node + tool call node + background work + context management), and then a few other steps (compaction, prepare + answering), and some extra buffer
+  return Math.ceil(cycleLimit * 4.5 + 20);
 };

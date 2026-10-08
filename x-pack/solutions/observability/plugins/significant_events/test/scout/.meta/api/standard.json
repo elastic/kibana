@@ -1,5 +1,5 @@
 {
-  "sha1": "a9c406d3daed07578691cc770ded49b9c521016d",
+  "sha1": "74e56919159b841fa71abf40a81adaa64852352d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 16,
+        "line": 14,
         "column": 27
+      }
+    },
+    {
+      "id": "83c95f0c4329cc6-46bc6083876c76b",
+      "title": "Significant Events read from .rule-events returns events to a Nightshift reader without Alerting v2 or index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/rule_events_read.spec.ts",
+        "line": 77,
+        "column": 25
+      }
+    },
+    {
+      "id": "5de67efbbfc6ad6-e4e9816c415896d",
+      "title": "Pause when Nightshift is turned off pauses when the flag is turned off and stays paused when it is turned back on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
+        "line": 36,
+        "column": 31
       }
     },
     {

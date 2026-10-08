@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { VERSION_MAX_LENGTH, ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
+import { ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
@@ -60,13 +60,11 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         matcher: { expression: "env == 'production' && region == 'us-west-2'" },
         group_by: ['service.name', 'environment'],
         throttle: { interval: '5m' },
-        version: created.version,
       },
     });
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.id).toBe(created.id);
-    expect(typeof response.body.version).toBe('string');
     expect(response.body.name).toBe('updated-policy');
     expect(response.body.description).toBe('updated-policy-description');
     expect(response.body.destinations).toStrictEqual([
@@ -78,8 +76,8 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
     expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
-    // The API key is server-side only and must never be exposed over the wire.
-    expect(response.body.auth.apiKey).toBeUndefined();
+    // API key ownership is server-side only and must never be exposed over the wire.
+    expect(response.body.auth).toBeUndefined();
   });
 
   apiTest(
@@ -98,7 +96,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { name: 'only-name-updated', version: created.version },
+        body: { name: 'only-name-updated' },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -131,7 +129,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { description: 'only-description-updated', version: created.version },
+        body: { description: 'only-description-updated' },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -166,7 +164,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           matcher: { expression: "env == 'staging' && region == 'eu-central-1'" },
           group_by: ['service.name', 'host.name'],
           throttle: { interval: '15m' },
-          version: created.version,
         },
       });
 
@@ -202,7 +199,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           destinations: [{ type: 'workflow', id: 'updated-dest-workflow' }],
-          version: created.version,
         },
       });
 
@@ -226,7 +222,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'mode-update-policy',
           description: 'will update grouping mode',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'on_status_change' },
         })
       );
@@ -236,7 +232,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         body: {
           grouping_mode: 'all',
           throttle: { strategy: 'time_interval', interval: '10m' },
-          version: created.version,
         },
       });
 
@@ -258,7 +253,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'strategy-transition-policy',
           description: 'transitions from per_status_interval to on_status_change',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'per_status_interval', interval: '10m' },
         })
       );
@@ -267,7 +262,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           throttle: { strategy: 'on_status_change' },
-          version: created.version,
         },
       });
 
@@ -303,7 +297,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           grouping_mode: null,
           group_by: null,
           throttle: null,
-          version: created.version,
         },
       });
 
@@ -334,7 +327,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           matcher: null,
           group_by: null,
           throttle: null,
-          version: created.version,
         },
       });
 
@@ -349,30 +341,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('concurrency: returns 409 when version is stale', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({
-        name: 'conflict-policy',
-        description: 'conflict-policy description',
-        destinations: [{ type: 'workflow', id: 'conflict-workflow-id' }],
-      })
-    );
-    const staleVersion = created.version;
-
-    const firstUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { name: 'first-update', version: staleVersion },
-    });
-    expect(firstUpdate).toHaveStatusCode(200);
-
-    const secondUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { name: 'second-update', version: staleVersion },
-    });
-    expect(secondUpdate).toHaveStatusCode(409);
-    expect(secondUpdate.body.code).toBe('ACTION_POLICY_VERSION_CONFLICT');
-  });
-
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
@@ -380,7 +348,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         name: 'some-name',
         description: 'some-description',
         destinations: [{ type: 'workflow', id: 'some-workflow-id' }],
-        version: 'WzEsMV0=',
       },
     });
 
@@ -395,60 +362,12 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
     const response = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { destinations: [], version: created.version },
+      body: { destinations: [] },
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
-
-  apiTest('validation: rejects missing version', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'no-version-policy' })
-    );
-
-    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { name: 'no-version-update' },
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects empty version', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'empty-version-policy' })
-    );
-
-    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { name: 'empty-version-update', version: '' },
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest(
-    'validation: rejects version over the maximum length',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'long-version-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: {
-          name: 'long-version-update',
-          version: 'a'.repeat(VERSION_MAX_LENGTH + 1),
-        },
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
 
   apiTest(
     'validation: rejects empty name (when name is provided)',
@@ -459,7 +378,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { name: '', version: created.version },
+        body: { name: '' },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -478,7 +397,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           name: 'a'.repeat(MAX_NAME_LENGTH + 1),
-          version: created.version,
         },
       });
 
@@ -496,7 +414,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { foo: 'bar', version: created.version },
+        body: { foo: 'bar' },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -509,7 +427,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
         name: 'too-long-id-update',
-        version: 'WzEsMV0=',
       },
     });
 
@@ -526,7 +443,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { name: 'writer-can-patch-updated', version: created.version },
+        body: { name: 'writer-can-patch-updated' },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -546,7 +463,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { name: 'reader-cannot-patch-updated', version: created.version },
+        body: { name: 'reader-cannot-patch-updated' },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -563,7 +480,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { name: 'no-access-cannot-patch-updated', version: created.version },
+        body: { name: 'no-access-cannot-patch-updated' },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -582,7 +499,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...actionPoliciesOnlyCredentials.apiKeyHeader },
-        body: { name: 'action-policies-only-cannot-patch-updated', version: created.version },
+        body: { name: 'action-policies-only-cannot-patch-updated' },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -601,7 +518,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...rulesOnlyCredentials.apiKeyHeader },
-        body: { name: 'rules-only-cannot-patch-updated', version: created.version },
+        body: { name: 'rules-only-cannot-patch-updated' },
       });
 
       expect(response).toHaveStatusCode(403);

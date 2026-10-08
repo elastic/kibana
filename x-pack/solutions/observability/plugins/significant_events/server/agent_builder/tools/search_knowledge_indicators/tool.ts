@@ -22,9 +22,10 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
@@ -123,7 +124,7 @@ export function createSearchKnowledgeIndicatorsTool({
   logger,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
 }): StaticToolRegistration<typeof searchKnowledgeIndicatorsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> = {
@@ -188,6 +189,7 @@ export function createSearchKnowledgeIndicatorsTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanReadSignificantEvents({ request, server });
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

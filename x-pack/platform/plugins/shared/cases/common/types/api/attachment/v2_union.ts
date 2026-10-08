@@ -12,12 +12,8 @@ import {
   AttachmentRequestRt,
   AttachmentRequestWithoutRefsRt,
 } from './v1';
-import {
-  AttachmentRtV2,
-  AttachmentsRtV2,
-  UnifiedAttachmentPayloadRt,
-} from '../../domain/attachment/v2';
-import { UnifiedAttachmentPatchRequestRt } from './v2';
+import { AttachmentRtV2, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
+import { UnifiedAttachmentPutRequestRt } from './v2';
 import { limitedArraySchema } from '../../../schema';
 
 export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
@@ -27,7 +23,7 @@ export const AttachmentRequestWithoutRefsRtV2 = rt.union([
 ]);
 export const AttachmentPatchRequestRtV2 = rt.union([
   AttachmentPatchRequestRt,
-  UnifiedAttachmentPatchRequestRt,
+  rt.intersection([UnifiedAttachmentPutRequestRt, rt.strict({ id: rt.string })]),
 ]);
 
 export const AttachmentsFindResponseRtV2 = rt.strict({
@@ -46,24 +42,7 @@ export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
   fieldName: 'attachments',
 });
 
-// Bulk-get response tolerates legacy shapes: the getter (`AttachmentGetter.bulkGet`)
-// is mixed until every attachment type is migrated (see `toUnifiedAttributes`), so an
-// unmigrated type would fail a unified-only decode here and 500 the route. Narrow this
-// to unified-only once the getter is unified-only too.
-export const BulkGetAttachmentsResponseRtV2 = rt.strict({
-  attachments: AttachmentsRtV2,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
-    })
-  ),
-});
-
 export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
 export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
 export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
 export type BulkCreateAttachmentsRequestV2 = rt.TypeOf<typeof BulkCreateAttachmentsRequestRtV2>;
-export type BulkGetAttachmentsResponseV2 = rt.TypeOf<typeof BulkGetAttachmentsResponseRtV2>;

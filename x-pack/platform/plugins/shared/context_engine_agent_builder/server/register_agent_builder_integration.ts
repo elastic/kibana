@@ -53,6 +53,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       id: aiIndex.id,
       esqlTarget: aiIndex.dest.value,
       description: aiIndex.description,
+      memoryEnabled: aiIndex.memory_enabled,
     }));
   });
 

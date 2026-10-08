@@ -269,7 +269,7 @@ const persistDeductiveSessionId = async ({
     const conversationClient = context.conversationClient as ConversationClient;
     await conversationClient.update(
       { id: conversationId, metadata: updatedMetadata },
-      { access: 'owner', retryOnConflict: true }
+      { access: 'owner', retryOnConflict: true, source: 'execution' }
     );
   } catch (error) {
     context.logger.warn(

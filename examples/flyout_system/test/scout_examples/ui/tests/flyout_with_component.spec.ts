@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { test } from '../fixtures';
 
 test.describe(
   'Flyout System - FlyoutTemplate component',

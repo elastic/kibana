@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +22,35 @@ import { ConversationMetaInfo } from './conversation_meta_info';
 
 /** Fixed, so a longer age does not push the titles out of line. */
 const AGE_COLUMN_WIDTH = '6.5rem';
+/** Room for "Approved by" plus a typical display name before the label truncates. */
+const OUTCOME_MAX_WIDTH = '14rem';
+
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<{ $isSelected: boolean }>(({ theme: { euiTheme }, $isSelected }) => ({
+  padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
+  cursor: 'pointer',
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  '&:hover': {
+    backgroundColor: $isSelected
+      ? euiTheme.colors.backgroundBaseInteractiveSelect
+      : euiTheme.colors.backgroundBaseSubdued,
+    boxShadow: 'none',
+  },
+}));
 
 interface ConversationCardCompactProps {
   investigation: Investigation;
-  hasBorder: boolean;
   isSelected?: boolean;
   /** Resolved by the caller: `Investigation` carries no decision fields. */
   outcome?: string;
@@ -33,6 +59,7 @@ interface ConversationCardCompactProps {
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   chatHref?: string;
+  onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
 /**
@@ -42,7 +69,6 @@ interface ConversationCardCompactProps {
 export const ConversationCardCompact = memo<ConversationCardCompactProps>(
   ({
     investigation,
-    hasBorder,
     isSelected = false,
     outcome,
     onClickRecommendedAction,
@@ -50,32 +76,19 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onClickCard,
     onOpenChat,
     chatHref,
+    onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
-        css={{
-          padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
-          cursor: 'pointer',
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          boxShadow: 'none',
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          '&:hover': {
-            backgroundColor: isSelected
-              ? euiTheme.colors.backgroundBaseInteractiveSelect
-              : euiTheme.colors.backgroundBaseSubdued,
-            boxShadow: 'none',
-          },
-        }}
+        $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
@@ -92,13 +105,19 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
         }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH }}>
+          <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH, flexShrink: 0 }}>
             <ConversationMetaInfo createdAt={investigation.createdAt} />
           </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            {/* Truncate together, so the outcome and controls keep their place. */}
+          {/* `minInlineSize: 0` lets the item shrink below its text, so the title
+              truncates instead of squeezing the age and outcome onto two lines. */}
+          <EuiFlexItem grow={true} css={{ minInlineSize: 0 }}>
+            {/* Truncate together, so the outcome and controls keep their place. The
+                native tooltip keeps the clipped tail reachable for pointer users. */}
             <EuiText
               size="s"
+              title={[investigation.title, investigation.primaryActionLabel]
+                .filter(Boolean)
+                .join('\n')}
               css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
               <strong>{investigation.title}</strong>
@@ -112,24 +131,43 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
               ) : null}
             </EuiText>
           </EuiFlexItem>
-          {outcome ? (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {outcome}
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem grow={false}>
-            <ConversationsActionsGroup
-              investigation={investigation}
-              onClickRecommendedAction={onClickRecommendedAction}
-              onClickAction={onClickAction}
-              onOpenChat={() => onOpenChat(investigation.id)}
-              chatHref={chatHref}
-            />
+            {/* Tighter gutter than the row: with the divider's own margin, the outcome
+                sits as far from the line as the agent icon glyph does on the other side. */}
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {outcome ? (
+                // Capped and truncating: the decider's display name can be long, and
+                // unbounded it would eat the title before overflowing the row.
+                <EuiFlexItem grow={false} css={{ minInlineSize: 0 }}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    title={outcome}
+                    css={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxInlineSize: OUTCOME_MAX_WIDTH,
+                    }}
+                  >
+                    {outcome}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <ConversationsActionsGroup
+                  investigation={investigation}
+                  onClickRecommendedAction={onClickRecommendedAction}
+                  onClickAction={onClickAction}
+                  onOpenChat={() => onOpenChat(investigation.id)}
+                  chatHref={chatHref}
+                  onCopyLink={onCopyLink}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );

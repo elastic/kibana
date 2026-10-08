@@ -36,6 +36,7 @@ describe('createPublicConversationTemplatesContract', () => {
       attachmentsService: agentBuilderMocks.createStart().attachments,
       openSidebarConversation: jest.fn(),
       openFullscreenConversation: jest.fn().mockResolvedValue(undefined),
+      getConversationUrl: jest.fn(),
     };
     return {
       context,

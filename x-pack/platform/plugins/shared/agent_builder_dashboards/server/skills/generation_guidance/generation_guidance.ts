@@ -48,11 +48,11 @@ For an existing dashboard:
 
 ## Panel Inputs
 
-Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom content panels). Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
 
-- Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. Prefer this over \`source: "config"\` whenever you have an id: it costs far fewer tokens than repeating the payload, and for custom content it is the only way to place the panel that was actually generated — a custom content \`config\` takes a prompt and generates a **new** template, producing a different panel.
-- Use \`source: "config"\` for markdown, and for a visualization you hold by value with no attachment id.
+- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel. Set \`renderer\` to pick the engine; each renderer accepts only its own fields.
+- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
+- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
 
@@ -61,7 +61,7 @@ Choose the panel type in this priority order:
 1. **Lens** (\`source: "request"\`, \`renderer: "lens"\` or omit renderer) — default for metric, time series, bar, line, pie, area, and data table visualizations.
 2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
 3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
-4. **Custom content** (\`source: "config"\`, \`type: "custom_content"\`) — a last resort for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
+4. **Custom content** (\`source: "request"\`, \`renderer: "custom_content"\`) — a last resort for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
 
 ### Custom content panels
 
@@ -71,16 +71,16 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
-**ES|QL for custom content:** set \`config.esqlQuery\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
+**ES|QL for custom content:** set \`esql\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
 
 **Creating a custom content panel:**
-- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
-- Set \`config.esqlQuery\` when the panel needs live data.
+- Set \`query\` to a concise description of what to display. The HTML template is generated server-side from it.
+- Set \`esql\` when the panel needs live data.
 - Give it enough height. These panels lay out as HTML and scroll inside their own frame when the grid is too short for the content, so size \`grid.h\` from what you asked for — see the custom content entry in the grid sizes below.
 
 **Editing a custom content panel:**
-- Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
-- Supply only \`prompt\` and/or \`esqlQuery\` — omit fields that should stay unchanged. The server regenerates the template from the merged prompt and query. Do not supply \`template\`.
+- Use \`edit_panels\` (\`source: "request"\`, \`renderer: "custom_content"\`) and set \`panelId\` to the target panel.
+- Set \`query\` to the requested change and/or \`esql\` to a new query (\`null\` removes it). Omit \`esql\` to keep the current query. The server refines the existing template.
 
 ## Chart Type Guidance
 
@@ -97,7 +97,7 @@ ${dashboardDesignGuidancePrompt}
 
 ## ES|QL
 
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
+Omit the \`esql\` field on visualization panels unless the query came from \`${platformCoreTools.generateEsql}\` or the user pasted it. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. A query you wrote yourself doesn't qualify, even after running it with \`${platformCoreTools.executeEsql}\`: running a query only shows that it works, so use \`${platformCoreTools.executeEsql}\` to inspect results, not to approve your own queries. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
 
 ## Controls
 
@@ -107,6 +107,8 @@ Controls are interactive filters pinned above the dashboard that let users explo
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
 
+Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`GROK\`, \`EVAL\`, \`RENAME\`) cannot back a control. Controls are optional: when no mapped field fits, add fewer controls or none.
+
 **Control types:**
 - \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
 - \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
@@ -114,9 +116,10 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 
 **Required fields per control:**
 - \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact field name as it appears in the panel queries (e.g. \`"service.name"\`).
+- \`field_name\` (not for \`time_slider_control\`): exact name of a field mapped on \`index\` (e.g. \`"service.name"\`).
 - \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
 - \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
+- \`user_requested\` (optional): \`true\` only when the user asked explicitly for the controls.
 
 **Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
 
@@ -124,9 +127,8 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 
 ## Generation Edge Cases
 
-- Never invent a \`source: "config"\` payload for content you have not actually resolved. If you cannot obtain a panel's configuration, report it clearly instead of fabricating one.
 - Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
-- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens visualization panels (\`source: "request"\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and custom content panels (\`source: "config"\`, \`type: "custom_content"\`).
+- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and ML anomaly panels (\`source: "config"\`, \`type: "ml_anomaly_charts"\` / \`"ml_anomaly_swimlane"\` / \`"ml_single_metric_viewer"\`).
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;

@@ -9,11 +9,15 @@ import Boom from '@hapi/boom';
 
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
 
-import { createServiceAccountParamsSchema } from '../../common/service_accounts';
+import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
+import {
+  getCreateServiceAccountParamsSchema,
+  serviceAccountNameSchema,
+} from '../../common/service_accounts';
 
 /** Create parameters, once validated: the same shape the route accepts. */
 export type ParsedCreateServiceAccountParams = ReturnType<
-  typeof createServiceAccountParamsSchema.parse
+  ReturnType<typeof getCreateServiceAccountParamsSchema>['parse']
 >;
 
 /**
@@ -21,12 +25,16 @@ export type ParsedCreateServiceAccountParams = ReturnType<
  * Callers of the server contract never pass through the route, and the name reaches an
  * Elasticsearch URL path from here.
  *
+ * `limits` are the calling backend's own role limits. The schema drops duplicate roles before
+ * counting them.
+ *
  * Rejects with a 400, so the failure looks the same whichever entry point the caller used.
  */
 export const parseCreateServiceAccountParams = (
-  params: CreateServiceAccountParams
+  params: CreateServiceAccountParams,
+  limits: ServiceAccountRoleLimits
 ): ParsedCreateServiceAccountParams => {
-  const parsed = createServiceAccountParamsSchema.safeParse(params);
+  const parsed = getCreateServiceAccountParamsSchema(limits).safeParse(params);
 
   if (!parsed.success) {
     throw Boom.badRequest(
@@ -37,4 +45,15 @@ export const parseCreateServiceAccountParams = (
   }
 
   return parsed.data;
+};
+
+/**
+ * The name a refused create can safely name in its audit event, or `undefined` when there is none.
+ * The Elasticsearch backend checks the caller's privilege before
+ * {@link parseCreateServiceAccountParams} has vouched for anything, so the name is checked on its
+ * own here rather than written to the log as received.
+ */
+export const auditableName = (params: CreateServiceAccountParams): { name: string } | undefined => {
+  const parsed = serviceAccountNameSchema.safeParse(params.name);
+  return parsed.success ? { name: parsed.data } : undefined;
 };

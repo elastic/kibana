@@ -22,6 +22,10 @@ const menuAriaLabel = (label: string): string =>
     values: { label },
   });
 
+// A modified click on an `href` item opens it elsewhere (e.g. a new tab), so the menu stays open.
+const isModifiedClick = (event: React.MouseEvent) =>
+  event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+
 const resolvePanels = (
   panels: FlyoutFooterMenuPanel[],
   closePopover: () => void,
@@ -83,7 +87,9 @@ const resolvePanels = (
             ...item,
             onClick: (event: React.MouseEvent<Element, globalThis.MouseEvent>) => {
               onClick?.(event);
-              closePopover();
+              if (!href || !isModifiedClick(event)) {
+                closePopover();
+              }
             },
           };
         }),
@@ -133,6 +139,8 @@ export const PrimaryActionMenuButton = ({
           type="button"
           element="button"
           isSelected={undefined}
+          color="primary"
+          size="m"
           fill
           iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           iconSide="right"

@@ -6,13 +6,13 @@
  */
 
 import { ApiPrivileges } from '@kbn/core-security-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
-import { proposalCategorySchema } from '@kbn/agentic-investigations-plugin/common';
+import { proposalCategorySchema } from '@kbn/proposals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { ProposalsPageResponse } from '../../../common/proposals/list';
@@ -22,24 +22,29 @@ import {
   fitsQueueReach,
 } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
-// PROPOSALS_API_PRIVILEGE_READ cannot be imported from agentic_investigations/server (cross-plugin
+// PROPOSALS_API_PRIVILEGE_READ cannot be imported from proposals/server (cross-plugin
 // server import is forbidden), so we derive the identical value here. It is load-bearing: the
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalsByCategoryParams = z.object({
-  category: proposalCategorySchema,
-});
+const GetProposalsByCategoryParams = lazySchema(() =>
+  z.object({
+    category: proposalCategorySchema,
+  })
+);
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetProposalsByCategoryQuery = z
-  .object({
-    size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
-    from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
-  })
-  .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
+const GetProposalsByCategoryQuery = lazySchema(() =>
+  z
+    .object({
+      size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
+      from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+    })
+    .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` })
+);
 
 export const registerGetProposalsByCategoryRoute = ({
   router,
@@ -69,7 +74,7 @@ export const registerGetProposalsByCategoryRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { category } = request.params;
           const { size, from } = request.query;
@@ -92,6 +97,6 @@ export const registerGetProposalsByCategoryRoute = ({
             body: { message: 'Failed to get proposals by category' },
           });
         }
-      }
+      })
     );
 };

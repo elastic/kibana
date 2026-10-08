@@ -7,16 +7,24 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
+  EscalationFlyoutHeader,
   type ConversationDetailsFlyoutFooterProps,
-  AttachmentsTab,
   OverviewTab,
-  TimelineTab,
 } from '../components/details';
-import { conversationToInvestigation } from './conversation_to_investigation';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
+import {
+  conversationToInvestigation,
+  conversationToEscalationHeader,
+} from './conversation_to_investigation';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -27,38 +35,183 @@ import { conversationToInvestigation } from './conversation_to_investigation';
  */
 interface InvestigationSlotProps {
   conversation: Conversation;
+  refetchConversation?: () => Promise<void>;
 }
 
-export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
-  <OverviewTab investigation={conversationToInvestigation(conversation)} />
-);
-
-export const TimelineSlot = ({ conversation }: InvestigationSlotProps) => (
-  <TimelineTab events={conversationToInvestigation(conversation).events} />
-);
-
-export interface AttachmentsSlotProps {
-  conversation: Conversation;
-  attachmentsService: AttachmentServiceStartContract;
+export interface OverviewSlotProps extends InvestigationSlotProps {
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /**
+   * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
+   * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
+   */
+  renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
-export const AttachmentsSlot = ({ conversation, attachmentsService }: AttachmentsSlotProps) => (
-  <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
-);
-
-export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
-  <ConversationDetailsFlyoutHeader investigation={conversationToInvestigation(conversation)} />
-);
-
-export interface FooterSlotProps extends InvestigationSlotProps {
-  onOpenChat: () => void;
-  onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
-}
-
-export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: FooterSlotProps) => (
-  <ConversationDetailsFlyoutFooter
+export const OverviewSlot = ({
+  conversation,
+  groupedAttachments,
+  renderProposedActions,
+  renderProposedActionsCount,
+}: OverviewSlotProps) => (
+  <OverviewTab
     investigation={conversationToInvestigation(conversation)}
-    onOpenChat={onOpenChat}
-    onOpenEscalation={onOpenEscalation}
+    attachments={conversation.attachments}
+    groupedAttachments={groupedAttachments}
+    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
   />
 );
+
+export interface HeaderSlotProps extends InvestigationSlotProps {
+  renderAssignees?: RenderAssignees;
+  renderStatus?: RenderStatus;
+}
+
+export const HeaderSlot = ({
+  conversation,
+  renderAssignees,
+  renderStatus,
+  refetchConversation,
+}: HeaderSlotProps) => {
+  const investigation = conversationToInvestigation(conversation);
+  const assigneesNode = renderAssignees
+    ? renderAssignees({
+        conversationId: conversation.id,
+        templateId: 'investigation',
+        assigneeUids: investigation.assignees,
+        status: investigation.status,
+        refetchConversation,
+      })
+    : undefined;
+  const statusNode = renderStatus
+    ? renderStatus({
+        conversationId: conversation.id,
+        templateId: 'investigation',
+        status: investigation.status,
+        refetchConversation,
+      })
+    : undefined;
+  return (
+    <ConversationDetailsFlyoutHeader
+      investigation={investigation}
+      assigneesNode={assigneesNode}
+      statusNode={statusNode}
+    />
+  );
+};
+
+export interface FooterSlotProps extends InvestigationSlotProps {
+  isOpenedFromChat: boolean;
+  onOpenChat: () => void;
+  onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
+  wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
+  onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
+}
+
+export const FooterSlot = ({
+  isOpenedFromChat,
+  conversation,
+  onOpenChat,
+  onOpenEscalation,
+  wrapEscalationButton,
+  onCloseInvestigation,
+}: FooterSlotProps) => (
+  <ConversationDetailsFlyoutFooter
+    investigation={conversationToInvestigation(conversation)}
+    isOpenedFromChat={isOpenedFromChat}
+    onOpenChat={onOpenChat}
+    onOpenEscalation={onOpenEscalation}
+    wrapEscalationButton={wrapEscalationButton}
+    onCloseInvestigation={onCloseInvestigation}
+  />
+);
+
+// ---------------------------------------------------------------------------
+// Escalation header slot
+// ---------------------------------------------------------------------------
+
+export interface EscalationHeaderSlotProps {
+  conversation: Conversation;
+  refetchConversation?: () => Promise<void>;
+  renderAssignees?: RenderAssignees;
+  renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
+}
+
+export const EscalationHeaderSlot = ({
+  conversation,
+  renderAssignees,
+  renderStatus,
+  renderSyncIndicator,
+  refetchConversation,
+}: EscalationHeaderSlotProps) => {
+  const { status, assigneeUids } = conversationToEscalationHeader(conversation);
+
+  const assigneesNode = renderAssignees
+    ? renderAssignees({
+        conversationId: conversation.id,
+        templateId: 'escalation',
+        assigneeUids,
+        status,
+        refetchConversation,
+      })
+    : undefined;
+
+  const statusNode = renderStatus
+    ? renderStatus({
+        conversationId: conversation.id,
+        templateId: 'escalation',
+        status,
+        refetchConversation,
+      })
+    : undefined;
+
+  return (
+    <EscalationFlyoutHeader
+      title={conversation.title}
+      createdAt={conversation.created_at}
+      status={status}
+      assigneeUids={assigneeUids}
+      assigneesNode={assigneesNode}
+      statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
+    />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation overview slot (body tab)
+// ---------------------------------------------------------------------------
+
+export interface EscalationOverviewSlotProps {
+  conversation: Conversation;
+  renderLinkedInvestigations?: RenderLinkedInvestigations;
+  onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
+}
+
+/**
+ * The body tab for the escalation details flyout. Renders the linked investigations list via
+ * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
+ * Returns `null` when no render prop is provided.
+ */
+export const EscalationOverviewSlot = ({
+  conversation,
+  renderLinkedInvestigations,
+  onOpenInvestigation,
+}: EscalationOverviewSlotProps) => {
+  if (!renderLinkedInvestigations) return null;
+
+  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+
+  return (
+    <>
+      {renderLinkedInvestigations({
+        escalationId: conversation.id,
+        linkedInvestigationIds,
+        onOpenInvestigation,
+      })}
+    </>
+  );
+};
