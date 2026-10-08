@@ -320,3 +320,20 @@ export const pinAgenticConnector = async (fetch: HttpHandler, connectorId: strin
   ]);
   return () => writeInferenceFeatures(fetch, previous);
 };
+
+/**
+ * Runs every cleanup step even when an earlier one throws, so a failed cancellation or fixture
+ * teardown can never leave the shared inference settings pinned to the eval connector. The first
+ * failure is rethrown once all steps have run.
+ */
+export const runAllCleanups = async (steps: Array<() => Promise<unknown>>) => {
+  const failures: unknown[] = [];
+  for (const step of steps) {
+    try {
+      await step();
+    } catch (error) {
+      failures.push(error);
+    }
+  }
+  if (failures.length) throw failures[0];
+};

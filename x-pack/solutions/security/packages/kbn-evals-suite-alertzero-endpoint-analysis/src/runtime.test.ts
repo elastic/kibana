@@ -8,7 +8,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import { ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
-import { AlertZeroRuntime, pinAgenticConnector, seedAlertZeroEndpoint } from './runtime';
+import {
+  AlertZeroRuntime,
+  pinAgenticConnector,
+  runAllCleanups,
+  seedAlertZeroEndpoint,
+} from './runtime';
 
 const createEs = () => {
   const es = {
@@ -124,5 +129,30 @@ describe('pinAgenticConnector', () => {
       .filter(([, options]) => options?.method === 'PUT')
       .map(([, options]) => JSON.parse((options as { body: string }).body).features);
     expect(restored[1]).toEqual(previous);
+  });
+});
+
+describe('runAllCleanups', () => {
+  it('runs every step in order, including the restore, when an earlier step throws', async () => {
+    const order: string[] = [];
+    const steps = [
+      async () => {
+        order.push('cancel');
+        throw new Error('cancel failed');
+      },
+      async () => {
+        order.push('cleanup');
+        throw new Error('cleanup failed');
+      },
+      async () => {
+        order.push('restore');
+      },
+    ];
+    await expect(runAllCleanups(steps)).rejects.toThrow('cancel failed');
+    expect(order).toEqual(['cancel', 'cleanup', 'restore']);
+  });
+
+  it('resolves when every step succeeds', async () => {
+    await expect(runAllCleanups([async () => 1, async () => 2])).resolves.toBeUndefined();
   });
 });

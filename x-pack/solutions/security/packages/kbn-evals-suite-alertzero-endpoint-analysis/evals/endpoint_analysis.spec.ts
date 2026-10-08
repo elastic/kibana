@@ -13,7 +13,12 @@ import {
   extractAgentConversationIds,
   readAgentToolCallsFromTraces,
 } from '@kbn/security-evals-workflow-traces';
-import { AlertZeroRuntime, pinAgenticConnector, seedAlertZeroEndpoint } from '../src/runtime';
+import {
+  AlertZeroRuntime,
+  pinAgenticConnector,
+  runAllCleanups,
+  seedAlertZeroEndpoint,
+} from '../src/runtime';
 import { assertAnalysisExecution, assertPersistedProposal } from '../src/assertions';
 import { analysisWorkflowId, proposalWorkflowId, workerWorkflowId } from '../src/contracts';
 
@@ -136,9 +141,11 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           )
         );
       } finally {
-        await runtime.cancelAll();
-        await seededFixture?.cleanup();
-        await restoreInference();
+        await runAllCleanups([
+          () => runtime.cancelAll(),
+          async () => seededFixture?.cleanup(),
+          restoreInference,
+        ]);
       }
     }
   );
