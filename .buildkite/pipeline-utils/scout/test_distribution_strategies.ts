@@ -10,7 +10,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths.ts';
-import { scoutTestTrack, type ScoutTestTrack } from './test_tracks.ts';
+import { scoutTestTrack, type ScoutTestLane, type ScoutTestTrack } from './test_tracks.ts';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order.ts';
 import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite/index.ts';
 import { getKibanaDir } from '../utils.ts';
@@ -50,15 +50,27 @@ async function distributeScoutTestsByModule() {
   }
 }
 
-interface LaneInfo {
-  label: string;
-  loadGroups: Array<{ configSet: string; loadIDs: string[] }>;
+interface LoadGroup {
+  configSet: string;
+  loadIDs: string[];
 }
 
-interface LanePair {
-  testTarget: ScoutTestTrack['metadata']['testTarget'];
-  server: ScoutTestTrack['metadata']['server'];
-  lane: ScoutTestTrack['lanes'][0];
+// Lanes of combined tracks list their own load groups, other lanes run their track's server config set
+function getLaneLoadGroups(
+  lane: ScoutTestLane,
+  server: ScoutTestTrack['metadata']['server']
+): LoadGroup[] {
+  if (lane.metadata.loadGroups) {
+    return lane.metadata.loadGroups.map(({ configSet, loads }) => ({ configSet, loadIDs: loads }));
+  }
+
+  if (server === undefined) {
+    throw new Error(
+      `Scout test lane #${lane.number} has neither load groups nor a server config set`
+    );
+  }
+
+  return [{ configSet: server.configSet, loadIDs: lane.loads }];
 }
 
 async function distributeScoutTestsOnLanes() {
@@ -69,117 +81,60 @@ async function distributeScoutTestsOnLanes() {
   }
 
   const steps: BuildkiteCommandStep[] = [];
-  const loadInfoByStepKey: Record<string, LaneInfo> = {};
+  const loadInfoByStepKey: Record<string, { label: string; loadGroups: LoadGroup[] }> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
-  const targetRuntimeMs =
-    parseFloat(process.env.SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES || '20') * 60 * 1000;
-  // target/2 guarantees at least two compact lanes always fit into one combined step.
-  const compactThresholdMs = targetRuntimeMs / 2;
-
-  const allLanePairs: LanePair[] = testTracksDefinitionPaths
+  testTracksDefinitionPaths
     .map(scoutTestTrack.definitions.loadFromPath)
     .flatMap((definition: { tracks: ScoutTestTrack[] }) =>
-      definition.tracks.flatMap((track) => track.lanes.map((lane) => ({ ...track.metadata, lane })))
-    );
+      definition.tracks.flatMap((track) =>
+        track.lanes.flatMap((lane) => ({ ...track.metadata, lane }))
+      )
+    )
+    .forEach(({ testTarget, server, lane }) => {
+      // Define the effective lane number. `lane.number` is only accurate in reference to the originating test track
+      const effectiveLaneNumber = steps.length + 1;
+      const loadGroups = getLaneLoadGroups(lane, server);
 
-  const regularPairs = allLanePairs.filter(
-    ({ lane }) => lane.runtimeEstimate >= compactThresholdMs
-  );
-  const compactPairs = allLanePairs.filter(({ lane }) => lane.runtimeEstimate < compactThresholdMs);
-
-  const sharedEnv = {
-    SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-      process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
-    ...envVarsIfSet(['SERVERLESS_TESTS_ONLY', 'UIAM_DOCKER_IMAGE', 'UIAM_COSMOSDB_DOCKER_IMAGE']),
-    ...collectEnvFromLabels(),
-  };
-
-  const addLaneStep = (
-    testTarget: LanePair['testTarget'],
-    agentQueue: string,
-    groups: LaneInfo['loadGroups']
-  ) => {
-    const effectiveLaneNumber = steps.length + 1;
-    const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
-    // `lane.number` is only accurate relative to its originating track; use the global counter instead
-    const configSetLabel =
-      groups.length === 1
-        ? groups[0].configSet
-        : `combined [${groups.map((g) => g.configSet).join('+')}]`;
-    const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSetLabel}`;
-
-    steps.push({
-      key: stepKey,
-      label: stepLabel,
-      command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
-      timeout_in_minutes: 60,
-      agents: expandAgentQueue(agentQueue),
-      env: {
+      const laneEnv = {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
         SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
         SCOUT_TEST_TARGET_LOCATION: testTarget.location,
         SCOUT_TEST_TARGET_ARCH: testTarget.arch,
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
-        ...sharedEnv,
-      },
-      retry: {
-        automatic: [
-          { exit_status: '-1', limit: 3 },
-          { exit_status: '*', limit: 1 },
-        ],
-      },
+        SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
+          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
+        ...envVarsIfSet([
+          'SERVERLESS_TESTS_ONLY',
+          'UIAM_DOCKER_IMAGE',
+          'UIAM_COSMOSDB_DOCKER_IMAGE',
+        ]),
+        ...collectEnvFromLabels(),
+      };
+
+      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+      const configSets = loadGroups.map(({ configSet }) => configSet).join(', ');
+      const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSets}`;
+
+      // Agent that will do the actual work of running the test loads
+      steps.push({
+        key: stepKey,
+        label: stepLabel,
+        command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
+        timeout_in_minutes: 60,
+        agents: expandAgentQueue(lane.metadata.buildkite.agentQueue),
+        env: laneEnv,
+        retry: {
+          automatic: [
+            { exit_status: '-1', limit: 3 },
+            { exit_status: '*', limit: 1 },
+          ],
+        },
+      });
+
+      // Lane load information to be referenced by the agent (IDs in particular)
+      loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups };
     });
-
-    loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups: groups };
-  };
-
-  regularPairs.forEach(({ testTarget, server, lane }) => {
-    addLaneStep(testTarget, lane.metadata.buildkite.agentQueue, [
-      { configSet: server.configSet, loadIDs: lane.loads },
-    ]);
-  });
-
-  // Pack compact lanes: group by testTarget then greedy bin-pack into combined Buildkite steps.
-  if (compactPairs.length > 0) {
-    const compactByTarget = new Map<string, LanePair[]>();
-    for (const pair of compactPairs) {
-      const key = `${pair.testTarget.location}-${pair.testTarget.arch}-${pair.testTarget.domain}`;
-      const existing = compactByTarget.get(key) ?? [];
-      existing.push(pair);
-      compactByTarget.set(key, existing);
-    }
-
-    interface CombinedSlot {
-      testTarget: LanePair['testTarget'];
-      agentQueue: string;
-      usedMs: number;
-      groups: LaneInfo['loadGroups'];
-    }
-
-    for (const [, pairs] of compactByTarget) {
-      const combinedSlots: CombinedSlot[] = [];
-
-      for (const { testTarget, server, lane } of pairs) {
-        let slot = combinedSlots.find((s) => s.usedMs + lane.runtimeEstimate <= targetRuntimeMs);
-        if (!slot) {
-          slot = {
-            testTarget,
-            agentQueue: lane.metadata.buildkite.agentQueue,
-            usedMs: 0,
-            groups: [],
-          };
-          combinedSlots.push(slot);
-        }
-        slot.groups.push({ configSet: server.configSet, loadIDs: lane.loads });
-        slot.usedMs += lane.runtimeEstimate;
-      }
-
-      for (const { testTarget, agentQueue, groups } of combinedSlots) {
-        addLaneStep(testTarget, agentQueue, groups);
-      }
-    }
-  }
 
   if (steps.length === 0) {
     // Stop early. No test steps to upload. ✨
