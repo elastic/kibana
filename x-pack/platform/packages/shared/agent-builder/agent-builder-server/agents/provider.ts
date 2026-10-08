@@ -121,6 +121,7 @@ export interface CreateSubAgentParams {
 
 /** Parameters for sending a message to an existing persistent sub-agent. */
 export interface SendToSubAgentParams {
+  agentId: string;
   parentExecutionId: string;
   /** Existing child conversation id */
   conversationId: string;
@@ -204,6 +205,19 @@ export interface DeploymentContext {
     status?: string;
   };
 }
+
+/**
+ * How a run relates to its conversation:
+ * - `readWrite`: the run persists what belongs to its conversation (round, metadata, workspace,
+ *   child conversations).
+ * - `readOnly`: the run loaded an existing conversation as context and stores nothing to it
+ *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
+ * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
+ *   persisted (one-shot run).
+ *
+ * Unrelated to conversation access control: the caller's permissions are checked separately.
+ */
+export type ExecutionConversationAccess = 'readWrite' | 'readOnly' | 'none';
 
 export interface AgentHandlerContext {
   /**
@@ -352,6 +366,10 @@ export interface AgentHandlerContext {
    * Id of the parent execution that spawned this one, when applicable.
    */
   parentExecutionId?: string;
+  /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}.
+   */
+  conversationAccess: ExecutionConversationAccess;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

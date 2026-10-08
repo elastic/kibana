@@ -414,6 +414,86 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('score direction', () => {
+      const name = `ftr-direction-${suffix}`;
+      const mixedJudge: LlmJudgeConfig = {
+        ...judge,
+        output: {
+          scores: [
+            { name: 'grounded', type: 'number' },
+            { name: 'hallucination', type: 'number', direction: 'minimize' },
+          ],
+        },
+      };
+
+      after(async () => {
+        await adminClient.delete(evaluatorPath(name)).catch(() => {
+          // best-effort cleanup
+        });
+      });
+
+      it('rejects a direction outside maximize, minimize, and neutral', async () => {
+        await adminClient
+          .post(EVALS_EVALUATORS_URL)
+          .send({
+            name: `bad-direction-${suffix}`,
+            description: 'Invalid evaluator',
+            judge: {
+              ...judge,
+              output: { scores: [{ name: 'tone', type: 'number', direction: 'upward' }] },
+            },
+          })
+          .expect(400);
+      });
+
+      it('stores a direction per score', async () => {
+        const { body } = await adminClient
+          .post(EVALS_EVALUATORS_URL)
+          .send({ name, description: 'Mixed-direction evaluator', judge: mixedJudge })
+          .expect(200);
+
+        expect((body as CreateEvaluatorResponse).evaluator.judge).to.eql(mixedJudge);
+      });
+
+      it('writes no version when a score without a direction is saved as maximize', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({
+            judge: {
+              ...mixedJudge,
+              output: {
+                scores: [
+                  { name: 'grounded', type: 'number', direction: 'maximize' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect((body as UpdateEvaluatorResponse).evaluator.version).to.eql('1.0.0');
+      });
+
+      it('takes a major when a score changes direction', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({
+            judge: {
+              ...mixedJudge,
+              output: {
+                scores: [
+                  { name: 'grounded', type: 'number', direction: 'neutral' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect((body as UpdateEvaluatorResponse).evaluator.version).to.eql('2.0.0');
+      });
+    });
+
     describe('spaces', () => {
       const spaceId = `evals-evaluators-${suffix}`;
       const inSpace = (path: string) => `/s/${spaceId}${path}`;
