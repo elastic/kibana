@@ -21,12 +21,6 @@ const REVIEWERS = Object.freeze({
     label: 'reviewer:codex',
     workflowId: 'reviewer-codex.lock.yml',
   }),
-  claude: Object.freeze({
-    id: 'claude',
-    command: '@claude',
-    label: 'reviewer:claude',
-    workflowId: 'reviewer-claude.lock.yml',
-  }),
   scout: Object.freeze({
     id: 'scout',
     command: '@scout',
