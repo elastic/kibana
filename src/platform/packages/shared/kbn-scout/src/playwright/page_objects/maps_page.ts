@@ -118,6 +118,10 @@ export class MapsPage {
     return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
   }
 
+  async doesLayerExist(layerName: string) {
+    return this.getLayerToggleButton(layerName).isVisible();
+  }
+
   async selectFileUploadCard() {
     await this.page.testSubj.click('uploadFile');
   }

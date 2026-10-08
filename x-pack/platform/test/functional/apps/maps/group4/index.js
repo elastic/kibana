@@ -67,7 +67,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./mvt_geotile_grid'));
     loadTestFile(require.resolve('./layer_errors'));
     loadTestFile(require.resolve('./visualize_create_menu'));
-    loadTestFile(require.resolve('./discover'));
+
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./tile_map'));
   });

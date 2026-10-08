@@ -30,7 +30,6 @@ test.describe(
 
     test('add layer panel', async ({ browserAuth, page, pageObjects }) => {
       const { maps } = pageObjects;
-      const layerToggleButton = maps.getLayerToggleButton(INDEX_PATTERN);
 
       await browserAuth.loginAsPrivilegedUser();
       await maps.gotoNewMap();
@@ -40,7 +39,7 @@ test.describe(
       await maps.waitForLayersToLoad();
 
       await test.step('should show unsaved layer in layer TOC', async () => {
-        await expect.poll(() => layerToggleButton.isVisible()).toBe(true);
+        await expect.poll(() => maps.doesLayerExist(INDEX_PATTERN)).toBe(true);
       });
 
       await test.step('should disable save button when map has unsaved changes', async () => {
@@ -50,7 +49,7 @@ test.describe(
       await test.step('should remove layer on cancel', async () => {
         await page.testSubj.click('layerAddCancelButton');
         await expect.poll(() => maps.layerAddForm.isVisible()).toBe(false);
-        await expect.poll(() => layerToggleButton.isVisible()).toBe(false);
+        await expect.poll(() => maps.doesLayerExist(INDEX_PATTERN)).toBe(false);
       });
 
       await test.step('should enable save button when map does not have unsaved changes', async () => {
