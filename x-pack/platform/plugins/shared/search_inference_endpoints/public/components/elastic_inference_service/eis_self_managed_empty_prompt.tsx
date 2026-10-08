@@ -64,7 +64,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.topProviders',
-              { defaultMessage: 'Choose from the top providers and newest models' }
+              { defaultMessage: 'Choose from top providers and the latest models' }
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.regionRestriction',
