@@ -9,7 +9,7 @@
 
 import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
-import type { ContractContextOptions } from '../create_contract_context';
+import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
 import type { QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
@@ -40,6 +40,14 @@ export type RecordingFinding =
       readonly rejected: readonly RejectedInput[];
     }
   | { readonly kind: 'handler-error'; readonly action: string; readonly message: string }
+  /** The action threw before sending a request under every auth type it was run with. */
+  | {
+      readonly kind: 'no-auth-type';
+      readonly action: string;
+      readonly errors: Readonly<Record<string, string>>;
+    }
+  /** The contract context can't be built for the auth type, so no action ran with it. */
+  | { readonly kind: 'auth-type-error'; readonly authType: string; readonly message: string }
   | {
       readonly kind: 'request-violation';
       readonly action: string;
@@ -99,22 +107,36 @@ const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, u
   return (config as Record<string, unknown> | undefined) ?? {};
 };
 
+const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
+  auth?.types.length
+    ? auth.types.map((definition) =>
+        typeof definition === 'string' ? definition : definition.type
+      )
+    : ['none'];
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 /**
  * Runs every action of a connector against the contract mock, with inputs generated from its
- * schema, and records the vendor operations each one calls. Handlers that throw, e.g. on a
- * sampled response they can't use, still count for the requests they made before.
+ * schema, under each of its auth types, and records the vendor operations the runs call.
+ * Handlers that throw, e.g. on a sampled response they can't use, still count for the requests
+ * they made before.
  */
 export const recordActions = async ({
   connector,
   specs,
   fixtures = {},
   config,
+  authType,
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
+  const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
   const findings: RecordingFinding[] = [];
+  const brokenAuthTypes = new Map<string, string>();
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
@@ -126,24 +148,58 @@ export const recordActions = async ({
       findings.push({ kind: 'no-input', action, rejected });
     }
     const calls: ContractCall[] = [];
-    for (const input of inputs) {
-      const { mock, runAction } = await createContractContext({
-        ...contextOptions,
-        connector,
-        config: connectorConfig,
-        specs,
-        fixtures: toResponseFixtures(fixture.responses),
-      });
-      try {
-        await runAction(action, input);
-      } catch (error) {
-        findings.push({ kind: 'handler-error', action, message: (error as Error).message });
-      }
-      calls.push(...mock.calls);
-      if (input === inputs[0]) {
-        for (const { operation, violations } of mock.rejectedResponses) {
-          findings.push({ kind: 'rejected-response', action, operation, violations });
+    // Per auth type under which every run threw without sending a request, the first error.
+    const unavailable: Record<string, string> = {};
+    const handlerErrors: Record<string, string[]> = {};
+    const ran: string[] = [];
+    for (const id of authTypes.filter((candidate) => !brokenAuthTypes.has(candidate))) {
+      const errors: string[] = [];
+      let worked = false;
+      for (const input of inputs) {
+        let context: ContractContext;
+        try {
+          context = await createContractContext({
+            ...contextOptions,
+            connector,
+            authType: id,
+            config: connectorConfig,
+            specs,
+            fixtures: toResponseFixtures(fixture.responses),
+          });
+        } catch (error) {
+          brokenAuthTypes.set(id, errorMessage(error));
+          break;
         }
+        const { mock, runAction } = context;
+        try {
+          await runAction(action, input);
+          worked = true;
+        } catch (error) {
+          errors.push(errorMessage(error));
+        }
+        worked ||= mock.calls.length > 0;
+        calls.push(...mock.calls);
+        if (ran.length === 0 && input === inputs[0]) {
+          for (const { operation, violations } of mock.rejectedResponses) {
+            findings.push({ kind: 'rejected-response', action, operation, violations });
+          }
+        }
+      }
+      if (!brokenAuthTypes.has(id)) {
+        ran.push(id);
+        handlerErrors[id] = errors;
+        if (!worked && errors.length > 0) {
+          unavailable[id] = errors[0];
+        }
+      }
+    }
+    if (ran.length > 0 && ran.every((id) => id in unavailable)) {
+      findings.push({ kind: 'no-auth-type', action, errors: unavailable });
+    }
+    // An action that refuses some auth types works under the others, so only those count.
+    for (const id of ran.filter((candidate) => !(candidate in unavailable))) {
+      for (const message of handlerErrors[id]) {
+        findings.push({ kind: 'handler-error', action, message });
       }
     }
 
@@ -199,6 +255,14 @@ export const recordActions = async ({
     if (notFound.length > 0) {
       unmatched[action] = uniqueSorted(notFound, ({ method, path }) => `${path} ${method}`);
     }
+  }
+  if (brokenAuthTypes.size === authTypes.length && authTypes.length > 0) {
+    throw new Error(
+      [...brokenAuthTypes].map(([id, message]) => `Auth type ${id}: ${message}`).join('\n')
+    );
+  }
+  for (const [id, message] of brokenAuthTypes) {
+    findings.push({ kind: 'auth-type-error', authType: id, message });
   }
   return {
     operations,

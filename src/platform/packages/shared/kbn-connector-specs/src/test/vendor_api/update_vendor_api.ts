@@ -118,6 +118,14 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
       return `${finding.action}: the handler threw: ${finding.message}`;
+    case 'no-auth-type':
+      return `${
+        finding.action
+      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+        .map(([authType, message]) => `${authType}: ${message}`)
+        .join('; ')}`;
+    case 'auth-type-error':
+      return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
@@ -134,6 +142,7 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
+  kind === 'no-auth-type' ||
   kind === 'request-violation' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||

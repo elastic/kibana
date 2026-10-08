@@ -608,7 +608,7 @@ The folder holds:
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
-Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults.
+Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
 Connectors without a usable vendor spec, such as database drivers, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Connectors whose artifacts haven't been recorded yet are listed there too, until [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
@@ -621,9 +621,10 @@ The script fails when:
 - a `queries` entry is never needed;
 - a response override breaks the spec;
 - a request matches no operation and isn't listed in `unmatched`;
-- an operation looks like it returns a collection, but has no `pagination` and none could be proposed.
+- an operation looks like it returns a collection, but has no `pagination` and none could be proposed;
+- an action throws before sending a request under every auth type, so nothing it calls would be recorded.
 
-Handler errors and proposed `pagination` descriptors are reported as warnings.
+Other handler errors, auth types that can't be used against the contract mock, and proposed `pagination` descriptors are reported as warnings. An action's errors under an auth type it refuses are left out when another auth type works.
 
 ### Contract test
 
