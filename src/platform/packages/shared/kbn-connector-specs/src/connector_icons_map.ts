@@ -433,6 +433,10 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.azure_sql',
+    lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
+  ],
+  [
     '.solarwinds_platform',
     lazy(
       () =>

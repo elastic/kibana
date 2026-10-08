@@ -51,8 +51,30 @@ import {
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
 } from './errors';
+import {
+  ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+  ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  type EscalationInvestigationEventData,
+} from '../../../common/escalations/conversation_events';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 import { copyInvestigationAttachments } from './copy_investigation_attachments';
+
+/** Agent Builder rejects `addEvents` calls with more events than this. */
+const MAX_EVENTS_PER_REQUEST = 10;
+
+const toEventData = ({
+  id,
+  title,
+  agent_id: agentId,
+}: {
+  id: string;
+  title: string;
+  agent_id?: string;
+}): EscalationInvestigationEventData => ({
+  investigation_id: id,
+  title,
+  ...(agentId ? { agent_id: agentId } : {}),
+});
 
 /**
  * Builds the Elasticsearch filter clause for the list endpoint.
@@ -187,7 +209,7 @@ export class EscalationsService {
       `Creating escalation from investigation ${body.linked_investigation_id} with visibility ${body.visibility}`
     );
 
-    return client.create({
+    const escalation = await client.create({
       // Omit agentId so it defaults to the shared default agent, which all users can access.
       // Inheriting the investigation's agent_id would hide the escalation from collaborators
       // who lack access to that agent.
@@ -196,6 +218,15 @@ export class EscalationsService {
       metadata,
       accessControl,
     });
+
+    await this.addTimelineEvents(client, escalation.id, [
+      {
+        type: ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+        data: toEventData(investigation),
+      },
+    ]);
+
+    return escalation;
   }
 
   async link(
@@ -240,7 +271,45 @@ export class EscalationsService {
       { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union },
       { access: 'converse' }
     );
+
+    const previouslyLinked = new Set(prev);
+    await this.addTimelineEvents(
+      client,
+      escalationId,
+      toAdd
+        .filter((id, index) => !previouslyLinked.has(id) && toAdd.indexOf(id) === index)
+        .map((id) => ({
+          type: ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+          data: toEventData(resolved.get(id)!),
+        }))
+    );
+
     return conversation;
+  }
+
+  /**
+   * Writes informational events to the escalation's timeline. Best-effort like `addAttachments`:
+   * a failed note is logged and never fails the escalation write that preceded it.
+   */
+  private async addTimelineEvents(
+    client: ConversationPublicClient,
+    escalationId: string,
+    events: Array<{ type: string; data: EscalationInvestigationEventData }>
+  ): Promise<void> {
+    for (let i = 0; i < events.length; i += MAX_EVENTS_PER_REQUEST) {
+      try {
+        await client.addEvents({
+          conversationId: escalationId,
+          events: events.slice(i, i + MAX_EVENTS_PER_REQUEST),
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to add timeline events to escalation ${escalationId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   /**

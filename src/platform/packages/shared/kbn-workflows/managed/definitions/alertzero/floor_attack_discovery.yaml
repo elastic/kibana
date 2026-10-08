@@ -57,6 +57,9 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-security-attack-discovery-worker
+      # Runs the global runner, and every child it starts, as this worker's service
+      # account. Requires `run_as`; the worker cannot be enabled without one.
+      run-as-mode: inherit
       inputs:
         # All three worker settings are forwarded. `autonomy` decides how the child's
         # review handles a true-positive verdict; the other two are traceability only
