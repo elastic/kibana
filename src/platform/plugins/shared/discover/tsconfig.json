@@ -172,7 +172,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-session-constants",
     "@kbn/field-types",
-    "@kbn/esql-browser"
+    "@kbn/esql-browser",
+    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }
