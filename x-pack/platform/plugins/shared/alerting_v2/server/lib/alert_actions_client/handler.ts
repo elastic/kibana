@@ -26,6 +26,12 @@ import type { AlertActionState } from './context_loaders/load_alert_action_state
 export interface PreparedAction {
   alertActionDoc: AlertActionDocument;
   ruleEvent?: AlertEventDocument;
+  /**
+   * The alert's ack / assignee / tags once this action is applied. Set by the
+   * handlers that declare {@link ActionHandler.requiresActionState}, so a bulk
+   * batch can check a later item for the same alert against it.
+   */
+  updatedActionState?: AlertActionState;
 }
 
 /**

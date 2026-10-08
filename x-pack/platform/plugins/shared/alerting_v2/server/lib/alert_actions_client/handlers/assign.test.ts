@@ -28,6 +28,12 @@ describe('assignHandler', () => {
     expect(prepared.alertActionDoc).toBe(item.alertActionDoc);
   });
 
+  it('reports the requested assignee once applied', () => {
+    expect(assignHandler.prepare(buildItem('user-2', 'user-1')).updatedActionState).toEqual(
+      expect.objectContaining({ assignee_uid: 'user-2' })
+    );
+  });
+
   it('accepts assigning an unassigned alert', () => {
     expect(() => assignHandler.prepare(buildItem('user-1', null))).not.toThrow();
   });

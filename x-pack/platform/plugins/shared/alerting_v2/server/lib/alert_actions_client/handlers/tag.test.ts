@@ -28,6 +28,12 @@ describe('tagHandler', () => {
     expect(prepared.alertActionDoc).toBe(item.alertActionDoc);
   });
 
+  it('reports the requested tags once applied', () => {
+    expect(tagHandler.prepare(buildItem(['prod', 'db'], ['prod'])).updatedActionState).toEqual(
+      expect.objectContaining({ tags: ['prod', 'db'] })
+    );
+  });
+
   it('accepts tagging an untagged alert', () => {
     expect(() => tagHandler.prepare(buildItem(['prod'], []))).not.toThrow();
   });

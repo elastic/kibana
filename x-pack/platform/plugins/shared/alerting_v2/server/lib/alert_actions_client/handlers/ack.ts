@@ -41,7 +41,7 @@ export const ackHandler: ActionHandler<AckAlertActionBody> = {
       });
     }
 
-    return { alertActionDoc };
+    return { alertActionDoc, updatedActionState: { ...actionState, acknowledged: true } };
   },
 };
 
@@ -58,6 +58,6 @@ export const unackHandler: ActionHandler<UnackAlertActionBody> = {
       });
     }
 
-    return { alertActionDoc };
+    return { alertActionDoc, updatedActionState: { ...actionState, acknowledged: false } };
   },
 };

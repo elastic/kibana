@@ -793,5 +793,130 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toMatchObject({ alert_id: 'episode-2' });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(1);
     });
+
+    it('rejects a repeat of an earlier item for the same alert in the batch', async () => {
+      const items: BulkCreateEpisodeAlertActionItemBody[] = [
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      ];
+
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      const result = await client.createBulkEpisodeActions(items);
+
+      expect(result.affected_count).toBe(1);
+      expect(result.errors).toEqual([
+        {
+          id: 'episode-1',
+          error: expect.objectContaining({ code: 'INVALID_ALERT_STATE_TRANSITION' }),
+        },
+      ]);
+      expect(getDocs()).toHaveLength(1);
+      expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(1);
+    });
+
+    it('checks each item for the same alert against the state the previous one left', async () => {
+      const items: BulkCreateEpisodeAlertActionItemBody[] = [
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['prod'] },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['db'] },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['db'] },
+      ];
+
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      const result = await client.createBulkEpisodeActions(items);
+
+      expect(result.affected_count).toBe(2);
+      expect(result.errors).toEqual([
+        { id: 'episode-1', error: expect.objectContaining({ code: 'ALERT_ACTION_NO_OP' }) },
+      ]);
+      expect(getDocs()).toEqual([
+        expect.objectContaining({ tags: ['prod'] }),
+        expect.objectContaining({ tags: ['db'] }),
+      ]);
+    });
+
+    it('checks each assign for the same alert against the assignee the previous one left', async () => {
+      const items: BulkCreateEpisodeAlertActionItemBody[] = [
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          assignee_uid: 'user-1',
+        },
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          assignee_uid: 'user-1',
+        },
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          assignee_uid: null,
+        },
+      ];
+
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      const result = await client.createBulkEpisodeActions(items);
+
+      expect(result.affected_count).toBe(2);
+      expect(result.errors).toEqual([
+        { id: 'episode-1', error: expect.objectContaining({ code: 'ALERT_ACTION_NO_OP' }) },
+      ]);
+      expect(getDocs()).toEqual([
+        expect.objectContaining({ assignee_uid: 'user-1' }),
+        expect.objectContaining({ assignee_uid: null }),
+      ]);
+    });
+
+    it('rejects a repeated lifecycle item for the same alert in the batch', async () => {
+      const items: BulkCreateEpisodeAlertActionItemBody[] = [
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ];
+
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        );
+
+      const result = await client.createBulkEpisodeActions(items);
+
+      expect(result.affected_count).toBe(1);
+      expect(result.errors).toEqual([
+        {
+          id: 'episode-1',
+          error: expect.objectContaining({
+            code: 'INVALID_ALERT_STATE_TRANSITION',
+            details: expect.objectContaining({ alert_status: 'inactive' }),
+          }),
+        },
+      ]);
+    });
   });
 });

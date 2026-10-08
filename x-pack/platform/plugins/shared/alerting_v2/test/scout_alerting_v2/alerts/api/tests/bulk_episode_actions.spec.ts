@@ -701,6 +701,39 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     }
   );
 
+  apiTest(
+    'precondition: rejects a repeat of an earlier item for the same alert in the batch',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-ack-duplicate-item-rule';
+      const episodeId = 'bulk-ack-duplicate-item-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-duplicate-item-group'),
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: episodeId }, { alert_id: episodeId }] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(episodeId);
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
+      expect(actions).toHaveLength(1);
+    }
+  );
+
   apiTest('schema: rejects a bare array body with 400', async ({ apiClient }) => {
     // The body must be an `{ items: [...] }` envelope, not a bare array.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
