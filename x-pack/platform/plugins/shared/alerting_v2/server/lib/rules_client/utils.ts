@@ -36,6 +36,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { applyPatch } from '../apply_patch';
 import {
   toApiArtifacts,
+  toApiDescription,
   toApiGrouping,
   toApiQuery,
   toApiStateTransition,
@@ -291,7 +292,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
   kind: attrs.kind,
   metadata: {
     name: attrs.metadata.name,
-    description: attrs.metadata.description,
+    description: toApiDescription(attrs.metadata.description),
     tags: attrs.metadata.tags,
     routing_tags: attrs.metadata.routing_tags,
     builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
@@ -468,7 +469,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
-      description: attrs.metadata.description,
+      description: toApiDescription(attrs.metadata.description),
       tags: attrs.metadata.tags,
       routing_tags: attrs.metadata.routing_tags,
       builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,

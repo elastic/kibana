@@ -119,6 +119,15 @@ describe('composeFormToCreateRequest', () => {
     expect(result.metadata.tags).toBeUndefined();
   });
 
+  it('omits the description the user never typed rather than sending an empty string', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, description: '' },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.metadata).not.toHaveProperty('description');
+  });
+
   it('maps routing tags when present and omits them when empty', () => {
     const withRoutingTags = composeFormToCreateRequest({
       ...baseFormValues,
@@ -423,10 +432,13 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.query).toEqual({ base: 'FROM logs-*', breach: null });
   });
 
-  it('nullifies the description the user cleared rather than omitting it', () => {
+  it.each([
+    ['never set', undefined],
+    ['emptied in the field', ''],
+  ])('nullifies a description %s rather than omitting it', (_label, description) => {
     const result = composeFormToUpdateRequest({
       ...baseFormValues,
-      metadata: { ...baseFormValues.metadata, description: undefined },
+      metadata: { ...baseFormValues.metadata, description },
     });
 
     expect(result.metadata?.description).toBeNull();

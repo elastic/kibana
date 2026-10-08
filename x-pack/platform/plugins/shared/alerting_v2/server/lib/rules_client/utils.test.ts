@@ -214,6 +214,35 @@ describe('utils', () => {
       expect(result.metadata.description).toBe('Existing desc');
     });
 
+    it('clears the description when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', description: 'Existing desc' },
+      });
+      const updateData: UpdateRuleData = { metadata: { description: null } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.description).toBeUndefined();
+    });
+
+    it('patches a rule whose description is a legacy empty string on disk', () => {
+      const existing = createRuleSoAttributes({ metadata: { name: 'original', description: '' } });
+      const updateData: UpdateRuleData = { metadata: { name: 'renamed' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.name).toBe('renamed');
+      expect(result.metadata.description).toBeUndefined();
+    });
+
     it('clears tags when update sends null', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'original', tags: ['prod', 'infra'] },
@@ -756,6 +785,15 @@ describe('utils', () => {
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.artifacts).toBeUndefined();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty description as an absent key', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', description: '' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.description).toBeUndefined();
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 

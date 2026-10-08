@@ -204,6 +204,10 @@ export const toApiQuery = (query: ReadableQuery): Query => ({
   ...(hasBreachCondition(query.breach) ? { breach: { segment: query.breach.segment } } : {}),
 });
 
+export const toApiDescription = (
+  description: RuleSavedObjectAttributes['metadata']['description']
+): string | undefined => description || undefined;
+
 export const toApiArtifacts = (
   artifacts: RuleSavedObjectAttributes['artifacts']
 ): RuleSavedObjectAttributes['artifacts'] =>

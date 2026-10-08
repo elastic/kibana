@@ -765,6 +765,17 @@ describe('rule_request_mappers', () => {
       expect(result.metadata.description).toBe('Create rule description');
     });
 
+    it('omits a description the user never typed rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.metadata).not.toHaveProperty('description');
+    });
+
     it('produces a superset of mapFormValuesToRuleRequest', () => {
       const common = mapFormValuesToRuleRequest(baseFormValues);
       const create = mapFormValuesToCreateRequest(baseFormValues);
@@ -966,6 +977,17 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.metadata?.routing_tags).toEqual(['sre']);
+    });
+
+    it('nullifies a description the user emptied rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.description).toBeNull();
     });
 
     it('passes through a description and tags the user kept', () => {

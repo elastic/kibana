@@ -305,11 +305,12 @@ describe('rule template create-rule schema coupling', () => {
               "properties": Object {
                 "builder": Object {
                   "additionalProperties": false,
-                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL; send \`null\` on PATCH to clear it.",
                   "properties": Object {
                     "type": Object {
                       "description": "Rule builder type.",
                       "maxLength": 64,
+                      "minLength": 1,
                       "type": "string",
                     },
                   },
@@ -319,8 +320,9 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "object",
                 },
                 "description": Object {
-                  "description": "Human-readable description of the rule.",
+                  "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
                   "maxLength": 1024,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "name": Object {

@@ -403,17 +403,17 @@ Use \`set_metadata\` to name the rule and add a description or \`tags\` so the u
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`name\` | string | optional | Rule name (must be unique within the space). (min length: 1, max length: 256) |
-| \`description\` | string | optional | Human-readable description of the rule. (max length: 1024) |
+| \`description\` | string | optional | Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected. (min length: 1, max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`routing_tags\` | string[] | optional | Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\". (min items: 1, max items: 20) |
-| \`builder\` | object | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL. |
+| \`builder\` | object | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL; send \`null\` on PATCH to clear it. |
 | \`operation\` | \\"set_metadata\\" | required |  |
 
 ##### \`builder\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`type\` | string | required | Rule builder type. (max length: 64) |
+| \`type\` | string | required | Rule builder type. (min length: 1, max length: 64) |
 
 #### \`operation: \\"set_kind\\"\`
 

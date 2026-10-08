@@ -41,7 +41,7 @@ import {
 
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
-  description: metadata.description,
+  ...(metadata.description ? { description: metadata.description } : {}),
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
   ...(metadata.routingTags?.length ? { routing_tags: metadata.routingTags } : {}),
 });
@@ -123,7 +123,7 @@ export const toUpdateRuleData = (request: RuleRequestCommon): UpdateRuleData => 
     ...rest,
     metadata: {
       ...metadata,
-      description: metadata.description ?? null,
+      description: metadata.description || null,
       tags: metadata.tags ?? null,
       routing_tags: metadata.routing_tags ?? null,
     },

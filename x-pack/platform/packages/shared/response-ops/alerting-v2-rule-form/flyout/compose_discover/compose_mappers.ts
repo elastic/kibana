@@ -39,7 +39,7 @@ export const composeFormToCreateRequest = (
     kind: formValues.kind,
     metadata: {
       name: formValues.metadata.name,
-      description: formValues.metadata.description,
+      ...(formValues.metadata.description ? { description: formValues.metadata.description } : {}),
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
       ...(formValues.metadata.routingTags?.length
         ? { routing_tags: formValues.metadata.routingTags }

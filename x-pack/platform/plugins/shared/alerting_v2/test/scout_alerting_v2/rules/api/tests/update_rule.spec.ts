@@ -491,6 +491,25 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  // `null` is the only way to clear a description; an empty string names no new value.
+  apiTest(
+    'validation: rejects an empty or blank metadata.description',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-with-blank-description' } })
+      );
+
+      for (const description of ['', '   ']) {
+        const response = await apiClient.patch(getRuleUrl(created.id), {
+          headers: writerHeaders,
+          body: { metadata: { description } },
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    }
+  );
+
   apiTest(
     'validation: should reject body with unknown metadata keys (strict schema)',
     async ({ apiClient, apiServices }) => {

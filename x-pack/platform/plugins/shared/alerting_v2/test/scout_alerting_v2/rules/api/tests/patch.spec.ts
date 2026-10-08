@@ -72,6 +72,9 @@ apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, 
 
     expect(after.updatedAt).not.toBe(before.updatedAt);
     expect(findNullPaths(after)).toStrictEqual([]);
+
+    const projected = await rules.get(created.id);
+    expect(projected.metadata).toStrictEqual({ name: 'patch-clear' });
   });
 
   apiTest('leaves every branch the body omits byte-identical on disk', async ({ apiServices }) => {

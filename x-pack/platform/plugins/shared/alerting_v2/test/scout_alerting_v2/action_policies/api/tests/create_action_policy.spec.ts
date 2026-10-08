@@ -231,6 +231,18 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
+  apiTest('validation: rejects an empty or blank description', async ({ apiClient }) => {
+    for (const description of ['', '   ']) {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({ description }),
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
