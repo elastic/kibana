@@ -1,9 +1,7 @@
 ---
 description: >-
   Shared setup step: installs the pinned Buildkite CLI (`bk`) on the self-hosted
-  runner. Consumers pass the masked authentication step output to engine.env,
-  so only the agent execution step receives BUILDKITE_API_TOKEN.
-  Keep the pinned version/SHA here, in one place.
+  runner. Installs the Buildkite CLI version specified here and verifies its download checksum. Provides the token explicitly to the step running the AI agent, instead of making it available to every later step. GitHub masks the token in logs.
 steps:
   - name: Install Buildkite CLI
     env:
