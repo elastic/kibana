@@ -73,7 +73,8 @@ interface ExpandedEntityRowProps {
   /** Grid density, so child rows match the height of grid rows. */
   cellPadding: EuiDataGridStyleCellPaddings;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
-  columns: EuiDataGridColumn[];
+  /** The grid's columns by id. */
+  columnsById: ReadonlyMap<string, EuiDataGridColumn>;
   euiTheme: EuiThemeComputed;
   watchlistNames: Map<string, string>;
   handlers?: CellHandlers;
@@ -97,7 +98,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   isEnriching,
   cellPadding,
   visCols,
-  columns,
+  columnsById,
   euiTheme,
   watchlistNames,
   handlers,
@@ -121,7 +122,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
         `}
       >
         {visCols.map((col) => {
-          const colDef = columns.find((c) => c.id === col.id);
+          const colDef = columnsById.get(col.id);
           if (!colDef) {
             const width = 'width' in col && typeof col.width === 'number' ? col.width : 36;
             return <div key={col.id} style={{ width, flexShrink: 0 }} />;
@@ -237,7 +238,8 @@ const ExpandedEntityTreeConnector: React.FC<ChildTreeConnectorProps> = ({ isLast
 );
 
 interface ExpandedEntityGroupProps
-  extends Omit<ExpandedEntityRowProps, 'child' | 'isLast' | 'isEnriching'> {
+  extends Omit<ExpandedEntityRowProps, 'child' | 'isLast' | 'isEnriching' | 'columnsById'> {
+  columns: EuiDataGridColumn[];
   entityId: string;
   timeRange: TimeRange;
   keepFields: readonly string[];
@@ -248,6 +250,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
   entityId,
   timeRange,
   keepFields,
+  columns,
   ...rowProps
 }) => {
   const {
@@ -260,6 +263,10 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
     () => records.map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),
     [records]
   );
+  const columnsById = useMemo(
+    () => new Map(columns.map((column) => [column.id, column])),
+    [columns]
+  );
   const { euiTheme, cellPadding } = rowProps;
   return (
     <>
@@ -269,6 +276,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
           child={child}
           isLast={i === rows.length - 1}
           isEnriching={isEnriching}
+          columnsById={columnsById}
           {...rowProps}
         />
       ))}
