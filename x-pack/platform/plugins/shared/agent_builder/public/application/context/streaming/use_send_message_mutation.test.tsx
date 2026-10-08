@@ -116,12 +116,14 @@ describe('useSendMessageMutation', () => {
     });
   });
 
-  it('drops the query string from the screen context url', async () => {
-    window.history.pushState(
-      {},
-      '',
-      '/app/agent_builder?additional-instructions=injected#/route?injected=1'
-    );
+  it.each([
+    ['/app/agent_builder', '/app/agent_builder'],
+    ['/app/agent_builder?injected=1', '/app/agent_builder'],
+    ['/app/dev_tools#/console', '/app/dev_tools#/console'],
+    ['/app/dev_tools#/console?injected=1', '/app/dev_tools#/console'],
+    ['/app/agent_builder?injected=1#/route?injected=2', '/app/agent_builder#/route'],
+  ])('sends %s as screen context url %s', async (location, expected) => {
+    window.history.pushState({}, '', location);
     const { result } = setup();
 
     act(() => result.current.mutate(vars));
@@ -130,7 +132,7 @@ describe('useSendMessageMutation', () => {
     expect(mockChat.mock.calls[0][0].attachments).toContainEqual(
       expect.objectContaining({
         type: 'screen_context',
-        data: { url: `${window.location.origin}/app/agent_builder#/route` },
+        data: { url: `${window.location.origin}${expected}` },
       })
     );
   });
