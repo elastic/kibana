@@ -20,10 +20,10 @@ import type {
 import type { ESQLMessage } from '../definitions/types';
 
 /**
- * Parameters passed to {@link ICommandMethods.fieldsInScope} to reshape the query used for
+ * Parameters passed to {@link ICommandMethods.columnsInScope} to reshape the query used for
  * computing the columns available at the cursor.
  */
-export interface FieldsInScopeParams {
+export interface ColumnsInScopeParams {
   /** The query parsed up to the relevant position. */
   root: ESQLAstQueryExpression;
   /** The text `root` was parsed from (the query up to the cursor during autocomplete). */
@@ -108,7 +108,7 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * FORK branches, and STATS/INLINE STATS groupings (`STATS AVG(x) BY a = y`) — override this to
    * expose those columns too. Return `undefined` to fall back to the default.
    */
-  fieldsInScope?: (params: FieldsInScopeParams) => ESQLAstQueryExpression | undefined;
+  columnsInScope?: (params: ColumnsInScopeParams) => ESQLAstQueryExpression | undefined;
 }
 
 export interface ICommandMetadata {

@@ -9,7 +9,7 @@
 
 import type { ESQLAstItem, ESQLAstQueryExpression, ESQLCommand } from '@elastic/esql/types';
 import { Builder, Parser, isAssignment, isColumn } from '@elastic/esql';
-import type { FieldsInScopeParams } from '../registry';
+import type { ColumnsInScopeParams } from '../registry';
 import {
   findAstPosition,
   getBracketsToClose,
@@ -79,11 +79,11 @@ const groupingToEvalArg = (grouping: ESQLAstItem, fullText: string): ESQLAstItem
  * per-aggregation WHERE clause. Expose them by rewriting the stats command into an EVAL of its
  * groupings, so they are both resolvable and suggested there — but not within the BY clause itself.
  */
-export const fieldsInScope = ({
+export const columnsInScope = ({
   root,
   fullText,
   cursorOffset,
-}: FieldsInScopeParams): ESQLAstQueryExpression | undefined => {
+}: ColumnsInScopeParams): ESQLAstQueryExpression | undefined => {
   if (cursorOffset === undefined) {
     return undefined;
   }

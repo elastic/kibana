@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
-import type { FieldsInScopeParams } from '../registry';
+import type { ColumnsInScopeParams } from '../registry';
 import { getBracketsToClose } from '../../definitions/utils/ast';
 import { endsWithComma } from '../../definitions/utils/regex';
 import { expandEvals } from '../../../language/shared/expand_evals';
@@ -21,10 +21,10 @@ import { expandEvals } from '../../../language/shared/expand_evals';
  * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = /
  * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1
  */
-export const fieldsInScope = ({
+export const columnsInScope = ({
   root,
   queryString,
-}: FieldsInScopeParams): ESQLAstQueryExpression | undefined => {
+}: ColumnsInScopeParams): ESQLAstQueryExpression | undefined => {
   const { commands } = root;
   const lastCommand = commands[commands.length - 1];
 

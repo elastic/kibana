@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstForkCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
-import type { FieldsInScopeParams } from '../registry';
+import type { ColumnsInScopeParams } from '../registry';
 
 /**
  * When the cursor is inside a FORK branch, the columns in scope are those produced by the branch
@@ -18,9 +18,9 @@ import type { FieldsInScopeParams } from '../registry';
  * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
  * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
  */
-export const fieldsInScope = ({
+export const columnsInScope = ({
   root,
-}: FieldsInScopeParams): ESQLAstQueryExpression | undefined => {
+}: ColumnsInScopeParams): ESQLAstQueryExpression | undefined => {
   const { commands } = root;
   const forkCommand = commands[commands.length - 1] as ESQLAstForkCommand;
 

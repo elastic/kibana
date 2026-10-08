@@ -11,7 +11,7 @@ import { columnsAfter } from './columns_after';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import { summary } from './summary';
-import { fieldsInScope } from '../stats/fields_in_scope';
+import { columnsInScope } from '../stats/columns_in_scope';
 import type { ICommandContext } from '../types';
 import type { ICommandMethods } from '../registry';
 
@@ -20,7 +20,7 @@ const inlineStatsCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
   columnsAfter,
   summary,
-  fieldsInScope,
+  columnsInScope,
 };
 
 export const inlineStatsCommand = {

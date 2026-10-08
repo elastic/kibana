@@ -18,7 +18,7 @@ import { queryUntilPreviousCommand } from './query_until_previous_command';
  *
  * Generally, this is the user's query up to the end of the previous command, but commands that
  * define columns usable within themselves (EVAL, FORK, STATS ... BY) reshape it through their
- * `fieldsInScope` method so those columns are available too.
+ * `columnsInScope` method so those columns are available too.
  *
  * IMPORTANT: the AST nodes in the new query still reference locations in the original query text
  *
@@ -34,11 +34,11 @@ export function getQueryForFields(
   options?: { fullText?: string; cursorOffset?: number }
 ): ESQLAstQueryExpression {
   const lastCommand = root.commands[root.commands.length - 1];
-  const fieldsInScope =
-    lastCommand && esqlCommandRegistry.getCommandMethods(lastCommand.name)?.fieldsInScope;
+  const columnsInScope =
+    lastCommand && esqlCommandRegistry.getCommandMethods(lastCommand.name)?.columnsInScope;
 
   return (
-    fieldsInScope?.({
+    columnsInScope?.({
       root,
       queryString,
       fullText: options?.fullText ?? queryString,
