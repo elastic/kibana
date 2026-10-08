@@ -38,7 +38,11 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
       expect(role.elasticsearch.cluster).toEqual(['monitor_inference']);
       expect(role.elasticsearch.indices).toContainEqual({
         names: ['ai-index-idx-security-investigations'],
-        privileges: ['read', 'index', 'auto_configure'],
+        privileges: ['read', 'view_index_metadata', 'index', 'auto_configure'],
+      });
+      expect(role.elasticsearch.indices).toContainEqual({
+        names: ['.ai-index-idx-elastic-index'],
+        privileges: ['read', 'view_index_metadata'],
       });
       expect(role.kibana).toHaveLength(1);
       expect(role.kibana[0].spaces).toEqual(['*']);

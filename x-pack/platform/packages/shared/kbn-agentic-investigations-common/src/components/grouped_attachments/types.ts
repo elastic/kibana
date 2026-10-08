@@ -12,6 +12,8 @@ export enum FlyoutGroupedAttachments {
   ALERTS = 'alerts',
   ATTACKS = 'attacks',
   RULES = 'rules',
+  TIMELINE = 'timeline',
+  IOCS = 'iocs',
 }
 
 export interface FlyoutGroupedAttachmentRendererProps {
