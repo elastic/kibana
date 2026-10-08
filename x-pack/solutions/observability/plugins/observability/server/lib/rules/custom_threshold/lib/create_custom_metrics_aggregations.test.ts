@@ -229,7 +229,7 @@ describe('createCustomMetricsAggregations', () => {
         [{ name: 'A', aggType: Aggregators.LAST_VALUE, field: 'metric', filter: KQL_FILTER }],
         timeFrame,
         '@timestamp'
-      );
+      ) as Record<string, any>;
 
       expect(aggregations._aggregatedValue_A.filter.bool.must).toEqual([
         { exists: { field: 'metric' } },
