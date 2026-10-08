@@ -47,8 +47,12 @@ const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user
  * Risk score change is the current entity score minus the reference score.
  *
  * This is the boundary window of the risk movers tile, so its rows agree with the tile.
- * The two hours cover at least one hourly scoring run; the lower bound keeps the query
- * from reading all older history.
+ *
+ * Why: scoring runs hourly, so two hours cover at least one run, and the query reads one
+ * score per entity whatever the range. Reading every score in the range took ~46s at 30d;
+ * this takes ~0.5s (10M entities, 16GB ECH, Oct 2026).
+ * Consequence: an entity first scored inside the range has no reference, so it has no change.
+ * Counting it (vs its earliest score in the range) needs that full read; deferred past 9.6.
  */
 const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => {
   const windowStart = buildLookback(timeRange);

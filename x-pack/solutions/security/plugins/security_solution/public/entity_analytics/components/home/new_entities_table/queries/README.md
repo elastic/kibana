@@ -107,3 +107,8 @@ queries a large view runs. The tiles have their own snapshots. A change that sho
 results should leave the snapshots alone; one that should, should only change the lines it
 means to. Query changes so far were also checked on a 10M-entity ECH, comparing the rows and
 timings of the old and new queries.
+
+The reasons behind each limit and plan (the measurement, its date and cluster, and the options
+we rejected) are in comments next to the code they govern: `SPLIT_SORT_MIN_VIEW_SIZE`,
+`MAX_DIRECT_TARGETS`, `ID_LIST_CHUNK_SIZE`, `fetchAliasGroupsPage`, `buildReferenceScoreDocs`,
+`buildLookback`, and the risk tile queries. Re-measure before changing them.

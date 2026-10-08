@@ -29,10 +29,22 @@ import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '..
  * LOOKUP JOIN.
  */
 
-/** Views with fewer entities keep the general sort query, which is cheaper for them. */
+/**
+ * Views with fewer entities keep the general sort query.
+ *
+ * Why: the split sort avoids reading `entity.id` for every entity in view, but costs one or
+ * two extra queries, so it only pays off on large views.
+ * Measured (10M entities, 16GB ECH, Oct 2026): no filter 15–22s → 0.8–6s, a host filter
+ * 5–8s → 0.4–2s; the two lines cross at about 500k entities in view.
+ * Rejected: caching the value ids per filter set. It would only help pages inside the empty
+ * block, and goes stale as new alerts arrive.
+ */
 export const SPLIT_SORT_MIN_VIEW_SIZE = 500_000;
 
-/** Most value rows a split sort reads: ES|QL returns at most 10k rows. */
+/**
+ * Most value rows a split sort reads: ES|QL returns at most 10k rows. Above it, the split
+ * sort can't list the value ids to exclude from the empty rows, so the general query runs.
+ */
 export const MAX_VALUE_ROWS = 10_000;
 
 export interface SplitSortPlan {

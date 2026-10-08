@@ -47,7 +47,10 @@ const ENRICH_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Some columns of the entities table could not be loaded' }
 );
 
-/** Most rows the grid loads: it renders every loaded row, so it caps them. */
+/**
+ * Most rows the grid loads: its custom body renders every loaded row (no virtualization), so
+ * it caps them. Not yet profiled in Chrome; raise it if rendering 1k rows stays smooth.
+ */
 export const MAX_LOADED_ROWS = 500;
 
 /** `page`: the grid rows. `children`: the records of expanded groups. */

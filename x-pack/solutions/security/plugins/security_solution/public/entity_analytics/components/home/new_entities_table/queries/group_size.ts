@@ -201,10 +201,22 @@ const isAfterCursor =
     return cursor.sortDirection === 'desc' ? size < cursor.sortValue : size > cursor.sortValue;
   };
 
-/** Most targets a search page reads directly; above it, it reads the groups with aliases. */
+/**
+ * Most targets a search page reads directly; above it, it reads the groups with aliases.
+ *
+ * Why: the direct read costs grow with the matches, the groups read doesn't. ES|QL returns at
+ * most 10k rows, so the matches can't be listed past it anyway.
+ * Measured (10M entities, 16GB ECH, Oct 2026): a narrow search 0.6s here vs 2–3s through the
+ * groups; a broad search 2.5–4s, where the single search query timed out.
+ */
 const MAX_DIRECT_TARGETS = 10_000;
 
-/** Ids per IN list: ids run to about 100 characters, and an ES|QL statement is capped at 1MB. */
+/**
+ * Ids per IN list.
+ *
+ * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a
+ * 10k-id list fails ("ESQL statement is too large"). 2,000 ids stays well under the cap.
+ */
 const ID_LIST_CHUNK_SIZE = 2_000;
 
 /** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
@@ -304,8 +316,13 @@ const fetchSearchedTargetsPage = async (
 
 /**
  * The groups with aliases and a page of single entities, merged here. With a search, only
- * the groups whose target matches it. Grouping every entity in one query took about 20s for
- * 10M entities on ECH; this takes 2–5s.
+ * the groups whose target matches it.
+ *
+ * Why: most entities are alone in their group, so only the alias docs need grouping.
+ * Measured (10M entities, 16GB ECH, Oct 2026): grouping every entity in one query 20–25s;
+ * this 1.3–2.7s (a deep page 7s), with the same rows.
+ * Rejected: caching the groups with aliases between pages. It saves ~1s per page after the
+ * first, but would show stale group sizes as entities resolve.
  */
 const fetchAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
   const aliasGroups = await runQuery(buildAliasGroupsQuery(args));

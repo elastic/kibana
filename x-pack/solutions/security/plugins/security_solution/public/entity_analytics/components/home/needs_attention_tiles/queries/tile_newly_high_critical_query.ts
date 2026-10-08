@@ -30,7 +30,7 @@ import { buildLookback, getRiskScoreIndex } from '../../new_entities_table/queri
  * entity docs, so the cost grows with their number, not with the length of the period.
  *
  * Reading every risk doc in the period took 46s at 30d on 10M entities; this takes about
- * 0.5s with the same entities.
+ * 0.5s with the same entities (16GB ECH, Oct 2026).
  *
  * An entity qualifies when:
  *   - current_level_num >= 3  (is High or Critical right now)

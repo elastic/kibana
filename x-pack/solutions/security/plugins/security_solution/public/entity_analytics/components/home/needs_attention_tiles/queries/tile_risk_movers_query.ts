@@ -23,7 +23,8 @@ import { buildLookback, getRiskScoreIndex } from '../../new_entities_table/queri
  * The two branches are merged by `entity.id` instead of a LOOKUP JOIN. Only entities with a
  * current score can qualify, and the entity branch reads only those, so both branches stay
  * small. A LOOKUP JOIN of every boundary entity cost about 0.1ms per row on a 10M-entity
- * store (3.5s for 30k entities); the merge takes about 0.5s with the same entities.
+ * store (3.1–3.7s for 30k entities); the merge takes 0.4–0.6s with the same entities, and
+ * counts the same (16GB ECH, Oct 2026).
  *
  * Entity filters apply to the entity branch, so only entity docs in view take part.
  *
