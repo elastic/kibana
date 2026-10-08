@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
@@ -47,6 +47,23 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 
     return <div data-test-subj="savedQueriesDropdown">Saved Queries</div>;
   },
+}));
+
+// Mock the version options hook so tests don't need a live schema endpoint.
+const MOCK_VERSION_OPTIONS = [
+  { label: '5.23.1' },
+  { label: '5.23.0' },
+  { label: '5.22.0' },
+  { label: '5.0.0' },
+];
+jest.mock('./use_osquery_version_options', () => ({
+  useOsqueryVersionOptions: () => ({
+    options: MOCK_VERSION_OPTIONS,
+    osqueryVersion: '5.23.1',
+    pkgVersion: '1.35.1',
+    helpText:
+      'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.1: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.',
+  }),
 }));
 
 // Stub ScheduleSection so the flyout tests don't pull in the full EUI form
@@ -857,6 +874,34 @@ describe('QueryFlyout', () => {
       expect(saved.platform).toBe('windows');
     });
 
+    // The serializer drops a `version` equal to the pack default, so a legacy
+    // invalid pack default seeded into an overriding query must not block it.
+    it('does not block submit on an invalid pack default when overriding another field', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q3'],
+        packMinOsqueryVersion: 'latest',
+        packPlatform: 'linux',
+        defaultValue: {
+          id: 'q3',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          version: 'latest',
+          platform: 'windows',
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('version');
+      expect(saved.platform).toBe('windows');
+      expect(screen.queryByText(/is not a valid format/)).not.toBeInTheDocument();
+    });
+
     // Regression: with the toggle ON, the serializer deleted `result_type` when
     // it matched the pack default but left the seeded `snapshot`/`removed` pair
     // behind. The server decodes that pair as an explicit per-query override, so
@@ -1060,6 +1105,277 @@ describe('QueryFlyout', () => {
       await waitFor(() => expect(onSave).toHaveBeenCalled());
 
       expect(onSave.mock.calls[0][0].platform).toBe('windows');
+    });
+  });
+
+  describe('version field (useOsqueryVersionOptions integration)', () => {
+    it('shows help text with detected osquery and integration version', () => {
+      renderFlyout({ uniqueQueryIds: [] });
+
+      expect(
+        screen.getByText(
+          'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.1: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('typing an invalid version (latest) shows an error and does not select it', async () => {
+      const { getByTestId } = renderFlyout({ uniqueQueryIds: [] });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: 'latest' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+    });
+
+    it('a rejected typed version blocks submit instead of saving the previous value', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: '5.12.0',
+          shards: {},
+        },
+      });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.x' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => {
+        expect(screen.getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      // Let the submit's async validation settle before asserting it was blocked.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(onSave).not.toHaveBeenCalled();
+      expect(screen.getByText(/Version must be a numeric string/)).toBeInTheDocument();
+
+      fireEvent.change(comboBox, { target: { value: '5.19.1' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0].version).toBe('5.19.1');
+    });
+
+    it('clears the rejection error once the typed text is cleared after a blocked submit', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: '5.12.0',
+          shards: {},
+        },
+      });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.x' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(onSave).not.toHaveBeenCalled();
+
+      fireEvent.change(comboBox, { target: { value: '' } });
+      await waitFor(() => {
+        expect(screen.queryByText(/Version must be a numeric string/)).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      expect(onSave.mock.calls[0][0].version).toBe('5.12.0');
+    });
+
+    // With the toggle off the field is disabled and the serializer drops the
+    // query's version, so leftover rejected text must not block saving.
+    it('does not block submit with a rejected typed value after the override toggle is turned off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packMinOsqueryVersion: '5.10.0',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: '5.12.0',
+          shards: {},
+        },
+      });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.x' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => {
+        expect(screen.getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('osquery-query-override-pack-defaults'));
+      await waitFor(() => {
+        expect(screen.queryByText(/Version must be a numeric string/)).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      expect(onSave.mock.calls[0][0]).not.toHaveProperty('version');
+    });
+
+    it('typing a valid version (5.19.1) selects it and saves', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({ onSave, uniqueQueryIds: [] });
+
+      fireEvent.change(screen.getByRole('textbox', { name: /ID/i }), {
+        target: { value: 'my-query' },
+      });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.19.1' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Version must be a numeric string/)).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0].version).toBe('5.19.1');
+    });
+
+    it('renders the hook options in the dropdown with the live version first', () => {
+      const { getByTestId } = renderFlyout({ uniqueQueryIds: [] });
+
+      fireEvent.click(within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput'));
+
+      const options = screen.getAllByRole('option').map((o) => o.textContent);
+      expect(options[0]).toBe('5.23.1');
+      expect(options.some((o) => o?.startsWith('4.'))).toBe(false);
+    });
+
+    it('typing a version replaces the current single selection', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: '5.12.0',
+          shards: {},
+        },
+      });
+
+      const comboBox = within(getByTestId('version-field-row')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.20.1' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0].version).toBe('5.20.1');
+    });
+
+    it('a stored invalid version (latest) blocks submit until corrected', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: 'latest',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Stored version "latest" is not a valid format/)
+        ).toBeInTheDocument();
+      });
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('an inherited invalid pack default (latest) does not block submit when override is off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packMinOsqueryVersion: 'latest',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0]).not.toHaveProperty('version');
+      expect(screen.queryByText(/is not a valid format/)).not.toBeInTheDocument();
+    });
+
+    it('a stored invalid query version still blocks submit when the pack has no version default', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packResultType: 'differential',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: 'latest',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Stored version "latest" is not a valid format/)
+        ).toBeInTheDocument();
+      });
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('clearing the version stays valid and saves without a version', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: 'latest',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(within(getByTestId('version-field-row')).getByTestId('comboBoxClearButton'));
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0]).not.toHaveProperty('version');
     });
   });
 });

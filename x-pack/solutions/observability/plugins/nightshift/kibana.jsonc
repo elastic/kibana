@@ -25,7 +25,6 @@
       "agenticInvestigations",
       "nightshiftInvestigations",
       "serverless",
-      "significantEventsApp",
       "spaces"
     ],
     "requiredBundles": ["kibanaReact", "nightshiftInvestigations"]

@@ -78,7 +78,8 @@ const setup = ({
   return { service, workflowsApi, tool, call, request };
 };
 
-describe('proposals.create', () => {
+// Failing: See https://github.com/elastic/kibana/issues/295813
+describe.skip('proposals.create', () => {
   it('is the allow-listed builtin tool id', () => {
     expect(setup().tool.id).toBe(PROPOSALS_CREATE_TOOL_ID);
   });

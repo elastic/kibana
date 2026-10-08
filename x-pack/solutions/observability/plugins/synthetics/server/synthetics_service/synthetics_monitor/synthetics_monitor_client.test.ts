@@ -214,6 +214,13 @@ describe('SyntheticsMonitorClient', () => {
       undefined
     );
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
+    // only the public location that was removed from the monitor is deleted at the service
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledWith([
+      expect.objectContaining({
+        spaceId: 'test-space',
+        monitor: expect.objectContaining({ locations: [locations[0]] }),
+      }),
+    ]);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
@@ -227,6 +234,14 @@ describe('SyntheticsMonitorClient', () => {
     await client.deleteMonitors([monitor as unknown as SyntheticsMonitorWithId], 'test-space');
 
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledWith([
+      {
+        spaceId: 'test-space',
+        monitor,
+        configId: (monitor as any).config_id,
+        params: {},
+      },
+    ]);
     expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);
   });
 

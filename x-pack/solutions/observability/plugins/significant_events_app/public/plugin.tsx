@@ -17,7 +17,6 @@ import {
   type SignificantEventsLinkId,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { lazy, Suspense } from 'react';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
@@ -29,7 +28,6 @@ import type {
   SignificantEventsAppStartDependencies,
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
-import type { EmbeddableSlackAppCardProps } from './components/slack_app_card';
 
 export class SignificantEventsAppPlugin
   implements
@@ -188,24 +186,7 @@ export class SignificantEventsAppPlugin
       );
     }
 
-    // Loaded on first render so other plugins' bundles don't pull in the settings UI.
-    const LazySlackAppCard = lazy(async () => {
-      const { createEmbeddableSlackAppCard } = await import('./components/slack_app_card');
-      return {
-        default: createEmbeddableSlackAppCard({
-          coreStart,
-          pluginsStart,
-          services: { focusedSignificantEventService: this.focusedSignificantEventService },
-        }),
-      };
-    });
-    const SlackAppCard = (props: EmbeddableSlackAppCardProps) => (
-      <Suspense fallback={null}>
-        <LazySlackAppCard {...props} />
-      </Suspense>
-    );
-
-    return { SlackAppCard };
+    return {};
   }
 
   stop() {

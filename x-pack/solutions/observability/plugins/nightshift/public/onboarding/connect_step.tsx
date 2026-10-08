@@ -16,7 +16,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
+import { SlackAppCard } from '../settings/components/apps_section';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
 import {
@@ -46,8 +48,9 @@ const SECRET_PRESETS: SandboxSecretPreset[] = [
 
 /** Step 1: give the sandbox credentials, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
-  const { significantEventsApp } = useKibana().services;
-  const SlackAppCard = significantEventsApp?.SlackAppCard;
+  const { application } = useKibana().services;
+  // Same privilege as the Apps section of the Nightshift settings.
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   return (
     <div data-test-subj="nightshiftOnboardingConnectStep">
@@ -87,19 +90,17 @@ export function OnboardingConnectStep(): React.ReactElement {
         <SandboxSecretsPanel presets={SECRET_PRESETS} />
       </EuiPanel>
 
-      {SlackAppCard && (
-        <>
-          <EuiSpacer size="l" />
-          <div data-test-subj="nightshiftOnboardingSlack">
-            <SlackAppCard
-              description={i18n.translate('xpack.nightshift.onboarding.connect.slackDescription', {
-                defaultMessage:
-                  'Get investigation updates in Slack and ask Nightshift for help from a channel.',
-              })}
-            />
-          </div>
-        </>
-      )}
+      <EuiSpacer size="l" />
+      <div data-test-subj="nightshiftOnboardingSlack">
+        <SlackAppCard
+          canEdit={canManageAndConfigure}
+          showWhenUnavailable
+          description={i18n.translate('xpack.nightshift.onboarding.connect.slackDescription', {
+            defaultMessage:
+              'Get investigation updates in Slack and ask Nightshift for help from a channel.',
+          })}
+        />
+      </div>
 
       <OnboardingHintsSection />
     </div>

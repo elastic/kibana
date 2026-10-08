@@ -14,6 +14,8 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import { detectSecretRefs } from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
 import type { AgentCredentialVars } from './package_inputs';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
@@ -105,6 +107,7 @@ export async function updateAgentBasedPolicy(
   // send an empty vars block that clears AWS credentials already stored as Fleet secrets.
   type ExistingVarValue = string | { isSecretRef: boolean; id: string };
   const existingVarValues: Record<string, ExistingVarValue> = {};
+  let existingSecretRefs: ExistingSecretRefs | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
@@ -112,6 +115,7 @@ export async function updateAgentBasedPolicy(
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
     existingPolicyIds = existing.data?.item?.policy_ids;
+    existingSecretRefs = detectSecretRefs(existing.data?.item);
     for (const [key, entry] of Object.entries(
       (existing.data?.item?.vars ?? {}) as Record<string, { value: unknown }>
     )) {
@@ -168,7 +172,13 @@ export async function updateAgentBasedPolicy(
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const builtVars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
+  const builtVars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    agentCredentials,
+    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs
+  );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id
   // left over after switching to shared_credentials). When no credentials are in memory (access/

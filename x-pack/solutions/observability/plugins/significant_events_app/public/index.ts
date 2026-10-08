@@ -15,7 +15,6 @@ import type {
 } from './types';
 
 export type { SignificantEventsAppPublicSetup, SignificantEventsAppPublicStart };
-export type { EmbeddableSlackAppCardProps } from './components/slack_app_card';
 
 export const plugin: PluginInitializer<
   SignificantEventsAppPublicSetup,

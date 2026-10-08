@@ -38,7 +38,7 @@ const AUTHORING_NOTE = 'Created a bar chart using the requested data.';
 
 describe('buildVegaConfig', () => {
   const events = {} as ToolEventEmitter;
-  const esClient = { asCurrentUser: {} } as IScopedClusterClient;
+  const esClient = { asCurrentUser: {}, asInternalUser: {} } as IScopedClusterClient;
   const modelProvider = {} as ModelProvider;
 
   let logger: Logger;
@@ -73,7 +73,10 @@ describe('buildVegaConfig', () => {
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 
-    expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
+    expect(mockedBuildCallbacks).toHaveBeenCalledWith({
+      esClient,
+      logger,
+    });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
     expect(result).toEqual({
