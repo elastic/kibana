@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { Client } from '@elastic/elasticsearch';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -37,8 +38,10 @@ import { retryForSuccess } from '../fixtures/poll';
  *   rate         (400 - 100) / 300 = 1   (1000 - 500) / 300 = 1.67
  */
 
-const INDEX_NAME = 'kbn-scout-custom-threshold-metric-filter';
-const DATA_VIEW_ID = 'scout-custom-threshold-metric-filter-data-view';
+// Unique per run so leftovers from an aborted run can't collide with this one.
+const RUN_ID = randomUUID().slice(0, 8);
+const INDEX_NAME = `kbn-scout-custom-threshold-metric-filter-${RUN_ID}`;
+const DATA_VIEW_ID = `scout-custom-threshold-metric-filter-${RUN_ID}`;
 const ALERTS_INDEX = '.alerts-observability.threshold.alerts-default';
 const KQL_FILTER = 'status: 500';
 
@@ -96,6 +99,25 @@ const createRule = async (
   return (res.body as RuleResponse).id;
 };
 
+// The rule evaluates "the last N minutes" relative to when it runs, so the documents are re-seeded
+// before every test to keep them inside the evaluated windows.
+const seedDocs = async (esClient: Client) => {
+  await esClient.deleteByQuery({
+    index: INDEX_NAME,
+    query: { match_all: {} },
+    refresh: true,
+    conflicts: 'proceed',
+  });
+  const now = Date.now();
+  await esClient.bulk({
+    refresh: true,
+    operations: DOCS.flatMap(({ offsetMs, status, metric, counter }) => [
+      { index: { _index: INDEX_NAME } },
+      { '@timestamp': new Date(now - offsetMs).toISOString(), status, metric, counter },
+    ]),
+  });
+};
+
 const waitForEvaluationValue = (esClient: Client, ruleId: string) =>
   retryForSuccess(
     async () => {
@@ -136,14 +158,6 @@ apiTest.describe(
           },
         },
       });
-      const now = Date.now();
-      await esClient.bulk({
-        refresh: true,
-        operations: DOCS.flatMap(({ offsetMs, status, metric, counter }) => [
-          { index: { _index: INDEX_NAME } },
-          { '@timestamp': new Date(now - offsetMs).toISOString(), status, metric, counter },
-        ]),
-      });
 
       const dataViewRes = await apiClient.post('api/content_management/rpc/create', {
         headers,
@@ -166,6 +180,10 @@ apiTest.describe(
         },
       });
       expect(dataViewRes).toHaveStatusCode(200);
+    });
+
+    apiTest.beforeEach(async ({ esClient }) => {
+      await seedDocs(esClient);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
