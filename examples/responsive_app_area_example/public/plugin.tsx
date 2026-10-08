@@ -32,7 +32,10 @@ export class ResponsiveAppAreaExamplePlugin implements Plugin<void, void, SetupD
         const [coreStart] = await core.getStartServices();
         const { App } = await import('./app');
 
-        ReactDOM.render(coreStart.rendering.addContext(<App />), element);
+        ReactDOM.render(
+          coreStart.rendering.addContext(<App rendering={coreStart.rendering} />),
+          element
+        );
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
