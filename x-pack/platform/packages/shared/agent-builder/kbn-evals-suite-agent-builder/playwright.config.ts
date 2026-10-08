@@ -10,10 +10,11 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   // The `esql-generation` suite (`esql.playwright.config.ts`) owns specs
-  // under `evals/esql/`. Excluding them here prevents the recursive
-  // `testDir` walk from picking them up and double-running them in the
-  // agent-builder weekly cycle.
-  testIgnore: ['**/esql/**', '**/skill_selection/**'],
+  // under `evals/esql/`, and the `agent-builder-regression` suite
+  // (`regression.playwright.config.ts`) owns `evals/analytical/`. Excluding
+  // them here prevents the recursive `testDir` walk from picking them up and
+  // double-running them in the agent-builder weekly cycle.
+  testIgnore: ['**/esql/**', '**/skill_selection/**', '**/analytical/**'],
   // CI job timeout is ~1h; keep default low and use EVAL_REPETITIONS
   // for longer/higher-confidence runs.
   repetitions: 1,
