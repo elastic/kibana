@@ -1300,3 +1300,188 @@ describe('EscalationsService.addAttachments', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-investigation'));
   });
 });
+
+describe('EscalationsService.sync', () => {
+  const version = {
+    version: 1,
+    data: { text: 'hello' },
+    created_at: '2026-01-01T00:00:00.000Z',
+    content_hash: 'h1',
+    estimated_tokens: 2,
+  };
+  const fullAttachment = (id: string) => ({
+    id,
+    type: 'text',
+    active: true,
+    current_version: 1,
+    versions: [version],
+  });
+
+  const makeEscalation = ({
+    updatedAt = '2026-01-02T00:00:00.000Z',
+    attachmentIds = [] as string[],
+    linked = ['inv-1'],
+  } = {}) => ({
+    ...MOCK_ESCALATION,
+    updated_at: updatedAt,
+    metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    attachments: attachmentIds.map(fullAttachment),
+  });
+
+  const makeSummary = ({
+    updatedAt = '2026-01-01T00:00:00.000Z',
+    attachmentIds = ['att-1'],
+  } = {}) => ({
+    ...MOCK_INVESTIGATION,
+    updated_at: updatedAt,
+    attachments: attachmentIds.map((id) => ({ id, type: 'text' })),
+  });
+
+  const setup = ({
+    escalation,
+    summary,
+  }: {
+    escalation: ReturnType<typeof makeEscalation>;
+    summary: ReturnType<typeof makeSummary>;
+  }) => {
+    const full = {
+      ...summary,
+      attachments: (summary.attachments ?? []).map((att) => fullAttachment(att.id)),
+    };
+    const deps = makeService({
+      get: jest.fn().mockImplementation(async (id: string) => (id === 'inv-1' ? full : escalation)),
+      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-1', summary]])),
+    });
+    (deps.attachmentsClient.bulkCreate as jest.Mock).mockImplementation(
+      async ({ attachments }: { attachments: unknown[] }) => ({
+        created: attachments,
+        errors: [],
+      })
+    );
+    return deps;
+  };
+
+  it('copies missing attachments when the investigation changed after the escalation', async () => {
+    const { service, client, attachmentsClient } = setup({
+      escalation: makeEscalation({ updatedAt: '2026-01-01T00:00:00.000Z' }),
+      summary: makeSummary({ updatedAt: '2026-01-02T00:00:00.000Z' }),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 1, failed: 0 });
+    expect(attachmentsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'escalation-1',
+        attachments: [expect.objectContaining({ id: 'inv-1:att-1' })],
+      })
+    );
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'escalation-1',
+      events: [
+        {
+          type: 'escalation_attachments_synced',
+          data: {
+            investigation_id: 'inv-1',
+            title: 'My Investigation',
+            agent_id: 'default-agent',
+            attachment_ids: ['inv-1:att-1'],
+          },
+        },
+      ],
+    });
+  });
+
+  it('writes the event before the attachments so it shows above them in the timeline', async () => {
+    const { service, client, attachmentsClient } = setup({
+      escalation: makeEscalation({ updatedAt: '2026-01-01T00:00:00.000Z' }),
+      summary: makeSummary({ updatedAt: '2026-01-02T00:00:00.000Z' }),
+    });
+
+    await service.sync(request, 'escalation-1');
+
+    expect((client.addEvents as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (attachmentsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('copies when the escalation is newer but holds fewer copies than the investigation has', async () => {
+    const { service, client, attachmentsClient } = setup({
+      escalation: makeEscalation({ attachmentIds: ['inv-1:att-1'] }),
+      summary: makeSummary({ attachmentIds: ['att-1', 'att-2'] }),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 1, failed: 0 });
+    const { attachments } = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(attachments.map((a: { id: string }) => a.id)).toEqual(['inv-1:att-2']);
+    expect(client.addEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        events: [
+          expect.objectContaining({
+            data: expect.objectContaining({ attachment_ids: ['inv-1:att-2'] }),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('copies a replacement attachment even when the counts match', async () => {
+    const { service, attachmentsClient } = setup({
+      escalation: makeEscalation({ attachmentIds: ['inv-1:att-1'] }),
+      summary: makeSummary({ attachmentIds: ['att-2'] }),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 1, failed: 0 });
+    const { attachments } = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(attachments.map((a: { id: string }) => a.id)).toEqual(['inv-1:att-2']);
+  });
+
+  it('does nothing when the escalation is up to date', async () => {
+    const { service, client, attachmentsClient } = setup({
+      escalation: makeEscalation({ attachmentIds: ['inv-1:att-1'] }),
+      summary: makeSummary(),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not rewrite copies that already exist when only the timestamp is newer', async () => {
+    const { service, attachmentsClient } = setup({
+      escalation: makeEscalation({
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        attachmentIds: ['inv-1:att-1'],
+      }),
+      summary: makeSummary({ updatedAt: '2026-01-02T00:00:00.000Z' }),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns zero counts when the escalation links no investigations', async () => {
+    const { service, client } = setup({
+      escalation: makeEscalation({ linked: [] }),
+      summary: makeSummary(),
+    });
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 0, failed: 0 });
+    expect(client.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('skips linked investigations that cannot be resolved', async () => {
+    const { service, client, attachmentsClient } = setup({
+      escalation: makeEscalation(),
+      summary: makeSummary(),
+    });
+    (client.bulkGet as jest.Mock).mockResolvedValue(new Map());
+
+    await expect(service.sync(request, 'escalation-1')).resolves.toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('throws NotAnEscalationError when the target is not an escalation', async () => {
+    const { service } = makeService({ get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION) });
+
+    await expect(service.sync(request, 'inv-1')).rejects.toThrow(NotAnEscalationError);
+  });
+});
