@@ -17,6 +17,24 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
+  * The access control for the case. A restricted case and everything attached to it is visible only to its assignees. Requires the `xpack.cases.restrictedCases.enabled` setting and a Platinum license.
+
+  */
+export const CaseAccess = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).
+     */
+    mode: z
+      .enum(['default', 'restricted'])
+      .describe(
+        'Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).'
+      ),
+  })
+);
+export type CaseAccess = z.infer<typeof CaseAccess>;
+
+/**
  * An array containing users that are assigned to the case.
  */
 export const Assignees = lazySchema(() =>
@@ -440,6 +458,7 @@ export type CaseExtendedFields = z.infer<typeof CaseExtendedFields>;
  */
 export const CreateCaseRequest = lazySchema(() =>
   z.object({
+    access: CaseAccess.optional(),
     assignees: Assignees.optional(),
     connector: z.union([
       ConnectorPropertiesNone,
@@ -733,6 +752,7 @@ export const CaseStatusEnum = CaseStatus.enum;
 
 export const CaseResponseProperties = lazySchema(() =>
   z.object({
+    access: CaseAccess.optional(),
     assignees: Assignees.optional(),
     /**
      * The case category.
@@ -911,6 +931,7 @@ export const UpdateCaseRequest = lazySchema(() =>
     cases: z
       .array(
         z.object({
+          access: CaseAccess.optional(),
           assignees: Assignees.optional(),
           category: CaseCategory.optional(),
           connector: z
