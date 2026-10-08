@@ -605,6 +605,41 @@ with:
     expect(label).not.toBeNull();
   });
 
+  it('removing an optional field does not throw when the step has no `with` map yet', () => {
+    // Regression test: a step whose only fields are optional (e.g.
+    // elasticsearch.bulk before its required `operations` was correctly
+    // surfaced) starts with no `with:` key at all. Add-then-remove used to
+    // call yaml's `deleteIn(['with', key])`, which throws on a missing `with`
+    // instead of treating it as a no-op (unlike `setIn`).
+    const optionalOnlyConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'listish',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          pipeline: z.string().optional(),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Listish',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const { onFragmentChange } = renderPanel({
+      stepType: 'listish',
+      connectors: optionalOnlyConnectors,
+      initialFragment: 'name: t\ntype: listish\n',
+    });
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.pipeline'));
+    expect(screen.getByTestId('workflowStepConfigField-with.pipeline')).toBeInTheDocument();
+    expect(() => {
+      fireEvent.click(screen.getByTestId('workflowStepConfigRemoveOptional-with.pipeline'));
+    }).not.toThrow();
+    expect(screen.queryByTestId('workflowStepConfigField-with.pipeline')).not.toBeInTheDocument();
+    for (const call of onFragmentChange.mock.calls) {
+      expect(call[0] as string).not.toContain('with:');
+    }
+  });
+
   it('closes immediately from the header after editing via the YAML view (valid draft, no Done needed)', () => {
     const { onClose } = renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();

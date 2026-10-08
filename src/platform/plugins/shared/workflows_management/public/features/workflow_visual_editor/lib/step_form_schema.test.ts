@@ -233,6 +233,33 @@ describe('step_form_schema', () => {
       });
     });
 
+    it('does not hide a `with.*` array-of-union/array-of-object field as nested steps', () => {
+      // Regression test: isNestedStepsSchema must only apply to root
+      // (configSchema) keys like `if.steps`/`else` — never to `with.*`,
+      // where elasticsearch.bulk's required `operations` lives.
+      const bulkLikeConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'bulk-like',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            operations: z.array(
+              z.union([z.object({ index: z.unknown() }), z.record(z.string(), z.unknown())])
+            ),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const schema = getStepFormSchema('bulk-like', bulkLikeConnectors)!;
+      expect(schema.fields.find((f) => f.key === 'operations')).toMatchObject({
+        path: ['with', 'operations'],
+        required: true,
+        kind: 'code',
+        language: 'json',
+      });
+    });
+
     it('maps built-in `wait` input under `with`', () => {
       const schema = getStepFormSchema('wait', connectors);
       expect(schema!.fields.find((f) => f.key === 'duration')).toMatchObject({
@@ -429,6 +456,29 @@ describe('step_form_schema', () => {
         name: 'webhook_step',
         type: 'webhook',
         with: { payload: '' },
+      });
+    });
+
+    it('pre-fills a required `with.*` array-of-union field (not hidden as nested steps)', () => {
+      const bulkLikeConnectors: ConnectorContractUnion[] = [
+        {
+          type: 'bulk-like',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            operations: z.array(
+              z.union([z.object({ index: z.unknown() }), z.record(z.string(), z.unknown())])
+            ),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const step = buildDefaultStep('bulk-like', 'bulk_step', bulkLikeConnectors);
+      expect(step).toEqual({
+        name: 'bulk_step',
+        type: 'bulk-like',
+        with: { operations: '' },
       });
     });
   });

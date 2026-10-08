@@ -23,6 +23,7 @@ import type { Node as YamlNode } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/monaco';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import {
   isTriggerType,
   type LayoutDirection,
@@ -1269,20 +1270,27 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           onWidthChange={setStoredPanelWidth}
           canvasWidth={canvasWidth}
         >
-          <StepConfigPanel
+          <KibanaSectionErrorBoundary
             key={panel.sessionId}
-            mode={panel.origin}
-            stepType={panel.stepType}
-            actionLabel={panel.actionLabel}
-            initialFragment={panel.fragment}
-            connectors={connectors}
-            workflowDefinition={workflow}
-            onClose={handleStepClose}
-            onRevert={handleStepRevert}
-            isFallbackStep={panelIsFallbackStep}
-            onExpandedChange={setFieldEditorExpanded}
-            onFragmentChange={handleStepDraftChange}
-          />
+            sectionName={i18n.translate(
+              'workflows.visualEditor.stepConfigPanelErrorBoundarySectionName',
+              { defaultMessage: 'Step configuration panel' }
+            )}
+          >
+            <StepConfigPanel
+              mode={panel.origin}
+              stepType={panel.stepType}
+              actionLabel={panel.actionLabel}
+              initialFragment={panel.fragment}
+              connectors={connectors}
+              workflowDefinition={workflow}
+              onClose={handleStepClose}
+              onRevert={handleStepRevert}
+              isFallbackStep={panelIsFallbackStep}
+              onExpandedChange={setFieldEditorExpanded}
+              onFragmentChange={handleStepDraftChange}
+            />
+          </KibanaSectionErrorBoundary>
         </CanvasConfigPanelShell>
       )}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (

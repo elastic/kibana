@@ -181,7 +181,12 @@ const writeFragmentValue = (
   // An empty string is the expression-mode sentinel for boolean/number fields —
   // don't delete it; keep the key so the UI stays in expression mode.
   if (isEmptyFieldValue(value) && value !== '' && !field.required) {
-    doc.deleteIn(field.path as string[]);
+    // Nothing to delete when the key — or an ancestor mapping like `with` —
+    // is absent: unlike `setIn`, `deleteIn` throws on a missing intermediate
+    // node instead of treating it as a no-op.
+    if (doc.hasIn(field.path as string[])) {
+      doc.deleteIn(field.path as string[]);
+    }
   } else {
     doc.setIn(field.path as string[], value);
   }

@@ -295,10 +295,17 @@ const fieldsFromObject = (
   if (!schema) return [] as StepFormField[];
   const inner = unwrapSchema(schema);
   if (!(inner instanceof z.ZodObject)) return [] as StepFormField[];
+  // Nested-steps arrays (`steps`, `else`, `cases[].steps`…) are a root-level
+  // (`configSchema`) concept only — they're never under `with`. Scoping the
+  // check to root keys avoids misreading an array-of-union/array-of-object
+  // `with.*` field (e.g. `elasticsearch.bulk`'s `operations`) as structural.
+  const isRootLevel = basePath.length === 0;
   return Object.entries(inner.shape as Record<string, z.ZodType>)
     .filter(
       ([key, fieldSchema]) =>
-        !HIDDEN_KEYS.has(key) && !isNestedStepsSchema(fieldSchema) && !isNeverSchema(fieldSchema)
+        !HIDDEN_KEYS.has(key) &&
+        !(isRootLevel && isNestedStepsSchema(fieldSchema)) &&
+        !isNeverSchema(fieldSchema)
     )
     .map(([key, fieldSchema]): StepFormField => {
       const { kind, language, options } = resolveKind(stepType, key, fieldSchema);
