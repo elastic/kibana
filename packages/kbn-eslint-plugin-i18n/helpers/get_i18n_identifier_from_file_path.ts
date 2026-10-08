@@ -21,7 +21,8 @@ const getI18nrcPaths = () => {
       fs.readFileSync(resolve(REPO_ROOT, 'x-pack/.i18nrc.json'), 'utf8')
     );
     const rootI18nrc = JSON.parse(fs.readFileSync(resolve(REPO_ROOT, '.i18nrc.json'), 'utf8'));
-    i18nrcPaths = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
+    const paths: Record<string, string | string[]> = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
+    i18nrcPaths = paths;
   }
   return i18nrcPaths;
 };

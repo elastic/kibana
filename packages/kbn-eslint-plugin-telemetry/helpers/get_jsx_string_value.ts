@@ -8,7 +8,7 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { parse } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, parse } from '@typescript-eslint/typescript-estree';
 
 // The entity syntax typescript-estree decodes in JSX text and JSX attribute strings.
 const JSX_ENTITY = /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g;
@@ -27,8 +27,12 @@ const decodeEntity = (entity: string) => {
 };
 
 /**
- * Decodes HTML entities such as `&nbsp;` in the source text of a JSX text or JSX attribute string.
- * ESLint's parsers decode them in the node's `value`, Oxlint keeps them as written, so the rules
- * decode `raw` to see the same text in both linters.
+ * Returns the text of a JSX text node or JSX attribute string with HTML entities such as `&nbsp;`
+ * decoded. Oxlint keeps entities as written in `value`, so this decodes `raw` the way ESLint's
+ * parsers did. JSX attribute strings have no escape sequences, so `raw` is the value plus quotes.
  */
-export const decodeJsxEntities = (raw: string) => raw.replace(JSX_ENTITY, decodeEntity);
+export const getJsxStringValue = (node: TSESTree.JSXText | TSESTree.Literal): string =>
+  (node.type === AST_NODE_TYPES.JSXText ? node.raw : node.raw.slice(1, -1)).replace(
+    JSX_ENTITY,
+    decodeEntity
+  );

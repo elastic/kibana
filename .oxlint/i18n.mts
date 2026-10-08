@@ -24,7 +24,6 @@ export const i18nOverrides: OxlintOverride[] = [
       'x-pack/solutions/observability/plugins/**/*',
       'x-pack/solutions/observability/packages/**/*',
       'src/platform/plugins/shared/ai_assistant_management/**/*',
-      'x-pack/solutions/observability/plugins/significant_events_app/**/*',
       'x-pack/platform/plugins/shared/streams_app/**/*',
       'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/*',
     ],

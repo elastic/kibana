@@ -7,45 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import { RuleTester } from 'eslint';
-import { rules } from '..';
 import { RULE_WARNING_MESSAGE } from './strings_should_be_translated_with_formatted_message';
 
-// `eslintCompatPlugin` gave the rule the `create` method ESLint's RuleTester calls.
-const StringsShouldBeTranslatedWithFormattedMessage =
-  rules.strings_should_be_translated_with_formatted_message as unknown as Rule.RuleModule;
-
-const tsTester = [
-  '@typescript-eslint/parser',
-  new RuleTester({
-    parser: require.resolve('@typescript-eslint/parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-  }),
-] as const;
-
-const babelTester = [
-  '@babel/eslint-parser',
-  new RuleTester({
-    parser: require.resolve('@babel/eslint-parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      requireConfigFile: false,
-      babelOptions: {
-        presets: ['@kbn/babel-preset/node_preset'],
-      },
-    },
-  }),
-] as const;
-
-const invalid: RuleTester.InvalidTestCase[] = [
+const invalid = [
   {
     name: 'A JSX element with a string literal should be translated with i18n',
     filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
@@ -410,7 +374,7 @@ function TestComponent3() {
   },
 ];
 
-const valid: RuleTester.ValidTestCase[] = [
+const valid = [
   {
     name: 'A JSXText element inside a EuiCode component should not be translated',
     filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
@@ -491,15 +455,5 @@ function TestComponent() {
   },
 ];
 
-for (const [name, tester] of [tsTester, babelTester]) {
-  describe(name, () => {
-    tester.run(
-      '@kbn/strings_should_be_translated_with_formatted_message',
-      StringsShouldBeTranslatedWithFormattedMessage,
-      {
-        valid,
-        invalid,
-      }
-    );
-  });
-}
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const stringsShouldBeTranslatedWithFormattedMessageCases = { valid, invalid };

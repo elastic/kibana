@@ -8,13 +8,13 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
-import { decodeJsxEntities } from '../helpers/decode_jsx_entities';
+import { getJsxStringValue } from '../helpers/get_jsx_string_value';
 import {
   getTranslatableValueFromString,
   getValueFromJSXAttribute,
@@ -30,17 +30,11 @@ export const StringsShouldBeTranslatedWithFormattedMessage: CreateOnceRule = {
     fixable: 'code',
   },
   createOnce(context) {
-    let cwd: string;
-    let filename: string;
-    let sourceCode: SourceCode;
-
     return {
-      before() {
-        ({ cwd, filename, sourceCode } = context);
-      },
       JSXText(node) {
+        const { cwd, filename, sourceCode } = context;
         const jsxTextNode = node as unknown as TSESTree.JSXText;
-        const text = decodeJsxEntities(jsxTextNode.raw);
+        const text = getJsxStringValue(jsxTextNode);
         const value = getTranslatableValueFromString(text);
 
         // If the JSXText element is empty or untranslatable we don't need to do anything
@@ -55,9 +49,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: CreateOnceRule = {
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionName = getFunctionName(
-          sourceCode.getScope(node).block as unknown as TSESTree.Node
-        );
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 
@@ -91,6 +83,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: CreateOnceRule = {
         });
       },
       JSXAttribute(node) {
+        const { cwd, filename, sourceCode } = context;
         const jsxAttrNode = node as unknown as TSESTree.JSXAttribute;
 
         // Only check specific attributes that should be translated
@@ -111,9 +104,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: CreateOnceRule = {
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionName = getFunctionName(
-          sourceCode.getScope(node).block as unknown as TSESTree.Node
-        );
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 

@@ -8,13 +8,13 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getAppIdFromFilePath } from '../helpers/get_app_id_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
-import { decodeJsxEntities } from '../helpers/decode_jsx_entities';
+import { getJsxStringValue } from '../helpers/get_jsx_string_value';
 import { getStringValue, isTruthy } from '../helpers/utils';
 
 export const RULE_WARNING_MESSAGE =
@@ -29,14 +29,7 @@ export const FormattedMessageShouldStartWithTheRightId: CreateOnceRule = {
     fixable: 'code',
   },
   createOnce(context) {
-    let cwd: string;
-    let filename: string;
-    let sourceCode: SourceCode;
-
     return {
-      before() {
-        ({ cwd, filename, sourceCode } = context);
-      },
       JSXElement(node) {
         const jsxNode = node as unknown as TSESTree.JSXElement;
         const { openingElement } = jsxNode;
@@ -48,6 +41,8 @@ export const FormattedMessageShouldStartWithTheRightId: CreateOnceRule = {
         ) {
           return;
         }
+
+        const { cwd, filename, sourceCode } = context;
 
         // Find the id attribute
         const idAttribute = openingElement.attributes.find(
@@ -96,12 +91,10 @@ export const FormattedMessageShouldStartWithTheRightId: CreateOnceRule = {
         const identifier =
           idAttribute?.value?.type === AST_NODE_TYPES.Literal &&
           typeof idAttribute.value.value === 'string'
-            ? decodeJsxEntities(idAttribute.value.raw.slice(1, -1))
+            ? getJsxStringValue(idAttribute.value)
             : false;
 
-        const functionName = getFunctionName(
-          sourceCode.getScope(node).block as unknown as TSESTree.Node
-        );
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =

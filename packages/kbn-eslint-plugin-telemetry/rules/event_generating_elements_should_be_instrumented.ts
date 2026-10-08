@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scope } from 'eslint';
-import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
@@ -36,14 +35,7 @@ export const EventGeneratingElementsShouldBeInstrumented: CreateOnceRule = {
     fixable: 'code',
   },
   createOnce(context) {
-    let cwd: string;
-    let filename: string;
-    let sourceCode: SourceCode;
-
     return {
-      before() {
-        ({ cwd, filename, sourceCode } = context);
-      },
       JSXIdentifier(node) {
         const { name, range, parent } = node as unknown as TSESTree.JSXIdentifier;
 
@@ -54,9 +46,9 @@ export const EventGeneratingElementsShouldBeInstrumented: CreateOnceRule = {
           return;
         }
 
-        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(
-          parent,
-          () => sourceCode.getScope(node) as Scope.Scope
+        const { cwd, filename, sourceCode } = context;
+        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
+          sourceCode.getScope(node)
         );
 
         if (hasDataTestSubjProp) {
@@ -70,9 +62,7 @@ export const EventGeneratingElementsShouldBeInstrumented: CreateOnceRule = {
         const appName = getAppName(filename, cwd);
 
         // 2. Component name
-        const functionName = getFunctionName(
-          sourceCode.getScope(node).block as unknown as TSESTree.Node
-        );
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
         const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 
         // 3. The intention of the element (i.e. "Select date", "Submit", "Cancel")

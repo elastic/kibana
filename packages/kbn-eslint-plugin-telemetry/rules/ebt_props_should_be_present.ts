@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scope } from 'eslint';
-import type { CreateOnceRule, SourceCode } from '@oxlint/plugins';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { checkNodeForExistingEbtProps } from '../helpers/check_node_for_existing_ebt_props';
@@ -55,12 +54,7 @@ export const EbtPropsShouldBePresent: CreateOnceRule = {
     },
   },
   createOnce(context) {
-    let sourceCode: SourceCode;
-
     return {
-      before() {
-        ({ sourceCode } = context);
-      },
       JSXIdentifier(node) {
         const { name, parent } = node as unknown as TSESTree.JSXIdentifier;
 
@@ -75,9 +69,8 @@ export const EbtPropsShouldBePresent: CreateOnceRule = {
           return;
         }
 
-        const hasEbtProps = checkNodeForExistingEbtProps(
-          parent,
-          () => sourceCode.getScope(node) as Scope.Scope
+        const hasEbtProps = checkNodeForExistingEbtProps(parent, () =>
+          context.sourceCode.getScope(node)
         );
 
         if (hasEbtProps) {
