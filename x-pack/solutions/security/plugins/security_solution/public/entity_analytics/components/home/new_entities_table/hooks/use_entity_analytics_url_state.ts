@@ -125,8 +125,6 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   resetGridQuery: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
-  /** Clears all expanded rows (e.g. on rows-mode switch). */
-  clearExpandedIds: () => void;
 }
 
 // ── hook ──────────────────────────────────────────────────────────────────────
@@ -288,11 +286,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [update]
   );
 
-  const clearExpandedIds = useCallback(
-    () => update((params) => params.delete(PARAM.EXPANDED), { replace: true }),
-    [update]
-  );
-
   return {
     timeRange,
     rowsMode,
@@ -308,6 +301,5 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     setActiveTile,
     resetGridQuery,
     toggleExpandedId,
-    clearExpandedIds,
   };
 };

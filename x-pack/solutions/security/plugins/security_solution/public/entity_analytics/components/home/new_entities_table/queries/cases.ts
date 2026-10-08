@@ -9,7 +9,7 @@ import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_
 import { getEntityIds } from '../common';
 import type { RunContext, PageEnricher, ColumnQuerySpec } from '../common';
 
-export const CASE_COUNT_FIELD = 'case_count';
+const CASE_COUNT_FIELD = 'case_count';
 
 const fetchCaseCounts = async (
   { http, signal }: RunContext,

@@ -99,8 +99,7 @@ const buildScoredEntityRows = (args: QueryArgs): string[] =>
     entityConditions: [`${RISK_SCORE_NORM_FIELD} IS NOT NULL`],
   });
 
-export const riskScoreChangeSplitSortPlan: SplitSortPlan = {
-  sortField: RISK_SCORE_CHANGE_FIELD,
+const riskScoreChangeSplitSortPlan: SplitSortPlan = {
   emptyValue: null,
   buildValueRowsQuery: (args, limit) =>
     [

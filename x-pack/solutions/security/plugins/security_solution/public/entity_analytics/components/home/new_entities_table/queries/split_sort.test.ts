@@ -38,7 +38,6 @@ const fakePlan = (
 ): { plan: SplitSortPlan; calls: string[] } => {
   const calls: string[] = [];
   const plan: SplitSortPlan = {
-    sortField: 'alert_count',
     emptyValue,
     buildValueRowsQuery: (args, limit) =>
       `values cursor=${args.cursor?.entityId ?? '-'} limit=${limit}`,

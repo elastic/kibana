@@ -54,7 +54,7 @@ const ENRICH_ERROR_TITLE = i18n.translate(
 export const MAX_LOADED_ROWS = 500;
 
 /** `page`: the grid rows. `children`: the records of expanded groups. */
-export type EntityGridKeyScope = 'page' | 'children';
+type EntityGridKeyScope = 'page' | 'children';
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
 export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;

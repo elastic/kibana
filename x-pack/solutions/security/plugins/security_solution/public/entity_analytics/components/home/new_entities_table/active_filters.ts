@@ -14,7 +14,7 @@ import {
 } from '../needs_attention_tiles/tile_entity_filter';
 import { RESOLVED_TO_FIELD } from './common';
 import { joinAnd } from './queries/esql';
-import type { RowsMode } from './common';
+import type { QueryArgs, RowsMode } from './common';
 import {
   buildEntityFiltersExpression,
   buildEntityFiltersQuery,
@@ -38,12 +38,7 @@ export interface ActiveFilters {
   rowsMode: RowsMode;
 }
 
-export interface ActiveFiltersEsql {
-  /** Lucene-pushable search: KQL can't run after a LOOKUP JOIN, so queries place it apart. */
-  searchExpression?: string;
-  /** Filter dropdowns and the active tile, on entity docs. */
-  entityExpression?: string;
-}
+type ActiveFiltersEsql = Pick<QueryArgs, 'searchExpression' | 'entityExpression'>;
 
 export const toEsql = ({
   search,

@@ -56,7 +56,7 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
 
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
-export const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
+const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
   sortField: ANOMALY_COUNT_FIELD,
   emptyValue: null,
   buildForeignRows: (args) => [SET_UNMAPPED_NULLIFY, ...buildAnomalyEntityRows(args)],

@@ -150,7 +150,7 @@ const ALERT_EMPTY_COLUMNS = [
   `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
 ].join(', ');
 
-export const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
+const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
   buildEntityListSortPlan({
     sortField,
     // Entities without alerts count 0, so they sort first ascending; their last alert is null.

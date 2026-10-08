@@ -116,7 +116,7 @@ export interface RunContext {
 }
 
 /** Fields an enricher fetched, per entity id; `null` when its query failed. */
-export type EnrichedFields = ReadonlyMap<string, Row>;
+type EnrichedFields = ReadonlyMap<string, Row>;
 
 /** Reads computed fields of the page rows after the sort query. It rejects when it fails. */
 export interface PageEnricher {
@@ -150,10 +150,7 @@ export interface ColumnQuerySpec {
   enricher?: PageEnricher;
 }
 
-export const toRows = ({
-  columns,
-  values,
-}: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
+const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
 // ── row readers ──────────────────────────────────────────────────────────────
@@ -181,7 +178,7 @@ export const toSortValue = (value: unknown): SortValue =>
   typeof value === 'string' || typeof value === 'number' ? value : null;
 
 /** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
-export const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
+const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
 
 export const createEsqlRunner = (
   searchService: DataPublicPluginStart['search'],
@@ -214,10 +211,6 @@ export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
     if (isAbortError(err)) throw err;
     return null;
   });
-
-// ── grid config ───────────────────────────────────────────────────────────────
-
-export const RESOLUTION_GROUPING_ID = 'ea-new-home-resolution';
 
 /** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
 const isMissingFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>

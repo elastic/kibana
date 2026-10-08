@@ -56,10 +56,9 @@ export const SPLIT_SORT_MIN_VIEW_SIZE = 500_000;
  * Most value rows a split sort reads: ES|QL returns at most 10k rows. Above it, the split
  * sort can't list the value ids to exclude from the empty rows, so the general query runs.
  */
-export const MAX_VALUE_ROWS = 10_000;
+const MAX_VALUE_ROWS = 10_000;
 
 export interface SplitSortPlan {
-  sortField: string;
   /** Sort value of an entity without foreign data: 0 sorts first ascending, null always last. */
   emptyValue: 0 | null;
   /** Page of value rows after the cursor, sorted, at most `limit` rows. */
@@ -154,7 +153,7 @@ const fetchEmptyRowsExcludingValueIds = async (
   return runQuery(buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit));
 };
 
-export interface EntityListSortOptions {
+interface EntityListSortOptions {
   sortField: string;
   emptyValue: SplitSortPlan['emptyValue'];
   /** Foreign index rows mapped to `entity.id`, before any STATS. */
@@ -189,7 +188,6 @@ export const buildEntityListSortPlan = ({
     ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
   ];
   return {
-    sortField,
     emptyValue,
     buildValueRowsQuery: (args, limit) =>
       [
