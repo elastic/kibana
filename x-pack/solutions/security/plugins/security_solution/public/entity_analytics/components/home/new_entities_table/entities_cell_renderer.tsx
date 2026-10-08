@@ -527,7 +527,7 @@ const renderKnownEntityCell = (
   return assertNever(columnId);
 };
 
-/** Columns that page enrichers fill after the sort query; the sort column has its value. */
+/** The content of a grid cell: the row's value for the column, rendered for its type. */
 export const renderEntityCell = (
   columnId: string,
   value: unknown,

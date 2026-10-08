@@ -74,7 +74,7 @@ const MAX_ALIAS_GROUPS = 10_000;
  * Entity filters without a search: build the groups that have aliases from the alias docs only
  * (few), and read every other target as a group of one, filtered and sorted natively. The merge
  * keeps the larger size per target. This avoids grouping and joining every entity, which timed
- * out at 10M entities. Same rows as the join-first query, as entity filters apply to the target.
+ * out at 10M entities. Same rows as grouping every entity, as entity filters apply to the target.
  */
 const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
   const entityFilter = buildFilterClause(args.entityExpression);

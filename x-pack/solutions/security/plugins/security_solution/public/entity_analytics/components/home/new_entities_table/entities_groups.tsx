@@ -204,7 +204,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   );
 };
 
-// ── leaf: ChildEntityGrid with combined filters ───────────────────────────────
+// ── leaf: an entities grid with the search and the group's filters ───────────
 
 interface LeafGridProps extends GroupViewProps {
   currentGroupFilters: Filter[];
