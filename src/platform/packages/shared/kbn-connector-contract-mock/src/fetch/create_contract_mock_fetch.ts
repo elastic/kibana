@@ -10,6 +10,8 @@
 import type { ContractRequest, ContractResponse, Responder, Violation } from '../contract/types';
 import type { Recording, RejectedResponse, ResponseFixture } from '../engine/response_engine';
 import { createResponseEngine } from '../engine/response_engine';
+import type { PaginationOptions } from '../engine/paginate';
+import { withPagination } from '../engine/paginate';
 import { sampleResponse } from '../engine/sample_response';
 import type { OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
@@ -26,7 +28,7 @@ export interface ContractCall {
   readonly responseViolations: readonly Violation[];
 }
 
-export interface ContractMockOptions {
+export interface ContractMockOptions extends PaginationOptions {
   /** The vendor specs the connector targets, e.g. both API versions it calls. */
   readonly specs: readonly OpenApiDocument[];
   /** Hand-written responses, served in preference to everything else. */
@@ -103,11 +105,16 @@ export const createContractMockFetch = ({
   specs,
   fixtures,
   recordings,
+  pagination,
+  collectionSize,
   respond = sampleResponse,
 }: ContractMockOptions): ContractMock => {
   const operations = specs.flatMap(loadContractOperations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(operations, engine.respond);
+  const contract = createOpenApiAdapter(
+    operations,
+    withPagination(operations, { pagination, collectionSize }, engine.respond)
+  );
   const calls: ContractCall[] = [];
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {

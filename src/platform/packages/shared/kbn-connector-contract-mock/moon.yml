@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: src/platform/packages/shared/kbn-connector-contract-mock
-dependsOn: []
+dependsOn:
+  - '@kbn/safer-lodash-set'
 tags:
   - test-helper
   - package

@@ -61,7 +61,9 @@ export interface ResponseEngine {
   readonly rejected: readonly RejectedResponse[];
 }
 
-const toKey = ({ method, path }: OperationRef): string => `${method.toUpperCase()} ${path}`;
+/** Formats an operation reference as `METHOD /path`, the key fixtures and recordings match on. */
+export const toOperationKey = ({ method, path }: OperationRef): string =>
+  `${method.toUpperCase()} ${path}`;
 
 const toContractResponse = ({ status, headers = {}, body }: StoredResponse): ContractResponse => {
   const hasContentType = Object.keys(headers).some((name) => name.toLowerCase() === 'content-type');
@@ -91,7 +93,7 @@ export const createResponseEngine = (
   operations: readonly ContractOperation[],
   { fixtures = [], recordings = [], fallback }: ResponseEngineOptions
 ): ResponseEngine => {
-  const byKey = new Map(operations.map((operation) => [toKey(operation), operation]));
+  const byKey = new Map(operations.map((operation) => [toOperationKey(operation), operation]));
   const served = new Map<ContractOperation, ContractResponse>();
   const rejected: RejectedResponse[] = [];
 
@@ -99,7 +101,7 @@ export const createResponseEngine = (
     source: RejectedResponse['source'],
     { operation: ref, response }: ResponseFixture
   ) => {
-    const key = toKey(ref);
+    const key = toOperationKey(ref);
     const operation = byKey.get(key);
     if (!operation) {
       rejected.push({ source, operation: key, violations: [NOT_IN_SPEC] });
