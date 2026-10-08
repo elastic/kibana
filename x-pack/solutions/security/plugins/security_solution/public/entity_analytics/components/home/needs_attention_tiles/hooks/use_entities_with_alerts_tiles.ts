@@ -22,7 +22,10 @@ import {
 } from '../queries/entities_with_alerts_query';
 import type { TimeRange } from '../../use_time_range_param';
 import { EMPTY_ENTITY_IDS } from '../data';
-import { parseAlertBasedTilesResponse } from '../../../../../../common/entity_analytics/needs_attention/parse_alert_based_tiles';
+import {
+  parseAlertBasedTilesResponse,
+  type AlertBasedTilesResult,
+} from '../../../../../../common/entity_analytics/needs_attention/parse_alert_based_tiles';
 import { useAlertBasedTilesTrend } from './use_alert_based_tiles_trend';
 import {
   getEntityFilterESQL,
