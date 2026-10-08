@@ -30,6 +30,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useIsFetching } from '@kbn/react-query';
+import { APP_ID } from '../../../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useResetEntityGridFilters } from '../hooks/use_entity_grid_filters';
 import {
   ENTITY_GRID_CHILDREN_QUERY_KEY,
@@ -373,7 +375,7 @@ export interface EntitiesGridProps {
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
-  columns,
+  columns: rowsColumns,
   rowsMode,
   timeRange,
   watchlistNames,
@@ -390,6 +392,13 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const { euiTheme } = useEuiTheme();
   const { fontSize: toolbarFontSize, lineHeight: toolbarLineHeight } = useEuiFontSize('xs');
   const { dataView } = useContext(DataViewContext);
+  const { cases } = useKibana().services;
+  const canReadCases = cases.helpers.canUseCases([APP_ID]).read;
+  // Users who can't read Security cases get no case counts: no Cases column, not zeros.
+  const columns = useMemo(
+    () => rowsColumns.filter(({ id }) => canReadCases || id !== 'case_count'),
+    [rowsColumns, canReadCases]
+  );
   const isIndividualRows = rowsMode === 'individual';
   const showToolbar = groupSelectorComponent !== undefined;
 
