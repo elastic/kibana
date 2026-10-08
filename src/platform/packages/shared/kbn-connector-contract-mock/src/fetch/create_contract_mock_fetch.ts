@@ -16,6 +16,7 @@ import { sampleResponse } from '../engine/sample_response';
 import type { OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
+import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -102,7 +103,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
 /**
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
  * get 404, requests without the credentials the operation requires get 401, and requests that
- * break the spec get 422 listing the violations; every request is recorded in `calls`. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * break the spec get 422 listing the violations; every request is recorded in `calls`. The
+ * token URLs of the specs' OAuth 2 flows issue stub tokens. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createContractMockFetch = ({
   specs,
@@ -113,6 +115,7 @@ export const createContractMockFetch = ({
   respond = sampleResponse,
 }: ContractMockOptions): ContractMock => {
   const operations = specs.flatMap(loadContractOperations);
+  const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
     operations,
@@ -129,6 +132,18 @@ export const createContractMockFetch = ({
       request.url.pathname
     }`;
     const routed = contract.route(request);
+    const grants = tokenEndpoints.get(`${request.url.origin}${request.url.pathname}`);
+    if (!('operation' in routed) && grants) {
+      const response = respondToTokenRequest(grants, request);
+      calls.push({
+        request: description,
+        operation: 'OAuth token',
+        status: response.statusCode,
+        requestViolations: [],
+        responseViolations: [],
+      });
+      return response;
+    }
     if (!('operation' in routed)) {
       calls.push({
         request: description,

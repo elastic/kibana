@@ -26,6 +26,8 @@ Each request is recorded in `calls` with its operation, status, and request and 
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
 
+The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against the server) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token URLs the spec also documents as operations are answered by those operations.
+
 Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
 
 ```yaml
