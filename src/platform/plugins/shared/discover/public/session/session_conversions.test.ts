@@ -737,6 +737,17 @@ describe('Discover session conversion and UI preparation', () => {
     expect(session.tabs[0].chartInterval).toBe('5m');
   });
 
+  it('raises a Classic sample size below the API minimum to 10 before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].sampleSize = 1;
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('sample_size', 10);
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].sampleSize).toBe(1);
+  });
+
   it('omits the fields that ES|QL tabs do not use before saving', () => {
     const session = fromDiscoverSessionApiResponse(response);
     session.tabs[2].sampleSize = 500;
