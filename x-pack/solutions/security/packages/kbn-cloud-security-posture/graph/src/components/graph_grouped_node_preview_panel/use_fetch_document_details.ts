@@ -14,12 +14,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import {
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { showDetailsErrorToast } from '../utils';
 import type { EventItem, AlertItem } from './components/grouped_item/types';
+import { resolveActorAndTargets } from './resolve_actor_and_targets';
 
 // Minimal shape of an ES hit we care about. (Avoid pulling large shared types until needed.)
 export interface DocumentHit<_Source = unknown> {
@@ -100,10 +103,16 @@ const normalizeToArray = (value?: string | string[]): string[] | undefined => {
   return Array.isArray(value) ? value : [value];
 };
 
-const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
+export const buildItemFromHit = (
+  hit: EsHitRecord,
+  euid: EntityStoreEuid | undefined
+): EventItem | AlertItem => {
   // TODO Fix typing issue and replace `any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hitSource = hit._source as Record<string, any>;
+  const { actorId, targetIds } = euid
+    ? resolveActorAndTargets(hitSource, euid)
+    : { actorId: undefined, targetIds: [] };
   return {
     itemType: hit._index?.includes('alerts-security.alerts-')
       ? DOCUMENT_TYPE_ALERT
@@ -113,8 +122,8 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
     index: hit._index,
     timestamp: hitSource['@timestamp'],
     action: hitSource.event?.action,
-    actor: { id: hitSource.actor?.entity?.id },
-    target: { id: hitSource.target?.entity?.id },
+    actor: actorId ? { id: actorId } : undefined,
+    target: targetIds.length > 0 ? { ids: targetIds } : undefined,
     ips: normalizeToArray(hitSource.source?.ip),
     countryCodes: normalizeToArray(hitSource.source?.geo?.country_iso_code),
   };
@@ -155,11 +164,15 @@ export const useFetchDocumentDetails = <_Source = unknown>({
 
   const queryClient = useQueryClient();
 
+  // Async-hydrated: `undefined` until the EUID chunk loads. Items are built from the raw hits
+  // below, so rows gain their actor/targets when it arrives without refetching.
+  const euid = useEntityStoreEuidApi()?.euid;
+
   const { isLoading, isFetching, isError, error, data } = useQuery(
     queryKey,
     async () => {
       if (missingDataView || normalizedIds.length === 0) {
-        return { page: [], total: 0 };
+        return { hits: [] as EsHitRecord[], total: 0 };
       }
       const search$ = dataService.search.search({
         params: buildDocumentsRequest(
@@ -172,7 +185,7 @@ export const useFetchDocumentDetails = <_Source = unknown>({
       const response = await lastValueFrom(search$);
       const { hits } = response?.rawResponse;
       return {
-        page: hits.hits.map((hit) => buildItemFromHit(hit as EsHitRecord)),
+        hits: hits.hits as EsHitRecord[],
         total: number.is(hits.total)
           ? hits.total
           : hits.total && number.is(hits.total.value)
@@ -188,6 +201,11 @@ export const useFetchDocumentDetails = <_Source = unknown>({
     }
   );
 
+  const page = useMemo(
+    () => (data?.hits ?? []).map((hit) => buildItemFromHit(hit, euid)),
+    [data?.hits, euid]
+  );
+
   if (missingDataView) {
     return {
       data: { page: [], total: 0 },
@@ -200,7 +218,7 @@ export const useFetchDocumentDetails = <_Source = unknown>({
   }
 
   return {
-    data: data ?? { page: [], total: 0 },
+    data: { page, total: data?.total ?? 0 },
     isLoading,
     isFetching,
     isError,
