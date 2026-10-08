@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { EntityType } from '@kbn/entity-store/common';
 import React from 'react';
 import {
   useEntityStoreStatus,
@@ -17,9 +18,13 @@ import {
 } from './use_entity_store';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useShouldInstallServiceEngine } from './use_should_install_service_engine';
 
 jest.mock('../../../api/entity_store');
 jest.mock('../../../../common/lib/kibana/kibana_react');
+jest.mock('./use_should_install_service_engine');
+
+const mockShouldInstallServiceEngine = jest.fn();
 
 /** Expected child shape for entity_analytics:entity_store_management labels. */
 const contextFor = (id: string) => ({
@@ -57,6 +62,9 @@ describe('use_entity_store hooks — execution context wiring', () => {
       stopEntityStore,
       deleteEntityStore,
     });
+    getEntityStoreStatus.mockResolvedValue({ status: 'not_installed', engines: [] });
+    mockShouldInstallServiceEngine.mockResolvedValue(false);
+    (useShouldInstallServiceEngine as jest.Mock).mockReturnValue(mockShouldInstallServiceEngine);
 
     (useKibana as jest.Mock).mockReturnValue({
       services: { telemetry: { reportEvent: jest.fn() } },
@@ -76,7 +84,7 @@ describe('use_entity_store hooks — execution context wiring', () => {
     );
   });
 
-  it('useInstallEntityStoreMutation threads entity_store_install context to installEntityStore', async () => {
+  it('useInstallEntityStoreMutation installs user, host, and generic by default', async () => {
     installEntityStore.mockResolvedValueOnce({});
 
     const { result } = renderHook(() => useInstallEntityStoreMutation(), {
@@ -88,7 +96,35 @@ describe('use_entity_store hooks — execution context wiring', () => {
     });
 
     await waitFor(() =>
-      expect(installEntityStore).toHaveBeenCalledWith(contextFor('entity_store_install'))
+      expect(installEntityStore).toHaveBeenCalledWith(
+        [EntityType.enum.user, EntityType.enum.host, EntityType.enum.generic],
+        contextFor('entity_store_install')
+      )
+    );
+  });
+
+  it('useInstallEntityStoreMutation includes service when the install policy requires it', async () => {
+    mockShouldInstallServiceEngine.mockResolvedValueOnce(true);
+    installEntityStore.mockResolvedValueOnce({});
+
+    const { result } = renderHook(() => useInstallEntityStoreMutation(), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() =>
+      expect(installEntityStore).toHaveBeenCalledWith(
+        [
+          EntityType.enum.user,
+          EntityType.enum.host,
+          EntityType.enum.generic,
+          EntityType.enum.service,
+        ],
+        contextFor('entity_store_install')
+      )
     );
   });
 

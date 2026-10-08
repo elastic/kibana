@@ -28,6 +28,7 @@ import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
 import { EntityStoreErrorCallout } from '../entity_store_error_callout';
 import { ENGINE_STATUS_PANEL_TEST_ID } from '../../../../test_ids';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -69,10 +70,13 @@ export const EngineStatus = () => {
     );
   }
 
-  const enginesStatusData = enabledEntityTypes.map((type) => ({
-    type,
-    engine: data.engines.find((e) => e.type === type),
-  }));
+  const enginesStatusData = enabledEntityTypes
+    .map((type) => ({
+      type,
+      engine: data.engines.find((e) => e.type === type),
+    }))
+    // Service extraction is intentionally optional for new Security installs.
+    .filter(({ type, engine }) => type !== EntityType.service || engine !== undefined);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={ENGINE_STATUS_PANEL_TEST_ID}>

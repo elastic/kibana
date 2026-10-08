@@ -92,6 +92,48 @@ describe('EngineStatus', () => {
     expect(screen.getByText('Download status')).toBeInTheDocument();
   });
 
+  it('does not present an absent service engine as needing installation', () => {
+    mockUseEntityStore.mockReturnValue({
+      data: {
+        engines: [
+          {
+            type: EntityType.user,
+            components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.queryByText('Service Store')).not.toBeInTheDocument();
+  });
+
+  it('continues to show an installed service engine', () => {
+    mockUseEntityStore.mockReturnValue({
+      data: {
+        engines: [
+          {
+            type: EntityType.service,
+            components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByText('Service Store')).toBeInTheDocument();
+  });
+
   it('calls downloadJson when download button is clicked', () => {
     const mockData = {
       engines: [
