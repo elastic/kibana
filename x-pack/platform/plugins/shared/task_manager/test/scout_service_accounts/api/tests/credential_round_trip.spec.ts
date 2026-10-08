@@ -121,13 +121,13 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const serviceAccountTaskId = uniqueId();
         const apiKeyTaskId = uniqueId();
+        taskIds.push(serviceAccountTaskId, apiKeyTaskId);
 
         const response = await bulkScheduleTasks(apiClient, [
           { id: serviceAccountTaskId, runAs: RUN_AS },
           { id: apiKeyTaskId },
         ]);
         expect(response).toHaveStatusCode(200);
-        taskIds.push(serviceAccountTaskId, apiKeyTaskId);
         expect(response.body).toStrictEqual({ ids: [serviceAccountTaskId, apiKeyTaskId] });
 
         await expectEncryptedCredential(apiClient, esClient, serviceAccountTaskId);
