@@ -47,7 +47,7 @@ const params: GenerateBriefRequestBody = {
 const createMemoryStore = (
   options: { failOn?: (patch: BriefJobPatch) => boolean } = {}
 ): BriefJobStore & { doc: ExecutiveBriefJob; patches: BriefJobPatch[] } => {
-  const store = {
+  const store: BriefJobStore & { doc: ExecutiveBriefJob; patches: BriefJobPatch[] } = {
     doc: {
       id: 'job-1',
       spaceId: 'default',
@@ -78,7 +78,7 @@ const entitiesFor = (euids: string[]): Record<string, BriefEntity> =>
   );
 
 const createBuilders = (): jest.Mocked<SnapshotBuilders> => ({
-  buildGlance: jest.fn(async () => ({
+  buildGlance: jest.fn(async (_ctx: SnapshotContext) => ({
     value: {
       glance: {
         ...FIXTURE_SNAPSHOT.glance,
@@ -88,14 +88,24 @@ const createBuilders = (): jest.Mocked<SnapshotBuilders> => ({
     },
     sources: { posture: { status: 'ok' as const, tookMs: 1 } },
   })),
-  buildStorylines: jest.fn(async () => ({
-    value: FIXTURE_SNAPSHOT.storylines,
-    sources: { storylines: { status: 'ok' as const, tookMs: 2 } },
-  })),
-  buildBlindSpots: jest.fn(async () => ({
-    value: FIXTURE_SNAPSHOT.blindSpots,
-    sources: { alertsByTactic: { status: 'ok' as const, tookMs: 3 } },
-  })),
+  buildStorylines: jest.fn(
+    async (
+      _ctx: SnapshotContext,
+      _input: { materialRiskEuids: string[]; riskMoverEuids: string[] }
+    ) => ({
+      value: FIXTURE_SNAPSHOT.storylines,
+      sources: { storylines: { status: 'ok' as const, tookMs: 2 } },
+    })
+  ),
+  buildBlindSpots: jest.fn(
+    async (
+      _ctx: SnapshotContext,
+      _input: { storylineEuids: string[]; materialRiskEuids: string[] }
+    ) => ({
+      value: FIXTURE_SNAPSHOT.blindSpots,
+      sources: { alertsByTactic: { status: 'ok' as const, tookMs: 3 } },
+    })
+  ),
   fetchBriefEntities: jest.fn(async (_ctx, euids: string[]) => entitiesFor(euids)),
 });
 

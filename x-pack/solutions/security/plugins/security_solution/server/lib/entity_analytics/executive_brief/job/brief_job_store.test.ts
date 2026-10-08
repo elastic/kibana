@@ -73,7 +73,7 @@ describe('createBriefJobStore', () => {
     esClient.get.mockResolvedValueOnce({
       error: { type: 'index_not_found_exception' },
       status: 404,
-    });
+    } as unknown as Awaited<ReturnType<typeof esClient.get>>);
     expect(await store.get('x')).toBeUndefined();
   });
 });

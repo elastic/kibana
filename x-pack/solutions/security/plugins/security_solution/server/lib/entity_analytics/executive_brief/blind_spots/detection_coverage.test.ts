@@ -180,7 +180,7 @@ describe('fetchDetectionCoverage', () => {
 
     const coverage = await fetchDetectionCoverage(ctx, createTestLookup());
 
-    const [{ options }] = rulesClient.find.mock.calls[0];
+    const options = rulesClient.find.mock.calls[0][0]?.options;
     expect(options?.filter).toContain('alert.attributes.enabled: true');
     expect(options?.perPage).toBe(10000);
     expect(options?.fields).toEqual(

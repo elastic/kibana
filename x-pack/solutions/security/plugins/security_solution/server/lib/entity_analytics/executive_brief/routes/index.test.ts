@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { APP_ID } from '../../../../../common';
 import { FIXTURE_JOB_SUCCEEDED } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
@@ -68,7 +69,7 @@ describe('executive brief routes', () => {
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     clients.core.security.authc.getCurrentUser.mockImplementation(() =>
-      username ? { username } : null
+      username ? ({ username } as unknown as AuthenticatedUser) : null
     );
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));
     const getStartServices = jest.fn().mockResolvedValue([
