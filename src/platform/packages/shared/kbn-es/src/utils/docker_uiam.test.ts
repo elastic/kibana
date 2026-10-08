@@ -8,7 +8,15 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import {
+  getUiamContainers,
+  initializeUiamContainers,
+  runUiamContainer,
+  UIAM_CONTAINERS,
+} from './docker_uiam';
+
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -50,6 +58,50 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
+describe('#getUiamContainers()', () => {
+  const ephemeralExpirationParam = (container: { params: string[] }) =>
+    container.params.find((param) => param.startsWith('uiam.tokens.ephemeral.expiration='));
+
+  test('leaves the ephemeral token lifetime to UIAM by default', () => {
+    expect(getUiamContainers({ includeOAuth: true }).map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  test('sets the ephemeral token lifetime on the UIAM container only', () => {
+    const containers = getUiamContainers({ includeOAuth: true, ephemeralTokenExpiration: 'PT1M' });
+
+    expect(containers.map(({ name }) => name)).toEqual(['uiam-cosmosdb', 'uiam', 'uiam-oauth']);
+    expect(containers.map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      'uiam.tokens.ephemeral.expiration=PT1M',
+      undefined,
+    ]);
+    expect(containers[1].params.slice(-2)).toEqual([
+      '--env',
+      'uiam.tokens.ephemeral.expiration=PT1M',
+    ]);
+  });
+
+  test.each(['PT1M', 'PT90S', 'PT2M30S', 'PT5M'])('accepts %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).not.toThrow();
+  });
+
+  test.each(['PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])('rejects %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
+      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+    );
+  });
+
+  test('does not change the shared container definitions', () => {
+    getUiamContainers({ ephemeralTokenExpiration: 'PT1M' });
+
+    expect(UIAM_CONTAINERS.map(ephemeralExpirationParam)).toEqual([undefined, undefined]);
+  });
+});
+
 describe(`#runUiamContainer()`, () => {
   test('should be able to run UIAM containers', async () => {
     const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
@@ -83,15 +135,19 @@ describe(`#runUiamContainer()`, () => {
             "--net",
             "elastic",
             "--memory",
-            "1g",
+            "1536m",
             "--memory-swap",
-            "1g",
+            "1536m",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
             "127.0.0.1:8081:8081",
             "-p",
+            "[::1]:8081:8081",
+            "-p",
             "127.0.0.1:8082:1234",
+            "-p",
+            "[::1]:8082:1234",
             "--env",
             "AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1",
             "--env",
@@ -171,6 +227,8 @@ describe(`#runUiamContainer()`, () => {
             "/some/path/kibana.crt:/tmp/server.crt:z",
             "-p",
             "127.0.0.1:8443:8443",
+            "-p",
+            "[::1]:8443:8443",
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
             "--env",
@@ -198,7 +256,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"org\\".level=INFO",
             "--env",
-            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=INFO",
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
             "--env",
@@ -238,7 +296,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.gateway_connection_mode=true",
             "--env",
-            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=,3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=",
             "--env",
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",

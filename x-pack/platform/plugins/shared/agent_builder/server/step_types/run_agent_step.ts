@@ -26,7 +26,10 @@ import {
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import { normalizeOptionalStringParam } from '../../common/normalize_optional_string_param';
-import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
+import {
+  EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
+  runAgentStepCommonDefinition,
+} from '../../common/step_types/run_agent_step';
 import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
 
 /**
@@ -82,11 +85,18 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
           'public-conversation': publicConversation,
+          ephemeral,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
+          'product-solution': productSolution,
+          'product-feature': productFeature,
           'max-step-size': maxStepSize,
           'reasoning-level': reasoningLevel,
         } = context.config;
+        // Workflows only validate the config schema's shape, which drops its refinements.
+        if (ephemeral && createConversation) {
+          throw new Error(EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE);
+        }
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
 
@@ -120,7 +130,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           });
         }
 
-        const storeConversation = createConversation || Boolean(conversationId);
+        const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));
         const accessControl = publicConversation
           ? { access_mode: ConversationAccessControlMode.Public }
           : undefined;
@@ -158,7 +168,17 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
             ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
-            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
+            ...(pluginId
+              ? {
+                  telemetryMetadata: {
+                    pluginId,
+                    aggregateBy,
+                    productSolution,
+                    productFeature,
+                    interactionId: context.contextManager.getContext().execution.id,
+                  },
+                }
+              : {}),
           },
           // workflows already run as scheduled tasks
           useTaskManager: false,

@@ -1,9 +1,126 @@
 {
-  "sha1": "66b678b1bd8e4ff8ad10f48c68c5eeac0dda8e6a",
+  "sha1": "601e2199f1e407ee5ce3728461b3bcc65a64d810",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "b8e57e3fcdc8548-ef889f717578f66",
+      "title": "Bulk create rules API create: should create two rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 31,
+        "column": 31
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-22fa7f9a4b02018",
+      "title": "Bulk create rules API create: should report RULE_ALREADY_EXISTS for colliding ids and still create the rest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-c17562168d4a5de",
+      "title": "Bulk create rules API validation: should reject an empty items array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-da0739da340622d",
+      "title": "Bulk create rules API validation: should reject unknown keys in the body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 89,
+        "column": 70
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-fc91b08cbb2a7bb",
+      "title": "Bulk create rules API validation: should reject a body with no items field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 102,
+        "column": 17
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-7b7f42650518309",
+      "title": "Bulk create rules API validation: should reject arrays longer than MAX_BULK_ITEMS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-ef7135175d1c9f0",
+      "title": "Bulk create rules API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 121,
+        "column": 40
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-a0f241534e7c204",
+      "title": "Bulk create rules API authorization: should return 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 134,
+        "column": 14
+      }
+    },
+    {
+      "id": "b8e57e3fcdc8548-377f35a1bca4eec",
+      "title": "Bulk create rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 153,
+        "column": 23
+      }
+    },
     {
       "id": "08aadcbedf19dcb-b93be70a3064766",
       "title": "Bulk delete rules by IDs API delete: should delete rules by ids",
@@ -456,7 +573,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
         "line": 60,
-        "column": 29
+        "column": 7
       }
     },
     {
@@ -468,7 +585,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 87,
+        "line": 89,
         "column": 19
       }
     },
@@ -481,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 111,
+        "line": 113,
         "column": 14
       }
     },
@@ -494,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 119,
+        "line": 121,
         "column": 22
       }
     },
@@ -507,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 125,
+        "line": 127,
         "column": 5
       }
     },
@@ -520,7 +637,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 136,
+        "line": 138,
         "column": 96
       }
     },
@@ -533,7 +650,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 145,
+        "line": 147,
         "column": 95
       }
     },
@@ -546,7 +663,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 157,
+        "line": 159,
         "column": 30
       }
     },
@@ -559,7 +676,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 172,
+        "line": 174,
         "column": 69
       }
     },
@@ -572,7 +689,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 188,
+        "line": 190,
         "column": 8
       }
     },
@@ -585,7 +702,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 31,
+        "line": 30,
         "column": 31
       }
     },
@@ -598,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 55,
-        "column": 81
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -611,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 69,
+        "line": 72,
         "column": 46
       }
     },
@@ -624,7 +741,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 80,
+        "line": 83,
         "column": 30
       }
     },
@@ -637,7 +754,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 96,
+        "line": 99,
         "column": 20
       }
     },
@@ -650,7 +767,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 111,
+        "line": 114,
         "column": 5
       }
     },
@@ -663,7 +780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 117,
+        "line": 120,
         "column": 8
       }
     },
@@ -676,21 +793,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 128,
+        "line": 131,
         "column": 37
-      }
-    },
-    {
-      "id": "ebd999d5574271b-aa546c2a0270706",
-      "title": "Create rule API validation: rejects body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 138,
-        "column": 58
       }
     },
     {
@@ -702,8 +806,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 151,
-        "column": 19
+        "line": 141,
+        "column": 58
       }
     },
     {
@@ -715,21 +819,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 163,
-        "column": 5
+        "line": 152,
+        "column": 30
       }
     },
     {
-      "id": "ebd999d5574271b-27be1f4ffc22507",
-      "title": "Create rule API validation: rejects body with empty query.breach.query",
+      "id": "ebd999d5574271b-cf436d27a7a9a1e",
+      "title": "Create rule API validation: rejects body with an empty query.base",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 172,
-        "column": 14
+        "line": 163,
+        "column": 4
       }
     },
     {
@@ -741,73 +845,86 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 185,
+        "line": 172,
+        "column": 12
+      }
+    },
+    {
+      "id": "ebd999d5574271b-7b2cd12c2400e9a",
+      "title": "Create rule API validation: rejects a signal rule that sets recovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 188,
+        "column": 89
+      }
+    },
+    {
+      "id": "ebd999d5574271b-8c82201b499abb5",
+      "title": "Create rule API validation: rejects a signal rule that sets no_data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 205,
+        "column": 25
+      }
+    },
+    {
+      "id": "ebd999d5574271b-ec5447e168335ae",
+      "title": "Create rule API validation: rejects recovery.strategy \"query\" without a query field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 219,
+        "column": 17
+      }
+    },
+    {
+      "id": "ebd999d5574271b-a2f417d035def1b",
+      "title": "Create rule API validation: rejects recovery.strategy \"condition\" without query.breach",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 231,
+        "column": 91
+      }
+    },
+    {
+      "id": "ebd999d5574271b-c0b46df2e2bbd0f",
+      "title": "Create rule API validation: rejects recovery with strategy \"no_breach\" that also carries a query field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 248,
         "column": 5
       }
     },
     {
-      "id": "ebd999d5574271b-b46849f77f71090",
-      "title": "Create rule API validation: rejects a signal rule with recovery_strategy \"query\"",
+      "id": "ebd999d5574271b-8c039cadaf2f09f",
+      "title": "Create rule API validation: rejects a recovering delay when recovery never happens",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 198,
+        "line": 261,
         "column": 4
-      }
-    },
-    {
-      "id": "ebd999d5574271b-ac3e95de7bee459",
-      "title": "Create rule API validation: rejects a signal rule with a no_data query in standalone format",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 213,
-        "column": 18
-      }
-    },
-    {
-      "id": "ebd999d5574271b-9e68214db6463c4",
-      "title": "Create rule API validation: rejects with recovery_strategy: \"query\" and missing the recovery query field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 233,
-        "column": 19
-      }
-    },
-    {
-      "id": "ebd999d5574271b-8f51593a43bdc51",
-      "title": "Create rule API validation: rejects recovery with strategy: \"no_breach\" that also includes a query field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 253,
-        "column": 27
-      }
-    },
-    {
-      "id": "ebd999d5574271b-63b9924377d58ad",
-      "title": "Create rule API validation: rejects a recovering delay when recovery is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 273,
-        "column": 27
       }
     },
     {
@@ -819,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 289,
-        "column": 4
+        "line": 282,
+        "column": 14
       }
     },
     {
@@ -832,99 +949,190 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 314,
-        "column": 14
-      }
-    },
-    {
-      "id": "ebd999d5574271b-3757b0a91a3af0c",
-      "title": "Create rule API create: returns 201 with standalone format and a recovery query",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 352,
-        "column": 25
-      }
-    },
-    {
-      "id": "ebd999d5574271b-a9e10c634f85b62",
-      "title": "Create rule API create: returns 201 with standalone format and recovery_strategy \"no_breach\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 372,
+        "line": 302,
         "column": 27
       }
     },
     {
-      "id": "ebd999d5574271b-16beecfe9a6387a",
-      "title": "Create rule API create: returns 201 with standalone format and a no_data query",
+      "id": "ebd999d5574271b-c02718638351f0b",
+      "title": "Create rule API validation: rejects an alert rule that omits recovery or no_data",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 386,
-        "column": 25
+        "line": 340,
+        "column": 14
       }
     },
     {
-      "id": "ebd999d5574271b-e9b260f09fc4f1f",
-      "title": "Create rule API create: returns 201 with composed format",
+      "id": "ebd999d5574271b-dfe832f7a846bf4",
+      "title": "Create rule API create: returns 201 with a standalone recovery query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 412,
+        "line": 356,
+        "column": 30
+      }
+    },
+    {
+      "id": "ebd999d5574271b-95183cd1df2f867",
+      "title": "Create rule API create: returns 201 with recovery strategy \"no_breach\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 374,
+        "column": 4
+      }
+    },
+    {
+      "id": "ebd999d5574271b-e76c594ed217321",
+      "title": "Create rule API create: returns 201 with recovery strategy \"manual\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 387,
         "column": 9
       }
     },
     {
-      "id": "ebd999d5574271b-8d5063a08ab1ab0",
-      "title": "Create rule API create: persists a conditionless composed rule without a breach block",
+      "id": "ebd999d5574271b-faf8509e723c7cf",
+      "title": "Create rule API create: returns 201 with a no_data presence query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 430,
-        "column": 24
+        "line": 409,
+        "column": 14
       }
     },
     {
-      "id": "ebd999d5574271b-ca23ce4bb86ca83",
-      "title": "Create rule API create: returns 201 with composed format including a recovery segment",
+      "id": "ebd999d5574271b-872cb42a5f55d27",
+      "title": "Create rule API create: returns 201 with no_data strategy \"ignore\"",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 447,
-        "column": 53
-      }
-    },
-    {
-      "id": "ebd999d5574271b-c1bc7c888c9ff75",
-      "title": "Create rule API create: returns 201 with composed format and no_data_strategy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 467,
+        "line": 428,
         "column": 28
+      }
+    },
+    {
+      "id": "ebd999d5574271b-aa0e1ff7a16d676",
+      "title": "Create rule API create: returns 201 with no_data strategy \"keep_last\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 428,
+        "column": 28
+      }
+    },
+    {
+      "id": "ebd999d5574271b-3820f8cb6b732e7",
+      "title": "Create rule API create: returns 201 with no_data strategy \"resolve\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 428,
+        "column": 28
+      }
+    },
+    {
+      "id": "ebd999d5574271b-7a795deb8636421",
+      "title": "Create rule API validation: rejects the \"alert\" no_data strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 444,
+        "column": 7
+      }
+    },
+    {
+      "id": "ebd999d5574271b-f0067476e538ce6",
+      "title": "Create rule API validation: rejects a classifying no_data strategy that has no way to tell absence from a breach",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 459,
+        "column": 22
+      }
+    },
+    {
+      "id": "ebd999d5574271b-29c965f28c774bf",
+      "title": "Create rule API create: returns 201 with a breach segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 473,
+        "column": 16
+      }
+    },
+    {
+      "id": "ebd999d5574271b-74192e4560dce3d",
+      "title": "Create rule API create: persists a conditionless rule without a breach block",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 487,
+        "column": 88
+      }
+    },
+    {
+      "id": "ebd999d5574271b-2fc9fd94b5052ae",
+      "title": "Create rule API create: returns 201 with a recovery condition segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 499,
+        "column": 7
+      }
+    },
+    {
+      "id": "ebd999d5574271b-bcb379513b820a0",
+      "title": "Create rule API create: returns 201 with a breach segment and a no_data strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 519,
+        "column": 4
       }
     },
     {
@@ -936,8 +1144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 485,
-        "column": 17
+        "line": 539,
+        "column": 25
       }
     },
     {
@@ -949,8 +1157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 504,
-        "column": 14
+        "line": 548,
+        "column": 9
       }
     },
     {
@@ -962,8 +1170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 512,
-        "column": 21
+        "line": 561,
+        "column": 17
       }
     },
     {
@@ -975,8 +1183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 526,
-        "column": 5
+        "line": 569,
+        "column": 7
       }
     },
     {
@@ -988,8 +1196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 534,
-        "column": 30
+        "line": 580,
+        "column": 52
       }
     },
     {
@@ -1001,8 +1209,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 547,
-        "column": 29
+        "line": 592,
+        "column": 14
       }
     },
     {
@@ -1279,8 +1487,8 @@
       }
     },
     {
-      "id": "74ddfca7c423c5f-9b0cd2e8a14a5c7",
-      "title": "Disable rule API state: preserves the rule fields and bumps version/updatedAt after an enable → disable round-trip",
+      "id": "74ddfca7c423c5f-5796525f8d5e7a3",
+      "title": "Disable rule API state: preserves the rule fields and bumps updatedAt after an enable → disable round-trip",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1300,8 +1508,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/disable_rule.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 81,
+        "column": 62
       }
     },
     {
@@ -1313,8 +1521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/disable_rule.spec.ts",
-        "line": 95,
-        "column": 27
+        "line": 90,
+        "column": 14
       }
     },
     {
@@ -1326,8 +1534,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/disable_rule.spec.ts",
-        "line": 105,
-        "column": 14
+        "line": 98,
+        "column": 19
       }
     },
     {
@@ -1339,7 +1547,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/disable_rule.spec.ts",
-        "line": 118,
+        "line": 113,
         "column": 84
       }
     },
@@ -1352,7 +1560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/disable_rule.spec.ts",
-        "line": 135,
+        "line": 130,
         "column": 24
       }
     },
@@ -1513,8 +1721,8 @@
       }
     },
     {
-      "id": "99bd0fc8ef5e784-9fa2746f899aef5",
-      "title": "Enable rule API state: preserves the rule fields and bumps version/updatedAt after a disable → enable round-trip",
+      "id": "99bd0fc8ef5e784-4ef95de3e03a9b1",
+      "title": "Enable rule API state: preserves the rule fields and bumps updatedAt after a disable → enable round-trip",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1534,8 +1742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/enable_rule.spec.ts",
-        "line": 88,
-        "column": 9
+        "line": 82,
+        "column": 62
       }
     },
     {
@@ -1547,8 +1755,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/enable_rule.spec.ts",
-        "line": 96,
-        "column": 27
+        "line": 91,
+        "column": 14
       }
     },
     {
@@ -1560,8 +1768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/enable_rule.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 99,
+        "column": 19
       }
     },
     {
@@ -1573,7 +1781,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/enable_rule.spec.ts",
-        "line": 123,
+        "line": 118,
         "column": 7
       }
     },
@@ -1586,7 +1794,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/enable_rule.spec.ts",
-        "line": 148,
+        "line": 143,
         "column": 23
       }
     },
@@ -1887,8 +2095,8 @@
       }
     },
     {
-      "id": "f88537985d20309-2a9808edbf487e7",
-      "title": "Find rule templates API pagination: should slice results and report the total across pages",
+      "id": "f88537985d20309-e27481402d68ae4",
+      "title": "Find rule templates API tags: should exclude templates carrying excluded tags",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1907,6 +2115,26 @@
       }
     },
     {
+      "id": "f88537985d20309-2a9808edbf487e7",
+      "title": "Find rule templates API pagination: should slice results and report the total across pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
+        "line": 235,
+        "column": 28
+      }
+    },
+    {
       "id": "f88537985d20309-c2481d01cba86c4",
       "title": "Find rule templates API sort: should sort by name ascending by default",
       "expectedStatus": "passed",
@@ -1922,8 +2150,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 240,
-        "column": 4
+        "line": 271,
+        "column": 17
       }
     },
     {
@@ -1942,8 +2170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 261,
-        "column": 25
+        "line": 290,
+        "column": 65
       }
     },
     {
@@ -1962,8 +2190,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 286,
-        "column": 80
+        "line": 318,
+        "column": 13
       }
     },
     {
@@ -1982,8 +2210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 310,
-        "column": 12
+        "line": 341,
+        "column": 74
       }
     },
     {
@@ -2002,8 +2230,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 316,
-        "column": 16
+        "line": 349,
+        "column": 91
       }
     },
     {
@@ -2022,8 +2250,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 324,
-        "column": 80
+        "line": 359,
+        "column": 5
       }
     },
     {
@@ -2042,8 +2270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 334,
-        "column": 30
+        "line": 366,
+        "column": 14
       }
     },
     {
@@ -2062,8 +2290,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 344,
-        "column": 11
+        "line": 376,
+        "column": 74
       }
     },
     {
@@ -2082,8 +2310,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 355,
-        "column": 12
+        "line": 387,
+        "column": 25
       }
     },
     {
@@ -2102,8 +2330,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 369,
-        "column": 40
+        "line": 405,
+        "column": 23
       }
     },
     {
@@ -2115,7 +2343,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 42
       }
     },
@@ -2128,7 +2356,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 88
       }
     },
@@ -2141,7 +2369,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 41
       }
     },
@@ -2154,7 +2382,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 24
       }
     },
@@ -2167,7 +2395,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 117,
+        "line": 118,
         "column": 12
       }
     },
@@ -2180,7 +2408,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 43
       }
     },
@@ -2193,7 +2421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 151,
+        "line": 152,
         "column": 22
       }
     },
@@ -2206,7 +2434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 186,
+        "line": 187,
         "column": 81
       }
     },
@@ -2219,7 +2447,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 196,
+        "line": 197,
         "column": 86
       }
     },
@@ -2232,7 +2460,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 216,
+        "line": 217,
         "column": 9
       }
     },
@@ -2245,7 +2473,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 242,
+        "line": 243,
         "column": 5
       }
     },
@@ -2258,7 +2486,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 274,
+        "line": 275,
         "column": 24
       }
     },
@@ -2271,7 +2499,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 298,
+        "line": 299,
         "column": 58
       }
     },
@@ -2284,8 +2512,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 322,
+        "line": 323,
         "column": 8
+      }
+    },
+    {
+      "id": "016ff4533c1aea0-e2e1b8f3502bb2e",
+      "title": "Find rules API filter: rejects malformed KQL with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
+        "line": 343,
+        "column": 5
       }
     },
     {
@@ -2297,8 +2538,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 342,
-        "column": 5
+        "line": 349,
+        "column": 8
       }
     },
     {
@@ -2310,8 +2551,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 347,
-        "column": 68
+        "line": 359,
+        "column": 4
       }
     },
     {
@@ -2323,8 +2564,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 356,
-        "column": 14
+        "line": 364,
+        "column": 7
       }
     },
     {
@@ -2336,8 +2577,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 363,
-        "column": 7
+        "line": 371,
+        "column": 88
       }
     },
     {
@@ -2349,8 +2590,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 370,
-        "column": 73
+        "line": 380,
+        "column": 22
       }
     },
     {
@@ -2362,8 +2603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 379,
-        "column": 22
+        "line": 388,
+        "column": 69
       }
     },
     {
@@ -2375,8 +2616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 387,
-        "column": 89
+        "line": 397,
+        "column": 11
       }
     },
     {
@@ -2388,8 +2629,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 396,
-        "column": 11
+        "line": 403,
+        "column": 12
       }
     },
     {
@@ -2401,8 +2642,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 407,
-        "column": 54
+        "line": 416,
+        "column": 22
       }
     },
     {
@@ -2414,8 +2655,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/find_rules.spec.ts",
-        "line": 422,
-        "column": 14
+        "line": 429,
+        "column": 18
       }
     },
     {
@@ -2479,7 +2720,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 4
       }
     },
@@ -2492,7 +2733,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 160,
+        "line": 162,
         "column": 5
       }
     },
@@ -2505,7 +2746,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 181,
+        "line": 183,
         "column": 23
       }
     },
@@ -2518,7 +2759,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 201,
+        "line": 203,
         "column": 23
       }
     },
@@ -2531,7 +2772,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 232,
+        "line": 234,
         "column": 43
       }
     },
@@ -2544,7 +2785,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 250,
+        "line": 252,
         "column": 5
       }
     },
@@ -2557,7 +2798,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 260,
+        "line": 262,
         "column": 14
       }
     },
@@ -2570,7 +2811,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 268,
+        "line": 270,
         "column": 16
       }
     },
@@ -2583,7 +2824,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 276,
+        "line": 278,
         "column": 22
       }
     },
@@ -2596,7 +2837,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 285,
+        "line": 287,
         "column": 23
       }
     },
@@ -2609,7 +2850,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 300,
+        "line": 302,
         "column": 5
       }
     },
@@ -2622,8 +2863,128 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_tags.spec.ts",
-        "line": 314,
+        "line": 316,
         "column": 14
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-f5092ac0105614a",
+      "title": "Get rule template tags API returns tags from all v2 templates independently of list pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 39,
+        "column": 30
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-bbd8ee0614060ea",
+      "title": "Get rule template tags API returns at most 20 tags ordered by usage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 79,
+        "column": 4
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-9955efe20de5603",
+      "title": "Get rule template tags API filters tags by prefix and excludes v1 templates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 102,
+        "column": 23
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-9bfbe4507edfb04",
+      "title": "Get rule template tags API rejects a search longer than the tag limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 130,
+        "column": 7
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-ec13d477d0863bc",
+      "title": "Get rule template tags API allows users with read-only rules privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 138,
+        "column": 38
+      }
+    },
+    {
+      "id": "c04a5cb18014d4f-068611de4e7656b",
+      "title": "Get rule template tags API rejects users without alerting v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule_template_tags.spec.ts",
+        "line": 156,
+        "column": 4
       }
     },
     {
@@ -2768,8 +3129,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 44,
+        "column": 23
       }
     },
     {
@@ -2781,7 +3142,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 14
       }
     },
@@ -2794,7 +3155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule.spec.ts",
-        "line": 60,
+        "line": 59,
         "column": 7
       }
     },
@@ -2807,7 +3168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule.spec.ts",
-        "line": 73,
+        "line": 72,
         "column": 14
       }
     },
@@ -2820,7 +3181,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rule.spec.ts",
-        "line": 85,
+        "line": 84,
         "column": 9
       }
     },
@@ -2994,6 +3355,123 @@
       }
     },
     {
+      "id": "43d3aea485b9312-5891588a5cd7d35",
+      "title": "Match rules API tags: should return the alert rules with any of the matcher tags, sorted by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "43d3aea485b9312-2cf2c2f8f9febeb",
+      "title": "Match rules API tags: should ignore the matcher expression",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 92,
+        "column": 5
+      }
+    },
+    {
+      "id": "43d3aea485b9312-c04367851d6acda",
+      "title": "Match rules API tags: should return an empty list when no rule has the matcher tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 110,
+        "column": 30
+      }
+    },
+    {
+      "id": "43d3aea485b9312-e80fe324ca8c29e",
+      "title": "Match rules API kind: should not return signal rules, even when they have the matcher tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 124,
+        "column": 30
+      }
+    },
+    {
+      "id": "43d3aea485b9312-77747c1d16f3ab6",
+      "title": "Match rules API catch-all: should return every alert rule when the matcher has no tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 131,
+        "column": 90
+      }
+    },
+    {
+      "id": "43d3aea485b9312-8084d2e64bddd7d",
+      "title": "Match rules API pagination: should paginate the matching rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 153,
+        "column": 5
+      }
+    },
+    {
+      "id": "43d3aea485b9312-31d8bd447d5bda5",
+      "title": "Match rules API validation: should return 400 for unknown top-level keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 171,
+        "column": 9
+      }
+    },
+    {
+      "id": "43d3aea485b9312-2e28eb265eafdf2",
+      "title": "Match rules API validation: should return 400 when per_page exceeds the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 184,
+        "column": 18
+      }
+    },
+    {
+      "id": "43d3aea485b9312-d5068a6cc60fb66",
+      "title": "Match rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 188,
+        "column": 14
+      }
+    },
+    {
       "id": "fc474d7c402bdfc-b29d71d53ae58ac",
       "title": "Matcher value suggestions API returns a 200 with an array of suggested values for a static field",
       "expectedStatus": "passed",
@@ -3002,8 +3480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 90,
-        "column": 65
+        "line": 84,
+        "column": 5
       }
     },
     {
@@ -3015,47 +3493,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 106,
-        "column": 14
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-7759773fc3b7aae",
-      "title": "Matcher value suggestions API rule.name: narrows the saved object search to names matching the query prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 122,
-        "column": 11
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-1d340d0aaa0c2a4",
-      "title": "Matcher value suggestions API rule.tags: returns the deduplicated tags across all rules",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 143,
-        "column": 38
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-950c0b50dd2bec5",
-      "title": "Matcher value suggestions API rule.tags: caps the result at 10 suggestions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 171,
-        "column": 14
+        "line": 100,
+        "column": 7
       }
     },
     {
@@ -3067,8 +3506,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 191,
-        "column": 8
+        "line": 115,
+        "column": 22
       }
     },
     {
@@ -3080,8 +3519,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 207,
-        "column": 20
+        "line": 129,
+        "column": 25
       }
     },
     {
@@ -3093,8 +3532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 223,
-        "column": 20
+        "line": 145,
+        "column": 25
       }
     },
     {
@@ -3106,8 +3545,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 239,
-        "column": 39
+        "line": 161,
+        "column": 25
       }
     },
     {
@@ -3119,21 +3558,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 256,
-        "column": 20
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-76e03773677b2a5",
-      "title": "Matcher value suggestions API space isolation: only suggests rules that live in the requested space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 267,
-        "column": 46
+        "line": 178,
+        "column": 25
       }
     },
     {
@@ -3145,8 +3571,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 300,
-        "column": 20
+        "line": 191,
+        "column": 11
       }
     },
     {
@@ -3158,8 +3584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 313,
-        "column": 44
+        "line": 200,
+        "column": 5
       }
     },
     {
@@ -3171,8 +3597,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 330,
-        "column": 41
+        "line": 218,
+        "column": 14
       }
     },
     {
@@ -3184,8 +3610,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 339,
-        "column": 4
+        "line": 225,
+        "column": 20
       }
     },
     {
@@ -3197,8 +3623,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 349,
-        "column": 12
+        "line": 236,
+        "column": 22
       }
     },
     {
@@ -3210,8 +3636,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 357,
-        "column": 6
+        "line": 246,
+        "column": 74
       }
     },
     {
@@ -3223,8 +3649,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 367,
-        "column": 7
+        "line": 257,
+        "column": 11
       }
     },
     {
@@ -3236,8 +3662,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 378,
-        "column": 18
+        "line": 268,
+        "column": 80
       }
     },
     {
@@ -3249,8 +3675,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 393,
-        "column": 9
+        "line": 281,
+        "column": 25
       }
     },
     {
@@ -3262,8 +3688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 405,
-        "column": 24
+        "line": 292,
+        "column": 4
       }
     },
     {
@@ -3462,8 +3888,8 @@
       }
     },
     {
-      "id": "72d92ac0c91652a-e6b57e809ab5e8d",
-      "title": "Run rule API run: returns 204 for an enabled rule",
+      "id": "72d92ac0c91652a-d50d1ffe579ba83",
+      "title": "Run rule API run: returns 202 for an enabled rule",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3501,8 +3927,8 @@
       }
     },
     {
-      "id": "72d92ac0c91652a-68e2933dec8cbd1",
-      "title": "Run rule API authorization: returns 204 for a user with full alerting_v2 privileges",
+      "id": "72d92ac0c91652a-972e116122c690f",
+      "title": "Run rule API authorization: returns 202 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3548,7 +3974,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 31,
+        "line": 29,
         "column": 31
       }
     },
@@ -3561,7 +3987,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 14
       }
     },
@@ -3574,7 +4000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 14
       }
     },
@@ -3587,86 +4013,99 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 97,
+        "line": 95,
         "column": 24
       }
     },
     {
-      "id": "df929c73b65283e-c85b88530664ff6",
-      "title": "Update rule API update: should update query to standalone format with a recovery query",
+      "id": "df929c73b65283e-bfaa0c487983540",
+      "title": "Update rule API update: should switch recovery to a standalone recovery query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 121,
+        "line": 115,
+        "column": 24
+      }
+    },
+    {
+      "id": "df929c73b65283e-17ce7e4240b7f51",
+      "title": "Update rule API update: should add a no_data presence query to a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 140,
+        "column": 23
+      }
+    },
+    {
+      "id": "df929c73b65283e-5e61f8d41a0b28f",
+      "title": "Update rule API validation: rejects a no_data strategy the merged query cannot tell apart from a breach",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 172,
+        "column": 18
+      }
+    },
+    {
+      "id": "df929c73b65283e-4501780c5fb2cfc",
+      "title": "Update rule API validation: rejects the \"alert\" no_data strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 193,
+        "column": 5
+      }
+    },
+    {
+      "id": "df929c73b65283e-ef843c2ed109388",
+      "title": "Update rule API update: should add a breach segment to the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 208,
+        "column": 14
+      }
+    },
+    {
+      "id": "df929c73b65283e-b9352f2d0f9c0bb",
+      "title": "Update rule API update: persists a conditionless query without a breach block",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 229,
+        "column": 4
+      }
+    },
+    {
+      "id": "df929c73b65283e-793e31d63ba594a",
+      "title": "Update rule API update: should switch recovery to a condition segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 246,
         "column": 9
-      }
-    },
-    {
-      "id": "df929c73b65283e-6fe1e022e0de330",
-      "title": "Update rule API update: should add a no_data query to a standalone-format rule",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 156,
-        "column": 17
-      }
-    },
-    {
-      "id": "df929c73b65283e-ea5f51c12e1c6dc",
-      "title": "Update rule API update: should update query to composed format",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 192,
-        "column": 30
-      }
-    },
-    {
-      "id": "df929c73b65283e-b2cca139da1a625",
-      "title": "Update rule API update: persists a conditionless composed query without a breach block",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 211,
-        "column": 66
-      }
-    },
-    {
-      "id": "df929c73b65283e-530cfa51d9d438f",
-      "title": "Update rule API update: should update query to composed format with a recovery segment",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 230,
-        "column": 7
-      }
-    },
-    {
-      "id": "df929c73b65283e-4e872c2d608da57",
-      "title": "Update rule API update: should return 409 when the request body version is stale",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 265,
-        "column": 24
       }
     },
     {
@@ -3678,8 +4117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 286,
-        "column": 14
+        "line": 280,
+        "column": 23
       }
     },
     {
@@ -3691,8 +4130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 305,
-        "column": 77
+        "line": 300,
+        "column": 9
       }
     },
     {
@@ -3704,8 +4143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 329,
-        "column": 14
+        "line": 322,
+        "column": 32
       }
     },
     {
@@ -3717,8 +4156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 354,
-        "column": 7
+        "line": 348,
+        "column": 14
       }
     },
     {
@@ -3730,8 +4169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 378,
-        "column": 5
+        "line": 369,
+        "column": 14
       }
     },
     {
@@ -3743,8 +4182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 385,
-        "column": 15
+        "line": 379,
+        "column": 8
       }
     },
     {
@@ -3756,8 +4195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 395,
-        "column": 78
+        "line": 388,
+        "column": 14
       }
     },
     {
@@ -3769,8 +4208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 408,
-        "column": 24
+        "line": 403,
+        "column": 14
       }
     },
     {
@@ -3782,20 +4221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 421,
-        "column": 49
-      }
-    },
-    {
-      "id": "df929c73b65283e-ac7b3c43478e5e0",
-      "title": "Update rule API validation: should reject body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 434,
+        "line": 416,
         "column": 43
       }
     },
@@ -3808,7 +4234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 448,
+        "line": 430,
         "column": 5
       }
     },
@@ -3821,7 +4247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 457,
+        "line": 439,
         "column": 14
       }
     },
@@ -3834,8 +4260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 470,
-        "column": 69
+        "line": 452,
+        "column": 81
       }
     },
     {
@@ -3847,52 +4273,65 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 485,
+        "line": 467,
         "column": 15
       }
     },
     {
-      "id": "df929c73b65283e-a778bc0fef2f65a",
-      "title": "Update rule API validation: should reject disabling recovery that would leave a stored recovering delay inert",
+      "id": "df929c73b65283e-0b1cc0016ea4f34",
+      "title": "Update rule API validation: should reject switching recovery to \"manual\" while a recovering delay is stored",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 508,
+        "line": 490,
         "column": 5
       }
     },
     {
-      "id": "df929c73b65283e-aada47ed9bc3de0",
-      "title": "Update rule API validation: should reject updating a signal rule query to composed format",
+      "id": "df929c73b65283e-1c526322e32270b",
+      "title": "Update rule API validation: should reject setting no_data on a signal rule",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 535,
-        "column": 12
+        "line": 521,
+        "column": 56
       }
     },
     {
-      "id": "df929c73b65283e-59a4fa78ddb28c7",
-      "title": "Update rule API validation: should reject setting recovery_strategy on a signal rule",
+      "id": "df929c73b65283e-414b0fd6052c635",
+      "title": "Update rule API validation: should reject setting recovery on a signal rule",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 550,
-        "column": 43
+        "line": 533,
+        "column": 68
       }
     },
     {
-      "id": "df929c73b65283e-27fa83fe5bf9ac2",
-      "title": "Update rule API validation: should reject recovery_strategy \"query\" without a recovery block",
+      "id": "df929c73b65283e-4a767664ff5d713",
+      "title": "Update rule API validation: should reject recovery.strategy \"condition\" on a rule whose query has no breach",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 541,
+        "column": 15
+      }
+    },
+    {
+      "id": "df929c73b65283e-d7b85d35e2430e0",
+      "title": "Update rule API validation: should reject removing query.breach while recovery.strategy is \"condition\"",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3900,46 +4339,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
         "line": 559,
-        "column": 24
+        "column": 17
       }
     },
     {
-      "id": "df929c73b65283e-3f809bfcb5a75ba",
-      "title": "Update rule API validation: should reject a composed rule setting recovery_strategy \"query\" without a recovery segment",
+      "id": "df929c73b65283e-67877a7a29987f3",
+      "title": "Update rule API validation: should reject a recovery segment that does not parse",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 577,
-        "column": 14
-      }
-    },
-    {
-      "id": "df929c73b65283e-5191b364a564f46",
-      "title": "Update rule API validation: should reject clearing recovery_strategy while a composed recovery segment remains",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 596,
-        "column": 32
-      }
-    },
-    {
-      "id": "df929c73b65283e-7c60ed290b85c05",
-      "title": "Update rule API validation: should reject a no_data_strategy without a no_data block (standalone)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 626,
-        "column": 29
+        "line": 588,
+        "column": 39
       }
     },
     {
@@ -3951,7 +4364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 640,
+        "line": 618,
         "column": 23
       }
     },
@@ -3964,8 +4377,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 653,
-        "column": 15
+        "line": 628,
+        "column": 8
       }
     },
     {
@@ -3977,8 +4390,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 671,
-        "column": 34
+        "line": 646,
+        "column": 29
       }
     },
     {
@@ -3990,8 +4403,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 691,
-        "column": 49
+        "line": 658,
+        "column": 14
       }
     },
     {
@@ -4003,7 +4416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 710,
+        "line": 674,
         "column": 27
       }
     },
@@ -4016,7 +4429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 32,
+        "line": 30,
         "column": 31
       }
     },
@@ -4029,8 +4442,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 53,
-        "column": 81
+        "line": 50,
+        "column": 14
       }
     },
     {
@@ -4042,7 +4455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 87,
+        "line": 83,
         "column": 14
       }
     },
@@ -4055,7 +4468,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 112,
+        "line": 108,
         "column": 47
       }
     },
@@ -4068,8 +4481,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 139,
-        "column": 55
+        "line": 134,
+        "column": 26
       }
     },
     {
@@ -4081,7 +4494,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 146,
+        "line": 140,
         "column": 7
       }
     },
@@ -4094,7 +4507,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 165,
+        "line": 159,
         "column": 11
       }
     },
@@ -4107,7 +4520,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 167,
+        "line": 161,
         "column": 79
       }
     },
@@ -4120,7 +4533,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 177,
+        "line": 171,
         "column": 32
       }
     },
@@ -4133,7 +4546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 186,
+        "line": 180,
         "column": 95
       }
     },
@@ -4146,7 +4559,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 199,
+        "line": 193,
         "column": 18
       }
     },
@@ -4159,21 +4572,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 209,
+        "line": 203,
         "column": 14
-      }
-    },
-    {
-      "id": "63d456e0152970c-f355ddab85bfe85",
-      "title": "Upsert rule API validation: should reject body when metadata.owner exceeds the maximum length",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 218,
-        "column": 9
       }
     },
     {
@@ -4185,34 +4585,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 230,
+        "line": 212,
         "column": 9
       }
     },
     {
-      "id": "63d456e0152970c-ec40c6fe7672b77",
-      "title": "Upsert rule API validation: should reject body with empty query.breach",
+      "id": "63d456e0152970c-ad07f6320b979b8",
+      "title": "Upsert rule API validation: should reject body with an empty query.base",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 244,
-        "column": 29
+        "line": 223,
+        "column": 64
       }
     },
     {
-      "id": "63d456e0152970c-b98f7ede6c6874f",
-      "title": "Upsert rule API validation: should reject a recovering delay when recovery is disabled",
+      "id": "63d456e0152970c-af75e0949fc1800",
+      "title": "Upsert rule API validation: should reject a recovering delay when recovery never happens",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 259,
-        "column": 54
+        "line": 237,
+        "column": 19
       }
     },
     {
@@ -4224,8 +4624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 273,
-        "column": 9
+        "line": 259,
+        "column": 79
       }
     },
     {
@@ -4237,8 +4637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 283,
-        "column": 48
+        "line": 268,
+        "column": 5
       }
     },
     {
@@ -4250,8 +4650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 298,
-        "column": 65
+        "line": 279,
+        "column": 10
       }
     }
   ]

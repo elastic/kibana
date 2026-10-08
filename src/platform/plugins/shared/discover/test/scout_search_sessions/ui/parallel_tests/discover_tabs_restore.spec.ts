@@ -59,8 +59,7 @@ spaceTest.describe(
       // Discover persists its tabs per user, so a restored tab left open comes back in the next
       // test and re-persists the background search it holds. This has to run in the hook rather
       // than the test body so it still happens when a test fails mid-restore.
-      // Closed back-to-front: `closeTab` waits on a positional locator, so closing anything but
-      // the last tab leaves that position resolving to the tab that shifted into it.
+      // Closed back-to-front so indices stay valid as tabs disappear.
       const openTabs = await pageObjects.unifiedTabs.getTabLabels();
       for (let i = openTabs.length - 1; i >= 1; i--) {
         await pageObjects.unifiedTabs.closeTab(i);
@@ -108,7 +107,7 @@ spaceTest.describe(
         await spaceTest.step('store a named ES|QL background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.backgroundSearch.sendToBackground();
 
           await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
@@ -150,7 +149,7 @@ spaceTest.describe(
         await spaceTest.step('store a background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.backgroundSearch.sendToBackground();
         });
 
@@ -158,7 +157,7 @@ spaceTest.describe(
           await pageObjects.unifiedTabs.createNewTab();
           await pageObjects.discover.selectTextBaseLang();
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.discover.submitQuery();
           await pageObjects.discover.waitUntilSearchingHasFinished();
         });

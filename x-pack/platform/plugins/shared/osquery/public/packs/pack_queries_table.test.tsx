@@ -6,19 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 import { PackQueriesTable } from './pack_queries_table';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { allowedExperimentalValues } from '../../common/experimental_features';
-
-const setFlag = (rruleScheduling: boolean) =>
-  ExperimentalFeaturesService.init({
-    experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling },
-  });
 
 const baseQuery = (overrides: Partial<PackQueryFormData> = {}): PackQueryFormData => ({
   id: 'query-1',
@@ -38,22 +31,17 @@ const renderTable = (props: Partial<React.ComponentProps<typeof PackQueriesTable
   );
 
 describe('PackQueriesTable', () => {
-  describe('flag off (legacy interval column)', () => {
-    beforeEach(() => setFlag(false));
-
-    it('renders the "Interval (s)" column with the raw interval value', () => {
+  describe('interval-mode schedule column', () => {
+    it('renders the "Schedule" column with interval text and no legacy column', () => {
       renderTable({ data: [baseQuery({ interval: 3600 })] });
 
-      expect(screen.getByText('Interval (s)')).toBeInTheDocument();
-      expect(screen.queryByText('Schedule')).not.toBeInTheDocument();
-      expect(screen.getByText('3600')).toBeInTheDocument();
+      expect(screen.getByText('Schedule')).toBeInTheDocument();
+      expect(screen.queryByText('Interval (s)')).not.toBeInTheDocument();
+      expect(screen.getByText('3600s')).toBeInTheDocument();
     });
   });
 
-  describe('flag on (Schedule column)', () => {
-    beforeEach(() => setFlag(true));
-    afterEach(() => setFlag(false));
-
+  describe('rrule-mode schedule column', () => {
     it('renders the "Schedule" column header', () => {
       renderTable({ data: [baseQuery()] });
 
@@ -146,6 +134,165 @@ describe('PackQueriesTable', () => {
 
       expect(screen.getByText('3600s')).toBeInTheDocument();
       expect(screen.queryByText('80s')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('V5: Enabled column and disabled row opacity', () => {
+    it('renders the Enabled switch as checked for a query with no enabled field (default on)', () => {
+      renderTable({ data: [baseQuery({})] });
+      const toggle = screen.getByTestId('query-enabled-switch-query-1');
+      expect(toggle).toBeChecked();
+    });
+
+    it('renders the Enabled switch as checked when enabled: true', () => {
+      renderTable({ data: [baseQuery({ enabled: true })] });
+      expect(screen.getByTestId('query-enabled-switch-query-1')).toBeChecked();
+    });
+
+    it('renders the Enabled switch as unchecked when enabled: false', () => {
+      renderTable({ data: [baseQuery({ enabled: false })] });
+      expect(screen.getByTestId('query-enabled-switch-query-1')).not.toBeChecked();
+    });
+
+    it('marks a disabled query row', () => {
+      renderTable({ data: [baseQuery({ enabled: false })] });
+      expect(screen.getByTestId('pack-query-row-disabled-query-1')).toBeInTheDocument();
+    });
+
+    it('does not mark an enabled query row as disabled', () => {
+      renderTable({ data: [baseQuery({ enabled: true })] });
+      expect(screen.queryByTestId('pack-query-row-disabled-query-1')).not.toBeInTheDocument();
+    });
+
+    it('calls onToggleEnabled with correct args when switch is toggled', () => {
+      const onToggleEnabled = jest.fn();
+      // isReadOnly must be false so the switch is not disabled.
+      renderTable({ data: [baseQuery({ enabled: true })], onToggleEnabled, isReadOnly: false });
+      const switchEl = screen.getByTestId('query-enabled-switch-query-1');
+      fireEvent.click(switchEl);
+      expect(onToggleEnabled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'query-1' }),
+        false
+      );
+    });
+  });
+
+  describe('column labels and order', () => {
+    it('renders the "Min version" header, not "Min Osquery version"', () => {
+      renderTable({ data: [baseQuery()] });
+
+      expect(screen.getByText('Min version')).toBeInTheDocument();
+      expect(screen.queryByText('Min Osquery version')).not.toBeInTheDocument();
+    });
+
+    it('renders the version fallback as "All" in Title Case', () => {
+      renderTable({ data: [baseQuery({ version: undefined })] });
+
+      expect(screen.getByText('All')).toBeInTheDocument();
+      expect(screen.queryByText('ALL')).not.toBeInTheDocument();
+    });
+
+    it('orders columns ID | Operating systems | Min version | Schedule | Enabled | Actions', () => {
+      const { container } = renderTable({ data: [baseQuery()], isReadOnly: false });
+      const headers = Array.from(container.querySelectorAll('thead th')).map((th) =>
+        th.textContent?.trim()
+      );
+
+      // A leading select-all checkbox column is present when not read-only.
+      expect(headers.slice(-6)).toEqual([
+        'ID',
+        'Operating systems',
+        'Min version',
+        'Schedule',
+        'Enabled',
+        'Actions',
+      ]);
+    });
+
+    it('treats a reordered all-OS platform as inheriting the pack default', () => {
+      renderTable({
+        data: [baseQuery({ platform: 'linux,darwin,windows' })],
+        packPlatform: 'linux',
+      });
+
+      expect(screen.getByText('Linux')).toBeInTheDocument();
+      expect(screen.queryByText('macOS')).not.toBeInTheDocument();
+      expect(screen.getByText('(pack default)')).toBeInTheDocument();
+    });
+  });
+
+  describe('Schedule column truncation', () => {
+    it('renders a short schedule inline with no tooltip wrapper', () => {
+      renderTable({
+        data: [
+          baseQuery({
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00.000Z' },
+          }),
+        ],
+      });
+
+      const cell = screen.getByText('Daily');
+      expect(cell).toBeInTheDocument();
+      expect(cell.tagName).not.toBe('SPAN');
+    });
+
+    it('renders a seven-weekday schedule in full when it fits the budget', () => {
+      renderTable({
+        data: [
+          baseQuery({
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR,SA',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          }),
+        ],
+      });
+
+      const full = 'Every week on Sun, Mon, Tue, Wed, Thu, Fri, Sat';
+      // 47 chars — under the 48 budget, so it must NOT truncate.
+      expect(full.length).toBeLessThanOrEqual(48);
+      expect(screen.getByText(full)).toBeInTheDocument();
+    });
+
+    it('truncates when the rendered text exceeds the budget', () => {
+      renderTable({
+        data: [
+          baseQuery({
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=WEEKLY;INTERVAL=100;BYDAY=SU,MO,TU,WE,TH,FR,SA',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          }),
+        ],
+      });
+
+      const full = 'Every 100 weeks on Sun, Mon, Tue, Wed, Thu, Fri, Sat';
+      expect(full.length).toBeGreaterThan(48);
+      // Truncated text is rendered, full text is on aria-label.
+      expect(screen.queryByText(full)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(full)).toBeInTheDocument();
+      expect(screen.getByLabelText(full).textContent).toMatch(/…$/);
+    });
+  });
+
+  describe('V5: Disabled badge in ID column', () => {
+    it('renders a Disabled badge next to the query name when enabled: false', () => {
+      renderTable({ data: [baseQuery({ enabled: false })] });
+      expect(screen.getByTestId('query-disabled-badge-query-1')).toBeInTheDocument();
+      expect(screen.getByTestId('query-disabled-badge-query-1')).toHaveTextContent('Disabled');
+    });
+
+    it('does not render a Disabled badge when enabled: true', () => {
+      renderTable({ data: [baseQuery({ enabled: true })] });
+      expect(screen.queryByTestId('query-disabled-badge-query-1')).not.toBeInTheDocument();
+    });
+
+    it('does not render a Disabled badge when enabled is not set (default on)', () => {
+      renderTable({ data: [baseQuery()] });
+      expect(screen.queryByTestId('query-disabled-badge-query-1')).not.toBeInTheDocument();
     });
   });
 });

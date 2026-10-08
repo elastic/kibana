@@ -5,31 +5,49 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderContentProps, EuiPageHeaderProps } from '@elastic/eui';
-import {
-  EuiBetaBadge,
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import type { AppHeaderTab, AppHeaderTitle } from '@kbn/app-header';
+import { SuppressChromeBackButton } from '@kbn/app-header';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { AppHeader } from '@kbn/app-header';
+import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
-import { useLocalStorage } from '../../hooks/use_local_storage';
-import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
+import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
+import { AddDataTabs } from '../../views/add_data_view/types';
+import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
+import { SchemaSelector } from '../schema_selector';
+import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
+import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
+import { AsyncStatus } from '../../hooks/use_async';
+import {
+  getStorageExplorerAvailability,
+  StorageExplorerAvailability,
+} from '../../utils/get_storage_explorer_availability';
 
-const headerPaddingFixCss = css`
-  .euiPageHeaderContent {
-    padding-bottom: 0;
+export const STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP = i18n.translate(
+  'xpack.profiling.headerActionMenu.storageExplorer.notSetUpTooltip',
+  {
+    defaultMessage:
+      'Storage explorer only supports Universal Profiling. Run the setup process to start using it.',
   }
-`;
+);
+
+export const STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.profiling.headerActionMenu.storageExplorer.notAvailableTooltip',
+  { defaultMessage: 'Serverless support for Storage explorer is coming soon.' }
+);
+
+const STORAGE_EXPLORER_DISABLED_REASONS: Record<StorageExplorerAvailability, string | undefined> = {
+  [StorageExplorerAvailability.Available]: undefined,
+  [StorageExplorerAvailability.NotSetUp]: STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP,
+  [StorageExplorerAvailability.NotAvailable]: STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP,
+};
 
 export function ProfilingAppPageTemplate({
   children,
@@ -42,121 +60,186 @@ export function ProfilingAppPageTemplate({
   }),
   showBetaBadge = false,
   customSearchBar,
+  suppressMenu = false,
+  showSchemaSelector = false,
 }: {
-  children: React.ReactElement;
-  tabs?: EuiPageHeaderContentProps['tabs'];
+  children?: React.ReactElement;
+  tabs?: AppHeaderTab[];
   hideSearchBar?: boolean;
   noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
-  pageTitle?: React.ReactNode;
+  pageTitle?: AppHeaderTitle;
   showBetaBadge?: boolean;
   customSearchBar?: React.ReactNode;
+  suppressMenu?: boolean;
+  /** Renders schema selector that allows users to choose the profiling schema to query. */
+  showSchemaSelector?: boolean;
 }) {
   const {
     start: { observabilityShared },
   } = useProfilingDependencies();
 
-  const [privilegesWarningDismissed, setPrivilegesWarningDismissed] = useLocalStorage(
-    'profiling.privilegesWarningDismissed',
-    false
-  );
-  const { profilingSetupStatus } = useProfilingSetupStatus();
-
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
-  const history = useHistory();
+  const { search, pathname } = useLocation();
+
+  const router = useProfilingRouter();
+
+  const { from: defaultRangeFrom, to: defaultRangeTo } = useDefaultTimeRange();
+
+  const searchParams = new URLSearchParams(search);
+  const kuery = searchParams.get('kuery') ?? '';
+  const rangeFrom = searchParams.get('rangeFrom') || defaultRangeFrom;
+  const rangeTo = searchParams.get('rangeTo') || defaultRangeTo;
+
+  const backTarget = useBackNavigation();
+  const { data: profilingStatus, status: profilingStatusRequestStatus } = useProfilingStatus();
+  // A failed status request doesn't need handling here: CheckStatus renders ProfilingStatusErrorPrompt
+  // instead of the page, higher up in the tree
+  const isProfilingStatusLoading = profilingStatusRequestStatus !== AsyncStatus.Settled;
+  const storageExplorerDisabledReason = profilingStatus?.isEnabled
+    ? STORAGE_EXPLORER_DISABLED_REASONS[
+        getStorageExplorerAvailability(profilingStatus.universalProfiling)
+      ]
+    : undefined;
+  // The schema provider is rendered below, so we need to read the current schema from the query param here.
+  const schema = useSchemaQueryParam();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [history.location.pathname]);
+  }, [pathname]);
+
+  const appHeaderMenu = {
+    items: [
+      {
+        id: 'storage-explorer',
+        label: i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+          defaultMessage: 'Storage explorer',
+        }),
+        href: router.link('/storage-explorer', {
+          query: {
+            kuery,
+            rangeFrom,
+            rangeTo,
+            indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+          },
+        }),
+        iconType: 'database',
+        isLoading: isProfilingStatusLoading,
+        disableButton: storageExplorerDisabledReason !== undefined,
+        tooltipContent: storageExplorerDisabledReason,
+      },
+      {
+        id: 'settings',
+        label: i18n.translate('xpack.profiling.headerActionMenu.settings', {
+          defaultMessage: 'Settings',
+        }),
+        href: router.link('/settings'),
+        iconType: 'gear',
+        overflow: true,
+      },
+    ],
+    primaryActionItem: {
+      id: 'add-data',
+      label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
+        defaultMessage: 'Add data',
+      }),
+      href: router.link('/add-data-instructions', {
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      }),
+      iconType: 'plusCircle',
+    },
+  };
 
   return (
-    <ObservabilityPageTemplate
-      noDataConfig={noDataConfig}
-      pageHeader={{
-        'data-test-subj': 'profilingPageTemplate',
-        pageTitle: (
-          <EuiFlexGroup gutterSize="s" alignItems="baseline">
-            <EuiFlexItem grow={false}>{pageTitle}</EuiFlexItem>
-            {showBetaBadge && (
+    <>
+      {/*
+        In some contexts like when using the noDataConfig prop, the page template might choose not to render it's children. 
+        When that happens, because AppHeader is nested inside the template, it won't be rendered.
+        Without an explicit AppHeader component, the Chrome Next framework would attempt to render the compatibility header with the back button derived from breadcrumbs.
+        This component is here to prevent these edge cases from rendering incorrect back buttons. 
+        When AppHeader exists, this component doesn't do anything so the explicit back buttons we do want to render (when using the back prop) won't be hidden. 
+        It's safe to render both at the same time, suppression only happens for auto-generated back targets.
+      */}
+      <SuppressChromeBackButton />
+      <ObservabilityPageTemplate
+        noDataConfig={noDataConfig}
+        restrictWidth={restrictWidth}
+        pageSectionProps={{
+          contentProps: {
+            style: {
+              display: 'flex',
+              flexGrow: 1,
+            },
+          },
+        }}
+      >
+        <SchemaScope
+          isEnabled={showSchemaSelector}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          kuery={kuery}
+        >
+          <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
+            <AppHeader
+              back={backTarget}
+              spacing="largeBleed"
+              title={pageTitle}
+              tabs={tabs}
+              menu={suppressMenu ? undefined : appHeaderMenu}
+              badges={
+                showBetaBadge
+                  ? [
+                      {
+                        label: i18n.translate('xpack.profiling.header.betaBadgeLabel', {
+                          defaultMessage: 'Beta',
+                        }),
+                        color: 'hollow',
+                        tooltip: i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
+                          defaultMessage:
+                            'This module is not GA. Please help us by reporting any bugs.',
+                        }),
+                      },
+                    ]
+                  : undefined
+              }
+            />
+            {!hideSearchBar && (
               <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label="Beta"
-                  color="hollow"
-                  tooltipContent={i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
-                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
-                  })}
-                />
+                {customSearchBar ?? (
+                  <PrimaryProfilingSearchBar schema={showSchemaSelector ? schema : undefined} />
+                )}
               </EuiFlexItem>
             )}
+            {showSchemaSelector && (
+              <EuiFlexItem grow={false} css={{ alignSelf: 'flex-start' }}>
+                <SchemaSelector />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>{children}</EuiFlexItem>
           </EuiFlexGroup>
-        ),
-        color: 'subdued' as unknown as EuiPageHeaderProps['color'], // This value is valid but not properly typed
-        children:
-          tabs.length > 0 || !hideSearchBar ? (
-            <EuiFlexGroup direction="column">
-              {tabs.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiTabs size="m" bottomBorder={!hideSearchBar}>
-                    {tabs.map(({ label, ...tabRest }) => (
-                      <EuiTab key={tabRest.href} {...tabRest}>
-                        {label}
-                      </EuiTab>
-                    ))}
-                  </EuiTabs>
-                </EuiFlexItem>
-              )}
-              {!hideSearchBar && (
-                <EuiFlexItem grow={false}>
-                  {customSearchBar ?? <PrimaryProfilingSearchBar />}
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          ) : undefined,
-        bottomBorder: 'extended',
-        css: hideSearchBar && tabs.length > 0 ? headerPaddingFixCss : undefined,
-      }}
-      restrictWidth={restrictWidth}
-      pageSectionProps={{
-        contentProps: {
-          style: {
-            display: 'flex',
-            flexGrow: 1,
-          },
-        },
-      }}
-    >
-      <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
-        {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
-          <EuiFlexItem grow={false}>
-            <EuiCallOut
-              announceOnMount
-              iconType="warning"
-              title={i18n.translate('xpack.profiling.privilegesWarningTitle', {
-                defaultMessage: 'User privilege limitation',
-              })}
-            >
-              <p>
-                {i18n.translate('xpack.profiling.privilegesWarningDescription', {
-                  defaultMessage:
-                    'Due to privileges issues we could not check the Universal Profiling status. If you encounter any issues or if data fails to load, please contact your administrator for assistance.',
-                })}
-              </p>
-              <EuiButton
-                data-test-subj="profilingProfilingAppPageTemplateDismissButton"
-                onClick={() => {
-                  setPrivilegesWarningDismissed(true);
-                }}
-              >
-                {i18n.translate('xpack.profiling.dismissPrivilegesCallout', {
-                  defaultMessage: 'Dismiss',
-                })}
-              </EuiButton>
-            </EuiCallOut>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>{children}</EuiFlexItem>
-      </EuiFlexGroup>
-    </ObservabilityPageTemplate>
+        </SchemaScope>
+      </ObservabilityPageTemplate>
+    </>
+  );
+}
+
+function SchemaScope({
+  isEnabled,
+  children,
+  ...searchParams
+}: {
+  isEnabled: boolean;
+  rangeFrom: string;
+  rangeTo: string;
+  kuery: string;
+  children: React.ReactElement;
+}) {
+  if (!isEnabled) {
+    return children;
+  }
+
+  return (
+    <ProfilingSchemaContextProvider {...searchParams}>{children}</ProfilingSchemaContextProvider>
   );
 }

@@ -7,11 +7,15 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { z } from '@kbn/zod/v4';
+import { isContextLengthExceededError } from '@kbn/inference-common';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
-
-const TAXONOMY_BODY_CHAR_LIMIT = 30_000;
+import {
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+} from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -26,12 +30,14 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .transform((values) => values.filter((v): v is T => (allowed as readonly string[]).includes(v)))
     .transform((values) => [...new Set(values)].slice(0, max));
 
-export const taxonomyOutputSchema = z.object({
-  categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
-  regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
-  relevance: z.number().min(0).max(1),
-  diamond_suitable: z.boolean(),
-});
+export const taxonomyOutputSchema = lazySchema(() =>
+  z.object({
+    categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
+    regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
+    relevance: z.number().min(0).max(1),
+    diamond_suitable: z.boolean(),
+  })
+);
 
 export type TaxonomyOutput = z.infer<typeof taxonomyOutputSchema>;
 
@@ -42,7 +48,6 @@ export interface EnrichTaxonomyParams {
 }
 
 const buildTaxonomyPrompt = (params: EnrichTaxonomyParams): string => {
-  const truncated = params.text.slice(0, TAXONOMY_BODY_CHAR_LIMIT);
   const reportIdLine = params.report_id ? `Report id: ${params.report_id}\n` : '';
   const titleLine = params.title ? `Report title: ${params.title}\n` : '';
   return `You are a threat intel taxonomist. Categorize the following report AND score how useful it is for writing a detection rule.
@@ -80,7 +85,7 @@ genuinely targets multiple continents. Do not invent values
 outside the closed sets.
 
 ${reportIdLine}${titleLine}Report text:
-${truncated}`;
+${params.text}`;
 };
 
 /**
@@ -96,17 +101,44 @@ export const enrichTaxonomy = async (
   logger: Logger,
   params: EnrichTaxonomyParams
 ): Promise<TaxonomyOutput> => {
-  const prompt = buildTaxonomyPrompt(params);
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(taxonomyOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  const invokeTaxonomy = async (
+    promptText: string
+  ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: TaxonomyOutput }> => {
+    const invoked = (await structured.invoke(
+      buildTaxonomyPrompt({ ...params, text: promptText })
+    )) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: TaxonomyOutput | null;
+    };
+    return requireParsedStructuredOutput(invoked, 'enrich_taxonomy');
+  };
+
+  let text = params.text;
+  let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: TaxonomyOutput;
   };
+  try {
+    result = await invokeTaxonomy(text);
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    let context = selectOverflowRetryArticleContext(params.text);
+    text = context.text;
+    try {
+      result = await invokeTaxonomy(text);
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      text = context.text;
+      result = await invokeTaxonomy(text);
+    }
+  }
 
   logStageUsage(logger, 'enrich_taxonomy', inferenceEndpointId, result.raw.response_metadata ?? {});
 

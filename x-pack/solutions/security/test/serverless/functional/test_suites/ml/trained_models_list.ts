@@ -33,9 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await svlMl.navigation.security.navigateToTrainedModels();
 
         await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with one trained model'
+          'should display the stats bar and the analytics table with two trained models'
         );
-        await ml.trainedModels.assertStats(3);
+        await ml.trainedModels.assertStats(2);
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });

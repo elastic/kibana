@@ -38,6 +38,8 @@ export const UI_SETTINGS = {
   'dateFormat:tz': 'UTC',
   'format:bytes:defaultPattern': '0,0.[000]b',
   'histogram:maxBars': 100,
+  // Legend counts and annotation times were recorded against the previous default.
+  'histogram:barTarget': 50,
 } as const;
 
 export const ALLOW_STRING_INDICES_SETTING = 'metrics:allowStringIndices';

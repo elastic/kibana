@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type {
-  AlertEpisodeStatus,
-  AlertEventSeverity,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
   DispatchOutcome,
   DispatchPlan,
-  EpisodeScan,
-  EpisodeTriage,
+  AlertScan,
+  AlertTriage,
   PolicyCatalog,
   RuleCatalog,
   SuppressionIndex,
@@ -24,36 +22,48 @@ import type { DispatchFailureReason } from './steps/constants';
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
-export type AlertEpisodeData = Record<string, unknown>;
+export type AlertData = Record<string, unknown>;
 
 export interface ActionPolicyDestination {
   type: 'workflow';
   id: string;
 }
 
-export interface AlertEpisode {
+export interface Alert {
   last_event_timestamp: string;
   rule_id: RuleId | null;
   source: string;
   space_id: string;
   group_hash: string;
-  episode_id: string;
-  episode_status: AlertEpisodeStatus;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
-  data?: AlertEpisodeData;
+  data?: AlertData;
 }
 
-export interface AlertEpisodeSuppression {
+/** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
+export interface SuppressionRow {
   rule_id: RuleId | null;
   source: string | null;
   space_id: string | null;
   group_hash: string;
-  episode_id: string | null;
+  alert_id: string | null;
   should_suppress: boolean;
   last_ack_action?: string | null;
   last_deactivate_action?: string | null;
   last_snooze_action?: string | null;
 }
+
+/** Row of the alert suppressions query: ack and deactivate state of one alert. */
+export type AlertSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze_action'> & {
+  alert_id: string;
+};
+
+/** Row of the series suppressions query: snooze state of a series, so it carries no `alert_id`. */
+export type SeriesSuppressionRow = Omit<
+  SuppressionRow,
+  'alert_id' | 'last_ack_action' | 'last_deactivate_action'
+>;
 
 export interface DispatcherExecutionParams {
   eventWatermark?: Date;
@@ -86,7 +96,7 @@ export interface Rule {
   id: RuleId;
   spaceId: string;
   name: string;
-  tags: string[];
+  routingTags: string[];
 }
 
 export interface PolicyMatcherAttributes {
@@ -99,29 +109,27 @@ export interface ActionPolicy {
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** Structured matcher evaluated against the alert episode context.
-   *  Null or absent means catch-all (matches every episode). */
+  /** Structured matcher evaluated against the alert context.
+   *  Null or absent means catch-all (matches every alert). */
   matcher?: PolicyMatcherAttributes | null;
-  /** data.* fields used to group episodes into a single action group */
+  /** data.* fields used to group alerts into a single action group */
   groupBy: string[];
-  /** User-defined tags for organizing and filtering policies */
-  tags: string[];
-  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_episode' | 'all' | 'per_field';
+  /** How alerts are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
+  groupingMode: 'per_alert' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
     interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
-  /** Target destinations to dispatch matched episodes to */
+  /** Target destinations to dispatch matched alerts to */
   destinations: ActionPolicyDestination[];
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
 
 export interface MatchedPair {
-  episode: AlertEpisode;
+  alert: Alert;
   policy: ActionPolicy;
 }
 
@@ -131,43 +139,45 @@ export interface ActionGroup {
   policyId: ActionPolicyId;
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: Alert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
+export type ActionPolicyWorkflowPayloadAlert = Alert;
+
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: ActionPolicyWorkflowPayloadAlert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {
   action_group_id: ActionGroupId;
   last_notified: string;
-  episode_status?: string;
+  alert_status?: string;
 }
 
 export interface LastNotifiedInfo {
   lastNotified: Date;
-  episodeStatus?: string;
+  alertStatus?: string;
 }
 
 /**
  * A single failed attempt to dispatch one action group to one workflow
  * destination. Carries everything the execution-history step needs to emit a
  * `dispatch_failed` event: the parent policy, the failing group + workflow, the
- * affected episodes, and a machine-readable + human-readable cause.
+ * affected alerts, and a machine-readable + human-readable cause.
  */
 export interface DispatchFailure {
   policyId: ActionPolicyId;
   spaceId: string;
   actionGroupId: ActionGroupId;
   workflowId: string;
-  episodes: AlertEpisode[];
+  alerts: Alert[];
   reason: DispatchFailureReason;
   message: string;
 }
@@ -185,14 +195,14 @@ export interface DispatcherPipelineInput {
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  /** Result of the windowed candidate scan (episodes + truncation flag). */
-  readonly scan?: EpisodeScan;
-  /** Count of episodes that received an `.alert-actions` record this tick. */
-  readonly recordedEpisodes?: number;
-  /** Suppression facts from `.alert-actions`, indexed for per-episode lookup. */
+  /** Result of the windowed candidate scan (alerts + truncation flag). */
+  readonly scan?: AlertScan;
+  /** Count of alerts that received an `.alert-actions` record this tick. */
+  readonly recordedAlerts?: number;
+  /** Suppression facts from `.alert-actions`, indexed for per-alert lookup. */
   readonly suppressions?: SuppressionIndex;
-  /** Dispatchable vs suppressed verdict on the scanned episodes. */
-  readonly triage?: EpisodeTriage;
+  /** Dispatchable vs suppressed verdict on the scanned alerts. */
+  readonly triage?: AlertTriage;
   readonly rules?: RuleCatalog;
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
@@ -203,7 +213,11 @@ export interface DispatcherPipelineState {
   readonly outcome?: DispatchOutcome;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
+export type DispatcherHaltReason =
+  | 'no_alerts'
+  | 'no_actions'
+  | 'aborted'
+  | 'inline_stats_too_large';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

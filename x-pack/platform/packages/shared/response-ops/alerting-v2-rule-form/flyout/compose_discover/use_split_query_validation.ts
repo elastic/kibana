@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { ESQLLang, monaco } from '@kbn/code-editor';
 import { useDebounceFn } from '@kbn/react-hooks';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { registerEditorMessages, type EditorMessages } from './esql_editor_messages_registry';
 
 const MARKER_OWNER = 'alertingV2SplitQuery';
 // Module-level so the object identity is stable across renders — `useDebounceFn`
@@ -42,6 +43,10 @@ interface UseSplitQueryValidationParams {
 export function useSplitQueryValidation({ baseQuery, callbacks }: UseSplitQueryValidationParams) {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const contentDisposableRef = useRef<monaco.IDisposable | null>(null);
+  const messagesDisposableRef = useRef<(() => void) | null>(null);
+  // Latest fragment-space messages (with `code` intact) for the code action
+  // provider — read from the registry keyed by this editor's model URI.
+  const messagesRef = useRef<EditorMessages>({ errors: [], warnings: [] });
 
   // `useDebounceFn` keeps `run` stable while always invoking the latest closure,
   // so `validate` can read `baseQuery` / `callbacks` directly, and the debounce
@@ -68,23 +73,36 @@ export function useSplitQueryValidation({ baseQuery, callbacks }: UseSplitQueryV
       return;
     }
 
-    const markers = [...result.errors, ...result.warnings]
-      // Keep only markers that fall inside the fragment, not the locked base.
-      .filter((marker) => marker.startLineNumber > baseLineCount)
-      .map((marker) => ({
-        ...marker,
-        startLineNumber: marker.startLineNumber - baseLineCount,
-        endLineNumber: marker.endLineNumber - baseLineCount,
-        // Don't surface the raw error code in the editor.
-        code: undefined,
-      }));
+    // Keep only messages inside the fragment (not the locked base) and shift their
+    // line numbers into the block editor's coordinate space. `code` is kept so the
+    // code action provider can look up quick fixes.
+    const toFragmentSpace = <T extends monaco.editor.IMarkerData>(message: T): T => ({
+      ...message,
+      startLineNumber: message.startLineNumber - baseLineCount,
+      endLineNumber: message.endLineNumber - baseLineCount,
+    });
+    const isInsideFragment = (message: monaco.editor.IMarkerData) =>
+      message.startLineNumber > baseLineCount;
 
-    monaco.editor.setModelMarkers(model, MARKER_OWNER, markers);
+    const errors = result.errors.filter(isInsideFragment).map(toFragmentSpace);
+    const warnings = result.warnings.filter(isInsideFragment).map(toFragmentSpace);
+    messagesRef.current = { errors, warnings };
+
+    monaco.editor.setModelMarkers(
+      model,
+      MARKER_OWNER,
+      // Don't surface the raw error code next to the squiggle.
+      [...errors, ...warnings].map((marker) => ({ ...marker, code: undefined }))
+    );
   }, DEBOUNCE_OPTIONS);
 
   const onEditorMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
+      const modelUri = editor.getModel()?.uri.toString();
+      if (modelUri) {
+        messagesDisposableRef.current = registerEditorMessages(modelUri, () => messagesRef.current);
+      }
       contentDisposableRef.current = editor.onDidChangeModelContent(() => scheduleValidation());
       scheduleValidation();
     },
@@ -99,6 +117,7 @@ export function useSplitQueryValidation({ baseQuery, callbacks }: UseSplitQueryV
   useEffect(() => {
     return () => {
       contentDisposableRef.current?.dispose();
+      messagesDisposableRef.current?.();
       const model = editorRef.current?.getModel();
       if (model && !model.isDisposed()) {
         monaco.editor.setModelMarkers(model, MARKER_OWNER, []);

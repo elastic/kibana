@@ -69,7 +69,7 @@ See the YAML block above.
 
 The **Security - Attack discovery - Run example** workflow is the recommended way to desk-test the pipeline end-to-end.
 
-1. Start Kibana and Elasticsearch (`yarn es snapshot --license trial`, then `yarn start`).
+1. Start Kibana and Elasticsearch (`pnpm es snapshot --license trial`, then `pnpm start`).
 2. Navigate to **http://localhost:5601/app/workflows**.
 3. Managed workflows are hidden from the list view by default — go directly to:
    `http://localhost:5601/app/workflows/system-attack-discovery-run-example`
@@ -607,7 +607,7 @@ Results from both sources are merged before generation.
 
 #### `provided` — Pre-retrieved alerts (auto-detected)
 
-Pass alerts directly via the `alerts` input. The step **auto-detects** that alerts are provided and sets `alert_retrieval_mode` to `provided`, skipping all retrieval:
+Pass alerts directly via the `alerts` input. The step **auto-detects** that alerts are provided — detection keys on `alerts` being a non-empty array, never on `alert_retrieval_mode` — and skips all retrieval (`default_retrieval_enabled` is forced to `false`; `alert_retrieval_mode` keeps its `custom_query`/`esql` meaning for the built-in default retrieval workflow). The supplied alerts are passed straight to generation and are surfaced in the Alert Retrieval section of the flyout with `extraction_strategy: "provided"`:
 
 ```json
 {
@@ -675,7 +675,7 @@ The `replacements` map is **excluded by the step's output schema** — not just 
 |---------|----------|
 | Workflow not found at `/app/workflows/system-attack-discovery-run-example` | Restart Kibana to trigger platform reconciliation of managed workflows |
 | `connector_id` not found | Run the connector list `curl` command in [Quick start](#3-run-the-example-workflow) |
-| `provided` mode not auto-detected | Confirm `alerts` is a non-empty array of strings; explicit `alert_retrieval_mode` overrides auto-detection |
+| `provided` mode not auto-detected | Confirm `alerts` is a non-empty array of strings — auto-detection keys on the supplied alerts, never on `alert_retrieval_mode` |
 | Async results not appearing | Wait 30–60 seconds; check the Attack Discovery UI; search logs for the `execution_uuid` |
 
 ## Attack Discovery Generator Skill

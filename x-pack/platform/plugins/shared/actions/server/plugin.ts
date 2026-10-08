@@ -81,11 +81,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import {
-  createInboundEventsClient,
-  dispatchConnectorEvents,
-  type ConnectorEventEmitter,
-} from './inbound';
+import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -96,6 +92,7 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -276,6 +273,7 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -293,6 +291,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private securityStart?: SecurityPluginStart;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -356,6 +355,8 @@ export class ActionsPlugin
           baseUrl: this.actionsConfig.relay.url,
           configurationUtilities: actionsConfigUtils,
           logger: this.logger.get('relay-client'),
+          useSystemIdentity: this.actionsConfig.relay.uiam?.enabled ?? false,
+          getSystemIdentity: () => this.securityStart?.authc.systemIdentity,
         })
       : undefined;
 
@@ -494,29 +495,15 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
-    const inboundEvents = inboundEventsEnabled
-      ? {
-          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-          client: createInboundEventsClient({
-            logger: this.logger,
-            inboundEventsEnabled: true,
-            isActionTypeEnabled: (actionTypeId) =>
-              actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-            maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-            getStartServices: core.getStartServices,
-            inMemoryConnectors: this.inMemoryConnectors,
-            emitConnectorEvents: (params) =>
-              dispatchConnectorEvents({
-                emitter: this.connectorEventEmitter,
-                params,
-              }),
-          }),
-          getSpaceId: (request: KibanaRequest) =>
-            this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-        }
-      : undefined;
+    const inboundEvents = setupInboundEvents({
+      actionsConfigUtils,
+      http: core.http,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      spaces: this.spaces,
+      inMemoryConnectors: this.inMemoryConnectors,
+      getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
     defineRoutes({
       router,
       licenseState: this.licenseState,
@@ -601,6 +588,12 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    this.securityStart = plugins.security;
+    if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
+      this.logger.warn(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
+      );
+    }
     const {
       logger,
       licenseState,
@@ -1181,10 +1174,14 @@ export class ActionsPlugin
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      const { isInboundEventsEnabled: requestedEventsEnabled, ...withoutEventsFlag } = connector;
       this.inMemoryConnectors.push({
-        ...connector,
+        ...withoutEventsFlag,
         isDynamic: true,
         isPreconfigured: true,
+        ...(this.actionsConfig.inboundEvents.enabled && requestedEventsEnabled === true
+          ? { isInboundEventsEnabled: true }
+          : {}),
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
       return true;

@@ -47,7 +47,7 @@ const nerRuleSchema = schema.allOf([
 export function getUiSettings(): Record<string, UiSettingsParams> {
   return {
     [aiAnonymizationSettings]: {
-      category: ['observability'],
+      category: ['general'],
       name: i18n.translate('xpack.inference.anonymizationSettingsLabel', {
         defaultMessage: 'Anonymization Settings',
       }),
@@ -75,12 +75,12 @@ export function getUiSettings(): Record<string, UiSettingsParams> {
       description: i18n.translate('xpack.inference.anonymizationSettingsDescription', {
         defaultMessage: `List of anonymization rules
           <ul>
-            <li><strong>type:</strong> "ner" or "regex"</li>
-            <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
-            <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
-            <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
+            <li><strong>type:</strong> "NER" or "RegExp"</li>
+            <li><strong>entityClass:</strong> (RegExp type only) eg: EMAIL, URL, IP</li>
+            <li><strong>pattern:</strong> (RegExp type only) the regular-expression string to match</li>
+            <li><strong>modelId:</strong> (NER type only) ID of the NER (Named Entity Recognition) model to use</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
-            <li><strong>timeoutSeconds:</strong> (ner type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
+            <li><strong>timeoutSeconds:</strong> (NER type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
           </ul>`,
         values: {
           ul: (chunks) => `<ul>${chunks}</ul>`,
@@ -94,7 +94,6 @@ export function getUiSettings(): Record<string, UiSettingsParams> {
       }),
       type: 'json',
       requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
     },
   };

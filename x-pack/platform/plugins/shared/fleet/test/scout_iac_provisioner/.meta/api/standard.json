@@ -1,5 +1,5 @@
 {
-  "sha1": "30056b574c534471e802b84e7c121fc9b33375b9",
+  "sha1": "c42ae1c767ac7593607346122deaff92284757d5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 35,
-        "column": 31
+        "line": 38,
+        "column": 9
       }
     },
     {
@@ -42,8 +42,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 53,
-        "column": 28
+        "line": 51,
+        "column": 25
+      }
+    },
+    {
+      "id": "c44a76f06065e66-7bd4dffb0c9ec1b",
+      "title": "Fleet IaC Provisioner render route returns 400 when workflow is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 64,
+        "column": 13
       }
     },
     {
@@ -56,13 +70,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 68,
-        "column": 26
+        "line": 73,
+        "column": 10
       }
     },
     {
-      "id": "c44a76f06065e66-bdb2056374d0063",
-      "title": "Fleet IaC Provisioner render route returns 400 when more than 10 integrations are sent",
+      "id": "c44a76f06065e66-8cd387fe2d34dc7",
+      "title": "Fleet IaC Provisioner render route returns 400 when more integrations than the render limit are sent",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -70,8 +84,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 78,
-        "column": 47
+        "line": 84,
+        "column": 51
+      }
+    },
+    {
+      "id": "c44a76f06065e66-22afba436bf004f",
+      "title": "Fleet IaC Provisioner render route accepts exactly the render limit of integrations and reaches the handler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 105,
+        "column": 23
       }
     },
     {
@@ -84,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 99,
-        "column": 20
+        "line": 128,
+        "column": 16
       }
     }
   ]

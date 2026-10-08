@@ -45,7 +45,7 @@ if [[ "$EFFECTIVE_BUILD_ID" != "$BUILDKITE_BUILD_ID" ]]; then
   skip "This build reused the distributable from $EFFECTIVE_BUILD_ID, so it does not contain this PR's code."
 fi
 
-BASELINE_BUILD_ID=$(ts-node .buildkite/scripts/steps/bench/resolve_merge_base_build.ts || echo "")
+BASELINE_BUILD_ID=$(node .buildkite/scripts/steps/bench/resolve_merge_base_build.ts || echo "")
 if [[ -z "$BASELINE_BUILD_ID" ]]; then
   skip "No usable merge-base distributable for ${GITHUB_PR_MERGE_BASE:-unknown merge base}."
 fi
@@ -89,7 +89,7 @@ fi
 buildkite-agent artifact upload "$REPORT_PATH" || echo "Warning: failed to upload the report"
 
 echo "--- Report warm-start memory results"
-ts-node .buildkite/scripts/steps/bench/notify_warm_start_memory.ts \
+node .buildkite/scripts/steps/bench/notify_warm_start_memory.ts \
   --report-path "$REPORT_PATH" \
   --metrics-path "$METRICS_PATH" \
   || echo "Warning: failed to report warm-start memory results"

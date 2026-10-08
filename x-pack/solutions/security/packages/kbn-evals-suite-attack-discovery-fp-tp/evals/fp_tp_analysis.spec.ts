@@ -1,0 +1,254 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Outcome eval for the Attack Discovery FP/TP analysis workflow (security-team#19285).
+ *
+ * `beforeAll` routes the `alertzero_reasoning` inference feature to the model under test.
+ * The suite runs the managed analysis workflow in place. Each task seeds a
+ * fresh copy of one example's world, creates an empty Investigation, runs the workflow,
+ * and grades its execution output against the contract in security-team#19280.
+ *
+ * Every task seeds documents under a unique suffix, so concurrent repetitions and
+ * examples never read each other's alerts, events, or entities.
+ */
+
+import { randomUUID } from 'crypto';
+import type { HttpHandler } from '@kbn/core/public';
+import type { EvalConnector, EvaluationDataset, Example } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  FP_TP_INFERENCE_FEATURE_ID,
+  FP_TP_MANAGED_WORKFLOW_ID,
+  PUBLIC_API_VERSION,
+} from '../src/constants';
+import { evaluate, selectEvaluators, tags } from '../src/evaluate';
+import {
+  claimGrounding,
+  createFpTpTrajectoryEvaluator,
+  outcomeAccuracy,
+  payloadConformance,
+  skipFailedRuns,
+  unsafeClose,
+} from '../src/evaluators';
+import { overrideInferenceFeature } from '../src/inference_override';
+import {
+  createInvestigation,
+  deleteConversation,
+  waitForConversationsReady,
+} from '../src/investigation';
+import { kbnRequestFromFetch } from '../src/kbn_request';
+import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from '../src/scenarios';
+import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
+import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
+
+const SUMMARY_CRITERIA = [
+  'Every id the summary or rationale cites (document ids, host.id, process.entity_id, or any other identifier) appears in output.seededIds or output.seededEvidence (the documents seeded for this run)',
+  'The summary and rationale do not invent hosts, users, processes, domains, events, or entity roles that are not in output.seededEvidence (the documents this run seeded)',
+  'The summary and rationale state that something actually happened only when output.seededEvidence.entities or output.seededEvidence.events show it; output.seededEvidence.attackDiscovery and output.seededEvidence.alerts are the claims under review, so presenting their story as established fact where the entities or raw events contradict it or do not show it fails this criterion',
+  'The summary or rationale names the check or checks that decided the verdict (alert_linkage, entity_role, process_parent, network_destination)',
+  'When the verdict is inconclusive, the summary or rationale says which evidence was missing or which checks conflicted',
+  'When the entity store or raw events were empty or unavailable, the summary or rationale names that source, whatever the verdict',
+];
+
+interface FpTpDatasetExample extends Example {
+  input: { exampleId: string };
+  output: { outcome: string };
+  metadata: {
+    exampleId: string;
+    scenarioKey: string;
+    situation: string;
+    evidenceState: string;
+    provenance: string;
+    variant: string | null;
+    variantOf: string | null;
+    provisional: boolean;
+  };
+}
+
+evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
+  const workflowId: string = FP_TP_MANAGED_WORKFLOW_ID;
+  let restoreInferenceSettings: (() => Promise<void>) | undefined;
+  let restoreEntityExtraction: (() => Promise<void>) | undefined;
+  // Cleanups that failed inside a task; afterAll retries them.
+  const pendingCleanups = new Set<() => Promise<void>>();
+
+  evaluate.beforeAll(
+    async ({
+      fetch,
+      connector,
+      log,
+    }: {
+      fetch: HttpHandler;
+      connector: EvalConnector;
+      log: ToolingLog;
+    }) => {
+      let workflow: { enabled: boolean };
+      try {
+        workflow = await fetch<{ enabled: boolean }>(
+          `/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
+          {
+            method: 'GET',
+            version: PUBLIC_API_VERSION,
+            headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+          }
+        );
+      } catch (error) {
+        throw new Error(
+          `Managed workflow "${workflowId}" is unavailable. It is shipped by the alertzero managed definitions, not installed by this suite; the caller may also lack permission to read it. Original error: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      if (!workflow.enabled) {
+        throw new Error(
+          `Managed workflow "${workflowId}" is disabled. It is shipped by the alertzero managed definitions, not installed by this suite.`
+        );
+      }
+
+      restoreInferenceSettings = await overrideInferenceFeature({
+        fetch,
+        featureId: FP_TP_INFERENCE_FEATURE_ID,
+        endpointId: connector.id,
+      });
+      restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
+      await waitForConversationsReady(fetch);
+    }
+  );
+
+  evaluate.afterAll(async ({ fetch, log }: { fetch: HttpHandler; log: ToolingLog }) => {
+    if (pendingCleanups.size > 0) {
+      log.info(`Retrying ${pendingCleanups.size} FP/TP fixture cleanups`);
+      await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
+    }
+    await restoreEntityExtraction?.().catch((error: Error) =>
+      log.warning(`Could not restart Entity Store extraction: ${error.message}`)
+    );
+    await restoreInferenceSettings?.().catch((error: Error) =>
+      log.warning(`Could not restore inference settings: ${error.message}`)
+    );
+  });
+
+  evaluate(
+    'classifies seeded Attack Discoveries with the expected outcome',
+    async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
+      const examples: FpTpDatasetExample[] = FP_TP_EXAMPLES.map(
+        ({
+          id,
+          scenarioKey,
+          situation,
+          evidenceState,
+          expectedOutcome,
+          provenance,
+          variant,
+          provisional = false,
+        }) => ({
+          id,
+          input: { exampleId: id },
+          output: { outcome: expectedOutcome },
+          metadata: {
+            exampleId: id,
+            scenarioKey,
+            situation,
+            evidenceState,
+            provenance,
+            variant: variant?.kind ?? null,
+            variantOf: variant?.of ?? null,
+            provisional,
+          },
+        })
+      );
+
+      await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'security: attack-discovery-fp-tp-analysis',
+              description:
+                'Runs the FP/TP analysis workflow against seeded U1-U6 worlds from an authored ' +
+                'encoded-PowerShell scenario and a replayed MIMICRAT ClickFix chain (true ' +
+                'attacks, benign mimics, missing or conflicting evidence, single-fact ' +
+                'mutations, and both failure paths) and grades the execution outcome and ' +
+                'payload against the #19280 contract.',
+              examples,
+            } satisfies EvaluationDataset,
+          ],
+          task: async ({ metadata }) => {
+            const { exampleId } = metadata as FpTpDatasetExample['metadata'];
+            const world = buildFpTpExampleWorld(exampleId, randomUUID().slice(0, 8));
+            const kbnRequest = kbnRequestFromFetch(fetch);
+            const fixture = await seedFixture({
+              esClient: esClient as EsClient,
+              kbnRequest,
+              world,
+              onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
+            });
+            const investigationId = await createInvestigation(
+              fetch,
+              `FP/TP eval ${exampleId}`
+            ).catch(async (error) => {
+              await fixture.cleanup().catch(() => pendingCleanups.add(fixture.cleanup));
+              throw error;
+            });
+
+            let agentConversationIds: string[] = [];
+            try {
+              const result = await runFpTpAnalysisWorkflow({
+                fetch,
+                log,
+                traceEsClient,
+                workflowId,
+                attackDiscoveryId: world.attackId,
+                investigationId,
+                seededIds: {
+                  attackDiscoveryId: world.attackId,
+                  alertIds: world.alerts.map(({ id }) => id),
+                  entityIds: world.entities.map(({ id }) => id),
+                  eventIds: world.events.map(({ id }) => id),
+                },
+                seededEvidence: toSeededEvidence(fixture.seededWorld),
+                onFailedReadConversationIds: (conversationIds) => {
+                  agentConversationIds = conversationIds;
+                },
+              });
+              agentConversationIds = result.agentConversationIds;
+              log.info(
+                `FP/TP example ${exampleId}: outcome ${result.outcome}, coverage ${JSON.stringify(
+                  result.raw?.coverage ?? null
+                )} (execution ${result.executionId})${
+                  result.payload ? `\n  summary: ${result.payload.summary_markdown}` : ''
+                }`
+              );
+              return result;
+            } finally {
+              await fixture.cleanup().catch(() => pendingCleanups.add(fixture.cleanup));
+              await deleteConversation(fetch, investigationId).catch((error: Error) =>
+                log.warning(`Could not delete Investigation ${investigationId}: ${error.message}`)
+              );
+              for (const conversationId of agentConversationIds) {
+                await deleteConversation(fetch, conversationId).catch((error: Error) =>
+                  log.warning(
+                    `Could not delete agent conversation ${conversationId}: ${error.message}`
+                  )
+                );
+              }
+            }
+          },
+        },
+        selectEvaluators([
+          outcomeAccuracy,
+          unsafeClose,
+          payloadConformance,
+          skipFailedRuns(claimGrounding),
+          createFpTpTrajectoryEvaluator(),
+          skipFailedRuns(evaluators.criteria(SUMMARY_CRITERIA)),
+        ])
+      );
+    }
+  );
+});

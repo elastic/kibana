@@ -7,8 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { nodeBuilder } from '@kbn/es-query';
+import { z } from '@kbn/zod/v4';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
@@ -25,19 +28,33 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type {
+  ConversationEvent,
+  ConversationSearchOptions,
+  ConversationParentLink,
   ConversationTemplate,
+  ConversationUpdatedTriggerEvent,
   SerializedMetadataValue,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
+import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
+import { roundToEvents } from './rounds_to_events';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
+
+jest.mock('../../../workflows/triggers/describe_conversation_write', () => {
+  const actual = jest.requireActual('../../../workflows/triggers/describe_conversation_write');
+  return { ...actual, describeConversationWrite: jest.fn(actual.describeConversationWrite) };
+});
+const describeConversationWriteMock = jest.mocked(describeConversationWrite);
 
 const testSpace = 'default';
 
@@ -65,6 +82,11 @@ const mockRawEsClient: MockRawEsClient = {
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
 
+const mockConversationEvents: ConversationEventsServiceStart = {
+  getDefinition: jest.fn(),
+  list: jest.fn().mockReturnValue([]),
+};
+
 jest.mock('./storage', () => ({
   createStorage: jest.fn(() => ({
     getClient: jest.fn(() => mockEsClient),
@@ -72,8 +94,7 @@ jest.mock('./storage', () => ({
   conversationIndexName: '.kibana_agent_builder_conversations',
 }));
 
-// Failing: See https://github.com/elastic/kibana/issues/289049
-describe.skip('ConversationClient', () => {
+describe('ConversationClient', () => {
   let client: ConversationClient;
   let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
@@ -92,6 +113,7 @@ describe.skip('ConversationClient', () => {
     rounds = [],
     attachments,
     workspaceId,
+    parentConversation,
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
@@ -114,12 +136,13 @@ describe.skip('ConversationClient', () => {
     rounds?: unknown[];
     attachments?: unknown[];
     workspaceId?: string;
+    parentConversation?: ConversationParentLink;
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
     pinnedBy?: Array<{ userId: string }>;
     schemaVersion?: number;
-    events?: TimelineEvent[];
+    events?: ConversationEvent[];
     space?: string;
     hasSpace?: boolean;
   } = {}): Document =>
@@ -140,6 +163,7 @@ describe.skip('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(parentConversation ? { parent_conversation: parentConversation } : {}),
         ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
         ...(events !== undefined ? { events } : {}),
         access_control: {
@@ -175,6 +199,37 @@ describe.skip('ConversationClient', () => {
     mockRawEsClient.get.mockRejectedValue(
       Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
     );
+  };
+
+  const mockGetReturnsIndexedDocument = () => {
+    mockRawEsClient.get.mockImplementation(async ({ id }: { id: string }) => {
+      const { calls, results } = mockEsClient.index.mock;
+      let callIndex = -1;
+      for (let i = calls.length - 1; i >= 0; i--) {
+        if (calls[i][0].id === id) {
+          callIndex = i;
+          break;
+        }
+      }
+      if (callIndex === -1) {
+        throw Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+      }
+
+      const { document } = calls[callIndex][0] as { document: Document['_source'] };
+      const indexed = (await results[callIndex].value) as {
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+
+      return {
+        _id: id,
+        _index: TEST_CONVERSATION_INDEX,
+        _source: document,
+        _seq_no: indexed._seq_no,
+        _primary_term: indexed._primary_term,
+        found: true,
+      };
+    });
   };
 
   const expectNoReadBy = (conversation: unknown) => {
@@ -214,7 +269,15 @@ describe.skip('ConversationClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // `clearAllMocks` only clears call history — queued `mockResolvedValueOnce` /
+    // `mockRejectedValueOnce` implementations survive it. Reset the ES client mocks fully so a
+    // once-queued 409 left behind by a conflict test cannot leak into the next test (#289049).
     mockRawEsClient.get.mockReset();
+    mockEsClient.search.mockReset();
+    mockEsClient.delete.mockReset();
+    mockEsClient.index.mockReset();
+    // Default OCC-style index response; describes that need something else override it.
+    mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
     agentRegistry = {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
@@ -228,6 +291,7 @@ describe.skip('ConversationClient', () => {
       logger: loggerMock.create(),
       esClient: mockRawEsClient as unknown as ElasticsearchClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
       user: {
         id: 'user-1',
         username: 'test-user',
@@ -708,6 +772,244 @@ describe.skip('ConversationClient', () => {
       expectOwnerPermissionsInList(results);
       expectNoRoundsInList(results);
     });
+
+    // --- filter ---
+
+    const searchFilterClauses = async (options: ConversationSearchOptions): Promise<unknown[]> => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter;
+    };
+
+    it('appends the compiled filter to the access filters', async () => {
+      const withoutFilter = await searchFilterClauses({ query: 'anything' });
+
+      mockEsClient.search.mockClear();
+      const withFilter = await searchFilterClauses({
+        query: 'anything',
+        filter: 'attachment_type: alert',
+      });
+
+      expect(withFilter).toEqual([
+        ...withoutFilter,
+        {
+          bool: {
+            should: [{ term: { 'attachments.type': { value: 'alert' } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
+    });
+
+    it('accepts a pre-built filter AST as well as a KQL string', async () => {
+      const fromString = await searchFilterClauses({ filter: 'attachment_type: alert' });
+
+      mockEsClient.search.mockClear();
+      const fromNode = await searchFilterClauses({
+        filter: nodeBuilder.is('attachment_type', 'alert'),
+      });
+
+      expect(fromNode).toEqual(fromString);
+    });
+
+    it('searches by filter alone, with no query', async () => {
+      const filterClauses = await searchFilterClauses({ filter: 'status: completed' });
+
+      expect(filterClauses).toContainEqual({
+        bool: {
+          should: [{ term: { status: { value: 'completed' } } }],
+          minimum_should_match: 1,
+        },
+      });
+      expect(mockEsClient.search.mock.calls[0][0].query.bool.must).toEqual([]);
+    });
+
+    it('sorts by the requested field alone when no query narrows relevance', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ filter: 'status: completed' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }],
+        })
+      );
+    });
+
+    it('applies an explicit sort instead of relevance when a query is present', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything', sort: { field: 'created_at', order: 'asc' } });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ created_at: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('rejects an invalid filter before touching Elasticsearch', async () => {
+      await expect(client.search({ filter: 'space: default' })).rejects.toThrow(
+        /Invalid filter field "space"/
+      );
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkGet', () => {
+    it('keys results by conversation id, independently of the order hits come back in', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'conversation-2', title: 'Second' }),
+            createConversationDocument({ id: 'conversation-1', title: 'First' }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-1', 'conversation-2']);
+
+      expect(result.size).toBe(2);
+      expect(result.get('conversation-1')?.title).toBe('First');
+      expect(result.get('conversation-2')?.title).toBe('Second');
+    });
+
+    it('sends a single ids clause alongside the shared access filters', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1', 'conversation-2']);
+
+      const { query } = mockEsClient.search.mock.calls[0][0];
+      expect(query.bool.filter).toContainEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+      // Space scoping and read access still apply, on top of the ids clause.
+      expect(query.bool.filter).toHaveLength(3);
+    });
+
+    it('resolves sub-agent conversations, unlike the list surfaces', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1']);
+
+      const { query } = mockEsClient.search.mock.calls[0][0];
+      expect(query.bool.filter).not.toContainEqual({
+        bool: { must_not: [{ exists: { field: 'parent_conversation' } }] },
+      });
+    });
+
+    it('returns the parent link so callers can tell sub-agent conversations apart', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'conversation-parent' }),
+            createConversationDocument({
+              id: 'conversation-child',
+              parentConversation: {
+                id: 'conversation-parent',
+                relation: ConversationParentRelation.subagent,
+              },
+            }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-parent', 'conversation-child']);
+
+      expect(mockEsClient.search.mock.calls[0][0]._source).toContain('parent_conversation');
+      expect(result.get('conversation-child')?.parent_conversation).toEqual({
+        id: 'conversation-parent',
+        relation: ConversationParentRelation.subagent,
+      });
+      expect(result.get('conversation-parent')?.parent_conversation).toBeUndefined();
+    });
+
+    it('sizes the query to the id count and does not track totals', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1', 'conversation-2', 'conversation-3']);
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 3, track_total_hits: false })
+      );
+      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('from');
+    });
+
+    it('omits ids that did not resolve rather than erroring', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ id: 'conversation-1' })] },
+      });
+
+      const result = await client.bulkGet(['conversation-1', 'missing']);
+
+      expect(result.size).toBe(1);
+      expect(result.has('missing')).toBe(false);
+    });
+
+    it('returns an empty map for an empty id array without querying Elasticsearch', async () => {
+      await expect(client.bulkGet([])).resolves.toEqual(new Map());
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty map when the user cannot access any underlying agents', async () => {
+      agentRegistry.getIds.mockResolvedValue([]);
+
+      await expect(client.bulkGet(['conversation-1'])).resolves.toEqual(new Map());
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.bulkGet(ids)).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns rounds-less rows carrying active attachment summaries', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              id: 'conversation-1',
+              attachments: [
+                { id: 'att-1', type: 'text', versions: [], current_version: 1 },
+                { id: 'att-2', type: 'esql', versions: [], current_version: 1, active: false },
+              ],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-1']);
+      const conversation = result.get('conversation-1');
+
+      expectNoRoundsInList([conversation]);
+      expect(conversation?.attachments).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('requests attachment identity without version content in _source', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1']);
+
+      const { _source: sourceFields } = mockEsClient.search.mock.calls[0][0];
+      expect(sourceFields).toEqual(
+        expect.arrayContaining(['attachments.id', 'attachments.type', 'attachments.active'])
+      );
+      expect(sourceFields).not.toContain('attachments');
+      expect(sourceFields).not.toContain('conversation_rounds');
+    });
   });
 
   describe('get', () => {
@@ -805,6 +1107,32 @@ describe.skip('ConversationClient', () => {
   // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
+  describe('getAuthor', () => {
+    const createClientForUser = (user: { id?: string; username: string }) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { ...user, isAdmin: false },
+      });
+
+    it('prefers the origin author over the client user', () => {
+      const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+      expect(client.getAuthor(originAuthor)).toEqual(originAuthor);
+    });
+
+    it('attributes the round to the client user', () => {
+      expect(client.getAuthor()).toEqual({ id: 'user-1', username: 'test-user' });
+    });
+
+    it('assigns no author when the user has no profile id', () => {
+      expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+  });
+
   describe('space isolation for reads-by-id', () => {
     const createClientInSpace = (space: string) =>
       createClient({
@@ -812,6 +1140,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
       });
 
@@ -853,17 +1182,20 @@ describe.skip('ConversationClient', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
-      const result = await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-      });
+      const result = await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -874,17 +1206,109 @@ describe.skip('ConversationClient', () => {
       expectNoReadBy(result);
     });
 
+    it('forces an immediate refresh instead of waiting for the scheduled one', async () => {
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
+    });
+
+    it('reads the created conversation back by id through the converse access gate', async () => {
+      const result = await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
+
+      // The response is built from a read-after-write, not from the request payload, so it goes
+      // through the same raw `get` and agent `use` check as `client.get`.
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(result).toMatchObject({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        user: { id: 'user-1', username: 'test-user' },
+        rounds: [],
+        events: [],
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        read: false,
+        pinned: false,
+        read_only: false,
+      });
+      expect(result.created_at).toBe(result.updated_at);
+      expectOwnerPermissions(result);
+      expectNoReadBy(result);
+    });
+
+    it('returns the same shape as get for the created conversation', async () => {
+      const created = await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Document['_source'];
+      };
+      mockGetDocumentResponse({
+        _id: 'conversation-1',
+        _seq_no: 0,
+        _primary_term: 1,
+        _source: indexedDoc,
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(created);
+    });
+
+    it('fails when the index response carries no version metadata', async () => {
+      mockEsClient.index.mockResolvedValueOnce({ result: 'created' });
+
+      await expect(
+        client.create(
+          {
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('Conversation conversation-1 was indexed without version metadata');
+    });
+
     it('throws an already-exists error when the id already exists', async () => {
       const conflictError = Object.assign(new Error('version conflict'), { statusCode: 409 });
       mockEsClient.index.mockRejectedValueOnce(conflictError);
 
       await expect(
-        client.create({
-          id: 'conversation-1',
-          title: 'Conversation 1',
-          agent_id: 'agent-1',
-          rounds: [],
-        })
+        client.create(
+          {
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toMatchObject({
         message: 'Conversation conversation-1 already exists',
       });
@@ -895,12 +1319,15 @@ describe.skip('ConversationClient', () => {
       mockEsClient.index.mockRejectedValueOnce(error);
 
       await expect(
-        client.create({
-          id: 'conversation-1',
-          title: 'Conversation 1',
-          agent_id: 'agent-1',
-          rounds: [],
-        })
+        client.create(
+          {
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toBe(error);
     });
 
@@ -917,14 +1344,17 @@ describe.skip('ConversationClient', () => {
       };
       getTemplateMock.mockReturnValue(template);
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-        template_id: 'tmpl-serialize',
-        metadata: { flag: true, count: 42 },
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'tmpl-serialize',
+          metadata: { flag: true, count: 42 },
+        },
+        { source: 'http_api' }
+      );
 
       const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
         document: Record<string, unknown>;
@@ -983,9 +1413,9 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await expect(client.update({ id: 'conversation-1', title: 'Updated title' })).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
+      await expect(
+        client.update({ id: 'conversation-1', title: 'Updated title' }, { source: 'http_api' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
@@ -995,7 +1425,7 @@ describe.skip('ConversationClient', () => {
 
       const result = await client.update(
         { id: 'conversation-1', title: 'Renamed' },
-        { access: 'rename' }
+        { access: 'rename', source: 'http_api' }
       );
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -1013,7 +1443,7 @@ describe.skip('ConversationClient', () => {
 
       const result = await client.update(
         { id: 'conversation-1', title: 'Renamed' },
-        { access: 'rename' }
+        { access: 'rename', source: 'http_api' }
       );
 
       const { document } = mockEsClient.index.mock.calls[0][0];
@@ -1033,7 +1463,10 @@ describe.skip('ConversationClient', () => {
       );
 
       await expect(
-        client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' })
+        client.update(
+          { id: 'conversation-1', title: 'Renamed' },
+          { access: 'rename', source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -1048,7 +1481,10 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' });
+      await client.update(
+        { id: 'conversation-1', title: 'Updated title' },
+        { access: 'converse', source: 'http_api' }
+      );
 
       // Holds because `toEs` takes no caller; pinned so a `currentUser` argument cannot slip in.
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -1072,7 +1508,10 @@ describe.skip('ConversationClient', () => {
       );
 
       await expect(
-        client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
+        client.update(
+          { id: 'conversation-1', title: 'Updated title' },
+          { access: 'converse', source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
@@ -1084,7 +1523,10 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
+        client.update(
+          { id: 'conversation-1', title: 'Updated title' },
+          { access: 'converse', source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
@@ -1096,7 +1538,7 @@ describe.skip('ConversationClient', () => {
     it('reads the document by id via the raw ES get API', async () => {
       mockGetDocumentResponse(createConversationDocument());
 
-      await client.update({ id: 'conversation-1', title: 'Updated title' });
+      await client.update({ id: 'conversation-1', title: 'Updated title' }, { source: 'http_api' });
 
       expect(mockRawEsClient.get).toHaveBeenCalledWith({
         index: TEST_CONVERSATION_INDEX,
@@ -1107,7 +1549,7 @@ describe.skip('ConversationClient', () => {
     it('passes the version read from the document to the write', async () => {
       mockGetDocumentResponse(createConversationDocument({ seqNo: 42, primaryTerm: 7 }));
 
-      await client.update({ id: 'conversation-1', title: 'Updated title' });
+      await client.update({ id: 'conversation-1', title: 'Updated title' }, { source: 'http_api' });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({ if_seq_no: 42, if_primary_term: 7 })
@@ -1117,9 +1559,9 @@ describe.skip('ConversationClient', () => {
     it('refuses to write when the read returned no version metadata', async () => {
       mockGetDocumentResponse(createConversationDocument({ versioned: false }));
 
-      await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow(
-        /read without version metadata/
-      );
+      await expect(
+        client.update({ id: 'conversation-1', title: 'x' }, { source: 'http_api' })
+      ).rejects.toThrow(/read without version metadata/);
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
@@ -1127,7 +1569,9 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
       mockEsClient.index.mockRejectedValue(createConflictError());
 
-      const error = await client.update({ id: 'conversation-1', title: 'x' }).catch((e) => e);
+      const error = await client
+        .update({ id: 'conversation-1', title: 'x' }, { source: 'http_api' })
+        .catch((e) => e);
 
       expect(isConversationWriteConflictError(error)).toBe(true);
       expect(error.meta.statusCode).toBe(409);
@@ -1137,7 +1581,9 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
       mockEsClient.index.mockRejectedValue(createConflictError());
 
-      await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow();
+      await expect(
+        client.update({ id: 'conversation-1', title: 'x' }, { source: 'http_api' })
+      ).rejects.toThrow();
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
@@ -1234,6 +1680,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -1311,6 +1758,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -1320,259 +1768,6 @@ describe.skip('ConversationClient', () => {
       const { document } = mockEsClient.index.mock.calls[0][0];
       expect(document.pinned_by).toEqual([]);
       expect(result.pinned).toBe(false);
-    });
-  });
-
-  describe('upsertRound', () => {
-    const round = createRound({ id: 'round-2', input: { message: 'second' } });
-
-    const persistedRounds = (call: number = 0) =>
-      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{ id: string }>;
-
-    beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    });
-
-    it('appends the round to the stored conversation', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-
-      await client.upsertRound({ id: 'conversation-1', round });
-
-      expect(persistedRounds().map(({ id }) => id)).toEqual(['round-1', 'round-2']);
-    });
-
-    it('re-reads and keeps a round written concurrently after a conflict', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      // the winning writer's round is now present in the stored document
-      mockGetDocumentResponse(
-        createConversationDocument({
-          seqNo: 2,
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-        })
-      );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError());
-
-      await client.upsertRound({ id: 'conversation-1', round });
-
-      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
-      expect(persistedRounds(1).map(({ id }) => id)).toEqual([
-        'round-1',
-        'round-concurrent',
-        'round-2',
-      ]);
-    });
-
-    it('throws a write conflict error once retries are exhausted', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-      mockEsClient.index.mockRejectedValue(createConflictError());
-
-      const error = await client.upsertRound({ id: 'conversation-1', round }).catch((e) => e);
-
-      expect(isConversationWriteConflictError(error)).toBe(true);
-      expect(error.meta.statusCode).toBe(409);
-    });
-
-    it('preserves a title renamed while the round was running', async () => {
-      mockGetDocumentResponse(createConversationDocument({ title: 'Renamed by user' }));
-
-      const result = await client.upsertRound({ id: 'conversation-1', round });
-
-      expectNoReadBy(result);
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ title: 'Renamed by user' }),
-        })
-      );
-      expect(result.title).toBe('Renamed by user');
-    });
-
-    it('keeps a concurrent attachment alongside one the round created', async () => {
-      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
-      const fromRound = { id: 'attachment-from-round', versions: [], current_version: 1 };
-
-      mockGetDocumentResponse(createConversationDocument({ attachments: [concurrent] }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        attachments: { snapshot: [], produced: [fromRound] } as never,
-      });
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
-        'attachment-concurrent',
-        'attachment-from-round',
-      ]);
-    });
-
-    it('keeps a round edit to an attachment the stored conversation still has at v1', async () => {
-      const stored = { id: 'X', versions: [], current_version: 1 };
-      const edited = { id: 'X', versions: [], current_version: 2 };
-
-      mockGetDocumentResponse(createConversationDocument({ attachments: [stored] }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        // the round started from v1 and edited it in memory; nothing has
-        // persisted that yet, so the stored record must not win
-        attachments: { snapshot: [stored], produced: [edited] } as never,
-      });
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments).toEqual([edited]);
-    });
-
-    it('does not overwrite a workspace already set on the stored conversation', async () => {
-      mockGetDocumentResponse(createConversationDocument({ workspaceId: 'workspace-existing' }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        workspaceId: 'workspace-new',
-      });
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ workspace_id: 'workspace-existing' }),
-        })
-      );
-    });
-
-    it('sets the workspace when the stored conversation has none', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        workspaceId: 'workspace-new',
-      });
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ workspace_id: 'workspace-new' }),
-        })
-      );
-    });
-  });
-
-  describe('addAttachmentsToLastRound', () => {
-    const refs = [{ attachment_id: 'attachment-1', version: 1 }];
-    const produced = [{ id: 'attachment-1', versions: [], current_version: 1 }];
-
-    const persistedRounds = (call: number = 0) =>
-      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{
-        id: string;
-        input: { attachment_refs?: Array<{ attachment_id: string }> };
-      }>;
-
-    const request = {
-      id: 'conversation-1',
-      refs,
-      attachments: { snapshot: [], produced },
-    } as never;
-
-    beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    });
-
-    it('merges the refs into the last stored round only', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-2' })],
-        })
-      );
-
-      await client.addAttachmentsToLastRound(request);
-
-      const [first, last] = persistedRounds();
-      expect(first.input.attachment_refs).toBeUndefined();
-      expect(last.input.attachment_refs).toEqual(refs);
-    });
-
-    it('applies the refs to a round appended concurrently after a conflict', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      mockGetDocumentResponse(
-        createConversationDocument({
-          seqNo: 2,
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-        })
-      );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError());
-
-      await client.addAttachmentsToLastRound(request);
-
-      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
-
-      const [first, last] = persistedRounds(1);
-      expect(first.id).toBe('round-1');
-      expect(first.input.attachment_refs).toBeUndefined();
-      expect(last.id).toBe('round-concurrent');
-      expect(last.input.attachment_refs).toEqual(refs);
-    });
-
-    it('keeps a concurrent attachment alongside the produced ones', async () => {
-      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
-
-      mockGetDocumentResponse(
-        createConversationDocument({
-          rounds: [createRound({ id: 'round-1' })],
-          attachments: [concurrent],
-        })
-      );
-
-      await client.addAttachmentsToLastRound(request);
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
-        'attachment-1',
-        'attachment-concurrent',
-      ]);
-    });
-
-    it('throws a bad request error when the stored conversation has no rounds', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-
-      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
-        'Conversation conversation-1 has no rounds to attach to'
-      );
-
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-
-    it('throws a write conflict error once retries are exhausted', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      mockEsClient.index.mockRejectedValue(createConflictError());
-
-      const error = await client.addAttachmentsToLastRound(request).catch((e) => e);
-
-      expect(isConversationWriteConflictError(error)).toBe(true);
-      expect(error.meta.statusCode).toBe(409);
-    });
-
-    it('remains owner-only by default for public conversations', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({
-          userId: 'other-user-id',
-          username: 'other-user',
-          accessMode: ConversationAccessControlMode.Public,
-          rounds: [createRound({ id: 'round-1' })],
-        })
-      );
-
-      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
-
-      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
   });
 
@@ -1835,7 +2030,7 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await expect(
-        client.applyTemplate('conversation-1', 'unknown-template')
+        client.applyTemplate('conversation-1', 'unknown-template', { source: 'http_api' })
       ).rejects.toMatchObject({
         message: expect.stringContaining('Template not found'),
       });
@@ -1859,7 +2054,7 @@ describe.skip('ConversationClient', () => {
       getTemplateMock.mockReturnValue(template);
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
-      await client.applyTemplate('conversation-1', 'tmpl-a');
+      await client.applyTemplate('conversation-1', 'tmpl-a', { source: 'http_api' });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1891,7 +2086,9 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
+      await expect(
+        client.applyTemplate('conversation-1', 'tmpl-b', { source: 'http_api' })
+      ).rejects.toThrow(
         'Conversation already has template "tmpl-a". Switching templates is not supported'
       );
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -1919,7 +2116,9 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
+      await expect(
+        client.applyTemplate('conversation-1', 'tmpl-b', { source: 'http_api' })
+      ).rejects.toThrow(
         'Conversation already has template "tmpl-a". Switching templates is not supported'
       );
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -1953,7 +2152,7 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.applyTemplate('conversation-1', 'tmpl-a');
+      await client.applyTemplate('conversation-1', 'tmpl-a', { source: 'http_api' });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1979,7 +2178,7 @@ describe.skip('ConversationClient', () => {
       getTemplateMock.mockReturnValue(template);
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
-      await client.applyTemplate('conversation-1', 'tmpl-bool');
+      await client.applyTemplate('conversation-1', 'tmpl-bool', { source: 'http_api' });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1997,7 +2196,7 @@ describe.skip('ConversationClient', () => {
       getTemplateMock.mockReturnValue(template);
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
-      await client.applyTemplate('conversation-1', 'tmpl-arr');
+      await client.applyTemplate('conversation-1', 'tmpl-arr', { source: 'http_api' });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2014,7 +2213,9 @@ describe.skip('ConversationClient', () => {
         createConversationDocument({ userId: 'other-user', username: 'other' })
       );
 
-      await expect(client.applyTemplate('conversation-1', 'tmpl-a')).rejects.toMatchObject({
+      await expect(
+        client.applyTemplate('conversation-1', 'tmpl-a', { source: 'http_api' })
+      ).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
       });
     });
@@ -2030,7 +2231,7 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
       await expect(
-        client.patchMetadata('conversation-1', { severity: 'high' })
+        client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'http_api' })
       ).rejects.toMatchObject({
         message: expect.stringContaining('has no template'),
       });
@@ -2057,7 +2258,11 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.patchMetadata('conversation-1', { severity: 'high', notified: true });
+      await client.patchMetadata(
+        'conversation-1',
+        { severity: 'high', notified: true },
+        { source: 'http_api' }
+      );
 
       const written = mockEsClient.index.mock.calls[0][0].document;
       expect(written.metadata).toEqual({
@@ -2089,7 +2294,7 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.patchMetadata('conversation-1', { severity: 'high' });
+      await client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'http_api' });
 
       const written = mockEsClient.index.mock.calls[0][0].document;
       // The concurrently written `status` key must be preserved in the output.
@@ -2108,7 +2313,7 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }));
 
       await expect(
-        client.patchMetadata('conversation-1', { unknown_field: 'value' })
+        client.patchMetadata('conversation-1', { unknown_field: 'value' }, { source: 'http_api' })
       ).rejects.toMatchObject({
         message: expect.stringContaining('unknown_field'),
       });
@@ -2121,12 +2326,63 @@ describe.skip('ConversationClient', () => {
         createConversationDocument({ userId: 'other-user', username: 'other' })
       );
 
-      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+      await expect(
+        client.patchMetadata('conversation-1', { x: 'value' }, { source: 'http_api' })
+      ).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
       });
     });
 
-    describe('onMetadataPatched callback', () => {
+    it('default (owner) denies a non-owner on a public conversation', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user',
+          username: 'other',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      await expect(
+        client.patchMetadata('conversation-1', { x: 'value' }, { source: 'http_api' })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('explicit { access: converse } allows a non-owner on a public conversation', async () => {
+      const template = makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } });
+      getTemplateMock.mockReturnValue(template);
+      // The document must carry a template_id so patchMetadata can resolve the template.
+      const doc = createConversationDocumentWithTemplate({
+        templateId: 'tmpl-a',
+        // Override user and access_mode to simulate a public conversation owned by someone else.
+      });
+      // Patch the access_control to be Public and userId to be a different user.
+      const publicOtherDoc = {
+        ...doc,
+        _source: {
+          ...doc._source,
+          user_id: 'other-user',
+          user_name: 'other',
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        },
+      };
+      mockGetDocumentResponse(publicOtherDoc as Document);
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockGetDocumentResponseOnce(publicOtherDoc as Document);
+
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { x: 'value' },
+        { access: 'converse', source: 'http_api' }
+      );
+      expect(changedFields).toEqual(['x']);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
           input_type: 'SELECT',
@@ -2141,15 +2397,22 @@ describe.skip('ConversationClient', () => {
         mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       });
 
-      it('calls onMetadataPatched with changed fields after a successful write', async () => {
-        const onMetadataPatched = jest.fn();
+      const buildEventEmitter = () => ({
+        emitMetadataPatched: jest.fn(),
+        emitAttachmentEvents: jest.fn(),
+        emitConversationUpdated: jest.fn(),
+      });
+
+      it('emits emitMetadataPatched with changed fields after a successful write', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2159,9 +2422,13 @@ describe.skip('ConversationClient', () => {
           })
         );
 
-        await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { severity: 'high' },
+          { source: 'http_api' }
+        );
 
-        expect(onMetadataPatched).toHaveBeenCalledWith({
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith({
           conversationId: 'conversation-1',
           templateId: template.id,
           parentId: undefined,
@@ -2170,14 +2437,15 @@ describe.skip('ConversationClient', () => {
       });
 
       it('includes parentId when the conversation has a parent_conversation', async () => {
-        const onMetadataPatched = jest.fn();
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         const docWithParent = {
@@ -2192,22 +2460,27 @@ describe.skip('ConversationClient', () => {
 
         mockGetDocumentResponse(docWithParent);
 
-        await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { status: 'closed' },
+          { source: 'http_api' }
+        );
 
-        expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith(
           expect.objectContaining({ parentId: 'parent-conv-1' })
         );
       });
 
-      it('does not call onMetadataPatched when all values are identical (no-op suppression)', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when all values are identical (no-op suppression)', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2218,20 +2491,25 @@ describe.skip('ConversationClient', () => {
           })
         );
 
-        await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { status: 'open' },
+          { source: 'http_api' }
+        );
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
 
-      it('does not call onMetadataPatched when the write fails', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when the write fails', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2240,10 +2518,10 @@ describe.skip('ConversationClient', () => {
         mockEsClient.index.mockRejectedValue(new Error('disk full'));
 
         await expect(
-          clientWithCb.patchMetadata('conversation-1', { severity: 'high' })
+          clientWithCb.patchMetadata('conversation-1', { severity: 'high' }, { source: 'http_api' })
         ).rejects.toThrow('disk full');
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
     });
   });
@@ -2251,8 +2529,8 @@ describe.skip('ConversationClient', () => {
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2271,13 +2549,16 @@ describe.skip('ConversationClient', () => {
       );
       getTemplateMock.mockReturnValue(template);
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-        template_id: 'tmpl-seed',
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'tmpl-seed',
+        },
+        { source: 'http_api' }
+      );
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2302,13 +2583,16 @@ describe.skip('ConversationClient', () => {
       });
       getTemplateMock.mockReturnValue(template);
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-        template_id: 'tmpl-bool',
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'tmpl-bool',
+        },
+        { source: 'http_api' }
+      );
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2326,13 +2610,16 @@ describe.skip('ConversationClient', () => {
       });
       getTemplateMock.mockReturnValue(template);
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-        template_id: 'tmpl-arr',
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'tmpl-arr',
+        },
+        { source: 'http_api' }
+      );
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2347,25 +2634,31 @@ describe.skip('ConversationClient', () => {
       getTemplateMock.mockReturnValue(undefined);
 
       await expect(
-        client.create({
-          id: 'conversation-1',
-          title: 'Conversation 1',
-          agent_id: 'agent-1',
-          rounds: [],
-          template_id: 'non-existent',
-        })
+        client.create(
+          {
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+            template_id: 'non-existent',
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Template not found: non-existent');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('creates without a template when template_id is not provided', async () => {
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
 
       expect(getTemplateMock).not.toHaveBeenCalled();
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -2443,7 +2736,10 @@ describe.skip('ConversationClient', () => {
       expectNoReadBy(result);
       expectParticipantPermissions(result);
       await expect(
-        client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
+        client.update(
+          { id: 'conversation-1', title: 'renamed' },
+          { access: 'rename', source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
     });
   });
@@ -2467,10 +2763,14 @@ describe.skip('ConversationClient', () => {
     it('stamps added_at on new entries and persists the requested mode', async () => {
       mockGetDocumentResponse(createConversationDocument());
 
-      const result = await client.updateAccessControl('conversation-1', {
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [newMember],
-      });
+      const result = await client.updateAccessControl(
+        'conversation-1',
+        {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [newMember],
+        },
+        { source: 'http_api' }
+      );
 
       expect(result).toEqual({
         access_mode: ConversationAccessControlMode.Private,
@@ -2488,10 +2788,14 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Public,
-          entries: [newMember],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Public,
+            entries: [newMember],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('ACL entries are not supported when access_mode is "public"');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2500,10 +2804,14 @@ describe.skip('ConversationClient', () => {
     it('allows publishing the conversation with an empty entries list', async () => {
       mockGetDocumentResponse(createConversationDocument());
 
-      const result = await client.updateAccessControl('conversation-1', {
-        access_mode: ConversationAccessControlMode.Public,
-        entries: [],
-      });
+      const result = await client.updateAccessControl(
+        'conversation-1',
+        {
+          access_mode: ConversationAccessControlMode.Public,
+          entries: [],
+        },
+        { source: 'http_api' }
+      );
 
       expect(result).toEqual({ access_mode: ConversationAccessControlMode.Public, entries: [] });
     });
@@ -2515,10 +2823,14 @@ describe.skip('ConversationClient', () => {
       };
       mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
 
-      const result = await client.updateAccessControl('conversation-1', {
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [newMember, { ...newMember, id: 'user-3' }],
-      });
+      const result = await client.updateAccessControl(
+        'conversation-1',
+        {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [newMember, { ...newMember, id: 'user-3' }],
+        },
+        { source: 'http_api' }
+      );
 
       expect(result.entries).toEqual([
         existing,
@@ -2529,10 +2841,14 @@ describe.skip('ConversationClient', () => {
     it('drops an entry naming the owner', async () => {
       mockGetDocumentResponse(createConversationDocument());
 
-      const result = await client.updateAccessControl('conversation-1', {
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [{ ...newMember, id: 'user-1' }, newMember],
-      });
+      const result = await client.updateAccessControl(
+        'conversation-1',
+        {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ ...newMember, id: 'user-1' }, newMember],
+        },
+        { source: 'http_api' }
+      );
 
       expect(result.entries).toEqual([{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }]);
     });
@@ -2541,10 +2857,14 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [newMember, newMember],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [newMember, newMember],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Duplicate ACL entry for user "user-2"');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2554,10 +2874,14 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [{ ...newMember, role: 'manager' as ConversationAccessControlRole }],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [{ ...newMember, role: 'manager' as ConversationAccessControlRole }],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Unknown ACL role: manager');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2572,10 +2896,14 @@ describe.skip('ConversationClient', () => {
       );
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries,
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries,
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow(`ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`);
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2585,15 +2913,19 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            { ...newMember, type: 'role' } as unknown as Omit<
-              ConversationAccessControlEntry,
-              'added_at'
-            >,
-          ],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              { ...newMember, type: 'role' } as unknown as Omit<
+                ConversationAccessControlEntry,
+                'added_at'
+              >,
+            ],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Each ACL entry requires a type of "user"');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2603,10 +2935,14 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [{ ...newMember, id: '' }],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [{ ...newMember, id: '' }],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Each ACL entry requires a non-empty id');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -2616,15 +2952,19 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(createConversationDocument());
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            {
-              ...newMember,
-              id: 'a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
-            },
-          ],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              {
+                ...newMember,
+                id: 'a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
+              },
+            ],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow(
         `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
       );
@@ -2642,13 +2982,426 @@ describe.skip('ConversationClient', () => {
       );
 
       await expect(
-        client.updateAccessControl('conversation-1', {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [],
-        })
+        client.updateAccessControl(
+          'conversation-1',
+          {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addAccessControlEntries', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('adds new entries on a private conversation, stamping added_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            access_control: {
+              access_mode: ConversationAccessControlMode.Private,
+              entries: [
+                {
+                  type: 'user',
+                  id: 'user-2',
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-08-11T10:00:00.000Z',
+                },
+              ],
+            },
+          }),
+        })
+      );
+    });
+
+    it("writes the role from the caller's entry, not a hardcoded Member", async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      // Add with the only currently valid role — but the role comes from the caller, not hardcoded
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries[0].role).toBe(ConversationAccessControlRole.Member);
+    });
+
+    it('is a no-op for a public conversation — does not index and returns the existing conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Public,
+          entries: [],
+        })
+      );
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when every principal is already a member', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('leaves an existing entry unchanged even when a different role is requested, and skips the write when nothing new remains', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      // Request the same principal again — entry already exists, so skip the write regardless of role
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('deduplicates principals within the request — same principal twice becomes one entry', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [
+          { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+          { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+        ],
+        { source: 'http_api' }
+      );
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries).toHaveLength(1);
+      expect(access_control.entries[0].id).toBe('user-2');
+    });
+
+    it('preserves added_at for principals that are already members when new ones are also given', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [
+          { type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member },
+          { type: 'user', id: 'user-3', role: ConversationAccessControlRole.Member },
+        ],
+        { source: 'http_api' }
+      );
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      const entry2 = access_control.entries.find(
+        (e: ConversationAccessControlEntry) => e.id === 'user-2'
+      );
+      const entry3 = access_control.entries.find(
+        (e: ConversationAccessControlEntry) => e.id === 'user-3'
+      );
+      // user-2 was already a member — original added_at is kept
+      expect(entry2.added_at).toBe('2025-01-01T00:00:00.000Z');
+      // user-3 is new — added_at is stamped now
+      expect(entry3.added_at).toBe('2026-08-11T10:00:00.000Z');
+    });
+
+    it('silently skips the owner entry — adding the owner to entries would be inert', async () => {
+      mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [] }));
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-1', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      // no-op because the only entry is the owner
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects when total entries (existing + new) would exceed CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES', async () => {
+      const existing: ConversationAccessControlEntry[] = Array.from(
+        { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES },
+        (_, i) => ({
+          type: 'user',
+          id: `existing-user-${i}`,
+          role: ConversationAccessControlRole.Member,
+          added_at: '2025-01-01T00:00:00.000Z',
+        })
+      );
+      mockGetDocumentResponse(createConversationDocument({ entries: existing }));
+
+      await expect(
+        client.addAccessControlEntries(
+          'conversation-1',
+          [{ type: 'user', id: 'new-user-1', role: ConversationAccessControlRole.Member }],
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow(`ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('masks non-members (converse access) as not found on a private conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await expect(
+        client.addAccessControlEntries(
+          'conversation-1',
+          [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('Conversation conversation-1 not found');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows a member (non-owner) to add new members using default converse access', async () => {
+      const existingMember: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-1', // this is the test client's user
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'owner-user-id',
+          username: 'owner-user',
+          entries: [existingMember],
+        })
+      );
+
+      await client.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-3', role: ConversationAccessControlRole.Member }],
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            access_control: expect.objectContaining({
+              entries: expect.arrayContaining([expect.objectContaining({ id: 'user-3' })]),
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('removeAccessControlEntries', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('removes the given principal and keeps others with their original added_at', async () => {
+      const keep: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      const toRemove: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-3',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-06-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [keep, toRemove] }));
+
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-3' }], {
+        source: 'http_api',
+      });
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries).toHaveLength(1);
+      expect(access_control.entries[0].id).toBe('user-2');
+      expect(access_control.entries[0].added_at).toBe('2025-01-01T00:00:00.000Z');
+    });
+
+    it('is a no-op for a public conversation — does not index', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          accessMode: ConversationAccessControlMode.Public,
+          entries: [],
+        })
+      );
+
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }], {
+        source: 'http_api',
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when none of the requested principals are members', async () => {
+      const existing: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [existing] }));
+
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-99' }], {
+        source: 'http_api',
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('ignores the owner principal — owner cannot appear in entries', async () => {
+      const member: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      // The document is owned by 'user-1' (default in createConversationDocument)
+      mockGetDocumentResponse(createConversationDocument({ userId: 'user-1', entries: [member] }));
+
+      // Trying to remove the owner — no entries match, so it's a no-op
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-1' }], {
+        source: 'http_api',
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('keeps access_mode as Private when the last entry is removed', async () => {
+      const entry: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-2',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(createConversationDocument({ entries: [entry] }));
+
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }], {
+        source: 'http_api',
+      });
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.access_mode).toBe(ConversationAccessControlMode.Private);
+      expect(access_control.entries).toHaveLength(0);
+    });
+
+    it('masks non-members (converse access) as not found on a private conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      );
+
+      await expect(
+        client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }], {
+          source: 'http_api',
+        })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows a member (non-owner) to remove other members using default converse access', async () => {
+      const caller: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-1', // test client's user
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      const target: ConversationAccessControlEntry = {
+        type: 'user',
+        id: 'user-3',
+        role: ConversationAccessControlRole.Member,
+        added_at: '2025-01-01T00:00:00.000Z',
+      };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'owner-user-id',
+          username: 'owner-user',
+          entries: [caller, target],
+        })
+      );
+
+      await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-3' }], {
+        source: 'http_api',
+      });
+
+      const { access_control } = mockEsClient.index.mock.calls[0][0].document;
+      expect(access_control.entries.map((e: ConversationAccessControlEntry) => e.id)).toEqual([
+        'user-1',
+      ]);
     });
   });
 
@@ -2668,6 +3421,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
@@ -2692,7 +3446,7 @@ describe.skip('ConversationClient', () => {
 
       const updated = await adminClient.update(
         { id: 'conversation-1', title: 'renamed by admin' },
-        { access: 'rename' }
+        { access: 'rename', source: 'http_api' }
       );
 
       expect(updated.title).toBe('renamed by admin');
@@ -2709,7 +3463,7 @@ describe.skip('ConversationClient', () => {
       await expect(
         adminClient.update(
           { id: 'conversation-1', title: 'renamed by admin' },
-          { access: 'rename' }
+          { access: 'rename', source: 'http_api' }
         )
       ).rejects.toThrow('Conversation conversation-1 not found');
 
@@ -2731,8 +3485,592 @@ describe.skip('ConversationClient', () => {
       mockGetDocumentResponse(conversationOwnedByAnotherUser(ConversationAccessControlMode.Public));
 
       await expect(
-        adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
+        adminClient.update(
+          { id: 'conversation-1', title: 'renamed by admin' },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('emitAttachmentEvents callback', () => {
+    const attachmentAddedEvent = (id: string): TimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2026-09-16T10:00:00.000Z',
+        actor: { type: EventActorType.system, id: 'system' },
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'http_api',
+        },
+      } as TimelineEvent);
+
+    const userMessageEvent = (id: string): TimelineEvent => ({
+      id,
+      type: TimelineEventType.userMessage,
+      created_at: '2026-09-16T10:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+      data: { message: 'hello' },
+    });
+
+    let emitAttachmentEvents: jest.Mock;
+    let clientWithCb: ConversationClient;
+
+    beforeEach(() => {
+      emitAttachmentEvents = jest.fn();
+      clientWithCb = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        conversationEvents: mockConversationEvents,
+        eventEmitter: {
+          emitMetadataPatched: jest.fn(),
+          emitAttachmentEvents,
+          emitConversationUpdated: jest.fn(),
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('appendEvents fires with only the attachment events after the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-1');
+
+      await clientWithCb.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [userMessageEvent('r1::user_message'), added],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(emitAttachmentEvents).toHaveBeenCalledTimes(1);
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('appendEvents does not fire for an event id that was already stored (dedup)', async () => {
+      const added = attachmentAddedEvent('evt-att-1');
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [added] }));
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [added] },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents does not fire when there are no attachment events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [userMessageEvent('r1::user_message')],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('replaceRoundEvents fires with the attachment events of the new batch', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-2');
+
+      await clientWithCb.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'r1',
+          events: [userMessageEvent('r1::user_message'), added],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('create fires with the attachment events of the initial batch', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
+      const added = attachmentAddedEvent('evt-att-3');
+
+      await clientWithCb.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          events: [userMessageEvent('r1::user_message'), added],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('update never fires', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update({ id: 'conversation-1', title: 'renamed' }, { source: 'http_api' });
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('does not fire when the write fails', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+      await expect(
+        clientWithCb.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [attachmentAddedEvent('evt-att-4')],
+          },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('disk full');
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('a throwing callback does not fail the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      emitAttachmentEvents.mockImplementation(() => {
+        throw new Error('listener exploded');
+      });
+
+      await expect(
+        clientWithCb.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [attachmentAddedEvent('evt-att-5')],
+          },
+          { source: 'http_api' }
+        )
+      ).resolves.toBeDefined();
+    });
+  });
+
+  describe('emitConversationUpdated', () => {
+    const userMessage = (id: string): TimelineEvent => ({
+      id,
+      type: TimelineEventType.userMessage,
+      created_at: '2026-09-29T10:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+      data: { message: 'hello' },
+    });
+
+    const terminated = (id: string, executionId: string): TimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.executionTerminated,
+        created_at: '2026-09-29T10:00:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: executionId,
+        data: {},
+      } as TimelineEvent);
+
+    let emitConversationUpdated: jest.Mock;
+    let clientWithCb: ConversationClient;
+    let logger: ReturnType<typeof loggerMock.create>;
+
+    beforeEach(() => {
+      emitConversationUpdated = jest.fn();
+      logger = loggerMock.create();
+      clientWithCb = createClient({
+        space: testSpace,
+        logger,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        conversationEvents: mockConversationEvents,
+        eventEmitter: {
+          emitMetadataPatched: jest.fn(),
+          emitAttachmentEvents: jest.fn(),
+          emitConversationUpdated,
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    const emitted = (): ConversationUpdatedTriggerEvent => {
+      expect(emitConversationUpdated).toHaveBeenCalledTimes(1);
+      return emitConversationUpdated.mock.calls[0][0];
+    };
+
+    it('appendEvents emits the added events with the caller source', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [userMessage('evt-1')] },
+        { source: 'execution' }
+      );
+
+      expect(emitted()).toEqual({
+        conversationId: 'conversation-1',
+        source: 'execution',
+        changeKinds: ['events'],
+        eventTypes: ['user_message'],
+        actorTypes: ['user'],
+        attachmentTypes: [],
+        attachmentIds: [],
+        changedFields: [],
+      });
+    });
+
+    it('appendEvents with only already-stored events emits nothing', async () => {
+      const stored = userMessage('evt-1');
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [stored] }));
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [stored] },
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('replaceRoundEvents does not re-report the rewritten user message', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, events: [userMessage('r1::user_message')] })
+      );
+
+      await clientWithCb.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'r1',
+          events: [
+            userMessage('r1::user_message'),
+            terminated('r1::execution_terminated', 'exec-1'),
+          ],
+        },
+        { source: 'execution' }
+      );
+
+      expect(emitted()).toMatchObject({
+        source: 'execution',
+        changeKinds: ['events'],
+        eventTypes: ['execution_terminated'],
+        actorTypes: ['agent'],
+        executionId: 'exec-1',
+      });
+    });
+
+    it('a write skipped by the terminal guard emits nothing', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [terminated('r1::execution_terminated', 'exec-1')],
+        })
+      );
+
+      await clientWithCb.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [userMessage('evt-2')],
+          skipIfTerminalExistsFor: 'exec-1',
+        },
+        { source: 'execution' }
+      );
+
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('the first append to a legacy conversation reports only what it adds', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'r1', status: ConversationRoundStatus.completed })],
+        })
+      );
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [userMessage('r2::user_message')] },
+        { source: 'execution' }
+      );
+
+      expect(emitted()).toMatchObject({ changeKinds: ['events'], eventTypes: ['user_message'] });
+    });
+
+    it('diffs against the attempt that was written after an OCC conflict', async () => {
+      const concurrent = terminated('r0::execution_terminated', 'exec-0');
+      mockGetDocumentResponseOnce(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, events: [concurrent], seqNo: 2 })
+      );
+      mockEsClient.index
+        .mockRejectedValueOnce(createConflictError())
+        .mockResolvedValueOnce({ _seq_no: 3, _primary_term: 1 });
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [userMessage('evt-1')] },
+        { source: 'execution' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      expect(emitted()).toMatchObject({ eventTypes: ['user_message'], actorTypes: ['user'] });
+      expect(emitted().executionId).toBeUndefined();
+    });
+
+    it('update emits title with the caller source, and nothing when the title is unchanged', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename', source: 'http_api' }
+      );
+      expect(emitted()).toMatchObject({ source: 'http_api', changeKinds: ['title'] });
+
+      emitConversationUpdated.mockClear();
+      await clientWithCb.update(
+        { id: 'conversation-1', title: 'Conversation 1' },
+        { source: 'http_api' }
+      );
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('patchMetadata emits the changed field names, and nothing for an unchanged TOGGLE value', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('tmpl-a', {
+          severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+          notified: { input_type: 'TOGGLE', description: 'Notified' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { notified: 'true' },
+        })
+      );
+
+      await clientWithCb.patchMetadata(
+        'conversation-1',
+        { severity: 'high' },
+        { source: 'workflow' }
+      );
+      expect(emitted()).toMatchObject({
+        templateId: 'tmpl-a',
+        source: 'workflow',
+        changeKinds: ['metadata'],
+        changedFields: ['severity'],
+      });
+
+      emitConversationUpdated.mockClear();
+      await clientWithCb.patchMetadata(
+        'conversation-1',
+        { notified: true },
+        { source: 'workflow' }
+      );
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('applyTemplate emits template and the seeded metadata fields', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('tmpl-a', {
+          status: {
+            input_type: 'SELECT',
+            description: 'Status',
+            options: ['open', 'closed'],
+            default_value: 'open',
+          },
+        })
+      );
+      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+
+      await clientWithCb.applyTemplate('conversation-1', 'tmpl-a', { source: 'http_api' });
+
+      expect(emitted()).toMatchObject({
+        templateId: 'tmpl-a',
+        changeKinds: ['metadata', 'template'],
+        changedFields: ['status'],
+      });
+    });
+
+    it('updateAccessControl and addAccessControlEntries emit access; a skipped add emits nothing', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+
+      await clientWithCb.updateAccessControl(
+        'conversation-1',
+        { access_mode: ConversationAccessControlMode.Public, entries: [] },
+        { source: 'http_api' }
+      );
+      expect(emitted()).toMatchObject({ source: 'http_api', changeKinds: ['access'] });
+
+      emitConversationUpdated.mockClear();
+      await clientWithCb.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-2', role: ConversationAccessControlRole.Member }],
+        { source: 'server_api' }
+      );
+      expect(emitted()).toMatchObject({ source: 'server_api', changeKinds: ['access'] });
+
+      emitConversationUpdated.mockClear();
+      await clientWithCb.addAccessControlEntries(
+        'conversation-1',
+        [{ type: 'user', id: 'user-1', role: ConversationAccessControlRole.Member }],
+        { source: 'server_api' }
+      );
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('markRead and setPinned never emit', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.markRead('conversation-1', true);
+      await clientWithCb.setPinned('conversation-1', true);
+
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('create emits created, title and the initial events with the caller source', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
+
+      await clientWithCb.create(
+        {
+          id: 'conversation-1',
+          title: 'New conversation',
+          agent_id: 'agent-1',
+          rounds: [],
+          events: [userMessage('r1::user_message')],
+        },
+        { source: 'execution' }
+      );
+
+      expect(emitted()).toMatchObject({
+        conversationId: 'conversation-1',
+        source: 'execution',
+        changeKinds: ['created', 'events', 'title'],
+        eventTypes: ['user_message'],
+      });
+    });
+
+    it('create describes the indexed document, not a concurrent write read back by get', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockRawEsClient.get.mockImplementation(async () => {
+        const { document } = mockEsClient.index.mock.calls[0][0] as {
+          document: Document['_source'];
+        };
+        return {
+          _id: 'conversation-1',
+          _index: TEST_CONVERSATION_INDEX,
+          _source: {
+            ...document,
+            events: [...(document.events ?? []), terminated('r9::execution_terminated', 'exec-9')],
+          },
+          _seq_no: 1,
+          _primary_term: 1,
+          found: true,
+        };
+      });
+
+      const created = await clientWithCb.create(
+        {
+          id: 'conversation-1',
+          title: 'New conversation',
+          agent_id: 'agent-1',
+          rounds: [],
+          events: [userMessage('r1::user_message')],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(created.events?.map(({ id }) => id)).toContain('r9::execution_terminated');
+      const event = emitted();
+      expect(event.eventTypes).toEqual(['user_message']);
+      expect(event.actorTypes).toEqual(['user']);
+      expect(event.executionId).toBeUndefined();
+    });
+
+    it('does not emit when the write fails', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+      await expect(
+        clientWithCb.appendEvents(
+          { id: 'conversation-1', events: [userMessage('evt-1')] },
+          { source: 'execution' }
+        )
+      ).rejects.toThrow('disk full');
+
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('a throwing listener does not fail the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      emitConversationUpdated.mockImplementation(() => {
+        throw new Error('listener exploded');
+      });
+
+      await expect(
+        clientWithCb.appendEvents(
+          { id: 'conversation-1', events: [userMessage('evt-1')] },
+          { source: 'execution' }
+        )
+      ).resolves.toBeDefined();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('listener exploded'));
+    });
+
+    describe('when describing the write throws', () => {
+      beforeEach(() => {
+        describeConversationWriteMock.mockImplementationOnce(() => {
+          throw new Error('malformed event');
+        });
+      });
+
+      it('an update still resolves, logs a warning and emits nothing', async () => {
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+        await expect(
+          clientWithCb.appendEvents(
+            { id: 'conversation-1', events: [userMessage('evt-1')] },
+            { source: 'execution' }
+          )
+        ).resolves.toBeDefined();
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed event'));
+        expect(emitConversationUpdated).not.toHaveBeenCalled();
+      });
+
+      it('create still resolves, logs a warning and emits nothing', async () => {
+        mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+        mockGetReturnsIndexedDocument();
+
+        await expect(
+          clientWithCb.create(
+            {
+              id: 'conversation-1',
+              title: 'New conversation',
+              agent_id: 'agent-1',
+              rounds: [],
+              events: [userMessage('r1::user_message')],
+            },
+            { source: 'execution' }
+          )
+        ).resolves.toBeDefined();
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed event'));
+        expect(emitConversationUpdated).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -2742,14 +4080,17 @@ describe.skip('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
+      mockGetReturnsIndexedDocument();
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
-      });
+      await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        },
+        { source: 'http_api' }
+      );
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: {
@@ -2768,34 +4109,97 @@ describe.skip('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
+    it('appends to a legacy conversation by deriving its timeline first, promoting the document', async () => {
+      // A pre-events-native document: rounds only, no schema_version, no stored events.
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        })
+      );
+
+      await client.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [
+            {
+              id: '9c2e0f11-0000-4000-8000-000000000001',
+              type: TimelineEventType.userMessage,
+              created_at: '2026-09-22T10:00:00.000Z',
+              actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+              data: { message: 'Pool limit is now 200' },
+            },
+          ],
+        },
+        { source: 'http_api' }
+      );
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      // The round's derived events survive, the appended message lands after them, and the
+      // document is now events-native.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        '9c2e0f11-0000-4000-8000-000000000001',
+      ]);
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.conversation_rounds).toHaveLength(1);
+    });
+
+    it('appendEvents writes with the requested refresh, the storage default otherwise', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+      const append = (eventId: string, refresh?: false) =>
+        client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [
+              {
+                id: eventId,
+                type: TimelineEventType.userMessage,
+                created_at: '2026-09-22T10:00:00.000Z',
+                actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+                data: { message: 'hello' },
+              },
+            ],
+          },
+          { source: 'execution', ...(refresh !== undefined ? { refresh } : {}) }
+        );
+
+      await append('9c2e0f11-0000-4000-8000-000000000002', false);
+      await append('9c2e0f11-0000-4000-8000-000000000003');
+
+      const [[withRefresh], [withDefault]] = mockEsClient.index.mock.calls;
+      expect(withRefresh).toEqual(expect.objectContaining({ refresh: false }));
+      expect(withDefault).not.toHaveProperty('refresh');
+    });
+
     it('round-trips attachment_refs through the stored events projection', async () => {
+      mockGetReturnsIndexedDocument();
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
 
-      const written = createConversationDocument({
-        schemaVersion: 1,
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
-      mockGetDocumentResponse(written);
-
-      const created = await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
+      const created = await client.create(
+        {
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [
+            {
+              ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+              input: { message: 'hi', attachment_refs: attachmentRefs },
+            },
+          ],
+        },
+        { source: 'http_api' }
+      );
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
@@ -2804,61 +4208,6 @@ describe.skip('ConversationClient', () => {
 
       expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
       expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
-    });
-
-    it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
-      const inProgressRound = createRound({
-        id: 'round-crash',
-        status: ConversationRoundStatus.inProgress,
-      });
-      const stalePartialEvents: TimelineEvent[] = [
-        {
-          id: 'round-crash::user_message',
-          type: TimelineEventType.userMessage,
-          created_at: '2025-08-04T07:42:20.789Z',
-          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
-          data: inProgressRound.input,
-        },
-        {
-          id: 'round-crash::execution_started',
-          type: TimelineEventType.executionStarted,
-          created_at: '2025-08-04T07:42:20.789Z',
-          actor: { type: EventActorType.agent, id: 'agent-1' },
-          execution_id: 'round-crash::execution',
-          trigger_event_id: 'round-crash::user_message',
-          data: { trigger_type: TimelineTriggerType.userMessage },
-        },
-      ];
-      mockGetDocumentResponse(
-        createConversationDocument({
-          schemaVersion: 1,
-          rounds: [inProgressRound],
-          events: stalePartialEvents,
-        })
-      );
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round: {
-          ...inProgressRound,
-          status: ConversationRoundStatus.completed,
-          response: { message: 'now finished' },
-        },
-      });
-
-      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
-        document: { events?: Array<{ id: string; type: string }> };
-      };
-      const terminals = indexed.events?.filter(
-        (event) => event.type === TimelineEventType.executionTerminated
-      );
-      expect(terminals).toHaveLength(1);
-      expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
-      expect(indexed.events?.map((event) => event.id)).toEqual([
-        'round-crash::user_message',
-        'round-crash::execution_started',
-        'round-crash::execution_terminated',
-      ]);
     });
 
     // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
@@ -2893,6 +4242,16 @@ describe.skip('ConversationClient', () => {
         data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
       } as TimelineEvent);
 
+    const completedTimelineEvents = (roundId: string): TimelineEvent[] =>
+      roundToEvents(
+        createRound({
+          id: roundId,
+          status: ConversationRoundStatus.completed,
+          started_at: '2025-08-04T07:41:00.000Z',
+        }),
+        { agent_id: 'agent-1', user: { id: 'user-1', username: 'test-user' } }
+      );
+
     it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
       const start = startTimelineEvents('round-1');
       const step0 = stepTimelineEvent('round-1', 0);
@@ -2908,7 +4267,10 @@ describe.skip('ConversationClient', () => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
       // This flush carries step::0 (already persisted concurrently) and step::1 (new).
-      await client.appendEvents({ id: 'conversation-1', events: [step0, step1] });
+      await client.appendEvents(
+        { id: 'conversation-1', events: [step0, step1] },
+        { source: 'http_api' }
+      );
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
       const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
@@ -2923,7 +4285,162 @@ describe.skip('ConversationClient', () => {
       ]);
     });
 
-    it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
+    describe('skipIfTerminalExistsFor (atomic terminal guard)', () => {
+      const terminated = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_terminated`,
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: {
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'responded', response: { message: 'ok' } },
+          },
+        } as TimelineEvent);
+      const failed = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_failed`,
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+        } as TimelineEvent);
+
+      it('replaceRoundEvents skips the write and returns the stored document when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.replaceRoundEvents(
+          {
+            id: 'conversation-1',
+            roundId: 'round-1',
+            events: [...startTimelineEvents('round-1'), failed('round-1')],
+            skipIfTerminalExistsFor: 'round-1::execution',
+          },
+          { source: 'http_api' }
+        );
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('appendEvents skips the write when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [failed('round-1')],
+            skipIfTerminalExistsFor: 'round-1::execution',
+          },
+          { source: 'http_api' }
+        );
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('writes when no terminal exists for the execution', async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({ schemaVersion: 1, events: startTimelineEvents('round-1') })
+        );
+
+        await client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [failed('round-1')],
+            skipIfTerminalExistsFor: 'round-1::execution',
+          },
+          { source: 'http_api' }
+        );
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+          document: { events?: Array<{ id: string }> };
+        };
+        expect(indexed.events?.map((event) => event.id)).toContain('round-1::execution_failed');
+      });
+
+      it("another execution's terminal does not block the write", async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [failed('round-2')],
+            skipIfTerminalExistsFor: 'round-2::execution',
+          },
+          { source: 'http_api' }
+        );
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not notify attachment events on a skipped write', async () => {
+        const onAttachmentEvents = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          conversationEvents: mockConversationEvents,
+          eventEmitter: {
+            emitMetadataPatched: jest.fn(),
+            emitAttachmentEvents: onAttachmentEvents,
+            emitConversationUpdated: jest.fn(),
+          },
+        });
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await clientWithCb.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [
+              {
+                id: 'att-evt-1',
+                type: TimelineEventType.attachmentAdded,
+                created_at: '2025-08-04T07:42:32.000Z',
+                actor: { type: EventActorType.user, id: 'user-1' },
+                execution_id: 'round-1::execution',
+                data: { attachment_id: 'a1', attachment_type: 'text', current_version: 1 },
+              } as TimelineEvent,
+            ],
+            skipIfTerminalExistsFor: 'round-1::execution',
+          },
+          { source: 'http_api' }
+        );
+
+        expect(onAttachmentEvents).not.toHaveBeenCalled();
+      });
+    });
+
+    it('replaceRoundEvents replaces the round in place, moving interleaved events after it and preserving surrounding history', async () => {
+      const earlierEvents = completedTimelineEvents('round-0');
+      const earlierAdditiveEvent: ConversationEvent = {
+        id: 'note-before-round',
+        type: 'example.note',
+        created_at: '2025-08-04T07:41:30.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'Before the round' },
+      };
       const storedRound1UserMessage = {
         id: 'round-1::user_message',
         type: TimelineEventType.userMessage,
@@ -2944,13 +4461,26 @@ describe.skip('ConversationClient', () => {
       const storedRound1Step1 = stepTimelineEvent('round-1', 1);
       // Stale live-streamed step that is NOT in the canonical projection — must be dropped.
       const staleRound1Step2 = stepTimelineEvent('round-1', 2);
-      const additiveEvent = {
-        id: 'additive-error-1',
-        type: TimelineEventType.executionTerminated,
+      const additiveEvent: ConversationEvent = {
+        id: 'note-during-round',
+        type: 'example.note',
         created_at: '2025-08-04T07:42:02.000Z',
-        actor: { type: EventActorType.agent, id: 'agent-1' },
-        data: {},
-      } as TimelineEvent;
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'During the round' },
+      };
+      const attachmentEvent: TimelineEvent = {
+        id: 'attachment-during-round',
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2025-08-04T07:42:03.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: true,
+          source: 'http_api',
+        },
+      };
       const round2UserMessage = {
         id: 'round-2::user_message',
         type: TimelineEventType.userMessage,
@@ -2963,12 +4493,15 @@ describe.skip('ConversationClient', () => {
         createConversationDocument({
           schemaVersion: 1,
           events: [
+            ...earlierEvents,
+            earlierAdditiveEvent,
             storedRound1UserMessage,
             storedRound1ExecutionStarted,
             storedRound1Step0,
-            storedRound1Step1,
-            staleRound1Step2,
             additiveEvent,
+            storedRound1Step1,
+            attachmentEvent,
+            staleRound1Step2,
             round2UserMessage,
           ],
         })
@@ -3002,33 +4535,49 @@ describe.skip('ConversationClient', () => {
         },
       } as TimelineEvent;
 
-      await client.replaceRoundEvents({
-        id: 'conversation-1',
-        roundId: 'round-1',
-        events: [
-          canonicalUserMessage,
-          storedRound1ExecutionStarted,
-          canonicalStep0,
-          canonicalStep1,
-          terminated,
-        ],
-      });
+      await client.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events: [
+            canonicalUserMessage,
+            storedRound1ExecutionStarted,
+            canonicalStep0,
+            canonicalStep1,
+            terminated,
+            attachmentEvent,
+          ],
+        },
+        { source: 'http_api' }
+      );
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: {
           events?: Array<{ id: string; created_at?: string; data?: { message?: string } }>;
         };
       };
-      // Round-1 events replaced wholesale; stale step::2 dropped; additive event and round-2
-      // event survive untouched.
+      // Round-1 stays after earlier history; interleaved events follow its terminal in stored
+      // order, without duplicating the attachment event supplied in the replacement batch.
       expect(indexed.events?.map((event) => event.id)).toEqual([
-        'additive-error-1',
-        'round-2::user_message',
+        ...earlierEvents.map((event) => event.id),
+        'note-before-round',
         'round-1::user_message',
         'round-1::execution_started',
         'round-1::step::0',
         'round-1::step::1',
         'round-1::execution_terminated',
+        'note-during-round',
+        'attachment-during-round',
+        'round-2::user_message',
+      ]);
+      expect(indexed.events?.slice(0, earlierEvents.length + 1)).toEqual([
+        ...earlierEvents,
+        earlierAdditiveEvent,
+      ]);
+      expect(indexed.events?.slice(-3)).toEqual([
+        additiveEvent,
+        attachmentEvent,
+        round2UserMessage,
       ]);
       const replacedUserMessage = indexed.events?.find(
         (event) => event.id === 'round-1::user_message'
@@ -3038,6 +4587,71 @@ describe.skip('ConversationClient', () => {
       expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
     });
 
+    it.each([
+      { name: 'empty', stored: [] },
+      { name: 'non-empty', stored: completedTimelineEvents('round-0') },
+    ])(
+      'replaceRoundEvents appends to the $name timeline when the round has no stored events',
+      async ({ stored }) => {
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+        const events = completedTimelineEvents('round-1');
+
+        const result = await client.replaceRoundEvents(
+          {
+            id: 'conversation-1',
+            roundId: 'round-1',
+            events,
+          },
+          { source: 'http_api' }
+        );
+
+        const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+          document: Document['_source'];
+        };
+        expect(indexed.events).toEqual([...stored, ...events]);
+        expect(result.events).toEqual(indexed.events);
+      }
+    );
+
+    it('replaceRoundEvents preserves a concurrent external append after the execution on OCC retry', async () => {
+      const earlierEvents = completedTimelineEvents('round-0');
+      const stored = [...earlierEvents, ...startTimelineEvents('round-1')];
+      const concurrentEvent: ConversationEvent = {
+        id: 'concurrent-note',
+        type: 'example.note',
+        created_at: '2025-08-04T07:42:25.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'Added during the write' },
+      };
+      mockGetDocumentResponseOnce(createConversationDocument({ schemaVersion: 1, events: stored }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          seqNo: 2,
+          events: [...stored, concurrentEvent],
+        })
+      );
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      const events = completedTimelineEvents('round-1');
+
+      const result = await client.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events,
+        },
+        { source: 'http_api' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
+        document: Document['_source'];
+      };
+      expect(indexed.events).toEqual([...earlierEvents, ...events, concurrentEvent]);
+      expect(result.events).toEqual(indexed.events);
+    });
+
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -3045,7 +4659,10 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename', source: 'http_api' }
+      );
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: {
@@ -3059,7 +4676,7 @@ describe.skip('ConversationClient', () => {
       expect(indexed.events).toBeUndefined();
     });
 
-    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+    it('keeps events-native docs events-native on update (keeps schema_version, preserves stored events verbatim)', async () => {
       const existingRound = createRound({
         id: 'round-1',
         status: ConversationRoundStatus.completed,
@@ -3081,7 +4698,10 @@ describe.skip('ConversationClient', () => {
         })
       );
 
-      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename', source: 'http_api' }
+      );
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: {
@@ -3090,11 +4710,38 @@ describe.skip('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(indexed.events?.map((event) => event.id)).toEqual([
-        'round-1::user_message',
-        'round-1::execution_started',
-        'round-1::execution_terminated',
-      ]);
+      expect(indexed.events).toEqual(storedEvents);
+    });
+  });
+
+  describe('addCustomEvents', () => {
+    const mockEventType = {
+      type: 'text_note',
+      payloadSchema: z.object({
+        title: z.string().min(1).max(256).optional(),
+        text: z.string().min(1).max(1000),
+      }),
+    };
+    beforeEach(() => {
+      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(mockEventType);
+    });
+
+    it('calls appendEvents with access converse and returns materialized events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const result = await client.addCustomEvents(
+        {
+          id: 'conversation-1',
+          events: [{ type: 'text_note', data: { text: 'hello' } }],
+        },
+        { source: 'http_api' }
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe('text_note');
+      expect(result[0].actor.type).toBe(EventActorType.user);
+      expect(result[0].actor.id).toBe('user-1');
     });
   });
 });

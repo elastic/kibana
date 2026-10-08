@@ -10,12 +10,14 @@ import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeActionRow {
-  episode_id: string;
+  alert_id: string;
   rule_id: string | null;
   group_hash: string | null;
   last_ack_action: string | null;
   last_assignee_uid: string | null;
   last_ack_actor: string | null;
+  last_deactivate_action: string | null;
+  last_deactivate_actor: string | null;
 }
 
 export const buildEpisodeActionsQuery = (
@@ -28,17 +30,20 @@ export const buildEpisodeActionsQuery = (
   return asTypedEsqlQuery<EpisodeActionRow>(
     esql.from(ALERT_ACTIONS_DATA_STREAM)
       .where`space_id == ${spaceId}`
-      .where`episode_id IN (${episodeIdLiterals})`
-      .where`action_type IN ("ack", "unack", "assign")`
+      .where`alert_id IN (${episodeIdLiterals})`
+      .where`action_type IN ("ack", "unack", "assign", "deactivate", "activate")`
       .pipe`EVAL
         ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
         assignee_value = CASE(action_type == "assign", assignee_uid, null),
-        ack_actor = CASE(action_type == "ack", actor, null)`
+        ack_actor = CASE(action_type == "ack", actor.profile_uid, null),
+        deactivate_actor = CASE(action_type == "deactivate", actor.profile_uid, null)`
       .pipe`STATS
         last_ack_action = LAST(ack_action, @timestamp),
         last_assignee_uid = LAST(assignee_value, @timestamp),
-        last_ack_actor = LAST(ack_actor, @timestamp)
-        BY episode_id, rule_id, group_hash`
-      .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor')
+        last_ack_actor = LAST(ack_actor, @timestamp),
+        last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+        last_deactivate_actor = LAST(deactivate_actor, @timestamp)
+        BY alert_id, rule_id, group_hash`
+      .keep('alert_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor', 'last_deactivate_action', 'last_deactivate_actor')
   );
 };

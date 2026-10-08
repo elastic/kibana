@@ -37,6 +37,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -73,12 +74,16 @@ import {
   type ProfileStateDefinition,
 } from '../../../../common/context_awareness';
 import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiResponse } from '../../../../server';
+import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalResponse,
+} from '../../../../server/api/internal_schema';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
-import { createSessionService } from '../../../session/session_service';
+import { createDiscoverSessionService } from '../../../session/session_service';
 import type {
   DiscoverSessionClient,
-  DiscoverSessionRequestData,
+  DiscoverSessionClientRequestData,
 } from '../../../session/api_client';
 import { TABS_LOCAL_STORAGE_KEY } from './tabs_storage_manager';
 import { appLocatorGetLocationCommon } from '../../../../common/app_locator_get_location';
@@ -249,7 +254,9 @@ describe('Discover state', () => {
         })
       );
       await new Promise(process.nextTick);
-      expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
+      expect(getCurrentUrl()).toBe(
+        '/#?_g=(refreshInterval:(pause:!t,value:5000),time:(from:now-15m,to:now))'
+      );
     });
   });
 
@@ -356,6 +363,38 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.sort).toEqual([['bytes', 'desc']]);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
+  });
+
+  describe('Session load warnings', () => {
+    const warning: DiscoverSessionWarning = {
+      type: 'dropped_panel',
+      tab_id: 'tab-1',
+      panel_id: 'control-1',
+      message: 'Unable to transform control panel [control-1].',
+    };
+
+    test.each([
+      { warnings: [], toastCount: 0 },
+      { warnings: [warning], toastCount: 1 },
+    ])(
+      'shows $toastCount warning toasts when loading $warnings',
+      async ({ warnings, toastCount }) => {
+        const { internalState, services } = getDiscoverInternalStateMock();
+        const session = createDiscoverSessionMock({ id: 'test-session' });
+        jest
+          .spyOn(services.discoverSessionService, 'get')
+          .mockResolvedValueOnce({ session, warnings });
+
+        await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
+        await internalState
+          .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
+          .unwrap();
+
+        expect(services.discoverSessionService.get).toHaveBeenCalledWith(session.id);
+        expect(internalState.getState().persistedDiscoverSession).toEqual(session);
+        expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
+      }
+    );
   });
 
   describe('Loading a session with an inline data view', () => {
@@ -665,7 +704,7 @@ describe('Discover state', () => {
     it.each([
       { action: 'Save', copyOnSave: false, savedId: response.id, method: 'upsert' as const },
       { action: 'Save As', copyOnSave: true, savedId: 'copied-session', method: 'create' as const },
-    ])('keeps inline IDs after $action and refresh', async ({ copyOnSave, savedId, method }) => {
+    ])('restores inline IDs after $action', async ({ copyOnSave, savedId, method }) => {
       const services = createDiscoverServicesMock();
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory();
@@ -674,33 +713,36 @@ describe('Discover state', () => {
       const tabId = firstLoad.getCurrentTab().id;
       await firstLoad.initializeSingleTab({ tabId });
 
-      const savedResponse = cloneDeep(response);
+      const savedResponse: DiscoverSessionInternalResponse = cloneDeep(response);
       savedResponse.id = savedId;
-      const respondToSave = async (data: DiscoverSessionRequestData) => {
+      const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
         expect(data.tabs[0]).toMatchObject({
-          data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
-          filters: apiFilters,
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            id: expect.any(String),
+          },
+          filters: [{ ...apiFilters[0], data_view_id: expect.any(String) }, apiFilters[1]],
         });
-        expect(data.tabs[0].data_source).not.toHaveProperty('id');
-        // Save As assigns a new tab ID; the API still returns the inline spec without its ID.
-        savedResponse.data.tabs[0].id = data.tabs[0].id;
+        savedResponse.data = discoverSessionInternalDataSchema.parse(data);
         return cloneDeep(savedResponse);
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {
         create: jest.fn(respondToSave),
-        upsert: jest.fn((_id: string, data: DiscoverSessionRequestData) => respondToSave(data)),
+        upsert: jest.fn((_id: string, data: DiscoverSessionClientRequestData) =>
+          respondToSave(data)
+        ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi: true,
       });
-      // Exercise HTTP through the existing save boundary without connecting production callers.
       jest
-        .spyOn(services.savedSearch, 'saveDiscoverSession')
-        .mockImplementation((session, options = {}) => sessionService.save(session, options));
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(discoverSessionService.save);
 
       await firstLoad.saveDiscoverSession({ newCopyOnSave: copyOnSave });
 
@@ -739,11 +781,11 @@ describe('Discover state', () => {
         internalStateActions.disconnectTab({ tabId: firstLoad.getCurrentTab().id })
       );
 
+      // No local tab state: the response must supply the saved identity.
       const reloadedServices = createDiscoverServicesMock();
-      reloadedServices.storage = services.storage;
       reloadedServices.history = createMemoryHistory({ initialEntries: [url] });
       const reloaded = createState(reloadedServices);
-      const loadedSession = await sessionService.get(savedId);
+      const loadedSession = await discoverSessionService.get(savedId);
       await reloaded.initializeTabs({ persistedDiscoverSession: loadedSession.session });
       const reloadedTabId = reloaded.getCurrentTab().id;
       await reloaded.initializeSingleTab({ tabId: reloadedTabId });
@@ -1262,6 +1304,7 @@ describe('Discover state', () => {
           "sampleSize": undefined,
           "sharingSavedObjectProps": undefined,
           "sort": Array [],
+          "tabTypeState": undefined,
           "tags": undefined,
           "timeRange": undefined,
           "timeRestore": false,
@@ -1665,21 +1708,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithTimeField,
-        id: savedSearchWithTimeField.id ?? '',
-        title: savedSearchWithTimeField.title ?? '',
-        description: savedSearchWithTimeField.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchWithTimeField.id ?? '',
-              label: savedSearchWithTimeField.title ?? '',
-            },
-            savedSearch: savedSearchWithTimeField,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchWithTimeField,
+          id: savedSearchWithTimeField.id ?? '',
+          title: savedSearchWithTimeField.title ?? '',
+          description: savedSearchWithTimeField.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithTimeField.id ?? '',
+                label: savedSearchWithTimeField.title ?? '',
+              },
+              savedSearch: savedSearchWithTimeField,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithTimeField.id })
@@ -1710,21 +1756,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchMock,
-        id: savedSearchMock.id ?? '',
-        title: savedSearchMock.title ?? '',
-        description: savedSearchMock.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchMock.id ?? '',
-              label: savedSearchMock.title ?? '',
-            },
-            savedSearch: savedSearchMock,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchMock,
+          id: savedSearchMock.id ?? '',
+          title: savedSearchMock.title ?? '',
+          description: savedSearchMock.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchMock.id ?? '',
+                label: savedSearchMock.title ?? '',
+              },
+              savedSearch: savedSearchMock,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchMock.id })
@@ -1887,7 +1936,6 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
-      const persistedDataViewId = savedSearchMockWithESQL.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQL,
@@ -1907,7 +1955,9 @@ describe('Discover state', () => {
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
+      expect(currentDataView$.getValue()).toEqual(
+        expect.objectContaining({ type: ESQL_TYPE, title: 'index-pattern-esql' })
+      );
     });
 
     test('onChangeDataView', async () => {

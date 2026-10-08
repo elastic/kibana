@@ -38,6 +38,8 @@ import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys'
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common/constants';
+import type { RegisterFlyoutGroupedAttachment } from '@kbn/agentic-investigations-common';
+import { getLazyCloudDefendPliAuthBlockExtension } from './cloud_defend/lazy_cloud_defend_pli_auth_block_extension';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -86,13 +88,24 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
+  registerAttackDiscoveryAttachment,
+  registerAttackDiscoveryVerdictAttachment,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
+  registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerSiemMigrationRuleItemsAttachment,
+  registerInvestigationTimelineAttachment,
+  registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
+import { registerAlertsFlyoutGroupedAttachment } from './agent_builder/attachment_types/alerts';
+import { registerAttacksFlyoutGroupedAttachment } from './agent_builder/attachment_types/attack_discovery/register_attacks_flyout_grouped_attachment';
+import { registerIocsFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_iocs/register_iocs_flyout_grouped_attachment';
+import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_timeline/register_timeline_flyout_grouped_attachment';
+import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
@@ -120,6 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
   private _securityCanvasContextPromise?: Promise<SecurityCanvasEmbeddedBundle>;
   private _coreSetup?: CoreSetup<StartPluginsDependencies, PluginStart>;
+  private registerFlyoutGroupedAttachment?: RegisterFlyoutGroupedAttachment;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -144,6 +158,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: SetupPlugins
   ): PluginSetup {
     this._coreSetup = core;
+    this.registerFlyoutGroupedAttachment =
+      plugins.agenticInvestigations?.registerFlyoutGroupedAttachment;
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
@@ -156,7 +172,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
       registerSecurityWorkflowTriggers(workflowsExtensions);
-      if (this.experimentalFeatures.threatIntelSupplyEnabled) {
+      if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);
       }
     }
@@ -359,7 +375,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttachmentUiDefinitions({ attachments: plugins.agentBuilder.attachments });
+      registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
+      this.registerFlyoutGroupedAttachments(core, plugins);
+      registerAttackDiscoveryAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        getUrlForApp: core.application.getUrlForApp,
+      });
+      registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -398,16 +423,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           uiSettings: core.uiSettings,
         });
       }
+      registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         experimentalFeatures: this.experimentalFeatures,
+        overlays: core.overlays,
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
+        registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -416,6 +444,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getServices: () => this.getDiscoverFlyoutServices(coreSetup),
           getStore: () => this.getDiscoverFlyoutStore(coreSetup),
           spaces: plugins.spaces,
+        });
+      }
+      if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+        registerInvestigationTimelineAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
         });
       }
     }
@@ -517,6 +553,35 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
     return this._securityCanvasContextPromise;
+  }
+
+  private registerFlyoutGroupedAttachments(core: CoreStart, plugins: StartPlugins): void {
+    const register = this.registerFlyoutGroupedAttachment;
+    if (!register) {
+      return;
+    }
+
+    const resolveSecurityCanvasContext = () =>
+      this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies);
+    const getSpaceId = () => plugins.spaces.getActiveSpace().then(({ id }) => id);
+
+    registerAlertsFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      getSpaceId,
+      search: plugins.data.search.search,
+      resolveSecurityCanvasContext,
+    });
+    registerAttacksFlyoutGroupedAttachment({ register, getSpaceId, resolveSecurityCanvasContext });
+    registerRulesFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      resolveSecurityCanvasContext,
+    });
+    if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+      registerTimelineFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+      registerIocsFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+    }
   }
 
   public async registerDiscoverSharedFeatures(
@@ -838,7 +903,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(this.isServerless),
+      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
@@ -1001,6 +1066,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     registerExtension({
+      package: 'cloud_defend',
+      view: 'pli-auth-block',
+      Component: getLazyCloudDefendPliAuthBlockExtension(registerOptions),
+    });
+
+    registerExtension({
       package: 'cloud_security_posture',
       view: 'pli-auth-block',
       Component: getLazyCloudSecurityPosturePliAuthBlockExtension(registerOptions),
@@ -1010,6 +1081,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'cribl',
       view: 'package-policy-replace-define-step',
       Component: LazyCustomCriblExtension,
+      useWidePageLayout: true,
     });
   }
 

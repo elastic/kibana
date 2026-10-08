@@ -11,13 +11,10 @@ import type { ActionPolicyFormState } from './types';
 
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
-    id: 'per_episode',
-    label: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode',
-      {
-        defaultMessage: 'Episode',
-      }
-    ),
+    id: 'per_alert',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perAlert', {
+      defaultMessage: 'Alert',
+    }),
   },
   {
     id: 'per_field',
@@ -34,27 +31,27 @@ export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> =
 ];
 
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help',
+  per_alert: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perAlert.help',
     {
       defaultMessage:
-        'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
+        'Each matching alert triggers its own notification. Best for when you need individual visibility into each issue.',
     }
   ),
   per_field: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help',
     {
       defaultMessage:
-        'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
+        'Bundles alerts that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related alerts, such as one per service or host.',
     }
   ),
   all: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest.help', {
     defaultMessage:
-      "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
+      "Combines all matching alerts into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
   }),
 };
 
-export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
+export const PER_ALERT_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
   {
     value: 'on_status_change',
     text: i18n.translate(
@@ -104,31 +101,31 @@ export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: 
 ];
 
 export const DEFAULT_STRATEGY_FOR_MODE: Record<GroupingMode, ThrottleStrategy> = {
-  per_episode: 'on_status_change',
+  per_alert: 'on_status_change',
   per_field: 'time_interval',
   all: 'time_interval',
 };
 
-export const PER_EPISODE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
+export const PER_ALERT_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
   on_status_change: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange.help',
     {
       defaultMessage:
-        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.',
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.',
     }
   ),
   per_status_interval: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval.help',
     {
       defaultMessage:
-        'Notifies on status change, then resends at a regular interval while the episode remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
+        'Notifies on status change, then resends at a regular interval while the alert remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
     }
   ),
   every_time: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime.help',
     {
       defaultMessage:
-        'Sends a notification on every rule evaluation per episode. Use only for infrequent rule schedules or when you need a full audit trail.',
+        'Sends a notification on every rule evaluation per alert. Use only for infrequent rule schedules or when you need a full audit trail.',
     }
   ),
 };
@@ -169,67 +166,11 @@ export const DURATION_UNIT_LABELS: Record<string, string> = {
   }),
 };
 
-export interface EpisodeStatusFilterOption {
-  value: 'active' | 'recovering' | 'pending' | 'inactive';
-  title: string;
-  badgeColor: 'danger' | 'success' | 'warning' | 'default';
-  description: string;
-}
-
-export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
-  {
-    value: 'active',
-    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.active.title', {
-      defaultMessage: 'Active',
-    }),
-    badgeColor: 'danger',
-    description: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.active.description',
-      { defaultMessage: 'Episode is confirmed and ongoing' }
-    ),
-  },
-  {
-    value: 'recovering',
-    title: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.recovering.title',
-      { defaultMessage: 'Recovering' }
-    ),
-    badgeColor: 'success',
-    description: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.recovering.description',
-      { defaultMessage: 'Condition stopped breaching, waiting for confirmation' }
-    ),
-  },
-  {
-    value: 'pending',
-    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.title', {
-      defaultMessage: 'Pending',
-    }),
-    badgeColor: 'warning',
-    description: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.description',
-      { defaultMessage: 'First breach detected, not yet confirmed' }
-    ),
-  },
-  {
-    value: 'inactive',
-    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.title', {
-      defaultMessage: 'Inactive',
-    }),
-    badgeColor: 'default',
-    description: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.description',
-      { defaultMessage: 'Episode is fully resolved' }
-    ),
-  },
-];
-
 export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
-  tags: [],
   matcher: null,
-  groupingMode: 'per_episode',
+  groupingMode: 'per_alert',
   groupBy: [],
   throttleStrategy: 'on_status_change',
   throttleInterval: '',

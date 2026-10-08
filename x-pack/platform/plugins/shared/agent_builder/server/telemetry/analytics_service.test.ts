@@ -12,6 +12,7 @@ import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
+  ConversationOriginType,
   ConversationRoundStatus,
   ConversationRoundStepType,
   agentBuilderDefaultAgentId,
@@ -21,6 +22,7 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import { ModelProvider } from '@kbn/inference-common';
+import type { ExecutionTelemetry } from '../services/execution/utils/report_round_telemetry';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -111,6 +113,7 @@ describe('AnalyticsService', () => {
         attachments: undefined,
         conversation_id: 'conversation-1',
         execution_id: undefined,
+        origin: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -244,6 +247,7 @@ describe('AnalyticsService', () => {
         attachments: undefined,
         conversation_id: 'conversation-1',
         execution_id: undefined,
+        origin: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -261,6 +265,22 @@ describe('AnalyticsService', () => {
         tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
+    });
+
+    it('reports the origin stamped on the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: { ...round, origin: { type: ConversationOriginType.Slack } },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ origin: ConversationOriginType.Slack })
+      );
     });
 
     it('does not throw when reporting throws', () => {
@@ -595,6 +615,167 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportExecutionComplete', () => {
+    const modelProvider = ModelProvider.OpenAI;
+
+    const buildRound = (parts: Partial<ConversationRound> = {}): ConversationRound =>
+      ({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        input: { message: 'hi' },
+        response: { message: 'there' },
+        steps: [],
+        started_at: '2026-01-01T00:00:00.000Z',
+        time_to_first_token: 10,
+        time_to_last_token: 20,
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 4, output_tokens: 2 },
+        ...parts,
+      } as ConversationRound);
+
+    const telemetry = (parts: Partial<ExecutionTelemetry> = {}): ExecutionTelemetry => ({
+      roundId: 'round-1',
+      roundCount: 2,
+      executionIndex: 1,
+      executionRound: buildRound(),
+      roundTotals: buildRound({
+        model_usage: {
+          connector_id: 'c1',
+          llm_calls: 3,
+          input_tokens: 10,
+          output_tokens: 5,
+        },
+      }),
+      isRoundTerminal: true,
+      isResume: true,
+      pendingPromptTypes: [],
+      promptResponseTypes: [],
+      promptResponseOutcomes: [],
+      ...parts,
+    });
+
+    it("reports this execution's own usage, not the round totals", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        conversationId: 'conversation-1',
+        executionId: 'execution-1',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry(),
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      const [eventType, payload] = analytics.reportEvent.mock.calls[0];
+      expect(eventType).toBe(AGENT_BUILDER_EVENT_TYPES.ExecutionComplete);
+      expect(payload).toEqual(
+        expect.objectContaining({
+          round_id: 'round-1',
+          round_number: 2,
+          execution_index: 1,
+          trigger: 'prompt_response',
+          outcome: 'responded',
+          input_tokens: 4,
+          output_tokens: 2,
+          llm_calls: 1,
+          // the round's message, which only the first execution carries
+          message_length: 2,
+          response_length: 5,
+        })
+      );
+    });
+
+    it('resolves user image attachments from refs, as round_complete does', () => {
+      const conversationAttachments: VersionedAttachment[] = [
+        { id: 'image-1', type: AttachmentType.image, versions: [], current_version: 1 },
+      ];
+
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments,
+        telemetry: telemetry({
+          roundTotals: buildRound({
+            input: {
+              message: 'what is this?',
+              attachment_refs: [
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.user },
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.agent },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(expect.objectContaining({ attachments: [AttachmentType.image] }));
+    });
+
+    it('marks a pause and carries the prompt types it paused on', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({
+          isRoundTerminal: false,
+          isResume: false,
+          executionIndex: 0,
+          pendingPromptTypes: ['confirmation'],
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({
+          trigger: 'user_message',
+          outcome: 'prompt_requested',
+          prompt_count: 1,
+          prompt_types: ['confirmation'],
+        })
+      );
+    });
+
+    it('omits the optional HITL fields when there are none', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({ isResume: false, executionIndex: 0 }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('prompt_count');
+      expect(payload).not.toHaveProperty('prompt_response_types');
+      expect(payload).not.toHaveProperty('human_latency_ms');
+    });
+
+    it('carries the human latency when it was measured', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({ humanLatencyMs: 30_000 }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(expect.objectContaining({ human_latency_ms: 30_000 }));
+    });
+
+    it('does not throw when reporting fails', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('EBT unavailable');
+      });
+
+      expect(() =>
+        service.reportExecutionComplete({
+          agentId: 'my-agent',
+          modelProvider,
+          conversationAttachments: [],
+          telemetry: telemetry(),
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
   describe('reportRoundError', () => {
     const defaultArgs = {
       agentId: agentBuilderDefaultAgentId,
@@ -616,6 +797,24 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           error_message: `${'a'.repeat(500)}`,
         })
+      );
+    });
+
+    it('reports the round origin as origin', () => {
+      service.reportRoundError({ ...defaultArgs, roundOrigin: ConversationOriginType.Slack });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ origin: ConversationOriginType.Slack })
+      );
+    });
+
+    it('leaves origin unset when the round has no external origin', () => {
+      service.reportRoundError(defaultArgs);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ origin: undefined })
       );
     });
   });
@@ -662,6 +861,23 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           tool_id: 'platform.dashboard.manage_dashboard',
         })
+      );
+    });
+
+    it('reports the conversation origin alongside the tool call source', () => {
+      service.reportToolCallSuccess({
+        agentId: agentBuilderDefaultAgentId,
+        origin: ConversationOriginType.Slack,
+        toolId: 'my_custom_tool',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        resultTypes: ['other'],
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+        expect.objectContaining({ origin: ConversationOriginType.Slack, source: 'agent' })
       );
     });
 
@@ -743,6 +959,24 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           error_message: 'x'.repeat(500),
         })
+      );
+    });
+
+    it('reports the conversation origin alongside the tool call source', () => {
+      service.reportToolCallError({
+        agentId: agentBuilderDefaultAgentId,
+        origin: ConversationOriginType.Slack,
+        toolId: 'tool-1',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: 'fail',
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallError,
+        expect.objectContaining({ origin: ConversationOriginType.Slack, source: 'agent' })
       );
     });
 

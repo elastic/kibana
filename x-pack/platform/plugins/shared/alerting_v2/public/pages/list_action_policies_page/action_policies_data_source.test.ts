@@ -14,7 +14,6 @@ describe('toFindActionPoliciesRequest', () => {
         page: 3,
         perPage: 10,
         search: 'slack',
-        tags: ['a', 'b'],
         enabled: true,
         sortField: 'name',
         sortOrder: 'asc',
@@ -22,11 +21,18 @@ describe('toFindActionPoliciesRequest', () => {
     ).toEqual({
       page: 3,
       per_page: 10,
+      filter: 'enabled: true',
       search: 'slack',
-      tags: ['a', 'b'],
-      enabled: true,
       sort_field: 'name',
       sort_order: 'asc',
     });
+  });
+
+  it('maps a disabled state filter to a KQL filter', () => {
+    expect(toFindActionPoliciesRequest({ enabled: false }).filter).toBe('enabled: false');
+  });
+
+  it('omits the filter when no state filter is selected', () => {
+    expect(toFindActionPoliciesRequest({}).filter).toBeUndefined();
   });
 });

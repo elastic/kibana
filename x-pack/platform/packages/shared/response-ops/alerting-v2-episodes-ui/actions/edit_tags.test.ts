@@ -65,7 +65,7 @@ describe('createEditTagsAction', () => {
     const onSuccess = jest.fn();
 
     await createEditTagsAction(deps).execute({
-      // Two episodes in the same group still produce one TAG item each
+      // Two episodes in the same group — both get tagged (episode-scoped)
       episodes: [
         makeEpisode({ 'episode.id': 'e1', group_hash: 'g1' }),
         makeEpisode({ 'episode.id': 'e2', group_hash: 'g1' }),
@@ -79,8 +79,8 @@ describe('createEditTagsAction', () => {
       queryClient: deps.queryClient,
     });
     expect(bulk.bulkTagEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', tags: ['alpha', 'beta'] },
-      { episode_id: 'e2', tags: ['alpha', 'beta'] },
+      { alert_id: 'e1', tags: ['alpha', 'beta'] },
+      { alert_id: 'e2', tags: ['alpha', 'beta'] },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -105,6 +105,22 @@ describe('createEditTagsAction', () => {
         queryClient: deps.queryClient,
       }
     );
+  });
+
+  it('execute: passes empty tags into flyout when multiple episodes are selected', async () => {
+    const deps = makeDeps();
+    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    jest.spyOn(bulk, 'bulkTagEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+
+    await createEditTagsAction(deps).execute({
+      episodes: [
+        makeEpisode({ 'episode.id': 'e1', group_hash: 'g1', last_tags: ['foo', 'bar'] }),
+        makeEpisode({ 'episode.id': 'e2', group_hash: 'g2', last_tags: ['bar', 'baz'] }),
+      ],
+    });
+
+    const passedTags = (flyout.openTagsFlyout as jest.Mock).mock.calls[0][2] as string[];
+    expect(passedTags).toHaveLength(0);
   });
 
   it('execute: error path calls notifications.toasts.addDanger', async () => {

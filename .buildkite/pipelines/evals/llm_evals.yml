@@ -39,7 +39,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
-      diskSizeGb: 130
 
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
@@ -81,7 +80,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -107,7 +105,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -132,7 +129,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -156,7 +152,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -179,7 +174,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -202,7 +196,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -220,14 +213,13 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
           # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
-          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.7-opus,eis/anthropic-claude-4.8-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-flash-lite,eis/google-gemini-3.5-flash,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-5.6-luna,eis/openai-gpt-5.6-terra,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.8-opus,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-5.6-luna,eis/openai-gpt-5.6-terra,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -243,17 +235,15 @@ steps:
           EVAL_SUITE_ID: 'nightshift-investigations'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          # This suite only scores its own plumbing with CODE evaluators, so no model influences
-          # the result. One cheap connector is enough to satisfy the per-connector Playwright
-          # project; fanning out across the weekly tiers would cost budget for identical scores.
-          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.5-haiku'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Enables the investigation engine and sandbox when the ci-prod config has a sandbox block.
+          EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -276,7 +266,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -298,7 +287,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -322,7 +310,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -370,7 +357,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -394,7 +380,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -418,7 +403,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -441,7 +425,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -472,7 +455,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -495,7 +477,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -519,7 +500,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -542,7 +522,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -565,7 +544,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -588,7 +566,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -612,7 +589,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -635,7 +611,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:

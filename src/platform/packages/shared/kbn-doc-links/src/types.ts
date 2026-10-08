@@ -385,6 +385,12 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly api: string;
+      readonly explore: {
+        readonly landing: string;
+        readonly hostsPage: string;
+        readonly networkPage: string;
+        readonly usersPage: string;
+      };
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
@@ -408,6 +414,7 @@ export interface DocLinks {
     readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
+    readonly queryESQLViews: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -601,6 +608,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     agentlessIntegrations: string;
+    cloudConnectorDeployment: string;
     api: string;
     managedOtlp: string;
     uninstallAgent: string;
@@ -765,6 +773,10 @@ export interface DocLinks {
     readonly federatedIdentity: string;
     readonly querying: string;
     readonly security: string;
+  };
+  readonly contextEngine: {
+    readonly overview: string;
+    readonly aiIndices: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;

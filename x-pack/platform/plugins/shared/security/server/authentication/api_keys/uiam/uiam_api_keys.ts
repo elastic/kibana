@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { timingSafeEqual } from 'crypto';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
@@ -20,7 +21,8 @@ import type {
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-import { isExternalApiKey, type UiamServicePublic } from '../../../uiam';
+import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
+import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -81,9 +83,16 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
-        includeClientAuthentication: !isExternalApiKey(this.getCurrentUser(request)),
-      });
+      // External API keys must not carry client authentication (`null`). For other credentials,
+      // preserve the request's secret and only default to Kibana's for internally created requests.
+      const clientAuthentication = userHasExternalApiKey(this.getCurrentUser(request))
+        ? null
+        : getUiamClientAuthentication(request);
+      const { id, key, description } = await this.uiam?.grantApiKey(
+        authorization,
+        params,
+        clientAuthentication
+      );
 
       result = {
         id,
@@ -128,7 +137,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      await this.uiam?.revokeApiKey(id, authorization.credentials);
+      await this.uiam?.revokeApiKey(request, id);
 
       this.logger.debug(`API key ${id} was invalidated successfully`);
 
@@ -187,6 +196,17 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    */
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
     return this.uiam.getInternalCallerAttestationHeaders(credential);
+  }
+
+  isOwnClientAuthentication(value: string): boolean {
+    const own = this.uiam.getClientAuthentication().value;
+    const presented = Buffer.from(value);
+    const expected = Buffer.from(own);
+    return presented.length === expected.length && timingSafeEqual(presented, expected);
+  }
+
+  isExternalApiKey(request: KibanaRequest): boolean {
+    return userHasExternalApiKey(this.getCurrentUser(request));
   }
 
   /**

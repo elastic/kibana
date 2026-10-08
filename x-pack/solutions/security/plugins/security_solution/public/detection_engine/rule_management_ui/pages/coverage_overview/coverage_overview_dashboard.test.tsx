@@ -16,6 +16,9 @@ import { CoverageOverviewDashboardContextProvider } from './coverage_overview_da
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: () => ({ frameworkVersion: '16.1' }),
+}));
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
@@ -39,6 +42,7 @@ describe('CoverageOverviewDashboard', () => {
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: getMockCoverageOverviewDashboard(),
       isLoading: false,
+      isMitreError: false,
       refetch: jest.fn(),
     });
   });
@@ -69,11 +73,46 @@ describe('CoverageOverviewDashboard', () => {
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: mockDashboard,
       isLoading: false,
+      isMitreError: false,
       refetch: jest.fn(),
     });
 
     renderCoverageOverviewDashboard();
 
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeInTheDocument();
+  });
+
+  test('shows a loading spinner while isLoading is true', () => {
+    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isMitreError: false,
+      refetch: jest.fn(),
+    });
+
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByTestId('coverageOverviewLoadingSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewMitreErrorCallout')).not.toBeInTheDocument();
+  });
+
+  test('shows a MITRE error callout when isMitreError is true and loading is false', () => {
+    (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isMitreError: true,
+      refetch: jest.fn(),
+    });
+
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByTestId('coverageOverviewMitreErrorCallout')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewLoadingSpinner')).not.toBeInTheDocument();
+  });
+
+  test('does NOT show error callout when MITRE data loads successfully', () => {
+    renderCoverageOverviewDashboard();
+
+    expect(screen.queryByTestId('coverageOverviewMitreErrorCallout')).not.toBeInTheDocument();
   });
 });

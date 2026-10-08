@@ -10,10 +10,10 @@
 import type { EuiBreadcrumb, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBreadcrumbs,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -646,54 +646,66 @@ export function ActionsMenu({
           euiTheme,
         })
       }
-      css={styles.selectable}
+      css={styles.fill}
       singleSelection
       height="full"
     >
       {(list, search) => (
-        <div ref={menuContainerRef} css={styles.container}>
-          <div css={styles.header}>
-            <EuiTitle size="xxs">
-              <h3 css={styles.title}>
-                <FormattedMessage id="workflows.actionsMenu.title" defaultMessage="Actions menu" />
-              </h3>
-            </EuiTitle>
-            <div>{search}</div>
-          </div>
+        <div ref={menuContainerRef} css={styles.fill}>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h3>
+                  <FormattedMessage
+                    id="workflows.actionsMenu.title"
+                    defaultMessage="Actions menu"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{search}</EuiFlexItem>
+          </EuiFlexGroup>
 
-          <EuiFlexGroup gutterSize="none" css={styles.body}>
+          <EuiFlexGroup gutterSize="none" css={styles.body} responsive={false}>
             <EuiFlexItem
               css={styles.leftColumn}
               onMouseDown={keepSearchFocused}
               onMouseMove={handleListMouseMove}
             >
-              {showBreadcrumbs && (
-                <div css={styles.breadcrumbRow}>
-                  <EuiBreadcrumbs
-                    breadcrumbs={breadcrumbs}
-                    truncate={false}
-                    max={4}
-                    aria-label={i18n.translate('workflows.actionsMenu.breadcrumb.ariaLabel', {
-                      defaultMessage: 'Actions menu navigation',
-                    })}
-                  />
-                </div>
-              )}
-              {showNoResults ? (
-                <div css={styles.noResults}>
-                  <EuiText size="s" color="subdued" textAlign="center">
-                    <FormattedMessage
-                      id="workflows.actionsMenu.noResults"
-                      defaultMessage="{query} doesn't match any options."
-                      values={{ query: searchTerm.trim() }}
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                css={styles.fill}
+                responsive={false}
+              >
+                {showBreadcrumbs && (
+                  <EuiFlexItem grow={false} css={styles.breadcrumbRow}>
+                    <EuiBreadcrumbs
+                      breadcrumbs={breadcrumbs}
+                      truncate={false}
+                      max={4}
+                      aria-label={i18n.translate('workflows.actionsMenu.breadcrumb.ariaLabel', {
+                        defaultMessage: 'Actions menu navigation',
+                      })}
                     />
-                  </EuiText>
-                </div>
-              ) : (
-                <div css={styles.listViewport}>
-                  <div css={styles.listPane}>{list}</div>
-                </div>
-              )}
+                  </EuiFlexItem>
+                )}
+                {showNoResults ? (
+                  <EuiEmptyPrompt
+                    paddingSize="m"
+                    titleSize="xs"
+                    body={
+                      <FormattedMessage
+                        id="workflows.actionsMenu.noResults"
+                        defaultMessage="{query} doesn't match any options."
+                        values={{ query: searchTerm.trim() }}
+                      />
+                    }
+                  />
+                ) : (
+                  <EuiFlexItem css={styles.listFill}>{list}</EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
