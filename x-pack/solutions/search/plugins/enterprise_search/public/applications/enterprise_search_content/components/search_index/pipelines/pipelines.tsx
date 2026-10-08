@@ -171,12 +171,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink
-                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutUsingPipelinesInSearchLink"
-                href={docLinks.ingestPipelines}
-                target="_blank"
-                color="subdued"
-              >
+              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
@@ -244,12 +239,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink
-                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutDeployingMachineLearningModelsInElasticLink"
-                href={docLinks.deployTrainedModels}
-                target="_blank"
-                color="subdued"
-              >
+              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {

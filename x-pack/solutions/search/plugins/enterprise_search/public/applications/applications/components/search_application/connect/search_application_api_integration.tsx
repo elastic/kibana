@@ -232,10 +232,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
                 defaultMessage="To get the most out of the JavaScript client, use the client's example template and follow our {searchapplicationSearchDocLink} on building a search experience."
                 values={{
                   searchapplicationSearchDocLink: (
-                    <EuiLink
-                      data-test-subj="enterpriseSearchSearchApplicationApiIntegrationStageHowToGuideLink"
-                      href={docLinks.searchApplicationsSearch}
-                    >
+                    <EuiLink href={docLinks.searchApplicationsSearch}>
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step3.clientDocumenation',
                         {
@@ -258,11 +255,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
         <>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" alignItems="flexEnd">
-            <EuiLink
-              data-test-subj="enterpriseSearchSearchApplicationApiIntegrationStageTryInConsoleLink"
-              href={consolePreviewLink}
-              target="_blank"
-            >
+            <EuiLink href={consolePreviewLink} target="_blank">
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.consoleButton"
                 defaultMessage="Try in console"

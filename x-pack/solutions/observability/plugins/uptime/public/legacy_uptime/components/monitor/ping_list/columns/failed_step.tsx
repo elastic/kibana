@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { FailedStepsApiResponse } from '../../../../../../common/runtime_types/ping/synthetics';
 
 interface Props {
@@ -20,7 +19,7 @@ export const FailedStep = ({ checkGroup, failedSteps }: Props) => {
   );
 
   if (!thisFailedStep) {
-    return <>{i18n.translate('xpack.uptime.failedStep.Label', { defaultMessage: '--' })}</>;
+    return <>--</>;
   }
   return (
     <div>

@@ -80,12 +80,7 @@ export const SyncRulesTable: React.FC = () => {
     <EuiText size="s" color="default">
       {getSyncRulesDescription(indexName)}
       <EuiSpacer />
-      <EuiLink
-        data-test-subj="enterpriseSearchSyncRulesTableLink"
-        href={docLinks.syncRules}
-        external
-        target="_blank"
-      >
+      <EuiLink href={docLinks.syncRules} external target="_blank">
         {SYNC_RULES_LEARN_MORE_LINK}
       </EuiLink>
     </EuiText>
@@ -95,7 +90,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          data-test-subj="enterpriseSearchColumnsSelect"
           autoFocus
           fullWidth
           value={filteringRule.policy}
@@ -124,7 +118,6 @@ export const SyncRulesTable: React.FC = () => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
-              data-test-subj="enterpriseSearchColumnsFieldText"
               fullWidth
               value={rule.field}
               onChange={(e) => onChange(e.target.value)}
@@ -144,7 +137,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
           value={filteringRule.rule}
           onChange={(e) => onChange(e.target.value)}
@@ -164,7 +156,6 @@ export const SyncRulesTable: React.FC = () => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
-              data-test-subj="enterpriseSearchColumnsFieldText"
               fullWidth
               value={rule.value}
               onChange={(e) => onChange(e.target.value)}

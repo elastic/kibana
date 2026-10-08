@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -24,12 +23,8 @@ export const touchdownTemplate = ({ wholeBucket }: Props) => {
       <p className="visTooltip__header">
         <EuiIcon type="info" className="visTooltip__headerIcon" aria-hidden={true} />
         <span className="visTooltip__headerText">
-          {wholeBucket ? 'Part of this bucket' : 'This area'}
-          <FormattedMessage
-            id="visTypeVislib.touchdownTemplate.span.mayContainPartialDataLabel"
-            defaultMessage="may contain partial data. The selected
-          time range does not fully cover it."
-          />
+          {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
+          time range does not fully cover it.
         </span>
       </p>
     </KibanaRenderContextProvider>

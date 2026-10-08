@@ -30,11 +30,7 @@ export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, modelDe
   return (
     <EuiBadge color="hollow">
       {modelDetailsPageUrl ? (
-        <EuiLink
-          data-test-subj="enterpriseSearchLicenseBadgeLink"
-          target="_blank"
-          href={modelDetailsPageUrl}
-        >
+        <EuiLink target="_blank" href={modelDetailsPageUrl}>
           {licenseLabel}
         </EuiLink>
       ) : (

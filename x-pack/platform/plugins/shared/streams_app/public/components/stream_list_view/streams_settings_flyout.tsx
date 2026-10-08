@@ -390,10 +390,7 @@ output.elasticsearch:
                               external
                               // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
                             >
-                              {i18n.translate(
-                                'xpack.streams.streamsSettingsFlyout.bulkAPILinkLabel',
-                                { defaultMessage: 'Bulk API' }
-                              )}
+                              Bulk API
                             </EuiLink>
                           ),
                         }}

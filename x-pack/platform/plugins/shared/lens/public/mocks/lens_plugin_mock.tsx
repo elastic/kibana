@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { createFormulaPublicApi } from '../async_services';
 import type { LensPublicStart } from '..';
 import { visualizationSubtypes } from '../visualizations/xy/types';
@@ -18,14 +17,7 @@ export const lensPluginMock = {
   createStartContract: (): Start => {
     const startContract: Start = {
       EmbeddableComponent: jest.fn((props) => {
-        return (
-          <span>
-            <FormattedMessage
-              id="xpack.lens.startContract.span.lensEmbeddableComponentLabel"
-              defaultMessage="Lens Embeddable Component"
-            />
-          </span>
-        );
+        return <span>Lens Embeddable Component</span>;
       }),
       SaveModalComponent: jest.fn(() => {
         return <span>Lens Save Modal Component</span>;

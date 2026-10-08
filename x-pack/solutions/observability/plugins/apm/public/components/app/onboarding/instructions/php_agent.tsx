@@ -60,10 +60,7 @@ export const createPhpAgentInstructions = (commonOptions: AgentInstructions): Eu
               defaultMessage: 'Copy the code to install the APM agent for PHP',
             })}
           >
-            {i18n.translate(
-              'xpack.apm.createPhpAgentInstructions.apkAddallowuntrustedpackagefileapkCodeBlockLabel',
-              { defaultMessage: 'apk add --allow-untrusted <package-file>.apk' }
-            )}
+            apk add --allow-untrusted &lt;package-file&gt;.apk
           </EuiCodeBlock>
           <EuiSpacer />
           <EuiMarkdownFormat>

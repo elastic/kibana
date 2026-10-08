@@ -201,7 +201,6 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 
             <EuiFlexItem>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchConfigurationPopoverConfigurationButton"
                 color="primary"
                 iconType="chevronSingleDown"
                 iconSide="right"
@@ -435,7 +434,6 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
                     additionalInputProps={getInputProps({
                       append: (
                         <EuiButtonEmpty
-                          data-test-subj="enterpriseSearchSearchApplicationDocsExplorerViewApiCallButton"
                           color="primary"
                           iconType="eye"
                           onClick={() => setShowAPICallFlyout(true)}

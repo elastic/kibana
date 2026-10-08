@@ -8,7 +8,6 @@
 import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -27,13 +26,7 @@ export function DiagnosticsIndexPatternSettings() {
   const indexTemplatesByIndexPattern = diagnosticsBundle?.indexTemplatesByIndexPattern;
 
   if (!indexTemplatesByIndexPattern || indexTemplatesByIndexPattern?.length === 0) {
-    return (
-      <EuiText>
-        {i18n.translate('xpack.apm.diagnosticsIndexPatternSettings.noSettingsToDisplayTextLabel', {
-          defaultMessage: 'No settings to display',
-        })}
-      </EuiText>
-    );
+    return <EuiText>No settings to display</EuiText>;
   }
 
   const elms = indexTemplatesByIndexPattern.map(({ indexPattern, indexTemplates }) => {

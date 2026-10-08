@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -47,10 +46,7 @@ const LeftoverIntegrationFound: React.FC = () => {
 
   return (
     <KbnWarningCallout
-      title={i18n.translate(
-        'xpack.synthetics.leftoverIntegrationFound.kbnWarningCallout.leftoverIntegrationFoundLabel',
-        { defaultMessage: 'Leftover integration found' }
-      )}
+      title="Leftover integration found"
       text={
         <p>
           <FormattedMessage

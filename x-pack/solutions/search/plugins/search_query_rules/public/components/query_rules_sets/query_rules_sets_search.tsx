@@ -7,7 +7,6 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 
@@ -33,12 +32,7 @@ export const QueryRulesSetsSearch: React.FC<QueryRulesSetsSearchProps> = ({
 
   return (
     <EuiFieldSearch
-      aria-label={
-        <FormattedMessage
-          id="undefined.queryRulesSetsSearch.euiFieldSearch.searchQueryRulesSetsLabel"
-          defaultMessage="Search query rules sets"
-        />
-      }
+      aria-label="Search query rules sets"
       placeholder="Search"
       onChange={(e) => setSearchKey(e.target.value)}
       onSearch={onSearch}

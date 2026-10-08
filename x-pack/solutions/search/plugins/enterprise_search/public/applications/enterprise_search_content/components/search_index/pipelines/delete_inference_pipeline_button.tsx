@@ -48,7 +48,6 @@ export const DeleteInferencePipelineButton: React.FC<DeleteInferencePipelineButt
         )}
       >
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchDeleteInferencePipelineButtonButton"
           data-telemetry-id={props['data-telemetry-id']}
           size="s"
           flush="both"
@@ -63,7 +62,6 @@ export const DeleteInferencePipelineButton: React.FC<DeleteInferencePipelineButt
   }
   return (
     <EuiButtonEmpty
-      data-test-subj="enterpriseSearchDeleteInferencePipelineButtonButton"
       data-telemetry-id={props['data-telemetry-id']}
       size="s"
       flush="both"

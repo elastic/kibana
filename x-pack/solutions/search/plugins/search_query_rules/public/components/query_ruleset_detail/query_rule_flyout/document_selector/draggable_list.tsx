@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -46,16 +45,7 @@ export const DraggableList: React.FC<DraggableListProps> = ({
       <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
         <>
           {actionFields.length === 0 && actionIdsFields?.length === 0 && (
-            <KbnWarningCallout
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="undefined.draggableList.kbnWarningCallout.atLeastOneDocumentLabel"
-                  defaultMessage="At least one document is required"
-                />
-              }
-              size="s"
-            />
+            <KbnWarningCallout announceOnMount title="At least one document is required" size="s" />
           )}
           {isIdRule && actionIdsFields
             ? actionIdsFields.map((doc, index) => (

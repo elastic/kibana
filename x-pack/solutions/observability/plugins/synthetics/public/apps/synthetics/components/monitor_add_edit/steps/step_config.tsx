@@ -129,13 +129,7 @@ const MONITOR_API_SCRIPT_STEP: Step = {
             id="xpack.synthetics.monitorConfig.monitorApiScriptStep.description"
             defaultMessage="Write a {apiJourney} script using {playwright} APIRequestContext. No browser is launched."
             values={{
-              apiJourney: (
-                <code>
-                  {i18n.translate('xpack.synthetics..code.apijourneyLabel', {
-                    defaultMessage: 'apiJourney(...)',
-                  })}
-                </code>
-              ),
+              apiJourney: <code>apiJourney(...)</code>,
               playwright: (
                 <EuiLink
                   data-test-subj="syntheticsApiJourneyPlaywrightLink"
@@ -175,16 +169,7 @@ const MONITOR_API_SCRIPT_STEP_EDIT = (readOnly: boolean = false): Step => ({
             <FormattedMessage
               id="xpack.synthetics.monitorConfig.monitorApiScriptEditStep.description"
               defaultMessage="Edit the existing {apiJourney} script (or paste a new one) in the editor."
-              values={{
-                apiJourney: (
-                  <code>
-                    {i18n.translate(
-                      'xpack.synthetics.mONITOR_API_SCRIPT_STEP_EDIT.code.apijourneyLabel',
-                      { defaultMessage: 'apiJourney(...)' }
-                    )}
-                  </code>
-                ),
-              }}
+              values={{ apiJourney: <code>apiJourney(...)</code> }}
             />
           )}
         </p>

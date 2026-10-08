@@ -135,7 +135,6 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
-              data-test-subj="enterpriseSearchAnalyticsCollectionTableFieldSearch"
               placeholder={i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
                 defaultMessage: 'Search collection names',
               })}
@@ -195,7 +194,6 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       <AddAnalyticsCollection
         render={(onClick) => (
           <EuiButton
-            data-test-subj="enterpriseSearchAnalyticsCollectionTableCreateNewCollectionButton"
             iconType="plusCircle"
             css={analyticsCollectionTableStyles.newCollection}
             onClick={onClick}

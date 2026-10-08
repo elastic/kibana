@@ -41,7 +41,6 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
           {isEditing && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchConnectorSyncRulesFormCancelButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-cancelEditing"
                 onClick={() => {
                   setIsEditing(!isEditing);
@@ -58,7 +57,6 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="enterpriseSearchConnectorSyncRulesFormSaveAndValidateDraftButton"
               data-telemetry-id="entSearchContent-connector-syncRules-editRules-saveAndValidate"
               disabled={hasJsonValidationError}
               isLoading={isLoading}

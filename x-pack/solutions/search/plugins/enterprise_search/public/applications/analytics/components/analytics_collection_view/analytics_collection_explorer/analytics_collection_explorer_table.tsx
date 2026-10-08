@@ -334,7 +334,6 @@ export const AnalyticsCollectionExplorerTable = () => {
       {table && (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFieldSearch
-            data-test-subj="enterpriseSearchAnalyticsCollectionExplorerTableFieldSearch"
             placeholder={i18n.translate(
               'xpack.enterpriseSearch.analytics.collectionsView.explorer.searchPlaceholder',
               {

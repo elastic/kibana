@@ -71,14 +71,7 @@ export const ThrottlingDownloadField = ({
         }}
         onBlur={() => onFieldBlur?.('download')}
         data-test-subj="syntheticsBrowserDownloadSpeed"
-        append={
-          <EuiFormAppend
-            label={i18n.translate(
-              'xpack.synthetics.throttlingDownloadField.euiFormAppend.mbpsLabel',
-              { defaultMessage: 'Mbps' }
-            )}
-          />
-        }
+        append={<EuiFormAppend label="Mbps" />}
         readOnly={readOnly}
       />
     </EuiFormRow>

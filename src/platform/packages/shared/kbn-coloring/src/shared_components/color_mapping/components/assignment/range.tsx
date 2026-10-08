@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormPrepend } from '@elastic/eui';
 import type { ColorMapping } from '../../config';
 
@@ -38,12 +37,7 @@ export const Range: React.FC<{
           onChange={(e) =>
             updateValue(+e.currentTarget.value, rule.max, rule.minInclusive, rule.maxInclusive)
           }
-          aria-label={
-            <FormattedMessage
-              id="coloring.range.euiFieldNumber.theMinValueLabel"
-              defaultMessage="The min value"
-            />
-          }
+          aria-label="The min value"
         />
       </EuiFlexItem>
       <EuiFlexItem>

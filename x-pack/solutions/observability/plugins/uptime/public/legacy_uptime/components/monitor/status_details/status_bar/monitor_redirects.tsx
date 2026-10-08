@@ -46,11 +46,7 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
 
   return list ? (
     <>
-      <EuiDescriptionListTitle>
-        {i18n.translate('xpack.uptime.monitorRedirects.redirectsDescriptionListTitleLabel', {
-          defaultMessage: 'Redirects',
-        })}
-      </EuiDescriptionListTitle>
+      <EuiDescriptionListTitle>Redirects</EuiDescriptionListTitle>
       <EuiPopover
         aria-label={i18n.translate('xpack.uptime.monitorRedirects.popoverAriaLabel', {
           defaultMessage: 'Monitor redirects details',

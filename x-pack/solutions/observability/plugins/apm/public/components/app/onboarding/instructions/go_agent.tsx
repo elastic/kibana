@@ -57,10 +57,7 @@ func main() {
               defaultMessage: 'Copy the code to install the APM agent for Go',
             })}
           >
-            {i18n.translate(
-              'xpack.apm.createGoAgentInstructions.goGetGoelasticcoapmCodeBlockLabel',
-              { defaultMessage: 'go get go.elastic.co/apm' }
-            )}
+            go get go.elastic.co/apm
           </EuiCodeBlock>
         </>
       ),

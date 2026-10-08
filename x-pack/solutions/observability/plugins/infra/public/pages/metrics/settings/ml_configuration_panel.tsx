@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { InputRangeFieldProps } from './input_fields';
 
 interface MLConfigurationPanelProps {
@@ -75,10 +74,7 @@ export const MLConfigurationPanel = ({
             showTicks
             showRange
             tickInterval={20}
-            aria-label={i18n.translate(
-              'xpack.infra.mLConfigurationPanel.euiRange.minimumSeverityScoreLabel',
-              { defaultMessage: 'Minimum severity score' }
-            )}
+            aria-label="Minimum severity score"
             disabled={isLoading}
             readOnly={readOnly}
             isLoading={isLoading}

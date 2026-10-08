@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   LanguageDocumentationPopover,
@@ -836,12 +835,7 @@ export function FormulaEditor({
                   })}
                 </EuiText>
                 <EuiSpacer size="s" />
-                <pre>
-                  <FormattedMessage
-                    id="xpack.lens.formulaEditor.pre.countLabel"
-                    defaultMessage="count() + 1"
-                  />
-                </pre>
+                <pre>count() + 1</pre>
               </div>
             ) : null}
           </div>

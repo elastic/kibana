@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { shallow } from 'enzyme';
 import { IconSelect, IconView, ICONS } from './icon_select';
 
@@ -29,17 +28,7 @@ describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_sel
 
   describe('<IconView />', () => {
     test('should render and match a snapshot', () => {
-      const wrapper = shallow(
-        <IconView
-          label={
-            <FormattedMessage
-              id="visTypeTimeseries..iconView.commentLabel"
-              defaultMessage="Comment"
-            />
-          }
-          value="fa-comment"
-        />
-      );
+      const wrapper = shallow(<IconView label="Comment" value="fa-comment" />);
 
       expect(wrapper).toMatchSnapshot();
     });

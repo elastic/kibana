@@ -6,7 +6,6 @@
  */
 
 import type { ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
@@ -204,7 +203,7 @@ function MetricPreview({ position }: { position: MetricStyleTemplatePresetId }) 
           text-align: ${textAlign};
         `}
       >
-        <FormattedMessage id="xpack.lens.value.TextLabel" defaultMessage="0,000" />
+        0,000
       </EuiText>
     </EuiFlexItem>
   );
@@ -217,7 +216,7 @@ function MetricPreview({ position }: { position: MetricStyleTemplatePresetId }) 
           text-align: ${textAlign};
         `}
       >
-        {i18n.translate('xpack.lens.title.titleTextLabel', { defaultMessage: 'Title' })}
+        Title
       </EuiText>
     </EuiFlexItem>
   );

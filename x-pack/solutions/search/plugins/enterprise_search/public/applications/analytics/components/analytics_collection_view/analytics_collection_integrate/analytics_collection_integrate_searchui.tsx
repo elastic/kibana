@@ -32,7 +32,6 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
               values={{
                 embedLink: (
                   <EuiLink
-                    data-test-subj="enterpriseSearchSearchUIEmbedStepsJavascriptEmbedLink"
                     data-telemetry-id={'entSearch-analytics-integrate-javascriptEmbed-tab'}
                     onClick={() => {
                       setSelectedTab('javascriptEmbed');
@@ -48,7 +47,6 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
                 ),
                 clientLink: (
                   <EuiLink
-                    data-test-subj="enterpriseSearchSearchUIEmbedStepsJavascriptClientLink"
                     data-telemetry-id={'entSearch-analytics-integrate-javascriptClientEmbed-tab'}
                     onClick={() => {
                       setSelectedTab('javascriptClientEmbed');
@@ -134,7 +132,6 @@ plugins: [
               values={{
                 link: (
                   <EuiLink
-                    data-test-subj="enterpriseSearchSearchUIEmbedStepsAnalyticsPluginDocumentationLink"
                     href="https://docs.elastic.co/search-ui/api/core/plugins/analytics-plugin"
                     target="_blank"
                     data-telemetry-id={

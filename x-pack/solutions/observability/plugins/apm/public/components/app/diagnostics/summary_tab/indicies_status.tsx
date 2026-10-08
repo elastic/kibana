@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -27,9 +26,7 @@ export function FieldMappingStatus() {
 
   return (
     <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="fieldMappingStatus">
-      {i18n.translate('xpack.apm.fieldMappingStatus.tabStatus.indicesLabel', {
-        defaultMessage: 'Indices',
-      })}
+      Indices
       <EuiLink
         data-test-subj="apmFieldMappingStatusSeeDetailsLink"
         href={router.link('/diagnostics/indices', { query })}

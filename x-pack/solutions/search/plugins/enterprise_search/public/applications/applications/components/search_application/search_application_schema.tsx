@@ -137,11 +137,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
                   id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.description"
                   defaultMessage="Learn more about field mapping in"
                 />{' '}
-                <EuiLink
-                  data-test-subj="enterpriseSearchSchemaFieldDetailsOurDocumentationLink"
-                  href={docLinks.elasticsearchMapping}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.elasticsearchMapping} target="_blank">
                   <FormattedMessage
                     id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.link"
                     defaultMessage="our documentation."
@@ -333,7 +329,6 @@ export const SearchApplicationSchema: React.FC = () => {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchColumnsMoreInfoButton"
                 size="s"
                 color="primary"
                 iconType={icon}
@@ -462,7 +457,6 @@ export const SearchApplicationSchema: React.FC = () => {
                 <EuiPopoverFooter>
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiButtonEmpty
-                      data-test-subj="enterpriseSearchSearchApplicationSchemaClearAllButton"
                       color="danger"
                       iconType="eraser"
                       size="s"

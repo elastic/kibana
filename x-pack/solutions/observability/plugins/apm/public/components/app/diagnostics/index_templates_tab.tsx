@@ -9,7 +9,6 @@ import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -36,13 +35,7 @@ export function DiagnosticsIndexTemplates() {
       field: 'status',
       render: (_, { exists, isNonStandard }) => {
         if (isNonStandard) {
-          return (
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.columns.nonStandardBadgeLabel', {
-                defaultMessage: 'Non standard',
-              })}
-            </EuiBadge>
-          );
+          return <EuiBadge color="warning">Non standard</EuiBadge>;
         }
 
         if (!exists) {

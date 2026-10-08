@@ -54,11 +54,7 @@ export const SearchApplicationDocumentation = () => {
             </p>
           </EuiText>
 
-          <EuiLink
-            data-test-subj="enterpriseSearchSearchApplicationDocumentationReadOurDocumentationLink"
-            href={docLinks.searchApplications}
-            external
-          >
+          <EuiLink href={docLinks.searchApplications} external>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.readDocumentation',
               {
@@ -102,11 +98,7 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink
-                      data-test-subj="enterpriseSearchSearchApplicationDocumentationLearnMoreLink"
-                      href={docLinks.apiKeys}
-                      external
-                    >
+                    <EuiLink href={docLinks.apiKeys} external>
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.manageAPIKeys.learnMore',
                         {
@@ -153,11 +145,7 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink
-                      data-test-subj="enterpriseSearchSearchApplicationDocumentationLearnMoreLink"
-                      href={docLinks.clientsGuide}
-                      external
-                    >
+                    <EuiLink href={docLinks.clientsGuide} external>
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.languageClients.learnMore',
                         {
@@ -204,11 +192,7 @@ export const SearchApplicationDocumentation = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <EuiLink
-                      data-test-subj="enterpriseSearchSearchApplicationDocumentationLearnMoreLink"
-                      href={docLinks.behavioralAnalytics}
-                      external
-                    >
+                    <EuiLink href={docLinks.behavioralAnalytics} external>
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchInsights.learnMore',
                         {

@@ -282,7 +282,7 @@ export class MarkdownPanelConfig extends Component<
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.MARKDOWN)}
             data-test-subj="markdown-subtab"
           >
-            <FormattedMessage id="visTypeTimeseries..markdownTabLabel" defaultMessage="Markdown" />
+            Markdown
           </EuiTab>
           <EuiTab
             data-test-subj="data-subtab"

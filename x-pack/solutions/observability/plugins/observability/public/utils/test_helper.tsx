@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render as testLibRender } from '@testing-library/react';
@@ -62,13 +61,7 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
 
-            ExploratoryViewEmbeddable: () => (
-              <div>
-                {i18n.translate('xpack.observability.render.div.embeddableExploratoryViewLabel', {
-                  defaultMessage: 'Embeddable exploratory view',
-                })}
-              </div>
-            ),
+            ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
           },
         }}
       >

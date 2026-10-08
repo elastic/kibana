@@ -10,16 +10,12 @@
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SearchSessionIncompleteWarning = (docLinks: DocLinksStart) => (
   <>
     <EuiSpacer size="s" />
-    {i18n.translate('data.searchSessionIncompleteWarning.itNeedsMoreTimeLabel', {
-      defaultMessage:
-        'It needs more time to fully render. You can wait here or come back to it later.',
-    })}
+    It needs more time to fully render. You can wait here or come back to it later.
     <EuiSpacer size="m" />
     <EuiText textAlign="right">
       <EuiLink

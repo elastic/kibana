@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import beeImage from './elastic_elk_b.png';
 
 function Bee() {
@@ -57,7 +56,7 @@ function Bee() {
     <img
       src={beeImage}
       alt="ELK-Bee"
-      title={<FormattedMessage id="xpack.lens.bee.img.bzzzzzzzLabel" defaultMessage="Bzzzzzzz" />}
+      title="Bzzzzzzz"
       style={{
         position: 'absolute',
         width: '80px',
