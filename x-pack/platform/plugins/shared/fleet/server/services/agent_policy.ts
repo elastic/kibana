@@ -934,6 +934,7 @@ class AgentPolicyService {
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
       spaceId?: string;
+      showAgentless?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -952,6 +953,7 @@ class AgentPolicyService {
       withPackagePolicies = false,
       fields,
       spaceId,
+      showAgentless = true,
     } = options;
 
     const baseFindParams: SavedObjectsFindOptions = {
@@ -967,7 +969,15 @@ class AgentPolicyService {
       baseFindParams.namespaces = [spaceId];
     }
 
-    const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
+    // Applied separately from the user kuery so that it is kept when falling back to a simple search
+    const hideAgentlessFilter = showAgentless
+      ? undefined
+      : normalizeKuery(savedObjectType, `NOT ${savedObjectType}.supports_agentless:true`);
+    const userFilter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
+    const filter =
+      hideAgentlessFilter && userFilter
+        ? `(${hideAgentlessFilter}) AND (${userFilter})`
+        : hideAgentlessFilter ?? userFilter;
     let agentPoliciesSO;
     try {
       agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
@@ -982,6 +992,7 @@ class AgentPolicyService {
         agentPoliciesSO = await soClient
           .find<AgentPolicySOAttributes>({
             ...baseFindParams,
+            filter: hideAgentlessFilter,
             search: kuery,
           })
           .catch(
