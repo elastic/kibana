@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
 import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -43,21 +42,16 @@ import {
   EntitiesGroups,
   EntitiesGrid,
   useEntityAnalyticsUrlState,
-  useEntityGridFilters,
-  buildEntityFiltersQuery,
+  useSearchBarExpression,
   INDIVIDUAL_ROWS_COLUMNS,
   RESOLVED_ROWS_COLUMNS,
-  joinAnd,
   getEntityId,
   getString,
   ENTITY_TYPE_FIELD,
 } from '../components/home/new_entities_table';
-import type {
-  RowActions,
-  CellHandlers,
-  EntityFilters,
-  RowsMode,
-} from '../components/home/new_entities_table';
+import { toDsl, toEsql } from '../components/home/new_entities_table/active_filters';
+import type { ActiveFilters } from '../components/home/new_entities_table/active_filters';
+import type { RowActions, CellHandlers, RowsMode } from '../components/home/new_entities_table';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -69,9 +63,7 @@ import { createDataProviders } from '../../app/actions/add_to_timeline/data_prov
 import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_investigate_in_timeline';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
-import type { ESBoolQuery } from '../../../common/typed_json';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
-import { isDefined } from '../../../common/utils/nullable';
 import {
   useAlertBasedTiles,
   useEntitiesWithAnomaliesCount,
@@ -82,8 +74,6 @@ import { SignalCards } from '../components/home/needs_attention_tiles/signal_car
 import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
-  buildTileFilter,
-  buildTileWhereExpression,
   capTileEntityIds,
 } from '../components/home/needs_attention_tiles/tile_entity_filter';
 import {
@@ -161,27 +151,6 @@ const ROWS_SELECTOR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.rowsSelector.title',
   { defaultMessage: 'Rows' }
 );
-
-const buildCombinedFilter = (
-  esFilter: ESBoolQuery | undefined,
-  entityFilters: EntityFilters,
-  rowsMode: RowsMode,
-  tileFilter?: QueryDslQueryContainer | null
-) => {
-  const filterClauses: QueryDslQueryContainer[] = [
-    esFilter,
-    ...buildEntityFiltersQuery(entityFilters),
-    tileFilter,
-  ].filter(isDefined);
-
-  const mustNotClauses =
-    rowsMode === 'resolved'
-      ? [{ exists: { field: 'entity.relationships.resolution.resolved_to' } }]
-      : [];
-  return filterClauses.length || mustNotClauses.length
-    ? { bool: { filter: filterClauses, must: [], must_not: mustNotClauses, should: [] } }
-    : undefined;
-};
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
@@ -330,7 +299,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { searchExpression, entityExpression } = useEntityGridFilters();
+  const searchExpression = useSearchBarExpression();
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -455,27 +424,23 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [activeTile, selectedEntityIds]
   );
 
-  const tileWhereExpression = useMemo(
-    () =>
-      cappedTileEntityIds == null
-        ? undefined
-        : buildTileWhereExpression(cappedTileEntityIds, rowsMode),
-    [cappedTileEntityIds, rowsMode]
+  const activeFilters = useMemo(
+    (): ActiveFilters => ({
+      search: { esql: searchExpression, dsl: esFilter },
+      entityFilters,
+      tileEntityIds: cappedTileEntityIds,
+      rowsMode,
+    }),
+    [searchExpression, esFilter, entityFilters, cappedTileEntityIds, rowsMode]
   );
-
-  const tileFilter = useMemo((): QueryDslQueryContainer | null => {
-    if (cappedTileEntityIds == null) return null;
-    return buildTileFilter(cappedTileEntityIds, rowsMode);
-  }, [cappedTileEntityIds, rowsMode]);
-
-  const combinedFilter = useMemo(
-    () => buildCombinedFilter(esFilter, entityFilters, rowsMode, tileFilter),
-    [esFilter, entityFilters, rowsMode, tileFilter]
-  );
+  // Strings, so a tile refetch with the same entities doesn't reset the pages below.
+  const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
+    useMemo(() => toEsql(activeFilters), [activeFilters]);
+  const groupingQuery = useMemo(() => toDsl(activeFilters), [activeFilters]);
 
   const groupingState = useMemo<EntityURLStateResult>(
     () => ({
-      query: (combinedFilter as ESBoolQuery | undefined) ?? {
+      query: groupingQuery ?? {
         bool: { filter: [], must: [], should: [], must_not: [] },
       },
       setUrlQuery: () => {},
@@ -489,23 +454,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       onResetFilters: () => {},
       getRowsFromPages: () => [],
     }),
-    [combinedFilter, groupingPageSize, groupingPageIndex]
-  );
-
-  const gridEntityExpression = useMemo(
-    () => joinAnd(entityExpression, tileWhereExpression),
-    [entityExpression, tileWhereExpression]
+    [groupingQuery, groupingPageSize, groupingPageIndex]
   );
 
   // Query bar changes do not go through the URL setters, so reset the page here.
   // resetPage replaces the entry and skips no-op updates, so Back still works.
   useUpdateEffect(() => {
     resetPage();
-  }, [searchExpression, gridEntityExpression, resetPage]);
+  }, [gridSearchExpression, gridEntityExpression, resetPage]);
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
-  }, [tileWhereExpression, searchExpression, entityExpression, rowsMode]);
+  }, [gridSearchExpression, gridEntityExpression, rowsMode]);
 
   useUpdateEffect(() => {
     if (!activeTile || selectedEntityIds.length <= MAX_TILE_FILTER_ENTITY_IDS) {
@@ -881,7 +841,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
                 rowsMode={rowsMode}
-                tileWhereExpression={tileWhereExpression}
+                searchExpression={gridSearchExpression}
+                entityExpression={gridEntityExpression}
                 groupSelectorComponent={tableControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
@@ -892,7 +853,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 rowsMode={rowsMode}
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
-                searchExpression={searchExpression}
+                searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}

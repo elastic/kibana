@@ -39,5 +39,5 @@ export {
   buildEntityFilterClauses,
   buildEntityFiltersExpression,
   buildEntityFiltersQuery,
-  useEntityGridFilters,
 } from './hooks/use_entity_grid_filters';
+export { useSearchBarExpression } from './hooks/use_search_bar_expression';
