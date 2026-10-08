@@ -974,6 +974,7 @@ paths:
                         permissions:
                           update_access_control: false
                           update_agent: false
+                          update_approvals: false
                         type: chat
                       - access_control:
                           access_mode: private
@@ -1000,6 +1001,7 @@ paths:
                         permissions:
                           update_access_control: true
                           update_agent: true
+                          update_approvals: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1096,6 +1098,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1528,6 +1555,7 @@ paths:
                     permissions:
                       update_access_control: true
                       update_agent: true
+                      update_approvals: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1631,6 +1659,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
