@@ -590,11 +590,6 @@ export class WorkersService {
       definition = getDefinitionFromTemplate(registration);
     }
 
-    const alertAnalysisReason =
-      registration.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
-        ? await this.checkAlertAnalysisPreflight(request)
-        : null;
-
     return {
       id: registration.id,
       name: registration.catalog.name,
@@ -602,10 +597,6 @@ export class WorkersService {
       enabled,
       lastRun,
       state: settingsUnavailable ? 'unavailable' : enabled ? 'ok' : 'paused',
-      ...(alertAnalysisReason === 'alertAnalysisWorkflowDisabled' ||
-      alertAnalysisReason === 'alertAnalysisRuntimeDisabled'
-        ? { enableBlockedReason: alertAnalysisReason }
-        : {}),
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),

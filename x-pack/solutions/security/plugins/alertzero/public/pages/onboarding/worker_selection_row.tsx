@@ -29,7 +29,7 @@ import * as i18n from './translations';
 
 interface Props {
   worker: CatalogWorker;
-  serverWorker?: Pick<Worker, 'id' | 'enableBlockedReason'>;
+  serverWorker?: Pick<Worker, 'id'>;
   scheduleInterval?: string;
   checked: boolean;
   disabled: boolean;

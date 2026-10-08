@@ -97,7 +97,7 @@ const enableableDependencyLabel = (id: EnableableDependencyId): string => {
 };
 
 interface Props {
-  worker: Pick<Worker, 'id' | 'enableBlockedReason'>;
+  worker: Pick<Worker, 'id'>;
   surface: 'onboarding' | 'settings';
 }
 
@@ -267,10 +267,10 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
         case 'alertAnalysis':
           return {
             id,
-            status: worker.enableBlockedReason ? 'missing' : 'satisfied',
+            status: checks.alertAnalysis,
             label: i18n.ALERT_ANALYSIS_LABEL,
             description:
-              worker.enableBlockedReason === 'alertAnalysisWorkflowDisabled'
+              checks.alertAnalysisWorkflow === 'missing'
                 ? i18n.ALERT_ANALYSIS_WORKFLOW_DESCRIPTION
                 : i18n.ALERT_ANALYSIS_RUNTIME_DESCRIPTION,
             destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
@@ -326,7 +326,8 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
     return messages.filter(({ status }) => status === 'missing' || status === 'unknown');
   }, [
     worker.id,
-    worker.enableBlockedReason,
+    checks.alertAnalysis,
+    checks.alertAnalysisWorkflow,
     checks.contextEngine,
     checks.attackDiscoveryFeatureAvailable,
     checks.attackDiscoveryWorkflows,

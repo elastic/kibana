@@ -20,20 +20,22 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  type Worker,
 } from '@kbn/alertzero-common';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+} from '@kbn/management-settings-ids';
+import { queryKeys } from '../../query_keys';
 import { WorkerDependenciesCallout } from './worker_dependencies_callout';
 import { THREAT_REPORT_WORKFLOWS } from './use_worker_dependency_checks';
 
-const worker = (id: string, enableBlockedReason?: Worker['enableBlockedReason']) => ({
-  id,
-  enableBlockedReason,
-});
+const ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
+const worker = (id: string) => ({ id });
 
 const setup = ({
   contextEnabled = true,
   discoveryEnabled = true,
+  analysisEnabled = true,
   spaceBasePath = '/s/analyst',
 } = {}) => {
   const core = coreMock.createStart();
@@ -44,13 +46,31 @@ const setup = ({
   core.uiSettings.getAll.mockReturnValue({});
   const contextSetting = new BehaviorSubject(contextEnabled);
   const discoverySetting = new BehaviorSubject(discoveryEnabled);
+  const analysisSetting = new BehaviorSubject(analysisEnabled);
   (core.uiSettings.get$ as jest.Mock).mockImplementation((id: string) =>
-    id === CONTEXT_ENGINE_ENABLED_SETTING_ID ? contextSetting : discoverySetting
+    id === CONTEXT_ENGINE_ENABLED_SETTING_ID
+      ? contextSetting
+      : id === SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED
+      ? analysisSetting
+      : discoverySetting
   );
   jest.spyOn(core.http.basePath, 'get').mockReturnValue(spaceBasePath);
-  core.http.get.mockResolvedValue({ total: 1 });
+  (core.http.get as jest.Mock).mockImplementation(async (path: string) =>
+    path === '/api/kibana/settings'
+      ? {
+          settings: {
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: {
+              userValue: analysisSetting.getValue(),
+            },
+          },
+        }
+      : { total: 1 }
+  );
   core.http.post.mockResolvedValue(
-    THREAT_REPORT_WORKFLOWS.map(({ id }) => ({ id, enabled: true }))
+    [...THREAT_REPORT_WORKFLOWS, { id: ALERT_ANALYSIS_WORKFLOW_ID }].map(({ id }) => ({
+      id,
+      enabled: true,
+    }))
   );
   core.http.put.mockResolvedValue({});
   core.application.getUrlForApp.mockImplementation(
@@ -62,7 +82,7 @@ const setup = ({
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   const renderCallouts = (
-    workers: Array<{ id: string; enableBlockedReason?: Worker['enableBlockedReason'] }>,
+    workers: Array<{ id: string }>,
     surface: 'onboarding' | 'settings' = 'settings'
   ) =>
     render(
@@ -79,7 +99,7 @@ const setup = ({
       </I18nProvider>
     );
 
-  return { core, contextSetting, discoverySetting, renderCallouts };
+  return { core, contextSetting, discoverySetting, analysisSetting, queryClient, renderCallouts };
 };
 
 describe('WorkerDependenciesCallout', () => {
@@ -441,18 +461,107 @@ describe('WorkerDependenciesCallout', () => {
     expect(screen.queryByTestId('alertZeroWorkerDependency-threatEnrich')).toBeNull();
   });
 
-  it('uses the Workers API reason for Alert Triage and links to alert analysis', () => {
-    const { renderCallouts } = setup();
-    renderCallouts([
-      worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, 'alertAnalysisWorkflowDisabled'),
-    ]);
-    const item = screen.getByTestId('alertZeroWorkerDependency-alertAnalysis');
+  it('checks the Alert Analysis workflow in the callout and links to its settings', async () => {
+    const { core, renderCallouts } = setup();
+    core.http.post.mockResolvedValue([{ id: ALERT_ANALYSIS_WORKFLOW_ID, enabled: false }]);
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+    const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
     expect(item).toHaveTextContent('workflow is missing or disabled');
     expect(within(item).getByRole('link')).toHaveAttribute(
       'href',
       '/s/analyst/app/security/rules/alert_analysis_workflow'
     );
     expect(within(item).queryByRole('button', { name: /Enable/ })).toBeNull();
+    expect(core.http.post).toHaveBeenCalledWith('/api/workflows/mget', {
+      version: '2023-10-31',
+      body: JSON.stringify({ ids: [ALERT_ANALYSIS_WORKFLOW_ID], source: ['enabled'] }),
+    });
+  });
+
+  it('checks the Alert Analysis setting and clears the callout when it changes', async () => {
+    const { core, analysisSetting, renderCallouts } = setup({ analysisEnabled: false });
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)], 'onboarding');
+
+    const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
+    expect(item).toHaveTextContent('Alert analysis is off for this space');
+    expect(screen.queryByText('Worker setup needs attention')).toBeNull();
+    expect(core.http.get).toHaveBeenCalledWith('/api/kibana/settings');
+
+    act(() => analysisSetting.next(true));
+    await waitFor(() =>
+      expect(screen.queryByTestId('alertZeroWorkerDependency-alertAnalysis')).toBeNull()
+    );
+  });
+
+  it('uses the saved Alert Analysis setting when the browser cache is stale', async () => {
+    const { core, renderCallouts } = setup({ analysisEnabled: true });
+    core.http.get.mockResolvedValue({
+      settings: {
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: { userValue: false },
+      },
+    });
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+
+    expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
+      'Alert analysis is off for this space'
+    );
+  });
+
+  it('clears the Alert Analysis warning after settings changed through another page', async () => {
+    const { core, queryClient, renderCallouts } = setup({ analysisEnabled: false });
+    core.http.get.mockResolvedValue({
+      settings: {
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: { userValue: true },
+      },
+    });
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryState(
+          queryKeys.workerDependencies.alertAnalysisSetting('/s/analyst', false)
+        )?.status
+      ).toBe('success')
+    );
+    expect(core.http.get).toHaveBeenCalledWith('/api/kibana/settings');
+    expect(screen.queryByTestId('alertZeroWorkerDependency-alertAnalysis')).toBeNull();
+  });
+
+  it('shows a verification message when the Alert Analysis setting cannot be read', async () => {
+    const { core, renderCallouts } = setup();
+    core.http.get.mockRejectedValue(new Error('Forbidden'));
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+
+    expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
+      'Could not verify'
+    );
+  });
+
+  it('does not report an unreadable Alert Analysis workflow as disabled and retries it', async () => {
+    const { core, renderCallouts } = setup();
+    core.http.post
+      .mockRejectedValueOnce(new Error('Forbidden'))
+      .mockResolvedValue([{ id: ALERT_ANALYSIS_WORKFLOW_ID, enabled: true }]);
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+
+    expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
+      'Could not verify'
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
+    await waitFor(() =>
+      expect(screen.queryByTestId('alertZeroWorkerDependency-alertAnalysis')).toBeNull()
+    );
+    expect(core.http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not report an omitted Alert Analysis workflow as disabled', async () => {
+    const { core, renderCallouts } = setup();
+    core.http.post.mockResolvedValue([]);
+    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
+
+    expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
+      'Could not verify'
+    );
   });
 
   it('uses administrator guidance if Attack Discovery is off at deployment level', () => {
