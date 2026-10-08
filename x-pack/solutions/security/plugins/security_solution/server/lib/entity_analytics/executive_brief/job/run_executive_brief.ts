@@ -43,6 +43,20 @@ export interface SnapshotBuilders {
   ) => Promise<Record<string, BriefEntity>>;
 }
 
+/** Flags entities the storyline builder treated as shared infrastructure (hub guard). */
+const markHubs = (
+  entities: Record<string, BriefEntity>,
+  hubEuids: string[]
+): Record<string, BriefEntity> => {
+  const hubs = new Set(hubEuids);
+  return Object.fromEntries(
+    Object.entries(entities).map(([euid, entity]) => [
+      euid,
+      hubs.has(euid) ? { ...entity, isHub: true } : entity,
+    ])
+  );
+};
+
 export interface RunExecutiveBriefArgs {
   briefId: string;
   params: GenerateBriefRequestBody;
@@ -194,7 +208,10 @@ export const runExecutiveBrief = async ({
       glance,
       storylines: storylinesPart.value,
       blindSpots: blindSpotsPart.value,
-      entities: { ...leaderEntities, ...fetched },
+      entities: markHubs(
+        { ...leaderEntities, ...fetched },
+        storylinesPart.value.storylines.flatMap((storyline) => storyline.hubEuids)
+      ),
       catalog: context.registry.toCatalog(),
       sources,
     };
