@@ -46,27 +46,46 @@ const StatusBadge: React.FC<{
   status: AiInsightsStatus;
   testSubj?: string;
   onClick?: () => void;
-}> = ({ status, testSubj = 'aiInsightsCollapsedStatus', onClick }) => (
-  <EuiBadge
-    color={STATUS_BADGE_COLOR[status]}
-    data-test-subj={testSubj}
-    onClick={onClick}
-    onClickAriaLabel={
-      onClick
-        ? i18n.translate('xpack.agentBuilderDashboards.aiInsights.toggleFromBadge', {
-            defaultMessage: 'Toggle AI Insights panel',
-          })
-        : undefined
-    }
-    css={css`
-      display: inline-flex;
-      align-items: center;
-      vertical-align: middle;
-    `}
-  >
-    {AI_INSIGHTS_STATUS_HEADLINE[status]}
-  </EuiBadge>
-);
+}> = ({ status, testSubj = 'aiInsightsCollapsedStatus', onClick }) => {
+  const badge = (
+    <EuiBadge
+      color={STATUS_BADGE_COLOR[status]}
+      data-test-subj={testSubj}
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+      `}
+    >
+      {AI_INSIGHTS_STATUS_HEADLINE[status]}
+    </EuiBadge>
+  );
+
+  if (!onClick) {
+    return badge;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={i18n.translate('xpack.agentBuilderDashboards.aiInsights.toggleFromBadge', {
+        defaultMessage: 'Toggle AI Insights panel',
+      })}
+      css={css`
+        appearance: none;
+        background: none;
+        border: 0;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        line-height: 1;
+      `}
+    >
+      {badge}
+    </button>
+  );
+};
 
 export interface AiInsightsPanelProps {
   insight: AiInsightsResult | undefined;

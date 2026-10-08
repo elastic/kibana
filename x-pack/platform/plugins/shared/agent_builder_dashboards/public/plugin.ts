@@ -6,6 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
@@ -17,6 +19,7 @@ import {
   ADD_AI_INSIGHTS_ACTION_ID,
   AI_INSIGHTS_EMBEDDABLE_TYPE,
 } from '../common/ai_insights/constants';
+import { SEED_DATA_APP_ID, SEED_DATA_APP_PATH } from '../common/seed_data/constants';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -36,11 +39,12 @@ export class AgentBuilderDashboardsPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
+  private cleanupSeedLabFab?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<
+    core: CoreSetup<
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
@@ -49,6 +53,23 @@ export class AgentBuilderDashboardsPlugin
     plugins.embeddable.registerEmbeddablePublicDefinition(AI_INSIGHTS_EMBEDDABLE_TYPE, async () => {
       const { aiInsightsEmbeddableFactory } = await import('./ai_insights/ai_insights_embeddable');
       return aiInsightsEmbeddableFactory;
+    });
+
+    core.application.register({
+      id: SEED_DATA_APP_ID,
+      title: i18n.translate('xpack.agentBuilderDashboards.seedData.appTitle', {
+        defaultMessage: 'Seed sample data',
+      }),
+      appRoute: SEED_DATA_APP_PATH,
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      euiIconType: 'indexOpen',
+      order: 9000,
+      visibleIn: ['globalSearch', 'classicSideNav'],
+      mount: async (params) => {
+        const [coreStart] = await core.getStartServices();
+        const { mountSeedDataApp } = await import('./seed_data/mount_seed_data_app');
+        return mountSeedDataApp(coreStart, params);
+      },
     });
 
     return {};
@@ -109,11 +130,17 @@ export class AgentBuilderDashboardsPlugin
       });
     }
 
+    // Global floating Lab button — seed flights / ecommerce / kubernetes from any page.
+    void import('./seed_data/mount_seed_lab_fab').then(({ mountSeedLabFab }) => {
+      this.cleanupSeedLabFab = mountSeedLabFab(core);
+    });
+
     return {};
   }
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.cleanupSeedLabFab?.();
   }
 }
 

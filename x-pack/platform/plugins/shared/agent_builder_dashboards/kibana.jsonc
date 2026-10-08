@@ -20,6 +20,7 @@
       "share",
       "uiActions",
       "unifiedSearch"
-    ]
+    ],
+    "optionalPlugins": ["fleet"]
   }
 }

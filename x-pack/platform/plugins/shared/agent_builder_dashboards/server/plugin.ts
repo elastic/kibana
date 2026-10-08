@@ -25,6 +25,7 @@ import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
 import { aiInsightsEmbeddableSchema } from './embeddable/ai_insights_schema';
 import { registerAiInsightsRoute } from './routes/ai_insights/register_route';
+import { registerSeedDataRoute } from './routes/seed_data/register_route';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -72,6 +73,11 @@ export class AgentBuilderDashboardsPlugin
 
     const router = coreSetup.http.createRouter();
     registerAiInsightsRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+    });
+    registerSeedDataRoute({
       router,
       coreSetup,
       logger: this.logger,

@@ -20,3 +20,11 @@ export type {
   AiInsightsDashboardContext,
 } from './ai_insights/types';
 export { AI_INSIGHTS_STATUS } from './ai_insights/constants';
+export {
+  SEED_DATA_APP_ID,
+  SEED_DATA_APP_PATH,
+  SEED_DATA_API_PATH,
+  SEED_DATA_FLIGHTS_ID,
+  SEED_DATA_ECOMMERCE_ID,
+  SEED_DATA_KUBERNETES_ID,
+} from './seed_data/constants';

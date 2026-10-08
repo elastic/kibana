@@ -51,6 +51,9 @@
     "@kbn/inference-connectors",
     "@kbn/config-schema",
     "@kbn/ui-ai-components",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-context-render",
+    "@kbn/fleet-plugin",
   ],
   "exclude": ["target/**/*"]
 }
