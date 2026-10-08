@@ -26,6 +26,13 @@ import { workloadPath } from '../fixtures/service_account_workloads';
 import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const PRINCIPAL_PATH = 'internal/service_accounts_test/_principal';
+/**
+ * An unforced delete and a forced one. A forced delete skips the management layer's checks, so the
+ * refusal tests run both to show the backend refuses on its own.
+ */
+const DELETE_QUERIES = ['', '?force=true'] as const;
+/** Comfortably inside a one-minute exchange token's lifetime. */
+const STILL_VALID_MS = 50_000;
 const uniqueName = () => `sa-uiam-delete-${randomUUID()}`;
 
 /** Headers that authenticate a request to Kibana with a UIAM service account token. */
@@ -209,8 +216,10 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
       });
       expect(gone).toHaveStatusCode(404);
 
-      // The binding outlives a forced delete, but UIAM refuses to exchange a revoked account.
+      // The binding outlives a forced delete, but UIAM refuses to exchange a revoked account. The
+      // test plugin reports any failure as a 500, so check the refusal at UIAM too.
       expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(500);
+      await expect(exchangeUiamServiceAccountToken(id)).rejects.toThrow(/0x3B8626/);
     }
   );
 
@@ -232,11 +241,13 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
         ...HEADERS,
       };
 
-      const refused = await apiClient.delete(serviceAccountPath(id), {
-        headers: viewerHeaders,
-        responseType: 'json',
-      });
-      expect(refused).toHaveStatusCode(403);
+      for (const query of DELETE_QUERIES) {
+        const refused = await apiClient.delete(`${serviceAccountPath(id)}${query}`, {
+          headers: viewerHeaders,
+          responseType: 'json',
+        });
+        expect(refused).toHaveStatusCode(403);
+      }
 
       const workloads = await apiClient.get(`${serviceAccountPath(id)}/workloads`, {
         headers: viewerHeaders,
@@ -260,14 +271,16 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
       const apiKey = await esClient.security.createApiKey({ name: uniqueName() });
       apiKeyIds.push(apiKey.id);
 
-      const refused = await apiClient.delete(serviceAccountPath(id), {
-        headers: { ...HEADERS, Authorization: `ApiKey ${apiKey.encoded}` },
-        responseType: 'json',
-      });
-      expect(refused).toHaveStatusCode(400);
-      expect(refused.body).toMatchObject({
-        message: 'Provided credential is not compatible with UIAM',
-      });
+      for (const query of DELETE_QUERIES) {
+        const refused = await apiClient.delete(`${serviceAccountPath(id)}${query}`, {
+          headers: { ...HEADERS, Authorization: `ApiKey ${apiKey.encoded}` },
+          responseType: 'json',
+        });
+        expect(refused).toHaveStatusCode(400);
+        expect(refused.body).toMatchObject({
+          message: 'Provided credential is not compatible with UIAM',
+        });
+      }
 
       const stillThere = await apiClient.get(serviceAccountPath(id), {
         headers: adminHeaders,
@@ -285,16 +298,18 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
       const caller = await uiamServiceAccounts.create({ name: uniqueName(), roles: ['admin'] });
       const token = await exchangeUiamServiceAccountToken(caller.id);
 
-      const refused = await apiClient.delete(serviceAccountPath(id), {
-        headers: tokenHeaders(token),
-        responseType: 'json',
-      });
-      expect(refused).toHaveStatusCode(400);
-      expect(refused.body).toMatchObject({
-        message:
-          'Cannot delete a service account: a service account cannot delete service accounts. ' +
-          'Make the request from a user session',
-      });
+      for (const query of DELETE_QUERIES) {
+        const refused = await apiClient.delete(`${serviceAccountPath(id)}${query}`, {
+          headers: tokenHeaders(token),
+          responseType: 'json',
+        });
+        expect(refused).toHaveStatusCode(400);
+        expect(refused.body).toMatchObject({
+          message:
+            'Cannot delete a service account: a service account cannot delete service accounts. ' +
+            'Make the request from a user session',
+        });
+      }
 
       const stillThere = await apiClient.get(serviceAccountPath(id), {
         headers: adminHeaders,
@@ -309,8 +324,11 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
     async ({ apiClient, uiamServiceAccounts }) => {
       apiTest.setTimeout(OUTLIVE_UIAM_TOKEN_TEST_TIMEOUT_MS);
       const { id } = await uiamServiceAccounts.create({ name: uniqueName(), roles: ['viewer'] });
-      const issuedAt = Date.now();
+      // UIAM issues the token somewhere during the exchange. Count "still valid" from before the
+      // request, and "expired" from after it, so neither check depends on how long it took.
+      const requestedAt = Date.now();
       const token = await exchangeUiamServiceAccountToken(id);
+      const issuedAt = Date.now();
       const authenticate = () =>
         apiClient.get(PRINCIPAL_PATH, { headers: tokenHeaders(token), responseType: 'json' });
       expect(await authenticate()).toHaveStatusCode(200);
@@ -328,7 +346,10 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
         principal: { type: 'service_account', variant: 'uiam', serviceAccountId: id },
       });
 
-      await setTimeout(Math.max(0, OUTLIVE_UIAM_TOKEN_MS - (Date.now() - issuedAt)));
+      await setTimeout(Math.max(0, requestedAt + STILL_VALID_MS - Date.now()));
+      expect(await authenticate()).toHaveStatusCode(200);
+
+      await setTimeout(Math.max(0, issuedAt + OUTLIVE_UIAM_TOKEN_MS - Date.now()));
       expect(await authenticate()).toHaveStatusCode(401);
     }
   );
