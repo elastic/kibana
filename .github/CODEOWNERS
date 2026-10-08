@@ -1440,7 +1440,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/secu
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-solution
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
@@ -3016,7 +3016,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/api/timeline @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/search_strategy/timeline @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/automatic-migrations
 
 /x-pack/solutions/security/plugins/security_solution/common/timelines @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/types/header_actions @elastic/security-investigations
@@ -3089,7 +3089,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/public/one_discover @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/automatic-migrations
 /x-pack/solutions/security/plugins/security_solution/public/common/flyout_prev_next_nav @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/threat_intelligence @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/timelines @elastic/security-investigations
@@ -3106,8 +3106,9 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_analysis @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_triage @elastic/security-investigations
 /x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/alert_triage_skill @elastic/security-investigations
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/automatic_migration @elastic/automatic-migrations
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_hunting @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/automatic-migrations
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-investigations
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/cases @elastic/security-investigations
@@ -3118,7 +3119,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/pagination @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/automatic-migrations
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-investigations
@@ -3127,7 +3128,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-investigations
 
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations @elastic/automatic-migrations
 
 /x-pack/solutions/security/test/serverless/functional/test_suites/ftr/discover @elastic/security-investigations
 /x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-investigations
@@ -3692,6 +3693,26 @@ x-pack/solutions/security/plugins/security_solution/test/scout/security_integrat
 # Ent. Search design
 /x-pack/solutions/search/plugins/enterprise_search/**/*.scss @elastic/search-design
 /x-pack/solutions/search/test/accessibility/ @elastic/search-ml-ux
+
+# SIEM Migrations - owned by Automatic Migrations
+# Must stay below the broader security-solution / investigations / upselling patterns above;
+# CODEOWNERS applies the LAST matching pattern.
+/x-pack/solutions/security/packages/features/src/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/docs/siem_migration @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_migration @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/rule_migration_items.ts @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/common/icons/siem_migrations.tsx @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_siem_migrations_service.ts @elastic/automatic-migrations
+/x-pack/solutions/security/packages/upselling/**/siem_migration* @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution_ess/public/upselling/**/siem_migration* @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/**/siem_migration* @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/es_archives/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/siem_migrations.ts @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/siem_migrations.ts @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/siem_migrations.ts @elastic/automatic-migrations
 
 # Security design
 /x-pack/solutions/security/plugins/security_solution/**/*.scss @elastic/security-design
