@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { cpuSpinStepDefinition, MAX_CPU_SPIN_DURATION_MS } from './cpu_spin_step';
@@ -43,12 +43,13 @@ describe('cpuSpinStepDefinition', () => {
 });
 
 describe('registerTestOnlyCpuSpinStep', () => {
-  const setup = async (enabled: boolean) => {
+  const load = async (enabled: boolean) => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const workflowsExtensions = workflowsExtensionsMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}] as never);
-    coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
+    const flag$ = new BehaviorSubject(enabled);
+    coreStart.featureFlags.getBooleanValue$.mockReturnValue(flag$);
 
     registerTestOnlyCpuSpinStep(coreSetup, workflowsExtensions);
 
@@ -56,14 +57,26 @@ describe('registerTestOnlyCpuSpinStep', () => {
     if (typeof stepDefinitionOrLoader !== 'function') {
       throw new Error('Expected a step-definition loader');
     }
-    return stepDefinitionOrLoader();
+    const definition = await stepDefinitionOrLoader();
+    if (!definition || !('handler' in definition)) {
+      throw new Error('Expected the step to be registered with a handler');
+    }
+    return { definition, flag$ };
   };
 
-  it('registers the step when the watchdog PoC is enabled', async () => {
-    await expect(setup(true)).resolves.toBe(cpuSpinStepDefinition);
+  it('always registers the step, so that the flag can be toggled at runtime', async () => {
+    const { definition } = await load(false);
+    expect(definition.id).toBe(cpuSpinStepDefinition.id);
   });
 
-  it('does not register the step when the watchdog PoC is disabled', async () => {
-    await expect(setup(false)).resolves.toBeUndefined();
+  it('spins only while the watchdog PoC flag is on', async () => {
+    const { definition, flag$ } = await load(true);
+    await expect(definition.handler({ input: { durationMs: 5 } } as never)).resolves.toMatchObject({
+      output: { blockedMs: expect.any(Number) },
+    });
+    flag$.next(false);
+    await expect(definition.handler({ input: { durationMs: 5 } } as never)).rejects.toThrow(
+      'test.cpuSpin requires the core.eventLoopWatchdog.enabled feature flag'
+    );
   });
 });

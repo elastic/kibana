@@ -31,6 +31,11 @@ export class BlockDetector {
 
   constructor(private readonly thresholdMs: number) {}
 
+  /** When the ongoing block started (its last heartbeat), while the main thread is blocked. */
+  public get blockedSince(): number | undefined {
+    return this.startedAt;
+  }
+
   /** Returns the block that ended, if any, given the main thread's last heartbeat. */
   public poll(now: number, lastHeartbeat: number): DetectedBlock | undefined {
     const { startedAt } = this;

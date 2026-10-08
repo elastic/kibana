@@ -22,10 +22,10 @@ export interface ManagedWorkerOptions<Message, Received = never> {
   logger: Logger;
   unref: boolean;
   restart: { maxAttempts: number; delayMs: number };
-  onStart(post: PostMessage<Message>): void;
+  onStart?(post: PostMessage<Message>): void;
   /** Receives messages posted by the worker. */
   onMessage?(message: Received): void;
-  onExit(): void;
+  onExit?(): void;
   onExhausted(): void;
 }
 
@@ -76,11 +76,11 @@ export class ManagedWorkerHandle<Message, Received = never> implements ManagedWo
       worker.on('exit', (code) => {
         if (!this.running || this.worker !== worker) return;
         this.worker = undefined;
-        this.params.onExit();
+        this.params.onExit?.();
         this.scheduleRestart(`exited unexpectedly (code ${code})`);
       });
       if (onMessage) worker.on('message', onMessage);
-      onStart((message, transferList) => worker.postMessage(message, transferList));
+      onStart?.((message, transferList) => worker.postMessage(message, transferList));
       // Apply reference policy after initialization, which can re-ref the worker's message port.
       if (unref) worker.unref();
     } catch (error) {
@@ -113,7 +113,7 @@ export class ManagedWorkerHandle<Message, Received = never> implements ManagedWo
   private discardWorker(): void {
     const { worker } = this;
     this.worker = undefined;
-    this.params.onExit();
+    this.params.onExit?.();
     if (!worker) return;
     worker.removeAllListeners('message');
     worker.removeAllListeners('exit');

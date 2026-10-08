@@ -100,4 +100,14 @@ describe('resolveDiagnosticDir', () => {
     );
     expect(resolveDiagnosticDir([], '')).toBeUndefined();
   });
+
+  it('takes the last occurrence, as Node does (Serverless overrides the start script default)', () => {
+    expect(
+      resolveDiagnosticDir(
+        [],
+        '--heapsnapshot-signal=SIGUSR2 --diagnostic-dir=/usr/share/kibana/data --diagnostic-dir=/mnt/elastic/diagnostics'
+      )
+    ).toBe('/mnt/elastic/diagnostics');
+    expect(resolveDiagnosticDir(['--diagnostic-dir=/cli'], '--diagnostic-dir=/env')).toBe('/cli');
+  });
 });

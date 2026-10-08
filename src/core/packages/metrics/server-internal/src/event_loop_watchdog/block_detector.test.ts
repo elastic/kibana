@@ -8,9 +8,18 @@
  */
 
 import { BlockDetector, REPORT_BURST, REPORT_REFILL_MS } from './block_detector';
-import { overlapsRotation } from './worker';
 
 describe('BlockDetector', () => {
+  it('exposes when the ongoing block started, while blocked', () => {
+    const detector = new BlockDetector(200);
+    detector.poll(150, 0);
+    expect(detector.blockedSince).toBeUndefined(); // not yet a block
+    detector.poll(250, 0);
+    expect(detector.blockedSince).toBe(0);
+    detector.poll(1000, 950);
+    expect(detector.blockedSince).toBeUndefined();
+  });
+
   it('reports a block once the heartbeat resumes', () => {
     const detector = new BlockDetector(200);
     expect(detector.poll(150, 0)).toBeUndefined();
@@ -36,15 +45,5 @@ describe('BlockDetector', () => {
     expect(block(10_000)).toMatchObject({ report: false });
     expect(block(11_000)).toMatchObject({ report: false });
     expect(block(10_000 + REPORT_REFILL_MS)).toMatchObject({ report: true, suppressedBlocks: 2 });
-  });
-});
-
-describe('overlapsRotation', () => {
-  it('detects stalls overlapping a finished or ongoing rotation', () => {
-    expect(overlapsRotation(100, 400, 150, 300)).toBe(true);
-    expect(overlapsRotation(100, 400, 350, 50)).toBe(true); // ongoing
-    expect(overlapsRotation(100, 400, 500, 600)).toBe(false);
-    expect(overlapsRotation(100, 400, 10, 50)).toBe(false);
-    expect(overlapsRotation(100, 400, 0, 0)).toBe(false); // never rotated
   });
 });

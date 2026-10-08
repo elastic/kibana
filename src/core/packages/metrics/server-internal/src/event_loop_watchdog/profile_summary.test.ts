@@ -8,22 +8,26 @@
  */
 
 import {
-  TRIMMED_FRAME,
   formatSummary,
-  sampleTimestamps,
   sanitizeLocation,
   summarizeProfile,
-  trimToBlocks,
   type CpuProfile,
 } from './profile_summary';
 
 const ROOT = '/kibana';
 
-/** Builds a `.cpuprofile`; stacks are listed leaf first. */
-const buildProfile = (
-  samples: Array<{ stack: string[]; at: number }>,
-  { startTime = 0, endTime = 10_000 } = {}
-): CpuProfile => {
+/** Where each test function lives: zod in node_modules, Kibana in src/ or node_modules/@kbn/. */
+const urlOf = (name: string) =>
+  name.startsWith('(')
+    ? ''
+    : name.startsWith('zod')
+    ? `file://${ROOT}/node_modules/zod/v4/core/${name}.cjs`
+    : name.startsWith('kbn')
+    ? `file://${ROOT}/node_modules/@kbn/workflows/spec/${name}.js`
+    : `file://${ROOT}/src/${name}.ts`;
+
+/** Builds a `.cpuprofile`, one sample per stack; stacks are listed leaf first. */
+const buildProfile = (stacks: string[][]): CpuProfile => {
   const nodes: CpuProfile['nodes'] = [
     { id: 1, callFrame: { functionName: '(root)', url: '', lineNumber: -1, columnNumber: -1 } },
   ];
@@ -36,12 +40,7 @@ const buildProfile = (
       if (!node) {
         node = {
           id: nodes.length + 1,
-          callFrame: {
-            functionName: name,
-            url: name.startsWith('(') ? '' : `file://${ROOT}/src/${name}.ts`,
-            lineNumber: 9,
-            columnNumber: 0,
-          },
+          callFrame: { functionName: name, url: urlOf(name), lineNumber: 9, columnNumber: 0 },
         };
         nodes.push(node);
         parent.children = [...(parent.children ?? []), node.id];
@@ -50,120 +49,85 @@ const buildProfile = (
     }
     return parent.id;
   };
-  const leaves = samples.map(({ stack }) => leafOf(stack));
   return {
     nodes,
-    startTime,
-    endTime,
-    samples: leaves,
-    timeDeltas: samples.map(({ at }, i) => at - (i === 0 ? startTime : samples[i - 1].at)),
+    startTime: 0,
+    endTime: stacks.length * 10_000,
+    samples: stacks.map(leafOf),
+    timeDeltas: stacks.map(() => 10_000),
   };
 };
 
-const names = (profile: CpuProfile) =>
-  profile.nodes.map(({ callFrame }) => callFrame.functionName).sort();
-
 describe('summarizeProfile', () => {
+  const zod = ['zodInit', 'zodInit', 'zodSchema'];
   const profile = buildProfile([
-    { stack: ['now', 'handler', 'run'], at: 1_100 },
-    { stack: ['now', 'handler', 'run'], at: 1_200 },
-    { stack: ['now', 'handler', 'run'], at: 1_300 },
-    { stack: ['now', 'handler', 'run'], at: 1_400 },
-    { stack: ['handler', 'run'], at: 1_500 },
-    { stack: ['(idle)'], at: 1_600 },
-    ...Array.from({ length: 10 }, (_, i) => ({ stack: ['other', 'run'], at: 5_000 + i })),
-    { stack: ['(idle)'], at: 6_000 },
+    ...Array.from({ length: 6 }, () => [...zod, 'generateStepSchema', 'handler']),
+    ...Array.from({ length: 2 }, () => ['(garbage collector)', ...zod, 'generateStepSchema']),
+    ['kbnConnectors', 'handler'],
+    ['zodParse'], // no Kibana frame at all
+    ['(idle)'],
+    ['(program)'],
   ]);
 
-  it('summarises busy samples within the blocks: self frames and callers', () => {
-    expect(summarizeProfile(profile, [[1_000, 2_000]], ROOT)).toEqual({
-      scope: 'blocks',
-      samples: 5,
-      windowSamples: 15,
-      frames: [
-        {
-          name: 'now',
-          location: 'src/now.ts:10',
-          samples: 4,
-          percent: 80,
-          callers: ['handler (src/handler.ts:10)', 'run (src/run.ts:10)'],
-        },
-        {
-          name: 'handler',
-          location: 'src/handler.ts:10',
-          samples: 1,
-          percent: 20,
-          callers: ['run (src/run.ts:10)'],
-        },
+  it('summarises busy frames, and the Kibana code they were reached from', () => {
+    const summary = summarizeProfile(profile, ROOT);
+    expect(summary.samples).toBe(11); // (idle) is not busy; (program) is
+    expect(summary.frames[0]).toEqual({
+      name: 'zodInit',
+      location: 'node_modules/zod/v4/core/zodInit.cjs:10',
+      samples: 6,
+      percent: 54.5,
+      callers: [
+        'zodInit (node_modules/zod/v4/core/zodInit.cjs:10)',
+        'zodSchema (node_modules/zod/v4/core/zodSchema.cjs:10)',
+        'generateStepSchema (src/generateStepSchema.ts:10)',
       ],
     });
-  });
-
-  it('falls back to the whole window when no sample is within a block', () => {
-    const summary = summarizeProfile(profile, [[9_000, 9_500]], ROOT);
-    expect(summary).toMatchObject({ scope: 'window', samples: 15, windowSamples: 15 });
-    expect(summary.frames[0]).toMatchObject({ name: 'other', samples: 10 });
+    expect(summary.kibanaFrames).toEqual([
+      {
+        name: 'generateStepSchema',
+        location: 'src/generateStepSchema.ts:10',
+        samples: 8,
+        percent: 72.7,
+        // only Kibana callers, for context
+        callers: ['handler (src/handler.ts:10)'],
+      },
+      {
+        // Kibana packages live under node_modules/@kbn/ in the distributable
+        name: 'kbnConnectors',
+        location: 'node_modules/@kbn/workflows/spec/kbnConnectors.js:10',
+        samples: 1,
+        percent: 9.1,
+        callers: ['handler (src/handler.ts:10)'],
+      },
+    ]);
   });
 
   it('formats a single readable line', () => {
-    const summary = summarizeProfile(profile, [[1_000, 2_000]], ROOT);
-    expect(formatSummary(summary, [1203], 1, { file: '/diag/x.cpuprofile' })).toBe(
-      'Event loop block profile #1: blocks [~1203ms], 5/15 samples in blocks. ' +
-        'Top: 80% now (src/now.ts:10) <- handler (src/handler.ts:10) <- run (src/run.ts:10); ' +
-        '20% handler (src/handler.ts:10) <- run (src/run.ts:10). File: /diag/x.cpuprofile'
+    const summary = summarizeProfile(profile, ROOT);
+    expect(
+      formatSummary(
+        summary,
+        { blockedMs: 3_204, profiledAfterMs: 2_010, profilerStartMs: 704 },
+        1,
+        { file: '/diag/x.cpuprofile' }
+      )
+    ).toBe(
+      'Event loop block profile #1: block ~3204ms (profiled after ~2010ms, profiler start took ~704ms), 11 samples. ' +
+        'Top: 54.5% zodInit (node_modules/zod/v4/core/zodInit.cjs:10) <- zodInit (node_modules/zod/v4/core/zodInit.cjs:10) <- zodSchema (node_modules/zod/v4/core/zodSchema.cjs:10) <- generateStepSchema (src/generateStepSchema.ts:10); ' +
+        '18.2% (garbage collector) <- zodInit (node_modules/zod/v4/core/zodInit.cjs:10) <- zodInit (node_modules/zod/v4/core/zodInit.cjs:10) <- zodSchema (node_modules/zod/v4/core/zodSchema.cjs:10); ' +
+        '9.1% kbnConnectors (node_modules/@kbn/workflows/spec/kbnConnectors.js:10) <- handler (src/handler.ts:10). ' +
+        'Kibana code: 72.7% generateStepSchema (src/generateStepSchema.ts:10) <- handler (src/handler.ts:10); ' +
+        '9.1% kbnConnectors (node_modules/@kbn/workflows/spec/kbnConnectors.js:10) <- handler (src/handler.ts:10). ' +
+        'File: /diag/x.cpuprofile'
     );
-    expect(formatSummary(summary, [1203], 2, { notWritten: 'file limit (100) reached' })).toMatch(
-      /^Event loop block profile #2: .* Not written: file limit \(100\) reached\.$/
+    expect(
+      formatSummary(summary, { blockedMs: 2_500, profiledAfterMs: 2_000 }, 2, {
+        notWritten: 'file limit (100) reached',
+      })
+    ).toMatch(
+      /^Event loop block profile #2: block ~2500ms \(profiled after ~2000ms\), .* Not written: file limit \(100\) reached\.$/
     );
-  });
-});
-
-describe('trimToBlocks', () => {
-  const profile = buildProfile([
-    { stack: ['early', 'run'], at: 100 },
-    { stack: ['before', 'run'], at: 1_500 },
-    { stack: ['now', 'handler', 'run'], at: 2_000 },
-    { stack: ['now', 'handler', 'run'], at: 2_400 },
-    { stack: ['between', 'run'], at: 5_000 },
-    { stack: ['spin', 'run'], at: 8_000 },
-    { stack: ['late', 'run'], at: 9_900 },
-  ]);
-
-  it('keeps the samples within the margin and narrows the time span', () => {
-    const trimmed = trimToBlocks(profile, [[2_000, 2_400]], 500);
-    expect(sampleTimestamps(trimmed)).toEqual([1_500, 2_000, 2_400]);
-    expect(trimmed).toMatchObject({ startTime: 1_500, endTime: 2_900 });
-    expect(names(trimmed)).toEqual(['(root)', 'before', 'handler', 'now', 'run']);
-    // a valid tree: every child exists and hit counts match the kept samples
-    const ids = new Set(trimmed.nodes.map(({ id }) => id));
-    expect(trimmed.nodes.flatMap(({ children = [] }) => children).every((id) => ids.has(id))).toBe(
-      true
-    );
-    expect(trimmed.nodes.reduce((sum, { hitCount = 0 }) => sum + hitCount, 0)).toBe(3);
-  });
-
-  it('marks samples dropped between distant blocks so timelines show the gap', () => {
-    const trimmed = trimToBlocks(
-      profile,
-      [
-        [2_000, 2_400],
-        [8_000, 8_000],
-      ],
-      500
-    );
-    const leafNames = trimmed.samples.map(
-      (leaf) => trimmed.nodes.find(({ id }) => id === leaf)?.callFrame.functionName
-    );
-    expect(leafNames).toEqual(['before', 'now', 'now', TRIMMED_FRAME, 'spin']);
-    // the gap starts where the first dropped sample was taken
-    expect(sampleTimestamps(trimmed)).toEqual([1_500, 2_000, 2_400, 5_000, 8_000]);
-    expect(trimmed).toMatchObject({ startTime: 1_500, endTime: 8_500 });
-  });
-
-  it('survives a JSON round trip, as written', () => {
-    const trimmed = trimToBlocks(profile, [[2_000, 2_400]], 0);
-    expect(JSON.parse(JSON.stringify(trimmed))).toEqual(trimmed);
-    expect(sampleTimestamps(trimmed)).toEqual([2_000, 2_400]);
   });
 });
 

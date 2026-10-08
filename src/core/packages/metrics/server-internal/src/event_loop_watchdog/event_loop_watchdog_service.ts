@@ -41,18 +41,23 @@ export interface EventLoopWatchdogStartDeps {
   featureFlags: FeatureFlagsStart;
 }
 
-/** Node's `--diagnostic-dir`, where Serverless collects diagnostic files from. */
+/**
+ * Node's `--diagnostic-dir`, where Serverless collects diagnostic files from (its archive volume).
+ * As for Node itself, the last occurrence wins, and command-line flags override `NODE_OPTIONS`:
+ * Kibana's start script sets a default early in `NODE_OPTIONS` that the controller overrides.
+ */
 export const resolveDiagnosticDir = (
   execArgv: readonly string[] = process.execArgv,
   nodeOptions: string = process.env.NODE_OPTIONS ?? ''
 ): string | undefined =>
-  [...execArgv, ...nodeOptions.split(/\s+/)]
+  [...nodeOptions.split(/\s+/), ...execArgv]
     .map((arg) => /^--diagnostic-dir=(.+)$/.exec(arg)?.[1])
-    .find(Boolean);
+    .filter(Boolean)
+    .pop();
 
 /**
  * Core-owned event-loop watchdog PoC: while the feature flag is on, a worker detects blocks and
- * the main thread keeps V8 CPU profiles of the windows they happen in.
+ * profiles the main thread (through an inspector session) during egregious blocks.
  * @internal
  */
 export class EventLoopWatchdogService {

@@ -16,15 +16,15 @@ export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 export const HEARTBEAT_INTERVAL_MS = 50;
 export const BLOCK_THRESHOLD_MS = 200;
 export const POLL_INTERVAL_MS = 25;
+/** A block is profiled once it has lasted this long: egregious blocks only, not jitter. */
+export const PROFILE_AFTER_MS = 2_000;
+/** A profile stops when its block ends, or after this long. */
+export const MAX_PROFILE_MS = 10_000;
+/** At most one profile per this interval (counted from its start). */
+export const PROFILE_COOLDOWN_MS = 60_000;
 /** 99 Hz, as Datadog's tracer: avoids sampling in lockstep with 10ms timers. */
 export const SAMPLING_INTERVAL_US = Math.round(1_000_000 / 99);
-/** V8's default `--cpu-profiler-sampling-interval`, restored once the profiler exists. */
-export const V8_DEFAULT_SAMPLING_INTERVAL_US = 1_000;
-export const WINDOW_MS = 60_000;
-/** A window holding a block is rotated early, but never before it is this old. */
-export const MIN_FLAGGED_WINDOW_MS = 10_000;
-export const MAX_SESSION_MS = 2 * 60 * 60 * 1000;
-/** Files are written for windows holding one of this many largest blocks written so far... */
+/** Files are written for blocks among this many largest written so far... */
 export const MAX_LARGEST_FILES = 10;
 /** ...exceeding the smallest of them by this factor once ranked (records: the largest). */
 export const MIN_BLOCK_GROWTH = 1.25;
@@ -32,7 +32,7 @@ export const MIN_BLOCK_GROWTH = 1.25;
 export const MAX_RANKED_FILES = 70;
 /** Safety cap on files written per worker. */
 export const MAX_WRITTEN_FILES = 100;
-/** Startup windows are written only for a new largest startup block, at most this many. */
+/** Startup blocks are written only for a new largest startup block, at most this many. */
 export const MAX_STARTUP_FILES = 10;
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
@@ -42,9 +42,6 @@ export const RUNNING_FALLBACK_MS = 5 * 60_000;
 /** Startup blocks are expected (and seen before serving traffic); they get their own budget. */
 export type Phase = 'startup' | 'running';
 
-/** Samples within this margin of a block are written as context; the rest of the window is not. */
-export const CONTEXT_MARGIN_MS = 1_000;
-
 /**
  * Slots of the BigInt64Array shared by the main thread and the worker. Times are process-wide
  * monotonic microseconds (`process.hrtime`).
@@ -52,19 +49,10 @@ export const CONTEXT_MARGIN_MS = 1_000;
 export const Slot = {
   /** Stamped by the main thread every heartbeat interval. */
   heartbeat: 0,
-  /** Incremented by the worker for each block not caused by the profiler. */
-  blocks: 1,
-  /** Written by the main thread around each profile rotation. */
-  rotationStart: 2,
-  rotationEnd: 3,
-  /** Last heartbeat the worker has classified, published after counting any block it ended. */
-  classified: 4,
   /** When Kibana was considered running (0 while starting up); blocks before it are startup. */
-  runningSince: 5,
+  runningSince: 1,
 } as const;
-export const SLOT_COUNT = 6;
-/** Longest the main thread defers rotation after a stall, waiting for the worker to classify it. */
-export const MAX_CLASSIFY_WAIT_MS = 2_000;
+export const SLOT_COUNT = 2;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);
 
@@ -73,20 +61,9 @@ export interface WatchdogWorkerData {
   sanitizeRoot: string;
   diagnosticDir?: string;
   admissionLimits?: AdmissionLimits;
+  /** Overrides of the profiling thresholds, for tests. */
+  profiling?: { afterMs: number; maxMs: number; cooldownMs: number };
 }
-
-export interface ProfileMessage {
-  type: 'profile';
-  /** The window's V8 CPU profile (`.cpuprofile` JSON), as returned by the profiler. */
-  json: string;
-  /** Monotonic time (`process.hrtime`) right after the profile was stopped, to map V8's clock. */
-  stoppedAtUs: number;
-  windowStartUs: number;
-  windowEndUs: number;
-  /** Number of windows kept so far in the session, including this one. */
-  kept: number;
-}
-export type MainToWorkerMessage = ProfileMessage;
 
 export interface WatchdogLogMeta extends LogMeta {
   kibana: { event_loop_watchdog: Record<string, unknown> };
@@ -99,3 +76,5 @@ export interface LogMessage {
   meta?: WatchdogLogMeta;
 }
 export type WorkerToMainMessage = LogMessage;
+/** The main thread sends nothing: the worker profiles it through an inspector session. */
+export type MainToWorkerMessage = never;

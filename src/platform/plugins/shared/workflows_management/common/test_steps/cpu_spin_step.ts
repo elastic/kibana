@@ -13,7 +13,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
 export const CPU_SPIN_STEP_ID = 'test.cpuSpin';
-export const MAX_CPU_SPIN_DURATION_MS = 2_000;
+export const MAX_CPU_SPIN_DURATION_MS = 10_000;
 
 const inputSchema = z.object({
   durationMs: z.number().int().min(1).max(MAX_CPU_SPIN_DURATION_MS),

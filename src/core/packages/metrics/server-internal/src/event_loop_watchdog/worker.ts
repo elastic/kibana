@@ -8,66 +8,60 @@
  */
 
 /*
- * Runs in the watchdog worker thread: detects blocks from the main thread's heartbeat, flags them
- * to the main thread's profiling session through shared memory, and summarises/stores the
- * profiles the main thread keeps. All logs are posted to the main thread's logger.
+ * Runs in the watchdog worker thread: detects blocks from the main thread's heartbeat and, when a
+ * block is egregious, profiles the main thread through an inspector session. Inspector commands
+ * run on the main thread through V8 interrupts, so profiling can start while it is blocked. The
+ * profile arrives parsed in this thread, which summarises and writes it. All logs are posted to
+ * the main thread's logger.
  */
 
+import Fs from 'node:fs/promises';
+import { Session } from 'node:inspector';
 import Os from 'node:os';
+import Path from 'node:path';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
-import { BlockDetector, type DetectedBlock } from './block_detector';
 import { WriteAdmission, type AdmissionLimits } from './admission';
-import { writeFileAtomically } from './atomic_write';
+import { BlockDetector, type DetectedBlock } from './block_detector';
 import {
   formatSummary,
   summarizeProfile,
-  trimToBlocks,
   type CpuProfile,
   type ProfileOutcome,
-  type TimeRange,
 } from './profile_summary';
 import {
   BLOCK_THRESHOLD_MS,
-  CONTEXT_MARGIN_MS,
+  MAX_PROFILE_MS,
   MAX_STARTUP_FILES,
   POLL_INTERVAL_MS,
+  PROFILE_AFTER_MS,
+  PROFILE_COOLDOWN_MS,
+  SAMPLING_INTERVAL_US,
   Slot,
   monotonicUs,
   type LogMessage,
   type Phase,
-  type MainToWorkerMessage,
   type WatchdogWorkerData,
 } from './types';
 
-/** Recent blocks remembered to locate them in kept windows (a window lasts at most 60s). */
-const MAX_REMEMBERED_BLOCKS = 200;
-
-interface Block {
-  startUs: number;
-  endUs: number;
-  blockedMs: number;
-  phase: Phase;
+/** The part of `node:inspector`'s `Session` used here. */
+export interface InspectorSession {
+  connectToMainThread(): void;
+  post(
+    method: string,
+    params: object,
+    callback: (error: Error | null, result?: object) => void
+  ): void;
+  disconnect(): void;
 }
 
-/** Whether a rotation of the main thread's profiler overlapped `[startUs, endUs]`. */
-export const overlapsRotation = (
-  startUs: number,
-  endUs: number,
-  rotationStartUs: number,
-  rotationEndUs: number
-): boolean =>
-  rotationStartUs > 0 &&
-  rotationStartUs <= endUs &&
-  (rotationEndUs < rotationStartUs || rotationEndUs >= startUs);
-
-/** Leads with the phase and the zero-padded largest block, so sorted listings surface the worst. */
-const fileName = (phase: Phase, maxBlockedMs: number, date: Date) =>
-  `event-loop-block-${phase}-${String(Math.round(maxBlockedMs)).padStart(6, '0')}ms-${date
+/** Leads with the phase and the zero-padded block duration, so sorted listings surface the worst. */
+const fileName = (phase: Phase, blockedMs: number, date: Date) =>
+  `event-loop-block-${phase}-${String(Math.round(blockedMs)).padStart(6, '0')}ms-${date
     .toISOString()
     .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.cpuprofile`;
 
-/** Startup windows are written only for a new largest startup block. */
+/** Startup blocks are written only for a new largest startup block. */
 const STARTUP_ADMISSION_LIMITS: AdmissionLimits = {
   maxLargest: 1,
   minGrowth: 1,
@@ -75,12 +69,33 @@ const STARTUP_ADMISSION_LIMITS: AdmissionLimits = {
   maxFiles: MAX_STARTUP_FILES,
 };
 
-export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void => {
-  const { sanitizeRoot, diagnosticDir } = data;
+interface Capture {
+  session: InspectorSession;
+  /** Monotonic µs when the block started (its last heartbeat). */
+  blockStartUs: number;
+  requestedAtUs: number;
+  profilerStartMs?: number;
+  stopping: boolean;
+}
+
+export const runWatchdogWorker = (
+  port: MessagePort,
+  data: WatchdogWorkerData,
+  createSession: () => InspectorSession = () => new Session()
+): void => {
+  const {
+    sanitizeRoot,
+    diagnosticDir,
+    profiling: { afterMs, maxMs, cooldownMs } = {
+      afterMs: PROFILE_AFTER_MS,
+      maxMs: MAX_PROFILE_MS,
+      cooldownMs: PROFILE_COOLDOWN_MS,
+    },
+  } = data;
   const shared = new BigInt64Array(data.shared);
   const detector = new BlockDetector(BLOCK_THRESHOLD_MS);
-  /** Phase at `atUs` (now by default): running once the main thread has marked it. */
-  const currentPhase = (atUs = monotonicUs()): Phase => {
+  /** Phase at `atUs`: running once the main thread has marked it. */
+  const phaseAt = (atUs: number): Phase => {
     const runningSince = Number(Atomics.load(shared, Slot.runningSince));
     return runningSince > 0 && atUs >= runningSince ? 'running' : 'startup';
   };
@@ -88,48 +103,120 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     startup: new WriteAdmission(STARTUP_ADMISSION_LIMITS),
     running: new WriteAdmission(data.admissionLimits),
   };
-  const blocks: Block[] = [];
   const epochOffsetUs =
     Math.round((performance.timeOrigin + performance.now()) * 1000) - monotonicUs();
   const log = (level: LogMessage['level'], message: string, meta?: LogMessage['meta']) =>
     port.postMessage({ type: 'log', level, message, meta } satisfies LogMessage);
 
-  const poll = () => {
-    const heartbeat = Atomics.load(shared, Slot.heartbeat);
-    const block = detector.poll(monotonicUs() / 1000, Number(heartbeat) / 1000);
-    if (block) onBlock(block);
-    // Acknowledge after counting, so the main thread can rotate knowing the block is flagged.
-    Atomics.store(shared, Slot.classified, heartbeat);
+  let capture: Capture | undefined;
+  let lastCaptureAtUs = -Infinity;
+  let profiled = 0;
+
+  const post = <T>(session: InspectorSession, method: string, params: object = {}) =>
+    new Promise<T>((resolve, reject) =>
+      session.post(method, params, (error, result) =>
+        error ? reject(error) : resolve(result as T)
+      )
+    );
+
+  const endCapture = (current: Capture) => {
+    try {
+      current.session.disconnect(); // also stops a profile that is still running
+    } catch {
+      // already disconnected
+    }
+    if (capture === current) capture = undefined;
+  };
+
+  const startCapture = (blockStartUs: number) => {
+    const session = createSession();
+    session.connectToMainThread();
+    const current: Capture = {
+      session,
+      blockStartUs,
+      requestedAtUs: monotonicUs(),
+      stopping: false,
+    };
+    capture = current;
+    lastCaptureAtUs = current.requestedAtUs;
+    // Pipelined: the main thread runs them in order at its next interrupt check.
+    Promise.all([
+      post(session, 'Profiler.enable'),
+      post(session, 'Profiler.setSamplingInterval', { interval: SAMPLING_INTERVAL_US }),
+      post(session, 'Profiler.start'),
+    ])
+      .then(() => {
+        current.profilerStartMs = (monotonicUs() - current.requestedAtUs) / 1000;
+      })
+      .catch((error) => {
+        log('warn', `Failed to start profiling an event loop block: ${error.message}`);
+        endCapture(current);
+      });
+  };
+
+  const onProfile = async (current: Capture, profile: CpuProfile, blockedMs: number) => {
+    const summary = summarizeProfile(profile, sanitizeRoot);
+    const phase = phaseAt(current.blockStartUs);
+    const block = {
+      blockedMs,
+      profiledAfterMs: (current.requestedAtUs - current.blockStartUs) / 1000,
+      profilerStartMs: current.profilerStartMs,
+    };
+    let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
+    if (summary.samples === 0) {
+      outcome = { notWritten: 'no busy samples (the block ended as profiling started)' };
+    } else if (diagnosticDir) {
+      const admitted = admissions[phase].admit(blockedMs);
+      if (admitted.write) {
+        // Files there are collected a minute after their last change: no partial uploads.
+        const file = Path.join(diagnosticDir, fileName(phase, blockedMs, new Date()));
+        await Fs.writeFile(file, JSON.stringify(profile));
+        outcome = { file };
+      } else {
+        outcome = { notWritten: admitted.reason };
+      }
+    }
+    // Written profiles are the ones to look at; the others still show where blocks come from.
+    log('file' in outcome ? 'warn' : 'info', formatSummary(summary, block, ++profiled, outcome), {
+      tags: ['event-loop-watchdog'],
+      kibana: {
+        event_loop_watchdog: {
+          profile: { ...summary, ...block, profiled, phase, ...outcome },
+        },
+      },
+    });
+  };
+
+  const stopCapture = (current: Capture, blockedMs: number) => {
+    if (current.stopping) return;
+    current.stopping = true;
+    post<{ profile: CpuProfile }>(current.session, 'Profiler.stop')
+      .then(({ profile }) => onProfile(current, profile, blockedMs))
+      .catch((error) =>
+        log('error', `Failed to process an event loop block profile: ${error.message}`)
+      )
+      .finally(() => endCapture(current));
   };
 
   const onBlock = (block: DetectedBlock) => {
     const startUs = block.startedAt * 1000;
-    const endUs = block.endedAt * 1000;
-    const profilerCaused = overlapsRotation(
-      startUs,
-      endUs,
-      Number(Atomics.load(shared, Slot.rotationStart)),
-      Number(Atomics.load(shared, Slot.rotationEnd))
-    );
-    if (!profilerCaused) {
-      blocks.push({ startUs, endUs, blockedMs: block.blockedMs, phase: currentPhase(startUs) });
-      if (blocks.length > MAX_REMEMBERED_BLOCKS) blocks.shift();
-      Atomics.add(shared, Slot.blocks, 1n);
+    if (capture && !capture.stopping && capture.blockStartUs === startUs) {
+      stopCapture(capture, block.blockedMs);
     }
     if (!block.report) return;
     const blockedMs = Math.round(block.blockedMs);
     log(
       'warn',
       `Event loop blocked for ~${blockedMs}ms${
-        profilerCaused ? ' (overlapping a profiler start or rotation)' : ''
-      }${block.suppressedBlocks ? `; ${block.suppressedBlocks} earlier blocks not reported` : ''}`,
+        block.suppressedBlocks ? `; ${block.suppressedBlocks} earlier blocks not reported` : ''
+      }`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
           event_loop_watchdog: {
             blockedMs,
             startedAt: new Date((startUs + epochOffsetUs) / 1000).toISOString(),
-            profilerCaused,
+            phase: phaseAt(startUs),
             suppressedBlocks: block.suppressedBlocks,
           },
         },
@@ -137,76 +224,33 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     );
   };
 
-  const onProfile = async ({
-    json,
-    stoppedAtUs,
-    windowStartUs,
-    windowEndUs,
-    kept,
-  }: MainToWorkerMessage) => {
-    const windowBlocks = blocks.filter(
-      ({ startUs, endUs }) => endUs >= windowStartUs && startUs <= windowEndUs
-    );
-    const profile: CpuProfile = JSON.parse(json);
-    // V8's profile clock is not hrtime's: the profile ended just before the main thread's stamp.
-    const clockOffsetUs = profile.endTime - stoppedAtUs;
-    const ranges = windowBlocks.map(
-      ({ startUs, endUs }): TimeRange => [startUs + clockOffsetUs, endUs + clockOffsetUs]
-    );
-    // Summarise the whole window first: the summary reports how many of its samples were in blocks.
-    const summary = summarizeProfile(profile, ranges, sanitizeRoot);
-    const blockedMs = windowBlocks.map(({ blockedMs: ms }) => Math.round(ms));
-    const maxBlockedMs = Math.max(0, ...blockedMs);
-    // A window belongs to the phase of its largest block.
-    const largest = windowBlocks.reduce<Block | undefined>(
-      (max, block) => (max && max.blockedMs >= block.blockedMs ? max : block),
-      undefined
-    );
-    const phase = largest?.phase ?? currentPhase();
-    let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
-    if (windowBlocks.length === 0) {
-      // e.g. the window was flagged by a worker that has since been replaced: nothing to rank on
-      outcome = { notWritten: 'no block recorded for this window' };
-    } else if (diagnosticDir) {
-      const admitted = admissions[phase].admit(maxBlockedMs);
-      if (admitted.write) {
-        // Without samples in blocks, the whole window is the only evidence: keep it.
-        const written =
-          summary.scope === 'blocks'
-            ? trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000)
-            : profile;
-        const file = await writeFileAtomically(
-          diagnosticDir,
-          fileName(phase, maxBlockedMs, new Date()),
-          JSON.stringify(written)
-        );
-        outcome = { file };
-      } else {
-        outcome = { notWritten: admitted.reason };
-      }
+  const poll = () => {
+    const nowMs = monotonicUs() / 1000;
+    const block = detector.poll(nowMs, Number(Atomics.load(shared, Slot.heartbeat)) / 1000);
+    if (block) onBlock(block);
+    const { blockedSince } = detector;
+    if (blockedSince === undefined) return;
+    if (
+      !capture &&
+      nowMs - blockedSince >= afterMs &&
+      nowMs * 1000 - lastCaptureAtUs >= cooldownMs * 1000
+    ) {
+      startCapture(blockedSince * 1000);
+    } else if (
+      capture &&
+      capture.blockStartUs === blockedSince * 1000 &&
+      nowMs * 1000 - capture.requestedAtUs >= maxMs * 1000
+    ) {
+      // still blocked: keep what was sampled so far
+      stopCapture(capture, nowMs - blockedSince);
     }
-    // Written profiles are the ones to look at; the others still count towards block frequency.
-    log('file' in outcome ? 'warn' : 'info', formatSummary(summary, blockedMs, kept, outcome), {
-      tags: ['event-loop-watchdog'],
-      kibana: {
-        event_loop_watchdog: {
-          profile: { ...summary, kept, phase, blockedMs, maxBlockedMs, ...outcome },
-        },
-      },
-    });
   };
 
-  // One profile at a time: bounds the worker's memory to a single decoded profile.
-  let processing = Promise.resolve();
-  port.on('message', (message: MainToWorkerMessage) => {
-    processing = processing
-      .then(() => onProfile(message))
-      .catch((error) =>
-        log('error', `Failed to process event loop block profile: ${error.message}`)
-      );
-  });
   const timer = setInterval(poll, POLL_INTERVAL_MS);
-  port.on('close', () => clearInterval(timer));
+  port.on('close', () => {
+    clearInterval(timer);
+    if (capture) endCapture(capture);
+  });
 };
 
 if (!isMainThread && parentPort) {
