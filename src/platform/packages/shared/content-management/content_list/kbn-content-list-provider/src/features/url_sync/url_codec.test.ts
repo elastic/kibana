@@ -17,7 +17,7 @@ import {
   queryTextCodec,
   sortCodec,
 } from './url_codec';
-import type { SortDirectionsByField } from './url_codec';
+import type { SortDirectionsByField } from '../sorting';
 
 const initialSort = { field: 'title', direction: 'asc' as const };
 const directions = (...values: Array<'asc' | 'desc'>) => new Set(values);
@@ -186,7 +186,6 @@ describe('url_codec', () => {
 
       expect(getSortingConfigKey({ ...sorting, fields: [...sorting.fields].reverse() })).toBe(key);
       expect(getSortingUrlConfigFromKey(key)).toEqual({
-        initialSort: { field: 'updatedAt', direction: 'desc' },
         sortDirectionsByField: new Map([
           ['title', directions('asc', 'desc')],
           ['updatedAt', directions('asc', 'desc')],
