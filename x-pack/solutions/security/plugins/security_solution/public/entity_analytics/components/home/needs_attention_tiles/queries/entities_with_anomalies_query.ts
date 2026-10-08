@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../new_entities_table';
+import type { TimeRange } from '../../new_entities_table/common';
 // The query module, not the table index: the index also loads the grid components.
 import {
   ANOMALY_RECORD_FILTER,

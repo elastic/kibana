@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../new_entities_table';
+import type { TimeRange } from '../../new_entities_table/common';
 import { buildLookback, getRiskScoreIndex } from '../../new_entities_table/queries/esql';
 
 /**
