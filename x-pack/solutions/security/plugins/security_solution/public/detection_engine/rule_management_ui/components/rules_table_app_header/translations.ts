@@ -29,7 +29,7 @@ export const ADD_ELASTIC_RULES_WITH_COUNT = (count: number) =>
 export const CREATE_RULE_MENU_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.contextMenu.buttonLabel',
   {
-    defaultMessage: 'Create a rule',
+    defaultMessage: 'Create rule',
   }
 );
 

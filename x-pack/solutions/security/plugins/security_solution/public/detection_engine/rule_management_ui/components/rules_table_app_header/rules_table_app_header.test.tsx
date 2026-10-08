@@ -26,7 +26,7 @@ jest.mock('./use_rules_table_header_tabs', () => ({
 jest.mock('./use_create_rule_primary_action', () => ({
   useCreateRulePrimaryAction: () => ({
     id: 'createRule',
-    label: 'Create new rule',
+    label: 'Create rule',
     iconType: 'plusCircle',
     href: '/rules/create',
     testId: 'create-new-rule',
