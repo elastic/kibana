@@ -101,7 +101,8 @@ export const deleteSignificantEvent = async (
 ): Promise<void> => {
   await esClient.deleteByQuery({
     index: RULE_EVENTS_INDEX,
-    query: { term: { group_hash: eventId } },
+    // Status updates are written with a hashed `group_hash`, so match on the event id instead.
+    query: { term: { 'data.event_id': eventId } },
     refresh: true,
     ignore_unavailable: true,
   });

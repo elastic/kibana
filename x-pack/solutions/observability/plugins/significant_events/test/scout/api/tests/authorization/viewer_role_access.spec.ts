@@ -161,15 +161,21 @@ apiTest.describe(
     apiTest(
       'can search events but cannot create knowledge indicators from Agent Builder',
       async ({ apiClient }) => {
-        const searchResponse = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
-          headers: toolHeaders,
-          body: { tool_id: EVENT_SEARCH_TOOL_ID, tool_params: {} },
-          responseType: 'json',
-        });
-        expect(searchResponse).toHaveStatusCode(200);
-        expect(searchResponse.body.results).toStrictEqual([
-          expect.objectContaining({ type: 'other' }),
-        ]);
+        await expect
+          .poll(async () => {
+            const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+              headers: toolHeaders,
+              body: { tool_id: EVENT_SEARCH_TOOL_ID, tool_params: { event_ids: [eventId] } },
+              responseType: 'json',
+            });
+            return {
+              statusCode: response.statusCode,
+              eventIds: (response.body.results?.[0]?.data?.events ?? []).map(
+                ({ event_id: id }: { event_id: string }) => id
+              ),
+            };
+          }, POLL_OPTIONS)
+          .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
 
         const createResponse = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
           headers: toolHeaders,
