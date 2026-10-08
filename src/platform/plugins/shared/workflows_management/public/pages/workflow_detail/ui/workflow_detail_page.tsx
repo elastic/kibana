@@ -52,7 +52,10 @@ import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_execut
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  useWorkflowUrlState,
+  type WorkflowUrlUpdateOptions,
+} from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -99,6 +102,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
+    updateUrlState,
     setActiveTab: setUrlTab,
     replayExecutionId,
     replayIsTestRun,
@@ -217,26 +221,54 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
+  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
+  const clearSelectedExecution = useCallback(
+    (options?: WorkflowUrlUpdateOptions) => {
+      if (isExecutionsViewEnabled) {
+        updateUrlState(
+          {
+            tab: 'workflow',
+            executionId: undefined,
+            stepExecutionId: undefined,
+            stepId: undefined,
+          },
+          options
+        );
+        return;
+      }
+      setSelectedExecution(null, options);
+    },
+    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
+  );
+
   // Both handlers also close the list, which is local state rather than URL state. They must
   // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null, { replace: true });
+      clearSelectedExecution({ replace: true });
       return;
     }
     setIsExecutionListOpen(true);
-  }, [isExecutionListOpen, selectedExecutionId, setSelectedExecution]);
+  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null, { replace: true });
-  }, [setSelectedExecution]);
+    clearSelectedExecution({ replace: true });
+  }, [clearSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    // Push so Back reopens the run.
+    clearSelectedExecution({ replace: false });
+  }, [clearSelectedExecution]);
+
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
 
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
@@ -304,7 +336,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         ) : (
           <>
             <WorkflowEditorLayout
-              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
+                />
+              }
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />

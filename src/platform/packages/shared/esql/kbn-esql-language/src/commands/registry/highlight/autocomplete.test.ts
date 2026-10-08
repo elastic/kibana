@@ -160,10 +160,55 @@ describe('HIGHLIGHT Autocomplete', () => {
       );
     });
 
-    test('suggests ON keyword after a complete string query', async () => {
+    test('suggests ON, WITH and the end of the command after a complete string query', async () => {
       await expectHighlightSuggestions(
         buildHighlightQuery({ query: '"search query"' }) + ' ',
-        [onCompleteItem.text],
+        [
+          onCompleteItem.text,
+          withCompleteItem.text,
+          newLineCompleteItem.text,
+          pipeCompleteItem.text,
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('suggests ON, WITH and the end of the command right after HIGHLIGHT', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight ',
+        {
+          contains: [
+            onCompleteItem.text,
+            withCompleteItem.text,
+            newLineCompleteItem.text,
+            pipeCompleteItem.text,
+          ],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests ON, WITH and the end of the command after a prefix modifier', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight prefix = "hl_" ',
+        {
+          contains: [
+            onCompleteItem.text,
+            withCompleteItem.text,
+            newLineCompleteItem.text,
+            pipeCompleteItem.text,
+          ],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest ON or the end of the command while a query is being typed', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight MATCH(',
+        {
+          notContains: [onCompleteItem.text, withCompleteItem.text, pipeCompleteItem.text],
+        },
         mockCallbacks
       );
     });
@@ -209,8 +254,50 @@ describe('HIGHLIGHT Autocomplete', () => {
         buildHighlightQuery({ query: '"search query"', onClause: 'textField,' }) + ' ',
         {
           contains: ['keywordField'],
-          notContains: ['integerField'],
+          notContains: ['integerField', '*'],
         },
+        mockCallbacks
+      );
+    });
+
+    test('suggests a lone * alongside the fields at the start of the ON list', async () => {
+      await expectHighlightSuggestions(
+        buildHighlightQuery({ query: '"search query"' }) + ' ON ',
+        { contains: ['*', 'textField', 'keywordField'] },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest * after a comma in the ON list', async () => {
+      for (const onClause of ['textField,', 'textField, ', 'textField,key']) {
+        await expectHighlightSuggestions(
+          buildHighlightQuery({ query: '"search query"', onClause }),
+          { notContains: ['*'] },
+          mockCallbacks
+        );
+      }
+    });
+
+    test('suggests ON fields when the query is omitted', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight ON ',
+        { contains: ['*', 'textField', 'keywordField'], notContains: ['integerField'] },
+        mockCallbacks
+      );
+    });
+
+    test('only suggests WITH or the end of the command after *', async () => {
+      await expectHighlightSuggestions(
+        buildHighlightQuery({ query: '"search query"', onClause: '* ' }),
+        [withCompleteItem.text, newLineCompleteItem.text, pipeCompleteItem.text],
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest a new column definition in the ON list', async () => {
+      await expectHighlightSuggestions(
+        buildHighlightQuery({ query: '"search query"' }) + ' ON ',
+        { notContains: ['col0 = '] },
         mockCallbacks
       );
     });
