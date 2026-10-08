@@ -618,9 +618,22 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             errorsByInstance = Object.fromEntries(failed.map((id) => [id, msg]));
           }
         }
+        // A failed update leaves the members already deployed on the policy deployed: only the
+        // instances being added (or the ones this Retry asked for) fail.
+        const failedByExtension = extended.failedInstances.filter(
+          (id) =>
+            !(id in (detectAndReviewStep.policyIdsByInstance ?? {})) || instanceIds?.includes(id)
+        );
         policyIdsByInstance = { ...policyIdsByInstance, ...extended.policyIdsByInstance };
-        failed = [...failed, ...extended.failedInstances];
-        errorsByInstance = { ...errorsByInstance, ...extended.errorsByInstance };
+        failed = [...failed, ...failedByExtension];
+        errorsByInstance = {
+          ...errorsByInstance,
+          ...Object.fromEntries(
+            Object.entries(extended.errorsByInstance).filter(([id]) =>
+              failedByExtension.includes(id)
+            )
+          ),
+        };
 
         const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);

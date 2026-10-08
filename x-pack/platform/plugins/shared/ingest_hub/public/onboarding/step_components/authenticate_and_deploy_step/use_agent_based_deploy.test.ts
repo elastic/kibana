@@ -737,9 +737,35 @@ describe('useAgentBasedDeploy — reuse of an existing package policy', () => {
     expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
       expect.objectContaining({
         policyIdsByInstance: {},
-        failedInstances: expect.arrayContaining(['serviceA', 'serviceB']),
+        failedInstances: ['serviceB'],
       })
     );
+  });
+
+  it('retries a failed add as a PUT and does not create a second policy', async () => {
+    mockUpdateAgentBasedPolicy.mockRejectedValueOnce(new Error('boom'));
+    const { updateDetectAndReviewStep } = makeFlowMock({
+      policyIdsByInstance: { serviceA: 'pkg-policy-A' },
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([bundledGroup]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+    expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
+      expect.objectContaining({ failedInstances: ['serviceB'] })
+    );
+
+    await act(async () => {
+      await result.current.handleDeploy(['serviceB']);
+    });
+
+    expect(mockUpdateAgentBasedPolicy).toHaveBeenCalledTimes(2);
+    expect(mockUpdateAgentBasedPolicy.mock.calls[1][0]).toBe('pkg-policy-A');
+    expect(mockUpdateAgentBasedPolicy.mock.calls[1][1]).toEqual(['serviceA', 'serviceB']);
+    expect(mockDeployToExistingAgentPolicies).not.toHaveBeenCalled();
+    expect(mockDeployNewAgentPolicy).not.toHaveBeenCalled();
   });
 
   it('writes the policy once when cleanup prunes it and a service is added', async () => {
