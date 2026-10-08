@@ -48,6 +48,7 @@ import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
@@ -121,6 +122,9 @@ let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  authorization.getFindAuthorizationFilter.mockResolvedValue({
+    filter: fromKueryExpression('*'),
+  });
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
@@ -3629,17 +3633,23 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: undefined,
+      });
     });
 
     test('throws when user is not authorised to access logs', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access logs`)
+      );
 
       await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: undefined,
+      });
     });
   });
 
@@ -3652,7 +3662,13 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         "total": 5,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      fromKueryExpression('*'),
+      expect.any(Object),
+      undefined,
+      true
+    );
   });
 });
 
@@ -3682,17 +3698,23 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: undefined,
+      });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access kpi`)
+      );
 
       await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: undefined,
+      });
     });
   });
 
@@ -3707,6 +3729,12 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         "warning": 0,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      fromKueryExpression('*'),
+      expect.any(Object),
+      undefined,
+      true
+    );
   });
 });
