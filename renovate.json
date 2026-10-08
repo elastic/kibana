@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.3", "9.2", "8.19"],
@@ -129,7 +133,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:nightshift-context-and-research", "release_note:skip", "backport:all-open"],
@@ -186,12 +190,8 @@
     },
     {
       "groupName": "Enzyme dependencies",
-      "matchDepNames": [
-        "@wojtekmaj/enzyme-adapter-react-17",
-        "enzyme",
-        "enzyme-to-json",
-        "@types/enzyme"
-      ],
+      "matchDepNames": ["@wojtekmaj/enzyme-adapter-react-17", "enzyme", "enzyme-to-json",
+        "@types/enzyme"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["patch"],
@@ -512,7 +512,7 @@
     },
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "xterm"],
+      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
       "reviewers": ["team:contextual-security-apps"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:all-open"],
@@ -706,9 +706,9 @@
     {
       "groupName": "@elastic/ecs",
       "matchDepNames": ["@elastic/ecs"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:obs-onboarding"],
+      "labels": ["release_note:skip", "backport:skip", "Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -742,8 +742,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -836,6 +836,7 @@
       "matchDepNames": [
         "@apidevtools/swagger-parser",
         "@redocly/cli",
+        "bump-cli",
         "openapi-types",
         "ajv",
         "ajv-draft-04",
@@ -900,7 +901,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -969,7 +970,7 @@
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
-        "eslint-plugin-eslint-comments",
+        "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
         "eslint-plugin-jest",
@@ -1393,8 +1394,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1413,15 +1414,6 @@
     {
       "groupName": "borc",
       "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cpy",
-      "matchDepNames": ["cpy"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1572,7 +1564,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -1782,7 +1774,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: SecuritySolution", "backport:all-open", "release_note:skip"],
@@ -1860,7 +1852,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "allowedVersions": "<4.0.0",
@@ -1870,7 +1862,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1879,7 +1871,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1888,7 +1880,7 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": ["redux-actions", "@types/redux-actions"],
-      "reviewers": ["team:kibana-management", "team:actionable-obs-team"],
+      "reviewers": ["team:kibana-management", "team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "minimumReleaseAge": "14 days",
@@ -1932,7 +1924,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-yaml",
         "magic-bytes.js",
         "minimist",
         "object-hash",
@@ -1941,7 +1932,6 @@
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
-        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
@@ -2047,13 +2037,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-cli",
         "jest-config",
@@ -2065,7 +2056,8 @@
         "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
-        "mutation-observer"
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2103,7 +2095,7 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2117,7 +2109,7 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2145,7 +2137,7 @@
     {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2159,7 +2151,7 @@
     {
       "groupName": "@faker-js/faker",
       "matchDepNames": ["@faker-js/faker"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2182,7 +2174,7 @@
     {
       "groupName": "redux-saga",
       "matchDepNames": ["redux-saga"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2254,7 +2246,6 @@
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
@@ -2266,7 +2257,8 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "google-auth-library"
       ],
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
@@ -2357,7 +2349,13 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": ["@elastic/esql"],
+      "matchDepNames": [
+        "@elastic/esql",
+        "@elastic/esql-grammar",
+        "@elastic/esql-promql-grammar",
+        "@elastic/esql-types",
+        "@elastic/pretty-printer"
+      ],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -2379,9 +2377,9 @@
     {
       "groupName": "XState4",
       "matchDepNames": ["xstate", "@xstate/react"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:obs-onboarding", "release_note:skip", "backport:all-open"],
+      "labels": ["Team:streams-ui", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
@@ -2390,18 +2388,18 @@
     {
       "groupName": "constate",
       "matchDepNames": ["constate"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:obs-onboarding", "release_note:skip", "backport:all-open"],
+      "labels": ["Team:streams-ui", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "Oniguruma to es",
       "matchDepNames": ["oniguruma-to-es"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:obs-onboarding", "release_note:skip", "backport:all-open"],
+      "labels": ["Team:streams-ui", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2411,9 +2409,9 @@
         "@atlaskit/pragmatic-drag-and-drop",
         "@atlaskit/pragmatic-drag-and-drop-hitbox"
       ],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:obs-onboarding", "release_note:skip", "backport:all-open"],
+      "labels": ["Team:streams-ui", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2482,8 +2480,8 @@
       "groupName": "Response Ops HTTPS dependencies",
       "matchDepNames": [
         "@types/http-proxy",
+        "agent-base",
         "get-port",
-        "google-auth-library",
         "http-proxy",
         "http-proxy-agent",
         "https-proxy-agent",
@@ -2665,8 +2663,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "groupName": "@swc",
+      "matchDepNames": ["@swc/core", "@swc/helpers", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],

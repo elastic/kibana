@@ -69,12 +69,7 @@ import {
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import {
-  setPackageInfo,
-  generatePackageInfoFromArchiveBuffer,
-  deleteVerificationResult,
-  unpackBufferToAssetsMap,
-} from '../archive';
+import { setPackageInfo, deleteVerificationResult, unpackBufferToAssetsMap } from '../archive';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -92,6 +87,7 @@ import { _stateMachineInstallPackage } from './install_state_machine/_state_mach
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
+import { validatePackageUpload } from './validate_package_upload';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -103,6 +99,11 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import {
+  checkUploadPackageAssetPrivileges,
+  parsePackageAndCollectSignals,
+} from './upload_preflight_authz';
+export const PACKAGES_TO_INSTALL_WITH_STREAMING = ['security_detection_engine'];
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
 
@@ -110,12 +111,6 @@ export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 const MAX_INSTALL_RETRIES = 5;
 const BASE_RETRY_DELAY_MS = 1000; // 1s
-
-export const PACKAGES_TO_INSTALL_WITH_STREAMING = [
-  // The security_detection_engine package contains a large number of assets and
-  // is not suitable for regular installation as it might cause OOM errors.
-  'security_detection_engine',
-];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -657,6 +652,7 @@ export async function installPackageWithStateMachine(options: {
   automaticInstall?: boolean;
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
+  authorizedSpaces?: string[];
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -681,6 +677,7 @@ export async function installPackageWithStateMachine(options: {
     automaticInstall,
     installedAsDependencyOf,
     skipDependencyCheck,
+    authorizedSpaces,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -807,6 +804,7 @@ export async function installPackageWithStateMachine(options: {
       useStreaming,
       installedAsDependencyOf,
       skipDependencyCheck,
+      authorizedSpaces,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -905,7 +903,11 @@ async function installPackageByUpload({
         );
       }
     }
-    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
+
+    const { packageInfo, archiveSignals } = await parsePackageAndCollectSignals(
+      archiveBuffer,
+      contentType
+    );
     pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
@@ -917,9 +919,41 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    if (
+      !isBundledPackage &&
+      request &&
+      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+    ) {
+      await checkUploadPackageAssetPrivileges({
+        request,
+        archiveSignals,
+        spaceId,
+        pkgName,
+        installation: installedPkg,
+        savedObjectsClient,
+      });
+    }
+
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming,
+    });
+
+    if (!isBundledPackage) {
+      await validatePackageUpload({
+        packageInfo,
+        paths,
+        installedPkg,
+        savedObjectsClient,
+        esClient,
+      });
+    }
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
@@ -928,12 +962,6 @@ async function installPackageByUpload({
       name: pkgName,
       version: pkgVersion,
       packageInfo,
-    });
-
-    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
-      contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
@@ -1298,7 +1326,7 @@ export async function createInstallation(options: {
   const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
     (ds): ds is RegistryDataStream => !!ds.type
   );
-  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams, packageInfo);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1312,6 +1340,7 @@ export async function createInstallation(options: {
   let savedObject: Installation = {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
+    installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
@@ -1441,6 +1470,7 @@ export const saveKibanaAssetsRefs = async (
         pkgName,
         {
           installed_kibana: newAssetRefs,
+          installed_kibana_version: appContextService.getKibanaVersion(),
         },
         { refresh: false }
       );

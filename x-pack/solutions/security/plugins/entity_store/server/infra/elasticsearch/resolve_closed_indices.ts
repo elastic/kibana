@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
@@ -39,6 +40,33 @@ export interface ClosedIndexAdjustments {
 
 const toArray = (v: string | string[]): string[] => ([] as string[]).concat(v);
 
+// The ES client joins name arrays with commas then calls encodeURIComponent, so each comma
+// becomes %2C (3 bytes). Elasticsearch's Netty HTTP server rejects request lines > 4096 bytes,
+// so we cap each batch well below that limit.
+const MAX_URL_NAMES_BYTES = 3_500;
+const BATCH_CONCURRENCY_LIMIT = 30;
+
+const chunkByUrlLength = (names: string[]): string[][] => {
+  const chunks: string[][] = [];
+  let current: string[] = [];
+  let currentBytes = 0;
+
+  for (const name of names) {
+    const cost = name.length + (current.length > 0 ? 3 : 0); // 3 bytes for %2C separator
+    if (current.length > 0 && currentBytes + cost > MAX_URL_NAMES_BYTES) {
+      chunks.push(current);
+      current = [name];
+      currentBytes = name.length;
+    } else {
+      current.push(name);
+      currentBytes += cost;
+    }
+  }
+
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+};
+
 const resolveArgs = (name: string[]) => ({
   name,
   expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
@@ -69,12 +97,23 @@ export const resolveClosedIndexAdjustments = async (
 
     const backingIndexNames = resolved.data_streams.flatMap((ds) => toArray(ds.backing_indices));
     if (backingIndexNames.length > 0) {
-      // Second call with concrete backing index names — the first call returns them as plain
-      // strings with no open/closed attributes; we need this call to learn their status.
-      const backingResolved = await esClient.indices.resolveIndex(resolveArgs(backingIndexNames));
+      // The first resolveIndex call returns backing index names without open/closed attributes,
+      // so a second round is needed to learn their status. Batching avoids a
+      // too_long_http_line_exception when many backing indices would push the URL past the
+      // Elasticsearch Netty limit of 4096 bytes. Concurrency is capped to avoid overwhelming
+      // the cluster when there are many chunks.
+      const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
+      const batchResults = await Promise.all(
+        chunkByUrlLength(backingIndexNames).map((chunk) =>
+          limit(() => esClient.indices.resolveIndex(resolveArgs(chunk)))
+        )
+      );
 
       const closedBackingNames = new Set(
-        backingResolved.indices.filter((i) => i.attributes?.includes('closed')).map((i) => i.name)
+        batchResults
+          .flatMap((r) => r.indices)
+          .filter((i) => i.attributes?.includes('closed'))
+          .map((i) => i.name)
       );
 
       for (const ds of resolved.data_streams) {
@@ -93,11 +132,10 @@ export const resolveClosedIndexAdjustments = async (
     const negations = [...closedStandaloneNegations, ...dataStreamNegations];
 
     if (negations.length > 0 || openBackingIndices.length > 0) {
+      const preview = negations.slice(0, 20).join(', ');
+      const overflow = negations.length > 20 ? ` … and ${negations.length - 20} more` : '';
       logger.warn(
-        `Detected closed backing indices. Excluding data streams/indices: ${negations.join(', ')}` +
-          (openBackingIndices.length > 0
-            ? `; adding open backing indices back: ${openBackingIndices.join(', ')}`
-            : '')
+        `Detected closed backing indices. Excluding data streams/indices: ${preview}${overflow}`
       );
     }
 

@@ -6,6 +6,7 @@
  */
 import {
   extractParamReferences,
+  getParamsForSpace,
   monitorUsesGlobalParams,
   valueContainsParams,
 } from './param_utils';
@@ -16,6 +17,44 @@ import {
   MonitorTypeEnum,
   ScheduleUnit,
 } from '../../../common/runtime_types/monitor_management/monitor_configs';
+
+describe('getParamsForSpace', () => {
+  it('returns the space-specific params merged with globally-shared params', () => {
+    const paramsBySpace = {
+      space1: { LOCAL_KEY: 'local' },
+      '*': { GLOBAL_KEY: 'global' },
+    };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({
+      LOCAL_KEY: 'local',
+      GLOBAL_KEY: 'global',
+    });
+  });
+
+  it('falls back to globally-shared params when the space has no dedicated bucket', () => {
+    // Regression test for https://github.com/elastic/sdh-synthetics/issues/295:
+    // a "Share across spaces" param only ever lands in the '*' bucket, and
+    // getSyntheticsParams does not materialize a bucket for a space that has no
+    // space-specific params. A direct paramsBySpace[spaceId] lookup would return
+    // undefined and silently drop the shared param.
+    const paramsBySpace = { '*': { GLOBAL_KEY: 'global' } };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ GLOBAL_KEY: 'global' });
+  });
+
+  it('lets globally-shared params win on key collision, matching getSyntheticsParams/normalizeConfigs', () => {
+    const paramsBySpace = {
+      space1: { SHARED_KEY: 'local' },
+      '*': { SHARED_KEY: 'global' },
+    };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ SHARED_KEY: 'global' });
+  });
+
+  it('returns an empty object when there are no params at all', () => {
+    expect(getParamsForSpace({}, 'space1')).toEqual({});
+  });
+});
 
 describe('extractParamReferences', () => {
   it('extracts single param reference', () => {

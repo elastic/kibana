@@ -12,6 +12,7 @@ import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ebtSpanFilter } from './filters/ebt_span_filter';
+import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 import { CachedResourceObserver } from './apm_resource_counter';
 
 /** "GET protocol://hostname:port/pathname" */
@@ -63,6 +64,7 @@ export class ApmSystem {
     });
 
     apm.addFilter(ebtSpanFilter);
+    apm.addFilter(ignoredErrorsFilter);
 
     // Remove the query params from the URLs (page's URL and refererer)
     apm.addFilter((payload) => {
@@ -134,7 +136,7 @@ export class ApmSystem {
      */
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
-        this.closePageLoadTransaction();
+        this.closePageLoadTransaction(appId);
         this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
@@ -157,7 +159,7 @@ export class ApmSystem {
   }
 
   /* Close and clear the page load transaction */
-  private closePageLoadTransaction() {
+  private closePageLoadTransaction(appId: string) {
     if (this.pageLoadTransaction) {
       const loadCounts = this.resourceObserver.getCounts();
       this.pageLoadTransaction.addLabels({
@@ -165,6 +167,7 @@ export class ApmSystem {
         'cached-resources': loadCounts.memory,
       });
       this.resourceObserver.destroy();
+      this.pageLoadTransaction.name = `/app/${appId}`;
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
     }

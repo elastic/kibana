@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -16,13 +16,17 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError } from '../../../domain/errors';
 
-const bodySchema = z.object({
-  entity_ids: z
-    .array(z.string())
-    .min(1)
-    .max(1000)
-    .describe('Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entity_ids: z
+      .array(z.string())
+      .min(1)
+      .max(1000)
+      .describe(
+        'Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'
+      ),
+  })
+);
 
 export function registerResolutionUnlink(router: EntityStorePluginRouter) {
   router.versioned

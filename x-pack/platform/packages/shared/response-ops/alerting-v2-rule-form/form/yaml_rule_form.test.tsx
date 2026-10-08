@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { YamlRuleForm } from './yaml_rule_form';
 import { createFormWrapper, createMockServices } from '../test_utils';
 
@@ -158,7 +158,7 @@ describe('YamlRuleForm component', () => {
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
 
     // Replace editor content with valid YAML
-    const validYaml = dump({
+    const validYaml = stringify({
       kind: 'alert',
       metadata: { name: 'Test Rule', enabled: true },
       time_field: '@timestamp',
@@ -216,7 +216,7 @@ describe('YamlRuleForm component', () => {
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
 
     // Enter YAML without required name
-    const yamlWithoutName = dump({
+    const yamlWithoutName = stringify({
       kind: 'alert',
       metadata: {},
       evaluation: { query: { base: 'FROM logs-*' } },

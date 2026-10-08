@@ -145,6 +145,35 @@ const applyModelContentChanges = (
   }, prevValue);
 };
 
+const ALL_LINE_ENDINGS = /\r\n|\r|\n/g;
+// For CRLF models, this separates values that are already safe to leave untouched
+// (`foo\r\nbar`) from values whose offsets would not line up with Monaco's CRLF model
+// text (`foo\nbar`, `foo\rbar`).
+const HAS_NON_CRLF_LINE_ENDING = /(^|[^\r])\n|\r(?!\n)/;
+
+/**
+ * Keep the shadow value's line endings aligned with Monaco before applying
+ * `IModelContentChangedEvent.changes`.
+ *
+ * Monaco applies edits against its text buffer: it normalizes edit text to the buffer
+ * EOL, then records `rangeOffset` / `rangeLength` from that same buffer:
+ * https://github.com/microsoft/vscode/blob/e7e037083ff4455cf320e344325dacb480062c3c/src/vs/editor/common/model/pieceTreeTextBuffer/pieceTreeTextBuffer.ts#L276-L290
+ *
+ * Without this, an LF shadow is one `\r` shorter per preceding line break than a CRLF
+ * Monaco model, so model offsets replace the wrong character.
+ */
+const normalizeEndOfLine = (value: string, eol: string): string => {
+  if (eol === '\n' && !value.includes('\r')) {
+    return value;
+  }
+
+  if (eol === '\r\n' && !HAS_NON_CRLF_LINE_ENDING.test(value)) {
+    return value;
+  }
+
+  return value.replace(ALL_LINE_ENDINGS, eol);
+};
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -196,8 +225,9 @@ export function MonacoEditor({
    */
   const lastKnownValueRef = useRef<string>(value ?? defaultValue);
   useEffect(() => {
-    if (typeof value === 'string') {
-      lastKnownValueRef.current = value;
+    if (typeof value === 'string' && value !== lastKnownValueRef.current) {
+      const modelEol = editor.current?.getModel()?.getEOL();
+      lastKnownValueRef.current = modelEol ? normalizeEndOfLine(value, modelEol) : value;
     }
   }, [value]);
 
@@ -281,6 +311,7 @@ export function MonacoEditor({
       const finalOptions = { ...options, ...handleEditorWillMount() };
 
       const model = monaco.editor.createModel(finalValue!, language);
+      lastKnownValueRef.current = normalizeEndOfLine(finalValue!, model.getEOL());
 
       editor.current = monaco.editor.create(containerElement.current, {
         model,
@@ -336,15 +367,24 @@ export function MonacoEditor({
       }
 
       const model = editor.current.getModel();
+      if (!model) {
+        return;
+      }
+
+      const valueInModelEol = normalizeEndOfLine(value, model.getEOL());
+      if (valueInModelEol === lastKnownValueRef.current) {
+        return;
+      }
+
       __preventTriggerChangeEvent.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
-      model!.pushEditOperations(
+      model.pushEditOperations(
         [],
         [
           {
-            range: model!.getFullModelRange(),
-            text: value!,
+            range: model.getFullModelRange(),
+            text: valueInModelEol,
           },
         ],
         // @ts-expect-error
@@ -354,7 +394,7 @@ export function MonacoEditor({
       __preventTriggerChangeEvent.current = false;
 
       // Keep shadow state in sync for programmatic updates where we suppress onDidChangeModelContent.
-      lastKnownValueRef.current = value;
+      lastKnownValueRef.current = valueInModelEol;
     }
   }, [value]);
 

@@ -19,12 +19,14 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 function StaleAlert({
   alert,
+  alertIndex,
   alertStatus,
   rule,
   refetchRule,
   onUntrackAlert,
 }: {
   alert: TopAlert;
+  alertIndex: string | undefined;
   alertStatus: string | undefined;
   rule: Rule | undefined;
   refetchRule: () => void;
@@ -39,14 +41,14 @@ function StaleAlert({
   const trackEvent = useUiTracker();
   const handleUntrackAlert = useCallback(async () => {
     const alertUuid = alert?.fields[ALERT_UUID];
-    if (alertUuid) {
+    if (alertUuid && alertIndex) {
       await untrackAlerts({
-        indices: ['.internal.alerts-observability.*'],
+        indices: [alertIndex],
         alertUuids: [alertUuid],
       });
       onUntrackAlert();
     }
-  }, [alert?.fields, untrackAlerts, onUntrackAlert]);
+  }, [alert?.fields, alertIndex, untrackAlerts, onUntrackAlert]);
   const handleEditRuleDetails = () => {
     setRuleConditionsFlyoutOpen(true);
   };

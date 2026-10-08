@@ -385,7 +385,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
+  const bulkActions = useBulkActionsByTableType(
+    tableType,
+    finalBoolQuery,
+    refreshAlertsTable,
+    runtimeMappings
+  );
 
   useEffect(() => {
     if (isDataTableInitialized) return;

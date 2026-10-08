@@ -13,7 +13,7 @@ import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import type { ClientOptions } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
@@ -41,6 +41,7 @@ import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { isAllowedSnapshotUrl } from '../artifact';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
@@ -190,6 +191,7 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+const ALLOWED_IMAGE_PREFIX = `${DOCKER_REGISTRY}/`;
 
 const ES_REFRESH_INTERVAL_OVERRIDE_FLAG =
   '-Des.stateless.allow.index.refresh_interval.override=true';
@@ -290,6 +292,12 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
+
+  // Serverless ES throttles indexing when free disk drops below this reserve (defaults to 20% of total
+  // disk). CI agents share an overlay filesystem that can already sit above 80% full at ES startup, which
+  // trips the throttle immediately and stalls Kibana startup/migrations. Pin to an absolute 1gb for tests.
+  // Note: this must stay above the Lucene indexing buffer (~161mb here) or ES refuses to start; 1gb is safe.
+  ['stateless.indices.disk.reserved_bytes', '1gb'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
@@ -424,7 +432,7 @@ export function resolveDockerImage({
   defaultImg: string;
 }) {
   if (image) {
-    if (!image.includes(DOCKER_REGISTRY)) {
+    if (!image.startsWith(ALLOWED_IMAGE_PREFIX)) {
       throw createCliError(
         `Only verified images from ${DOCKER_REGISTRY} are currently allowed.\nIf you require this functionality in @kbn/es please contact the Kibana Operations Team.`
       );
@@ -1481,7 +1489,10 @@ async function runDockerContainerInSnapshotMode(
   let repo = DOCKER_REPO;
   const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
   if (!options.tag && !options.image && manifestUrl) {
-    const resp = await fetch(manifestUrl);
+    if (!isAllowedSnapshotUrl(manifestUrl)) {
+      throw createCliError(`ES_SNAPSHOT_MANIFEST points to an unexpected location: ${manifestUrl}`);
+    }
+    const resp = await fetch(manifestUrl, { redirect: 'error' });
     if (resp.ok) {
       const manifest = await resp.json();
       const { version, sha } = manifest;

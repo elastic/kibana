@@ -40,7 +40,7 @@ export class Session {
   }
 }
 
-const REQUEST_TIMEOUT_MS = 60_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 
 const getCookieFromResponseHeaders = (headers: Headers, body: string, errorMessage: string) => {
   // Headers.getSetCookie() is the Node 22 / undici way to read multi-valued
@@ -74,7 +74,7 @@ export const createCloudSession = async (
   params: CreateSamlSessionParams,
   retryParams: RetryParams = {
     attemptsCount: 3,
-    attemptDelay: 15_000,
+    attemptDelay: 10_000,
   }
 ): Promise<string> => {
   const { hostname, email, password, log } = params;

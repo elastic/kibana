@@ -54,7 +54,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-123',
                         },
                       },
@@ -93,8 +93,8 @@ describe('buildActionResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -182,9 +182,13 @@ describe('buildActionResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-kuery',
+              },
+            },
+            {
               query_string: {
-                query:
-                  'action_id: action-kuery AND agent.name: "test-agent" AND error.message: *timeout*',
+                query: 'agent.name: "test-agent" AND error.message: *timeout*',
               },
             },
           ],
@@ -227,8 +231,8 @@ describe('buildActionResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time-range',
+              term: {
+                action_id: 'action-time-range',
               },
             },
           ],
@@ -300,7 +304,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-comprehensive',
                         },
                       },
@@ -347,9 +351,13 @@ describe('buildActionResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-comprehensive',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-comprehensive AND error.type: "timeout" OR status: "failed"',
+                  query: 'error.type: "timeout" OR status: "failed"',
                 },
               },
             ],

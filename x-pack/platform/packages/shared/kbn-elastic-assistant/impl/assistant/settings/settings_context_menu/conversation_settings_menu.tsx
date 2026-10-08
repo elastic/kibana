@@ -367,9 +367,9 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
 
     return (
       <>
-        <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
+        <EuiPopover
+          button={
+            <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={i18n.CONVO_ASSISTANT_MENU}
                 isDisabled={isDisabled}
@@ -377,20 +377,20 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                 onClick={onButtonClick}
                 data-test-subj="conversation-settings-menu"
               />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
-          >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
-        </EuiToolTip>
+            </EuiToolTip>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftUp"
+        >
+          <EuiContextMenuPanel
+            items={items}
+            css={css`
+              width: 280px;
+            `}
+          />
+        </EuiPopover>
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             aria-labelledby={confirmModalTitleId}

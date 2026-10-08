@@ -11,7 +11,7 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
+      plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
         es6: true,
@@ -251,8 +251,8 @@ module.exports = {
           ],
           'import/no-default-export': 'error',
 
-          'eslint-comments/no-unused-disable': 'error',
-          'eslint-comments/no-unused-enable': 'error',
+          '@eslint-community/eslint-comments/no-unused-disable': 'error',
+          '@eslint-community/eslint-comments/no-unused-enable': 'error',
           'no-restricted-syntax': [
             'error',
             {

@@ -13,7 +13,8 @@ export const buildActionResultsQuery = ({
   actionId,
   sort,
 }: ActionResponsesRequestOptions): ISearchRequestParams => {
-  const fields = [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }];
+  // Only the completion timestamp is consumed from the hits (see `useGetAutomatedActionResponseList`)
+  const fields = [{ field: 'EndpointActions.completed_at' }];
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTION_RESPONSES_INDEX],

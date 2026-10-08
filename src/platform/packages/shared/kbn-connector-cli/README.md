@@ -7,8 +7,8 @@ CLI tool for bulk-creating testing connector instances in a running Kibana.
 ```bash
 # Prerequisites
 vault login --method oidc                    # One-time Vault authentication
-yarn es snapshot                             # Start Elasticsearch (separate terminal)
-yarn start                                   # Start Kibana (separate terminal)
+pnpm es snapshot                             # Start Elasticsearch (separate terminal)
+pnpm start                                   # Start Kibana (separate terminal)
 
 # Create all enabled connectors
 node scripts/create_connectors.js

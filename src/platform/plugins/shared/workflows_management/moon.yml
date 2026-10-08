@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
   - '@kbn/monaco'
@@ -104,6 +105,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/std'
   - '@kbn/kbn-client'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod

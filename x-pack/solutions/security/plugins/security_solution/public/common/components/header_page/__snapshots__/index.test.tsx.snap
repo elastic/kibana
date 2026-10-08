@@ -41,14 +41,14 @@ exports[`HeaderPage it renders 1`] = `
         class="css-acb1mh-flex-center"
       >
         <div
-          class="euiPageHeaderSection css-1xndooq-headerSection"
+          class="euiPageHeaderSection css-1nsw80o-headerSection"
         >
           <h1
-            class="euiTitle css-1tgxtfm-Header-euiTitle-l e1mvi39w1"
+            class="euiTitle css-1tgxtfm-Header-euiTitle-l ex2433o0"
             data-test-subj="header-page-title"
           >
             <span
-              class="css-80vzk8-TitleWrapper e1mvi39w0"
+              class="css-80vzk8-TitleWrapper ex2433o1"
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
@@ -119,7 +119,7 @@ exports[`HeaderPage it renders 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="css-v9atdk-Divider"
+    class="css-bp7v37-Divider"
   />
   <div
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"

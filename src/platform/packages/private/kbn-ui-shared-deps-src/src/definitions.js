@@ -43,7 +43,6 @@ const externals = {
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
-  jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
   react: '__kbnSharedDeps__.React',
@@ -155,6 +154,7 @@ const externals = {
   '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
   '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
   '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
+  '@kbn/core-user-profile-browser-context': '__kbnSharedDeps__.KbnCoreUserProfileBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

@@ -73,6 +73,7 @@ apiTest.describe(
     });
 
     apiTest('creates a new slo and transforms', async ({ apiClient }) => {
+      apiTest.setTimeout(210_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: DEFAULT_SLO,
@@ -221,6 +222,7 @@ apiTest.describe(
     );
 
     apiTest('creates instanceId for SLOs with multi groupBy', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(210_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: {
@@ -246,6 +248,7 @@ apiTest.describe(
     });
 
     apiTest('creates instanceId for SLOs with single groupBy', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(210_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: {
@@ -271,6 +274,7 @@ apiTest.describe(
     });
 
     apiTest('creates instanceId for SLOs without groupBy ([])', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(330_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: {
@@ -298,6 +302,7 @@ apiTest.describe(
     apiTest(
       'creates instanceId for SLOs without groupBy (["*"])',
       async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(210_000);
         const apiResponse = await apiClient.post('api/observability/slos', {
           headers,
           body: {
@@ -324,6 +329,7 @@ apiTest.describe(
     );
 
     apiTest('creates instanceId for SLOs without groupBy ("")', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(210_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: {

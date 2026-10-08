@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { DashboardStart } from './plugin';
 import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
 import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
+import type { DashboardApi, DashboardInternalApi } from './dashboard_api/types';
+import { DashboardContext } from './dashboard_api/use_dashboard_api';
+import { DashboardInternalContext } from './dashboard_api/use_dashboard_internal_api';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -48,6 +53,7 @@ export function setupIntersectionObserverMock({
     readonly root: Element | null = root;
     readonly rootMargin: string = rootMargin;
     readonly thresholds: readonly number[] = thresholds;
+    readonly scrollMargin: string = '';
     disconnect: () => void = disconnect;
     observe: (target: Element) => void = observe;
     takeRecords: () => IntersectionObserverEntry[] = takeRecords;
@@ -90,6 +96,57 @@ export function buildMockDashboardApi({
       : undefined,
   });
   return results;
+}
+
+/**
+ * Creates a React wrapper component that provides both `DashboardContext` and
+ * `DashboardInternalContext` for use with `renderHook` or `render` in tests.
+ *
+ * Builds a mock dashboard API from the given initial state and saved object ID,
+ * then optionally merges in shallow overrides for either the public API or the
+ * internal API before handing the contexts to the wrapped children.
+ *
+ * @param initialStateOverrides - Partial dashboard state merged on top of the default state.
+ * @param savedObjectId - Optional saved object ID; when provided the mock API is initialized as a saved dashboard.
+ * @param apiOverrides - Shallow overrides applied on top of the mock `DashboardApi`.
+ * @param internalApiOverrides - Shallow overrides applied on top of the mock `DashboardInternalApi`.
+ * @returns A React wrapper component suitable for passing to `renderHook({ wrapper })`.
+ */
+export function dashboardContextWrapper({
+  initialStateOverrides,
+  savedObjectId,
+  apiOverrides,
+  internalApiOverrides,
+}: {
+  initialStateOverrides?: Partial<DashboardState>;
+  savedObjectId?: string;
+  apiOverrides?: Partial<DashboardApi>;
+  internalApiOverrides?: Partial<DashboardInternalApi>;
+}) {
+  const { api, internalApi } = buildMockDashboardApi({
+    overrides: initialStateOverrides,
+    savedObjectId,
+  });
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <I18nProvider>
+      <DashboardContext.Provider
+        value={{
+          ...api,
+          ...(apiOverrides ?? {}),
+        }}
+      >
+        <DashboardInternalContext.Provider
+          value={{
+            ...internalApi,
+            ...(internalApiOverrides ?? {}),
+          }}
+        >
+          {children}
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    </I18nProvider>
+  );
 }
 
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {

@@ -112,7 +112,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
       return null;
     }
     const { aliases } = index;
-    if (aliases === 'none') {
+    if (!Array.isArray(aliases) || aliases.length === 0) {
       return (
         <Fragment>
           <EuiSpacer size="m" />
@@ -140,7 +140,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         </Fragment>
       );
     }
-    const aliasOptions = (aliases as string[]).map((alias: string) => {
+    const aliasOptions = aliases.map((alias: string) => {
       return {
         text: alias,
         value: alias,

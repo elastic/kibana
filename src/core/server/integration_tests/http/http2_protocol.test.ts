@@ -8,6 +8,7 @@
  */
 
 import type { Server } from 'http';
+import http2 from 'http2';
 import supertest from 'supertest';
 import { of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -238,5 +239,89 @@ describe('Http2 - Smoke tests', () => {
         expect(response.header).toEqual(expect.objectContaining({ connection: 'close' }));
       });
     });
+  });
+
+  describe('request events', () => {
+    let handlerEntered: PromiseWithResolvers<void>;
+    let releaseHandler: PromiseWithResolvers<void>;
+    let abortedEmitted: PromiseWithResolvers<void>;
+    let completedEmitted: PromiseWithResolvers<void>;
+    let abortedSpy: jest.Mock;
+    let completedSpy: jest.Mock;
+
+    beforeEach(async () => {
+      handlerEntered = Promise.withResolvers<void>();
+      releaseHandler = Promise.withResolvers<void>();
+      abortedEmitted = Promise.withResolvers<void>();
+      completedEmitted = Promise.withResolvers<void>();
+      abortedSpy = jest.fn(() => abortedEmitted.resolve());
+      completedSpy = jest.fn(() => completedEmitted.resolve());
+
+      const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
+      innerServerListener = innerServer.listener;
+
+      const router = new Router('', logger, enhanceWithContext, {
+        env,
+        versionedRouterOptions: {
+          defaultHandlerResolutionStrategy: 'oldest',
+        },
+      });
+
+      router.get(
+        {
+          path: '/parked',
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, req, res) => {
+          req.events.aborted$.subscribe({ next: abortedSpy });
+          req.events.completed$.subscribe({ next: completedSpy });
+          handlerEntered.resolve();
+          await releaseHandler.promise;
+          return res.ok({ body: 'ok' });
+        }
+      );
+
+      registerRouter(router);
+
+      await server.start();
+    });
+
+    afterEach(() => {
+      releaseHandler.resolve();
+    });
+
+    it('emits aborted$ when the client resets the stream while the request is pending', async () => {
+      const session = http2.connect(`https://127.0.0.1:${config.port}`, {
+        rejectUnauthorized: false,
+      });
+      session.on('error', () => {});
+      try {
+        const stream = session.request({ ':path': '/parked', ':method': 'GET' });
+        stream.on('error', () => {});
+        stream.end();
+
+        await handlerEntered.promise;
+        stream.close(http2.constants.NGHTTP2_CANCEL);
+
+        await abortedEmitted.promise;
+        expect(abortedSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        session.destroy();
+      }
+    }, 10_000);
+
+    it('emits completed$ but not aborted$ when the request completes', async () => {
+      releaseHandler.resolve();
+
+      const response = await supertest(innerServerListener).get('/parked').http2();
+      expect(response.status).toBe(200);
+
+      // the response 'close' event fires server-side after the client received the response
+      await completedEmitted.promise;
+
+      expect(completedSpy).toHaveBeenCalledTimes(1);
+      expect(abortedSpy).not.toHaveBeenCalled();
+    }, 10_000);
   });
 });

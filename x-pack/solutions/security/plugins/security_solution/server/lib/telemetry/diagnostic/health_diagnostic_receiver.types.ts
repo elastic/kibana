@@ -7,10 +7,15 @@
 
 import type { Observable } from 'rxjs';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
-import type { ExecutableQuery } from './health_diagnostic_service.types';
+import type { ApiExecutableQuery, ExecutableQuery } from './health_diagnostic_service.types';
 
 export interface QueryConfig {
   query: ExecutableQuery;
+  circuitBreakers: CircuitBreaker[];
+}
+
+export interface ApiQueryConfig {
+  query: ApiExecutableQuery;
   circuitBreakers: CircuitBreaker[];
 }
 
@@ -25,4 +30,13 @@ export interface CircuitBreakingQueryExecutor {
    * @returns An async iterable of results matching the query.
    */
   search<T>(queryConfig: QueryConfig): Observable<T>;
+
+  /**
+   * Executes a v3 API query against an ES HTTP endpoint and returns an
+   * Observable that emits each item extracted from the response.
+   *
+   * @param options - Configuration including the API query and circuit breakers.
+   * @returns An Observable of extracted result items.
+   */
+  searchApi(options: ApiQueryConfig): Observable<unknown>;
 }

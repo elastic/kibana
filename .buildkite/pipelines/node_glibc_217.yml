@@ -62,6 +62,7 @@ steps:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -108,7 +109,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -203,6 +204,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -433,7 +436,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build

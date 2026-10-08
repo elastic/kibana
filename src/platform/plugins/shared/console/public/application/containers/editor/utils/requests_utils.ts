@@ -8,6 +8,7 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/console/utils';
 import { parse } from 'hjson';
 import { i18n } from '@kbn/i18n';
 import { constructUrl } from '../../../../lib/es';
@@ -97,10 +98,13 @@ export const getRequestEndLineNumber = ({
   startLineNumber: number;
 }): number => {
   let endLineNumber: number;
+
   if (parsedRequest.endOffset) {
     // if the parser set an end offset for this request, then find the line number for it
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
+    const requestStartLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber;
+
     // if no end offset, try to find the line before the next request starts
     if (nextRequest) {
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
@@ -108,14 +112,29 @@ export const getRequestEndLineNumber = ({
         nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
-      let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
-      let nextLineContent: string;
-      while (nextLineNumber <= model.getLineCount()) {
-        nextLineContent = model.getLineContent(nextLineNumber).trim();
-        if (nextLineContent.match(startsWithMethodRegex)) {
+      const lineCount = model.getLineCount();
+      // The parser reads the request line as method + url and never opens a string on it, so the
+      // string scan starts at the body: a stray quote or comment marker on the request line must
+      // not phase-shift the string state of the lines below.
+      const bodyLines: string[] = [];
+      for (let lineNumber = requestStartLineNumber + 1; lineNumber <= lineCount; lineNumber++) {
+        bodyLines.push(model.getLineContent(lineNumber));
+      }
+      // Scan the body once and query each candidate line by offset; rescanning the whole prefix
+      // for every method-like line is quadratic on large unfinished bodies.
+      const isInsideUnfinishedString = createInsideConsoleStringChecker(bodyLines.join('\n'));
+      let nextLineNumber = requestStartLineNumber + 1;
+      let nextLineStartOffset = 0;
+      while (nextLineNumber <= lineCount) {
+        const nextLineContent = bodyLines[nextLineNumber - requestStartLineNumber - 1];
+        if (
+          nextLineContent.trim().match(startsWithMethodRegex) &&
+          !isInsideUnfinishedString(nextLineStartOffset)
+        ) {
           // found a line that starts with a method, stop iterating
           break;
         }
+        nextLineStartOffset += nextLineContent.length + 1;
         nextLineNumber++;
       }
       // nextLineNumber is now either the line with a method or 1 line after the end of the text
@@ -271,26 +290,31 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
+const requestDataTokensRegex = new RegExp(
+  [
+    /"""[\s\S]*?"""/.source, // Triple-quoted strings
+    /"(?:\\.|[^"\\])*"/.source, // JSON strings
+    /\/\/[^\r\n]*/.source, // // comments
+    /#[^\r\n]*/.source, // # comments
+    /\/\*[\s\S]*?\*\//.source, // Block comments
+  ].join('|'),
+  'g'
+);
+
+const isSlashCommentToken = (token: string) => token.startsWith('//') || token.startsWith('/*');
+const isCommentToken = (token: string) => isSlashCommentToken(token) || token.startsWith('#');
+
 export const containsComments = (requestData: string) => {
-  let insideString = false;
-  let prevChar = '';
-  for (let i = 0; i < requestData.length; i++) {
-    const char = requestData[i];
-    const nextChar = requestData[i + 1];
-
-    if (!insideString && char === '"') {
-      insideString = true;
-    } else if (insideString && char === '"' && prevChar !== '\\') {
-      insideString = false;
-    } else if (!insideString) {
-      if (char === '/' && (nextChar === '/' || nextChar === '*')) {
-        return true;
-      }
+  requestDataTokensRegex.lastIndex = 0;
+  let match = requestDataTokensRegex.exec(requestData);
+  while (match) {
+    if (isCommentToken(match[0])) {
+      requestDataTokensRegex.lastIndex = 0;
+      return true;
     }
-
-    prevChar = char;
+    match = requestDataTokensRegex.exec(requestData);
   }
-
+  requestDataTokensRegex.lastIndex = 0;
   return false;
 };
 
@@ -301,6 +325,40 @@ export const indentData = (dataString: string): string => {
     return JSON.stringify(parsedData, null, 2);
   } catch (e) {
     return dataString;
+  }
+};
+
+const removeCommentsFromDataWithTripleQuotes = (dataString: string): string | null => {
+  const dataWithoutComments = dataString.replace(requestDataTokensRegex, (token) =>
+    isCommentToken(token) ? ' ' : token
+  );
+
+  const { collapsedTripleQuotesData } = collapseTripleQuoteStrings(dataWithoutComments);
+  try {
+    parse(collapsedTripleQuotesData);
+    return dataWithoutComments;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * This function removes comments from the request data.
+ *
+ * The comment removal is done by parsing the data with hjson and stringifying the result.
+ * Since hjson can't parse multi-line strings in triple quotes, a token-aware fallback removes
+ * comments outside quoted strings and validates the result after collapsing triple-quote strings.
+ * Comments inside triple-quote strings (e.g. Painless comments) are preserved.
+ * If the data can't be parsed at all, it is returned unchanged.
+ */
+export const removeCommentsFromData = (dataString: string): string => {
+  try {
+    return JSON.stringify(parse(dataString), null, 2);
+  } catch {
+    if (!dataString.includes('"""')) {
+      return dataString;
+    }
+    return removeCommentsFromDataWithTripleQuotes(dataString) ?? dataString;
   }
 };
 

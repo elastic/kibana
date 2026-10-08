@@ -8,6 +8,7 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../utils/elasticsearch_terms_limits';
 import type { LeadEntity } from '../types';
 
 const createEntity = (
@@ -382,5 +383,63 @@ describe('BehavioralAnalysisModule', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch alert summaries')
     );
+  });
+
+  describe('large entity volumes (P90+ scale)', () => {
+    it('batches the terms query so a single type never exceeds the ES max_terms_count limit', async () => {
+      const totalEntities = DEFAULT_MAX_TERMS_QUERY_COUNT + 5000;
+      const entities: LeadEntity[] = Array.from({ length: totalEntities }, (_, i) =>
+        createEntity('user', `user-${i}`)
+      );
+
+      esClient.search.mockImplementation((params) => {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter.find(
+          (f) => (f.terms as Record<string, unknown> | undefined)?.entity_id_user
+        ) as { terms: Record<string, string[]> };
+        const chunk = termsFilter.terms.entity_id_user;
+
+        // Echo back a bucket for the first EUID in this chunk only, so we can
+        // prove that every chunk was actually queried and merged (not just the last one).
+        return Promise.resolve(
+          createAlertAggResponse([
+            {
+              key: chunk[0],
+              docCount: 12,
+              severities: { high: 12 },
+              rules: ['Rule A'],
+              maxRiskScore: 80,
+            },
+          ]) as never
+        );
+      });
+
+      const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
+      const observations = await module.collect(entities);
+
+      // ceil(70535 / 65535) = 2 queries for the single 'user' type
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+
+      for (const [params] of esClient.search.mock.calls) {
+        const query = (params as Record<string, unknown>).query as {
+          bool: { filter: Array<Record<string, unknown>> };
+        };
+        const termsFilter = query.bool.filter.find(
+          (f) => (f.terms as Record<string, unknown> | undefined)?.entity_id_user
+        ) as { terms: Record<string, string[]> };
+        expect(termsFilter.terms.entity_id_user.length).toBeLessThanOrEqual(
+          DEFAULT_MAX_TERMS_QUERY_COUNT
+        );
+      }
+
+      // The entity that triggered the first chunk and the entity that triggered the
+      // second chunk both need observations, proving results from every batch made it back.
+      expect(observations.some((o) => o.entityId === 'user:user-0')).toBe(true);
+      expect(
+        observations.some((o) => o.entityId === `user:user-${DEFAULT_MAX_TERMS_QUERY_COUNT}`)
+      ).toBe(true);
+    });
   });
 });

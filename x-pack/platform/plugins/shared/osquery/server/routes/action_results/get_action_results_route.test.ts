@@ -10,6 +10,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getActionResultsRoute } from './get_action_results_route';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import {
   Direction,
   OsqueryQueries,
@@ -40,7 +41,7 @@ describe('getActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   beforeEach(() => {

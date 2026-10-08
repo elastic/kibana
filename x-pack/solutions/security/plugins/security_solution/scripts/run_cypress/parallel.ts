@@ -271,6 +271,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
 
+      const isCypressFailedRunResult = (
+        runResult:
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+      ): runResult is CypressCommandLine.CypressFailedRunResult =>
+        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
+
       const isTestAssertionFailure = (
         runResult:
           | CypressCommandLine.CypressRunResult
@@ -588,7 +596,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
                 results.push(runResult);
 
-                if (!(runResult as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                if (isCypressFailedRunResult(runResult)) {
+                  infraFailedSpecFilePaths.push(filePath);
+                } else if (runResult.totalFailed === 0) {
                   _.pull(failedSpecFilePaths, filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});

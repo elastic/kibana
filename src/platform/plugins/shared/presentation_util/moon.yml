@@ -39,7 +39,6 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -49,6 +48,4 @@ fileGroups:
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

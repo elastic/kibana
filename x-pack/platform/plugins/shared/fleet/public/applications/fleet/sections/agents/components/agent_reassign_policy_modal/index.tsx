@@ -27,20 +27,30 @@ import {
 } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../../../../components';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
 
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
+  agentCount: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
+  agentCount,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
+
+  // Strip any version suffix (e.g. "base-uuid#9.4") so we match against base policy IDs returned
+  // by useGetAgentPolicies, which never include version-specific variants.
+  const agentBasePolicyId =
+    isSingleAgent && (agents[0] as Agent).policy_id
+      ? removeVersionSuffixFromPolicyId((agents[0] as Agent).policy_id!)
+      : undefined;
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
@@ -50,13 +60,15 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   const agentPolicies = useMemo(
     () =>
       agentPoliciesRequest.data
-        ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
+        ? agentPoliciesRequest.data.items
+            .filter((policy) => policy && !policy.is_managed)
+            .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
         : [],
     [agentPoliciesRequest.data]
   );
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    isSingleAgent ? (agents[0] as Agent).policy_id : undefined
+    agentBasePolicyId
   );
 
   const hasInitialized = useRef(!!selectedAgentPolicyId);
@@ -112,7 +124,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-          defaultMessage="Assign new agent policy"
+          defaultMessage="Assign new policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       onCancel={onClose}
@@ -127,12 +142,15 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         isSubmitting ||
         !selectedAgentPolicyId ||
         hasInvalidPolicySearch ||
-        (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
+        (isSingleAgent && selectedAgentPolicyId === agentBasePolicyId)
       }
       confirmButtonText={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
-          defaultMessage="Assign policy"
+          defaultMessage="Assign policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       buttonColor="primary"
@@ -142,9 +160,9 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutDescription"
-          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {# agents}} to."
           values={{
-            count: isSingleAgent ? 1 : 0,
+            count: agentCount,
           }}
         />
       </p>
