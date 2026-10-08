@@ -11,11 +11,12 @@ import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { AuditService } from './audit_service';
 
 export const auditLoggerMock = {
-  create() {
+  create(overrides: Partial<Pick<AuditLogger, 'enabled' | 'includeSavedObjectNames'>> = {}) {
     return lazyObject({
       log: jest.fn(),
       enabled: true,
       includeSavedObjectNames: false,
+      ...overrides,
     }) as jest.Mocked<AuditLogger>;
   },
 };

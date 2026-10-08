@@ -130,6 +130,32 @@ describe('preflightCheckForCreate', () => {
     );
   });
 
+  it(`adds the requested fields to the object's mget _source`, async () => {
+    const obj = {
+      type: 'obj-type',
+      id: 'id-1',
+      overwrite: true,
+      namespaces: ['a'],
+      fields: ['obj-type'],
+    };
+    const params = setup(obj);
+    mockMgetResults({ found: false }, { found: false }); // object, then its alias in "a"
+
+    await preflightCheckForCreate(params);
+
+    expect(client.mget).toHaveBeenCalledWith(
+      {
+        docs: [
+          expect.objectContaining({
+            _source: ['type', 'namespaces', 'originId', 'accessControl', 'obj-type'],
+          }),
+          expect.objectContaining({ _source: [`${LEGACY_URL_ALIAS_TYPE}.disabled`] }),
+        ],
+      },
+      expect.anything()
+    );
+  });
+
   it(`returns mix of success and error results`, async () => {
     const fourSpaces = ['a', 'b', 'c', 'd'];
     const obj1 = { type: 'obj-type', id: 'id-1', overwrite: false, namespaces: ['*'] }; // success: find aliases, object not found

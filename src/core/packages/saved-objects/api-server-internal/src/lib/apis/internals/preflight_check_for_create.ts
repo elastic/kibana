@@ -52,6 +52,8 @@ export interface PreflightCheckForCreateObject {
   namespaces: string[];
   /** Whether or not the object should be overwritten if it would encounter a regular conflict. */
   overwrite?: boolean;
+  /** Extra `_source` fields to fetch for the existing document (e.g. its attributes). */
+  fields?: string[];
 }
 
 export interface PreflightCheckForCreateParams {
@@ -85,6 +87,7 @@ interface ParsedObject {
   id: string;
   overwrite: boolean;
   spaces: Set<string>;
+  fields?: string[];
 }
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
@@ -200,9 +203,9 @@ async function optionallyFindAliases(
 ) {
   // Make a discriminated union based on the spaces the objects should be created in (Left=mget aliases, Right=find aliases)
   const objectsToGetOrObjectsToFind = objects.map<Either<ParsedObject>>((object) => {
-    const { type, id, namespaces, overwrite = false } = object;
+    const { type, id, namespaces, overwrite = false, fields } = object;
     const spaces = new Set(namespaces);
-    const value = { type, id, overwrite, spaces };
+    const value = { type, id, overwrite, spaces, ...(fields && { fields }) };
     return spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING)
       ? right(value)
       : left(value);
@@ -258,11 +261,11 @@ async function bulkGetObjectsAndAliases(
 ) {
   const docsToBulkGet: Array<{ _id: string; _index: string; _source: string[] }> = [];
   const aliasSpaces: string[] = [];
-  for (const { type, id, spaces, checkAliases } of objectsAndAliasesToBulkGet) {
+  for (const { type, id, spaces, checkAliases, fields = [] } of objectsAndAliasesToBulkGet) {
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId', 'accessControl'],
+      _source: ['type', 'namespaces', 'originId', 'accessControl', ...fields],
     });
     if (checkAliases) {
       for (const space of spaces) {

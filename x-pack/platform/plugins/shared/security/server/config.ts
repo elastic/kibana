@@ -300,23 +300,43 @@ export const ConfigSchema = schema.object({
       }),
     }),
   }),
-  audit: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    include_saved_object_names: schema.boolean({ defaultValue: true }),
-    appender: schema.maybe(coreConfig.logging.appenders),
-    ignore_filters: schema.maybe(
-      schema.arrayOf(
-        schema.object({
-          actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-        })
-      )
-    ),
-  }),
+  audit: schema.object(
+    {
+      enabled: schema.boolean({ defaultValue: false }),
+      include_saved_object_names: schema.boolean({ defaultValue: true }),
+      savedObjectDiff: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        typesToInclude: schema.arrayOf(schema.string({ maxLength: 100 }), {
+          defaultValue: [],
+          maxSize: 50,
+        }),
+        fieldSizeLimit: schema.byteSize({ defaultValue: '48kb', min: '1b' }),
+      }),
+      appender: schema.maybe(coreConfig.logging.appenders),
+      ignore_filters: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          })
+        )
+      ),
+    },
+    {
+      validate: (value) => {
+        if (value.savedObjectDiff.enabled && !value.enabled) {
+          return 'xpack.security.audit.savedObjectDiff.enabled requires xpack.security.audit.enabled to be true';
+        }
+        if (value.savedObjectDiff.enabled && value.savedObjectDiff.typesToInclude.length === 0) {
+          return 'xpack.security.audit.savedObjectDiff.typesToInclude must be non-empty when xpack.security.audit.savedObjectDiff.enabled is true';
+        }
+      },
+    }
+  ),
 
   roleManagementEnabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),

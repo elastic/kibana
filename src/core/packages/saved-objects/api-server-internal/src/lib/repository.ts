@@ -67,6 +67,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsExtensions,
   SavedObject,
+  SavedObjectDiffAuditAction,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -77,6 +78,7 @@ import {
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import type { RepositoryHelpers } from './apis/helpers';
+import { SavedObjectAuditDiffRecorder } from './apis/utils/saved_object_audit_diff_recorder';
 import {
   type ApiExecutionContext,
   performCreate,
@@ -240,6 +242,29 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
+   * Creates the per-operation audit recorder for a saved object write, or undefined
+   * when saved object diff auditing is disabled (so a recorder's existence implies
+   * the feature is active). The API implementation records facts (before/after
+   * attributes, per-object success) through it, and the repository flushes it once
+   * the operation settles.
+   */
+  private createSavedObjectAuditDiffRecorder(
+    action: SavedObjectDiffAuditAction
+  ): SavedObjectAuditDiffRecorder | undefined {
+    const { extensions, logger } = this.apiExecutionContext;
+    const { securityExtension, encryptionExtension } = extensions;
+    if (!securityExtension?.savedObjectDiffEnabled) {
+      return undefined;
+    }
+    return new SavedObjectAuditDiffRecorder({
+      action,
+      securityExtension,
+      encryptionExtension,
+      logger,
+    });
+  }
+
+  /**
    * {@inheritDoc ISavedObjectsRepository.create}
    */
   public async create<T = unknown>(
@@ -248,16 +273,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const timer = this.serverTiming?.start('so-create', type);
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_create');
     try {
       return await performCreate(
         {
           type,
           attributes,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }
@@ -270,15 +298,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-create');
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_create');
     try {
       return await performBulkCreate(
         {
           objects,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }
@@ -309,16 +340,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     const timer = this.serverTiming?.start('so-delete', type);
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_delete');
     try {
       return await performDelete(
         {
           type,
           id,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }
@@ -331,15 +365,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
     const timer = this.serverTiming?.start('so-bulk-delete');
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_delete');
     try {
       return await performBulkDelete(
         {
           objects,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }
@@ -505,6 +542,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     const timer = this.serverTiming?.start('so-update', type);
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_update');
     try {
       return await performUpdate(
         {
@@ -512,10 +550,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           id,
           attributes,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }
@@ -574,15 +614,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-update');
+    const auditDiffRecorder = this.createSavedObjectAuditDiffRecorder('saved_object_update');
     try {
       return await performBulkUpdate(
         {
           objects,
           options,
+          auditDiffRecorder,
         },
         this.apiExecutionContext
       );
     } finally {
+      auditDiffRecorder?.flush();
       timer?.end();
     }
   }

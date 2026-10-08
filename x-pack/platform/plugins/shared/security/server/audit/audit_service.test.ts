@@ -11,6 +11,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
@@ -31,6 +32,7 @@ import {
   applyAuditOtelFieldMap,
   AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
   AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+  serializeAuditDiffAttribute,
 } from './audit_otel_transform';
 import {
   AuditService,
@@ -72,6 +74,15 @@ beforeEach(() => {
   http.registerOnPostAuth.mockClear();
 });
 
+// Schema defaults for the always-present savedObjectDiff block.
+const savedObjectDiffDefaults = {
+  savedObjectDiff: {
+    enabled: false,
+    typesToInclude: [],
+    fieldSizeLimit: ByteSizeValue.parse('48kb'),
+  },
+};
+
 describe('#setup', () => {
   it('returns the expected contract', () => {
     const audit = new AuditService(logger);
@@ -107,6 +118,7 @@ describe('#setup', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -135,6 +147,7 @@ describe('#setup', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -165,6 +178,7 @@ describe('#setup', () => {
       config: {
         enabled: false,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: undefined,
       },
       logging,
@@ -462,6 +476,7 @@ describe('#asScoped', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -498,6 +513,7 @@ describe('#asScoped', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -597,6 +613,7 @@ describe('#withoutRequest', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -626,6 +643,7 @@ describe('#withoutRequest', () => {
       config: {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'console',
           layout: {
@@ -656,6 +674,7 @@ describe('#createLoggingConfig', () => {
     const loggingConfig = createLoggingConfig({
       enabled: true,
       include_saved_object_names: false,
+      ...savedObjectDiffDefaults,
       appender: {
         type: 'console',
         layout: {
@@ -693,6 +712,7 @@ describe('#createLoggingConfig', () => {
     const loggingConfig = createLoggingConfig({
       enabled: false,
       include_saved_object_names: false,
+      ...savedObjectDiffDefaults,
       appender: {
         type: 'console',
         layout: {
@@ -710,6 +730,7 @@ describe('#createLoggingConfig', () => {
     const loggingConfig = createLoggingConfig({
       enabled: true,
       include_saved_object_names: false,
+      ...savedObjectDiffDefaults,
       appender: {
         type: 'console',
         layout: {
@@ -728,6 +749,7 @@ describe('#createLoggingConfig', () => {
       {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'otel',
           protocol: 'http',
@@ -749,6 +771,7 @@ describe('#createLoggingConfig', () => {
       {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'otel',
           protocol: 'http',
@@ -792,6 +815,7 @@ describe('#createLoggingConfig', () => {
     const loggingConfig = createLoggingConfig({
       enabled: true,
       include_saved_object_names: false,
+      ...savedObjectDiffDefaults,
       appender: {
         type: 'console',
         layout: { type: 'pattern' },
@@ -809,6 +833,7 @@ describe('#createLoggingConfig', () => {
       {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'otel',
           protocol: 'http',
@@ -833,6 +858,7 @@ describe('#createLoggingConfig', () => {
       {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'otel',
           protocol: 'http',
@@ -869,6 +895,7 @@ describe('#createLoggingConfig', () => {
     const loggingConfig = createLoggingConfig({
       enabled: true,
       include_saved_object_names: false,
+      ...savedObjectDiffDefaults,
       appender: {
         type: 'console',
         layout: { type: 'pattern' },
@@ -881,28 +908,29 @@ describe('#createLoggingConfig', () => {
     expect(appenders.auditTrailAppender).not.toHaveProperty('promoteResourceAttributes');
   });
 
-  test('does not inject audit transforms for an OTel appender when not serverless', () => {
+  test('injects only the diff serialization for an OTel appender when not serverless', () => {
     const features = { allowAuditLogging: true };
 
     const loggingConfig = createLoggingConfig(
       {
         enabled: true,
         include_saved_object_names: false,
+        ...savedObjectDiffDefaults,
         appender: {
           type: 'otel',
           protocol: 'http',
           url: 'http://collector:4318/v1/logs',
         },
       },
-      // not serverless — the OTel appender is left untouched
+      // not serverless — the OTel appender only gets the kibana.diff serialization
       false
     )(features);
 
-    // The transform is Serverless-only: on other build flavors the OTel appender passes through
-    // unchanged (full resource, raw ECS field names).
+    // The Serverless field map and resource slimming are Serverless-only, but kibana.diff.ops
+    // is not a valid OTel attribute value on any flavor, so the diff serialization is always on.
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
-    expect(otelAppender).not.toHaveProperty('transformAttributes');
+    expect(otelAppender.transformAttributes).toBe(serializeAuditDiffAttribute);
     expect(otelAppender).not.toHaveProperty('includeResources');
     expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');
   });

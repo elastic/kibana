@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -24,6 +25,7 @@ import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -31,10 +33,11 @@ export interface PerformCreateParams<T = unknown> {
   type: string;
   attributes: T;
   options: SavedObjectsCreateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performCreate = async <T>(
-  { type, attributes, options }: PerformCreateParams<T>,
+  { type, attributes, options, auditDiffRecorder }: PerformCreateParams<T>,
   {
     registry,
     helpers,
@@ -42,6 +45,7 @@ export const performCreate = async <T>(
     client,
     serializer,
     migrator,
+    logger,
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
@@ -84,6 +88,10 @@ export const performCreate = async <T>(
   let existingOriginId: string | undefined;
   const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
 
+  // An overwrite can only replace an existing object when the caller supplied its id.
+  const captureBeforeState =
+    overwrite && !!options.id && !!auditDiffRecorder?.shouldComputeDiff(type);
+
   let preflightResult: PreflightCheckForCreateResult | undefined;
   if (registry.isSingleNamespace(type)) {
     savedObjectNamespace = initialNamespaces ? normalizeNamespace(initialNamespaces[0]) : namespace;
@@ -98,6 +106,8 @@ export const performCreate = async <T>(
             id,
             overwrite,
             namespaces: initialNamespaces ?? [namespaceString],
+            // Pull the attributes too so the diff's before-state needs no second read.
+            ...(captureBeforeState && { fields: [type] }),
           },
         ])
       )[0];
@@ -131,6 +141,12 @@ export const performCreate = async <T>(
       });
   }
 
+  const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+    attributes: {
+      ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
+      ...attributes,
+    },
+  });
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,
     object: {
@@ -139,15 +155,15 @@ export const performCreate = async <T>(
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
       accessControl: accessControlToWrite,
-      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
-        attributes: {
-          ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
-          ...attributes,
-        },
-      }),
+      name,
     },
   });
 
+  // Track the write for auditing (flushed by the repository once the operation
+  // settles). `after` is only recorded once encryption/migration has produced the
+  // stored form — never the caller's plaintext, so failures flushed before that
+  // point cannot leak unencrypted ESO attributes into the audit log.
+  const auditRecord = auditDiffRecorder?.track({ type, id, name });
   if (preflightResult?.error) {
     // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
@@ -179,6 +195,7 @@ export const performCreate = async <T>(
     ...(Array.isArray(references) && { references }),
     ...(accessControlToWrite && { accessControl: accessControlToWrite }),
   });
+  auditRecord?.setAfter((migrated.attributes ?? {}) as Record<string, unknown>);
 
   /**
    * If a validation has been registered for this type, we run it against the migrated attributes.
@@ -189,6 +206,31 @@ export const performCreate = async <T>(
   validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
+
+  // Before-state for the diff: multi-namespace types reuse the preflight read, other
+  // types need one `get`. Failure-isolated: a miss or error degrades to before={}.
+  if (captureBeforeState && preflightResult) {
+    const existingAttributes = preflightResult.existingDocument?._source?.[type];
+    auditRecord?.setBefore((existingAttributes ?? {}) as Record<string, unknown>);
+  } else if (captureBeforeState) {
+    try {
+      const existing = await client.get<SavedObjectsRawDocSource>(
+        {
+          id: raw._id,
+          index: commonHelper.getIndexForType(type),
+          _source_includes: [type],
+        },
+        { ignore: [404], meta: true }
+      );
+      auditRecord?.setBefore((existing.body._source?.[type] ?? {}) as Record<string, unknown>);
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on overwrite create ${type}:${id}: ${String(
+          error
+        )}`
+      );
+    }
+  }
 
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,
@@ -208,6 +250,8 @@ export const performCreate = async <T>(
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
   }
+
+  auditRecord?.succeed();
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(
     serializerHelper.rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
