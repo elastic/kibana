@@ -20,6 +20,7 @@ const mockBulkOnboarding = {
   bulkOnboardQueriesOnly: jest.fn().mockResolvedValue([]),
   onboardingStatusUpdateQueue: { add: jest.fn() },
   processStatusUpdateQueue: jest.fn().mockResolvedValue(undefined),
+  expectOnboardingStart: jest.fn(),
 };
 
 let mockSources: NightshiftSource[] = [];

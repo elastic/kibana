@@ -42,7 +42,7 @@ export function useBulkOnboarding({
 
   const { scheduleOnboarding, cancelOnboarding } = useOnboardingApi();
   const { getSourceTitle } = useSourcesById();
-  const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
+  const { onboardingStatusUpdateQueue, processStatusUpdateQueue, expectOnboardingStart } =
     useOnboardingStatusUpdateQueue(onSourceStatusUpdate);
 
   const [isScheduling, setIsScheduling] = useState(false);
@@ -142,5 +142,6 @@ export function useBulkOnboarding({
     bulkOnboardQueriesOnly,
     onboardingStatusUpdateQueue,
     processStatusUpdateQueue,
+    expectOnboardingStart,
   };
 }

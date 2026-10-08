@@ -167,6 +167,12 @@ export function SourcesTable({
       render: (source: NightshiftSource) => {
         const onboardingResult = onboardingResultMap[source.id];
 
+        // Generating before its status says so: a just-created or edited source, or a run that is
+        // being scheduled. Keeps the spinner up until the poll reports the real state.
+        if (generatingSourceIds.includes(source.id)) {
+          return <EuiLoadingSpinner size="m" />;
+        }
+
         if (onboardingResult === undefined) {
           return '-';
         }

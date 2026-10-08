@@ -10,6 +10,7 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { useCallback, useRef } from 'react';
+import { ONBOARDING_START_GRACE_MS } from '../../../constants';
 import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 
 type SourceOnboardingStatusUpdateCallback = (
@@ -17,11 +18,21 @@ type SourceOnboardingStatusUpdateCallback = (
   status: SignificantEventsWorkflowStatusResult
 ) => void;
 
+interface IAwaitingStart {
+  deadline: number;
+  /** Status and execution of the first read; a different one means a new run appeared. */
+  baselineKey?: string;
+}
+
+const getStatusKey = (status: SignificantEventsWorkflowStatusResult): string =>
+  `${status.status}:${status.executionId ?? ''}`;
+
 export function useOnboardingStatusUpdateQueue(
   onSourceStatusUpdate: SourceOnboardingStatusUpdateCallback
 ) {
   const queue = useRef(new Set<string>([]));
   const isProcessing = useRef(false);
+  const awaitingStart = useRef(new Map<string, IAwaitingStart>());
 
   const { getOnboardingStatuses } = useOnboardingApi();
 
@@ -40,6 +51,18 @@ export function useOnboardingStatusUpdateQueue(
         continue;
       }
 
+      const awaiting = awaitingStart.current.get(sourceId);
+      if (awaiting) {
+        const key = getStatusKey(statusResult);
+        awaiting.baselineKey ??= key;
+        if (key === awaiting.baselineKey && Date.now() < awaiting.deadline) {
+          // No new run yet. Report nothing: the caller shows the source as generating until the
+          // run appears, and a stale terminal status would clear that and fire its callbacks.
+          continue;
+        }
+        awaitingStart.current.delete(sourceId);
+      }
+
       onSourceStatusUpdate(sourceId, statusResult);
 
       if (!KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
@@ -53,6 +76,14 @@ export function useOnboardingStatusUpdateQueue(
     }
   }, [getOnboardingStatuses, onSourceStatusUpdate]);
 
+  /**
+   * Keeps a created or edited source in the queue until its run starts or the grace period ends.
+   * Call before adding the source to the queue.
+   */
+  const expectOnboardingStart = useCallback((sourceId: string) => {
+    awaitingStart.current.set(sourceId, { deadline: Date.now() + ONBOARDING_START_GRACE_MS });
+  }, []);
+
   const processStatusUpdateQueue = useCallback(async () => {
     if (isProcessing.current) {
       return;
@@ -65,5 +96,9 @@ export function useOnboardingStatusUpdateQueue(
     });
   }, [updateStatuses]);
 
-  return { onboardingStatusUpdateQueue: queue.current, processStatusUpdateQueue };
+  return {
+    onboardingStatusUpdateQueue: queue.current,
+    processStatusUpdateQueue,
+    expectOnboardingStart,
+  };
 }

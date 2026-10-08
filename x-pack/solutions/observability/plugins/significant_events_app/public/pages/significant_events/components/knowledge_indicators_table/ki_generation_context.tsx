@@ -88,6 +88,9 @@ export function KiGenerationProvider({
     Record<string, SignificantEventsWorkflowStatusResult>
   >({});
   const initialStatusFetchDoneRef = useRef(false);
+  // Separate from the flag above: with an empty catalog no status fetch ever runs, yet the first
+  // source created afterwards still needs to be recognised as new.
+  const hasSeenSourceListRef = useRef(false);
   // Dedup guard: every refetch of the source list returns a new array, which
   // re-fires the status-fetch effect. This ref maps each enqueued source id to the query version
   // (`esql_updated_at`) it was enqueued with, so only new sources and sources whose query changed
@@ -146,6 +149,7 @@ export function KiGenerationProvider({
   const {
     onboardingStatusUpdateQueue,
     processStatusUpdateQueue,
+    expectOnboardingStart,
     bulkOnboardAll: rawBulkOnboardAll,
     bulkOnboardFeaturesOnly: rawBulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly: rawBulkOnboardQueriesOnly,
@@ -155,9 +159,26 @@ export function KiGenerationProvider({
   useEffect(() => {
     if (!fetchedSources) return;
 
+    const isFirstSourceList = !hasSeenSourceListRef.current;
+    hasSeenSourceListRef.current = true;
+    if (!isFirstSourceList) {
+      // The loop below can stay alive while it waits for a run to start; do not hold back the
+      // completion and failure callbacks of that run until it ends.
+      initialStatusFetchDoneRef.current = true;
+    }
+
     let hasNew = false;
-    fetchedSources.forEach(({ id, esql_updated_at: queryVersion }) => {
-      if (enqueuedQueryVersionsRef.current.get(id) !== queryVersion) {
+    fetchedSources.forEach(({ id, enabled, esql_updated_at: queryVersion }) => {
+      const knownVersion = enqueuedQueryVersionsRef.current.get(id);
+      if (knownVersion !== queryVersion) {
+        // After the first load, a new id or a new query version is a source the user just created
+        // or edited. The server starts its onboarding asynchronously, so keep polling for it.
+        if (enabled && (knownVersion !== undefined || !isFirstSourceList)) {
+          expectOnboardingStart(id);
+          // Optimistic: show the spinner now. The status poll clears it when the grace period
+          // ends without a run, and keeps it while a run is going.
+          setGeneratingSources((current) => new Set(current).add(id));
+        }
         enqueuedQueryVersionsRef.current.set(id, queryVersion);
         onboardingStatusUpdateQueue.add(id);
         hasNew = true;
@@ -168,7 +189,12 @@ export function KiGenerationProvider({
         initialStatusFetchDoneRef.current = true;
       });
     }
-  }, [fetchedSources, onboardingStatusUpdateQueue, processStatusUpdateQueue]);
+  }, [
+    fetchedSources,
+    onboardingStatusUpdateQueue,
+    processStatusUpdateQueue,
+    expectOnboardingStart,
+  ]);
 
   const isGenerating = generatingSources.size > 0;
   const generatingSourceIds = useMemo(() => Array.from(generatingSources), [generatingSources]);

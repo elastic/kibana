@@ -126,7 +126,9 @@ const reconcileSourceRoute = createServerRoute({
       kiClient,
       onboardingClient,
       sourceKnowledgeState,
-      scheduleSourceOnboarding,
+      // A created or edited source gets its one-time onboarding even with continuous onboarding off.
+      scheduleSourceOnboarding: (scheduled) =>
+        scheduleSourceOnboarding(scheduled, { ignoreContinuousSetting: true }),
       request,
     });
     await applySourceEnabled({

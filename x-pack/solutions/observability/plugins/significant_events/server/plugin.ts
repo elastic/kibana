@@ -70,7 +70,11 @@ import type { SignificantEventsAlertingContext } from './lib/significant_events/
 
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
-import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
+import type {
+  GetScopedClients,
+  IScheduleSourceOnboardingOptions,
+  RouteHandlerScopedClients,
+} from './routes/types';
 import { createPriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
@@ -315,13 +319,19 @@ export class SignificantEventsPlugin
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         sourceKnowledgeState,
-        scheduleSourceOnboarding: async (source: NightshiftSource): Promise<boolean> => {
+        scheduleSourceOnboarding: async (
+          source: NightshiftSource,
+          { ignoreContinuousSetting = false }: IScheduleSourceOnboardingOptions = {}
+        ): Promise<boolean> => {
           if (
             !streamsKIsOnboardingClient ||
             !source.enabled ||
-            !(await uiSettingsClient.get<boolean>(
-              OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
-            )) ||
+            // The toggle governs the periodic sweeps only. A created or edited source is
+            // onboarded once for its new revision whatever the toggle says.
+            (!ignoreContinuousSetting &&
+              !(await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
+              ))) ||
             (await this.maintenanceService?.getState({ request })) === 'paused'
           ) {
             return false;

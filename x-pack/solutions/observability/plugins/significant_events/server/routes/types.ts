@@ -37,6 +37,12 @@ export type GetScopedClients = (params: {
   request: KibanaRequest;
 }) => Promise<RouteHandlerScopedClients>;
 
+/** Options of `scheduleSourceOnboarding`. */
+export interface IScheduleSourceOnboardingOptions {
+  /** Schedules even when continuous onboarding is off; for the one-time run of a source change. */
+  ignoreContinuousSetting?: boolean;
+}
+
 export interface RouteHandlerScopedClients extends SignificantEventsClients {
   scopedClusterClient: IScopedClusterClient;
   /**
@@ -52,7 +58,15 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: (source?: NightshiftSource) => Promise<KnowledgeIndicatorClient>;
   sourceKnowledgeState: SourceKnowledgeStateClient;
-  scheduleSourceOnboarding: (source: NightshiftSource) => Promise<boolean>;
+  /**
+   * Starts onboarding for a source revision; resolves to whether a run was started. Skipped for a
+   * disabled source, a paused maintenance state and, unless `ignoreContinuousSetting` is set,
+   * while continuous onboarding is off.
+   */
+  scheduleSourceOnboarding: (
+    source: NightshiftSource,
+    options?: IScheduleSourceOnboardingOptions
+  ) => Promise<boolean>;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;
