@@ -8,7 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { TimeState } from '@kbn/es-query';
 import { getSourcesForStream, type Streams } from '@kbn/streams-schema';
-import { conditionToESQLAst, type Condition } from '@kbn/streamlang';
+import { conditionToESQLFilterAst, type Condition } from '@kbn/streamlang';
 import type { TimeRange } from '@kbn/es-query';
 
 export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
@@ -30,7 +30,7 @@ export function buildFeatureDiscoverParams(
   timeState: TimeState
 ) {
   const sources = getSourcesForStream(stream);
-  const query = esql.from(sources).pipe`WHERE ${conditionToESQLAst(filter)}`;
+  const query = esql.from(sources).pipe`WHERE ${conditionToESQLFilterAst(filter)}`;
   query.addSetCommand('unmapped_fields', 'LOAD');
 
   return {
