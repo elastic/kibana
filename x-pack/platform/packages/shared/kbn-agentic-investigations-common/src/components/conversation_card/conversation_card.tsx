@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,6 +50,32 @@ interface ConversationCardProps {
   renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<{ $isSelected: boolean }>(({ theme: { euiTheme }, $isSelected }) => ({
+  // 16px on the right only: the 32px icon buttons carry 8px of their own inset,
+  // so their glyphs land at 24px from the edge like the text on the left.
+  padding: `${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
+  cursor: 'pointer',
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  '&:hover': {
+    backgroundColor: $isSelected
+      ? euiTheme.colors.backgroundBaseInteractiveSelect
+      : euiTheme.colors.backgroundBaseSubdued,
+    boxShadow: 'none',
+  },
+}));
+
 export const ConversationCard = memo<ConversationCardProps>(
   ({
     investigation,
@@ -67,36 +94,14 @@ export const ConversationCard = memo<ConversationCardProps>(
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
-        css={{
-          // 16px on the right only: the 32px icon buttons carry 8px of their own inset,
-          // so their glyphs land at 24px from the edge like the text on the left.
-          padding: `${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
-          cursor: 'pointer',
-          borderRadius: 0,
-          '&:not(:last-child)': {
-            borderBottom: `1px solid ${euiTheme.colors.disabled}`,
-          },
-          // The last row rounds to the queue panel's corners so the hover fill does not
-          // square them off. A footer after the rows keeps it from being the last child.
-          '&:last-child': {
-            borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
-          },
-          boxSizing: 'border-box',
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          '&:hover': {
-            backgroundColor: isSelected
-              ? euiTheme.colors.backgroundBaseInteractiveSelect
-              : euiTheme.colors.backgroundBaseSubdued,
-            boxShadow: 'none',
-          },
-        }}
+        $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
@@ -175,7 +180,7 @@ export const ConversationCard = memo<ConversationCardProps>(
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );
