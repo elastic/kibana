@@ -55,7 +55,7 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
           'If omitted, metrics are ordered alphabetically.',
       }),
     grid_sort_direction: z.enum(METRICS_GRID_SORT_DIRECTIONS).optional().meta({
-      description: 'Direction of the metrics grid order. If omitted, ascending.',
+      description: 'Direction of the metrics grid order. If omitted, defaults to ascending.',
     }),
   })
   .strict();
