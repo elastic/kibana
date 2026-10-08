@@ -127,6 +127,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-find-or-create-investigation
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             runId: "{{ execution.id }}"
@@ -135,6 +136,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-execute
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -148,6 +150,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-package-report
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -207,6 +210,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-

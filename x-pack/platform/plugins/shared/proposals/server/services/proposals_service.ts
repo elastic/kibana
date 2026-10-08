@@ -691,10 +691,8 @@ export class ProposalsService {
     const nextTitle = blankToUndefined(title);
 
     const revisionId = uuidv4();
-    const rootProposalId = original.rootProposalId ?? id;
-    // `?? 1` covers records created before this field existed. Bound to a `number`
-    // local so the spread below does not widen it back to `number | undefined`.
-    const revision: number = (original.revision ?? 1) + 1;
+    const { rootProposalId } = original;
+    const revision = original.revision + 1;
 
     const document: ProposalDocument = {
       ...original,
@@ -776,16 +774,6 @@ export class ProposalsService {
   }
 
   /**
-   * Resolves the live revision of the chain a given proposal belongs to,
-   * regardless of which revision's id was passed in. Used by the gate
-   * workflow so a decision is never written against a stale, already
-   * superseded pointer once a revision has landed while the gate was parked.
-   *
-   * A query on `rootProposalId` plus `supersededBy` absent is O(1) — it does
-   * not walk `supersedes` pointers hop by hop, so the cost does not grow with
-   * the length of the chain.
-   */
-  /**
    * The proposal a gate workflow execution created, or undefined while its create step has not
    * run yet. Revisions inherit the execution id, so the original (revision 1) is the one returned.
    */
@@ -849,6 +837,7 @@ export class ProposalsService {
     return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
   }
 
+  /** Resolves any proposal in a revision chain to its live revision using the root ID. */
   async getLatestRevision(
     id: string,
     spaceId: string
@@ -867,16 +856,7 @@ export class ProposalsService {
   }> {
     const { proposal } = await this.load(id, spaceId);
 
-    if (proposal.rootProposalId === undefined) {
-      // A record written before `rootProposalId` existed: the term query below
-      // cannot find it, so following the pointers is the only way to reach the
-      // live head. Without this the fallback answers with the stale member it
-      // was asked about — exactly the id a parked gate holds across an
-      // upgrade, and the row `update()` then refuses to settle.
-      return this.walkSupersededChain(proposal, spaceId);
-    }
-
-    const rootProposalId = proposal.rootProposalId;
+    const { rootProposalId } = proposal;
 
     const response = await this.deps.storage.search({
       track_total_hits: false,
@@ -897,7 +877,7 @@ export class ProposalsService {
       // caller's id" instead of failing the gate outright.
       return {
         proposalId: proposal.id,
-        revision: proposal.revision ?? 1,
+        revision: proposal.revision,
         status: proposal.status,
         decision: proposal.decision,
         actionInput: proposal.actionInput,
@@ -907,45 +887,10 @@ export class ProposalsService {
     const source = hit._source as ProposalDocument;
     return {
       proposalId: hit._id,
-      revision: source.revision ?? 1,
+      revision: source.revision,
       status: source.status,
       decision: source.decision,
       actionInput: source.actionInput,
-    };
-  }
-
-  /**
-   * Follows `supersededBy` hop by hop, for chains that predate
-   * `rootProposalId`. Bounded rather than open-ended: a corrupt chain that
-   * points in a circle would otherwise spin forever, and stopping after a
-   * finite number of hops degrades to the last member reached — the same
-   * "answer with what we have" the root query's fallback gives.
-   */
-  private async walkSupersededChain(
-    start: StoredProposalRecord,
-    spaceId: string
-  ): Promise<{
-    proposalId: string;
-    revision: number;
-    status: ProposalStatus;
-    decision: ProposalDecision | undefined;
-    actionInput: Record<string, unknown> | undefined;
-  }> {
-    let current = start;
-
-    for (let hop = 0; hop < MAX_LEGACY_CHAIN_HOPS; hop++) {
-      if (current.supersededBy === undefined) {
-        break;
-      }
-      current = (await this.load(current.supersededBy, spaceId)).proposal;
-    }
-
-    return {
-      proposalId: current.id,
-      revision: current.revision ?? 1,
-      status: current.status,
-      decision: current.decision,
-      actionInput: current.actionInput,
     };
   }
 
@@ -1312,12 +1257,6 @@ const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => p
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
-
-/**
- * Ceiling on the legacy pointer walk in `getLatestRevision`. A chain longer
- * than this is a corruption or an attack, and either way the walk has to end.
- */
-const MAX_LEGACY_CHAIN_HOPS = 100;
 
 /**
  * A status that has settled. `pending` and `executing` are the only two a

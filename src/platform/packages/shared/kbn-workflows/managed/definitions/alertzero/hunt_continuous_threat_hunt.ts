@@ -20,9 +20,7 @@ export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   id: ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bumped so already-installed Hunt workers pick up the locked scheduled+manual
-  // triggers (4h schedule). Version 1 installs could still be manual-only.
-  version: 2,
+  version: 1,
   yamlTemplate: (values: HuntWorkerTemplateValues): string =>
     renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<HuntWorkerTemplateValues>;
