@@ -285,6 +285,43 @@ actions:
     expect(await fs.readdir(path.join(directory, 'snapshots'))).toContain('old.openapi.json');
   });
 
+  it('converts Google Discovery documents to OpenAPI before bundling them', async () => {
+    const discoveryUrl = 'https://api.example.com/$discovery/rest?version=v1';
+    documents[discoveryUrl] = JSON.stringify({
+      kind: 'discovery#restDescription',
+      title: 'Example',
+      version: 'v1',
+      rootUrl: `${BASE}/`,
+      servicePath: '',
+      schemas: { Item: { id: 'Item', type: 'object', properties: { name: { type: 'string' } } } },
+      resources: {
+        items: {
+          methods: {
+            list: {
+              id: 'example.items.list',
+              path: 'items',
+              httpMethod: 'GET',
+              response: { $ref: 'Item' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+      changed: ['snapshots/main.openapi.json', 'manifest.json'],
+      problems: [],
+    });
+    expect(fetched).toEqual([discoveryUrl]);
+    expect((await readJson('manifest.json')).sources.main).toEqual(
+      expect.objectContaining({ format: 'discovery', apiVersion: 'v1' })
+    );
+    const snapshot = await readJson('snapshots/main.openapi.json');
+    expect(snapshot.openapi).toBe('3.0.3');
+    expect(snapshot.paths['/items'].get.operationId).toBe('example.items.list');
+    expect((await update()).changed).toEqual([]);
+  });
+
   it('removes snapshots of sources that are gone', async () => {
     await update({ sources: { main: SPEC_URL } });
     await fs.writeFile(path.join(directory, 'snapshots/old.openapi.json'), '{}');
