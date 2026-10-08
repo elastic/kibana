@@ -36,6 +36,7 @@ import {
 } from '../../hooks/use_proposals_api';
 import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
+import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
@@ -125,9 +126,7 @@ jest.mock('@kbn/agentic-investigations-common', () => {
 });
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
-jest.mock('../../hooks/use_running_summary', () => ({
-  useRunningSummary: () => ({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 }),
-}));
+jest.mock('../../hooks/use_running_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
@@ -137,6 +136,7 @@ const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock
 const mockUseClosedProposals = useClosedProposals as jest.Mock;
 const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
+const mockUseRunningSummary = useRunningSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
@@ -321,6 +321,7 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+  mockUseRunningSummary.mockReturnValue({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 });
 });
 
 describe('ConversationsPage proposals access', () => {
@@ -729,6 +730,41 @@ describe('ConversationsPage idle state', () => {
 
     expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Closed/ })).toBeInTheDocument();
+  });
+
+  it('does not claim Workers are running when none is enabled', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseRunningSummary.mockReturnValue({ watchCount: 0, enabledWorkerCount: 0, workerCount: 5 });
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).not.toContain(
+      'Your Watches are running'
+    );
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+  });
+
+  it('keeps the queue sections and their retry control when a section failed to load', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseProposalsByCategory.mockImplementation((category: string) => ({
+      data:
+        category === 'investigate'
+          ? undefined
+          : { pages: [{ proposals: [], total: 0 }], pageParams: [undefined] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      isInitialLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('conversationQueueError-investigate')).toBeInTheDocument();
   });
 
   it('hides the panel while proposals are open', () => {

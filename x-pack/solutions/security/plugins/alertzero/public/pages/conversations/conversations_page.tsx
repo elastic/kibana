@@ -155,8 +155,20 @@ const ConversationsPageContent: React.FC = () => {
     () => sections.find(({ id }) => id === CLOSED_GROUP_KEY)?.total,
     [sections]
   );
+  // A failed section query hides nothing but its rows, so it must not read as an empty queue,
+  // and "running" is only true once an enabled Worker is confirmed.
+  const hasSectionError = sections.some(
+    ({ hasLoadError, hasCountError }) => hasLoadError || hasCountError
+  );
+  const hasEnabledWorkers = runningSummary.enabledWorkerCount > 0;
   const isIdle =
-    !isLoading && !error && openCount === 0 && closedTotal === 0 && proposalsById.size === 0;
+    !isLoading &&
+    !error &&
+    !hasSectionError &&
+    hasEnabledWorkers &&
+    openCount === 0 &&
+    closedTotal === 0 &&
+    proposalsById.size === 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
