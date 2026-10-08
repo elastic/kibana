@@ -1,7 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target"
+    "outDir": "target/types"
   },
   "include": [
     "**/*.ts"
@@ -12,9 +12,10 @@
     "@kbn/core",
     "@kbn/evals",
     "@kbn/proposals-common",
-    "@kbn/scout",
     "@kbn/security-evals-workflow-traces",
     "@kbn/workflows",
-    "@kbn/zod"
+  ],
+  "exclude": [
+    "target/**/*"
   ]
 }
