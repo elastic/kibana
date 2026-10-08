@@ -1,0 +1,20 @@
+{
+  "listFunctionKeys": {
+    "queries": [
+      {
+        "source": "web",
+        "method": "POST",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/{functionName}/listkeys"
+      }
+    ]
+  },
+  "listHostKeys": {
+    "queries": [
+      {
+        "source": "web",
+        "method": "POST",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/host/default/listkeys"
+      }
+    ]
+  }
+}

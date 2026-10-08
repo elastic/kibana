@@ -300,7 +300,7 @@ const argoRequest = async (ctx: ActionContext, options: ArgoRequestOptions): Pro
     const response = await client.request({
       method: options.method,
       url: `${stripTrailingSlash(apiUrl)}${options.path}`,
-      ...(options.params ? { params: options.params } : {}),
+      ...(options.params ? { params: options.params, paramsSerializer: { indexes: null } } : {}),
       ...(options.data !== undefined ? { data: options.data } : {}),
     });
     return scrubSecrets(response.data);
@@ -661,12 +661,12 @@ export const ArgocdConnector: ConnectorSpec = {
           ...(input.resources ? { resources: input.resources } : {}),
           ...(input.strategy ? { strategy: input.strategy } : {}),
           ...(input.appNamespace ? { appNamespace: input.appNamespace } : {}),
+          ...(input.project ? { project: input.project } : {}),
         };
 
         return argoRequest(ctx, {
           method: 'POST',
           path: `/api/v1/applications/${encodeURIComponent(input.name)}/sync`,
-          params: stringParams({ project: input.project }),
           data: body,
         });
       },
@@ -683,7 +683,7 @@ export const ArgocdConnector: ConnectorSpec = {
         const data = (await argoRequest(ctx, {
           method: 'GET',
           path: '/api/v1/clusters',
-          params: stringParams({ id: input.id, name: input.name }),
+          params: stringParams({ server: input.id, name: input.name }),
         })) as ArgoClusterList;
 
         const items = Array.isArray(data.items) ? data.items : [];
