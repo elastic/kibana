@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
@@ -40,6 +43,12 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
 
 // ── query keys ────────────────────────────────────────────────────────────────
 
+/** `page`: the grid pages. `children`: the child rows of expanded groups. */
+export type EntityGridKeyScope = 'page' | 'children';
+
+/** Prefix of every child rows query, e.g. for `useIsFetching`. */
+export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
+
 /** Inputs that every grid query depends on. */
 interface GridQueryScope {
   sortField: string;
@@ -58,6 +67,7 @@ interface GridQueryScope {
  */
 const entityGridKeys = {
   shell: (
+    keyScope: EntityGridKeyScope,
     scope: GridQueryScope,
     page: {
       sortDirection: SortDir;
@@ -66,10 +76,11 @@ const entityGridKeys = {
       keepFieldsKey: string;
       anomalyJobIdsKey: string;
     }
-  ) => ['entity-grid', 'shell', { ...scope, ...page }] as const,
-  count: (spaceId: string, countQuery: string | null) =>
-    ['entity-grid', 'count', { spaceId, countQuery }] as const,
+  ) => ['entity-grid', keyScope, 'shell', { ...scope, ...page }] as const,
+  count: (keyScope: EntityGridKeyScope, spaceId: string, countQuery: string | null) =>
+    ['entity-grid', keyScope, 'count', { spaceId, countQuery }] as const,
   enrich: (
+    keyScope: EntityGridKeyScope,
     scope: GridQueryScope,
     page: {
       sortDirection: SortDir;
@@ -77,7 +88,16 @@ const entityGridKeys = {
       shellUpdatedAt: number;
       anomalyJobIdsKey: string;
     }
-  ) => ['entity-grid', 'enrich', { ...scope, ...page }] as const,
+  ) => ['entity-grid', keyScope, 'enrich', { ...scope, ...page }] as const,
+};
+
+/**
+ * How long a page stays fresh. A group's records rarely change while it is expanded, so a
+ * prefetched child page is still fresh when the row expands, and its rows aren't read twice.
+ */
+const SHELL_STALE_TIME_MS: Readonly<Record<EntityGridKeyScope, number>> = {
+  page: 0,
+  children: 60_000,
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -134,7 +154,7 @@ export const selectPageRows = ({
 const haveSameEntities = (a: readonly Row[], b: readonly Row[]): boolean =>
   a.length === b.length && a.every((row, i) => getEntityId(row) === getEntityId(b[i]));
 
-// ── hook ──────────────────────────────────────────────────────────────────────
+// ── queries ───────────────────────────────────────────────────────────────────
 
 export interface UseEntityGridDataOptions {
   sortField: string;
@@ -146,33 +166,59 @@ export interface UseEntityGridDataOptions {
   timeRange: TimeRange;
   rowsMode?: RowsMode;
   keepFields?: readonly string[];
+  keyScope?: EntityGridKeyScope;
 }
 
-export const useEntityGridData = ({
-  sortField,
-  sortDirection,
-  pageIndex,
-  pageSize,
-  searchExpression,
-  entityExpression,
-  timeRange,
-  rowsMode = 'resolved',
-  keepFields,
-}: UseEntityGridDataOptions) => {
+/** What the grid queries read besides the options; the hook and the prefetch share it. */
+interface GridQueryEnv {
+  queryClient: QueryClient;
+  searchService: DataPublicPluginStart['search'];
+  spaceId: string;
+  concreteEntityIndexName: string | null;
+  anomalyJobIds: readonly string[];
+}
+
+const useGridQueryEnv = () => {
   const queryClient = useQueryClient();
   const {
     data: { search: searchService },
     http,
   } = useKibana().services;
-
   const spaceId = useSpaceId() ?? 'default';
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
-
   const { jobIds: anomalyJobIds, loading: isAnomalyJobsLoading } = useInstalledSecurityJobsIds();
+
+  const env = useMemo(
+    (): GridQueryEnv => ({
+      queryClient,
+      searchService,
+      spaceId,
+      concreteEntityIndexName,
+      anomalyJobIds,
+    }),
+    [queryClient, searchService, spaceId, concreteEntityIndexName, anomalyJobIds]
+  );
+  return { env, http, isAnomalyJobsLoading };
+};
+
+/** Query keys, arguments and fetchers of one grid view. */
+const createGridQueries = (
+  { queryClient, searchService, spaceId, concreteEntityIndexName, anomalyJobIds }: GridQueryEnv,
+  {
+    sortField,
+    sortDirection,
+    pageSize,
+    searchExpression,
+    entityExpression,
+    timeRange,
+    rowsMode = 'resolved',
+    keepFields,
+    keyScope = 'page',
+  }: UseEntityGridDataOptions
+) => {
   const anomalyJobIdsKey = anomalyJobIds.join('\0');
   const isAnomalySort = sortField === ANOMALY_COUNT_FIELD;
-
   const keepFieldsKey = (keepFields ?? []).join('\0');
   const sortSpec = findSortQuerySpec(sortField);
 
@@ -187,7 +233,7 @@ export const useEntityGridData = ({
   };
   // Only the anomaly sort reads the anomaly jobs; other shells don't wait for them.
   const shellKey = (index: number) =>
-    entityGridKeys.shell(scope, {
+    entityGridKeys.shell(keyScope, scope, {
       sortDirection,
       pageIndex: index,
       pageSize,
@@ -210,6 +256,87 @@ export const useEntityGridData = ({
     anomalyJobIds,
   });
 
+  const countEsql =
+    concreteEntityIndexName && sortSpec
+      ? sortSpec.buildCountQuery(buildArgs(concreteEntityIndexName, null))
+      : null;
+  const countKey = entityGridKeys.count(keyScope, spaceId, countEsql);
+  const fetchCount = async ({ signal }: { signal?: AbortSignal }): Promise<number> => {
+    if (!countEsql) throw new Error(`Column ${sortField} is not sortable`);
+
+    const [countRow] = await createEsqlRunner(searchService, signal)(countEsql);
+    return (countRow && getNumber(countRow, 'total')) ?? 0;
+  };
+
+  /** One page of rows after `cursor`, and the cursor of the next page. */
+  const fetchShell = async (
+    cursor: PageCursor | null,
+    signal?: AbortSignal
+  ): Promise<EntityGridResponse> => {
+    if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
+    if (!sortSpec) throw new Error(`Column ${sortField} is not sortable`);
+
+    const args = buildArgs(concreteEntityIndexName, cursor);
+    const runQuery = createEsqlRunner(searchService, signal);
+    // A column that reads its page with several queries picks them by the view size,
+    // from the count query that runs for the grid anyway. Without a count it keeps its
+    // general sort query (view size 0).
+    const allRows = sortSpec.runSortPage
+      ? await sortSpec.runSortPage(args, {
+          runQuery,
+          viewSize:
+            (await nullOnFailure(
+              queryClient.fetchQuery({
+                queryKey: countKey,
+                queryFn: fetchCount,
+                staleTime: Infinity,
+              })
+            )) ?? 0,
+        })
+      : await runQuery(sortSpec.buildSortQuery(args));
+    const hasNextPage = allRows.length > pageSize;
+    const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
+
+    return {
+      entities: pageRows,
+      next_cursor: buildNextCursor(pageRows, args, hasNextPage),
+      total: null,
+    };
+  };
+
+  return {
+    scope,
+    keyScope,
+    isAnomalySort,
+    anomalyJobIdsKey,
+    shellKey,
+    buildArgs,
+    countEsql,
+    countKey,
+    fetchCount,
+    fetchShell,
+  };
+};
+
+// ── hooks ─────────────────────────────────────────────────────────────────────
+
+export const useEntityGridData = (options: UseEntityGridDataOptions) => {
+  const { sortDirection, pageIndex, pageSize, rowsMode = 'resolved' } = options;
+  const { env, http, isAnomalyJobsLoading } = useGridQueryEnv();
+  const { queryClient, searchService, concreteEntityIndexName } = env;
+  const {
+    scope,
+    keyScope,
+    isAnomalySort,
+    anomalyJobIdsKey,
+    shellKey,
+    buildArgs,
+    countEsql,
+    countKey,
+    fetchCount,
+    fetchShell,
+  } = createGridQueries(env, options);
+
   // Page N's cursor is page N-1's cached next_cursor. If the user jumps ahead,
   // fetch the first page we don't have until we reach pageIndex.
   let fetchPageIndex = pageIndex;
@@ -227,51 +354,9 @@ export const useEntityGridData = ({
       : queryClient.getQueryData<EntityGridResponse>(shellKey(fetchPageIndex - 1))?.next_cursor ??
         null;
 
-  const countEsql =
-    concreteEntityIndexName && sortSpec
-      ? sortSpec.buildCountQuery(buildArgs(concreteEntityIndexName, null))
-      : null;
-  const countKey = entityGridKeys.count(spaceId, countEsql);
-  const fetchCount = async ({ signal }: { signal?: AbortSignal }): Promise<number> => {
-    if (!countEsql) throw new Error(`Column ${sortField} is not sortable`);
-
-    const [countRow] = await createEsqlRunner(searchService, signal)(countEsql);
-    return (countRow && getNumber(countRow, 'total')) ?? 0;
-  };
-
   const shellQuery = useQuery(
     shellKey(fetchPageIndex),
-    async ({ signal }): Promise<EntityGridResponse> => {
-      if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
-      if (!sortSpec) throw new Error(`Column ${sortField} is not sortable`);
-
-      const args = buildArgs(concreteEntityIndexName, cursor);
-      const runQuery = createEsqlRunner(searchService, signal);
-      // A column that reads its page with several queries picks them by the view size,
-      // from the count query that runs for the grid anyway. Without a count it keeps its
-      // general sort query (view size 0).
-      const allRows = sortSpec.runSortPage
-        ? await sortSpec.runSortPage(args, {
-            runQuery,
-            viewSize:
-              (await nullOnFailure(
-                queryClient.fetchQuery({
-                  queryKey: countKey,
-                  queryFn: fetchCount,
-                  staleTime: Infinity,
-                })
-              )) ?? 0,
-          })
-        : await runQuery(sortSpec.buildSortQuery(args));
-      const hasNextPage = allRows.length > pageSize;
-      const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
-
-      return {
-        entities: pageRows,
-        next_cursor: buildNextCursor(pageRows, args, hasNextPage),
-        total: null,
-      };
-    },
+    ({ signal }) => fetchShell(cursor, signal),
     {
       enabled:
         !!concreteEntityIndexName &&
@@ -280,6 +365,7 @@ export const useEntityGridData = ({
       // Keep painting the last page while the next shell key loads (page/sort/filter).
       // Count stays strict below so pagination totals don't lag behind the tile/filter.
       keepPreviousData: true,
+      staleTime: SHELL_STALE_TIME_MS[keyScope],
     }
   );
 
@@ -294,7 +380,7 @@ export const useEntityGridData = ({
   const shellRows = isCurrentPage ? shellQuery.data?.entities : undefined;
 
   const enrichQuery = useQuery(
-    entityGridKeys.enrich(scope, {
+    entityGridKeys.enrich(keyScope, scope, {
       sortDirection,
       entityIdsKey: entityIdsOf(shellRows ?? []).join('\0'),
       shellUpdatedAt: shellQuery.dataUpdatedAt,
@@ -352,4 +438,21 @@ export const useEntityGridData = ({
       !concreteEntityIndexName,
     isLastPage: isCurrentPage && shellQuery.data != null && shellQuery.data.next_cursor == null,
   };
+};
+
+/** Fetches the first page of a grid view ahead of time, e.g. a group's records on hover. */
+export const usePrefetchEntityGridPage = (): ((options: UseEntityGridDataOptions) => void) => {
+  const { env } = useGridQueryEnv();
+  return useCallback(
+    (options: UseEntityGridDataOptions) => {
+      if (!env.concreteEntityIndexName) return;
+      const { keyScope, shellKey, fetchShell } = createGridQueries(env, options);
+      void env.queryClient.prefetchQuery({
+        queryKey: shellKey(0),
+        queryFn: ({ signal }) => fetchShell(null, signal),
+        staleTime: SHELL_STALE_TIME_MS[keyScope],
+      });
+    },
+    [env]
+  );
 };

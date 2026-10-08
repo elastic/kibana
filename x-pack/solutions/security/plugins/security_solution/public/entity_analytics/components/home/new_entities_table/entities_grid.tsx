@@ -27,12 +27,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useIsFetching } from '@kbn/react-query';
 import { useResetEntityGridFilters } from './hooks/use_entity_grid_filters';
-import { useEntityGridData } from './hooks/use_entity_grid_data';
-import { useEntityChildren } from './hooks/use_entity_children';
-import { GROUP_SIZE_FIELD, PAGE_SIZE_OPTIONS, entityIdsOf, getEntityId, getNumber } from './common';
+import {
+  ENTITY_GRID_CHILDREN_QUERY_KEY,
+  useEntityGridData,
+  usePrefetchEntityGridPage,
+} from './hooks/use_entity_grid_data';
+import { GROUP_SIZE_FIELD, PAGE_SIZE_OPTIONS, getEntityId, getNumber } from './common';
 import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
-import { ExpandedEntityRow } from './entities_expanded_row';
+import { ExpandedEntityGroup, groupRecordsOptions } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
 import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
@@ -108,7 +112,9 @@ interface EntityGridCellContext {
 /** Custom-body / expander React context — expand state lives here, not in cellContext. */
 interface EntityGridView extends EntityGridCellContext {
   expandedIds: ReadonlySet<string>;
-  childMap: Map<string, Row[]>;
+  /** Time range and extra fields of the expanded groups' records. */
+  timeRange: TimeRange;
+  keepFields: readonly string[];
   columns: EuiDataGridColumn[];
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
@@ -227,7 +233,8 @@ const EntityGridCustomBody = memo(
     const {
       rows,
       expandedIds,
-      childMap,
+      timeRange,
+      keepFields,
       columns,
       watchlistNames,
       cellHandlers,
@@ -263,8 +270,6 @@ const EntityGridCustomBody = memo(
           rows.map((row, i) => {
             const absoluteIndex = visibleRowData.startRow + i;
             const entityId = getEntityId(row);
-            const children =
-              entityId && expandedIds.has(entityId) ? childMap.get(entityId) ?? [] : [];
             return (
               <React.Fragment key={entityId ?? i}>
                 <div role="row" className="euiDataGridRow" css={rowCss}>
@@ -278,11 +283,11 @@ const EntityGridCustomBody = memo(
                     ))}
                   </div>
                 </div>
-                {children.map((child, childIdx) => (
-                  <ExpandedEntityRow
-                    key={`${entityId}-child-${childIdx}`}
-                    child={child}
-                    isLast={childIdx === children.length - 1}
+                {entityId && expandedIds.has(entityId) && (
+                  <ExpandedEntityGroup
+                    entityId={entityId}
+                    timeRange={timeRange}
+                    keepFields={keepFields}
                     cellPadding={cellPadding}
                     visCols={visCols}
                     columns={columns}
@@ -290,7 +295,7 @@ const EntityGridCustomBody = memo(
                     watchlistNames={watchlistNames}
                     handlers={cellHandlers}
                   />
-                ))}
+                )}
               </React.Fragment>
             );
           })
@@ -420,21 +425,13 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [sortField, sortDirection, onSortChange]
   );
 
-  // Fetch children only for expanded rows on this page; the URL can hold more ids.
-  const pageExpandedIds = useMemo(
-    () => new Set(entityIdsOf(rows).filter((id) => expandedIds.has(id))),
-    [rows, expandedIds]
+  // Expanded groups on this page read their records; the URL can hold more expanded ids.
+  const isChildrenFetching = useIsFetching({ queryKey: ENTITY_GRID_CHILDREN_QUERY_KEY }) > 0;
+  const prefetchGridPage = usePrefetchEntityGridPage();
+  const prefetchChildren = useCallback(
+    (entityId: string) => prefetchGridPage(groupRecordsOptions(entityId, timeRange, keepFields)),
+    [prefetchGridPage, timeRange, keepFields]
   );
-
-  const {
-    childMap,
-    isAnyChildFetching: isChildrenFetching,
-    prefetchChildren,
-  } = useEntityChildren({
-    expandedIds: pageExpandedIds,
-    timeRange,
-    keepFields,
-  });
 
   const extraColumns = useMemo(
     (): EuiDataGridColumn[] =>
@@ -552,7 +549,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     (): EntityGridView => ({
       ...cellContext,
       expandedIds,
-      childMap,
+      timeRange,
+      keepFields,
       columns: gridColumns,
       prefetchChildren,
       toggleExpandedId,
@@ -563,7 +561,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [
       cellContext,
       expandedIds,
-      childMap,
+      timeRange,
+      keepFields,
       gridColumns,
       prefetchChildren,
       toggleExpandedId,

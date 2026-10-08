@@ -5,16 +5,60 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import type {
   EuiDataGridColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridStyleCellPaddings,
   EuiThemeComputed,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
+import { useEntityGridData } from './hooks/use_entity_grid_data';
+import type { UseEntityGridDataOptions } from './hooks/use_entity_grid_data';
+import {
+  ENTITY_ID_FIELD,
+  GROUP_SIZE_FIELD,
+  RESOLVED_TO_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  esc,
+  getEntityId,
+} from './common';
+import type { TimeRange } from './common';
+
+/** Most records an expanded group shows. */
+const MAX_GROUP_RECORDS = 100;
+
+const truncatedGroupLabel = (shown: number, total: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.truncatedGroupLabel', {
+    defaultMessage: 'Showing {shown} of {total} records',
+    values: { shown, total },
+  });
+
+/**
+ * Grid options of a group's records: its target and the entities resolved to it, as
+ * individual rows. Expanding is structural, so the table filters don't apply.
+ */
+export const groupRecordsOptions = (
+  entityId: string,
+  timeRange: TimeRange,
+  keepFields: readonly string[]
+): UseEntityGridDataOptions => ({
+  keyScope: 'children',
+  rowsMode: 'individual',
+  entityExpression: `(${ENTITY_ID_FIELD} == ${esc(entityId)} OR ${RESOLVED_TO_FIELD} == ${esc(
+    entityId
+  )})`,
+  sortField: RISK_SCORE_NORM_FIELD,
+  sortDirection: 'desc',
+  pageIndex: 0,
+  pageSize: MAX_GROUP_RECORDS,
+  timeRange,
+  keepFields,
+});
 
 interface ChildTreeConnectorProps {
   isLast: boolean;
@@ -24,6 +68,8 @@ interface ChildTreeConnectorProps {
 interface ExpandedEntityRowProps {
   child: Record<string, unknown>;
   isLast: boolean;
+  /** The child is not enriched yet; enrich cells stay blank until it is. */
+  isEnriching: boolean;
   /** Grid density, so child rows match the height of grid rows. */
   cellPadding: EuiDataGridStyleCellPaddings;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
@@ -45,9 +91,10 @@ const cellPaddingBlock = (
   return '6px';
 };
 
-export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
+const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   child,
   isLast,
+  isEnriching,
   cellPadding,
   visCols,
   columns,
@@ -109,7 +156,15 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                         ${euiTheme.size.xs};
                     `}
                   >
-                    {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
+                    {renderEntityCell(
+                      col.id,
+                      value,
+                      child,
+                      watchlistNames,
+                      euiTheme,
+                      handlers,
+                      isEnriching
+                    )}
                   </div>
                 </div>
               </div>
@@ -132,7 +187,15 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                 padding: ${paddingBlock};
               `}
             >
-              {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
+              {renderEntityCell(
+                col.id,
+                value,
+                child,
+                watchlistNames,
+                euiTheme,
+                handlers,
+                isEnriching
+              )}
             </div>
           );
         })}
@@ -172,3 +235,56 @@ const ExpandedEntityTreeConnector: React.FC<ChildTreeConnectorProps> = ({ isLast
     />
   </div>
 );
+
+interface ExpandedEntityGroupProps
+  extends Omit<ExpandedEntityRowProps, 'child' | 'isLast' | 'isEnriching'> {
+  entityId: string;
+  timeRange: TimeRange;
+  keepFields: readonly string[];
+}
+
+/** The records of an expanded group, under its row. */
+export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
+  entityId,
+  timeRange,
+  keepFields,
+  ...rowProps
+}) => {
+  const {
+    rows: records,
+    isEnriching,
+    total,
+  } = useEntityGridData(groupRecordsOptions(entityId, timeRange, keepFields));
+  // Child rows show the parent grid's columns, Records included: each is one record.
+  const rows = useMemo(
+    () => records.map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),
+    [records]
+  );
+  const { euiTheme, cellPadding } = rowProps;
+  return (
+    <>
+      {rows.map((child, i) => (
+        <ExpandedEntityRow
+          key={getEntityId(child) ?? i}
+          child={child}
+          isLast={i === rows.length - 1}
+          isEnriching={isEnriching}
+          {...rowProps}
+        />
+      ))}
+      {total > rows.length && rows.length > 0 && (
+        <div
+          role="row"
+          css={css`
+            background: ${euiTheme.colors.body};
+            padding: ${cellPaddingBlock(euiTheme, cellPadding)} ${euiTheme.size.xl};
+          `}
+        >
+          <EuiText size="xs" color="subdued">
+            {truncatedGroupLabel(rows.length, total)}
+          </EuiText>
+        </div>
+      )}
+    </>
+  );
+};
