@@ -8,7 +8,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/evals-suite-security-automatic-migrations",
-  "owner": "@elastic/security-threat-hunting",
+  "owner": "@elastic/automatic-migrations",
   "group": "security",
   "visibility": "private",
   "devOnly": true

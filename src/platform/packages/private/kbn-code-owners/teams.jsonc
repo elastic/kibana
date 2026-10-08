@@ -807,6 +807,20 @@
     }
   },
   {
+    "id": "automatic-migrations",
+    "name": "Automatic Migrations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/automatic-migrations",
+      "label": "Team:Automatic Migrations"
+    },
+    "responsibilities": [
+      "SIEM rule and dashboard automatic migrations"
+    ]
+  },
+  {
     "id": "security-data-engineering",
     "name": "Security Data Engineering",
     "areas": [
