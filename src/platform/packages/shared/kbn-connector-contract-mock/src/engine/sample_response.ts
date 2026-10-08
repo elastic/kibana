@@ -9,7 +9,12 @@
 
 import type { Responder } from '../contract/types';
 import { validateValue } from '../openapi/schema_violations';
-import type { ContractOperation, MediaTypeContent, OperationResponse } from '../openapi/types';
+import type {
+  ContractOperation,
+  MediaTypeContent,
+  OperationResponse,
+  SpecSchema,
+} from '../openapi/types';
 import { sampleSchema } from './sample_schema';
 
 const statusOf = ({ code }: OperationResponse): number =>
@@ -95,10 +100,18 @@ export const sampleResponse: Responder = (operation, { headers: { accept } }) =>
     return { statusCode: 204 };
   }
   const statusCode = /^\d{3}$/.test(response.code) ? Number(response.code) : 200;
+  const conforms = (schema: SpecSchema, value: unknown) =>
+    validateValue(operation, schema, value, {
+      path: [],
+      subject: 'Example',
+      direction: 'response',
+    }).length === 0;
+  const sample = (schema: SpecSchema | undefined) =>
+    sampleSchema(schema?.schema, document, { pointer: schema?.pointer, conforms });
   const headers: Record<string, string> = {};
   for (const { name, required, schema } of response.headers) {
     if (required) {
-      headers[name.toLowerCase()] = String(sampleSchema(schema?.schema, document));
+      headers[name.toLowerCase()] = String(sample(schema));
     }
   }
   const { contents } = response;
@@ -118,6 +131,6 @@ export const sampleResponse: Responder = (operation, { headers: { accept } }) =>
   }
   headers['content-type'] = content.mediaType;
   const examples = conformingExamples(operation, content);
-  const body = examples.length > 0 ? examples[0] : sampleSchema(content.schema?.schema, document);
+  const body = examples.length > 0 ? examples[0] : sample(content.schema);
   return { statusCode, headers, body };
 };

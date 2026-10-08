@@ -140,4 +140,67 @@ describe('sampleResponse', () => {
       count: 3,
     });
   });
+
+  it('skips schema examples that contradict their schema and keeps samples in bounds', async () => {
+    const member = {
+      type: 'object',
+      required: ['id'],
+      // Trello's style: examples that break the schema they illustrate.
+      example: { name: 'no id' },
+      properties: {
+        id: { type: 'string', pattern: '^[0-9a-fA-F]{24}$', example: '5abbe4b7ddc1b351ef961414' },
+        joined: { type: 'string', format: 'date', example: '2018-04-26T17:03:25.155Z' },
+        count: { type: 'string', example: 0, default: '0' },
+        score: { type: 'integer', minimum: 1, maximum: 10, multipleOf: 5 },
+        tags: { type: 'array', items: { type: 'string' }, maxItems: 0 },
+        // The first variant's sample matches both variants, the second's only the second.
+        badge: {
+          oneOf: [
+            {
+              type: 'object',
+              additionalProperties: false,
+              properties: { label: { type: 'string' } },
+            },
+            {
+              type: 'object',
+              properties: { label: { type: 'string' }, url: { type: 'string' } },
+            },
+          ],
+        },
+      },
+    };
+    const memberMock = createContractMockFetch({
+      specs: [
+        {
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/member': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: { 'application/json': { schema: member } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const body = await (await memberMock.fetch('https://api.example.com/member')).json();
+
+    expect(body).toEqual({
+      id: '5abbe4b7ddc1b351ef961414',
+      joined: '2026-01-01',
+      count: '0',
+      score: 5,
+      tags: [],
+      badge: { label: 'string', url: 'string' },
+    });
+    expect(memberMock.calls[0].responseViolations).toEqual([]);
+  });
 });
