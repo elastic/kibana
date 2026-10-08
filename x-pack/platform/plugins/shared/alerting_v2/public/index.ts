@@ -55,7 +55,7 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
 export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
@@ -227,3 +227,5 @@ export const module = new ContainerModule(({ bind }) => {
     });
   });
 });
+
+export { pluginModule as module };
