@@ -12,17 +12,6 @@ import { installEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/h
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
   async ({ kbnClient }) => {
-    // Ensure this suite always starts from a clean install state. If a previous
-    // run left per-type extraction overrides behind, the "already installed"
-    // path can inherit them and make the whole suite deterministically fail.
-    await kbnClient.request({
-      method: 'POST',
-      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
-      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
-      body: {},
-      ignoreErrors: [404],
-    });
-
     await installEntityStoreSuiteWithKbnClient({ kbnClient });
 
     const startResponse = await kbnClient.request({
