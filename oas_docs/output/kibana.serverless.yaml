@@ -67865,7 +67865,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the default. Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the entity type default (for `frequency`: 1m for `host` and `user`, 10m for `service`, 30m for `generic`). Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction`, `excludedUserNames` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -67880,7 +67880,7 @@ paths:
           application/json:
             examples:
               clearLogExtractionOverrideExample:
-                description: Send null for any field to clear that override and revert it to the default value.
+                description: Send null for any field to clear that override and revert it to the entity type default. For frequency, that is 1m for host and user, 10m for service and 30m for generic.
                 summary: Clear log extraction overrides
                 value:
                   logExtraction:
@@ -76602,7 +76602,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. `logExtraction` sets overrides that apply to all entity types, on top of built-in defaults per entity type. The default `frequency` is 1m for `host` and `user`, 10m for `service` and 30m for `generic`. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the entity type default. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -77363,7 +77363,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details. Each engine reports the log extraction settings that apply to its entity type.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: get-security-entity-store-status
       parameters:
         - description: If true, returns a detailed status of each engine including all its components.
@@ -77390,7 +77390,7 @@ paths:
                     engines: []
                     status: not_installed
                 runningStatusExample:
-                  description: The Entity Store is running with two started engines using default settings.
+                  description: The Entity Store is running with three started engines using default settings. Each engine reports the log extraction settings for its entity type, so the default frequency is 1m for host and user, and 10m for service.
                   summary: Entity Store running
                   value:
                     engines:
@@ -77399,17 +77399,17 @@ paths:
                         enrichPolicyExecutionInterval: null
                         fieldHistoryLength: 10
                         filter: ''
-                        frequency: 30s
+                        frequency: 1m
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
-                        maxLogsPerPage: 40000
-                        maxLogsPerWindow: 500000
-                        maxLogsPerWindowCapBehavior: defer
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
+                        maxLogsPerWindowCapBehavior: drop
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
                         status: started
-                        timeout: 25s
+                        timeout: 59s
                         timestampField: '@timestamp'
                         type: host
                       - delay: 1m
@@ -77417,24 +77417,52 @@ paths:
                         enrichPolicyExecutionInterval: null
                         fieldHistoryLength: 10
                         filter: ''
-                        frequency: 30s
+                        frequency: 1m
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
-                        maxLogsPerPage: 40000
-                        maxLogsPerWindow: 500000
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
                         nonPriority:
+                          delay: 1m
                           error: null
+                          fieldHistoryLength: 10
+                          frequency: 1m
                           lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          lookbackPeriod: 3h
+                          maxLogsPerPage: 50000
+                          maxLogsPerWindow: 100000
+                          maxLogsPerWindowCapBehavior: drop
+                          maxTimeWindowSize: 15m
                           samplingRate: null
                           status: started
+                          timeout: 59s
                         status: started
-                        timeout: 25s
+                        timeout: 59s
                         timestampField: '@timestamp'
                         type: user
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 10m
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
+                        maxLogsPerWindowCapBehavior: drop
+                        maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
+                        status: started
+                        timeout: 59s
+                        timestampField: '@timestamp'
+                        type: service
+                    excludedUserNames: []
                     status: running
           description: Indicates a successful response.
       summary: Get Entity Store status
