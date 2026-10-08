@@ -66,8 +66,8 @@ interface AlertActionBoomData {
 
 /**
  * Builds a per-item bulk error keyed by the item's own identifier —
- * `group_hash` for series-level items, `episode_id` for episode-level items.
- * Handler-supplied context (e.g. `episode_status`) is carried in `details`.
+ * `group_hash` for series-level items, `alert_id` for episode-level items.
+ * Handler-supplied context (e.g. `alert_status`) is carried in `details`.
  */
 const toBulkActionError = (
   id: string,
@@ -84,7 +84,7 @@ const toBulkActionError = (
 /**
  * Converts an expected per-item precondition Boom error into a bulk-error
  * entry keyed by the item's identifier. The handler-thrown `code`/`details`
- * (e.g. `episode_status`) are preserved so a client can tell *which*
+ * (e.g. `alert_status`) are preserved so a client can tell *which*
  * precondition failed; handlers without a `code` fall back to the generic
  * `INTERNAL_SERVER_ERROR`.
  */
@@ -136,9 +136,9 @@ export class AlertActionsClient {
    * Creates a series-level action (`tag` / `snooze` / `unsnooze`) for the
    * series identified by `groupHash`. The series' latest event is still
    * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
-   * on the audit doc — but both the persisted `.alert-actions` document and
-   * the emitted domain event carry `episode_id: null`: the action targets
-   * the series as a whole, not whichever episode happened to be current.
+   * on the audit doc — but the persisted `.alert-actions` document carries
+   * `alert_id: null` and the emitted domain event `episodeId: null`: the action
+   * targets the series as a whole, not whichever episode happened to be current.
    */
   public async createSeriesAction(params: {
     groupHash: string;
@@ -155,7 +155,7 @@ export class AlertActionsClient {
       }),
     ]);
 
-    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docEpisodeId: null });
+    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docAlertId: null });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
@@ -205,7 +205,7 @@ export class AlertActionsClient {
       action,
       alertEvent,
       userProfileUid,
-      docEpisodeId: alertEvent.episode_id,
+      docAlertId: alertEvent.episode_id,
     });
 
     await this.persistPreparedActions([prepared]);
@@ -231,17 +231,17 @@ export class AlertActionsClient {
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
     /**
-     * `episode_id` to persist on the audit doc: the resolved event's episode
+     * `alert_id` to persist on the audit doc: the resolved event's episode
      * id for episode-scoped actions, `null` for series-scoped actions.
      */
-    docEpisodeId: string | null;
+    docAlertId: string | null;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid, docEpisodeId } = params;
+    const { action, alertEvent, userProfileUid, docAlertId } = params;
     const alertActionDoc = this.buildAlertActionDocument({
       action,
       alertEvent,
       userProfileUid,
-      docEpisodeId,
+      docAlertId,
     });
 
     return prepareWithHandler({ action, alertEvent, alertActionDoc }, ACTION_HANDLERS);
@@ -282,8 +282,8 @@ export class AlertActionsClient {
   /**
    * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: one
    * latest-event query for every series referenced in the batch, per-item
-   * `errors[]` for missing series, and `episode_id: null` on every persisted
-   * audit doc and emitted domain event.
+   * `errors[]` for missing series, `alert_id: null` on every persisted audit
+   * doc and `episodeId: null` on every emitted domain event.
    */
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
@@ -321,7 +321,7 @@ export class AlertActionsClient {
             action: item,
             alertEvent,
             userProfileUid,
-            docEpisodeId: null,
+            docAlertId: null,
           })
         );
       } catch (error) {
@@ -416,7 +416,7 @@ export class AlertActionsClient {
             action: item,
             alertEvent,
             userProfileUid,
-            docEpisodeId: alertEvent.episode_id,
+            docAlertId: alertEvent.episode_id,
           })
         );
       } catch (error) {
@@ -443,9 +443,9 @@ export class AlertActionsClient {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
-    docEpisodeId: string | null;
+    docAlertId: string | null;
   }): AlertActionDocument {
-    const { action, alertEvent, userProfileUid, docEpisodeId } = params;
+    const { action, alertEvent, userProfileUid, docAlertId } = params;
     const actionData = omit(action, ['group_hash', 'alert_id', 'action_type']);
     const storageActionData =
       action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
@@ -462,7 +462,7 @@ export class AlertActionsClient {
       rule_id: alertEvent.rule_id,
       source: alertEvent.source,
       group_hash: alertEvent.group_hash,
-      episode_id: docEpisodeId,
+      alert_id: docAlertId,
       space_id: alertEvent.space_id,
       ...storageActionData,
     };

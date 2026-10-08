@@ -387,17 +387,57 @@ describe('detection rule workflows', () => {
 
       // Manual autonomy stops once for permission to do the work; the entry gate
       // carries no action and a dismissal terminates the run before diagnosis.
-      expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
+      const gate = all.find(({ name }) => name === 'entry_gate')!;
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
+      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
+        'propose_entry',
+        'entry_decision',
+      ]);
+      expect(gate).not.toHaveProperty('else');
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
       // No action, so no inherited category; the queue drops an uncategorised proposal.
       expect(entryInputs.category).toBe('configure');
+      // Only an approval continues: it matches no case and falls through to diagnosis.
+      // A gate nobody answered reports an empty decision and must stop, not pass as an
+      // approval.
+      const entryDecision = all.find(({ name }) => name === 'entry_decision')!;
+      expect(entryDecision.type).toBe('switch');
+      expect(
+        (entryDecision.cases ?? []).map(({ match, steps: caseSteps }) => [
+          match,
+          caseSteps.map(({ name }) => name),
+        ])
+      ).toEqual([
+        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
+        ['expired', ['stop_expired']],
+      ]);
+      expect(entryDecision.default).toBeUndefined();
+      for (const [decision, routed] of [
+        ['approved', ''],
+        ['dismissed', 'dismissed'],
+        ['', 'expired'],
+      ]) {
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(String(entryDecision.expression), {
+            steps: { propose_entry: { output: { decision } } },
+          })
+        ).toBe(routed);
+      }
+      const stopExpired = all.find(({ name }) => name === 'stop_expired')!;
+      expect(stopExpired.type).toBe('workflow.output');
+      expect(stopExpired.with).toEqual({
+        rule_uuid: '{{ inputs.rule_uuid }}',
+        approved: false,
+        applied: false,
+      });
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
       expect(stopIndex).toBeLessThan(diagnoseIndex);
       expect(all[stopIndex].type).toBe('workflow.output');
-      expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
@@ -453,10 +493,10 @@ describe('detection rule workflows', () => {
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
-      expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms; propose_threshold also has a step-level
-      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
-      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
+      // The `entry_gate` if-step guards the entry proposal and the switch guards the
+      // arms; propose_threshold also has a step-level guard (incomplete_threshold_output)
+      // verified by the case-arm assertion above.
+      for (const proposal of [entry, action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -493,7 +533,7 @@ describe('detection rule workflows', () => {
       // starts asking for its own deadline has to be checked against the
       // ceiling here.
       //
-      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // Flattened, not top-level: `propose_entry` sits inside `entry_gate`, and
       // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
@@ -596,12 +636,10 @@ describe('detection rule workflows', () => {
       // disabled after alerting keeps harvesting until its FPs age out of the window.
       // The sweep checks live enabled status for the harvested candidates only and
       // drops disabled rules from the fan-out source (a parallel branch body cannot
-      // carry a step-level `if`), failing open into a full fan-out when the lookup
-      // returned nothing.
+      // carry a step-level `if`).
       it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
-        const resolve = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
         const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
@@ -616,25 +654,17 @@ describe('detection rule workflows', () => {
         expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
         expect(lookup['on-failure']).toEqual({ continue: true });
 
-        // The prefixed joined string stays non-empty when zero candidates are
-        // enabled, so all-disabled never reads as a missing lookup.
-        expect(String(resolve.if)).toContain('steps.list_enabled_candidates.output.data != null');
-        expect(String(resolve.with?.enabled_rule_ids)).toContain(
-          "| join: ',' | prepend: 'enabled:'"
-        );
-
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]'"
+          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
-        // where_exp argument; this direct reference keeps the ids resident. If it
-        // is removed, an evicted value renders null and the filter fails open.
-        expect(String(rows.with?.enabled_rule_ids)).toContain(
-          '${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}'
+        // where_exp argument. This direct reference keeps the keys resident.
+        expect(String(rows.with?.rule_revision_keys)).toContain(
+          '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.
@@ -646,6 +676,66 @@ describe('detection rule workflows', () => {
         expect(String((fanOut as NestedStep & { foreach?: string }).foreach)).toContain(
           'steps.resolve_fanout_rows.output.rows'
         );
+      });
+
+      // Rule A was edited after its false positives, so they came from an older
+      // version. Rule B was not edited. Only rule B should be reviewed.
+      it('reviews a rule only on false positives from its current version', () => {
+        const resolveVersions = tuningSteps.find(
+          ({ name }) => name === 'resolve_current_revisions'
+        )!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+
+        expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
+
+        const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(resolveVersions.with?.rule_revision_keys),
+          {
+            steps: {
+              list_enabled_candidates: {
+                output: {
+                  data: [
+                    { id: 'rule-a', revision: 2 },
+                    { id: 'rule-b', revision: 5 },
+                  ],
+                },
+              },
+            },
+          }
+        );
+
+        // The last column is the "rule@version" key the harvest query adds to each row.
+        const ruleAOldVersion = [
+          'rule-a',
+          12,
+          '2026-10-01T00:00:00.000Z',
+          ['a1'],
+          20,
+          12,
+          ',rule-a@1,',
+        ];
+        const ruleBCurrentVersion = [
+          'rule-b',
+          15,
+          '2026-10-01T00:00:00.000Z',
+          ['b1'],
+          20,
+          15,
+          ',rule-b@5,',
+        ];
+
+        const reviewedRows = resolveExpression(rows.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            harvest_fp_alerts_by_rule: {
+              output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
+            },
+            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
+            collect_candidates: { output: { fanout_limit: 10 } },
+          },
+        });
+
+        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
@@ -711,7 +801,12 @@ describe('detection rule workflows', () => {
 
         const [declined, dismissed, applied, acknowledged] = tagSteps;
         // A declined entry gate retires the alerts too, or the next sweep re-opens it.
-        expect(declined.if).toContain('steps.record_entry.output.declined == true');
+        const entryDecision = reviewSteps.find(({ name }) => name === 'entry_decision')!;
+        expect(
+          entryDecision.cases
+            ?.find(({ match }) => match === 'dismissed')
+            ?.steps.map(({ name }) => name)
+        ).toContain(declined.name);
         expect(declined.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
@@ -1009,12 +1104,22 @@ describe('detection rule workflows', () => {
           string,
           Record<string, string> | string
         >;
-        expect((previewInputs.preview_body as Record<string, string>).query).toBe(
-          '{{ steps.fetch_rule.output.query }}'
+        const previewBody = previewInputs.preview_body as Record<string, string>;
+        const proposedBody = previewInputs.proposed_body as Record<string, string>;
+        expect(previewBody.query).toBe('{{ steps.fetch_rule.output.query }}');
+        expect(previewBody.filters).toBe(
+          '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        expect((previewInputs.proposed_body as Record<string, string>).query).toBe(
-          '{{ steps.diagnose_rule.output.structured_output.proposed_query }}'
+        // The query arm previews the proposed query; the exception arm keeps the rule's
+        // own query and differs only in the filters the exception step built.
+        expect(proposedBody.query).toContain(
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}"
         );
+        expect(proposedBody.query).toContain(
+          '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
+        );
+        expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
+        expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
       });
 
       // The backtest informs the analyst but never decides whether the edit-rule
@@ -1030,7 +1135,7 @@ describe('detection rule workflows', () => {
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
         // applies the change and the alerts are tagged applied, not acknowledged.
-        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).toContain('Approving still applies the proposed change');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
       });

@@ -538,7 +538,9 @@ describe('ConversationsPage decisions', () => {
 
   it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
     renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    // Only the read-only "Copy link" remains in the menu: no decision can be made from it.
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
     expect(approveMutateAsync).not.toHaveBeenCalled();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
@@ -619,15 +621,15 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
-    // A decided investigation without `canManageEscalations` has no available actions —
-    // the menu trigger must not be rendered at all, not just show an empty popover.
+  it('offers only Copy link for a decided proposal when escalation is not available', () => {
+    // A decided investigation without `canManageEscalations` keeps just the read-only item.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
     expandClosed();
 
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Copy link']);
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.

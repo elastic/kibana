@@ -1,0 +1,49 @@
+{
+  "10.5.0": [
+    {
+      "defaultsVersion": "legacy",
+      "historySnapshot": {
+        "status": "stopped",
+        "frequency": "1h",
+        "retentionDays": 60
+      },
+      "logsExtraction": {
+        "additionalIndexPatterns": [],
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "24h",
+        "delay": "2m",
+        "docsLimit": 10000,
+        "timeout": "30s",
+        "frequency": "1h",
+        "excludedIndexPatterns": [],
+        "maxTimeWindowSize": "15m",
+        "maxLogsPerWindow": 500000,
+        "maxLogsPerWindowCapBehavior": "defer"
+      }
+    }
+  ],
+  "10.6.0": [
+    {
+      "defaultsVersion": "legacy",
+      "excludedUserNames": [],
+      "historySnapshot": {
+        "status": "stopped",
+        "frequency": "1h",
+        "retentionDays": 60
+      },
+      "logsExtraction": {
+        "additionalIndexPatterns": [],
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "24h",
+        "delay": "2m",
+        "docsLimit": 10000,
+        "timeout": "30s",
+        "frequency": "1h",
+        "excludedIndexPatterns": [],
+        "maxTimeWindowSize": "15m",
+        "maxLogsPerWindow": 500000,
+        "maxLogsPerWindowCapBehavior": "defer"
+      }
+    }
+  ]
+}

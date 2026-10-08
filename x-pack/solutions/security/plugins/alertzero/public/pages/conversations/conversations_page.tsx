@@ -22,7 +22,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
-  impactPills,
+  useEntityFilter,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -55,7 +55,8 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
-import { QUEUE_PAGE_INFO } from './translations';
+import { useCopyInvestigationLink } from './use_copy_investigation_link';
+import { COPY_LINK_TOASTS, QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { InFlightProposalBadge } from './in_flight_proposal_badge';
@@ -116,20 +117,7 @@ const ConversationsPageContent: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [entityFilter, setEntityFilter] = useState<string | null>(null);
-  const availableEntityIds = useMemo(
-    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
-    [conversations]
-  );
-  // A poll or a collapsed section can drop the selected entity from the loaded
-  // rows. Keep filtering only while that pill is still there to clear.
-  const effectiveEntityFilter =
-    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
-  useEffect(() => {
-    if (entityFilter !== effectiveEntityFilter) {
-      setEntityFilter(effectiveEntityFilter);
-    }
-  }, [entityFilter, effectiveEntityFilter]);
+  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(conversations);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -271,10 +259,14 @@ const ConversationsPageContent: React.FC = () => {
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
-        <LazyConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
       </EscalationModalBoundary>
     ),
-    []
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(
@@ -320,9 +312,22 @@ const ConversationsPageContent: React.FC = () => {
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
+  const copyInvestigationLink = useCopyInvestigationLink();
+  // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
+  const copyLinkForProposal = useCallback(
+    (proposalId: Investigation['id']) => {
+      const conversationId = proposalsById.get(proposalId)?.conversationId;
+      // The card menu closes on click, so there is no tooltip to confirm in: use a toast.
+      if (conversationId && copyInvestigationLink(conversationId)) {
+        notifications?.toasts.addSuccess(COPY_LINK_TOASTS.copied);
+      }
+    },
+    [proposalsById, copyInvestigationLink, notifications]
+  );
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: clearSelectedConversation,
+    onCopyLink: copyInvestigationLink,
   });
 
   const actionInvestigation = useMemo(
@@ -394,7 +399,9 @@ const ConversationsPageContent: React.FC = () => {
         renderEscalationModal={renderEscalationModal}
       />
 
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
+          long row title push the queue past the viewport instead of truncating. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
             // The header renders the charts-summary count, so it tracks that query
@@ -414,7 +421,7 @@ const ConversationsPageContent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <Impact
-            investigations={conversations}
+            items={conversations}
             entityFilter={effectiveEntityFilter}
             onEntityFilterChange={setEntityFilter}
           />
@@ -435,6 +442,7 @@ const ConversationsPageContent: React.FC = () => {
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
               canCloseInvestigation={canManageInvestigations}
+              onCopyLink={copyLinkForProposal}
               renderAssignees={renderAssignees}
               renderInFlightStatus={renderInFlightStatus}
             />

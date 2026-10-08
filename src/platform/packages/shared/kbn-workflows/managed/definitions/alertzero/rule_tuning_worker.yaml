@@ -165,8 +165,10 @@ steps:
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
         | INLINE STATS reviewed_watermark = MAX(@timestamp)
-            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
+            latest_revision = MAX(`kibana.alert.rule.revision`)
           BY `kibana.alert.rule.uuid`
+        | WHERE `kibana.alert.rule.revision` == latest_revision
         | EVAL is_unreviewed_fp = is_fp
             AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
         | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)
@@ -175,7 +177,7 @@ steps:
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
             recent_keys = TOP(fp_recency_key, {{ consts.max_diagnosis_ids }}, "desc") WHERE is_unreviewed_fp
-          BY `kibana.alert.rule.uuid`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
@@ -187,9 +189,10 @@ steps:
             alert_ids = VALUES(alert_id),
             total_count = MAX(total_count),
             fp_rate_count = MAX(fp_rate_count)
-          BY `kibana.alert.rule.uuid`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
+        | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
         | SORT fp_count DESC
-        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count, rule_revision_key
     on-failure:
       continue: true
 
@@ -212,18 +215,16 @@ steps:
     on-failure:
       continue: true
 
-  - name: resolve_enabled_rules
+  - name: resolve_current_revisions
     type: data.set
-    if: "${{ steps.list_enabled_candidates.output.data != null }}"
     with:
-      enabled_rule_ids: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+      rule_revision_keys: ",{% for rule in steps.list_enabled_candidates.output.data %}{{ rule.id }}@{{ rule.revision }},{% endfor %}"
 
-  # Only enabled rules are included in the fan-out.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      enabled_rule_ids: "${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}"
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+      rule_revision_keys: "${{ steps.resolve_current_revisions.output.rule_revision_keys }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
   # One review execution per rule, started without waiting. Each child parks on
   # its own approval gate for up to 72h; joining on them here would park this sweep
@@ -243,6 +244,7 @@ steps:
           continue: true
         with:
           workflow-id: system-security-rule-tuning-review
+          run-as-mode: inherit
           inputs:
             rule_uuid: "{{ foreach.item.0 }}"
             fp_count: "${{ foreach.item.1 }}"
@@ -265,6 +267,6 @@ steps:
       reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
       reviews_in_flight: "${{ steps.collect_active_rules.output.expected }}"
       # Both reads can fail without stopping the sweep. Zero requested after a failed
-      # harvest does not mean no noisy rule.
-      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"
+      # harvest does not mean no noisy rule. The enabled-rule lookup is part of the harvest.
+      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
