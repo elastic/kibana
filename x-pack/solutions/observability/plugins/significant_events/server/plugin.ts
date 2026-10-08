@@ -421,6 +421,19 @@ export class SignificantEventsPlugin
       logger: this.logger,
       server: this.server,
       getScopedClients: this.getScopedClients,
+      internalRuleBackedRules: {
+        listRuleIds: async () => {
+          const [coreStart] = await core.getStartServices();
+          return knowledgeIndicatorService.listRuleBackedRuleIds(
+            coreStart.elasticsearch.client.asInternalUser
+          );
+        },
+        bulkDisableRules: async (params) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const rulesClient = await pluginsStart.alertingVTwo.getUnsafeInternalRulesClient();
+          return rulesClient.bulkDisableRules(params);
+        },
+      },
     });
 
     const priceService = createPriceService({
@@ -628,6 +641,7 @@ export class SignificantEventsPlugin
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
         getScopedClients: this.getScopedClients,
+        server: this.server,
         logger: this.logger,
         isAvailable,
         availability: createSignificantEventsAvailability({

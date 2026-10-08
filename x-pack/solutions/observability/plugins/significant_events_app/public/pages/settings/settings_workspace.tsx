@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -16,12 +17,9 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import { SettingsTab } from '../significant_events/components/settings/tab';
-import { CostEstimate } from '../significant_events/components/settings/cost_estimate';
 import { DiscoveryControls } from '../detection/discovery_controls';
 import { InvestigationControls } from '../detection/investigation_controls';
 import { journey } from '../detection/journey_translations';
@@ -34,7 +32,6 @@ export const SettingsWorkspace = (): React.ReactElement => {
   const section =
     requested === 'detections' || requested === 'investigations' ? requested : 'general';
   const developerMode = useDeveloperMode();
-  const id = useGeneratedHtmlId({ prefix: 'nightshiftSettings' });
   return (
     <>
       <EuiText size="s" color="subdued">
@@ -84,7 +81,15 @@ export const SettingsWorkspace = (): React.ReactElement => {
             />
           </EuiPanel>
           <EuiSpacer size="l" />
-          <CostEstimate />
+          <EuiButtonEmpty
+            data-test-subj="significantEventsAppSettingsCostEstimateLink"
+            iconType="popout"
+            href={core.application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+              path: '/settings/detections',
+            })}
+          >
+            {journey.cost}
+          </EuiButtonEmpty>
         </>
       )}
       {section === 'investigations' && <InvestigationControls />}
@@ -92,11 +97,15 @@ export const SettingsWorkspace = (): React.ReactElement => {
         <>
           <DiscoveryControls />
           <EuiSpacer size="l" />
-          <CostEstimate />
-          <EuiSpacer size="l" />
-          <EuiAccordion id={`${id}-advanced`} buttonContent={journey.advanced} paddingSize="m">
-            <SettingsTab />
-          </EuiAccordion>
+          <EuiButtonEmpty
+            data-test-subj="significantEventsAppSettingsAdvancedLink"
+            iconType="popout"
+            href={core.application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+              path: '/settings/detections',
+            })}
+          >
+            {journey.advanced}
+          </EuiButtonEmpty>
         </>
       )}
     </>
