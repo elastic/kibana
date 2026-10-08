@@ -68,7 +68,8 @@ const buildScreenContextData = async ({
 }: {
   services: StartServices;
 }): Promise<ScreenContextAttachmentData | undefined> => {
-  const url = window.location.href;
+  const { origin, pathname, hash } = window.location;
+  const url = `${origin}${pathname}${hash.split('?')[0]}`;
   const app = await firstValueFrom(services.application.currentAppId$);
   const timefilter = services.plugins.data?.query.timefilter.timefilter;
   const time = timefilter?.getTime();

@@ -116,6 +116,25 @@ describe('useSendMessageMutation', () => {
     });
   });
 
+  it('drops the query string from the screen context url', async () => {
+    window.history.pushState(
+      {},
+      '',
+      '/app/agent_builder?additional-instructions=injected#/route?injected=1'
+    );
+    const { result } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+
+    expect(mockChat.mock.calls[0][0].attachments).toContainEqual(
+      expect.objectContaining({
+        type: 'screen_context',
+        data: { url: `${window.location.origin}/app/agent_builder#/route` },
+      })
+    );
+  });
+
   it('releases the pending message and live events once the refetch has their saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
