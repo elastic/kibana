@@ -315,7 +315,7 @@ run(
 
       Slack-triggered automations reply in the triggering thread, other triggers use a channel or
       direct message action or none, and "Investigate incoming alerts" keeps a legacy channel
-      action on a Slack trigger. Each author is created as a superuser so the automation records them as its creator. Runs are
+      action on a Slack trigger, which the edit form shows as stored. Each author is created as a superuser so the automation records them as its creator. Runs are
       written straight into ${EXECUTIONS_INDEX}, including failed, skipped, and still-running runs.
       Re-running deletes the seeded automations and runs first.`,
     flags: {

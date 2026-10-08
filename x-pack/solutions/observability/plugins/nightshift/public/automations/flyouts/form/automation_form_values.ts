@@ -11,6 +11,7 @@ export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self' | 'thread';
+const SLACK_TARGETS: SlackTarget[] = ['channel', 'self', 'thread'];
 
 export const SLACK_TRIGGER_EVENTS = {
   slack_message: 'message',
@@ -164,11 +165,11 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     instructions: automation.execution.promptTemplate ?? '',
     mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
-      trigger && isSlackTrigger(trigger)
-        ? SLACK_THREAD_ACTION
-        : automation.completion.action === 'post_to_slack'
+      automation.completion.action === 'post_to_slack'
         ? {
-            target: automation.completion.targetMode === 'self' ? 'self' : 'channel',
+            target:
+              SLACK_TARGETS.find((target) => target === automation.completion.targetMode) ??
+              'channel',
             destination: automation.completion.destination ?? '',
           }
         : undefined,

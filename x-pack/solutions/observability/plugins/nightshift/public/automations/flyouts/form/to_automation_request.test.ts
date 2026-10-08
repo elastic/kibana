@@ -283,6 +283,19 @@ describe('automation request', () => {
       });
     });
 
+    it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {
+      const automation = buildAutomation({
+        trigger: { rows: [{ kind: 'slack', event: 'message', channels: ['#oncall'] }] },
+        completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' },
+      });
+      const values = {
+        ...toAutomationFormValues(automation),
+        name: 'Renamed',
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).completion).toEqual(automation.completion);
+    });
+
     it('saves a reply-in-thread action without a destination', () => {
       const automation = buildAutomation({});
       const values = {
