@@ -90,7 +90,6 @@ engine:
   model: opus
   max-turns: 120
   env:
-    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
@@ -239,11 +238,6 @@ steps:
         }
 
 safe-outputs:
-  threat-detection:
-    engine:
-      id: claude
-      env:
-        BUILDKITE_API_TOKEN: ${{ '' }}
   needs: [check_pr_eligibility]
   steps:
     # Runs in the output job, outside the agent, before publishing any requested writes.
