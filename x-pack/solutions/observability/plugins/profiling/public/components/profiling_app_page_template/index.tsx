@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { AppHeader } from '@kbn/app-header';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
@@ -19,7 +18,6 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
-import { AddDataTabs } from '../../views/add_data_view/types';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
@@ -53,7 +51,6 @@ export function ProfilingAppPageTemplate({
   children,
   tabs = [],
   hideSearchBar = false,
-  noDataConfig,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
     defaultMessage: 'Universal Profiling',
@@ -66,7 +63,6 @@ export function ProfilingAppPageTemplate({
   children?: React.ReactElement;
   tabs?: AppHeaderTab[];
   hideSearchBar?: boolean;
-  noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
   pageTitle?: AppHeaderTitle;
   showBetaBadge?: boolean;
@@ -144,9 +140,7 @@ export function ProfilingAppPageTemplate({
       label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
         defaultMessage: 'Add data',
       }),
-      href: router.link('/add-data-instructions', {
-        query: { selectedTab: AddDataTabs.Kubernetes },
-      }),
+      href: router.link('/add-data-instructions', { query: {} }),
       iconType: 'plusCircle',
     },
   };
@@ -163,7 +157,6 @@ export function ProfilingAppPageTemplate({
       */}
       <SuppressChromeBackButton />
       <ObservabilityPageTemplate
-        noDataConfig={noDataConfig}
         restrictWidth={restrictWidth}
         pageSectionProps={{
           contentProps: {

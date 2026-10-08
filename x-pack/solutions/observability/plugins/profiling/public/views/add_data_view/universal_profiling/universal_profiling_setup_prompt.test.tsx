@@ -7,26 +7,26 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import type { NoDataCardProps } from '@kbn/shared-ux-card-no-data';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
 
-const mockPageTemplate = jest.fn();
+const mockNoDataCard = jest.fn();
 
-jest.mock('../../components/contexts/profiling_dependencies/use_profiling_dependencies');
-jest.mock('../../components/contexts/profiling_status/use_profiling_status');
-jest.mock('../../hooks/use_auto_aborted_http_client', () => ({
+jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies');
+jest.mock('../../../components/contexts/profiling_status/use_profiling_status');
+jest.mock('../../../hooks/use_auto_aborted_http_client', () => ({
   useAutoAbortedHttpClient: () => ({ name: 'http' }),
 }));
-jest.mock('../../components/profiling_app_page_template', () => ({
-  ProfilingAppPageTemplate: (props: { noDataConfig?: NoDataPageProps }) => {
-    mockPageTemplate(props);
+jest.mock('@kbn/shared-ux-card-no-data', () => ({
+  NoDataCard: (props: NoDataCardProps) => {
+    mockNoDataCard(props);
     return null;
   },
 }));
 
-import { AsyncStatus } from '../../hooks/use_async';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
+import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useProfilingStatus } from '../../../components/contexts/profiling_status/use_profiling_status';
 import { UniversalProfilingSetupPrompt } from './universal_profiling_setup_prompt';
 
 const makeStatus = (canSetup: boolean): ProfilingStatus => ({
@@ -46,11 +46,8 @@ describe('UniversalProfilingSetupPrompt', () => {
   const refresh = jest.fn();
   const addError = jest.fn();
 
-  // The setup card props from the latest render of the page template.
-  const getSetupCard = () => {
-    const { noDataConfig } = mockPageTemplate.mock.calls[mockPageTemplate.mock.calls.length - 1][0];
-    return noDataConfig.action.elasticAgent;
-  };
+  // The setup card props from its latest render.
+  const getSetupCard = () => mockNoDataCard.mock.calls[mockNoDataCard.mock.calls.length - 1][0];
 
   const clickSetupButton = async () => {
     await act(async () => {

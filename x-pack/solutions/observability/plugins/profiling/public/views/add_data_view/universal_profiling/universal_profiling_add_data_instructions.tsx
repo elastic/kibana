@@ -24,26 +24,32 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import major from 'semver/functions/major';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
-import { AsyncStatus, useAsync } from '../../hooks/use_async';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
-import { hasUsableProfilingData } from '../../utils/has_usable_profiling_data';
-import type { AddDataTab } from './types';
-import { AddDataTabs } from './types';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
+import { AsyncStatus, useAsync } from '../../../hooks/use_async';
+import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import type { UniversalProfilingAddDataTab } from './types';
+import { DEFAULT_UNIVERSAL_PROFILING_ADD_DATA_TAB, UniversalProfilingAddDataTabs } from './types';
 
 const supportedCPUArchitectures = ['x86_64', 'arm64'];
 
-export function AddDataInstructions() {
+export function UniversalProfilingAddDataInstructions() {
   const { query } = useProfilingParams('/add-data-instructions');
-  const { selectedTab } = query;
+  const { selectedTab = DEFAULT_UNIVERSAL_PROFILING_ADD_DATA_TAB } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
-  const { data: profilingStatus } = useEnabledProfilingStatus();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
+
+  // Writes the default tab to the URL, replacing the entry so going back skips the URL without it
+  useEffect(() => {
+    if (!query.selectedTab) {
+      profilingRouter.replace(routePath, {
+        path: {},
+        query: { selectedTab: DEFAULT_UNIVERSAL_PROFILING_ADD_DATA_TAB },
+      });
+    }
+  }, [query.selectedTab, profilingRouter, routePath]);
 
   const {
     services: { setupDataCollectionInstructions },
@@ -64,10 +70,10 @@ export function AddDataInstructions() {
   const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs: Array<AddDataTab<AddDataTabs>> = useMemo(
+  const tabs: Array<UniversalProfilingAddDataTab<UniversalProfilingAddDataTabs>> = useMemo(
     () => [
       {
-        key: AddDataTabs.Kubernetes,
+        key: UniversalProfilingAddDataTabs.Kubernetes,
         title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
           defaultMessage: 'Kubernetes',
         }),
@@ -120,7 +126,7 @@ elastic/profiling-agent`}
         ],
       },
       {
-        key: AddDataTabs.Docker,
+        key: UniversalProfilingAddDataTabs.Docker,
         title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
           defaultMessage: 'Docker',
         }),
@@ -142,7 +148,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
         ],
       },
       {
-        key: AddDataTabs.Binary,
+        key: UniversalProfilingAddDataTabs.Binary,
         title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
           defaultMessage: 'Binary',
         }),
@@ -188,7 +194,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
         }),
       },
       {
-        key: AddDataTabs.Deb,
+        key: UniversalProfilingAddDataTabs.Deb,
         title: i18n.translate('xpack.profiling.tabs.debTitle', {
           defaultMessage: 'DEB Package',
         }),
@@ -240,7 +246,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
         ],
       },
       {
-        key: AddDataTabs.RPM,
+        key: UniversalProfilingAddDataTabs.RPM,
         title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
           defaultMessage: 'RPM Package',
         }),
@@ -299,7 +305,7 @@ EOF`}
         ],
       },
       {
-        key: AddDataTabs.ElasticAgentIntegration,
+        key: UniversalProfilingAddDataTabs.ElasticAgentIntegration,
         title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.title', {
           defaultMessage: 'Elastic Agent Integration',
         }),
@@ -363,7 +369,7 @@ EOF`}
         ],
       },
       {
-        key: AddDataTabs.Symbols,
+        key: UniversalProfilingAddDataTabs.Symbols,
         title: i18n.translate('xpack.profiling.tabs.symbols.title', {
           defaultMessage: 'Upload Symbols',
         }),
@@ -490,155 +496,149 @@ EOF`}
 
   const isLoading = status === AsyncStatus.Loading;
 
+  if (isLoading) {
+    return (
+      <EuiFlexItem>
+        <EuiLoadingSpinner />
+      </EuiFlexItem>
+    );
+  }
+
   return (
-    <ProfilingAppPageTemplate
-      restrictWidth
-      hideSearchBar
-      pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
-        defaultMessage: 'Add profiling data',
-      })}
-      suppressMenu={!hasUsableProfilingData(profilingStatus)}
-    >
-      {isLoading ? (
-        <EuiFlexItem>
-          <EuiLoadingSpinner />
-        </EuiFlexItem>
-      ) : (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
-                values={{
-                  versionFrom: (
-                    <strong>
-                      {i18n.translate('xpack.profiling.tabs.strong.5.19Label', {
-                        defaultMessage: '5.19',
-                      })}
-                    </strong>
-                  ),
-                  versionTo: (
-                    <strong>
-                      {i18n.translate('xpack.profiling.tabs.strong.6.4Label', {
-                        defaultMessage: '6.4',
-                      })}
-                    </strong>
-                  ),
-                  linuxLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewLinuxKernelBugLink"
-                      target="_blank"
-                      href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
-                        defaultMessage: 'Linux kernel bug',
-                      })}
-                    </EuiLink>
-                  ),
-                  debianLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewDebianLink"
-                      target="_blank"
-                      href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
-                        defaultMessage: 'Debian',
-                      })}
-                    </EuiLink>
-                  ),
-                  fedoraLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewFedoraCentOsLink"
-                      target="_blank"
-                      href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
-                        defaultMessage: 'Fedora/CentOS',
-                      })}
-                    </EuiLink>
-                  ),
-                  advancedLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
-                      target="_blank"
-                      href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
-                        defaultMessage: 'Advanced configuration',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          />
-          <EuiSpacer />
-          <EuiText>
-            {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
-            })}
-          </EuiText>
-          <EuiSpacer />
-          <EuiSplitPanel.Outer>
-            <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
-              <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-                <EuiTabs style={{ padding: '0 24px' }}>
-                  {tabs.map((tab) => {
-                    return (
-                      <EuiTab
-                        key={tab.key}
-                        onClick={() => {
-                          profilingRouter.push(routePath, {
-                            path: {},
-                            query: { selectedTab: tab.key },
-                          });
-                        }}
-                        isSelected={tab.key === selectedTab}
-                      >
-                        {tab.title}
-                      </EuiTab>
-                    );
+    <>
+      <KbnWarningCallout
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.profiling.tabs.debWarning"
+            defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
+            values={{
+              versionFrom: (
+                <strong>
+                  {i18n.translate('xpack.profiling.tabs.strong.5.19Label', {
+                    defaultMessage: '5.19',
                   })}
-                </EuiTabs>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
-                <EuiSpacer size="s" />
-                {subTabs.length > 0 && (
-                  <EuiTabs style={{ padding: '0 24px' }}>
-                    {subTabs.map((tab) => {
-                      return (
-                        <EuiTab
-                          key={tab.key}
-                          onClick={() => {
-                            setSelectedSubTabKey(tab.key);
-                          }}
-                          isSelected={tab.key === selectedSubTabKey}
-                        >
-                          {tab.title}
-                        </EuiTab>
-                      );
-                    })}
-                  </EuiTabs>
-                )}
-                <EuiSpacer size="xxl" />
-                {displayedSteps.length > 0 && (
-                  <EuiSteps
-                    steps={displayedSteps.map((step) => {
-                      return {
-                        title: step.title,
-                        children: step.content,
-                        status: 'incomplete',
-                      };
-                    })}
-                  />
-                )}
-              </EuiSplitPanel.Inner>
-            </EuiPanel>
-          </EuiSplitPanel.Outer>
-        </>
-      )}
-    </ProfilingAppPageTemplate>
+                </strong>
+              ),
+              versionTo: (
+                <strong>
+                  {i18n.translate('xpack.profiling.tabs.strong.6.4Label', {
+                    defaultMessage: '6.4',
+                  })}
+                </strong>
+              ),
+              linuxLink: (
+                <EuiLink
+                  data-test-subj="profilingAddDataViewLinuxKernelBugLink"
+                  target="_blank"
+                  href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
+                >
+                  {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
+                    defaultMessage: 'Linux kernel bug',
+                  })}
+                </EuiLink>
+              ),
+              debianLink: (
+                <EuiLink
+                  data-test-subj="profilingAddDataViewDebianLink"
+                  target="_blank"
+                  href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
+                >
+                  {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
+                    defaultMessage: 'Debian',
+                  })}
+                </EuiLink>
+              ),
+              fedoraLink: (
+                <EuiLink
+                  data-test-subj="profilingAddDataViewFedoraCentOsLink"
+                  target="_blank"
+                  href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
+                >
+                  {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                    defaultMessage: 'Fedora/CentOS',
+                  })}
+                </EuiLink>
+              ),
+              advancedLink: (
+                <EuiLink
+                  data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
+                  target="_blank"
+                  href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
+                >
+                  {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
+                    defaultMessage: 'Advanced configuration',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
+      <EuiSpacer />
+      <EuiText>
+        {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
+          defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
+        })}
+      </EuiText>
+      <EuiSpacer />
+      <EuiSplitPanel.Outer>
+        <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
+          <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+            <EuiTabs style={{ padding: '0 24px' }}>
+              {tabs.map((tab) => {
+                return (
+                  <EuiTab
+                    key={tab.key}
+                    data-test-subj={`profilingAddDataViewTab-${tab.key}`}
+                    onClick={() => {
+                      profilingRouter.push(routePath, {
+                        path: {},
+                        query: { selectedTab: tab.key },
+                      });
+                    }}
+                    isSelected={tab.key === selectedTab}
+                  >
+                    {tab.title}
+                  </EuiTab>
+                );
+              })}
+            </EuiTabs>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
+            <EuiSpacer size="s" />
+            {subTabs.length > 0 && (
+              <EuiTabs style={{ padding: '0 24px' }}>
+                {subTabs.map((tab) => {
+                  return (
+                    <EuiTab
+                      key={tab.key}
+                      onClick={() => {
+                        setSelectedSubTabKey(tab.key);
+                      }}
+                      isSelected={tab.key === selectedSubTabKey}
+                    >
+                      {tab.title}
+                    </EuiTab>
+                  );
+                })}
+              </EuiTabs>
+            )}
+            <EuiSpacer size="xxl" />
+            {displayedSteps.length > 0 && (
+              <EuiSteps
+                steps={displayedSteps.map((step) => {
+                  return {
+                    title: step.title,
+                    children: step.content,
+                    status: 'incomplete',
+                  };
+                })}
+              />
+            )}
+          </EuiSplitPanel.Inner>
+        </EuiPanel>
+      </EuiSplitPanel.Outer>
+    </>
   );
 }

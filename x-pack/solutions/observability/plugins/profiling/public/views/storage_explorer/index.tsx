@@ -34,7 +34,7 @@ import {
   getStorageExplorerAvailability,
   StorageExplorerAvailability,
 } from '../../utils/get_storage_explorer_availability';
-import { AddDataTabs } from '../add_data_view/types';
+import { UniversalProfilingAddDataTabs } from '../add_data_view/universal_profiling/types';
 
 export function StorageExplorerView() {
   const {
@@ -52,7 +52,7 @@ export function StorageExplorerView() {
     if (availability === StorageExplorerAvailability.NotSetUp) {
       profilingRouter.replace('/add-data-instructions', {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: { selectedTab: UniversalProfilingAddDataTabs.Kubernetes },
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });

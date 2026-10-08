@@ -11,7 +11,6 @@ import { useLocation } from 'react-router-dom';
 import { AsyncStatus } from '../hooks/use_async';
 import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
 import { hasUsableProfilingData } from '../utils/has_usable_profiling_data';
@@ -80,10 +79,7 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     if (pathname !== PROFILING_PATHNAMES.addDataInstructions) {
       // If the cluster still has data from before 8.9.1, redirect to the add data page,
       // which shows the instructions to delete it
-      router.push(PROFILING_PATHNAMES.addDataInstructions, {
-        path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
-      });
+      router.push(PROFILING_PATHNAMES.addDataInstructions, { path: {}, query: {} });
       return null;
     }
     return children;
@@ -93,9 +89,6 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  router.push(PROFILING_PATHNAMES.addDataInstructions, {
-    path: {},
-    query: { selectedTab: AddDataTabs.Kubernetes },
-  });
+  router.push(PROFILING_PATHNAMES.addDataInstructions, { path: {}, query: {} });
   return null;
 }

@@ -13,7 +13,7 @@ import type { FrameType } from '@kbn/profiling-utils';
 import { getLanguageType } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { AddDataTabs } from '../../views/add_data_view/types';
+import { UniversalProfilingAddDataTabs } from '../../views/add_data_view/universal_profiling/types';
 
 interface Props {
   frameType: FrameType;
@@ -58,7 +58,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         <EuiButton
           data-test-subj="profilingMissingSymbolsCalloutUploadSymbolsButton"
           href={router.link('/add-data-instructions', {
-            query: { selectedTab: AddDataTabs.Symbols },
+            query: { selectedTab: UniversalProfilingAddDataTabs.Symbols },
           })}
           color="warning"
         >

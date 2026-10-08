@@ -24,7 +24,6 @@ jest.mock('./profiling_app_page_template', () => ({
 import { useLocation } from 'react-router-dom';
 import { AsyncStatus } from '../hooks/use_async';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
@@ -195,7 +194,7 @@ describe('CheckStatus', () => {
 
       expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: {},
       });
       expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
     });
@@ -256,7 +255,7 @@ describe('CheckStatus', () => {
 
     expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: {},
     });
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
@@ -268,7 +267,7 @@ describe('CheckStatus', () => {
 
     expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: {},
     });
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });

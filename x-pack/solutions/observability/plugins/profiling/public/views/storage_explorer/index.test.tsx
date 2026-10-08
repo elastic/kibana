@@ -15,7 +15,7 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import { AddDataTabs } from '../add_data_view/types';
+import { UniversalProfilingAddDataTabs } from '../add_data_view/universal_profiling/types';
 import { StorageExplorerView } from '.';
 
 jest.mock('@kbn/ebt-tools', () => ({
@@ -105,7 +105,7 @@ describe('StorageExplorerView', () => {
 
     expect(replace).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: { selectedTab: UniversalProfilingAddDataTabs.Kubernetes },
     });
     expect(queryByTestId('storageExplorerPage')).not.toBeInTheDocument();
     expect(useTimeRangeAsync).not.toHaveBeenCalled();
