@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PDFDocument } from 'pdf-lib';
+import type { PDFDocument as PdfDocument } from 'pdf-lib';
 import type domtoimageModule from 'dom-to-image-more';
 import type { ExecutiveBriefJob } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EXECUTIVE_BRIEF_BODY_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
@@ -26,8 +26,7 @@ import { A4_POINTS, PAGE_PADDING, USABLE_PAGE_WIDTH } from './page_layout';
 export const exportBriefToPdf = async (job: ExecutiveBriefJob): Promise<void> => {
   // Lazy-load dependencies
   const domtoimage = (await import('dom-to-image-more')).default;
-  const pdfLibModule = (await import('pdf-lib')) as { PDFDocument: typeof PDFDocument };
-  const { PDFDocument } = pdfLibModule;
+  const { PDFDocument } = await import('pdf-lib');
 
   const bodyElement = document.getElementById(EXECUTIVE_BRIEF_BODY_ID);
   if (!bodyElement) {
@@ -42,12 +41,10 @@ export const exportBriefToPdf = async (job: ExecutiveBriefJob): Promise<void> =>
     const sectionIds = Object.values(EXECUTIVE_BRIEF_SECTION_IDS);
     const images: Array<{ id: string; blob: Blob; height: number }> = [];
 
-    const sectionElements = sectionIds
-      .map((sectionId) => ({ sectionId, sectionElement: document.getElementById(sectionId) }))
-      .filter(
-        (entry): entry is { sectionId: string; sectionElement: HTMLElement } =>
-          entry.sectionElement !== null
-      );
+    const sectionElements = sectionIds.flatMap((sectionId) => {
+      const sectionElement = document.getElementById(sectionId);
+      return sectionElement ? [{ sectionId, sectionElement }] : [];
+    });
 
     for (const { sectionId, sectionElement } of sectionElements) {
       const sectionBlob = await captureSection(sectionElement, domtoimage);
@@ -125,7 +122,7 @@ const captureSection = async (
  * it starts a new page (no splitting of individual images).
  */
 const addImagesToPdf = async (
-  pdfDoc: PDFDocument,
+  pdfDoc: PdfDocument,
   images: Array<{ id: string; blob: Blob; height: number }>
 ): Promise<void> => {
   const imageUrls: Array<{ id: string; url: string; height: number }> = [];

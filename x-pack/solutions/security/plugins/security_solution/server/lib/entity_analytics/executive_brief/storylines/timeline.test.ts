@@ -264,7 +264,7 @@ describe('event building', () => {
 });
 
 describe('event ordering and caps', () => {
-  const draft = (type: DraftEvent['type'], at: string, summary = type): DraftEvent => ({
+  const draft = (type: DraftEvent['type'], at: string, summary: string = type): DraftEvent => ({
     type,
     at,
     entityEuids: [],

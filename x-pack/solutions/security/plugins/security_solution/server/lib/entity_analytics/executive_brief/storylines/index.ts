@@ -157,7 +157,7 @@ export const buildStorylines = async (
   input: BuildStorylinesInput
 ): Promise<SnapshotPart<StorylinesResult>> => {
   const sources: SnapshotSources = {};
-  const { esClient, spaceId, timeRange, registry, abortSignal: signal } = ctx;
+  const { esClient, spaceId, timeRange, abortSignal: signal } = ctx;
   const now = timeRange.to;
   const index = new ResolutionIndex(esClient, spaceId, signal);
 
