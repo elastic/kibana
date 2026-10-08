@@ -49,6 +49,7 @@ export const VIS_ICONS = {
   compute: { icon: 'processor' },
   globe: { icon: 'globe' },
   pin: { icon: 'pin' },
+  popout: { icon: 'external' },
   sortDown: { icon: 'sortDown' },
   sortUp: { icon: 'sortUp' },
   temperature: { icon: 'thermometer' },

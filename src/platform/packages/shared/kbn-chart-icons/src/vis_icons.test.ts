@@ -15,6 +15,7 @@ describe('resolveVisIcon', () => {
   it.each([
     ['mapMarker', 'waypoint'],
     ['kubernetesPod', 'cube'],
+    ['popout', 'external'],
     ['visLine', 'chartLine'],
   ])(
     'resolves the identifier "%s", named after a deprecated EUI icon, to the EUI icon "%s"',
