@@ -139,13 +139,29 @@ When `ContentListProvider` is rendered inside a React Router context, `queryText
 | `queryText` | `q` | full query string | `?q=createdBy:jane%20is:starred%20dashboard` |
 | `sort` | `sort` | `field:direction` | `?sort=updatedAt:desc` |
 
-Empty query text removes `q`. The resolved initial sort removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved verbatim — values are written using an RFC 3986–friendly encoder, so Rison-style params (e.g. `_g`, `_a`) keep their readable form (parens, colons, commas, `!`, etc.) instead of being percent-encoded on every rewrite.
+Empty query text removes `q`. The list's opening sort (see [Sort persistence](#sort-persistence)) removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved verbatim — values are written using an RFC 3986–friendly encoder, so Rison-style params (e.g. `_g`, `_a`) keep their readable form (parens, colons, commas, `!`, etc.) instead of being percent-encoded on every rewrite.
 
 Every URL write uses `history.replace`, so listing-page interactions (typing, filter toggles, sort changes) refine the current entry instead of adding to the back stack. Browser Back/Forward leaves the listing page.
 
 Legacy TableListView URLs using `s`, `title`, `sort`, `sortdir`, `created_by`, and `favorites` are decoded on first load and rewritten to the new `q` / `sort` shape. New-shape params win when both old and new params are present.
 
 Use `features={{ urlSync: false }}` for embedded lists, modals, sidebars, or secondary lists that share a route with another URL-synced list. Only one list per route should leave URL sync enabled unless the lists intentionally share the same URL state.
+
+### Sort persistence
+
+The sort a user picks (from the sort dropdown or a table header) is saved in `localStorage` under `contentList:sort:<queryKeyScope>` as `field:direction` (for example `contentList:sort:dashboard-listing:title:asc`). `queryKeyScope` defaults to `${id}-listing`, so each listing keeps its own sort.
+
+The sort a list opens with is resolved once at mount:
+
+| Priority | Source |
+|----------|--------|
+| 1 | The user's saved sort, if it is still offered by `features.sorting` |
+| 2 | `features.sorting.initialSort` |
+| 3 | The default (`title` ascending) |
+
+A saved value that is malformed or no longer offered (a removed field, or a direction a field doesn't allow) is ignored. Persistence only applies when sorting is enabled.
+
+`initialSort` is therefore the sort for users who haven't chosen one. A `?sort=` URL param overrides the opening sort for that visit and is **not** saved, so following a shared link never overwrites your preference. `sort` is omitted from the URL while it equals the opening sort, which means a URL without `sort` shows each viewer their own opening sort.
 
 #### Implementation note: one source of truth
 
