@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiCopy, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { buildPath } from '@kbn/core-http-browser';
 import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
@@ -31,7 +32,7 @@ export const ConnectorPublicKeys = ({
     if (!connectorId || !publicBaseUrl) return undefined;
     return buildConnectorPublicKeyUrls({ publicBaseUrl, spaceId, connectorTypeId, connectorId });
   }, [http.basePath, spaceId, connectorTypeId, connectorId]);
-  const [issuer, setIssuer] = useState<string>();
+  const [discovery, setDiscovery] = useState<{ issuer: string } | 'missing'>();
   useEffect(() => {
     if (!connectorId) return;
     let isMounted = true;
@@ -46,13 +47,14 @@ export const ConnectorPublicKeys = ({
         { prependBasePath: false }
       )
       .then(
-        (discovery) => isMounted && setIssuer(discovery.issuer),
-        () => isMounted && setIssuer(undefined)
+        ({ issuer }) => isMounted && setDiscovery({ issuer }),
+        () => isMounted && setDiscovery('missing')
       );
     return () => {
       isMounted = false;
     };
   }, [http, spaceId, connectorTypeId, connectorId]);
+  const issuer = discovery !== 'missing' ? discovery?.issuer : undefined;
   const fields = [
     {
       label: i18n.translate('xpack.triggersActionsUI.publicKeys.issuerLabel', {
@@ -64,13 +66,13 @@ export const ConnectorPublicKeys = ({
       label: i18n.translate('xpack.triggersActionsUI.publicKeys.jwksLabel', {
         defaultMessage: 'Public key URL (JWKS)',
       }),
-      value: urls?.jwksUrl,
+      value: issuer && urls?.jwksUrl,
     },
     {
       label: i18n.translate('xpack.triggersActionsUI.publicKeys.discoveryLabel', {
         defaultMessage: 'Discovery URL',
       }),
-      value: urls?.discoveryUrl,
+      value: issuer && urls?.discoveryUrl,
     },
   ];
   return (
@@ -88,6 +90,19 @@ export const ConnectorPublicKeys = ({
               'Kibana creates and stores the signing key. Receivers can read its public key without signing in. Save the connector to get its URLs.',
           })}
         </EuiCallOut>
+      )}
+      {discovery === 'missing' && (
+        <KbnWarningCallout
+          announceOnMount
+          size="s"
+          data-test-subj="connectorPublicKeysMissing"
+          title={i18n.translate('xpack.triggersActionsUI.publicKeys.missingTitle', {
+            defaultMessage: 'This connector has no signing key',
+          })}
+          text={i18n.translate('xpack.triggersActionsUI.publicKeys.missingDescription', {
+            defaultMessage: 'Create a new connector to get a signing key.',
+          })}
+        />
       )}
       {fields.map(({ label, value }) =>
         value ? (

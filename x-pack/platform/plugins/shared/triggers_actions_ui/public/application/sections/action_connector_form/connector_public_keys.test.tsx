@@ -61,17 +61,13 @@ describe('ConnectorPublicKeys', () => {
     );
   });
 
-  it('does not show an issuer when the connector has no key', async () => {
+  it('shows that the connector has no signing key and hides the URLs', async () => {
     (appMockRenderer.coreStart.http.get as jest.Mock).mockRejectedValue(new Error('Not Found'));
 
     appMockRenderer.render(<ConnectorPublicKeys connectorTypeId=".ssf" connectorId="ssf-1" />);
 
-    expect(
-      await screen.findByDisplayValue(
-        'https://new.example.com/.well-known/ssf-configuration/api/actions/public/.ssf/ssf-1'
-      )
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Issuer URL')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('connectorPublicKeysMissing')).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
   it('does not fetch the discovery document before the connector is saved', () => {
