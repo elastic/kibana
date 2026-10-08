@@ -18,6 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
+  - prefetch-same-team-fix-prs.yml
 
 permissions:
   contents: read
@@ -77,6 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  SAME_TEAM_FIX_PRS_ARTIFACT_NAME: &same_team_fix_prs_artifact_name same-team-fix-prs-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -175,12 +177,28 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
+  prefetch_same_team_fix_prs:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-same-team-fix-prs.yml
+    with:
+      pr_number: *pr_number
+      artifact_name: *same_team_fix_prs_artifact_name
 
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
+  - name: Download same-team fix PRs
+    # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
+    continue-on-error: true
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.SAME_TEAM_FIX_PRS_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
@@ -203,20 +221,6 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Detect duplicate fix PRs
-    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
-    # team as this PR, so the agent triages a short, relevant set instead of blind-searching.
-    # Non-fatal: a detection failure must not block verification — the agent treats a missing
-    # file as "no candidates".
-    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-    with:
-      script: |
-        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
-        try {
-          await writeDuplicateCandidates({ github, core, prNumber: Number(process.env.PR_NUMBER) });
-        } catch (err) {
-          core.warning(`Duplicate detection failed: ${err.message}`);
-        }
 
 safe-outputs:
   activation-comments: false
@@ -409,7 +413,7 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 ## Prefetched PR context
 
-A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
 
 - `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
 - `pr-diff.txt` — unified diff of every changed file.
