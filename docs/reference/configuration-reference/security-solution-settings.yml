@@ -115,6 +115,38 @@ groups:
           self: ga
           serverless: unavailable
 
+  - group: Entity analytics settings
+    id: entity-analytics-settings
+    settings:
+
+      - setting: xpack.securitySolution.entityAnalytics.riskEngine.alertSampleSizePerShard
+        description: |
+          The maximum number of alerts per index shard that the risk engine samples for each entity when calculating risk scores. A value set in the risk engine configuration takes precedence over this setting.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed
+        description: |
+          The maximum number of privileged users that [privileged user monitoring](docs-content://solutions/security/advanced-entity-analytics/privileged-user-monitoring.md) can track.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga 9.2, deprecated 9.4+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        deprecation_details: |
+          This setting has no effect since 9.4. Kibana accepts it but ignores the value. Privileged user monitoring is replaced by [watchlists](docs-content://solutions/security/advanced-entity-analytics/watchlists.md).
+
   - group: Experimental features
     id: experimental-features
     settings:
