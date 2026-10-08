@@ -7,6 +7,7 @@
 
 import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
@@ -77,6 +78,11 @@ export interface OpenAttackFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
+  /**
+   * Size of the flyout this one replaces. A number is a pixel width; a string is an EUI flyout size.
+   * When set, the persisted Security flyout width is not applied.
+   */
+  originFlyoutSize?: EuiFlyoutProps['size'];
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -155,9 +161,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       attackTitle,
       renderCellActions = cellActionRenderer,
       origin,
+      originFlyoutSize,
     }: OpenAttackFlyoutParams) => {
       writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attack, attackId, indexName });
       const onClose = buildOnClose(null);
+      const matchOriginFlyout = originFlyoutSize !== undefined;
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -171,13 +179,16 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           session: sessionMode,
           title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
           onClose,
+          ...(matchOriginFlyout ? { size: originFlyoutSize, maxWidth: false } : {}),
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.ATTACK,
           session: sessionMode,
           origin,
-        }
+        },
+        undefined,
+        matchOriginFlyout ? { persistWidth: false } : undefined
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
