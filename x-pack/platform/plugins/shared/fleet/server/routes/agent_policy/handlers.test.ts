@@ -197,9 +197,14 @@ describe('Agent policy API handlers', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       appContextService.start(createAppContextStartContractMock());
+      // Tag each SO client with the space it was created for so tests can assert which space a lookup used.
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientForSpaceId')
+        .mockImplementation((spaceId) => ({ spaceTag: spaceId } as any));
     });
 
     afterEach(() => {
+      jest.restoreAllMocks();
       appContextService.stop();
     });
 
@@ -215,6 +220,12 @@ describe('Agent policy API handlers', () => {
 
       await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
         /To update managed integrations/
+      );
+      // The guard looks the policy up in the request space, not the target `space_ids[0]`
+      expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+        { spaceTag: 'default' },
+        'agentless-policy',
+        false
       );
       expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
       expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
@@ -250,6 +261,14 @@ describe('Agent policy API handlers', () => {
 
       await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
         /not found/i
+      );
+      expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+        { spaceTag: 'default' },
+        'policy',
+        false
+      );
+      expect(appContextService.getInternalUserSOClientForSpaceId).not.toHaveBeenCalledWith(
+        'space-b'
       );
       expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
       expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
