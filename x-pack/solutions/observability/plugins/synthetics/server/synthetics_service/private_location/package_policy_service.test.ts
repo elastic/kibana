@@ -148,3 +148,132 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
   });
 });
+
+describe('PackagePolicyService deferred revision bumps', () => {
+  const makeDeferralServer = () => {
+    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const fleetBulkCreate = jest.fn();
+    const fleetBulkUpdate = jest.fn();
+    const fleetDelete = jest.fn();
+    const fleetGetByIDs = jest.fn();
+    const agentPolicyGetByIds = jest.fn().mockResolvedValue([agentPolicy([DEFAULT_SPACE_ID])]);
+
+    const server = {
+      logger: loggerMock.create(),
+      fleet: {
+        packagePolicyService: {
+          bulkCreate: fleetBulkCreate,
+          bulkUpdate: fleetBulkUpdate,
+          delete: fleetDelete,
+          getByIDs: fleetGetByIDs,
+        },
+        agentPolicyService: { getByIds: agentPolicyGetByIds, bumpRevision },
+      },
+      coreStart: {
+        savedObjects: {
+          getUnsafeInternalClient: () => ({ asScopedToNamespace: (space: string) => ({ space }) }),
+          createInternalRepository: () => ({ __repository: true }),
+        },
+        elasticsearch: { client: { asInternalUser: { __es: true } } },
+      },
+    } as unknown as SyntheticsServerSetup;
+
+    return { server, bumpRevision, fleetBulkCreate, fleetBulkUpdate, fleetDelete, fleetGetByIDs };
+  };
+
+  it('collects agent policy ids instead of bumping per write, then bumps each once', async () => {
+    const { server, fleetBulkUpdate, bumpRevision } = makeDeferralServer();
+    fleetBulkUpdate.mockImplementation(async (_client, _es, policies) => ({
+      updatedPolicies: policies,
+      failedPolicies: [],
+    }));
+    const service = new PackagePolicyService(server);
+    const deferredBumps = new Set<string>();
+
+    for (const id of ['monitor-1-policyId', 'monitor-2-policyId']) {
+      await service.bulkUpdate({
+        policiesToUpdate: [{ ...policy({ id }), id } as never],
+        spaceId: DEFAULT_SPACE_ID,
+        deferredBumps,
+      });
+    }
+
+    expect(fleetBulkUpdate).toHaveBeenCalledTimes(2);
+    expect(fleetBulkUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(deferredBumps).toEqual(new Set(['policyId']));
+    expect(bumpRevision).not.toHaveBeenCalled();
+
+    await service.scheduleRevisionBumps(deferredBumps);
+
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'policyId', {
+      asyncDeploy: true,
+    });
+    expect(deferredBumps.size).toBe(0);
+  });
+
+  it('leaves Fleet to bump when no deferredBumps set is passed', async () => {
+    const { server, fleetBulkUpdate } = makeDeferralServer();
+    fleetBulkUpdate.mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
+
+    await new PackagePolicyService(server).bulkUpdate({
+      policiesToUpdate: [policy() as never],
+      spaceId: DEFAULT_SPACE_ID,
+    });
+
+    expect(fleetBulkUpdate.mock.calls[0][3]).not.toHaveProperty('bumpRevision');
+  });
+
+  it('defers creates and deletes too', async () => {
+    const { server, fleetBulkCreate, fleetDelete, fleetGetByIDs, bumpRevision } =
+      makeDeferralServer();
+    const created = policy({ id: 'monitor-1-policyId' });
+    const deleted = policy({ id: 'monitor-2-policyId' });
+    fleetBulkCreate.mockResolvedValue({ created: [created], failed: [] });
+    fleetGetByIDs.mockResolvedValue([deleted]);
+    fleetDelete.mockResolvedValue([
+      { id: deleted.id, success: true, policy_ids: ['otherPolicyId'] },
+      { id: 'failed', success: false, policy_ids: ['ignoredPolicyId'] },
+    ]);
+    const service = new PackagePolicyService(server);
+    const deferredBumps = new Set<string>();
+
+    await service.bulkCreate({ newPolicies: [created], spaceId: DEFAULT_SPACE_ID, deferredBumps });
+    await service.bulkDelete({
+      policyIdsToDelete: [deleted.id as string],
+      spaceId: DEFAULT_SPACE_ID,
+      deferredBumps,
+    });
+
+    expect(fleetBulkCreate.mock.calls[0][3]).toEqual(
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(fleetDelete.mock.calls[0][3]).toEqual(expect.objectContaining({ bumpRevision: false }));
+    expect(deferredBumps).toEqual(new Set(['policyId', 'otherPolicyId']));
+    expect(bumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when no bumps were collected', async () => {
+    const { server, bumpRevision } = makeDeferralServer();
+
+    await new PackagePolicyService(server).scheduleRevisionBumps(new Set());
+
+    expect(bumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('attempts every bump and rethrows the first failure', async () => {
+    const { server, bumpRevision } = makeDeferralServer();
+    bumpRevision.mockRejectedValueOnce(new Error('bump failed')).mockResolvedValueOnce(undefined);
+
+    await expect(
+      new PackagePolicyService(server).scheduleRevisionBumps(new Set(['a', 'b']))
+    ).rejects.toThrow('bump failed');
+
+    expect(bumpRevision).toHaveBeenCalledTimes(2);
+  });
+});
