@@ -1037,6 +1037,8 @@
       "@kbn/dashboard-agent-authoring/*": ["./x-pack/platform/packages/shared/dashboard-agent-authoring/*"],
       "@kbn/dashboard-markdown": ["./src/platform/plugins/shared/dashboard_markdown"],
       "@kbn/dashboard-markdown/*": ["./src/platform/plugins/shared/dashboard_markdown/*"],
+      "@kbn/dashboard-markdown-schemas": ["./src/platform/packages/shared/dashboard-markdown-schemas"],
+      "@kbn/dashboard-markdown-schemas/*": ["./src/platform/packages/shared/dashboard-markdown-schemas/*"],
       "@kbn/dashboard-navigation-options-common": ["./src/platform/packages/private/dashboard/dashboard-navigation-options-common"],
       "@kbn/dashboard-navigation-options-common/*": ["./src/platform/packages/private/dashboard/dashboard-navigation-options-common/*"],
       "@kbn/dashboard-navigation-options-components": ["./src/platform/packages/private/dashboard/dashboard-navigation-options-components"],

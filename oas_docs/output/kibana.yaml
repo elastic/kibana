@@ -3682,6 +3682,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -4164,6 +4165,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -38973,6 +38975,13 @@ paths:
           required: false
           schema:
             type: string
+        - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
+          in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
         - description: use withAgentCount instead
           in: query
           name: noAgentCount
@@ -178190,7 +178199,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -178262,7 +178270,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -178334,7 +178341,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -180227,7 +180233,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -180263,7 +180268,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -182669,6 +182673,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileRankOperation'
@@ -182721,6 +182726,34 @@ components:
     Kibana_HTTP_APIs_visTermsRankByCustomDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
       description: Sort direction for custom ranking.
+    Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_visTermsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -182739,7 +182772,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -184943,8 +184975,7 @@ components:
             - enum:
                 - stepped
               type: string
-          default: linear
-          description: Curve interpolation method for line and area series
+          description: Curve interpolation method for line and area series. Defaults to linear.
         overlays:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyStylingOverlays'
         points:
@@ -201606,7 +201637,7 @@ components:
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         min_osquery_version:
-          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionInput'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
@@ -201614,7 +201645,7 @@ components:
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
-          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesInput'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
@@ -202838,17 +202869,29 @@ components:
             - sourceType
             - source
     Security_Osquery_API_MinOsqueryVersion:
-      description: Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+      description: Minimum osquery version required to run this pack or query, e.g. `"5.10.0"`.
       example: 5.10.0
       maxLength: 64
       minLength: 1
       type: string
-    Security_Osquery_API_MinOsqueryVersionOrUndefined:
-      $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+    Security_Osquery_API_MinOsqueryVersionInput:
+      description: Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.
+      example: 5.10.0
+      maxLength: 64
+      minLength: 1
+      pattern: ^\d+(\.\d+){0,2}$
+      type: string
+    Security_Osquery_API_MinOsqueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionInput'
       nullable: true
     Security_Osquery_API_ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItem'
+      description: An object of queries.
+      type: object
+    Security_Osquery_API_ObjectQueriesInput:
+      additionalProperties:
+        $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesItemInput'
       description: An object of queries.
       type: object
     Security_Osquery_API_ObjectQueriesItem:
@@ -202883,6 +202926,38 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
           $ref: '#/components/schemas/Security_Osquery_API_Version'
+    Security_Osquery_API_ObjectQueriesItemInput:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+        enabled:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
+        id:
+          $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
+        platform:
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+        query:
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
+        removed:
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        result_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
+        rrule_schedule:
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+        saved_query_id:
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+        schedule_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+        snapshot:
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+        version:
+          $ref: '#/components/schemas/Security_Osquery_API_PackQueryVersionInput'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -202918,6 +202993,14 @@ components:
     Security_Osquery_API_PackPlatformOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
       nullable: true
+    Security_Osquery_API_PackQueryVersionInput:
+      description: Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack's `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.
+      example: 5.10.0
+      maxLength: 64
+      pattern: ^(\d+(\.\d+){0,2})?$
+      type: string
+    Security_Osquery_API_PackQueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackQueryVersionInput'
     Security_Osquery_API_PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -203224,7 +203307,7 @@ components:
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         min_osquery_version:
-          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionInput'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
@@ -203232,7 +203315,7 @@ components:
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
-          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+          $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesInput'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:

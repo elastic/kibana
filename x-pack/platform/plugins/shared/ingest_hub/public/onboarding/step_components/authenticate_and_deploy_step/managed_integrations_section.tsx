@@ -223,7 +223,12 @@ export function ManagedIntegrationsSection({
   ];
 
   const gettingStartedLink = (
-    <EuiLink target="_blank" external>
+    <EuiLink
+      href={services.docLinks?.links.fleet.cloudConnectorDeployment}
+      target="_blank"
+      external
+      data-test-subj="managedIntegrationsSection-gettingStartedLink"
+    >
       <FormattedMessage
         id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.gettingStartedLink"
         defaultMessage="Getting Started"
