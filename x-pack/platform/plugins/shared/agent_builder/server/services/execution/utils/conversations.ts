@@ -61,6 +61,7 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 import { getPendingResumeRound } from './pending_round';
 import { toClientError } from './convert_errors';
 import { serializeExecutionError } from './serialize_execution_error';
+import { interleaveAttachmentEvents } from './interleave_attachment_events';
 
 /**
  * Resolves a persisted timeline event by id from the write result we just committed.
@@ -238,10 +239,10 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          const events: TimelineEvent[] = [
-            ...roundToEvents(round, conversation),
-            ...(roundCompletedEvent.data.attachment_events ?? []),
-          ];
+          const events = interleaveAttachmentEvents(
+            roundToEvents(round, conversation),
+            roundCompletedEvent.data.attachment_events ?? []
+          );
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
@@ -375,7 +376,10 @@ export const appendResumeExecution$ = ({
           const persisted = await conversationClient.appendEvents(
             {
               id: conversation.id,
-              events: [promptResponse, ...executionEvents, ...attachmentEvents],
+              events: interleaveAttachmentEvents(
+                [promptResponse, ...executionEvents],
+                attachmentEvents
+              ),
               status: round.status,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               ...(conversationState ? { state: conversationState } : {}),
@@ -575,7 +579,7 @@ export const persistExecutionInterruption = async (
         {
           id: conversation.id,
           roundId,
-          events: [userMessage, ...executionEvents, ...attachmentEvents],
+          events: interleaveAttachmentEvents([userMessage, ...executionEvents], attachmentEvents),
           status: ConversationRoundStatus.completed,
           skipIfTerminalExistsFor: executionId,
           ...attachmentsUpdate,
@@ -620,7 +624,10 @@ export const persistExecutionInterruption = async (
     const persisted = await conversationClient.appendEvents(
       {
         id: conversation.id,
-        events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
+        events: interleaveAttachmentEvents(
+          [promptResponse, ...executionEvents],
+          resumeAttachmentEvents
+        ),
         status: ConversationRoundStatus.completed,
         skipIfTerminalExistsFor: executionId,
         ...attachmentsUpdate,
