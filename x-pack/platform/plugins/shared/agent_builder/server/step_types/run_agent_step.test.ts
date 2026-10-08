@@ -909,6 +909,22 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       }
     });
 
+    it('does not call executeAgent when ephemeral is combined with create-conversation at runtime', async () => {
+      const execution = createExecutionMock(of());
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'create-conversation': true, ephemeral: true },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE);
+    });
+
     it('ConfigSchema accepts ephemeral alone and with public-conversation', () => {
       expect(ConfigSchema.safeParse({ ephemeral: true }).success).toBe(true);
       expect(ConfigSchema.safeParse({ ephemeral: true, 'public-conversation': true }).success).toBe(
