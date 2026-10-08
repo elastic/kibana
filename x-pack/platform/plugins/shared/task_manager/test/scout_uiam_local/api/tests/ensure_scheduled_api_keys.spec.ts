@@ -85,8 +85,9 @@ apiTest.describe(
         expect(createdUserScope.apiKeyId).toBeDefined();
         expect(createdUserScope.uiamApiKeyId).toBeDefined();
 
-        const keysAfterFirstCall = await countActiveTaskManagerEsApiKeys(esClient);
-        expect(keysAfterFirstCall).toBe(keysBefore + 1);
+        await expect
+          .poll(async () => countActiveTaskManagerEsApiKeys(esClient))
+          .toBe(keysBefore + 1);
 
         // API keys are granted before the task document is written, so an ensureScheduled call for
         // a task that already exists used to mint an ES + UIAM pair and then discard it when the
@@ -97,8 +98,9 @@ apiTest.describe(
         // The ES key count is the observable half of the pair: both keys are granted in the same
         // call, so no new ES key means no new UIAM key either. UIAM keys cannot be enumerated from
         // a test, so the stored UIAM key id below stands in for the rest.
-        const keysAfterRepeatCalls = await countActiveTaskManagerEsApiKeys(esClient);
-        expect(keysAfterRepeatCalls).toBe(keysBefore + 1);
+        await expect
+          .poll(async () => countActiveTaskManagerEsApiKeys(esClient))
+          .toBe(keysBefore + 1);
 
         const unchanged = await readTaskAttributes(esClient, taskDocId(TASK_ID));
         const unchangedUserScope = unchanged.userScope as Record<string, string>;
