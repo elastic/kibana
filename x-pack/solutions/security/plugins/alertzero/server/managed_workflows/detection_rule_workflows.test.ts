@@ -916,12 +916,17 @@ describe('detection rule workflows', () => {
             inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
             steps: { fetch_rule: fetchRule },
           };
-          const failStep = flattenSteps(yaml.steps as unknown as NestedStep[]).find(
+          const steps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+          const failStep = steps.find(
             ({ type, if: condition }) =>
               type === 'workflow.fail' && resolveExpression(condition, context) === true
           );
 
           expect(failStep?.name).toBe(expectedFailStep);
+          // The rule is only touched after every check has had its chance to stop the run.
+          expect(steps.findIndex(({ type }) => type.startsWith('security.'))).toBeGreaterThan(
+            steps.findIndex((step) => step === failStep)
+          );
         });
       });
 
