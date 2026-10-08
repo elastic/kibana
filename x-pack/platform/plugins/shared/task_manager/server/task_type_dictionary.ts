@@ -97,6 +97,10 @@ export interface TaskRegisterDefinition {
    */
   priority?: TaskPriority;
   /**
+   * Allows `runSoon({ priority })` and a successful run result to change this task's stored priority.
+   */
+  allowPriorityOverride?: boolean;
+  /**
    * An optional definition of the cost associated with running the task.
    */
   cost?: TaskCost;

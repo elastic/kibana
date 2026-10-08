@@ -259,10 +259,14 @@ const ConversationsPageContent: React.FC = () => {
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
-        <LazyConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
       </EscalationModalBoundary>
     ),
-    []
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(
@@ -395,7 +399,9 @@ const ConversationsPageContent: React.FC = () => {
         renderEscalationModal={renderEscalationModal}
       />
 
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
+          long row title push the queue past the viewport instead of truncating. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
             // The header renders the charts-summary count, so it tracks that query

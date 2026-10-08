@@ -345,7 +345,17 @@ export class TaskStore {
           docsWithApiKeys.push(taskInstance);
           const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
           if (targets.length > 0) {
-            invalidationTargets.push({ taskId: taskInstance.id, targets });
+            const { id, status, startedAt } = taskInstance;
+            const runningTask =
+              status === TaskStatus.Running && startedAt
+                ? // Set when replacing the key while the task is running. Together they
+                  // identify that run, so invalidation can wait until the task finishes.
+                  { taskId: id, taskStartedAt: startedAt.toISOString() }
+                : {};
+            invalidationTargets.push({
+              taskId: id,
+              targets: targets.map((target) => ({ ...target, ...runningTask })),
+            });
           }
         }
       });
