@@ -12,22 +12,14 @@ import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
 import { toEveryCron } from '../to_automation_request';
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { http: {}, notifications: { toasts: {} } } }),
-}));
-jest.mock('../../../../hooks/use_rule_suggestions', () => ({
-  useRuleSuggestions: () => ({
-    data: {
-      rules: [
-        { name: 'CPU usage high', tags: ['infra', 'prod'] },
-        { name: 'Disk full', tags: ['storage'] },
-      ],
-      total: 2,
-    },
+jest.mock('../../../../hooks/use_rule_catalog', () => ({
+  useRuleCatalog: () => ({
+    data: [
+      { name: 'CPU usage high', tags: ['infra', 'prod'] },
+      { name: 'Disk full', tags: ['storage', 'prod'] },
+      { name: 'Memory pressure', tags: ['infra'] },
+    ],
   }),
-}));
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query', () => ({
-  useGetRuleTagsQuery: () => ({ tags: ['prod', 'staging'], isLoading: false }),
 }));
 
 const onTriggerChange = jest.fn();
@@ -136,8 +128,10 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ ruleNames: ['Disk full'] });
 
     fireEvent.click(screen.getByTestId('automationRulePickerTab-tags'));
-    fireEvent.click(await screen.findByText('staging'));
-    expect(lastTrigger()).toMatchObject({ ruleNames: ['Disk full'], ruleTags: ['staging'] });
+    expect((await screen.findAllByText('2 rules now')).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByText('infra'));
+    expect(lastTrigger()).toMatchObject({ ruleNames: ['Disk full'], ruleTags: ['infra'] });
+    expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('3 rules');
 
     fireEvent.click(screen.getByTestId('automationRuleClear'));
     expect(lastTrigger()).toMatchObject({ ruleNames: [], ruleTags: [] });

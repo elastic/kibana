@@ -265,6 +265,16 @@ export const rulePickerLabels = {
       defaultMessage: '{count, plural, one {# tag} other {# tags}}',
       values: { count },
     }),
+  taggedPill: (tag: string) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.taggedPill', {
+      defaultMessage: 'Tagged {tag}',
+      values: { tag },
+    }),
+  rulesNow: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.rulePicker.rulesNow', {
+      defaultMessage: '{count, plural, one {# rule} other {# rules}} now',
+      values: { count },
+    }),
   clear: i18n.translate('xpack.nightshift.automations.rulePicker.clear', {
     defaultMessage: 'Clear',
   }),

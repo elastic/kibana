@@ -11,7 +11,9 @@ import type { AlertStatus, TriggerFormValues } from '../../automation_form_value
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels } from '../translations';
+import { useRuleCatalog } from '../../../../../hooks/use_rule_catalog';
 import { RulePicker } from './rule_picker';
+import { rulePillLabel } from './rule_selection';
 
 const ALERT_STATUSES = ['active', 'inactive'] as const;
 
@@ -77,6 +79,13 @@ export const AlertTriggerEditor = ({
   onChange: (trigger: TriggerFormValues) => void;
   readOnly?: boolean;
 }) => {
+  const { data: catalog = [] } = useRuleCatalog();
+  const { ruleNamePattern, ruleNames, ruleTags } = trigger;
+  const rulesLabel =
+    ruleNamePattern.trim() && ruleNames.length === 0 && ruleTags.length === 0
+      ? ruleNamePattern.trim()
+      : rulePillLabel(catalog, { ruleNames, ruleTags });
+
   return (
     <Sentence>
       <SentenceIcon type="logoElastic" />
@@ -85,19 +94,11 @@ export const AlertTriggerEditor = ({
       </EuiText>
       <EuiText size="s">{triggerLabels.from}</EuiText>
       {readOnly ? (
-        <EuiBadge>
-          {[trigger.ruleNamePattern, ...trigger.ruleNames, ...trigger.ruleTags]
-            .filter(Boolean)
-            .join(', ') || triggerLabels.anyRule}
-        </EuiBadge>
+        <EuiBadge>{rulesLabel}</EuiBadge>
       ) : (
         <PillPopover
           ariaLabel={triggerLabels.anyRule}
-          label={
-            [trigger.ruleNamePattern.trim(), ...trigger.ruleNames, ...trigger.ruleTags]
-              .filter(Boolean)
-              .join(', ') || triggerLabels.anyRule
-          }
+          label={rulesLabel}
           testSubject="automationRulePicker"
         >
           {() => <RulePicker trigger={trigger} onChange={onChange} />}

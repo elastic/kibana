@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
@@ -27,29 +27,24 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/react-hooks';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useRuleSuggestions } from '../../../../../hooks/use_rule_suggestions';
+import { useRuleCatalog } from '../../../../../hooks/use_rule_catalog';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { rulePickerLabels } from '../translations';
+import { matchedTags, resolveRuleNames } from './rule_selection';
 
 type AlertTrigger = Extract<TriggerFormValues, { kind: 'alert' }>;
 type PickerView = 'rules' | 'tags' | 'selected';
 
 type OptionData =
   | { kind: 'rule'; name: string; tags: string[]; viaTags: string[] }
-  | { kind: 'tag'; tag: string };
+  | { kind: 'tag'; tag: string; count: number };
 
 type PickerOption = EuiSelectableOption<OptionData>;
 
-const SEARCH_DEBOUNCE_MS = 300;
 const PANEL_WIDTH = 440;
 const LIST_MAX_HEIGHT = 320;
 const TAG_FILTER_WIDTH = 150;
 const ALL_TAGS_VALUE = '__all__';
-const MAX_TAGS = 50;
 
 const unique = (values: string[]) => [...new Set(values)];
 
@@ -61,35 +56,29 @@ export const RulePicker = ({
   onChange: (trigger: TriggerFormValues) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications } = useKibana().services;
+  const { data: catalog = [] } = useRuleCatalog();
   const { ruleNames, ruleTags } = trigger;
   const [view, setView] = useState<PickerView>('rules');
   const [query, setQuery] = useState('');
   const [tagFilter, setTagFilter] = useState('');
   const [snapshot, setSnapshot] = useState({ ruleNames, ruleTags });
-  const knownRuleTags = useRef(new Map<string, string[]>());
 
   const trimmedQuery = query.trim();
-  const search = useDebouncedValue(trimmedQuery, SEARCH_DEBOUNCE_MS);
   const q = trimmedQuery.toLowerCase();
 
-  const { data: allRules } = useRuleSuggestions('', '');
-  const { data: foundRules } = useRuleSuggestions(view === 'rules' ? search : '', tagFilter);
-  const { tags } = useGetRuleTagsQuery({
-    enabled: true,
-    search: view === 'tags' ? search : '',
-    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
-    perPage: MAX_TAGS,
-    http,
-    toasts: notifications.toasts,
-  });
-
-  [...(allRules?.rules ?? []), ...(foundRules?.rules ?? [])].forEach((rule) =>
-    knownRuleTags.current.set(rule.name, rule.tags)
-  );
-
-  const totalRules = allRules?.total ?? 0;
-  const selectedCount = ruleNames.length + ruleTags.length;
+  const catalogByName = useMemo(() => new Map(catalog.map((rule) => [rule.name, rule])), [catalog]);
+  const tagCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    catalog.forEach(({ tags }) =>
+      tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
+    );
+    return [...counts]
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+  }, [catalog]);
+  const resolved = resolveRuleNames(catalog, { ruleNames, ruleTags });
+  const totalRules = catalog.length;
+  const selectedCount = resolved.length;
 
   const commit = (next: { ruleNames: string[]; ruleTags: string[] }) =>
     onChange({ ...trigger, ruleNames: unique(next.ruleNames), ruleTags: unique(next.ruleTags) });
@@ -107,7 +96,7 @@ export const RulePicker = ({
     });
 
   const ruleOption = (name: string, ruleTagsOfRule: string[]): PickerOption => {
-    const viaTags = ruleTagsOfRule.filter((tag) => ruleTags.includes(tag));
+    const viaTags = matchedTags({ name, tags: ruleTagsOfRule }, { ruleNames, ruleTags });
     return {
       key: `rule-${name}`,
       label: name,
@@ -123,11 +112,12 @@ export const RulePicker = ({
     };
   };
 
-  const tagOption = (tag: string): PickerOption => ({
+  const tagOption = (tag: string, count: number): PickerOption => ({
     key: `tag-${tag}`,
     label: tag,
     kind: 'tag',
     tag,
+    count,
     checked: ruleTags.includes(tag) ? 'on' : undefined,
   });
 
@@ -137,9 +127,9 @@ export const RulePicker = ({
   const buildSelectedOptions = (): PickerOption[] => {
     const tagRows = unique([...snapshot.ruleTags, ...ruleTags])
       .filter((tag) => matches(tag))
-      .map(tagOption);
-    const ruleRows = unique([...snapshot.ruleNames, ...ruleNames])
-      .map((name) => ({ name, tags: knownRuleTags.current.get(name) ?? [] }))
+      .map((tag) => tagOption(tag, tagCounts.find((entry) => entry.tag === tag)?.count ?? 0));
+    const ruleRows = unique([...resolveRuleNames(catalog, snapshot), ...resolved])
+      .map((name) => ({ name, tags: catalogByName.get(name)?.tags ?? [] }))
       .filter(({ name, tags: ruleTagsOfRule }) => matches(name, ...ruleTagsOfRule))
       .map(({ name, tags: ruleTagsOfRule }) => ruleOption(name, ruleTagsOfRule));
     return [
@@ -170,12 +160,13 @@ export const RulePicker = ({
 
   const options: PickerOption[] =
     view === 'tags'
-      ? tags.map(tagOption)
+      ? tagCounts.filter(({ tag }) => matches(tag)).map(({ tag, count }) => tagOption(tag, count))
       : view === 'selected'
       ? buildSelectedOptions()
-      : (foundRules?.rules ?? []).map(({ name, tags: ruleTagsOfRule }) =>
-          ruleOption(name, ruleTagsOfRule)
-        );
+      : catalog
+          .filter((rule) => !tagFilter || rule.tags.includes(tagFilter))
+          .filter((rule) => matches(rule.name, ...rule.tags))
+          .map(({ name, tags: ruleTagsOfRule }) => ruleOption(name, ruleTagsOfRule));
 
   const shownRuleNames =
     view === 'rules'
@@ -205,9 +196,7 @@ export const RulePicker = ({
   };
 
   const summary = [
-    ruleNames.length > 0 || ruleTags.length === 0
-      ? rulePickerLabels.ruleCount(ruleNames.length)
-      : null,
+    rulePickerLabels.ruleCount(selectedCount),
     ruleTags.length > 0 ? rulePickerLabels.tagCount(ruleTags.length) : null,
   ]
     .filter(Boolean)
@@ -215,7 +204,7 @@ export const RulePicker = ({
 
   const searchPlaceholder =
     view === 'tags'
-      ? rulePickerLabels.searchTags(tags.length)
+      ? rulePickerLabels.searchTags(tagCounts.length)
       : view === 'selected'
       ? rulePickerLabels.searchSelected
       : rulePickerLabels.searchRules(totalRules);
@@ -233,7 +222,7 @@ export const RulePicker = ({
 
   const tabs: Array<{ id: PickerView; label: string; count: number }> = [
     { id: 'rules', label: rulePickerLabels.rulesTab, count: totalRules },
-    { id: 'tags', label: rulePickerLabels.tagsTab, count: tags.length },
+    { id: 'tags', label: rulePickerLabels.tagsTab, count: tagCounts.length },
     { id: 'selected', label: rulePickerLabels.selectedTab, count: selectedCount },
   ];
 
@@ -246,6 +235,11 @@ export const RulePicker = ({
           </EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
             <EuiHighlight search={trimmedQuery}>{option.tag}</EuiHighlight>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {rulePickerLabels.rulesNow(option.count)}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -294,9 +288,9 @@ export const RulePicker = ({
   };
 
   const tagFilterOptions = [
-    { value: ALL_TAGS_VALUE, label: rulePickerLabels.allTags },
-    ...tags.map((tag) => ({ value: tag, label: tag })),
-  ].map(({ value, label }) => ({
+    { value: ALL_TAGS_VALUE, label: rulePickerLabels.allTags, count: totalRules },
+    ...tagCounts.map(({ tag, count }) => ({ value: tag, label: tag, count })),
+  ].map(({ value, label, count }) => ({
     value,
     inputDisplay: (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -312,6 +306,11 @@ export const RulePicker = ({
           <EuiIcon type="tag" color="subdued" aria-hidden />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">{label}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {count}
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
   }));
@@ -335,7 +334,7 @@ export const RulePicker = ({
               data-test-subj="automationRulePickerSearch"
             />
           </EuiFlexItem>
-          {view === 'rules' && tags.length > 0 ? (
+          {view === 'rules' && tagCounts.length > 0 ? (
             <EuiFlexItem grow={false} css={{ inlineSize: TAG_FILTER_WIDTH }}>
               <EuiSuperSelect
                 compressed

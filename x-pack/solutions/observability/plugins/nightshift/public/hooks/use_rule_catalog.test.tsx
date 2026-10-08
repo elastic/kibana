@@ -9,19 +9,19 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
-import { useRuleSuggestions } from './use_rule_suggestions';
+import { useRuleCatalog } from './use_rule_catalog';
 
 jest.mock('./use_kibana');
 
 const post = jest.fn();
 
-describe('useRuleSuggestions', () => {
+describe('useRuleCatalog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({ services: { http: { post } } });
   });
 
-  it('searches rules and returns names, tags and total', async () => {
+  it('loads Observability rules with their tags', async () => {
     post.mockResolvedValue({
       data: [
         { name: 'CPU', tags: ['infra'], id: '1' },
@@ -34,21 +34,18 @@ describe('useRuleSuggestions', () => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
-    const { result } = renderHook(() => useRuleSuggestions('cp', 'infra'), { wrapper });
+    const { result } = renderHook(() => useRuleCatalog(), { wrapper });
 
     await waitFor(() =>
-      expect(result.current.data).toEqual({
-        rules: [
-          { name: 'CPU', tags: ['infra'] },
-          { name: 'Disk', tags: [] },
-        ],
-        total: 2,
-      })
+      expect(result.current.data).toEqual([
+        { name: 'CPU', tags: ['infra'] },
+        { name: 'Disk', tags: [] },
+      ])
     );
     expect(post).toHaveBeenCalledWith(
       '/internal/alerting/rules/_find',
       expect.objectContaining({
-        body: expect.stringContaining('"search":"cp*"'),
+        body: expect.stringContaining('"rule_type_ids":["apm.error_rate"'),
       })
     );
   });
