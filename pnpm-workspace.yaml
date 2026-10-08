@@ -90,7 +90,6 @@ overrides:
   'apache-arrow': '20.x - 21.x'
   'baseline-browser-mapping': '2.9.14'
   'chokidar': '3.5.3'
-  'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
   'esbuild': '0.28.1'
   'fast-xml-parser': '5.5.7'
   'globby>fast-glob': '3.3.2'
@@ -142,6 +141,7 @@ overrides:
   'colorette': '2.0.20'
   'concaveman': '1.2.0'
   'd3-format@3': '3.1.0'
+  'd3-interpolate@2.0.1>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
   'dom-accessibility-api@^0.5.9': '0.5.13'
   # eslint-plugin-import@2.28.0 needs eslint-module-utils@2.8.x; pnpm floats the
   # ^2.8.0 range to 2.14.0, which crashes the import/namespace rule (matches yarn).
