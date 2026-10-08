@@ -50,7 +50,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     serverWorkers,
     availableWorkerIds,
     workerEnabled,
-    blockedWorkerIds,
     enabledCount,
     canModifyWorkers,
     toggleWorker,
@@ -132,7 +131,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           workers={workers}
           serverWorkers={serverWorkers}
           workerEnabled={workerEnabled}
-          blockedWorkerIds={blockedWorkerIds}
           alertAnalysisSettingsUrl={alertAnalysisSettingsUrl}
           enabledCount={enabledCount}
           isSaving={isSaving}

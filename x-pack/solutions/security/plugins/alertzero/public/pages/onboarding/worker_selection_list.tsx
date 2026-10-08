@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CatalogWorker, ServerWorker } from './use_worker_selection';
+import { isEnableBlocked, type CatalogWorker, type ServerWorker } from './use_worker_selection';
 import { WorkerSelectionRow } from './worker_selection_row';
 import * as i18n from './translations';
 
@@ -16,7 +16,6 @@ interface Props {
   workers: readonly CatalogWorker[];
   serverWorkers: ReadonlyMap<string, ServerWorker>;
   workerEnabled: Readonly<Record<string, boolean>>;
-  blockedWorkerIds: ReadonlySet<string>;
   alertAnalysisSettingsUrl: string;
   enabledCount: number;
   isSaving: boolean;
@@ -28,7 +27,6 @@ export const WorkerSelectionList: React.FC<Props> = ({
   workers,
   serverWorkers,
   workerEnabled,
-  blockedWorkerIds,
   alertAnalysisSettingsUrl,
   enabledCount,
   isSaving,
@@ -61,7 +59,7 @@ export const WorkerSelectionList: React.FC<Props> = ({
                   worker={worker}
                   scheduleInterval={serverWorkers.get(worker.id)?.settings?.scheduleInterval}
                   checked={checked}
-                  blocked={blockedWorkerIds.has(worker.id)}
+                  blocked={isEnableBlocked(serverWorkers.get(worker.id))}
                   alertAnalysisSettingsUrl={alertAnalysisSettingsUrl}
                   disabled={(checked && enabledCount <= 1) || isSaving || !canModifyWorkers}
                   onToggle={onToggle}
