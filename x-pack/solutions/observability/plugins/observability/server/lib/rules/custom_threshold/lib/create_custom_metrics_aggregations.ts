@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, DslQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
@@ -17,6 +17,12 @@ import {
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 
 const FILTERED_METRIC_AGG_NAME = 'filtered_metric';
+
+const getMetricFilterQuery = (
+  { filter }: CustomThresholdExpressionMetric,
+  dataView?: DataViewBase
+): DslQuery | undefined =>
+  filter ? toElasticsearchQuery(fromKueryExpression(filter), dataView) : undefined;
 
 export const createCustomMetricsAggregations = (
   id: string,
@@ -30,9 +36,7 @@ export const createCustomMetricsAggregations = (
   const metricAggregations = customMetrics.reduce((acc, metric) => {
     const key = `${id}_${metric.name}`;
     const aggregation: Aggregators = metric.aggType;
-    const filterQuery = metric.filter
-      ? toElasticsearchQuery(fromKueryExpression(metric.filter), dataView)
-      : undefined;
+    const filterQuery = getMetricFilterQuery(metric, dataView);
 
     // Nests the metric aggregation under a filter aggregation when the metric has a KQL filter
     const withMetricFilter = (metricAggregation: Record<string, unknown>) => {
