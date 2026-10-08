@@ -32,3 +32,12 @@ describe('Slack app route privileges', () => {
     });
   });
 });
+
+describe('Slack app disconnect route body', () => {
+  const { body } =
+    internalSlackAppRoutes['POST /internal/significant_events/apps/slack/disconnect'].params.shape;
+
+  it.each([null, undefined, {}, { tenantKey: 'T0123ABC' }])('accepts %p', (value) => {
+    expect(body.safeParse(value).success).toBe(true);
+  });
+});

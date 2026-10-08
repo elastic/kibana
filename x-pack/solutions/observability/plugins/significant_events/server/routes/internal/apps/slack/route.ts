@@ -104,7 +104,7 @@ const disconnectSlackAppRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).optional(),
+    body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).nullish(),
   }),
   handler: async ({ params, request, server }): Promise<SlackAppDisconnectResponse> => {
     try {
