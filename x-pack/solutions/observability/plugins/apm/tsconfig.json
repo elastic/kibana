@@ -182,7 +182,8 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser-hooks",
     "@kbn/lens-common",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
+    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }
