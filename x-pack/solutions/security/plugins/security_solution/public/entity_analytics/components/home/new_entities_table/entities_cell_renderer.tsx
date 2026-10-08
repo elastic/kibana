@@ -30,7 +30,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { getNumber } from './common';
+import { SEVERITY_COUNT_FIELDS, getNumber } from './common';
 import type { Row } from './common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from './grid_columns';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
@@ -352,10 +352,10 @@ const AlertCountCell = memo(
         <EuiFlexItem css={noPointerEventsCss}>
           <AlertSeverityBar
             euiTheme={euiTheme}
-            critical={getNumber(row, 'alert_critical') ?? 0}
-            high={getNumber(row, 'alert_high') ?? 0}
-            medium={getNumber(row, 'alert_medium') ?? 0}
-            low={getNumber(row, 'alert_low') ?? 0}
+            critical={getNumber(row, SEVERITY_COUNT_FIELDS.critical) ?? 0}
+            high={getNumber(row, SEVERITY_COUNT_FIELDS.high) ?? 0}
+            medium={getNumber(row, SEVERITY_COUNT_FIELDS.medium) ?? 0}
+            low={getNumber(row, SEVERITY_COUNT_FIELDS.low) ?? 0}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

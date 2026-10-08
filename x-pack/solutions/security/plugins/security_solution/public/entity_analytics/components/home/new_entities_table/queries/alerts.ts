@@ -21,6 +21,7 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   LAST_SEEN_ALERT_FIELD,
+  SEVERITY_COUNT_FIELDS,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
@@ -30,13 +31,6 @@ import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
   'kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"';
-
-const SEVERITY_COUNT_FIELDS = {
-  critical: 'alert_critical',
-  high: 'alert_high',
-  medium: 'alert_medium',
-  low: 'alert_low',
-} as const;
 
 const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
 const ALERT_FIELDS = [LAST_SEEN_ALERT_FIELD, ...ALERT_COUNT_FIELDS] as const;

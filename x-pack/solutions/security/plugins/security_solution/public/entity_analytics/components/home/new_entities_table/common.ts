@@ -31,6 +31,14 @@ export const GROUP_SIZE_FIELD = 'group_size';
 export const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
 export const RISK_SCORE_CHANGE_FIELD = 'risk_score_change';
 
+/** Open alert counts per severity, set by the alert queries next to `alert_count`. */
+export const SEVERITY_COUNT_FIELDS = {
+  critical: 'alert_critical',
+  high: 'alert_high',
+  medium: 'alert_medium',
+  low: 'alert_low',
+} as const;
+
 export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 export const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
 
