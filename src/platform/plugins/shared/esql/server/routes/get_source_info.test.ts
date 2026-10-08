@@ -9,6 +9,9 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
+import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { buildEsQuery } from '@kbn/es-query';
+import { getTime } from '@kbn/data-plugin/common';
 import { registerGetSourceInfoRoute } from './get_source_info';
 import { esqlRouteRequestCounter } from '../metrics';
 
@@ -20,6 +23,7 @@ jest.mock('../metrics', () => ({
 jest.mock('@kbn/esql-utils', () => ({
   getNamedParams: jest.fn().mockReturnValue([]),
   fixESQLQueryWithVariables: jest.fn((query: string) => query),
+  parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@kbn/es-query', () => ({
@@ -116,6 +120,72 @@ describe('registerGetSourceInfoRoute', () => {
     );
     expect(response.ok).toHaveBeenCalledWith({
       body: { columns: [{ name: 'message', esType: 'keyword' }] },
+    });
+  });
+
+  describe('time filter', () => {
+    const timeRange = { from: 'now-15m', to: 'now' };
+    const timeFilter = { range: { '@timestamp': {} } };
+    const dslFilter = { bool: { filter: [timeFilter] } };
+
+    const run = async (body: Record<string, unknown>, timeFieldInQuery?: string) => {
+      const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+      (parseTimeFieldFromESQLQuery as jest.Mock).mockReturnValue(timeFieldInQuery);
+      (getTime as jest.Mock).mockReturnValue(timeFilter);
+      (buildEsQuery as jest.Mock).mockReturnValue(dslFilter);
+      registerGetSourceInfoRoute(router, context);
+      await handler(requestHandlerContext, { body }, response);
+      return esqlQuery;
+    };
+
+    it('filters on the given time field', async () => {
+      const esqlQuery = await run({
+        query: 'FROM logs-*',
+        timeRange,
+        timeFieldName: 'event.created',
+      });
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: 'event.created' });
+      expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter: dslFilter }));
+    });
+
+    it('filters on the time field found in the query when none is given', async () => {
+      const esqlQuery = await run(
+        { query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(100)', timeRange },
+        '@timestamp'
+      );
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: '@timestamp' });
+      expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter: dslFilter }));
+    });
+
+    it('prefers the given time field over the one found in the query', async () => {
+      await run(
+        {
+          query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(100)',
+          timeRange,
+          timeFieldName: 'event.created',
+        },
+        '@timestamp'
+      );
+
+      expect(getTime).toHaveBeenCalledWith(undefined, timeRange, { fieldName: 'event.created' });
+    });
+
+    it('does not filter a query without a time field when none is given', async () => {
+      const esqlQuery = await run({ query: 'FROM logs-* | STATS COUNT(*) BY agent', timeRange });
+
+      expect(getTime).not.toHaveBeenCalled();
+      expect(esqlQuery).toHaveBeenCalledWith(
+        expect.not.objectContaining({ filter: expect.anything() })
+      );
+    });
+
+    it('does not look for a time field in the query without a time range', async () => {
+      await run({ query: 'TS metrics-* | STATS SUM(bytes) BY TBUCKET(1 hour)' });
+
+      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
+      expect(getTime).not.toHaveBeenCalled();
     });
   });
 
