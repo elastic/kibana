@@ -856,6 +856,7 @@
     "@kbn/investigation-output": "workspace:*",
     "@kbn/io-ts-utils": "workspace:*",
     "@kbn/ipynb": "workspace:*",
+    "@kbn/isomer": "workspace:*",
     "@kbn/item-buffer": "workspace:*",
     "@kbn/json-schemas": "workspace:*",
     "@kbn/kbn-health-gateway-status-plugin": "workspace:*",
