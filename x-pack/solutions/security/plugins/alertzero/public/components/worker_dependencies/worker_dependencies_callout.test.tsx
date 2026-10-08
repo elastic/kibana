@@ -56,7 +56,7 @@ const setup = ({
   );
   jest.spyOn(core.http.basePath, 'get').mockReturnValue(spaceBasePath);
   (core.http.get as jest.Mock).mockImplementation(async (path: string) =>
-    path === '/api/kibana/settings'
+    path === '/internal/kibana/settings'
       ? {
           settings: {
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: {
@@ -485,7 +485,7 @@ describe('WorkerDependenciesCallout', () => {
     const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
     expect(item).toHaveTextContent('Alert analysis is off for this space');
     expect(screen.queryByText('Worker setup needs attention')).toBeNull();
-    expect(core.http.get).toHaveBeenCalledWith('/api/kibana/settings');
+    expect(core.http.get).toHaveBeenCalledWith('/internal/kibana/settings');
 
     act(() => analysisSetting.next(true));
     await waitFor(() =>
@@ -523,7 +523,7 @@ describe('WorkerDependenciesCallout', () => {
         )?.status
       ).toBe('success')
     );
-    expect(core.http.get).toHaveBeenCalledWith('/api/kibana/settings');
+    expect(core.http.get).toHaveBeenCalledWith('/internal/kibana/settings');
     expect(screen.queryByTestId('alertZeroWorkerDependency-alertAnalysis')).toBeNull();
   });
 

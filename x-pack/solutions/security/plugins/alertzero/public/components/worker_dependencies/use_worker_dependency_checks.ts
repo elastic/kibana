@@ -25,7 +25,7 @@ import { queryKeys } from '../../query_keys';
 
 export const ATTACK_DISCOVERY_WORKFLOWS_SETTING = 'securitySolution:enableAttackDiscoveryWorkflows';
 const FLEET_PACKAGE_POLICIES_PATH = '/api/fleet/package_policies';
-const UI_SETTINGS_PATH = '/api/kibana/settings';
+const UI_SETTINGS_PATH = '/internal/kibana/settings';
 const WORKFLOWS_MGET_PATH = '/api/workflows/mget';
 const ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
