@@ -257,6 +257,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-rule-tuning-review
+          run-as-mode: inherit
           inputs:
             rule_uuid: "{{ foreach.item.0 }}"
             fp_count: "${{ foreach.item.1 }}"

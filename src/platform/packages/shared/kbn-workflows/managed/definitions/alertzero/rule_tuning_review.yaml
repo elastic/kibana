@@ -223,6 +223,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             # Raised before any diagnosis, so the comment's own heading is the only
@@ -636,6 +637,7 @@ steps:
     if: "${{ steps.can_preview_query_change.output.supported == true }}"
     with:
       workflow-id: system-security-rule-preview
+      run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
         preview_body:
@@ -909,6 +911,7 @@ steps:
             type: workflow.execute
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 title: "{{ steps.compose_proposal.output.title }}"
@@ -929,6 +932,7 @@ steps:
             type: workflow.execute
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 title: "{{ steps.compose_proposal.output.title }}"
@@ -967,6 +971,7 @@ steps:
             type: workflow.execute
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 title: "{{ steps.compose_proposal.output.title }}"
@@ -999,6 +1004,7 @@ steps:
             type: workflow.execute
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 title: "{{ steps.compose_proposal.output.title }}"
@@ -1020,6 +1026,7 @@ steps:
             type: workflow.execute
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 title: "{{ steps.compose_proposal.output.title }}"
@@ -1041,6 +1048,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             title: "{{ steps.compose_proposal.output.title }}"
