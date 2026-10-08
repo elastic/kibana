@@ -16,34 +16,47 @@ import type { DataSource, DataSourceWithSecrets } from '../../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { emptyDatasetFormValues } from '../dataset_form_initial_values';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 
 jest.mock('../../create_data_source_flyout', () => ({
   CreateDataSourceFlyout: ({
     onSave,
   }: {
     onSave: (dataSource: DataSourceWithSecrets) => Promise<string | null>;
-  }) => (
-    <div data-test-subj="mockCreateDataSourceFlyout">
-      <button
-        data-test-subj="mockSaveDataSource"
-        onClick={() =>
-          void onSave({
-            name: 'new-source',
-            type: 's3',
-            description: '',
-            settings: {},
-          })
-        }
-      />
-    </div>
-  ),
+  }) => {
+    const [saveError, setSaveError] = jest.requireActual('react').useState(null);
+    return (
+      <div data-test-subj="mockCreateDataSourceFlyout">
+        <button
+          data-test-subj="mockSaveDataSource"
+          onClick={async () => {
+            setSaveError(
+              await onSave({
+                name: 'new-source',
+                type: 's3',
+                description: '',
+                settings: {},
+              })
+            );
+          }}
+        />
+        {saveError ? <div data-test-subj="mockSaveDataSourceError">{saveError}</div> : null}
+      </div>
+    );
+  },
 }));
 
 const initialDataSources: DataSource[] = [
   { name: 'source-1', type: 's3', description: '', settings: {} },
 ];
 
-function Harness({ add }: { add: jest.Mock }) {
+function Harness({
+  add,
+  loadDataSources,
+}: {
+  add: jest.Mock;
+  loadDataSources?: () => Promise<void>;
+}) {
   const [dataSources, setDataSources] = useState(initialDataSources);
   const methods = useForm<CreateDatasetFormValues>({
     defaultValues: emptyDatasetFormValues(),
@@ -55,12 +68,15 @@ function Harness({ add }: { add: jest.Mock }) {
         <CreateDatasetDetailsFields
           control={methods.control}
           dataSources={dataSources}
-          loadDataSources={async () => {
-            setDataSources([
-              ...dataSources,
-              { name: 'new-source', type: 's3', description: '', settings: {} },
-            ]);
-          }}
+          loadDataSources={
+            loadDataSources ??
+            (async () => {
+              setDataSources([
+                ...dataSources,
+                { name: 'new-source', type: 's3', description: '', settings: {} },
+              ]);
+            })
+          }
         />
         <div data-test-subj="selectedDataSource">{methods.watch('data_source')}</div>
       </FormProvider>
@@ -107,5 +123,28 @@ describe('CreateDatasetDetailsFields', () => {
 
     fireEvent.click(getByTestId('createDatasetDataSource'));
     expect(await findByTestId('createDatasetDataSource-new-source')).toBeInTheDocument();
+  });
+
+  it('reports a refresh failure after saving a new data source distinctly from a save failure', async () => {
+    const add = jest.fn().mockResolvedValue(undefined);
+    const loadDataSources = jest.fn().mockRejectedValue(new Error('list unavailable'));
+    const { getByTestId, findByTestId } = render(
+      <I18nProvider>
+        <EuiProvider>
+          <Harness add={add} loadDataSources={loadDataSources} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-connectNew'));
+    fireEvent.click(await findByTestId('mockSaveDataSource'));
+
+    expect(await findByTestId('mockSaveDataSourceError')).toHaveTextContent(
+      createDatasetWizardStrings.dataSourceRefreshAfterSaveError('new-source', 'list unavailable')
+    );
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(getByTestId('mockCreateDataSourceFlyout')).toBeInTheDocument();
+    expect(getByTestId('selectedDataSource')).toHaveTextContent('');
   });
 });

@@ -36,7 +36,9 @@ export class ResponseActionsHistoryPage {
     await this.page.gotoApp(HISTORY_APP_PATH, {
       params: { hosts: agentIds.join(',') },
     });
-    await this.table.waitFor({ state: 'visible' });
+    // The list is not rendered until the first fetch finishes. That request
+    // can still be in progress after the default 10s wait.
+    await this.table.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async toggleTypeFilter(label: string): Promise<void> {

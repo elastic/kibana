@@ -182,6 +182,7 @@ export const readCurrentRunState = async ({
   return {
     runId,
     reportId,
+    sseCount: currentRun.length,
     hasConfirmedHit,
     titles,
     evidenceLines,

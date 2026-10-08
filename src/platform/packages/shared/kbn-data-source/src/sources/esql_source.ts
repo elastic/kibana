@@ -16,6 +16,7 @@ import {
   getIndexPatternFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getESQLSourceInfo,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   getESQLTimeField,
   buildEsqlSourceCacheKey,
   isComputedColumn,
@@ -108,7 +109,11 @@ interface EsqlSourceConstructorArgs {
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
 export class EsqlSource implements DataSourceBase {
-  private static readonly instanceCache = new LRUCache<string, EsqlSource>({ max: 100 });
+  // Expires with the source info cache, so a source picks up new fields without a reload.
+  private static readonly instanceCache = new LRUCache<string, EsqlSource>({
+    max: 100,
+    ttl: ESQL_SOURCE_INFO_CACHE_TTL,
+  });
 
   public readonly kind = 'esql' as const;
   public readonly id: string;
