@@ -1454,6 +1454,7 @@ packages:
   - 'x-pack/platform/plugins/shared/data_quality'
   - 'x-pack/platform/plugins/shared/dataset_quality'
   - 'x-pack/platform/plugins/shared/elastic_console'
+  - 'x-pack/platform/plugins/shared/elasticsearch_home'
   - 'x-pack/platform/plugins/shared/embeddable_alerts_table'
   - 'x-pack/platform/plugins/shared/encrypted_saved_objects'
   - 'x-pack/platform/plugins/shared/entity_store'

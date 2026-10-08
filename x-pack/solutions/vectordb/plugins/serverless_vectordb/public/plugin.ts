@@ -67,7 +67,7 @@ export class ServerlessVectordbPlugin
           share: depsStart.share,
           console: depsStart.console,
           cloud: depsStart.cloud,
-          agentBuilder: depsStart.agentBuilder,
+          elasticsearchHome: depsStart.elasticsearchHome,
           history: params.history,
         };
         return renderApp(coreStart, appServices, params);
