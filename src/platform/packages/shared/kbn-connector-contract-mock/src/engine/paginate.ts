@@ -48,7 +48,10 @@ interface Located {
 
 /**
  * How a vendor operation pages, as declared in the connector's manifest. Paths into bodies use
- * lodash syntax; keys containing dots are quoted, e.g. `["@odata.nextLink"]`.
+ * lodash syntax; keys containing dots are quoted, e.g. `["@odata.nextLink"]`. An empty
+ * `itemsPath` means the body is the collection itself, which leaves no room in it for a next
+ * cursor, URL or total: such operations page by offset, page number, `Link` header or a cursor
+ * in a header.
  */
 export type PaginationDescriptor =
   | {
@@ -288,11 +291,14 @@ interface RecordedPage {
   readonly next: unknown;
 }
 
+const getItems = (body: unknown, itemsPath: string): unknown =>
+  itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
+
 const readRecordedPage = (
   pagination: PaginationDescriptor,
   { request = {}, response }: RecordedExchange
 ): RecordedPage[] => {
-  const items = isRecord(response.body) ? get(response.body, pagination.response.itemsPath) : [];
+  const items = getItems(response.body, pagination.response.itemsPath);
   if (!Array.isArray(items)) {
     return [];
   }
@@ -393,8 +399,9 @@ const paginate = (
   response: ContractResponse
 ): ContractResponse => {
   const { body } = response;
-  const template = isRecord(body) ? get(body, pagination.response.itemsPath) : undefined;
-  if (!isRecord(body) || !Array.isArray(template) || (template.length === 0 && !recorded)) {
+  const { itemsPath } = pagination.response;
+  const template = getItems(body, itemsPath);
+  if (!Array.isArray(template) || (template.length === 0 && !recorded)) {
     return response;
   }
   const read = (name: string) => readParameter(request, parameterLocation(pagination), name);
@@ -407,8 +414,10 @@ const paginate = (
   const collection = recorded
     ? resize(recorded.items, collectionSize)
     : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
-  const page = cloneDeep(body);
-  set(page, pagination.response.itemsPath, collection.slice(start, start + size));
+  const items = collection.slice(start, start + size);
+  const page: object =
+    itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
+  const inBody = !Array.isArray(page);
   const next = start + size < collection.length ? start + size : undefined;
   const cursor = next === undefined ? undefined : recorded?.cursors.get(next) ?? encodeCursor(next);
   const nextUrl =
@@ -421,12 +430,14 @@ const paginate = (
     case 'cursor': {
       const { in: nextIn = 'body', nextPath, hasMorePath } = pagination.response;
       if (nextIn === 'body') {
-        setNext(page, nextPath, cursor, pagination.end);
+        if (inBody) {
+          setNext(page, nextPath, cursor, pagination.end);
+        }
       } else {
         const atEnd = pagination.end === 'empty_string' ? '' : undefined;
         headers = withHeader(headers, nextPath, cursor ?? atEnd);
       }
-      if (hasMorePath) {
+      if (hasMorePath && inBody) {
         set(page, hasMorePath, next !== undefined);
       }
       break;
@@ -435,10 +446,12 @@ const paginate = (
       headers = withHeader(headers, 'link', nextUrl && `<${nextUrl}>; rel="next"`);
       break;
     case 'next_url':
-      setNext(page, pagination.response.nextPath, nextUrl, pagination.end);
+      if (inBody) {
+        setNext(page, pagination.response.nextPath, nextUrl, pagination.end);
+      }
       break;
     default:
-      if (pagination.response.totalPath) {
+      if (pagination.response.totalPath && inBody) {
         set(page, pagination.response.totalPath, collection.length);
       }
   }
