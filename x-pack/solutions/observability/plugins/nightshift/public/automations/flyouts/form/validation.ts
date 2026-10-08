@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
-import type { AutomationFormValues, TriggerFormValues } from './automation_form_values';
+import {
+  isSlackTrigger,
+  type AutomationFormValues,
+  type TriggerFormValues,
+} from './automation_form_values';
 
 export const validationLabels = {
   cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
@@ -16,6 +20,10 @@ export const validationLabels = {
   triggerRequired: i18n.translate('xpack.nightshift.automations.flyout.triggerRequired', {
     defaultMessage: 'Select a trigger to save',
   }),
+  slackChannelsRequired: i18n.translate(
+    'xpack.nightshift.automations.flyout.slackChannelsRequired',
+    { defaultMessage: 'Select at least one channel.' }
+  ),
   channelRequired: i18n.translate('xpack.nightshift.automations.flyout.channelRequired', {
     defaultMessage: 'Choose a Slack channel to post to before saving',
   }),
@@ -56,7 +64,14 @@ export const getSaveBlocker = (values: AutomationFormValues): string | undefined
   if (values.trigger?.kind === 'cron' && !isValidCron(values.trigger.cronExpression)) {
     return validationLabels.cronError;
   }
-  if (values.slackAction && !values.slackAction.destination.trim()) {
+  if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
+    return validationLabels.slackChannelsRequired;
+  }
+  if (
+    values.slackAction &&
+    values.slackAction.target !== 'thread' &&
+    !values.slackAction.destination.trim()
+  ) {
     return values.slackAction.target === 'channel'
       ? validationLabels.channelRequired
       : validationLabels.personRequired;

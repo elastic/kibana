@@ -63,4 +63,23 @@ describe('AutomationActionsSection', () => {
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
   });
+
+  it('shows a locked reply-in-thread action without edit or remove controls', () => {
+    render(
+      <I18nProvider>
+        <AutomationActionsSection
+          slackAction={{ target: 'thread', destination: '' }}
+          onSlackActionChange={onSlackActionChange}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Post in Slack')).toBeInTheDocument();
+    expect(
+      screen.getByText('Nightshift replies in the thread of the triggering message.')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('automationRemoveSlackAction')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationSlackDestination')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationAddAction')).not.toBeInTheDocument();
+  });
 });

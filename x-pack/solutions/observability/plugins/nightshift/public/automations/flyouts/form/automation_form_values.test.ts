@@ -96,7 +96,7 @@ describe('automation form values', () => {
       dailyDispatchLimit: '12',
       instructions: 'Investigate',
       mode: 'investigate',
-      slackAction: { target: 'self', destination: '@me' },
+      slackAction: { target: 'thread', destination: '' },
       isEnabled: true,
     });
   });

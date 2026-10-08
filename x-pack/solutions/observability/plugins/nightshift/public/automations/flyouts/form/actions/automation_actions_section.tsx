@@ -60,6 +60,9 @@ export const actionLabels = {
   searchPeople: i18n.translate('xpack.nightshift.automations.flyout.searchPeople', {
     defaultMessage: 'Search people…',
   }),
+  replyInThread: i18n.translate('xpack.nightshift.automations.flyout.replyInThread', {
+    defaultMessage: 'Nightshift replies in the thread of the triggering message.',
+  }),
   removeAction: i18n.translate('xpack.nightshift.automations.flyout.removeAction', {
     defaultMessage: 'Remove action',
   }),
@@ -75,6 +78,34 @@ const useActionRowCss = () => {
       background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
     }
   `;
+};
+
+const SlackThreadActionRow = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      wrap
+      responsive={false}
+      css={{ minBlockSize: euiTheme.size.xl }}
+      data-test-subj="automationSlackThreadAction"
+    >
+      <EuiFlexItem grow={false}>
+        <SentenceIcon type="logoSlack" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>{actionLabels.postInSlack}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s" color="subdued">
+          {actionLabels.replyInThread}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 const SlackActionRow = ({
@@ -175,13 +206,18 @@ export const AutomationActionsSection = ({
     <>
       <SectionHeader title={actionLabels.actions} />
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize={readOnly || !slackAction ? 'm' : 's'}>
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize={readOnly || !slackAction || slackAction.target === 'thread' ? 'm' : 's'}
+      >
         {!slackAction && (
           <EuiText size="s" color="subdued">
             {readOnly ? actionLabels.noActions : actionLabels.empty}
           </EuiText>
         )}
-        {slackAction && (
+        {slackAction?.target === 'thread' && <SlackThreadActionRow />}
+        {slackAction && slackAction.target !== 'thread' && (
           <>
             <SlackActionRow
               action={slackAction}

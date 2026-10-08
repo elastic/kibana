@@ -10,7 +10,7 @@ import type { Automation } from '../../hooks/use_automations';
 export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
-export type SlackTarget = 'channel' | 'self';
+export type SlackTarget = 'channel' | 'self' | 'thread';
 
 export const SLACK_TRIGGER_EVENTS = {
   slack_message: 'message',
@@ -53,6 +53,8 @@ export interface SlackActionFormValues {
   target: SlackTarget;
   destination: string;
 }
+
+export const SLACK_THREAD_ACTION: SlackActionFormValues = { target: 'thread', destination: '' };
 
 export interface AutomationFormValues {
   name: string;
@@ -162,7 +164,9 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     instructions: automation.execution.promptTemplate ?? '',
     mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
-      automation.completion.action === 'post_to_slack'
+      trigger && isSlackTrigger(trigger)
+        ? SLACK_THREAD_ACTION
+        : automation.completion.action === 'post_to_slack'
         ? {
             target: automation.completion.targetMode === 'self' ? 'self' : 'channel',
             destination: automation.completion.destination ?? '',

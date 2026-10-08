@@ -283,6 +283,24 @@ describe('automation request', () => {
       });
     });
 
+    it('saves a reply-in-thread action without a destination', () => {
+      const automation = buildAutomation({});
+      const values = {
+        ...alertValues,
+        slackAction: { target: 'thread', destination: '' },
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).completion).toEqual({
+        action: 'post_to_slack',
+        targetMode: 'thread',
+        destination: null,
+      });
+      expect(toAutomationRequestBody(values).completion).toEqual({
+        action: 'post_to_slack',
+        targetMode: 'thread',
+      });
+    });
+
     it('keeps a completion action that is not a Slack post', () => {
       const automation = buildAutomation({ completion: { action: 'create_investigation' } });
 

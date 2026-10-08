@@ -92,9 +92,11 @@ export const toAutomationRequestBody = (
       ...(instructions ? { promptTemplate: instructions } : {}),
       reasoningMode: values.mode === 'investigate' ? 'investigate' : 'observe',
     },
-    completion: values.slackAction
-      ? { action: 'post_to_slack', targetMode: values.slackAction.target, destination }
-      : {},
+    completion: !values.slackAction
+      ? {}
+      : values.slackAction.target === 'thread'
+      ? { action: 'post_to_slack', targetMode: 'thread' }
+      : { action: 'post_to_slack', targetMode: values.slackAction.target, destination },
     runtime: hasDailyLimit(values.trigger)
       ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
       : {},
@@ -127,6 +129,14 @@ const toUpdatedCompletion = (
   values: AutomationFormValues,
   automation: Automation
 ): NonNullable<UpdateAutomationBody['completion']> => {
+  if (values.slackAction?.target === 'thread') {
+    return {
+      ...automation.completion,
+      action: 'post_to_slack',
+      targetMode: 'thread',
+      destination: null,
+    };
+  }
   if (values.slackAction) {
     return {
       ...automation.completion,

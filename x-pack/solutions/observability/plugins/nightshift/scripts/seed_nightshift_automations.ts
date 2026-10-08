@@ -23,9 +23,14 @@ const REMOVED_AUTOMATION_NAMES = ['Managed Slack bot mention'];
 
 type RunStatus = 'completed' | 'failed' | 'running' | 'skipped';
 
+type SeedCompletion = Record<string, string>;
+
+const THREAD_REPLY: SeedCompletion = { action: 'post_to_slack', targetMode: 'thread' };
+
 interface SeedAutomation {
   name: string;
   trigger: Record<string, string | string[]>;
+  completion?: SeedCompletion;
   tags: string[];
   author: string;
   enabled: boolean;
@@ -41,6 +46,11 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Triage incoming alerts',
     trigger: { kind: 'alert' },
+    completion: {
+      action: 'post_to_slack',
+      targetMode: 'channel',
+      destination: '#nightshift-alerts',
+    },
     tags: ['triage', 'alerts'],
     author: 'Emily Clarke',
     enabled: true,
@@ -54,6 +64,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Escalate on-call alerts',
     trigger: { kind: 'slack', event: 'message', channels: ['#oncall'] },
+    completion: THREAD_REPLY,
     tags: ['oncall', 'escalation', 'p1'],
     author: 'James Turner',
     enabled: true,
@@ -67,6 +78,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Triage P0 Issues',
     trigger: { kind: 'slack', event: 'message', channels: ['#incidents'] },
+    completion: THREAD_REPLY,
     tags: ['p0', 'triage'],
     author: 'Sarah Mitchell',
     enabled: true,
@@ -80,6 +92,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Managed Slack bot messages',
     trigger: { kind: 'slack', event: 'message', channels: ['#nightshift'] },
+    completion: THREAD_REPLY,
     tags: [],
     author: 'Nightshift',
     enabled: true,
@@ -93,6 +106,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Daily Report - Active Usage',
     trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
+    completion: { action: 'post_to_slack', targetMode: 'self', destination: '@emily.clarke' },
     tags: ['reporting', 'leadership'],
     author: 'Emily Clarke',
     enabled: true,
@@ -119,6 +133,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Investigate incoming alerts',
     trigger: { kind: 'slack', event: 'message', channels: ['#alerts'] },
+    completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' },
     tags: [],
     author: 'Daniel Hughes',
     enabled: false,
@@ -258,7 +273,7 @@ run(
             isEnabled: enabled,
             trigger: { rows: [automation.trigger] },
             execution: {},
-            completion: {},
+            completion: automation.completion ?? {},
             runtime: { dailyDispatchLimit: limit },
           },
         }
@@ -298,7 +313,9 @@ run(
   {
     description: `Seeds ${AUTOMATIONS.length} Nightshift automations with varied authors, tags, run history, and daily usage.
 
-      Each author is created as a superuser so the automation records them as its creator. Runs are
+      Slack-triggered automations reply in the triggering thread, other triggers use a channel or
+      direct message action or none, and "Investigate incoming alerts" keeps a legacy channel
+      action on a Slack trigger. Each author is created as a superuser so the automation records them as its creator. Runs are
       written straight into ${EXECUTIONS_INDEX}, including failed, skipped, and still-running runs.
       Re-running deletes the seeded automations and runs first.`,
     flags: {

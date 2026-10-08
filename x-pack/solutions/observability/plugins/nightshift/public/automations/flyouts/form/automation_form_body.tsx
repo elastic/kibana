@@ -8,7 +8,12 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AutomationFormValues } from './automation_form_values';
+import {
+  isSlackTrigger,
+  SLACK_THREAD_ACTION,
+  type AutomationFormValues,
+  type TriggerFormValues,
+} from './automation_form_values';
 import { AutomationActionsSection } from './actions/automation_actions_section';
 import { AutomationInstructions } from './instructions/automation_instructions';
 import { AutomationTriggerSection } from './triggers/trigger_section';
@@ -55,6 +60,12 @@ export const AutomationFormBody = ({
   onRaiseLimit?: (limit: number) => void;
   onChange: (changes: Partial<AutomationFormValues>) => void;
 }) => {
+  const getActionForTrigger = (trigger?: TriggerFormValues): Partial<AutomationFormValues> => {
+    if (trigger && isSlackTrigger(trigger)) return { slackAction: SLACK_THREAD_ACTION };
+    if (values.slackAction?.target === 'thread') return { slackAction: undefined };
+    return {};
+  };
+
   return (
     <>
       {showIdentityFields && (
@@ -126,7 +137,7 @@ export const AutomationFormBody = ({
         <AutomationTriggerSection
           trigger={values.trigger}
           dailyDispatchLimit={values.dailyDispatchLimit}
-          onTriggerChange={(trigger) => onChange({ trigger })}
+          onTriggerChange={(trigger) => onChange({ trigger, ...getActionForTrigger(trigger) })}
           onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
           usedToday={usedToday}
           savedLimit={savedLimit}

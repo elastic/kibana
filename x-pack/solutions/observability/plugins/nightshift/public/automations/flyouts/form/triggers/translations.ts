@@ -33,7 +33,7 @@ export const triggerLabels = {
   }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
-      'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.',
+      "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",
   }),
   empty: i18n.translate('xpack.nightshift.automations.flyout.triggersEmpty', {
     defaultMessage: 'Choose what starts this automation.',

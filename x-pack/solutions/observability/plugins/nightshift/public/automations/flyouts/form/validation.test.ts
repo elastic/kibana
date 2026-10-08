@@ -89,6 +89,19 @@ describe('automation validation', () => {
       ).toBe('Choose who to message in Slack before saving');
     });
 
+    it('blocks a Slack trigger without a channel', () => {
+      const slackTrigger = createTriggerFormValues('slack_message');
+      expect(getSaveBlocker({ ...values, trigger: slackTrigger })).toBe(
+        'Select at least one channel.'
+      );
+      expect(
+        getSaveBlocker({
+          ...values,
+          trigger: { ...slackTrigger, channels: ['#oncall'] } as typeof slackTrigger,
+        })
+      ).toBeUndefined();
+    });
+
     it('asks for a trigger before saving', () => {
       expect(getSaveBlocker(values)).toBe('Select a trigger to save');
     });
