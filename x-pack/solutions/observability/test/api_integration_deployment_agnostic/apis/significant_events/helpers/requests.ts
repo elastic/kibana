@@ -205,6 +205,33 @@ export async function getQueries(
   };
 }
 
+const WRITE_LEASE_RETRY_ATTEMPTS = 20;
+const WRITE_LEASE_RETRY_DELAY_MS = 1_000;
+
+/**
+ * Creating a source starts its reconciliation, which holds the source's write lease; writes in
+ * that window answer 409 "retry after the current write finishes". Retries on that 409 only
+ * when the caller expects a success, so tests asserting a 409 still see the first response.
+ */
+async function retryOnWriteLease<T extends { status: number; body: unknown }>(
+  expectedStatusCode: number,
+  send: () => PromiseLike<T>
+): Promise<T['body']> {
+  for (let attempt = 1; ; attempt++) {
+    const response = await send();
+    if (
+      response.status === 409 &&
+      expectedStatusCode !== 409 &&
+      attempt < WRITE_LEASE_RETRY_ATTEMPTS
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, WRITE_LEASE_RETRY_DELAY_MS));
+    } else {
+      expect(response.status).to.eql(expectedStatusCode);
+      return response.body;
+    }
+  }
+}
+
 export async function upsertQuery(
   apiClient: SignificantEventsSupertestRepositoryClient,
   streamName: string,
@@ -212,8 +239,8 @@ export async function upsertQuery(
   body: Omit<BulkQueryIndexInput, 'id'>,
   expectStatusCode: number = 200
 ) {
-  return apiClient
-    .fetch('PUT /internal/significant_events/queries/{queryId}', {
+  return retryOnWriteLease(expectStatusCode, () =>
+    apiClient.fetch('PUT /internal/significant_events/queries/{queryId}', {
       params: {
         path: { queryId },
         body: {
@@ -222,8 +249,7 @@ export async function upsertQuery(
         },
       },
     })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
+  );
 }
 
 export async function deleteQueries(
@@ -273,14 +299,14 @@ export async function upsertFeature(
   feature: BaseFeature,
   expectedStatusCode = 200
 ): Promise<{ id: string; uuid: string }> {
-  await client
-    .fetch('POST /internal/streams/{sourceId}/features', {
+  await retryOnWriteLease(expectedStatusCode, () =>
+    client.fetch('POST /internal/streams/{sourceId}/features', {
       params: {
         path: { sourceId: streamName },
         body: feature,
       },
     })
-    .expect(expectedStatusCode);
+  );
 
   const { features } = await listFeatures(client, streamName);
   const created = features.find((f) => f.id === feature.id);
