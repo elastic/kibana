@@ -1286,16 +1286,20 @@ export class DataViewsService {
       if (overwrite) {
         if (dupe.id !== dataView.id) {
           if (preserveNamespaces && dupe.namespaces) {
-            // Spaces the user cannot access are redacted as UNKNOWN_SPACE and cannot be used as initial namespaces
-            dataView.namespaces = dupe.namespaces.filter(
-              (namespace) => namespace !== UNKNOWN_SPACE
-            );
+            // Spaces the user cannot access are redacted as UNKNOWN_SPACE; replacing the data view would drop it from them
+            if (dupe.namespaces.includes(UNKNOWN_SPACE)) {
+              throw new DataViewInsufficientAccessError(dupe.id);
+            }
+            dataView.namespaces = dupe.namespaces;
           }
           await this.delete(dupe.id);
         }
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
+    }
+    if (overwrite && dataView.id) {
+      this.clearInstanceCache(dataView.id);
     }
     const body = dataView.getAsSavedObjectBody();
 
