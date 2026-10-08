@@ -10,7 +10,12 @@ import {
   buildProposalSubjectKey,
   canFillRespondAction,
   decidePackageReport,
+  buildProposalSummaryBullets,
 } from './decide_package_report';
+import {
+  MAX_SUMMARY_BULLETS_CHARS,
+  MAX_SUMMARY_PROPOSAL_BULLETS,
+} from '../../../../../common/step_types/package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -450,5 +455,77 @@ describe('decidePackageReport', () => {
         processKey: 'p',
       })
     );
+  });
+});
+
+describe('buildProposalSummaryBullets', () => {
+  // journal_note.yaml caps `message` at this; the conclusion embeds the bullets verbatim.
+  const JOURNAL_NOTE_MESSAGE_MAX = 8000;
+
+  it('bounds the bullets for a 50-host, 2-action finding and states how many were omitted', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `a-fairly-long-host-name-number-${i}.corp.example.com`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: {
+        ok: true,
+        actions: [
+          isolateHost,
+          configureAction,
+          { ...isolateHost, workflowId: 'system-security-action-second' },
+        ],
+      },
+    });
+    expect(proposals).toHaveLength(100);
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    expect(bullets).toHaveLength(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(omittedCount).toBe(100 - MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets[0]).toBe(
+      '- **Isolate host a-fairly-long-host-name-number-0.corp.example.com** on `a-fairly-long-host-name-number-0.corp.example.com`: runs `system-security-action-isolate-host` on approval'
+    );
+  });
+
+  it('stays under the character cap with very long host names and counts what it drops', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `${i}-${'h'.repeat(2000)}`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    // Each host segment is cut to 253 characters and marked as cut. Without that cut a 2,000-char
+    // host fits only ~2 bullets in the budget, so the floor below only holds when it is applied.
+    const hostSegments = bullets.map((bullet) => /on `([^`]*)`/.exec(bullet)![1]);
+    expect(hostSegments.every((host) => host.length <= 253 && host.endsWith('…'))).toBe(true);
+    expect(bullets.length).toBeGreaterThanOrEqual(5);
+    expect(bullets.length).toBeLessThan(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThanOrEqual(MAX_SUMMARY_BULLETS_CHARS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets.length + omittedCount).toBe(proposals.length);
+  });
+
+  it('lists everything and omits nothing at or under the cap', () => {
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState(),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(buildProposalSummaryBullets(proposals)).toEqual({
+      bullets: [expect.stringContaining('`host-a`')],
+      omittedCount: 0,
+    });
   });
 });

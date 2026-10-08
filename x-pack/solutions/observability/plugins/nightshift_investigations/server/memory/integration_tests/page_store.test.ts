@@ -11,7 +11,6 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { MEMORY_INDEX } from '../../../common/memory';
-import { ensureMemoryIndex, MEMORY_INDEX_TEMPLATE_NAME } from '../ensure_memory_index';
 import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '../page_store';
 
 const SPACE_A = 'space-a';
@@ -25,7 +24,6 @@ const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): Mem
   tags: ['runbook'],
   categories: ['operations'],
   references: [],
-  status: 'established',
   user: 'nightshift-test',
   ...overrides,
 });
@@ -38,43 +36,41 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
 
   const logger = loggerMock.create();
 
-  const deleteIndexTemplate = async (): Promise<void> => {
-    try {
-      await esClient.indices.deleteIndexTemplate({ name: MEMORY_INDEX_TEMPLATE_NAME });
-    } catch (error) {
-      if ((error as { statusCode?: number }).statusCode !== 404) {
-        throw error;
-      }
-    }
-  };
-
   beforeAll(async () => {
     esServer = createTestEsCluster({
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
+      // The managed mapping writes semantic_text, which needs a trial license to
+      // run the inference endpoint on write.
+      license: 'trial',
     });
     await esServer.start();
     esClient = esServer.getClient();
 
     await esClient.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteIndexTemplate();
-    await ensureMemoryIndex({ esClient, logger });
   });
 
   afterAll(async () => {
     await esClient?.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteIndexTemplate();
     await esClient?.close();
     await esServer?.stop();
   });
 
-  it('creates a hidden index with the production semantic_text mapping', async () => {
-    const mapping = await esClient.indices.getMapping({ index: MEMORY_INDEX });
-    const settings = await esClient.indices.getSettings({
-      index: MEMORY_INDEX,
-      flat_settings: true,
+  it('auto-creates the managed ai-index mapping on first write', async () => {
+    const store = createMemoryPageStore({
+      esClient,
+      logger,
+      spaceId: SPACE_A,
+      now: () => NOW_SECONDS,
     });
+    await store.create(createPage('mapping-probe'));
 
-    expect(mapping[MEMORY_INDEX].mappings.properties?.context).toEqual(
+    const mapping = await esClient.indices.getMapping({ index: MEMORY_INDEX });
+    const properties = mapping[MEMORY_INDEX].mappings.properties;
+
+    expect(MEMORY_INDEX.startsWith('ai-index-idx-')).toBe(true);
+    // The task-recall context is stored in the managed `description` field, the
+    // same semantic shape as `title` and `content`.
+    expect(properties?.description).toEqual(
       expect.objectContaining({
         type: 'text',
         fields: expect.objectContaining({
@@ -82,7 +78,16 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
         }),
       })
     );
-    expect(settings[MEMORY_INDEX].settings?.['index.hidden']).toBe('true');
+    // Memory adds no field of its own: the managed mapping has no `context`,
+    // and no `ai-index@custom` component template exists.
+    expect(properties?.context).toBeUndefined();
+    expect(properties?.attributes).toEqual(expect.objectContaining({ type: 'flattened' }));
+    await expect(
+      esClient.cluster.getComponentTemplate({ name: 'ai-index@custom' })
+    ).rejects.toThrow();
+
+    // Start the lifecycle test from an empty, auto-created index.
+    await esClient.indices.delete({ index: MEMORY_INDEX });
   });
 
   it('exercises page lifecycle, isolation, and counter OCC on the semantic index', async () => {
@@ -176,17 +181,41 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect(archived).toEqual(
       expect.objectContaining({
         id: pageA.id,
-        status: 'archived',
+        archived: true,
         archive_reason: 'harmful',
       })
     );
     expect((await storeA.retrieve()).map(({ id }) => id)).toEqual(['memory_cache-warmup']);
-    expect((await storeA.list({ status: 'archived' })).pages.map(({ id }) => id)).toEqual([
+    expect((await storeA.list({ filter: 'archived' })).pages.map(({ id }) => id)).toEqual([
       pageA.id,
     ]);
+    expect((await storeA.list({ filter: 'active' })).pages.map(({ id }) => id)).toEqual([
+      'memory_cache-warmup',
+    ]);
 
+    // The header's two numbers under every list filter. `total` follows the
+    // listing; `archived` is the Space's own count, so the Active view no longer
+    // reports "0 archived" for a Space that has one.
+    for (const [filter, total] of [
+      ['active', 1],
+      ['archived', 1],
+      ['all', 2],
+    ] as const) {
+      const page = await storeA.listPaginated({ filter });
+      expect(page.stats).toMatchObject({ total, archived: 1 });
+    }
+
+    // Restoring clears the reason, which is the only archived marker.
+    const restored = await storeA.unarchive(pageA.id);
+    expect(restored).toEqual(expect.objectContaining({ id: pageA.id, archived: false }));
+    expect((await storeA.get(pageA.id))?.archive_reason).toBeUndefined();
+
+    // Counters apply again once restored: the page stood at 2 impressions before
+    // archiving, and the update adds one more.
     await storeA.applyCounterUpdates([{ id: pageA.id, addImp: 1, addConv: 1 }]);
-    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(2);
+    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(3);
+    // The archive/unarchive round trip preserved the rest of the document.
+    expect((await storeA.get(pageA.id))?.content).toContain('partition lag');
     expect((await storeB.get(pageB.id))?.title).toBe('Payments database recovery');
   });
 

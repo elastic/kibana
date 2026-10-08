@@ -1,0 +1,32 @@
+version: "1"
+name: AlertZero investigation summary
+description: >
+  Reads an investigation or escalation timeline — journal user messages, comments,
+  and newly added attachments — and writes metadata.summary. Shipped disabled. An
+  agent execution ending, a close, or an attachment edit does not start it. The run is standalone,
+  so it does not append a chat round.
+enabled: false
+tags:
+  - security
+  - alertzero
+settings:
+  concurrency:
+    key: "{{ workflow.id }}:{{ event.conversationId }}"
+    strategy: queue
+    max: 1
+    queue-size: 1
+triggers:
+  - type: ai.conversation.updated
+    on:
+      condition: >-
+        (event.templateId: "investigation" or event.templateId: "escalation")
+        and (
+          event.eventTypes: "user_message"
+          or event.eventTypes: "text_note"
+          or event.eventTypes: "attachment_added"
+        )
+steps:
+  - name: summarize
+    type: alertzero.investigation.summarize
+    with:
+      conversation_id: "{{ event.conversationId }}"
