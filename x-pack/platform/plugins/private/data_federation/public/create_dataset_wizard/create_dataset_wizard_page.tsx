@@ -25,7 +25,8 @@ import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
-import { UI_COUNTER_EVENTS } from '../ui_counters';
+import type { DatasetFormat } from '../../common/dataset_types';
+import { getDatasetCreateEvents, UI_COUNTER_EVENTS } from '../ui_counters';
 import { buildDatasetPayload } from './build_dataset_payload';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
@@ -154,6 +155,7 @@ export function CreateDatasetWizardPage({
     setIsSaving(true);
     const previousName = initialDataSet?.name.trim();
     let savedName: string;
+    const savedFormat = values.settings?.format as DatasetFormat | undefined;
     try {
       const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
@@ -182,7 +184,7 @@ export function CreateDatasetWizardPage({
     }
 
     reportUiCounter?.(
-      previousName ? UI_COUNTER_EVENTS.datasetUpdate : UI_COUNTER_EVENTS.datasetCreate
+      previousName ? UI_COUNTER_EVENTS.datasetUpdate : getDatasetCreateEvents(savedFormat)
     );
 
     try {

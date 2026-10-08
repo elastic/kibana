@@ -263,7 +263,7 @@ describe('DataSourcesTabContent', () => {
       fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
 
       await waitFor(() => {
-        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasourceCreate);
+        expect(reportUiCounter).toHaveBeenCalledWith(['datasource_create', 'datasource_create_s3']);
       });
       expect(reportUiCounter).toHaveBeenCalledTimes(1);
     });

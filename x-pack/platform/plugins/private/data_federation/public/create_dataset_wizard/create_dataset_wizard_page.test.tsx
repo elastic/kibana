@@ -330,7 +330,7 @@ describe('CreateDatasetWizardPage', () => {
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
     expect(reportUiCounter).toHaveBeenCalledTimes(1);
-    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetCreate);
+    expect(reportUiCounter).toHaveBeenCalledWith(['dataset_create', 'dataset_create_csv']);
   });
 
   it('persists common/advanced accordion show/hide state across wizard navigation', async () => {

@@ -18,7 +18,7 @@ import { DataSourcesTable } from './data_sources_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
-import { UI_COUNTER_EVENTS } from './ui_counters';
+import { getDatasourceCreateEvents, UI_COUNTER_EVENTS } from './ui_counters';
 
 type DataSourceFlyoutState =
   | { mode: 'closed' }
@@ -190,7 +190,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
           reportUiCounter?.(UI_COUNTER_EVENTS.datasourceUpdate);
         } else {
           await dataSourcesClient.add(dataSource);
-          reportUiCounter?.(UI_COUNTER_EVENTS.datasourceCreate);
+          reportUiCounter?.(getDatasourceCreateEvents(dataSource.type));
         }
 
         onClose({ savedChanges: true });

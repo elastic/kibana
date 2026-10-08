@@ -6,7 +6,13 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { createReportUiCounter, UI_COUNTER_APP_NAME, UI_COUNTER_EVENTS } from './ui_counters';
+import {
+  createReportUiCounter,
+  getDatasetCreateEvents,
+  getDatasourceCreateEvents,
+  UI_COUNTER_APP_NAME,
+  UI_COUNTER_EVENTS,
+} from './ui_counters';
 
 describe('createReportUiCounter', () => {
   describe('WHEN usageCollection is available', () => {
@@ -25,11 +31,53 @@ describe('createReportUiCounter', () => {
     });
   });
 
+  describe('WHEN given multiple events', () => {
+    it('SHOULD report them in a single call', () => {
+      const usageCollection = { reportUiCounter: jest.fn() };
+      const reportUiCounter = createReportUiCounter(usageCollection);
+
+      reportUiCounter(getDatasourceCreateEvents('gcs'));
+
+      expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+        UI_COUNTER_APP_NAME,
+        METRIC_TYPE.COUNT,
+        ['datasource_create', 'datasource_create_gcs'],
+        undefined
+      );
+    });
+  });
+
   describe('WHEN usageCollection is unavailable', () => {
     it('SHOULD not throw', () => {
       const reportUiCounter = createReportUiCounter(undefined);
 
       expect(() => reportUiCounter(UI_COUNTER_EVENTS.datasourceCreate)).not.toThrow();
+    });
+  });
+});
+
+describe('getDatasourceCreateEvents', () => {
+  it('SHOULD include the total and the per-type event', () => {
+    expect(getDatasourceCreateEvents('azure')).toEqual([
+      'datasource_create',
+      'datasource_create_azure',
+    ]);
+  });
+});
+
+describe('getDatasetCreateEvents', () => {
+  describe('WHEN the format is known', () => {
+    it('SHOULD include the total and the per-format event', () => {
+      expect(getDatasetCreateEvents('parquet')).toEqual([
+        'dataset_create',
+        'dataset_create_parquet',
+      ]);
+    });
+  });
+
+  describe('WHEN the format is missing', () => {
+    it('SHOULD include only the total event', () => {
+      expect(getDatasetCreateEvents(undefined)).toEqual(['dataset_create']);
     });
   });
 });
