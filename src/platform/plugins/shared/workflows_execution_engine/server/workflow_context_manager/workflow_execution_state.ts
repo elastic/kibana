@@ -268,15 +268,22 @@ export class WorkflowExecutionState {
    * always dropped. The `input` is kept only while the step is still running, so
    * foreach context re-evaluation across loop iterations keeps working; once the step
    * is finished its input is dropped too and re-fetched on demand by `StepIoService`.
+   * Outputs of `data.set` steps are kept: they are small variable maps that every later
+   * node reads through `variables`, so dropping them would force a refetch per node run.
    */
   public clearFlushedOutputs(ids: ReadonlyArray<string>): void {
     for (const id of ids) {
       const io = this.stepIo.get(id);
       if (io) {
-        if (io.input !== undefined && !this.isStepFinished(id)) {
-          this.stepIo.set(id, { input: io.input });
+        const keepInput = io.input !== undefined && !this.isStepFinished(id);
+        const keepOutput = io.output !== undefined && this.dataSetExecutionIds.has(id);
+        if (io.input !== undefined && !keepInput) this.evictedInputIds.add(id);
+        if (keepInput || keepOutput) {
+          this.stepIo.set(id, {
+            ...(keepInput ? { input: io.input } : {}),
+            ...(keepOutput ? { output: io.output } : {}),
+          });
         } else {
-          if (io.input !== undefined) this.evictedInputIds.add(id);
           this.stepIo.delete(id);
         }
       }
@@ -384,10 +391,31 @@ export class WorkflowExecutionState {
       });
     }
 
-    await this.stepExecutionRepository.bulkUpsert(updates);
+    try {
+      await this.stepExecutionRepository.bulkUpsert(updates);
+    } catch (error) {
+      this.requeueStepChanges(metadataChanges, ioChanges);
+      throw error;
+    }
     // Skip outputs rewritten while the bulk write was in flight; the next flush persists them.
     // Metadata-only ids are included so inputs drop once a step's terminal status is flushed.
     this.clearFlushedOutputs([...allIds].filter((id) => !this.pendingStepIo.has(id)));
+  }
+
+  /**
+   * Puts changes from a failed flush back in the pending maps. Changes recorded while the
+   * write was in flight are newer, so they win over the restored ones.
+   */
+  private requeueStepChanges(
+    metadataChanges: Map<string, Partial<StepExecutionMetadata>>,
+    ioChanges: Map<string, { input?: JsonValue; output?: JsonValue | null }>
+  ): void {
+    for (const [id, changes] of metadataChanges) {
+      this.stepDocumentsChanges.set(id, { ...changes, ...this.stepDocumentsChanges.get(id) });
+    }
+    for (const [id, io] of ioChanges) {
+      this.pendingStepIo.set(id, { ...io, ...this.pendingStepIo.get(id) });
+    }
   }
 
   /**

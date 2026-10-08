@@ -230,7 +230,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         // An output may have been written while the fetch was in flight.
         if (this.state.getStepIo(doc.id, 'output') === undefined) {
           const output = doc.output ?? null;
-          this.cache.set(doc.id, 'output', output, safeOutputSize(output) ?? undefined);
+          const size = safeOutputSize(output) ?? undefined;
+          this.cache.set(doc.id, 'output', output, size);
+          // Outputs written before a resume are not in the counters yet.
+          if (size !== undefined && !this.measuredSizes.has(doc.id)) {
+            this.measuredSizes.set(doc.id, size);
+            this.measuredTotalBytes += size;
+          }
           fetched.push({ id: doc.id, output });
         }
       }
