@@ -75,8 +75,6 @@ const FlyoutEntityButton = ({ entity }: { entity: ImpactContentEntity }) => (
   <button
     type="button"
     css={css({
-      display: 'block',
-      width: '100%',
       textAlign: 'left',
       background: 'transparent',
       border: 'none',
@@ -84,7 +82,11 @@ const FlyoutEntityButton = ({ entity }: { entity: ImpactContentEntity }) => (
       padding: 0,
     })}
     data-test-subj="investigationImpactEntityFlyout"
-    onClick={() => openImpactEntity({ id: entity.id, name: entity.name, type: entity.type })}
+    onClick={(event) => {
+      // Inside an accordion header, the name opens the entity; the rest of the header toggles.
+      event.stopPropagation();
+      openImpactEntity({ id: entity.id, name: entity.name, type: entity.type });
+    }}
   >
     <EntityHeader entity={entity} />
   </button>
@@ -117,25 +119,11 @@ const ImpactEntityRow = ({ entity, isLast }: { entity: ImpactContentEntity; isLa
         border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
       `}
     >
-      {entity.evidence && opensFlyout ? (
-        <>
-          {header}
-          <EuiAccordion
-            id={accordionId}
-            buttonContent={i18n.translate(
-              'xpack.agenticInvestigations.impact.attachments.entityEvidence',
-              { defaultMessage: 'Evidence' }
-            )}
-            paddingSize="none"
-            data-test-subj="investigationImpactEntityAccordion"
-          >
-            <EuiSpacer size="s" />
-            <EvidenceView evidence={entity.evidence} outlineChart={false} />
-          </EuiAccordion>
-        </>
-      ) : entity.evidence ? (
+      {entity.evidence ? (
         <EuiAccordion
           id={accordionId}
+          // A div trigger lets the header hold the entity button; the caret stays the toggle.
+          buttonElement={opensFlyout ? 'div' : 'button'}
           buttonContent={header}
           paddingSize="none"
           data-test-subj="investigationImpactEntityAccordion"

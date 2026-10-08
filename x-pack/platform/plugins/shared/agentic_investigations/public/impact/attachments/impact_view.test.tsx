@@ -131,6 +131,38 @@ describe('ImpactView', () => {
     expect(screen.getByText('Latency doubled.')).toBeVisible();
   });
 
+  it('puts the caret before an entity-store entity with evidence, and opens it from its name', () => {
+    const open = jest.fn();
+    registerImpactEntityOpener(open);
+
+    renderView({
+      ...base,
+      entities: [
+        {
+          id: 'service:orders-api',
+          name: 'orders-api',
+          type: 'service',
+          evidence: { description: 'Errors tripled.' },
+        },
+      ],
+    });
+
+    const accordion = screen.getByTestId('investigationImpactEntityAccordion');
+    expect(accordion).toContainElement(screen.getByTestId('investigationImpactEntityFlyout'));
+    expect(screen.queryByText('Evidence')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
+    expect(open).toHaveBeenCalledWith({
+      id: 'service:orders-api',
+      name: 'orders-api',
+      type: 'service',
+    });
+    expect(screen.queryByText('Errors tripled.')).not.toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+    expect(screen.getByText('Errors tripled.')).toBeVisible();
+  });
+
   it('keeps the inline render to entity badges', () => {
     renderView(
       {
