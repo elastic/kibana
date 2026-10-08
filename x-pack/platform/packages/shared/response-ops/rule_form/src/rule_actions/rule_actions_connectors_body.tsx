@@ -446,7 +446,7 @@ export const RuleActionsConnectorsBody = ({
                           color="warning"
                           label={DEPRECATED_LABEL}
                           size="s"
-                          tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                          title={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
                         />
                       </EuiFlexItem>
                     )}

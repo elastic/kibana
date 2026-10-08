@@ -294,5 +294,6 @@ describe('ruleActionsConnectorsBody', () => {
 
     expect(screen.getByText('Deprecated')).toBeInTheDocument();
     expect(screen.getAllByText('Deprecated')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Deprecated' })).not.toBeInTheDocument();
   });
 });
