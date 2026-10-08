@@ -20,9 +20,37 @@ For every request, the mock:
 2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
 3. builds a response, then validates its status code, headers and body against the spec.
 
-By default, the response is sampled from the spec. The mock picks the lowest declared 2xx response (then `2XX`, then `default`) and the content type that best matches the request's `Accept` header, preferring JSON. It answers **406** when no content type matches. Values come from the schema's first `examples` entry, `example`, `default`, `const` or `enum` value, and otherwise from a placeholder that matches the schema's type, format and bounds. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Pass `respond: (operation, request) => response` to answer differently.
-
 Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract.
+
+## Responses
+
+Responses come from, in order of preference:
+
+1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough;
+2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses`, which signals drift on the vendor's side. Recorded error responses are not served by default;
+3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
+4. **Samples** of the response schema.
+
+Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are:
+
+```ts
+const { fetch, rejectedResponses } = createContractMockFetch({
+  specs: [openApiDocument],
+  recordings: [
+    {
+      recordedAt: '2026-10-06',
+      exchanges: [
+        {
+          operation: { method: 'GET', path: '/api/v1/monitor' },
+          response: { status: 200, body: [{ id: 1, name: 'CPU' }] },
+        },
+      ],
+    },
+  ],
+});
+```
+
+Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example`, `default`, `const` or `enum` value, and otherwise from a placeholder that matches the schema's type, format and bounds. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Pass `respond: (operation, request) => response` to replace examples and samples.
 
 ## Spec loading
 

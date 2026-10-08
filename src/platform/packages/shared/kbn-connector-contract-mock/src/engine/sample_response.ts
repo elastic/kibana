@@ -8,7 +8,8 @@
  */
 
 import type { Responder } from '../contract/types';
-import type { MediaTypeContent, OperationResponse } from '../openapi/types';
+import { validateValue } from '../openapi/schema_violations';
+import type { ContractOperation, MediaTypeContent, OperationResponse } from '../openapi/types';
 import { sampleSchema } from './sample_schema';
 
 const statusOf = ({ code }: OperationResponse): number =>
@@ -69,11 +70,26 @@ export const negotiateContent = (
     : undefined;
 };
 
-/** Answers with a deterministic sample of the operation's success response. */
-export const sampleResponse: Responder = (
-  { responses, spec: { document } },
-  { headers: { accept } }
-) => {
+// Vendors' examples sometimes contradict their schemas, so only conforming ones are served.
+const conformingExamples = (operation: ContractOperation, { schema, examples }: MediaTypeContent) =>
+  examples.filter(
+    (example) =>
+      validateValue(operation, schema, example, {
+        path: ['body'],
+        subject: 'Example',
+        direction: 'response',
+      }).length === 0
+  );
+
+/**
+ * Answers with the operation's success response: the media type's first example that matches
+ * its schema, otherwise a deterministic sample of the schema.
+ */
+export const sampleResponse: Responder = (operation, { headers: { accept } }) => {
+  const {
+    responses,
+    spec: { document },
+  } = operation;
   const response = selectSuccessResponse(responses);
   if (!response) {
     return { statusCode: 204 };
@@ -101,5 +117,7 @@ export const sampleResponse: Responder = (
     };
   }
   headers['content-type'] = content.mediaType;
-  return { statusCode, headers, body: sampleSchema(content.schema?.schema, document) };
+  const examples = conformingExamples(operation, content);
+  const body = examples.length > 0 ? examples[0] : sampleSchema(content.schema?.schema, document);
+  return { statusCode, headers, body };
 };

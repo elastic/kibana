@@ -46,11 +46,6 @@ export interface Violation {
 /** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
 export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
 
-export interface MediaTypeContent {
-  readonly mediaType: string;
-  readonly schema?: SpecSchema;
-}
-
 export interface OperationParameter {
   readonly name: string;
   readonly in: ParameterLocation;
@@ -63,6 +58,13 @@ export interface OperationParameter {
   readonly content?: MediaTypeContent;
   /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
   readonly multiSegment?: true;
+}
+
+export interface MediaTypeContent {
+  readonly mediaType: string;
+  readonly schema?: SpecSchema;
+  /** The media type's `example`, then the values of its `examples`. */
+  readonly examples: readonly unknown[];
 }
 
 export interface OperationHeader {
