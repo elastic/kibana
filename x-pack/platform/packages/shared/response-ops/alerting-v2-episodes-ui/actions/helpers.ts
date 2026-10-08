@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ACTION_NO_OP_CODES, type BulkResponse } from '@kbn/alerting-v2-schemas';
+import { isAlertActionNoOpCode, type BulkResponse } from '@kbn/alerting-v2-schemas';
 import * as i18n from './translations';
 
 export const uniqueByGroup = <T extends { group_hash: string }>(items: T[]): T[] => {
@@ -32,9 +32,7 @@ export const readBulkOutcome = ({
   affected_count: processed,
   errors,
 }: BulkResponse): BulkOutcome => {
-  const unchanged = errors.filter(({ error }) =>
-    ALERT_ACTION_NO_OP_CODES.includes(error.code)
-  ).length;
+  const unchanged = errors.filter(({ error }) => isAlertActionNoOpCode(error.code)).length;
   return { processed, failed: errors.length - unchanged, unchanged };
 };
 

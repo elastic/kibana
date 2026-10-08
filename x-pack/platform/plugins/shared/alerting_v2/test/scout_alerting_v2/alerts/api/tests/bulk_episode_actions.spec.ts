@@ -591,7 +591,10 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe(olderEpisodeId);
       expect(response.body.errors[0].error.code).toBe('ALERT_NOT_LATEST');
-      expect(response.body.errors[0].error.details).toMatchObject({ group_hash: groupHash });
+      expect(response.body.errors[0].error.details).toMatchObject({
+        alert_id: olderEpisodeId,
+        group_hash: groupHash,
+      });
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,

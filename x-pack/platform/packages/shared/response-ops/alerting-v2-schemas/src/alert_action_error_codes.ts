@@ -19,7 +19,13 @@ export const INVALID_ALERT_STATE_TRANSITION_CODE = 'INVALID_ALERT_STATE_TRANSITI
 /** `assign` to the current assignee, or `tag` with the current set. */
 export const ALERT_ACTION_NO_OP_CODE = 'ALERT_ACTION_NO_OP';
 
-export const ALERT_ACTION_NO_OP_CODES: readonly string[] = [
+export const ALERT_ACTION_NO_OP_CODES = [
   INVALID_ALERT_STATE_TRANSITION_CODE,
   ALERT_ACTION_NO_OP_CODE,
-];
+] as const;
+
+export type AlertActionNoOpCode = (typeof ALERT_ACTION_NO_OP_CODES)[number];
+
+/** Whether an error code means the alert was left untouched because it already satisfied the request. */
+export const isAlertActionNoOpCode = (code: string): code is AlertActionNoOpCode =>
+  ALERT_ACTION_NO_OP_CODES.some((noOpCode) => noOpCode === code);

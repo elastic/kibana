@@ -107,19 +107,19 @@ const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionErr
 };
 
 /**
- * Lifecycle actions (`activate` / `deactivate`) write a synthetic
- * `.rule-events` doc with `@timestamp set at ingest time; applied to a superseded episode
- * that doc would make the old episode the group's latest and hijack the
- * director's group-level state machine, so they are guarded to the latest
- * episode of the series. The other episode actions are pure audit records
- * and may target any existing episode.
- */
-/**
  * Per-item rejections a bulk request absorbs into `errors[]`. Anything else
  * thrown while preparing an item is a real failure and aborts the batch.
  */
 const EXPECTED_BULK_ITEM_STATUS_CODES = new Set([400, 404, 409]);
 
+/**
+ * Lifecycle actions (`activate` / `deactivate`) write a synthetic
+ * `.rule-events` doc with `@timestamp` set at ingest time; applied to a superseded episode
+ * that doc would make the old episode the group's latest and hijack the
+ * director's group-level state machine, so they are guarded to the latest
+ * episode of the series. The other episode actions are pure audit records
+ * and may target any existing episode.
+ */
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -438,7 +438,7 @@ export class AlertActionsClient {
           toBulkActionError(item.alert_id, {
             code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
             message: getEpisodeNotLatestMessage(item.alert_id, alertEvent.group_hash),
-            details: { group_hash: alertEvent.group_hash },
+            details: { alert_id: item.alert_id, group_hash: alertEvent.group_hash },
           })
         );
         continue;

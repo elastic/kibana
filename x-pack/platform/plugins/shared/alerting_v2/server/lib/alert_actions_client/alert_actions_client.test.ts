@@ -638,7 +638,7 @@ describe('AlertActionsClient', () => {
           id: 'old-episode',
           error: expect.objectContaining({
             code: 'ALERT_NOT_LATEST',
-            details: { group_hash: 'group-1' },
+            details: { alert_id: 'old-episode', group_hash: 'group-1' },
           }),
         },
       ]);
