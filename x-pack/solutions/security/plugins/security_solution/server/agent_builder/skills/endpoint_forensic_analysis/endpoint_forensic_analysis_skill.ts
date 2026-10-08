@@ -141,8 +141,8 @@ typically follow) is permitted only under ALL of these conditions — otherwise 
 - The analyst explicitly asked for the expected, typical, or full sequence of attack stages. A bare "timeline of
   attacker activity" request does not qualify.
 - The host's telemetry is empty or near-empty. If the host HAS real events that pattern-match attack techniques
-  but carry a plausible benign explanation (e.g. \`vssadmin\` shadow enumeration, an SMB mount of an admin or
-  backup share), do NOT render a skeleton: describe only the observed events, flag the ambiguity, and stop.
+  but carry a plausible benign explanation (e.g. admin tooling, scheduled maintenance, routine share access), do
+  NOT render a skeleton: describe only the observed events, flag the ambiguity, and do not add a skeleton.
 - The skeleton is rendered as its own section AFTER the observed timeline, under a heading that says the stages
   were not observed on this host (e.g. "Expected stages — NOT observed on this host"). Skeleton stages never
   appear inside the observed timeline, never carry timestamps from the host's telemetry, and are never described
@@ -161,7 +161,9 @@ Where the timeline goes depends on how you were asked to answer:
   \`{ timestamp, host, description }\`. \`description\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field.
   \`events\` contains observed events only — skeleton (expected-but-unobserved) stages NEVER go into
-  \`events\`, even labelled. Do not also render the timeline in a free-text field.
+  \`events\`, even labelled. Do not also render the timeline in a free-text field. In structured-output mode,
+  omit the skeleton unless the schema has a dedicated non-timeline field for it; for empty telemetry
+  \`events: []\` is correct.
 
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and

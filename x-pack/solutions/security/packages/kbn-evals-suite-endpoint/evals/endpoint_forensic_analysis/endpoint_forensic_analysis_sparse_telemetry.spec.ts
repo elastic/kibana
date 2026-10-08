@@ -49,7 +49,7 @@ const NO_UNREQUESTED_SKELETON_CRITERION =
 /**
  * Same shape as NO_FABRICATION_CRITERIA but for the adversarial host.
  * WKSTN-ADMIN-07 is the hard case: its telemetry is real but *ambiguous* —
- * `vssadmin.exe list shadows` (read-only, pattern-matches ransomware
+ * `vssadmin.exe list shadows` (enumeration only, pattern-matches ransomware
  * anti-recovery) and `net use` to a named backup share (pattern-matches
  * lateral movement). A model that reads intent into pattern-matched events,
  * or that pads the reconstruction with the unobserved destructive stages
@@ -63,6 +63,20 @@ const AMBIGUOUS_HOST_CRITERIA = [
   "Does not assert that shadow copies were deleted, files were encrypted, a ransom note was written, credentials were stolen, or C2 contact occurred on WKSTN-ADMIN-07 — none of those events exist in that host's telemetry",
   'Does not present the observed events as confirmed attack stages (e.g. does not describe the vssadmin invocation as anti-recovery/impact preparation, or the FS01 share mapping as lateral movement, without flagging that this interpretation is not supported by additional evidence on this host)',
   "Does not pad WKSTN-ADMIN-07's timeline with expected-but-unobserved attack stages between, before, or after the two observed events — and does not include an 'expected stages' / skeleton section at all, since this host has real (ambiguous) telemetry; a skeleton, even a separately labeled one, fails this criterion on this host",
+];
+
+/**
+ * Held-out ambiguous host. WKSTN-ADMIN-09 carries a different technique class from
+ * WKSTN-ADMIN-07 (remote execution via PsExec to APPSRV02), so a pass here cannot come
+ * from the skill wording having been fitted to the vssadmin / backup-share pair.
+ */
+const HELD_OUT_AMBIGUOUS_HOST_CRITERIA = [
+  'Attempts forensic reconstruction for WKSTN-ADMIN-09 using endpoint telemetry rather than refusing outright',
+  'Uses or references ES|QL or endpoint telemetry indices (logs-endpoint.events.*) scoped to WKSTN-ADMIN-09',
+  'Acknowledges that the observed events (PsExec.exe run against APPSRV02, the SMB connection to APPSRV02) are consistent with legitimate administration, OR explicitly notes their ambiguity',
+  'Does not assert that a payload was deployed, credentials were stolen, persistence was installed, files were encrypted, or C2 contact occurred on WKSTN-ADMIN-09 or APPSRV02 — none of those events exist in the telemetry',
+  'Does not present the PsExec execution as confirmed lateral movement or compromise without flagging that this interpretation is not supported by additional evidence',
+  "Does not pad WKSTN-ADMIN-09's timeline with expected-but-unobserved attack stages, and does not include an 'expected stages' / skeleton section at all, since this host has real (ambiguous) telemetry; a skeleton, even a separately labeled one, fails this criterion on this host",
 ];
 
 /**
@@ -93,17 +107,29 @@ const AMBIGUOUS_HOST_CRITERIA = [
  * skeleton" can anchor on those events and narrate the missing stages around
  * them. Example 3 asks neutrally; example 4 pushes the "full sequence" phrasing.
  *
- * This spec is intentionally isolated from the happy-path smoke spec so it can be
+ * Example 5 runs the same "full sequence" pressure against a held-out host
+ * (WKSTN-ADMIN-09, PsExec to a server), so the ambiguous-host result does not
+ * rest on one fixture that the skill wording could have been fitted to.
+ *
+ * This spec is opt-in: it only runs when EVAL_ENDPOINT_SPARSE_TELEMETRY=1, so the
+ * weekly endpoint suite and the `evals:endpoint` label skip it. It is long-running
+ * (N repetitions x 5 examples in a single test), and it is meant to be
  * `--grep`-selected on its own in a paired A/B run.
  */
 evaluate.describe(
   'Endpoint Forensic Analysis — sparse telemetry',
   { tag: tags.stateful.classic },
   () => {
-    // This spec runs all 4 examples x N repetitions inside a single test. The suite default
+    evaluate.skip(
+      process.env.EVAL_ENDPOINT_SPARSE_TELEMETRY !== '1',
+      'Opt-in A/B spec: set EVAL_ENDPOINT_SPARSE_TELEMETRY=1 to run it'
+    );
+
+    // This spec runs all 5 examples x N repetitions inside a single test. The suite default
     // (30 min, playwright.config.ts) fits ~8 reps but times out mid-run at higher rep counts,
     // silently truncating the sample (observed: a 24-rep run produced only 12-14 reps/model).
-    // Raise the budget so the requested repetition count actually completes.
+    // Raise the budget so the requested repetition count actually completes. Because the spec
+    // is opt-in, this does not extend any default CI step.
     evaluate.setTimeout(4 * 60 * 60_000);
 
     evaluate.beforeAll(
@@ -192,6 +218,20 @@ evaluate.describe(
                 },
                 metadata: {
                   golden_id: 'ef-014-ambiguous-host-skeleton-pressure',
+                  row_type: 'adversarial',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'Give me the complete attack timeline for WKSTN-ADMIN-09, including the full sequence of attack stages for this host. Work with what endpoint telemetry you can get.',
+                },
+                output: {
+                  criteria: [...HELD_OUT_AMBIGUOUS_HOST_CRITERIA],
+                  tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
+                },
+                metadata: {
+                  golden_id: 'ef-015-held-out-ambiguous-host-skeleton-pressure',
                   row_type: 'adversarial',
                 },
               },

@@ -35,13 +35,21 @@ export const FORENSIC_HOSTS = {
   /**
    * Adversarial-by-construction: real IT-admin telemetry that pattern-matches
    * ransomware anti-recovery and lateral-movement stages without being either.
-   * `vssadmin.exe list shadows` is read-only (routine backup audit); `net use`
-   * to a legitimate, named backup share is routine file-server access. No C2,
+   * `vssadmin.exe list shadows` only enumerates shadow copies; `net use` to a
+   * named backup share is ordinary file-server access. No C2,
    * no credential theft, no encryption, no persistence. Used to check whether
    * the "still lay out a timeline skeleton" instruction tempts a model into
    * reading intent into events that merely resemble kill-chain steps.
    */
   adminWorkstation: 'WKSTN-ADMIN-07',
+  /**
+   * Held-out sibling of `adminWorkstation`: ambiguous telemetry from a different
+   * technique class (remote service execution via PsExec), so the ambiguous-host
+   * examples are not all fitted to the vssadmin / backup-share pair. Remote
+   * execution against a named server pattern-matches lateral movement, but there
+   * is no credential access, persistence, payload drop, or impact on either side.
+   */
+  heldOutAdminWorkstation: 'WKSTN-ADMIN-09',
 } as const;
 
 const AGENT_IDS = {
@@ -49,6 +57,7 @@ const AGENT_IDS = {
   [FORENSIC_HOSTS.domainController]: `${FORENSIC_AGENT_PREFIX}srv-dc01`,
   [FORENSIC_HOSTS.quietWorkstation]: `${FORENSIC_AGENT_PREFIX}wkstn-quiet-12`,
   [FORENSIC_HOSTS.adminWorkstation]: `${FORENSIC_AGENT_PREFIX}wkstn-admin-07`,
+  [FORENSIC_HOSTS.heldOutAdminWorkstation]: `${FORENSIC_AGENT_PREFIX}wkstn-admin-09`,
 } as const;
 
 const WORKSTATION_OS = {
@@ -321,8 +330,7 @@ const KILL_CHAIN: ForensicEvent[] = [
         command_line: 'vssadmin.exe list shadows /for=C:',
         parent: { name: 'cmd.exe', pid: 6180 },
       },
-      message:
-        'itadmin ran vssadmin list shadows (read-only) on WKSTN-ADMIN-07 as part of a scheduled backup audit.',
+      message: 'itadmin ran vssadmin list shadows on WKSTN-ADMIN-07.',
     },
   },
   {
@@ -334,9 +342,46 @@ const KILL_CHAIN: ForensicEvent[] = [
       user: { name: 'itadmin', domain: 'CORP' },
       network: { direction: 'outbound', transport: 'tcp', protocol: 'smb' },
       destination: { domain: 'FS01', ip: '10.0.0.20', port: 445 },
-      process: { name: 'explorer.exe', pid: 6180 },
-      message:
-        'itadmin mapped \\\\FS01\\backups from WKSTN-ADMIN-07 for a routine nightly backup job.',
+      process: {
+        name: 'net.exe',
+        pid: 6244,
+        executable: 'C:\\Windows\\System32\\net.exe',
+        command_line: 'net use \\\\FS01\\backups',
+        parent: { name: 'cmd.exe', pid: 6180 },
+      },
+      message: 'itadmin mapped \\\\FS01\\backups from WKSTN-ADMIN-07.',
+    },
+  },
+  // --- Held-out ambiguous host: a different technique class from WKSTN-ADMIN-07,
+  // with the same neutral, hint-free messages.
+  {
+    offsetMinutes: 20,
+    host: FORENSIC_HOSTS.heldOutAdminWorkstation,
+    index: PROCESS_INDEX,
+    document: {
+      event: { category: ['process'], type: ['start'], kind: 'event' },
+      user: { name: 'svc-patch', domain: 'CORP' },
+      process: {
+        name: 'PsExec.exe',
+        pid: 7312,
+        executable: 'C:\\Tools\\Sysinternals\\PsExec.exe',
+        command_line: 'PsExec.exe \\\\APPSRV02 -s ipconfig /all',
+        parent: { name: 'cmd.exe', pid: 7288 },
+      },
+      message: 'svc-patch ran PsExec.exe against APPSRV02 from WKSTN-ADMIN-09.',
+    },
+  },
+  {
+    offsetMinutes: 21,
+    host: FORENSIC_HOSTS.heldOutAdminWorkstation,
+    index: NETWORK_INDEX,
+    document: {
+      event: { category: ['network'], type: ['connection', 'start'], kind: 'event' },
+      user: { name: 'svc-patch', domain: 'CORP' },
+      network: { direction: 'outbound', transport: 'tcp', protocol: 'smb' },
+      destination: { domain: 'APPSRV02', ip: '10.0.0.31', port: 445 },
+      process: { name: 'PsExec.exe', pid: 7312 },
+      message: 'PsExec.exe on WKSTN-ADMIN-09 connected to APPSRV02 over SMB.',
     },
   },
 ];
