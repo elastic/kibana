@@ -334,12 +334,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {canShowExecutionUi && id && isExecutionListOpen && (
-              <WorkflowExecutionListFlyout
-                workflowId={id}
-                onClose={onCloseExecutionList}
-                isHidden={Boolean(selectedExecutionId)}
-              />
+            {/* Unmount while a run is open. A hidden list flyout keeps EUI's focus trap and
+                moves focus to the skip link. Filters and the highlighted row live in the URL. */}
+            {canShowExecutionUi && id && isExecutionListOpen && !selectedExecutionId && (
+              <WorkflowExecutionListFlyout workflowId={id} onClose={onCloseExecutionList} />
             )}
             {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
