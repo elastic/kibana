@@ -52,7 +52,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
             'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.description',
             {
               defaultMessage:
-                'Leverage AI-powered search, ingest and chat without the overhead of managing infrastructure or resources.',
+                'Use AI-powered search, ingest, and chat without managing infrastructure or resources.',
             }
           )}
         </p>
