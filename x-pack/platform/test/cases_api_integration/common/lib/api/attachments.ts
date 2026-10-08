@@ -154,19 +154,21 @@ export const createCaseAndBulkCreateAttachments = async ({
   expectedHttpCode?: number;
 }): Promise<{ theCase: Case; attachments: BulkCreateUnifiedAttachmentsRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
+  const attachments = getUnifiedAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,
-    params: getUnifiedAttachments(numberOfAttachments),
+    params: attachments,
     auth,
     expectedHttpCode,
   });
 
-  // Responses are projected to the legacy shape, so callers compare against the legacy form.
-  return { theCase: patchedCase, attachments: getAttachments(numberOfAttachments) };
+  return { theCase: patchedCase, attachments };
 };
 
-export const getUnifiedAttachments = (numberOfAttachments: number) =>
+export const getUnifiedAttachments = (
+  numberOfAttachments: number
+): BulkCreateUnifiedAttachmentsRequest =>
   [...Array(numberOfAttachments)].map((_, index) =>
     index % 10 === 0
       ? {
@@ -180,29 +182,6 @@ export const getUnifiedAttachments = (numberOfAttachments: number) =>
           rule: { id: `rule-test-id-${index + 1}`, name: `Test ${index + 1}` },
         })
   );
-
-export const getAttachments = (
-  numberOfAttachments: number
-): BulkCreateUnifiedAttachmentsRequest => {
-  return [...Array(numberOfAttachments)].map((_, index) => {
-    if (index % 10 === 0) {
-      return {
-        type: COMMENT_ATTACHMENT_TYPE,
-        data: { content: `Test ${index + 1}` },
-        owner: 'securitySolutionFixture',
-      };
-    }
-
-    return buildUnifiedAlertReq('securitySolutionFixture', {
-      alertId: [`test-id-${index + 1}`],
-      index: [`test-index-${index + 1}`],
-      rule: {
-        id: `rule-test-id-${index + 1}`,
-        name: `Test ${index + 1}`,
-      },
-    });
-  });
-};
 
 export const deleteComment = async ({
   supertest,

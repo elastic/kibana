@@ -14,14 +14,12 @@ import type { Case } from '@kbn/cases-plugin/common';
 import {
   COMMENT_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
+  isUnifiedAlertAttachment,
   isUnifiedCommentAttachment,
 } from '@kbn/cases-plugin/common';
 import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type {
-  UnifiedAttachmentPayload,
-  UnifiedReferenceAttachmentPayload,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
@@ -101,7 +99,11 @@ const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
     return { type: 'user', comment: attachment.data.content, owner: attachment.owner };
   }
 
-  const { attachmentId, metadata, owner } = attachment as UnifiedReferenceAttachmentPayload;
+  if (!isUnifiedAlertAttachment(attachment)) {
+    throw new Error(`No legacy user action mapping for attachment type "${attachment.type}"`);
+  }
+
+  const { attachmentId, metadata, owner } = attachment;
   return {
     type: 'alert',
     alertId: attachmentId,
