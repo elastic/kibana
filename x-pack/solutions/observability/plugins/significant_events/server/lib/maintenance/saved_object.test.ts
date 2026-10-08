@@ -5,7 +5,30 @@
  * 2.0.
  */
 
-import { backfillDisabledRules } from './saved_object';
+import {
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+  backfillDisabledRules,
+  getSignificantEventsMaintenanceStateSavedObjectType,
+} from './saved_object';
+
+describe('getSignificantEventsMaintenanceStateSavedObjectType', () => {
+  const type = getSignificantEventsMaintenanceStateSavedObjectType();
+
+  // One document per space. The document stored while the type was `agnostic` keeps its raw id,
+  // which is the default space's id for a space-isolated type, so it becomes that space's document.
+  it('is isolated to a space and keeps the type name and the document id', () => {
+    expect(type.namespaceType).toBe('single');
+    expect(type.name).toBe(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE);
+    expect(type.name).toBe('significant-events-maintenance-state');
+    expect(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID).toBe('significant-events-maintenance-state');
+    expect(type.hidden).toBe(true);
+  });
+
+  it('does not add a model version for the namespace change', () => {
+    expect(Object.keys(type.modelVersions ?? {})).toEqual(['1', '2', '3']);
+  });
+});
 
 describe('backfillDisabledRules', () => {
   it('maps legacy rule ids to the default space', () => {

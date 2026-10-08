@@ -72,8 +72,8 @@ export function getSignificantEventsTestApiService({
       );
     },
 
-    // Turning the flag off pauses Significant Events deployment-wide and turning it back on does
-    // not resume, so suites that flip the flag resume here to leave the deployment running.
+    // Turning the flag off pauses Significant Events in every space and turning it back on does
+    // not resume, so suites that flip the flag resume here to leave the space running.
     // Resume is gated by the flag, so it retries while a just-enabled override is still
     // propagating to every Cloud node.
     async resumeSignificantEvents() {

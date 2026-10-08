@@ -15,8 +15,12 @@ import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../fixtures/constants
 
 const STATUS_ENDPOINT = 'internal/significant_events/maintenance/_status';
 const AVAILABILITY_ENDPOINT = 'internal/significant_events/availability';
-// A managed workflow installed as soon as Significant Events is available.
-const WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-discovery';
+// A shared managed workflow, installed as soon as Significant Events is available. Every space
+// uses it, so the pause leaves it enabled.
+const SHARED_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-discovery';
+// A per-space workflow, created on demand. The pause turns it off in the space.
+const BOOTSTRAP_CLEANUP_ENDPOINT = 'internal/significant_events/maintenance/cleanup/_bootstrap';
+const SPACE_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-cleanup-default';
 // The flag-off pause runs only after the flag value settles, plus, on Cloud, the ~10s config
 // poll that carries the override to every node.
 const POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
@@ -52,8 +56,8 @@ apiTest.describe(
           expect(response).toHaveStatusCode(200);
           return { state: response.body.state, updatedBy: response.body.updatedBy };
         };
-        const isWorkflowEnabled = async () => {
-          const response = await apiClient.get(WORKFLOW_ENDPOINT, {
+        const isWorkflowEnabled = async (endpoint: string) => {
+          const response = await apiClient.get(endpoint, {
             headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
             responseType: 'json',
           });
@@ -61,8 +65,19 @@ apiTest.describe(
         };
 
         expect((await getMaintenance()).state).toBe('enabled');
-        // Installation is asynchronous, so wait until the workflow is installed and running.
-        await expect.poll(isWorkflowEnabled, POLL_OPTIONS).toBe(true);
+        // Installation is asynchronous, so wait until the shared workflow is installed and running.
+        await expect
+          .poll(() => isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+          .toBe(true);
+        // The per-space workflow only exists once something asks for it.
+        const bootstrap = await apiClient.post(BOOTSTRAP_CLEANUP_ENDPOINT, {
+          headers: internalHeaders,
+          responseType: 'json',
+        });
+        expect(bootstrap).toHaveStatusCode(200);
+        await expect
+          .poll(() => isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+          .toBe(true);
         // A flip only counts once the previous value has held for the settle window, and
         // global setup turned the flag on moments ago.
         await delay(NIGHTSHIFT_FLAG_SETTLE_MS + 1_000);
@@ -73,7 +88,11 @@ apiTest.describe(
           .poll(getMaintenance, POLL_OPTIONS)
           .toStrictEqual({ state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR });
         // The state reads `paused` as soon as the pause is claimed, before the sweep ends.
-        await expect.poll(isWorkflowEnabled, POLL_OPTIONS).toBe(false);
+        await expect
+          .poll(() => isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+          .toBe(false);
+        // The shared workflows belong to every space, so the pause does not turn them off.
+        expect(await isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT)).toBe(true);
 
         await apiServices.significantEventsTest.enableSignificantEvents();
         await expect

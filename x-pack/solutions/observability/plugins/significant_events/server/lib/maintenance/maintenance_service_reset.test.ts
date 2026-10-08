@@ -10,10 +10,7 @@ import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import {
-  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
@@ -24,10 +21,12 @@ import {
 } from './saved_object';
 import {
   REQUEST,
+  cleanupDocumentId,
   continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
   makeService,
+  requestInSpace,
 } from './maintenance_service.test_helpers';
 
 describe('SignificantEventsMaintenanceService', () => {
@@ -125,16 +124,87 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
       );
-      expect(soClient.create).toHaveBeenLastCalledWith(
+      // The space was never paused, so the document reset created to block it is removed
+      // again once there is nothing left to restore.
+      expect(soClient.delete).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({
-          state: 'enabled',
-          updatedBy: 'marco',
-          disabledWorkflows: [],
-          disabledRules: [],
-        }),
-        { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
+      expect(soClient.readDocument('default')).toBeUndefined();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
+    });
+
+    it('pauses every space through its own document before deleting data, then enables them all', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a', 'space-b'],
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+      // A space a user paused earlier keeps a document; the others never had one.
+      await service.pause({ request: requestInSpace('space-a'), updatedBy: 'marco' });
+      soClient.create.mockClear();
+
+      await service.reset({ request: REQUEST, updatedBy: 'admin' });
+
+      const wipeOrder = esClient.indices.deleteDataStream.mock.invocationCallOrder[0];
+      const pausedBeforeWipe = soClient.create.mock.calls
+        .map(([, attributes], index) => ({
+          state: (attributes as { state: string }).state,
+          spaceId: soClient.create.mock.contexts[index].spaceId,
+          order: soClient.create.mock.invocationCallOrder[index],
+        }))
+        .filter(({ state, order }) => state === 'paused' && order < wipeOrder)
+        .map(({ spaceId }) => spaceId);
+      // space-a was already paused, so only the two spaces without a document are written.
+      expect(new Set(pausedBeforeWipe)).toEqual(new Set(['default', 'space-b']));
+
+      // Everything is enabled again: the pre-existing document stays, the created ones go.
+      expect(soClient.readDocument('space-a')).toEqual(
+        expect.objectContaining({ state: 'enabled', updatedBy: 'admin' })
+      );
+      expect(soClient.readDocument('default')).toBeUndefined();
+      expect(soClient.readDocument('space-b')).toBeUndefined();
+      for (const spaceId of ['default', 'space-a', 'space-b']) {
+        await expect(service.getState({ request: requestInSpace(spaceId) })).resolves.toBe(
+          'enabled'
+        );
+      }
+    });
+
+    it('refuses to delete shared data when a space cannot be marked paused first', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+      // The first space is marked, the second one is not.
+      soClient.create
+        .mockResolvedValueOnce({} as never)
+        .mockRejectedValueOnce(new Error('space-a intent write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'space-a intent write failed'
+      );
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete shared data when it cannot list every space', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+        internalSpacesThrow: true,
+      });
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('spaces finder failed');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
@@ -283,7 +353,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('enabled');
       expect(summary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -387,7 +457,7 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
-      const failEnableFor: { id?: string } = { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID };
+      const failEnableFor: { id?: string } = { id: cleanupDocumentId('default') };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
       const { service, soClient } = makeService({ management: api });
 
@@ -395,9 +465,16 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(resetSummary.state).toBe('enabled');
       expect(resetSummary.workflowsDisabled).toBe(1);
       expect(resetSummary.partialFailures).toContainEqual({
-        target: expect.stringContaining(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID),
+        target: expect.stringContaining(cleanupDocumentId('default')),
         error: expect.stringContaining('enable failed'),
       });
+      // What could not be restored stays on the space's document, even though reset created it.
+      expect(soClient.readDocument('default')).toEqual(
+        expect.objectContaining({
+          state: 'enabled',
+          disabledWorkflows: [{ id: cleanupDocumentId('default'), spaceId: 'default' }],
+        })
+      );
 
       failEnableFor.id = undefined;
       updateWorkflow.mockClear();
@@ -405,7 +482,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(resumeSummary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -540,7 +617,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(inventoryWrite.state).toBe('paused');
       expect(inventoryWrite.disabledWorkflows.map(({ id }) => id)).toContain(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID
+        cleanupDocumentId('default')
       );
       expect(soClient.create.mock.invocationCallOrder[1]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
@@ -561,13 +638,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
       // The sweep is rolled back so the unrecorded workflows are not stranded.
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: false },
         expect.any(String),
         REQUEST
       );
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -576,7 +653,8 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
-      const { api } = makeManagementApi();
+      // A workflow that cannot be restored stays on the document, so the final write is needed.
+      const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
       const { service, soClient, esClient } = makeService({
         management: api,
         dataStreams: {

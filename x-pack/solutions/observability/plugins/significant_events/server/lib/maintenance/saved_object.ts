@@ -11,18 +11,22 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
 
 /**
- * A single, deployment-wide document recording the maintenance state of
- * Significant Events background activity (`enabled` / `paused`). It is a
- * global (not per-space) control, so a fixed id + `agnostic` namespace is used.
+ * One document per space recording the maintenance state of Significant Events
+ * background activity in that space (`enabled` / `paused`). A space without a
+ * document is enabled. The type is space-isolated (`single`), so the same fixed
+ * id exists independently in every space and pausing one space leaves the others
+ * untouched. The document that was stored while this type was `agnostic` has no
+ * namespace prefix, which makes it the default space's document.
  *
  * `state` is stored as a free-form string (keyword) rather than a closed enum
  * so a newer node can persist a state an older node does not yet know about;
  * readers normalise unknown values back to the default. The document also
- * stores the exact set of workflows and rules that were disabled, so resume
- * can re-enable precisely what was turned off (and nothing that was already
- * off). No data other than these enablement flags is affected.
+ * stores the exact set of workflows and rules of its own space that were
+ * disabled, so resume can re-enable precisely what was turned off (and nothing
+ * that was already off). No data other than these enablement flags is affected.
  *
- * The id intentionally matches the type name: there is only ever one document.
+ * The id intentionally matches the type name: there is only ever one document
+ * per space.
  */
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID = 'significant-events-maintenance-state';
 
@@ -127,7 +131,7 @@ export const backfillDisabledRules = (
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
   name: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
   hidden: true,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {

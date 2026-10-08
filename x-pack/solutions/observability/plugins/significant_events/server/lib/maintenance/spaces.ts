@@ -60,6 +60,18 @@ const listSpaceIds = async ({
 };
 
 /**
+ * Every space that exists, always including the default space, for callers that must not
+ * act on a partial list. Without the spaces plugin only the default space exists. An
+ * enumeration error is thrown rather than recorded.
+ */
+export const requireAllSpaceIds = async (server: SignificantEventsServer): Promise<SpaceId[]> => {
+  if (!server.spaces) {
+    return [DEFAULT_SPACE_ID];
+  }
+  return [...new Set([DEFAULT_SPACE_ID, ...(await findAllSpaceIdsInternally(server))])];
+};
+
+/**
  * Every space a maintenance sweep should cover, always including the default
  * space. Enumeration problems are recorded as failures rather than thrown.
  */
@@ -86,7 +98,7 @@ export const getAllSpaceIds = async ({
     const ids = await listSpaceIds({ server, spaces: server.spaces, request, access });
     return [...new Set([DEFAULT_SPACE_ID, ...ids])];
   } catch (error) {
-    // Surface (not just log) the under-scoping so pause doesn't silently skip
+    // Surface (not just log) the under-scoping so a sweep doesn't silently skip
     // per-space workflows in every space but the default.
     failures.push({
       target: 'spaces',

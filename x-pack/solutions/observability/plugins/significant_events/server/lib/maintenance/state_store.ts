@@ -77,32 +77,72 @@ export const emptySummary = (
   partialFailures: [],
 });
 
-/** Reads and writes the single deployment-wide maintenance saved object. */
+/** The targets that belong to `spaceId`; anything recorded for another space (or `*`) is dropped. */
+const ownTargets = <T extends { spaceId: string }>(
+  spaceId: SpaceId,
+  targets: T[] | undefined
+): T[] => (targets ?? []).filter((target) => target.spaceId === spaceId);
+
+/**
+ * A document holds the inventory of its own space only. The document stored while
+ * the type was `agnostic` still lists targets of every space, so those are dropped
+ * on read and again on write, which cleans the document the next time it is saved.
+ */
+const restrictToSpace = (
+  spaceId: SpaceId,
+  attributes: SignificantEventsMaintenanceStateAttributes
+): SignificantEventsMaintenanceStateAttributes => ({
+  ...attributes,
+  disabledWorkflows: ownTargets(spaceId, attributes.disabledWorkflows),
+  disabledRules: ownTargets(spaceId, attributes.disabledRules),
+  ...(attributes.pausedSettings
+    ? {
+        pausedSettings: {
+          ...attributes.pausedSettings,
+          scheduledDiscoveryEnabledSpaceIds:
+            attributes.pausedSettings.scheduledDiscoveryEnabledSpaceIds.filter(
+              (id) => id === spaceId
+            ),
+        },
+      }
+    : {}),
+});
+
+/** Reads and writes the maintenance saved object of each space. */
 export const createMaintenanceStateStore = (server: SignificantEventsServer) => {
   // Lazy: this factory runs in plugin setup, before `server.core` is assigned
   // in start(). Route authz is the user gate (Nightshift read for status,
-  // Nightshift manage for pause/resume, Nightshift manage and configure for reset). This SO is hidden,
-  // agnostic, and not listed on
-  // any Nightshift privilege `savedObject` array. A scoped client then checks
+  // Nightshift manage for pause/resume, Nightshift manage and configure for reset). This SO is hidden
+  // and not listed on any Nightshift privilege `savedObject` array. A scoped client then checks
   // `saved_object:significant-events-maintenance-state/get` and 403s every
-  // Nightshift-only user once the document exists. Same pattern as run quotas.
-  let soClient: SavedObjectsClientContract | undefined;
+  // Nightshift-only user once the document exists. So the internal client is used, which skips
+  // the security extension but keeps the spaces extension, and is rebound to each space.
+  // Same pattern as run quotas.
+  let internalClient: SavedObjectsClientContract | undefined;
+  const spaceClients = new Map<SpaceId, SavedObjectsClientContract>();
 
-  const getSoClient = (): SavedObjectsClientContract => {
-    soClient ??= server.core.savedObjects.createInternalRepository([
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-    ]);
-    return soClient;
+  const getSoClient = (spaceId: SpaceId): SavedObjectsClientContract => {
+    internalClient ??= server.core.savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
+    });
+    let spaceClient = spaceClients.get(spaceId);
+    if (!spaceClient) {
+      spaceClient = internalClient.asScopedToNamespace(spaceId);
+      spaceClients.set(spaceId, spaceClient);
+    }
+    return spaceClient;
   };
 
   const normalizePausedSettings = (
+    spaceId: SpaceId,
     raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
   ): PausedFeatureSettings | undefined =>
     raw
       ? {
           continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds:
-            raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
+          scheduledDiscoveryEnabledSpaceIds: raw.scheduledDiscoveryEnabledSpaceIds
+            .filter((id) => id === spaceId)
+            .map(brandSpaceId),
         }
       : undefined;
 
@@ -117,18 +157,21 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
    * https://github.com/elastic/kibana/issues/294271
    */
   const brandDisabledWorkflows = (
+    spaceId: SpaceId,
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
   ): MaintenanceWorkflowTarget[] =>
-    (workflows ?? [])
+    ownTargets(spaceId, workflows)
       .filter(
-        ({ id, spaceId }) =>
-          !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
+        ({ id, spaceId: targetSpaceId }) =>
+          !(targetSpaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
       )
-      .map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
+      .map(({ id }) => ({ id, spaceId }));
 
-  const readVersionedState = async (): Promise<VersionedMaintenanceState | undefined> => {
+  const readVersionedState = async (
+    spaceId: SpaceId
+  ): Promise<VersionedMaintenanceState | undefined> => {
     try {
-      const so = await getSoClient().get<SignificantEventsMaintenanceStateAttributes>(
+      const so = await getSoClient(spaceId).get<SignificantEventsMaintenanceStateAttributes>(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
@@ -136,12 +179,12 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
       return {
         attributes: {
           ...so.attributes,
-          disabledWorkflows: brandDisabledWorkflows(so.attributes.disabledWorkflows),
-          disabledRules: (so.attributes.disabledRules ?? []).map(({ id, spaceId }) => ({
+          disabledWorkflows: brandDisabledWorkflows(spaceId, so.attributes.disabledWorkflows),
+          disabledRules: ownTargets(spaceId, so.attributes.disabledRules).map(({ id }) => ({
             id,
-            spaceId: brandSpaceId(spaceId),
+            spaceId,
           })),
-          pausedSettings: normalizePausedSettings(so.attributes.pausedSettings),
+          pausedSettings: normalizePausedSettings(spaceId, so.attributes.pausedSettings),
         },
         version: so.version,
       };
@@ -153,18 +196,21 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
     }
   };
 
-  const readState = async (): Promise<LoadedMaintenanceState | undefined> =>
-    (await readVersionedState())?.attributes;
+  const readState = async (spaceId: SpaceId): Promise<LoadedMaintenanceState | undefined> =>
+    (await readVersionedState(spaceId))?.attributes;
 
   /**
    * Writes the paused intent only if the document is unchanged since `current`
    * was read, so when every Kibana node reacts to the same flag flip exactly one
-   * of them sweeps. Returns the claimed state, or `undefined` if another node won.
+   * of them sweeps a space. Returns the claimed state, or `undefined` if another
+   * node won.
    */
   const claimPausedIntent = async ({
+    spaceId,
     current,
     updatedBy,
   }: {
+    spaceId: SpaceId;
     current: VersionedMaintenanceState | undefined;
     updatedBy: string;
   }): Promise<LoadedMaintenanceState | undefined> => {
@@ -178,14 +224,14 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
     };
     try {
       if (current) {
-        await getSoClient().update<SignificantEventsMaintenanceStateAttributes>(
+        await getSoClient(spaceId).update<SignificantEventsMaintenanceStateAttributes>(
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
           claimed,
           { version: current.version }
         );
       } else {
-        await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
+        await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
           SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
           claimed,
           { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: false }
@@ -201,14 +247,29 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
   };
 
   const writeState = async (
+    spaceId: SpaceId,
     attributes: SignificantEventsMaintenanceStateAttributes
   ): Promise<void> => {
-    await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
+    await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      attributes,
+      restrictToSpace(spaceId, attributes),
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
     );
   };
 
-  return { readVersionedState, readState, claimPausedIntent, writeState };
+  /** Removes the document of a space, which reads as enabled afterwards. A missing document is fine. */
+  const deleteState = async (spaceId: SpaceId): Promise<void> => {
+    try {
+      await getSoClient(spaceId).delete(
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
+      );
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+        throw error;
+      }
+    }
+  };
+
+  return { readVersionedState, readState, claimPausedIntent, writeState, deleteState };
 };

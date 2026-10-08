@@ -7,11 +7,15 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
@@ -19,8 +23,16 @@ import type { KnowledgeIndicatorType } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
+import { requestForSpace } from './feature_settings';
+import {
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+} from './saved_object';
 
-export const REQUEST = { headers: {} } as KibanaRequest;
+export const REQUEST = { headers: {}, spaceId: asSpaceId('default') } as KibanaRequest;
+/** A request made in another space, with the caller's credentials. */
+export const requestInSpace = (spaceId: string): KibanaRequest =>
+  requestForSpace(REQUEST, brandSpaceId(spaceId));
 // The credential-less request system sweeps build for themselves.
 export const SYSTEM_REQUEST = expect.objectContaining({
   isFakeRequest: true,
@@ -31,55 +43,104 @@ export const SYSTEM_REQUEST = expect.objectContaining({
 export const continuousDocumentId = (spaceId: string): string =>
   `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
-// A minimal, stateful saved-objects client: `get` throws NotFound until `create`
-// stores the doc, then returns it with a version that every write bumps. `create`
-// without overwrite and `update` with a stale version throw a conflict, like ES.
+/** The per-space cleanup document of a space: scheduled, and not backed by a Settings toggle. */
+export const cleanupDocumentId = (spaceId: string): string =>
+  `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+
+/** The space a saved-objects call was scoped to; it travels as `this` (see `mock.contexts`). */
+interface SoCallContext {
+  spaceId: string;
+}
+
+// A minimal, stateful saved-objects client of a space-isolated type: every space has its own
+// document under the same id. `get` throws NotFound until `create` stores the doc, then returns
+// it with a version that every write bumps. `create` without overwrite and `update` with a stale
+// version throw a conflict, like ES.
+//
+// The calls are recorded on shared mocks, in the shape the real client takes, so a test sees
+// every write in order whichever space made it. `forSpace` is what `asScopedToNamespace` hands
+// out; `readDocument` and `seed` reach a space's stored document directly.
 export function makeSoClient() {
   const store = new Map<string, { attributes: Record<string, unknown>; version?: string }>();
-  const key = (type: string, id: string) => `${type}:${id}`;
+  const key = (spaceId: string, type: string, id: string) => `${spaceId}:${type}:${id}`;
   let nextVersion = 1;
-  const put = (type: string, id: string, attributes: Record<string, unknown>) =>
-    store.set(key(type, id), { attributes, version: String(nextVersion++) });
-  return {
-    get: jest.fn(async (type: string, id: string) => {
-      const stored = store.get(key(type, id));
-      if (!stored) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      return { id, type, references: [], ...stored };
-    }),
-    create: jest.fn(
-      async (
-        type: string,
-        attributes: Record<string, unknown>,
-        options: { id: string; overwrite?: boolean }
-      ) => {
-        if (options.overwrite === false && store.has(key(type, options.id))) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
-        }
-        put(type, options.id, attributes);
-        return { id: options.id, type, references: [], attributes };
-      }
-    ),
-    update: jest.fn(
-      async (
-        type: string,
-        id: string,
-        attributes: Record<string, unknown>,
-        options?: { version?: string }
-      ) => {
-        const stored = store.get(key(type, id));
-        if (!stored) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        if (options?.version !== undefined && options.version !== stored.version) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, id);
-        }
-        put(type, id, { ...stored.attributes, ...attributes });
-        return { id, type, references: [], attributes };
-      }
-    ),
+  const put = (spaceId: string, type: string, id: string, attributes: Record<string, unknown>) =>
+    store.set(key(spaceId, type, id), { attributes, version: String(nextVersion++) });
+
+  const get = jest.fn(async function (this: SoCallContext, type: string, id: string) {
+    const stored = store.get(key(this.spaceId, type, id));
+    if (!stored) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return { id, type, references: [], ...stored };
+  });
+  const create = jest.fn(async function (
+    this: SoCallContext,
+    type: string,
+    attributes: Record<string, unknown>,
+    options: { id: string; overwrite?: boolean }
+  ) {
+    if (options.overwrite === false && store.has(key(this.spaceId, type, options.id))) {
+      throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
+    }
+    put(this.spaceId, type, options.id, attributes);
+    return { id: options.id, type, references: [], attributes };
+  });
+  const update = jest.fn(async function (
+    this: SoCallContext,
+    type: string,
+    id: string,
+    attributes: Record<string, unknown>,
+    options?: { version?: string }
+  ) {
+    const stored = store.get(key(this.spaceId, type, id));
+    if (!stored) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    if (options?.version !== undefined && options.version !== stored.version) {
+      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+    }
+    put(this.spaceId, type, id, { ...stored.attributes, ...attributes });
+    return { id, type, references: [], attributes };
+  });
+  const remove = jest.fn(async function (this: SoCallContext, type: string, id: string) {
+    if (!store.delete(key(this.spaceId, type, id))) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return {};
+  });
+
+  const forSpace = (spaceId: string) => {
+    const context: SoCallContext = { spaceId };
+    return {
+      spaceId,
+      get: (...args: Parameters<typeof get>) => get.call(context, ...args),
+      create: (...args: Parameters<typeof create>) => create.call(context, ...args),
+      update: (...args: Parameters<typeof update>) => update.call(context, ...args),
+      delete: (...args: Parameters<typeof remove>) => remove.call(context, ...args),
+    };
   };
+
+  /** The stored maintenance document of a space, if any. */
+  const readDocument = (spaceId: string) =>
+    store.get(
+      key(
+        spaceId,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
+      )
+    )?.attributes;
+
+  /** Stores a maintenance document as is, e.g. one written while the type was still agnostic. */
+  const seed = (spaceId: string, attributes: Record<string, unknown>) =>
+    put(
+      spaceId,
+      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+      attributes
+    );
+
+  return { get, create, update, delete: remove, forSpace, readDocument, seed };
 }
 
 // Stateful workflows management mock: tracks each workflow's `enabled` flag so a
@@ -210,6 +271,8 @@ export function makeService(params?: {
   spaceIds?: string[];
   /** Space ids the internal client finds (default: same as `spaceIds`). */
   internalSpaceIds?: string[];
+  /** Make the internal client's space finder throw. */
+  internalSpacesThrow?: boolean;
   /** Per-space continuous-onboarding toggle before pause, in every space (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
@@ -326,6 +389,9 @@ export function makeService(params?: {
   const spacesRepository = {
     createPointInTimeFinder: jest.fn(() => ({
       async *find() {
+        if (params?.internalSpacesThrow) {
+          throw new Error('spaces finder failed');
+        }
         for (const id of params?.internalSpaceIds ?? params?.spaceIds ?? ['default']) {
           yield { saved_objects: [{ id }] };
         }
@@ -350,12 +416,21 @@ export function makeService(params?: {
     internalSpaceUiSettingsClients.set(spaceId, client);
     return client;
   };
-  const internalClient = { asScopedToNamespace: jest.fn((spaceId: string) => ({ spaceId })) };
+  // The internal client rebinds to a space: the maintenance document of each space comes from
+  // its own scoped client, and the uiSettings client reads the space off the same object.
+  const internalClient = {
+    asScopedToNamespace: jest.fn((spaceId: string) => soClient.forSpace(spaceId)),
+  };
 
   const savedObjects = {
-    createInternalRepository: jest.fn((types: string[]) =>
-      types.includes('space') ? spacesRepository : soClient
-    ),
+    // Only the spaces finder goes through a repository. The maintenance document is a
+    // space-isolated type, so an unscoped read of it would silently mean the default space.
+    createInternalRepository: jest.fn((types: string[]) => {
+      if (!types.includes('space')) {
+        throw new Error(`Unexpected internal repository for ${types.join(', ')}`);
+      }
+      return spacesRepository;
+    }),
     getScopedClient: jest.fn(),
     getUnsafeInternalClient: jest.fn(() => internalClient),
   };
@@ -418,6 +493,7 @@ export function makeService(params?: {
     service,
     soClient,
     savedObjects,
+    internalClient,
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,

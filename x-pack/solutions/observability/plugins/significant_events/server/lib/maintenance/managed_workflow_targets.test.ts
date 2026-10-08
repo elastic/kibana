@@ -49,14 +49,34 @@ describe('managed_workflow_targets registry', () => {
     );
   });
 
-  it('keeps the legacy default-space sync document in the pause and cancel sweeps', () => {
+  it('keeps the legacy default-space sync document in the default space sweeps only', () => {
     const legacySync = {
       id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
       spaceId: asSpaceId('default'),
     };
 
-    expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual(legacySync);
-    expect(buildCancelTargets([asSpaceId('space-a')])).toContainEqual(legacySync);
+    expect(buildDisableTargets([asSpaceId('default')])).toContainEqual(legacySync);
+    expect(buildCancelTargets([asSpaceId('default')])).toContainEqual(legacySync);
+    expect(buildDisableTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
+    expect(buildCancelTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
+  });
+
+  it('never disables the shared workflows, which belong to every space', () => {
+    const disabledIds = buildDisableTargets([asSpaceId('default'), asSpaceId('space-a')]).map(
+      ({ id }) => id
+    );
+    for (const id of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
+      expect(disabledIds).not.toContain(id);
+    }
+  });
+
+  it('cancels executions of the shared workflows in each swept space', () => {
+    const cancelTargets = buildCancelTargets([asSpaceId('space-a')]);
+    for (const id of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
+      expect(cancelTargets).toContainEqual({ id, spaceId: asSpaceId('space-a') });
+    }
+    // Only the swept space: another space's executions are not touched.
+    expect(cancelTargets.every(({ spaceId }) => spaceId === 'space-a')).toBe(true);
   });
 
   it('tracks cleanup as a per-space scheduled workflow', () => {

@@ -38,10 +38,13 @@ const SECTION_TITLE = i18n.translate('xpack.nightshift.settings.maintenance.titl
   defaultMessage: 'Detection engine activity',
 });
 
-const SECTION_DESCRIPTION = i18n.translate('xpack.nightshift.settings.maintenance.description', {
-  defaultMessage:
-    'Controls detection activity across all spaces, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Existing data always persists.',
-});
+const SECTION_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.settings.maintenance.spaceDescription',
+  {
+    defaultMessage:
+      'Controls detection activity in this space, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Other spaces are not affected. Existing data always persists.',
+  }
+);
 
 function PausedSummary({ status }: { status: SignificantEventsMaintenanceStatus }) {
   const { updatedBy, lastSummary } = status;
@@ -330,13 +333,13 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiText>
               <p>
                 {paused
-                  ? i18n.translate('xpack.nightshift.settings.maintenance.resumeConfirmBody', {
+                  ? i18n.translate('xpack.nightshift.settings.maintenance.spaceResumeConfirmBody', {
                       defaultMessage:
-                        'This re-enables the managed workflows and alerting rules that Pause disabled, and restores scheduled discovery / continuous onboarding only if they were enabled before pause. It does not restart executions that were cancelled.',
+                        'This re-enables the workflows and alerting rules that Pause disabled in this space, and restores scheduled discovery / continuous onboarding only if they were enabled before pause. It does not restart executions that were cancelled. Other spaces are not affected.',
                     })
-                  : i18n.translate('xpack.nightshift.settings.maintenance.pauseConfirmBody', {
+                  : i18n.translate('xpack.nightshift.settings.maintenance.spacePauseConfirmBody', {
                       defaultMessage:
-                        'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
+                        'This disables the Significant Events workflows of this space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries in this space. Other spaces keep running. No data is deleted.',
                     })}
               </p>
             </EuiText>

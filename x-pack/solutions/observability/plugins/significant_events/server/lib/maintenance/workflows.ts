@@ -126,7 +126,7 @@ export const reEnableWorkflow = async (
     const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
     if (!workflow) {
       if (reportMissing) {
-        // Gone — surface it, but don't keep the deployment paused on a workflow
+        // Gone — surface it, but don't keep the space paused on a workflow
         // that no longer exists.
         failures.push({ target, error: 'workflow not found' });
       }

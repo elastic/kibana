@@ -337,13 +337,13 @@ export function SignificantEventsPage() {
               >
                 <p>
                   {canManageAndConfigure
-                    ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
+                    ? i18n.translate('xpack.significantEventsApp.pausedBannerSpaceBody', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                          'Significant Events activity is stopped in this space: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                       })
-                    : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
+                    : i18n.translate('xpack.significantEventsApp.pausedBannerSpaceBodyReadOnly', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
+                          'Significant Events activity is stopped in this space: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
                       })}
                 </p>
                 {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (

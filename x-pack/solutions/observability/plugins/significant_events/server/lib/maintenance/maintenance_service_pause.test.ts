@@ -11,17 +11,23 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
 } from './saved_object';
 import {
   REQUEST,
+  cleanupDocumentId,
   continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
   makeService,
+  requestInSpace,
 } from './maintenance_service.test_helpers';
 
 describe('SignificantEventsMaintenanceService', () => {
@@ -52,11 +58,18 @@ describe('SignificantEventsMaintenanceService', () => {
       );
       // deduped rule ids, disabled in bulk on the v2 engine
       expect(v2RulesClient?.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+      // The shared workflows belong to every space: their executions in this space are
+      // cancelled, but the workflow documents themselves are left enabled.
       expect(cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        expect.any(String),
+        'default',
         REQUEST
       );
+      const disabledIds = updateWorkflow.mock.calls.map(([id]) => id);
+      for (const sharedId of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
+        expect(disabledIds).not.toContain(sharedId);
+      }
+      expect(updateWorkflow.mock.calls.every(([, , spaceId]) => spaceId === 'default')).toBe(true);
 
       // Settings toggles turned off; prior-enabled flags stored for resume.
       expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
@@ -97,7 +110,7 @@ describe('SignificantEventsMaintenanceService', () => {
     it('re-pauses while already paused: retries a workflow that failed the first time', async () => {
       const enabled = new Map<string, boolean>();
       const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
-      let failOnboarding = true;
+      let failCleanup = true;
 
       const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
         id,
@@ -106,8 +119,8 @@ describe('SignificantEventsMaintenanceService', () => {
       }));
       const updateWorkflow = jest.fn(
         async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
-          if (failOnboarding && id === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
-            throw new Error('update failed for onboarding');
+          if (failCleanup && id === cleanupDocumentId('default')) {
+            throw new Error('update failed for cleanup');
           }
           enabled.set(stateKey(id, spaceId), patch.enabled ?? true);
           return {
@@ -129,9 +142,9 @@ describe('SignificantEventsMaintenanceService', () => {
       const { service } = makeService({ management: api });
 
       const first = await service.pause({ request: REQUEST });
-      expect(first.partialFailures.some((f) => f.target.includes('onboarding'))).toBe(true);
+      expect(first.partialFailures.some((f) => f.target.includes('cleanup'))).toBe(true);
 
-      failOnboarding = false;
+      failCleanup = false;
       const second = await service.pause({ request: REQUEST });
 
       expect(second.partialFailures).toEqual([]);
@@ -139,7 +152,7 @@ describe('SignificantEventsMaintenanceService', () => {
       const status = await service.getStatus({ request: REQUEST });
       expect(status.state).toBe('paused');
       expect(
-        status.lastSummary?.partialFailures.some((f) => f.target.includes('onboarding'))
+        status.lastSummary?.partialFailures.some((f) => f.target.includes('cleanup'))
       ).toBeFalsy();
     });
 
@@ -216,18 +229,14 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('records a partial failure but still pauses when one workflow cannot be disabled', async () => {
-      const { api } = makeManagementApi({
-        failUpdateFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      });
+      const { api } = makeManagementApi({ failUpdateFor: cleanupDocumentId('default') });
       const { service } = makeService({ management: api });
 
       const summary = await service.pause({ request: REQUEST });
 
       expect(summary.state).toBe('paused');
       expect(summary.partialFailures.length).toBeGreaterThan(0);
-      expect(summary.partialFailures[0].target).toContain(
-        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
-      );
+      expect(summary.partialFailures[0].target).toContain(cleanupDocumentId('default'));
     });
 
     it('still pauses (recording a failure) when workflows management is unavailable', async () => {
@@ -339,9 +348,9 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBe(false);
     });
 
-    it('surfaces a failure (and processes the default space) when spaces cannot be enumerated', async () => {
+    it('does not enumerate spaces, so an enumeration failure cannot affect it', async () => {
       const { api } = makeManagementApi();
-      const { service } = makeService({
+      const { service, savedObjects } = makeService({
         management: api,
         spacesGetAllThrows: true,
       });
@@ -349,26 +358,61 @@ describe('SignificantEventsMaintenanceService', () => {
       const summary = await service.pause({ request: REQUEST });
 
       expect(summary.state).toBe('paused');
-      expect(summary.partialFailures).toContainEqual({
-        target: 'spaces',
-        error: expect.stringContaining('Failed to enumerate spaces'),
-      });
+      expect(summary.partialFailures).toEqual([]);
+      expect(savedObjects.createInternalRepository).not.toHaveBeenCalled();
     });
 
-    it("enumerates spaces with the caller's SpacesClient, not the internal client", async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service } = makeService({
+    it('only touches the space the request is made in', async () => {
+      const { api, updateWorkflow, cancelAllActiveWorkflowExecutions } = makeManagementApi();
+      const { service, soClient } = makeService({
         management: api,
-        spaceIds: ['default', 'space-a'],
-        internalSpaceIds: ['default', 'space-a', 'space-b'],
+        spaceIds: ['default', 'space-a', 'space-b'],
       });
 
-      await service.pause({ request: REQUEST });
+      await service.pause({ request: requestInSpace('space-a') });
 
-      // Scheduled workflow documents are space-suffixed; only the caller's spaces are hit.
+      // Scheduled workflow documents are space-suffixed; only the caller's space is hit.
       const disabledDocumentIds = updateWorkflow.mock.calls.map((call) => call[0] as string);
-      expect(disabledDocumentIds.some((id) => id.includes('space-a'))).toBe(true);
-      expect(disabledDocumentIds.some((id) => id.includes('space-b'))).toBe(false);
+      expect(disabledDocumentIds.length).toBeGreaterThan(0);
+      expect(disabledDocumentIds.every((id) => id.endsWith('-space-a'))).toBe(true);
+      expect(updateWorkflow.mock.calls.every(([, , spaceId]) => spaceId === 'space-a')).toBe(true);
+      expect(
+        cancelAllActiveWorkflowExecutions.mock.calls.every(([, spaceId]) => spaceId === 'space-a')
+      ).toBe(true);
+      // The legacy default-space sync document belongs to the default space.
+      expect(disabledDocumentIds).not.toContain(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
+      expect(soClient.readDocument('space-a')).toEqual(
+        expect.objectContaining({ state: 'paused' })
+      );
+      expect(soClient.readDocument('default')).toBeUndefined();
+      expect(soClient.readDocument('space-b')).toBeUndefined();
+    });
+
+    it("stores only the paused space's targets and restore flags on its document", async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+        ruleBackedRuleIds: ['rule-1'],
+      });
+
+      await service.pause({ request: requestInSpace('space-a') });
+
+      const document = soClient.readDocument('space-a') as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+        disabledRules: Array<{ id: string; spaceId: string }>;
+        pausedSettings: { scheduledDiscoveryEnabledSpaceIds: string[] };
+      };
+      expect(document.disabledWorkflows.length).toBeGreaterThan(0);
+      expect(document.disabledWorkflows.every(({ spaceId }) => spaceId === 'space-a')).toBe(true);
+      expect(document.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('space-a'),
+        spaceId: 'space-a',
+      });
+      expect(document.disabledRules).toEqual([{ id: 'rule-1', spaceId: 'space-a' }]);
+      expect(document.pausedSettings.scheduledDiscoveryEnabledSpaceIds).toEqual(['space-a']);
     });
 
     it('records restore flags when settings were enabled even if set(false) fails', async () => {
