@@ -54,7 +54,7 @@ describe('buildWorkloadHref', () => {
   });
 
   it.each([
-    // Not a plain app path.
+    // Not an app path.
     'app/workflows/w-1',
     '/api/status',
     '/application/x',
@@ -62,29 +62,20 @@ describe('buildWorkloadHref', () => {
     '/\\evil.example/app/x',
     'https://evil.example/app/x',
     'data:text/html,hello',
+    // Whitespace, control characters and backslashes.
     '/app/work flows',
     '/app/work\nflows',
     '/app/work\tflows',
     '/app/work\u0000flows',
     '/app\\x',
-    // Dot segments, literal or encoded.
+    // Dot segments, literal or encoded, that climb out of the app or the space.
+    '/app/..',
     '/app/../api/status',
     '/app/%2e%2e/api/status',
     '/app/%2E%2E/api/status',
     '/app/.%2E/api/status',
     '/app/%2e./api/status',
-    '/app/./workflows',
-    '/app/%2e/workflows',
-    '/app/workflows/..',
     '/app/x/../../../s/other/app/y',
-    // Encoded separators and malformed escapes.
-    '/app/%2f..%2fapi',
-    '/app/%2F',
-    '/app/%5c',
-    '/app/%E0%A4%A',
-    '/app/%',
-    // Empty segments before the end.
-    '/app//evil.example',
   ])('refuses the path %j', (path) => {
     expect(buildWorkloadHref('/kbn', 'marketing', path)).toBeUndefined();
   });
@@ -103,11 +94,21 @@ describe('buildWorkloadHref', () => {
       '/app/workflows/a%20b',
       '/app/workflows/w-1?x=../../y',
       '/app/discover#/view/..%2F..',
+      // Odd, but a URL parser keeps all of these under /app.
+      '/app/./workflows',
+      '/app/%2e/workflows',
+      '/app/workflows/..',
+      '/app/foo/../workflows/w-1',
+      '/app/%2f..%2fapi',
+      '/app/%5c..%5capi',
+      '/app/%E0%A4%A',
+      '/app//evil.example',
     ];
 
     for (const path of paths) {
-      const href = buildWorkloadHref('/kbn', 'marketing', path) ?? '';
-      expect(new URL(href, 'http://kibana.invalid').pathname).toMatch(
+      const href = buildWorkloadHref('/kbn', 'marketing', path);
+      expect(href).toBe(`/kbn/s/marketing${path}`);
+      expect(new URL(href ?? '', 'http://kibana.invalid').pathname).toMatch(
         /^\/kbn\/s\/marketing\/app\//
       );
     }
@@ -364,7 +365,7 @@ describe('createBoundWorkloadResolver', () => {
     ).resolves.toEqual([{}, {}, { title: 'Fine', href: '/app/workflows/w-3' }, {}]);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"Workload type [workflow] registered by plugin [workflows] returned 3 path(s) that are not plain /app/ paths, ignoring those workloads."`
+      `"Workload type [workflow] registered by plugin [workflows] returned 3 path(s) that Core cannot link to, ignoring those workloads."`
     );
   });
 

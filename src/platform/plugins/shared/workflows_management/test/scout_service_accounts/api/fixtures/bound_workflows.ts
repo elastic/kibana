@@ -60,17 +60,23 @@ export const createBoundWorkflow = async (
   expect(created, JSON.stringify(created.body)).toHaveStatusCode(200);
 };
 
-/** Deletes the workflow and its space, whichever of them exist. */
+/**
+ * Deletes the workflow and its space, whichever of them exist. The space goes even when deleting
+ * the workflow fails, so a failed cleanup doesn't leave it on a shared server.
+ */
 export const deleteBoundWorkflow = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   { spaceId, workflowId }: Record<string, string>
 ): Promise<void> => {
-  const deletedWorkflow = await apiClient.delete(
-    `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
-    { headers, responseType: 'json' }
-  );
-  expect([200, 404]).toContain(deletedWorkflow.statusCode);
-  const deletedSpace = await apiClient.delete(`api/spaces/space/${spaceId}`, { headers });
-  expect([204, 404]).toContain(deletedSpace.statusCode);
+  try {
+    const deletedWorkflow = await apiClient.delete(
+      `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+      { headers, responseType: 'json' }
+    );
+    expect([200, 404]).toContain(deletedWorkflow.statusCode);
+  } finally {
+    const deletedSpace = await apiClient.delete(`api/spaces/space/${spaceId}`, { headers });
+    expect([204, 404]).toContain(deletedSpace.statusCode);
+  }
 };

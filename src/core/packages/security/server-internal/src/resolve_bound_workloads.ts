@@ -18,6 +18,7 @@ import type {
   ServiceAccountWorkloadResolver,
 } from '@kbn/core-security-server';
 import { addSpaceIdToPath, asSpaceId, getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import { isInternalURL } from '@kbn/std';
 import type { WorkloadTypeRegistry } from './workload_type_registry';
 
 /**
@@ -29,39 +30,14 @@ export const WORKLOAD_RESOLUTION_TIMEOUT_MS = 10_000;
 export const WORKLOAD_RESOLUTION_METER_NAME = 'kibana.security.service_accounts';
 
 const APP_PATH_PREFIX = '/app/';
-const DUMMY_ORIGIN = 'http://kibana.invalid';
+/** Kept out of links so a raw control character never reaches an `href`. */
 const UNSAFE_PATH_CHARACTERS = /[\s\u0000-\u001f\u007f\\]/;
-
-const getPathname = (path: string): string => path.split(/[?#]/, 1)[0];
-
-/**
- * Whether every segment of a pathname stays the segment it looks like. A segment that decodes to
- * `.` or `..`, or to something with a separator in it, could move the link out of the app once a
- * browser or proxy normalizes it, so it fails, and so does a malformed escape.
- */
-const hasPlainSegments = (pathname: string): boolean => {
-  const segments = pathname.split('/').slice(1);
-  return segments.every((segment, index) => {
-    if (segment === '') {
-      return index === segments.length - 1;
-    }
-
-    let decoded: string;
-    try {
-      decoded = decodeURIComponent(segment);
-    } catch {
-      return false;
-    }
-
-    return decoded !== '.' && decoded !== '..' && !decoded.includes('/') && !decoded.includes('\\');
-  });
-};
 
 /**
  * Builds the link to a workload from the app path its workload type returned: the base path, then
- * the space of the binding, then the path. Returns `undefined` unless the path is a plain `/app/`
- * path and the link it produces still lands in that space and under `/app/` once a URL parser
- * normalizes it.
+ * the space of the binding, then the path. Returns `undefined` unless the path starts with `/app/`
+ * and the link it produces still lands in that space and under `/app` once a URL parser normalizes
+ * it, which also rules out literal and encoded dot segments that climb out of it.
  */
 export const buildWorkloadHref = (
   serverBasePath: string,
@@ -71,8 +47,7 @@ export const buildWorkloadHref = (
   if (
     typeof path !== 'string' ||
     !path.startsWith(APP_PATH_PREFIX) ||
-    UNSAFE_PATH_CHARACTERS.test(path) ||
-    !hasPlainSegments(getPathname(path))
+    UNSAFE_PATH_CHARACTERS.test(path)
   ) {
     return undefined;
   }
@@ -86,24 +61,7 @@ export const buildWorkloadHref = (
 
   const basePath = serverBasePath.endsWith('/') ? serverBasePath.slice(0, -1) : serverBasePath;
   const href = addSpaceIdToPath(basePath, spaceId, path);
-  const hrefPathname = getPathname(href);
-
-  let url: URL;
-  try {
-    url = new URL(href, DUMMY_ORIGIN);
-  } catch {
-    return undefined;
-  }
-
-  if (
-    url.origin !== DUMMY_ORIGIN ||
-    url.pathname !== hrefPathname ||
-    !hrefPathname.startsWith(`${basePath}${spacePrefix}${APP_PATH_PREFIX}`)
-  ) {
-    return undefined;
-  }
-
-  return href;
+  return isInternalURL(href, `${basePath}${spacePrefix}/app`) ? href : undefined;
 };
 
 const isNonBlankString = (value: unknown): value is string =>
@@ -306,7 +264,7 @@ export const createBoundWorkloadResolver = ({
 
         if (rejectedPaths > 0) {
           logger.warn(
-            `Workload type [${workloadType}] registered by plugin [${pluginId}] returned ${rejectedPaths} path(s) that are not plain /app/ paths, ignoring those workloads.`
+            `Workload type [${workloadType}] registered by plugin [${pluginId}] returned ${rejectedPaths} path(s) that Core cannot link to, ignoring those workloads.`
           );
         }
       })
