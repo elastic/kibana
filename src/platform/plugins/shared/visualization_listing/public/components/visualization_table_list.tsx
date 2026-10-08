@@ -67,11 +67,10 @@ export const VisualizationTableList = ({
   const createNewVis = useCallback(() => {
     firstValueFrom(core.application.currentAppId$)
       .then((currentApp) => {
-        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
         closeNewVisModal.current = visualizations.showNewVisModal({
-          originatingApp: currentApp,
-          originatingPath: window.location.hash,
-          breadcrumbs,
+          embeddableState: currentApp
+            ? { originatingApp: currentApp, breadcrumbs: getBreadcrumbs?.(currentApp) }
+            : undefined,
           outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
         });
       })
@@ -111,7 +110,6 @@ export const VisualizationTableList = ({
           path,
           state: {
             originatingApp: currentApp,
-            originatingPath: window.location.hash,
             breadcrumbs: getBreadcrumbs?.(currentApp),
           },
         });

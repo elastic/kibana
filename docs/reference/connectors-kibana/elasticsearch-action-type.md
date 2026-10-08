@@ -11,7 +11,9 @@ applies_to:
 
 The External Elasticsearch connector calls the [Elasticsearch REST API](https://www.elastic.co/docs/api/doc/elasticsearch) on a remote cluster so an agent can search and explore data, inspect index mappings and aliases, run ES|QL analytics queries, and retrieve cluster information. Use this connector when you need to query data on a separate Elasticsearch cluster — for example, a different Elastic Cloud deployment, a serverless project, an on-prem cluster behind a firewall, or any other cluster that is not directly accessible via cross-cluster search (CCS). The connector can be created from any Kibana deployment (including serverless) and can connect to any Elasticsearch cluster endpoint, whether Elastic Cloud, serverless, or self-managed.
 
-You can use this connector in **Agent Builder** and **Workflows**.
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-elasticsearch-ui]
 

@@ -120,7 +120,7 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({ euiTheme, status, episodeId
               ...listItems,
               {
                 title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.episodeIdLabel', {
-                  defaultMessage: 'Episode ID',
+                  defaultMessage: 'Alert ID',
                 }),
                 description: episodeId,
               },

@@ -217,14 +217,21 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         '  MITRE: T1574.002 (DLL Side-Loading)',
     },
     output: {
+      // Security Labs content is not seeded by either seed profile (minimal or
+      // parity): security.security_labs_search is a registered builtin, but it
+      // queries the AI knowledge base, which this suite never installs. In that case the tool
+      // replies that the content is not installed and tells the agent to make no further tool
+      // calls, so the reference requires obeying that instruction without fabricating research.
       reference:
-        'Searches Security Labs for prior research on this side-loading pattern/technique first, then ' +
-        'calls create-detection-rule with a description informed by that research (specific path, hash, ' +
-        'and technique), rather than creating a generic rule without grounding.',
+        'Attempts to search Security Labs for prior research on this side-loading pattern/technique ' +
+        'first. If research is found, calls security.create_detection_rule with a description informed ' +
+        'by that research (specific path, hash, and technique). If no Security Labs research is ' +
+        'available, states that the research is unavailable without fabricating or citing any research, ' +
+        'provides the GenAI Settings link, and makes no further tool calls as the tool instructs.',
     },
     metadata: {
       expectedSkill: 'detection-rule-edit',
-      expectedTools: ['security.security_labs_search', 'security.create_detection_rule'],
+      expectedTools: ['security.security_labs_search'],
       severity: 'high',
       tags: ['rule-creation', 'research'],
     },
@@ -320,12 +327,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     output: {
       reference:
         'Reads the attached alert, verifies the file hash with the virustotal_lookup tool, looks up the ' +
-        'current on-call analyst with the on_call_lookup tool, and creates a Slack channel with that ' +
-        'analyst containing the verdict, IOCs, and on-call owner, narrating each step.',
+        'current on-call analyst with the on_call_lookup tool, and attempts the Slack step with any ' +
+        'channel/notification tool exposed to it; if none is exposed, states that Slack is unavailable ' +
+        'and still provides the message content (verdict, IOCs, and on-call owner) the channel post ' +
+        'would carry, narrating each step.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
-      // No Slack tool is seeded by this suite, so the channel-creation step is scored through the
+      // No Slack tool is seeded by this suite, so the Slack step is scored through the
       // reference (correctness) rather than expectedTools.
       expectedTools: ['attachments.read', 'virustotal_lookup', 'on_call_lookup'],
       severity: 'critical',
@@ -348,15 +357,18 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     output: {
       reference:
         'Verifies the loader hash with the virustotal_lookup tool, looks up the on-call responder with the ' +
-        'on_call_lookup tool, opens a critical-severity case via the cases tool with a summary of the ' +
-        'confirmed findings, then creates a Slack incident channel with the on-call responder and posts ' +
-        'the case summary and top IOCs, reporting each step taken.',
+        'on_call_lookup tool, opens a critical-severity case via the case-management tool with a summary of the ' +
+        'confirmed findings, then attempts the Slack step with any channel/notification tool exposed to ' +
+        'it; if none is exposed, states that Slack is unavailable and still provides the channel ' +
+        'message content (case summary and top IOCs) for the on-call responder, reporting each step ' +
+        'taken.',
     },
     metadata: {
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
-      // No Slack tool is seeded by this suite; that step is scored through the reference.
-      expectedTools: ['virustotal_lookup', 'on_call_lookup', 'platform.core.cases'],
+      // No Slack tool is seeded by this suite, so the Slack step is scored through the
+      // reference (correctness) rather than expectedTools.
+      expectedTools: ['virustotal_lookup', 'on_call_lookup', 'platform.core.cases.manage'],
       severity: 'critical',
       tags: ['multi-step', 'incident-response'],
     },

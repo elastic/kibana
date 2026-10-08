@@ -55,7 +55,7 @@ export const ALERTING_ERROR_CODES = {
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /**
    * A builder rule's query was changed without explicitly clearing
-   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   * `metadata.builder`. The transition to ES|QL mode must be explicit.
    */
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
@@ -192,14 +192,14 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
 export const ALERTING_LOG_CODES = {
   // ─────────────────────────────── Dispatcher steps ──────────────────────
   /**
-   * Hydrate episode data step: some episodes had no matching .rule-events row;
-   * data will be absent for those episodes
+   * Hydrate alert data step: some alerts had no matching .rule-events row;
+   * data will be absent for those alerts
    */
-  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
-    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
-   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.
    */
   FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
@@ -281,6 +281,11 @@ export const ALERTING_LOG_CODES = {
    * succeeded; only the workflow fan-out for this event was lost.
    */
   EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED: 'EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED',
+  /**
+   * Releasing a per-space DI scope after an internal disable failed. The
+   * disable itself already succeeded; only the scope cleanup was lost.
+   */
+  INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED: 'INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED',
   /**
    * The alert-action → workflow subscriber failed to emit a workflow event
    * for an alert-action domain event. The originating action already
@@ -375,7 +380,7 @@ export const ALERTING_LOG_CODES = {
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
    * The dispatcher will write terminal `unmatched` records for the blocking
-   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   * alerts (which will NOT be dispatched) and force-advance the watermark.
    */
   DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
   /**
@@ -384,8 +389,8 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but no episodes were fetched for the window (the
-   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * The escape hatch fired but no alerts were fetched for the window (the
+   * pipeline was aborted before or during FetchAlertsStep, or the scan query
    * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
    * within one max scan window. The watermark is held; the stuck counter is
    * reset so the scan can recover without dropping the window. The message
@@ -393,16 +398,16 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The escape hatch fired with no fetched episodes and watermark lag already
+   * The escape hatch fired with no fetched alerts and watermark lag already
    * exceeds one max scan window. The window is force-advanced without knowing
-   * its episodes; unread events in that window are skipped so the dispatcher
+   * its alerts; unread events in that window are skipped so the dispatcher
    * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
   /**
    * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
-   * call failed. The watermark is held so episodes will be retried next tick.
+   * call failed. The watermark is held so alerts will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
   /**
@@ -580,6 +585,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
+  AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',
   /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
