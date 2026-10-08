@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
+  VersionedAttachment,
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { AttachmentIsomerCompositionMapping } from './isomer_composition';
 import type { AttachmentBoundedTool } from './tools';
 
 /**
@@ -94,7 +95,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Maps the attachment's data to an Isomer composition, so it renders on surfaces other than
    * Kibana, such as Slack. Without it, those surfaces leave it out.
    */
-  toIsomerComposition?: AttachmentIsomerCompositionMapping<TContent>;
+  toIsomerComposition?: (
+    data: TContent,
+    context: AttachmentIsomerCompositionContext
+  ) => AttachmentIsomerComposition;
 }
 
 /**
@@ -114,6 +118,26 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
    */
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.toIsomerComposition} function.
+ */
+export interface AttachmentIsomerCompositionContext {
+  attachment: VersionedAttachment;
+  version: number;
+}
+
+/** A block of GitHub-flavored markdown in an Isomer composition. */
+export interface IsomerMarkdownNode extends PrimitiveNode {
+  type: 'markdown';
+  text: string;
+}
+
+/**
+ * Return type of {@link AttachmentTypeDefinition.toIsomerComposition}: the Isomer composition
+ * shown in place of the attachment.
+ */
+export type AttachmentIsomerComposition = Composition<IsomerMarkdownNode>;
 
 /**
  * Return type for attachment's validation handlers.

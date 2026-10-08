@@ -15,13 +15,10 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentValidateContext,
-} from './type_definition';
-export type {
   AttachmentIsomerComposition,
   AttachmentIsomerCompositionContext,
-  AttachmentIsomerCompositionMapping,
   IsomerMarkdownNode,
-} from './isomer_composition';
+} from './type_definition';
 export type {
   AttachmentBoundedTool,
   BuiltinAttachmentBoundedTool,

@@ -7,12 +7,15 @@
 
 import type {
   ConversationOriginType,
+  ConversationRound,
   RoundCompleteEvent,
   SurfacePayload,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { buildComposition } from './composition';
+import { resolveAttachmentNode, toCompositionNodes } from './composition';
+import type { CompositionNode, MessageComposition } from './pack';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
 
@@ -58,13 +61,7 @@ export class SurfacesServiceImpl implements SurfacesService {
     }
 
     try {
-      const composition = buildComposition({
-        message: round.response.message,
-        attachments,
-        attachmentRefs: round.input.attachment_refs,
-        attachmentsService: this.attachmentsService,
-        logger: this.logger,
-      });
+      const composition = this.buildComposition(round, attachments);
 
       if (composition.body.length === 0) {
         this.logger.warn(
@@ -81,5 +78,29 @@ export class SurfacesServiceImpl implements SurfacesService {
 
       return undefined;
     }
+  }
+
+  /**
+   * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
+   * and each `<render_attachment>` tag is replaced, in place, by what its type's
+   * `toIsomerComposition` returns.
+   */
+  private buildComposition(
+    { response, input }: ConversationRound,
+    attachments: VersionedAttachment[]
+  ): MessageComposition {
+    return {
+      type: 'view',
+      body: toCompositionNodes(response.message).flatMap((node): CompositionNode[] =>
+        node.type === 'attachment'
+          ? resolveAttachmentNode(node, {
+              attachments,
+              attachmentRefs: input.attachment_refs,
+              attachmentsService: this.attachmentsService,
+              logger: this.logger,
+            })
+          : [node]
+      ),
+    };
   }
 }

@@ -17,7 +17,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import type { AttachmentNode, CompositionNode, MessageComposition } from './pack';
+import type { AttachmentNode, CompositionNode } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -47,7 +47,7 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
  */
-const toCompositionNodes = (message: string): CompositionNode[] => {
+export const toCompositionNodes = (message: string): CompositionNode[] => {
   const nodes: CompositionNode[] = [];
   let cursor = 0;
 
@@ -74,9 +74,7 @@ const toCompositionNodes = (message: string): CompositionNode[] => {
   return nodes;
 };
 
-export interface BuildCompositionOptions {
-  /** The response message, with its `<render_attachment>` tags. */
-  message: string;
+export interface ResolveAttachmentNodeOptions {
   /** The conversation's attachments, as carried by `round_complete`. */
   attachments: VersionedAttachment[];
   /** The round's attachment refs, which pick the version of tags without one. */
@@ -103,9 +101,13 @@ const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): Isomer
   return heading ? [{ type: 'markdown', text: heading }] : [];
 };
 
-const resolveAttachmentNode = (
+/**
+ * Replaces an attachment node with what its type's `toIsomerComposition` returns. Attachments
+ * that are missing, have no `toIsomerComposition`, or fail to map are left out.
+ */
+export const resolveAttachmentNode = (
   node: AttachmentNode,
-  { attachments, attachmentRefs, attachmentsService, logger }: BuildCompositionOptions
+  { attachments, attachmentRefs, attachmentsService, logger }: ResolveAttachmentNodeOptions
 ): IsomerMarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
   if (!attachment) {
@@ -143,16 +145,3 @@ const resolveAttachmentNode = (
     return [];
   }
 };
-
-/**
- * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
- * and each `<render_attachment>` tag is replaced, in place, by what its type's
- * `toIsomerComposition` returns. Attachments that are missing, have no `toIsomerComposition`, or
- * fail to map are left out.
- */
-export const buildComposition = (options: BuildCompositionOptions): MessageComposition => ({
-  type: 'view',
-  body: toCompositionNodes(options.message).flatMap((node): CompositionNode[] =>
-    node.type === 'attachment' ? resolveAttachmentNode(node, options) : [node]
-  ),
-});
