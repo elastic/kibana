@@ -8,7 +8,7 @@
 /**
  * How far behind the persisted watermark each scan re-reads. Re-reads are
  * free: the INLINE STATS dedup in `getDispatchableAlertEventsQuery`
- * (queries.ts:38-39) drops already-recorded episodes server-side before
+ * (queries.ts:38-39) drops already-recorded alerts server-side before
  * LIMIT. `@timestamp` is set by ES at ingest, so the gap between when it's set
  * and searchability is bounded by the refresh interval and covered by the
  * settle buffer; the overlap is slack for anything else (e.g. a paused
@@ -34,14 +34,14 @@ export const SETTLE_BUFFER_SECONDS = 5;
 /**
  * Number of consecutive ticks in which the watermark must not advance before
  * the escape hatch fires. After this many stuck ticks the dispatcher writes
- * terminal `unmatched` records for the blocking episodes and force-advances.
+ * terminal `unmatched` records for the blocking alerts and force-advances.
  */
 export const STUCK_TICK_LIMIT = 10;
 
 /**
- * When the pre-fetch escape hatch fires (stuck, no episodes known) and watermark
+ * When the pre-fetch escape hatch fires (stuck, no alerts known) and watermark
  * lag already exceeds one max scan window, force-advance to `windowEnd` instead
- * of retrying forever. Unread episodes in that window are skipped.
+ * of retrying forever. Unread alerts in that window are skipped.
  */
 export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
 

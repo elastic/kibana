@@ -12,7 +12,7 @@ import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
   createActionGroup,
   createActionPolicy,
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
@@ -23,9 +23,9 @@ const logger = createStepLogger();
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
-const info = (lastNotified: string, episodeStatus?: string): LastNotifiedInfo => ({
+const info = (lastNotified: string, alertStatus?: string): LastNotifiedInfo => ({
   lastNotified: new Date(lastNotified),
-  episodeStatus,
+  alertStatus,
 });
 
 describe('applyThrottling', () => {
@@ -54,7 +54,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -74,7 +74,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -116,7 +116,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -136,7 +136,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -156,7 +156,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -198,7 +198,7 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
@@ -430,12 +430,12 @@ describe('applyThrottling', () => {
       const g1 = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
       const g2 = createActionGroup({
         id: 'g2',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
       const policy = createActionPolicy({
         id: 'p1',
@@ -550,12 +550,12 @@ describe('ApplyThrottlingStep', () => {
       createActionGroup({
         id: 'unchanged',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       }),
       createActionGroup({
         id: 'changed',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       }),
     ];
     const policies = new Map([

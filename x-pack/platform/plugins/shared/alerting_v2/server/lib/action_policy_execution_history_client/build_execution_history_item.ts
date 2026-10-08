@@ -153,7 +153,7 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) }));
 
-  const alertIds = (dispatcher.episode_ids ?? []).filter(isString);
+  const alertIds = (dispatcher.alert_ids ?? []).filter(isString);
   const alerts = alertIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
 
   const failureReason = dispatcher.failure_reason;
@@ -163,7 +163,7 @@ export function buildExecutionHistoryItem(
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) },
     outcome: toPolicyExecutionOutcome(action),
-    alert_count: Number(dispatcher.episode_count ?? 0),
+    alert_count: Number(dispatcher.alert_count ?? 0),
     alerts,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
