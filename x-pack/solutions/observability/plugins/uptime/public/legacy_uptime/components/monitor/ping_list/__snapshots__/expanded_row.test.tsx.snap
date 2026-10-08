@@ -142,7 +142,6 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
     <div
       class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
       data-size="m"
-      style="--euiCallOutTypeColor:#0B64DD"
     >
       <div
         class="css-1slkmya-wrapper"

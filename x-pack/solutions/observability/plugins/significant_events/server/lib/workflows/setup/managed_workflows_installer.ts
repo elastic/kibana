@@ -11,9 +11,9 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { DETECTIONS_DATA_STREAM } from '../../significant_events/detections/data_stream';
 import { installWorkflows } from './install_workflows';
 
-// Managed workflows write to these with raw Elasticsearch requests, which auto-create a plain index
-// (blocking the data stream for good) when the data stream does not exist yet.
-const WORKFLOW_WRITTEN_DATA_STREAMS = [DETECTIONS_DATA_STREAM];
+// Managed workflows read these with raw Elasticsearch requests (ES|QL `FROM` fails on a missing
+// index), so the data stream must exist before the first run. Writes go through Kibana routes.
+const WORKFLOW_READ_DATA_STREAMS = [DETECTIONS_DATA_STREAM];
 
 export interface ManagedWorkflowsInstaller {
   /**
@@ -58,7 +58,7 @@ export const createManagedWorkflowsInstaller = ({
     }
 
     // Core creates data streams lazily, on first client use, so create them before any workflow can run.
-    for (const dataStreamName of WORKFLOW_WRITTEN_DATA_STREAMS) {
+    for (const dataStreamName of WORKFLOW_READ_DATA_STREAMS) {
       await dataStreams.initializeClient(dataStreamName);
     }
 

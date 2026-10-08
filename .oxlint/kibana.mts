@@ -148,4 +148,16 @@ export const kibanaOverrides: OxlintOverride[] = [
       '@kbn/eslint/no_sync_import_from_plugin': 'error',
     },
   },
+  {
+    // Plugin and core index files must list the APIs they expose instead of using `export *`.
+    files: [
+      'src/core/{server,public,common}/index.ts',
+      'src/platform/plugins/**/{server,public,common}/index.ts',
+      'x-pack/platform/plugins/**/{server,public,common}/index.ts',
+      'x-pack/solutions/*/plugins/**/{server,public,common}/index.ts',
+    ],
+    rules: {
+      '@kbn/eslint/no_export_all': 'error',
+    },
+  },
 ];
