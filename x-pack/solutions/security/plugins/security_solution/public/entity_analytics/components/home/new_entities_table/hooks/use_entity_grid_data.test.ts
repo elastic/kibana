@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mergeBatchRows } from './use_entity_grid_data';
+import { getLoadedRows } from './use_entity_grid_data';
 
-describe('mergeBatchRows', () => {
+describe('getLoadedRows', () => {
   it('shows the rows of every batch in order', () => {
     expect(
-      mergeBatchRows([
+      getLoadedRows([
         { rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }] },
         { rows: [{ 'entity.id': 'c' }] },
       ])
@@ -19,7 +19,7 @@ describe('mergeBatchRows', () => {
 
   it("adds a batch's computed columns once its enrich data arrives", () => {
     expect(
-      mergeBatchRows([
+      getLoadedRows([
         {
           rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }],
           enriched: [
@@ -38,7 +38,7 @@ describe('mergeBatchRows', () => {
 
   it('keeps the fresh entity fields of a refetched batch over its earlier enrich data', () => {
     expect(
-      mergeBatchRows([
+      getLoadedRows([
         {
           rows: [{ 'entity.id': 'a', 'entity.risk.calculated_score_norm': 80 }],
           enriched: [{ 'entity.id': 'a', 'entity.risk.calculated_score_norm': 70, alert_count: 3 }],
