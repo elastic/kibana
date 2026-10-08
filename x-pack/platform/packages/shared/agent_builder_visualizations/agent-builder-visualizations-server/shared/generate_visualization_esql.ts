@@ -129,6 +129,7 @@ export const generateVisualizationEsql = async ({
     events,
     logger,
     esClient: esClient.asCurrentUser,
+    internalEsClient: esClient.asInternalUser,
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,

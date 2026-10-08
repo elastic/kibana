@@ -28,7 +28,8 @@ const getDefaultModel = jest.fn();
 const modelProvider = { getDefaultModel } as unknown as ModelProvider;
 const fieldCaps = jest.fn();
 const asCurrentUser = { name: 'current-user-client', fieldCaps };
-const esClient = { asCurrentUser } as unknown as IScopedClusterClient;
+const asInternalUser = { name: 'internal-user-client' };
+const esClient = { asCurrentUser, asInternalUser } as unknown as IScopedClusterClient;
 
 const mockDateFields = (fieldNames: string[]) =>
   fieldCaps.mockResolvedValue({
@@ -87,6 +88,7 @@ describe('generateVisualizationEsql', () => {
         nlQuery: 'count logs by status',
         index: 'logs-*',
         esClient: asCurrentUser,
+        internalEsClient: asInternalUser,
         additionalInstructions: 'esql-instructions',
         timeRange: { from: 'now-7d', to: 'now' },
         execute: 'schema',

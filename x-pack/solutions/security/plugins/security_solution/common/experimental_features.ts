@@ -97,6 +97,18 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
+   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
+   * endpoint status, response action status)
+   * Release: TBD
+   *
+   * Ships disabled: it surfaces endpoint response-action state to chat and is
+   * the landing spot for the upcoming dispatch tools, so it must not be enabled
+   * by default on any branch. Enable it explicitly via config (or a Scout
+   * evals config) for local/CI testing.
+   */
+  endpointResponseActionsSkill: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -306,12 +318,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
   dexAiSkillRecommendPrebuiltRules: true,
-
-  /**
-   * Enables the detection-coverage Agent Builder skill.
-   * Part of the DEX AI skills family (`dexAiSkill*`).
-   */
-  dexAiSkillDetectionCoverage: false,
 
   /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the

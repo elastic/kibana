@@ -70,6 +70,8 @@ export class GraphPage {
   private readonly styleSelectionButton: Locator;
   private readonly drilldownButton: Locator;
   private readonly inspectButton: Locator;
+  private readonly drilldownsSettingsTab: Locator;
+  private readonly addDrilldownButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
@@ -116,6 +118,8 @@ export class GraphPage {
     this.styleSelectionButton = this.page.getByTestId('graphStyleSelection');
     this.drilldownButton = this.page.getByTestId('graphDrilldown');
     this.inspectButton = this.page.getByTestId('graphInspectButton');
+    this.drilldownsSettingsTab = this.page.getByTestId('drillDowns');
+    this.addDrilldownButton = this.page.getByTestId('graphAddNewTemplate');
     this.nodeLabelInput = this.page.getByTestId('graphNodeLabelInput');
     this.rawDocumentsDrilldown = this.page.getByTestId('graphRawDocumentsDrilldown');
     this.inspectorRequestTab = this.page.getByRole('tab', { name: 'Request', exact: true });
@@ -322,6 +326,35 @@ export class GraphPage {
 
   async openDrilldowns() {
     await this.drilldownButton.click();
+  }
+
+  async createDrilldown({ title, url, encoder }: { title: string; url: string; encoder: string }) {
+    await this.clickSettings();
+    await this.drilldownsSettingsTab.click();
+    await this.addDrilldownButton.click();
+
+    const newDrilldown = this.page
+      .getByTestId('graphSettingsFlyout')
+      .getByRole('group', { name: 'New drilldown' });
+    await newDrilldown.getByRole('textbox', { name: 'Title' }).fill(title);
+    await newDrilldown.getByRole('textbox', { name: 'URL', exact: true }).fill(url);
+    await this.page.components
+      .comboBox('graphDrilldownEncoder', newDrilldown)
+      .setSelectedOptions([encoder]);
+    await newDrilldown.getByRole('button', { name: 'Save drilldown' }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  async openDrilldown(title: string) {
+    const popupPromise = this.page.waitForEvent('popup');
+    await this.page
+      .getByTestId('graphDrilldowns')
+      .getByRole('button', { name: title, exact: true })
+      .click();
+    const popup = await popupPromise;
+    await popup.waitForURL((url) => url.toString() !== 'about:blank');
+    await popup.getByTestId('discoverDocTable').waitFor({ state: 'visible' });
+    return popup;
   }
 
   async saveWorkspace() {

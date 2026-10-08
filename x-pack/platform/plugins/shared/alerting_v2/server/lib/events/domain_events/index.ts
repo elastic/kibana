@@ -23,6 +23,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
+import type { EventOrigin } from '../../event_origin/token';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
@@ -124,6 +125,11 @@ export interface AlertingPublisherContext {
    * from the live HTTP socket.
    */
   readonly request: KibanaRequest;
+  /**
+   * Who made the change. Subscribers that need the caller's credentials
+   * (e.g. workflow scheduling) must skip `internal`.
+   */
+  readonly origin: EventOrigin;
 }
 
 /**

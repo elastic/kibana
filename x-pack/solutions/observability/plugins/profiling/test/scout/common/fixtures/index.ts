@@ -7,19 +7,26 @@
 
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiTest as base } from '@kbn/scout-oblt';
-import { COLLECTOR_PACKAGE_POLICY_NAME, SYMBOLIZER_PACKAGE_POLICY_NAME } from './constants';
+import {
+  COLLECTOR_PACKAGE_POLICY_NAME,
+  OTEL_PROFILING_EVENTS_DATA_STREAM,
+  otelEsArchiverPath,
+  PROFILING_OTEL_TEST_NAMESPACE,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
+} from './constants';
 
 export interface ProfilingHelper {
   installPolicies: () => Promise<void>;
   cleanupPolicies: (opts?: { includeAgentPolicy?: boolean }) => Promise<void>;
   getPolicyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
+  loadOtelData: () => Promise<void>;
 }
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
 export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
   profilingHelper: [
-    async ({ apiServices, log }, use) => {
+    async ({ apiServices, esClient, log, profilingSetup }, use) => {
       const installPolicies = async (): Promise<void> => {
         log.info('Checking if APM agent policy exists, creating if needed...');
         const getPolicyResponse = await apiServices.fleet.agent_policies.get({
@@ -101,10 +108,28 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
           symbolizerId: symbolizer?.id,
         };
       };
+      // Loads the OTel profiling data unless its own events are already there, since loading it
+      // twice would fail on the documents with fixed ids.
+      const loadOtelData = async (): Promise<void> => {
+        const { count } = await esClient.count({
+          index: OTEL_PROFILING_EVENTS_DATA_STREAM,
+          ignore_unavailable: true,
+          query: { term: { 'k8s.namespace.name': PROFILING_OTEL_TEST_NAMESPACE } },
+        });
+
+        if (count > 0) {
+          log.info('OTel profiling data already loaded');
+          return;
+        }
+
+        await profilingSetup.loadData(otelEsArchiverPath);
+      };
+
       await use({
         installPolicies,
         cleanupPolicies,
         getPolicyIds,
+        loadOtelData,
       });
     },
     { scope: 'worker' },

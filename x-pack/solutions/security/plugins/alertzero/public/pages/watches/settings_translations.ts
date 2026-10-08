@@ -18,40 +18,6 @@ import { i18n } from '@kbn/i18n';
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export const SERVICE_ACCOUNT_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.serviceAccountLabel',
-  {
-    defaultMessage: 'Run as',
-  }
-);
-
-export const SERVICE_ACCOUNT_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.serviceAccountHelp',
-  {
-    defaultMessage:
-      'The worker runs as this account. Select one before turning the worker on. A worker that is already on keeps running until you save an account for it.',
-  }
-);
-
-export const SERVICE_ACCOUNT_PLACEHOLDER = i18n.translate(
-  'xpack.alertzero.watches.settings.serviceAccountPlaceholder',
-  { defaultMessage: 'Select a service account' }
-);
-
-export const SERVICE_ACCOUNT_REQUIRED_TO_SAVE = i18n.translate(
-  'xpack.alertzero.watches.settings.serviceAccountRequiredToSave',
-  {
-    defaultMessage:
-      'Select a service account to save while this worker stays on. You can turn it off without one.',
-  }
-);
-
-export const serviceAccountSelectAriaLabel = (workerName: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.serviceAccountAriaLabel', {
-    defaultMessage: 'Run as for {workerName}',
-    values: { workerName },
-  });
-
 export const ENABLED_SWITCH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.enabledSwitch',
   {
@@ -145,6 +111,27 @@ export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Models                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const FEATURE_SETTINGS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.featureSettingsLink',
+  { defaultMessage: 'Feature settings' }
+);
+
+export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.models.label', {
+  defaultMessage: 'Models',
+});
+
+export const NO_MODEL_REASON_PLAIN = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.noModelPlain',
+  {
+    defaultMessage:
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.',
+  }
 );
 
 /* -------------------------------------------------------------------------- */
