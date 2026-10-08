@@ -168,6 +168,12 @@ steps:
             # missing hunt output (the step errored outright) has nothing to compare, so this
             # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
             expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
+            # What a clean run cannot leave on an attachment: the coordinator's Tier 2 target
+            # list, the process-bearing subset of it, and the executed behaviors. Packaging
+            # derives the coverage KI's `data_sources` and `validated_esql` from them.
+            tier2Targets: "${{ steps.hunt.output.tier2_targets | compact }}"
+            actionableIndices: "${{ steps.hunt.output.actionable_indices | compact }}"
+            behaviors: "${{ steps.hunt.output.behaviors | compact }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by

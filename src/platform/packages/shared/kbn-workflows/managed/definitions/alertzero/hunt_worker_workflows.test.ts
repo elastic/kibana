@@ -258,13 +258,11 @@ describe('Hunt Watch worker chain', () => {
   });
 
   // A clean run attaches no SSE, so the coordinator's Tier 2 targets and executed behaviors
-  // reach packaging only as inputs threaded hunt -> Worker -> packaging child -> step. The
-  // Worker leg is not wired here: its YAML is a `yamlTemplate` whose fingerprint guard needs a
-  // `version` bump, which is left to the owner. Until then these inputs arrive absent, which
-  // the step treats as "no dataset hint / no query".
+  // reach packaging only as inputs threaded hunt -> Worker -> packaging child -> step.
   describe('the coordinator result handed to packaging', () => {
     const resultVariables = () =>
       huntSteps.find((step) => step.with?.result_tier2_targets !== undefined)?.with ?? {};
+    const workerInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
     const decideInputs = () => stepIn(packageReportSteps, 'decide_and_package')?.with ?? {};
 
     it('declares the three results as hunt outputs', () => {
@@ -309,6 +307,20 @@ describe('Hunt Watch worker chain', () => {
           },
         })
       ).toEqual([{ technique_id: 'T1110' }]);
+    });
+
+    it('forwards the three results from the hunt output into the packaging call', () => {
+      expect(
+        ['tier2Targets', 'actionableIndices', 'behaviors'].map((key) => key in workerInputs())
+      ).toEqual([true, true, true]);
+    });
+
+    it('reads the packaging call inputs as empty arrays when the hunt output is missing', () => {
+      expect(
+        evaluateExpression(workerInputs().tier2Targets as string, {
+          steps: { hunt: { output: undefined } },
+        })
+      ).toEqual([]);
     });
 
     it('declares the three inputs on the packaging child without requiring them', () => {
