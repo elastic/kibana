@@ -17,16 +17,40 @@ export const NO_DATA_BODY = i18n.translate('xpack.profiling.noProfilingDataPromp
   defaultMessage: 'Try updating your search filters or selecting a different time range or schema',
 });
 
+export const NO_BASELINE_DATA_TITLE = i18n.translate(
+  'xpack.profiling.noProfilingDataPrompt.baselineTitle',
+  { defaultMessage: 'No baseline data found' }
+);
+
+export const NO_BASELINE_DATA_BODY = i18n.translate(
+  'xpack.profiling.noProfilingDataPrompt.baselineBody',
+  {
+    defaultMessage:
+      'Try updating your baseline search filters or selecting a different time range or schema',
+  }
+);
+
+type NoProfilingDataPromptVariant = 'default' | 'baseline';
+
+const COPY_BY_VARIANT: Record<NoProfilingDataPromptVariant, { title: string; body: string }> = {
+  default: { title: NO_DATA_TITLE, body: NO_DATA_BODY },
+  baseline: { title: NO_BASELINE_DATA_TITLE, body: NO_BASELINE_DATA_BODY },
+};
+
 export function NoProfilingDataPrompt({
   hasData,
+  variant = 'default',
   children,
 }: {
   hasData: boolean;
+  variant?: NoProfilingDataPromptVariant;
   children: React.ReactElement;
 }) {
   if (hasData) {
     return children;
   }
+
+  const { title, body } = COPY_BY_VARIANT[variant];
 
   return (
     <EuiEmptyPrompt
@@ -34,8 +58,8 @@ export function NoProfilingDataPrompt({
       color="subdued"
       iconType="magnify"
       titleSize="xs"
-      title={<h2>{NO_DATA_TITLE}</h2>}
-      body={<p>{NO_DATA_BODY}</p>}
+      title={<h2>{title}</h2>}
+      body={<p>{body}</p>}
     />
   );
 }

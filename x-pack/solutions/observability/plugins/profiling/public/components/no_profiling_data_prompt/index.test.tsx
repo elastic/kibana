@@ -7,11 +7,20 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { NO_DATA_BODY, NO_DATA_TITLE, NoProfilingDataPrompt } from '.';
+import {
+  NO_BASELINE_DATA_BODY,
+  NO_BASELINE_DATA_TITLE,
+  NO_DATA_BODY,
+  NO_DATA_TITLE,
+  NoProfilingDataPrompt,
+} from '.';
 
-const renderPrompt = (hasData: boolean) =>
+const renderPrompt = (
+  hasData: boolean,
+  variant?: React.ComponentProps<typeof NoProfilingDataPrompt>['variant']
+) =>
   render(
-    <NoProfilingDataPrompt hasData={hasData}>
+    <NoProfilingDataPrompt hasData={hasData} variant={variant}>
       <div data-test-subj="profilingData" />
     </NoProfilingDataPrompt>
   );
@@ -30,6 +39,14 @@ describe('NoProfilingDataPrompt', () => {
     expect(screen.queryByTestId('profilingData')).not.toBeInTheDocument();
     expect(screen.getByTestId('profilingNoDataPrompt')).toHaveTextContent(
       `${NO_DATA_TITLE}${NO_DATA_BODY}`
+    );
+  });
+
+  it('prompts to change the baseline search when the baseline has no data', () => {
+    renderPrompt(false, 'baseline');
+
+    expect(screen.getByTestId('profilingNoDataPrompt')).toHaveTextContent(
+      `${NO_BASELINE_DATA_TITLE}${NO_BASELINE_DATA_BODY}`
     );
   });
 });

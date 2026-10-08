@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { TopNFunctions } from '@kbn/profiling-utils';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
+import { NO_BASELINE_DATA_TITLE } from '../../../components/no_profiling_data_prompt';
 import type { AsyncState } from '../../../hooks/use_async';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
@@ -116,7 +117,7 @@ describe('DifferentialTopNFunctionsView', () => {
 
     render(<DifferentialTopNFunctionsView />);
 
-    expect(screen.getByTestId('profilingNoDataPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('profilingNoDataPrompt')).toHaveTextContent(NO_BASELINE_DATA_TITLE);
     expect(DifferentialTopNFunctionsGrid).not.toHaveBeenCalled();
   });
 

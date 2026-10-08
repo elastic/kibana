@@ -197,7 +197,7 @@ export function DifferentialTopNFunctionsView() {
             size="xl"
             alignTop
           >
-            <NoProfilingDataPrompt hasData={state.data?.TopN.length !== 0}>
+            <NoProfilingDataPrompt variant="baseline" hasData={state.data?.TopN.length !== 0}>
               <DifferentialTopNFunctionsGrid
                 base={state.data}
                 baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}

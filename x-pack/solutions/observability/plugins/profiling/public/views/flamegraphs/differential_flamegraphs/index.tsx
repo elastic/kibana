@@ -169,7 +169,10 @@ export function DifferentialFlameGraphsView() {
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <NoProfilingDataPrompt hasData={data?.primaryFlamegraph.TotalSamples !== 0}>
+          <NoProfilingDataPrompt
+            variant="baseline"
+            hasData={data?.primaryFlamegraph.TotalSamples !== 0}
+          >
             <FlameGraph
               id="flamechart"
               primaryFlamegraph={data?.primaryFlamegraph}
