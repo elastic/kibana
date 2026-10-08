@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiCopy, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
-import { buildConnectorPublicKeyUrls } from '@kbn/actions-plugin/common';
+import { buildPath } from '@kbn/core-http-browser';
+import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
+import {
+  buildConnectorPublicKeyUrls,
+  CONNECTOR_PUBLIC_KEYS_API_PATH,
+  SSF_DISCOVERY_PATH_PREFIX,
+} from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const ConnectorPublicKeys = ({
@@ -20,18 +25,40 @@ export const ConnectorPublicKeys = ({
   connectorId?: string;
 }) => {
   const { http } = useKibana().services;
+  const { spaceId } = getSpaceIdFromPath(http.basePath.get(), http.basePath.serverBasePath);
   const urls = useMemo(() => {
     const { publicBaseUrl } = http.basePath;
     if (!connectorId || !publicBaseUrl) return undefined;
-    const { spaceId } = getSpaceIdFromPath(http.basePath.get(), http.basePath.serverBasePath);
     return buildConnectorPublicKeyUrls({ publicBaseUrl, spaceId, connectorTypeId, connectorId });
-  }, [http.basePath, connectorTypeId, connectorId]);
+  }, [http.basePath, spaceId, connectorTypeId, connectorId]);
+  const [issuer, setIssuer] = useState<string>();
+  useEffect(() => {
+    if (!connectorId) return;
+    let isMounted = true;
+    // Signed tokens use the issuer stored with the key, which can differ from the current origin.
+    const spacePath = spaceId === DEFAULT_SPACE_ID ? '' : '/s/{space_id}';
+    http
+      .get<{ issuer: string }>(
+        buildPath(
+          `${http.basePath.serverBasePath}${SSF_DISCOVERY_PATH_PREFIX}${spacePath}${CONNECTOR_PUBLIC_KEYS_API_PATH}`,
+          { space_id: spaceId, connector_type_id: connectorTypeId, connector_id: connectorId }
+        ),
+        { prependBasePath: false }
+      )
+      .then(
+        (discovery) => isMounted && setIssuer(discovery.issuer),
+        () => isMounted && setIssuer(undefined)
+      );
+    return () => {
+      isMounted = false;
+    };
+  }, [http, spaceId, connectorTypeId, connectorId]);
   const fields = [
     {
       label: i18n.translate('xpack.triggersActionsUI.publicKeys.issuerLabel', {
         defaultMessage: 'Issuer URL',
       }),
-      value: urls?.issuer,
+      value: issuer,
     },
     {
       label: i18n.translate('xpack.triggersActionsUI.publicKeys.jwksLabel', {

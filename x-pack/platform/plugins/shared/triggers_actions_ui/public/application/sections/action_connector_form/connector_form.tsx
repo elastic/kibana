@@ -114,10 +114,13 @@ const ConnectorFormComponent: React.FC<Props> = ({
         authMode={connector.authMode}
         settingsContent={
           connectorTypePublishesKeys(connector.actionTypeId) ? (
-            <ConnectorPublicKeys
-              connectorTypeId={connector.actionTypeId}
-              connectorId={connector.id}
-            />
+            <>
+              {settingsContent}
+              <ConnectorPublicKeys
+                connectorTypeId={connector.actionTypeId}
+                connectorId={connector.id}
+              />
+            </>
           ) : (
             settingsContent
           )
