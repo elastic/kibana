@@ -93,13 +93,6 @@ export interface UpdateProposalParams {
   executionError?: string;
 }
 
-/**
- * What `create()` hands back: the proposal plus whether it is a pre-existing live
- * chain a caller-supplied `id` resolved to, rather than one this call minted. A
- * caller that gates on the proposal must not park a second gate on a reused one.
- */
-export type CreateProposalResult = ProposalWithMetadata & { reused: boolean };
-
 export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
@@ -126,22 +119,17 @@ export class ProposalsService {
    * the gate workflow does, to honour `always-gate` — would otherwise have to
    * fetch the same definition a second time.
    *
-   * `id`, when supplied, is what makes two calls for the same thing atomic: both
-   * attempt `op_type: 'create'` against it, so Elasticsearch — not a
-   * check-then-create race in application code — guarantees only one of them
-   * actually creates the chain. The caller derives it from what it is proposing.
-   *
-   * When the id already exists, a live chain in this space is reused and its
-   * current head returned with `reused: true`, so the caller can tell it created
-   * nothing. A settled chain, or a record in another space, throws
-   * {@link ProposalAlreadyExistsError}: the service does not decide that a
-   * settled proposal should be followed by a new one, the caller does, by
-   * deriving the next id.
+   * `id`, when supplied, is the id the proposal is created under instead of a
+   * random one, claimed with `op_type: 'create'`. An id that already exists is
+   * refused with {@link ProposalAlreadyExistsError} and nothing is read or
+   * returned: what a duplicate should mean is the caller's to decide, which is
+   * the point of the caller choosing the id.
    */
   async create(
     params: CreateProposalRequest,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
-  ): Promise<CreateProposalResult> {
+  ): Promise<ProposalWithMetadata> {
+    const id = params.id ?? uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
     // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
     // by the `date` mapping and an empty `actionWorkflowId` would make a
@@ -152,32 +140,9 @@ export class ProposalsService {
     // grouping, the impact (intrinsic to the action rather than to the situation
     // that produced it), and rejecting an `actionInput` the action could not
     // accept — before an analyst is asked to approve something that cannot run.
-    let metadata: ActionMetadata | undefined;
-    if (actionWorkflowId) {
-      try {
-        metadata = await this.resolveAndValidateAction(
-          actionWorkflowId,
-          params.actionInput,
-          spaceId,
-          request
-        );
-      } catch (error) {
-        // A reuse ignores this call's params, so they must not be what stops it: a
-        // duplicate of a live proposal converges on it whatever input it carries.
-        // Only a caller-chosen id can reuse anything, and only a failed validation
-        // is worth a second look; if nothing live is there, the original error is
-        // the right answer, and is not delayed waiting for a winner that is not
-        // coming (`awaitVisibility: false`).
-        if (params.id === undefined || !(error instanceof ProposalInvalidActionInputError)) {
-          throw error;
-        }
-        const live = await this.findLiveHead(params.id, spaceId, { awaitVisibility: false });
-        if (live === undefined) {
-          throw error;
-        }
-        return this.asReused(live, spaceId, request);
-      }
-    }
+    const metadata = actionWorkflowId
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
+      : undefined;
 
     // Caller first in both: it knows the situation the proposal came out of,
     // which the action's own metadata cannot. A category can end up absent —
@@ -194,7 +159,6 @@ export class ProposalsService {
     // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
 
-    const id = params.id ?? uuidv4();
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
@@ -224,25 +188,17 @@ export class ProposalsService {
     try {
       await this.deps.storage.index({ id, document, op_type: 'create' });
     } catch (error) {
-      if (params.id === undefined || !isVersionConflict(error)) {
-        throw error;
-      }
       // Only a caller-chosen id can already exist: a random one never collides.
-      // A live chain is a replay of the same operation, so its current head comes
-      // back rather than anything derived from this call's params — the caller
-      // gets the real outcome, not a blend of old and new.
-      const head = await this.findLiveHead(id, spaceId, { awaitVisibility: true });
-      if (head === undefined) {
-        throw new ProposalAlreadyExistsError(
-          `Proposal id [${id}] is already taken and cannot be reused: choose another id`
-        );
+      if (params.id !== undefined && isVersionConflict(error)) {
+        throw new ProposalAlreadyExistsError(`Proposal [${id}] already exists`);
       }
-      return this.asReused(head, spaceId, request);
+      throw error;
     }
 
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
-    return { ...toProposal(id, document), action: metadata, reused: false };
+    const proposal = toProposal(id, document);
+    return { ...proposal, action: metadata };
   }
 
   /**
@@ -925,45 +881,24 @@ export class ProposalsService {
     actionInput: Record<string, unknown> | undefined;
   }> {
     const { proposal } = await this.load(id, spaceId);
-    const head = await this.resolveChainHead(proposal, spaceId);
 
-    return {
-      proposalId: head.id,
-      revision: head.revision ?? 1,
-      status: head.status,
-      decision: head.decision,
-      actionInput: head.actionInput,
-    };
-  }
-
-  /**
-   * The live revision of the chain `member` belongs to, whichever member it is.
-   * The one place that knows how to find a chain's head, shared by
-   * `getLatestRevision` and the reuse path of `create()`.
-   *
-   * A query on `rootProposalId` plus `supersededBy` absent is O(1) — it does not
-   * walk `supersedes` pointers hop by hop, so the cost does not grow with the
-   * length of the chain.
-   */
-  private async resolveChainHead(
-    member: StoredProposalRecord,
-    spaceId: string
-  ): Promise<StoredProposalRecord> {
-    if (member.rootProposalId === undefined) {
+    if (proposal.rootProposalId === undefined) {
       // A record written before `rootProposalId` existed: the term query below
       // cannot find it, so following the pointers is the only way to reach the
       // live head. Without this the fallback answers with the stale member it
       // was asked about — exactly the id a parked gate holds across an
       // upgrade, and the row `update()` then refuses to settle.
-      return this.walkSupersededChain(member, spaceId);
+      return this.walkSupersededChain(proposal, spaceId);
     }
+
+    const rootProposalId = proposal.rootProposalId;
 
     const response = await this.deps.storage.search({
       track_total_hits: false,
       size: 1,
       query: {
         bool: {
-          filter: [{ term: { rootProposalId: member.rootProposalId } }, { term: { spaceId } }],
+          filter: [{ term: { rootProposalId } }, { term: { spaceId } }],
           must_not: [{ exists: { field: 'supersededBy' } }],
         },
       },
@@ -972,13 +907,26 @@ export class ProposalsService {
     const hit = response.hits.hits[0];
     if (!hit?._source || hit._id === undefined) {
       // Should be unreachable: every chain has exactly one live revision by
-      // construction. Falls back to the member that was asked about rather than
-      // throwing, so a storage inconsistency degrades to "trust the caller's id"
-      // instead of failing the gate outright.
-      return member;
+      // construction. Falls back to the proposal that was asked about rather
+      // than throwing, so a storage inconsistency degrades to "trust the
+      // caller's id" instead of failing the gate outright.
+      return {
+        proposalId: proposal.id,
+        revision: proposal.revision ?? 1,
+        status: proposal.status,
+        decision: proposal.decision,
+        actionInput: proposal.actionInput,
+      };
     }
 
-    return { id: hit._id, ...(hit._source as ProposalDocument) };
+    const source = hit._source as ProposalDocument;
+    return {
+      proposalId: hit._id,
+      revision: source.revision ?? 1,
+      status: source.status,
+      decision: source.decision,
+      actionInput: source.actionInput,
+    };
   }
 
   /**
@@ -991,7 +939,13 @@ export class ProposalsService {
   private async walkSupersededChain(
     start: StoredProposalRecord,
     spaceId: string
-  ): Promise<StoredProposalRecord> {
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    actionInput: Record<string, unknown> | undefined;
+  }> {
     let current = start;
 
     for (let hop = 0; hop < MAX_LEGACY_CHAIN_HOPS; hop++) {
@@ -1001,7 +955,13 @@ export class ProposalsService {
       current = (await this.load(current.supersededBy, spaceId)).proposal;
     }
 
-    return current;
+    return {
+      proposalId: current.id,
+      revision: current.revision ?? 1,
+      status: current.status,
+      decision: current.decision,
+      actionInput: current.actionInput,
+    };
   }
 
   /**
@@ -1105,64 +1065,6 @@ export class ProposalsService {
       return undefined;
     }
     return parsed.data;
-  }
-
-  /**
-   * The live head of the chain a caller-chosen id collided with, or `undefined`
-   * when there is nothing in this space to reuse: the chain has settled, or the
-   * id is not ours. Live means `pending` or `executing`, the only two statuses a
-   * proposal can still move out of.
-   *
-   * Resolves the head, not the row at `rootId`: a revision supersedes the row it
-   * replaces, so after one the root is a stale `superseded` row and the caller
-   * needs the revision.
-   *
-   * Reads are filtered to `spaceId`, which is what keeps a collision with another
-   * space's proposal from disclosing it: that id is simply not found here, and
-   * is refused exactly like a settled one.
-   *
-   * `awaitVisibility` is for a conflict this call just lost. The winner's
-   * document exists the moment the conflict is raised, but it is only searchable
-   * after the next refresh, and every read here is a search, so for up to a
-   * refresh interval the very thing that conflicted looks absent. Not found is
-   * therefore retried briefly before it is believed. The cost is paid only when
-   * nothing is there (an id from another space), which is rare and an error
-   * anyway.
-   */
-  private async findLiveHead(
-    rootId: string,
-    spaceId: string,
-    { awaitVisibility }: { awaitVisibility: boolean }
-  ): Promise<StoredProposalRecord | undefined> {
-    const attempts = awaitVisibility ? VISIBILITY_RETRY_ATTEMPTS : 1;
-
-    let root: StoredProposalRecord | undefined;
-    for (let attempt = 1; root === undefined; attempt++) {
-      try {
-        ({ proposal: root } = await this.load(rootId, spaceId));
-      } catch (error) {
-        if (!(error instanceof ProposalNotFoundError)) {
-          throw error;
-        }
-        if (attempt >= attempts) {
-          return undefined;
-        }
-        await sleep(VISIBILITY_RETRY_DELAY_MS);
-      }
-    }
-
-    const head = await this.resolveChainHead(root, spaceId);
-    return head.status === 'pending' || head.status === 'executing' ? head : undefined;
-  }
-
-  /** A live chain a caller-chosen id resolved to, as `create()` reports it. */
-  private async asReused(
-    head: StoredProposalRecord,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<CreateProposalResult> {
-    const reused = await this.withMetadata(stripRanks(head), spaceId, request);
-    return { ...reused, reused: true };
   }
 
   private async load(id: string, spaceId: string): Promise<StoredProposal> {
@@ -1431,16 +1333,6 @@ const toProposal = (id: string, document: ProposalDocument): Proposal =>
  * than this is a corruption or an attack, and either way the walk has to end.
  */
 const MAX_LEGACY_CHAIN_HOPS = 100;
-
-/**
- * How long `create()` waits for a conflicting winner to become searchable: five
- * looks a quarter-second apart, so a little over Elasticsearch's default one-second
- * refresh interval.
- */
-const VISIBILITY_RETRY_ATTEMPTS = 5;
-const VISIBILITY_RETRY_DELAY_MS = 250;
-
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * A status that has settled. `pending` and `executing` are the only two a

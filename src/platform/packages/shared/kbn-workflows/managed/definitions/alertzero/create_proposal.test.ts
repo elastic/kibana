@@ -189,14 +189,8 @@ describe('AlertZero create proposal bridge', () => {
 
     it('emits each one from the forwarded step', () => {
       const emitted = bridge.steps.find((step) => step.type === 'workflow.output')!;
-      for (const { name, type } of gate.outputs ?? []) {
-        // A boolean has to be evaluated, not rendered: Liquid would hand the
-        // output contract the string `'true'`.
-        expect(emitted.with?.[name]).toBe(
-          type === 'boolean'
-            ? `\${{ steps.create_proposal.output.${name} }}`
-            : `{{ steps.create_proposal.output.${name} }}`
-        );
+      for (const { name } of gate.outputs ?? []) {
+        expect(emitted.with?.[name]).toBe(`{{ steps.create_proposal.output.${name} }}`);
       }
     });
   });

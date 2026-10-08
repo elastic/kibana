@@ -168,65 +168,33 @@ Chains predating this field have `rootProposalId` on neither row; the term query
 misses and the fallback returns the row asked about, which is the correct answer
 for a chain of one. The plugin is unshipped, so there is nothing to migrate.
 
-### Deduplication
+### Caller-supplied ids
 
-A caller that raises "the same proposal" more than once can pass its own `id` to
-`create()` instead of taking a random one, derived from whatever makes two calls
-the same thing (for Hunt Watch: the action, the host and the space). Two calls for
-the same thing then meet at the same id, and `op_type: 'create'` decides which one
-creates it, so there is no check-then-create window in application code. Omitting
-the `id` mints a random one, exactly as before. The id must be a UUID.
+`create()` takes an optional `id`, and a UUID is required. Without one it mints a
+random id, exactly as before. With one, the proposal is created under that id with
+`op_type: 'create'`, so two callers that derive the same id from the same thing meet
+at the same document and Elasticsearch decides which one creates it, with no
+check-then-create window in application code.
 
-What `create()` does when the id already exists is the service's whole contract:
+An id that already exists is refused with `ProposalAlreadyExistsError`. The service
+reads nothing and returns nothing on the way there: what a duplicate means is the
+caller's to decide, which is why the caller chose the id. The error extends
+`ProposalConflictError`, so it is already a 409 on the routes and a `ConflictError`
+in a workflow. A caller that wants to converge on the existing proposal looks it up
+itself, with `get` and `getLatestRevision` (after a `revise()` the row at the
+original id is a superseded stub, not the head). A caller that wants a new proposal
+once the old one has settled derives its next id.
 
-| What is under the id | `create()` |
-| --- | --- |
-| A live chain (`pending` or `executing`) in this space | Returns the chain's current head with `reused: true`. Nothing is created and no second card is posted. |
-| A settled chain (`succeeded`, `failed`, `no_action`, `expired`) | Throws `ProposalAlreadyExistsError`. |
-| A record in another space | Throws `ProposalAlreadyExistsError`, saying nothing about the record. |
+The index is shared across spaces and the service does not scope the id, so the
+caller must put the space (and its own producer) into whatever the id is derived
+from. A clash is refused and never returned, so a missing space costs the caller a
+failed create and nothing more.
 
-The head, not the root, is what comes back: after a `revise()` the root is a
-superseded row. A proposal that was approved stays live until its action finishes,
-so a duplicate that arrives in that window still converges on it.
-
-A reuse ignores everything else this call carries. In particular an `actionInput`
-the action would refuse does not stop a duplicate converging on a live proposal;
-it is only reported when there is nothing live to converge on.
-
-When two callers race, the loser is told it lost as soon as the winner's document
-exists, but every read in this service is a search and a document only becomes
-searchable at the next refresh. `create()` therefore looks for the winner a few
-times, a quarter-second apart, before concluding the id is not ours.
-
-The service deliberately does not decide that a settled proposal should be
-followed by a new one. That is lifecycle policy and belongs to the caller: read
-what exists, and if it has settled, derive the next id and create that.
-
-**The service does not scope the id by space or producer, and nothing in it
-enforces that the caller does.** The index is shared, so a bare id used from two
-spaces is the same id. A caller must therefore put the space and its own producer
-into whatever the id is derived from; for Hunt Watch that is the id helper in
-elastic/security-team#19822, which is the only place that rule is enforced. The
-same-space check on a collision is the backstop, not the mechanism: a clash is
-refused and never returned, so a missing space in an id costs the caller a failed
-create, not another space's data. Creation is only reachable from server-side
-workflow steps, never over HTTP, so choosing an id needs the ability to author
-a workflow. The id is deliberately not namespaced by the service: the stored id
-would then differ from the one the caller passed, and a caller reads proposals back
-by id. `ProposalAlreadyExistsError` extends `ProposalConflictError`, so it is
-already a 409 on the routes and a `ConflictError` in a workflow.
-
-A reused proposal belongs to whichever execution created it, and only that
-execution is parked on it. `proposals.createProposal` therefore takes the id as
-`proposalId` and reports `reused`, and `system-create-proposal` ends the run there
-instead of parking a second gate that nothing would ever resume.
-`system-create-alertzero-proposal` forwards `proposalId` and `reused`. A settled
-or cross-space collision fails the run before any proposal id is held, so the
-failure handler has nothing to settle and the existing proposal is left alone.
-
-One narrow edge: a head that has just `failed` counts as settled even though the
-gate is about to `clone()` it back to `pending`, so a caller that derives the next
-id in that window mints a second proposal rather than reusing the first.
+`proposals.createProposal`, `system-create-proposal` and
+`system-create-alertzero-proposal` take the id as `proposalId` and pass it down. A
+duplicate fails the create step, before the gate workflow holds a proposal id, so
+nothing is parked or settled. A workflow that wants to handle it can branch on the
+step's `ConflictError`.
 
 ### Architecture
 

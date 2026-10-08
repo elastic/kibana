@@ -268,21 +268,14 @@ export const createProposalRequestSchema = z.object({
    * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
    * check-then-create in application code — decides which one creates it.
    *
-   * What happens when the id already exists is the caller's contract with the
-   * service, not something the service infers:
-   * - a live chain (`pending` or `executing`) in the caller's space is reused:
-   *   `create()` returns its current head with `reused: true` and creates nothing;
-   * - a settled chain, or a record in another space, throws
-   *   `ProposalAlreadyExistsError`. The caller believed the id was free, and
-   *   handing back a finished proposal as "reused" would end a gate with nobody
-   *   asked to decide.
+   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+   * service reads and returns nothing. What a duplicate means, and whether a
+   * settled proposal should be followed by a new one under another id, is the
+   * caller's to decide.
    *
-   * Whether a settled proposal should be followed by a new one is therefore the
-   * caller's decision: it reads what exists and derives the next id. Include the
-   * space and the producer in whatever the id is derived from: the index is shared
-   * and the service does not scope the id itself, so this is the caller's rule to
-   * keep. A clash with another space is refused, never returned. Omitting `id`
-   * mints a random one, exactly as before.
+   * The index is shared across spaces and the service does not scope the id, so
+   * the caller must put the space (and its own producer) into whatever the id is
+   * derived from. Omitting `id` mints a random one, exactly as before.
    */
   id: z.uuid().optional(),
 });

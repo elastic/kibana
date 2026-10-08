@@ -87,6 +87,8 @@ describe('proposals.createProposal input schema', () => {
     );
   });
 
+  // Liquid renders a template for an absent workflow input as `''`, so the
+  // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
@@ -265,7 +267,6 @@ describe('proposals.createProposal step', () => {
       category: 'tune',
       action: { name: 'Create rule' },
       expiresAt: '2026-09-04T00:00:00.000Z',
-      reused: false,
     });
     const { definition } = createDefinition(create);
 
@@ -293,23 +294,19 @@ describe('proposals.createProposal step', () => {
       category: 'tune',
       alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
-      reused: false,
     });
   });
 
-  it('should hand the proposalId to the service as its id and report a reused proposal', async () => {
+  it('should hand the proposalId to the service as its id', async () => {
     const create = jest.fn().mockResolvedValue({
-      id: 'existing-proposal',
-      rootProposalId: 'existing-root',
+      id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
       status: 'pending',
       category: 'respond',
-      action: { name: 'Isolate host', approvalPolicy: 'always-gate' },
-      expiresAt: '2026-09-04T00:00:00.000Z',
-      reused: true,
+      action: { name: 'Isolate host' },
     });
     const { definition } = createDefinition(create);
 
-    const result = await definition.handler(
+    await definition.handler(
       createContext({
         conversationId: 'conv-2',
         origin: 'alertzero',
@@ -322,13 +319,6 @@ describe('proposals.createProposal step', () => {
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({ id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50' }),
       expect.anything()
-    );
-    expect(result.output).toEqual(
-      expect.objectContaining({
-        proposalId: 'existing-proposal',
-        rootProposalId: 'existing-root',
-        reused: true,
-      })
     );
   });
 

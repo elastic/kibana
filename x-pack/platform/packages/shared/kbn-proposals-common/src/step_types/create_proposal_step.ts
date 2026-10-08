@@ -52,7 +52,7 @@ export const createProposalStepInputSchema = z.object({
     'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
   ),
   proposalId: optionalStepInput(z.uuid()).describe(
-    'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing so two calls for the same thing meet at the same id. While the proposal under that id is still pending or executing, the call creates nothing and returns it with `reused: true`. If it has settled, or the id belongs to another space, the call fails: choosing the next id is the caller\u2019s decision. Omit for a proposal that is always new.'
+    'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
   ),
 });
 
@@ -80,14 +80,6 @@ export const createProposalStepOutputSchema = z.object({
    * point rather than restarting the clock on every retry.
    */
   expiresAt: z.string().optional(),
-  /**
-   * `true` when `proposalId` resolved to a proposal that was already live,
-   * so nothing was created and the returned id belongs to someone else's gate.
-   * A workflow that parks on the proposal must not park a second gate on it:
-   * only the execution that created it is recorded on the proposal, so nothing
-   * would ever resume the second one.
-   */
-  reused: z.boolean(),
 });
 
 export const createProposalStepCommonDefinition: BaseStepDefinition<
@@ -109,7 +101,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('xpack.proposals.steps.createProposal.documentation.details', {
       defaultMessage:
-        'Writes a pending proposal and returns its id. The current workflow execution is recorded on the proposal, so approving it resumes this execution. Category and other display metadata are resolved from the action workflow definition. With a `proposalId`, a call made while the proposal under that id is still live returns it instead, with `reused: true`.',
+        'Writes a pending proposal and returns its id. The current workflow execution is recorded on the proposal, so approving it resumes this execution. Category and other display metadata are resolved from the action workflow definition.',
     }),
     examples: [
       `- name: create_proposal

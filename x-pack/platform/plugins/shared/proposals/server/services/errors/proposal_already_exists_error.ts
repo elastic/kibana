@@ -8,14 +8,13 @@
 import { ProposalConflictError } from './proposal_conflict_error';
 
 /**
- * Thrown when `create()` is given an `id` that is already taken by a proposal the
- * caller cannot reuse: its chain has settled, or it belongs to another space.
+ * Thrown when `create()` is given an `id` that already exists.
  *
  * A subclass of {@link ProposalConflictError} so it is already a 409 on the
  * routes and a `ConflictError` in a workflow, while a caller that wants to tell
- * it apart from "someone decided first" still can. Deliberately says nothing
- * about *why* the id is unusable beyond what the caller supplied: for a record in
- * another space, anything more would disclose it.
+ * it apart from "someone decided first" still can. The service reads nothing on
+ * the way to this error, so it says nothing about the existing proposal, whoever
+ * or whichever space owns it.
  */
 export class ProposalAlreadyExistsError extends ProposalConflictError {
   constructor(message: string) {

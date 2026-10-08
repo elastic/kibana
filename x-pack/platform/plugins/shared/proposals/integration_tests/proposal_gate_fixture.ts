@@ -77,8 +77,9 @@ const createInMemoryStorage = () => {
           document: ProposalDocument;
           op_type?: string;
         }) => {
-          // Elasticsearch's own contract for `op_type: 'create'`, which deduplication
-          // rests on: an id that already exists is refused, never overwritten.
+          // Elasticsearch's own contract for `op_type: 'create'`, which a
+          // caller-chosen id rests on: an id that already exists is refused,
+          // never overwritten.
           if (op_type === 'create' && documents.has(id)) {
             throw Object.assign(new Error('version conflict'), { statusCode: 409 });
           }
@@ -147,13 +148,9 @@ export interface ProposalGateFixture {
   /**
    * Creates a proposal through the real service, outside the workflow under
    * test: what another execution's gate has already done by the time this run
-   * starts. Returns what `create()` returned, so a test can see `reused`.
+   * starts.
    */
-  seedProposal: (params: {
-    id?: string;
-    conversationId?: string;
-    comment?: string;
-  }) => Promise<{ id: string; reused: boolean }>;
+  seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -272,12 +269,18 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const dynamicTimeout = latest?.state?.dynamicTimeout;
       return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
     },
-    seedProposal: async ({ conversationId = 'conv-other', comment = 'Seeded', ...rest }) => {
+    seedProposal: async ({ id }) => {
       const created = await service.create(
-        { conversationId, comment, origin: FIXTURE_ORIGIN, confidence: 'medium', ...rest },
+        {
+          conversationId: 'conv-other',
+          comment: 'Seeded',
+          origin: FIXTURE_ORIGIN,
+          confidence: 'medium',
+          id,
+        },
         { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
       );
-      return { id: created.id, reused: created.reused };
+      return { id: created.id };
     },
     start: async (inputs = {}) => {
       await engine.runWorkflow({

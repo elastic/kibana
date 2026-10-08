@@ -94,7 +94,6 @@ export const getCreateProposalStepDefinition = ({
             category: proposal.category,
             alwaysGate,
             expiresAt: proposal.expiresAt,
-            reused: proposal.reused,
           },
         };
       } catch (error) {

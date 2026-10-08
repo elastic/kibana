@@ -200,58 +200,32 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
-        'reused',
       ]);
     });
   });
 
   describe('a caller-supplied proposalId', () => {
-    const stop = () => findStep(workflow.steps, 'stop_if_reused');
-    const topLevelNames = () => workflow.steps.map(({ name }) => name);
-
-    it('forwards an optional proposalId to the create step', () => {
-      const input = workflow.triggers.find(({ type }) => type === 'manual')?.inputs?.properties
-        ?.proposalId as { type?: string } | undefined;
+    it('takes an optional proposalId and forwards it to the create step', () => {
+      const manual = workflow.triggers.find(({ type }) => type === 'manual');
+      const input = manual?.inputs?.properties?.proposalId as { type?: string } | undefined;
 
       expect(input?.type).toBe('string');
-      // Optional: the required list is pinned above and does not include it.
+      expect(manual?.inputs?.required).not.toContain('proposalId');
       expect(String(findStep(workflow.steps, 'create_proposal')?.with?.proposalId)).toContain(
         'inputs.proposalId'
       );
     });
 
-    it('ends the run on a reused proposal rather than parking a second gate on it', () => {
-      // Only the execution that created a proposal is recorded on it, so a
-      // second gate would wait for a resume that never comes, and its expiry
-      // would settle the live proposal as expired.
-      expect(stop()?.type).toBe('workflow.output');
-      expect(stop()?.if).toContain('steps.create_proposal.output.reused == true');
-      expect(WorkflowOutputStepSchema.safeParse(stop()).success).toBe(true);
-    });
-
-    it('decides before any state is initialised or any gate is entered', () => {
-      // After the create, before everything that parks or writes: anything
-      // earlier cannot know, anything later has already committed to a gate.
-      expect(topLevelNames().indexOf('stop_if_reused')).toBe(
-        topLevelNames().indexOf('create_proposal') + 1
-      );
-      expect(topLevelNames().indexOf('stop_if_reused')).toBeLessThan(
-        topLevelNames().indexOf('init_state')
-      );
-      expect(topLevelNames().indexOf('stop_if_reused')).toBeLessThan(
-        topLevelNames().indexOf('decision_loop')
-      );
-    });
-
-    it('reports the existing proposal, with no decision of its own', () => {
-      expect(String(stop()?.with?.proposalId)).toContain('steps.create_proposal.output.proposalId');
-      expect(String(stop()?.with?.status)).toContain('steps.create_proposal.output.status');
-      expect(stop()?.with?.decision).toBe('');
-      expect(stop()?.with?.reused).toBe(true);
-    });
-
-    it('reports reused: false from the normal exit', () => {
-      expect(findStep(workflow.steps, 'output_result')?.with?.reused).toBe(false);
+    it('adds no branch of its own: a duplicate id fails the create step, before any gate', () => {
+      // A duplicate is an error from the service, and the workflow does not
+      // interpret it. Nothing before the create step could park a gate or
+      // record a proposal id, so a failed create has nothing to settle.
+      expect(findStep(workflow.steps, 'stop_if_reused')).toBeUndefined();
+      expect(workflow.outputs?.map(({ name }) => name)).toEqual([
+        'proposalId',
+        'status',
+        'decision',
+      ]);
     });
   });
 
