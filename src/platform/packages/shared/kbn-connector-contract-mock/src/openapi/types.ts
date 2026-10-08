@@ -54,6 +54,8 @@ export interface OperationParameter {
   readonly schema?: SpecSchema;
   /** The single media type of a parameter described by `content` instead of `schema`. */
   readonly content?: MediaTypeContent;
+  /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
+  readonly multiSegment?: true;
 }
 
 export interface OperationHeader {

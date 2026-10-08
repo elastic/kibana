@@ -56,9 +56,14 @@ const compileServer = ({ url, variables }: OperationServer): ServerPrefix => {
 
 const compileRoute = (operation: ContractOperation): Route => {
   const parameterNames: string[] = [];
+  const multiSegment = new Set(
+    operation.parameters
+      .filter((parameter) => parameter.in === 'path' && parameter.multiSegment)
+      .map(({ name }) => name)
+  );
   const source = compileTemplate(operation.path, (name) => {
     parameterNames.push(name);
-    return '([^/]+)';
+    return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
   return {
     operation,
