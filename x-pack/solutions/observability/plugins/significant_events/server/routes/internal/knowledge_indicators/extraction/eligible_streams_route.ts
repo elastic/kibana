@@ -128,6 +128,7 @@ const eligibleStreamsRoute = createServerRoute({
       kiClient,
       sourceKnowledgeState,
       scheduleSourceOnboarding,
+      maxScheduled: maxStreams,
       onboardingClient: streamsKIsOnboardingClient,
       maintenanceService,
       request,

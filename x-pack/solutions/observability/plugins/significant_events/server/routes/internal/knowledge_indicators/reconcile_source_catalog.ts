@@ -296,12 +296,18 @@ export async function reconcileSourceCatalog({
   request,
   sourceKnowledgeState,
   scheduleSourceOnboarding,
+  maxScheduled,
 }: {
   sourcesClient: SourcesClient;
   kiClient: CatalogKiClient;
   onboardingClient?: OnboardingClient;
   sourceKnowledgeState?: SourceKnowledgeStateClient;
   scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
+  /**
+   * Caps concurrent onboarding runs for this sweep, counting the runs already going. Without it a
+   * source with no checkpoint is scheduled here regardless of the continuous onboarding limit.
+   */
+  maxScheduled?: number;
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
@@ -311,6 +317,22 @@ export async function reconcileSourceCatalog({
     maintenanceService.getState({ request }),
     loadRunningSourceSlugs(onboardingClient, request),
   ]);
+  let remainingSlots =
+    maxScheduled === undefined ? Infinity : Math.max(0, maxScheduled - runningSourceSlugs.size);
+  // Once the budget is spent the scheduler declines, which leaves the source unscheduled so the
+  // next sweep picks it up.
+  const scheduleWithinBudget = scheduleSourceOnboarding
+    ? async (source: NightshiftSource): Promise<boolean> => {
+        if (remainingSlots <= 0) {
+          return false;
+        }
+        const scheduled = await scheduleSourceOnboarding(source);
+        if (scheduled) {
+          remainingSlots -= 1;
+        }
+        return scheduled;
+      }
+    : undefined;
   const catalogIds = new Set(sources.map((source) => source.id));
   const catalogSlugs = new Set(sources.map((source) => source.slug));
   const ownedRuleSourceIds = new Set(ownedRuleIds);
@@ -327,7 +349,7 @@ export async function reconcileSourceCatalog({
           kiClient,
           onboardingClient,
           sourceKnowledgeState,
-          scheduleSourceOnboarding,
+          scheduleSourceOnboarding: scheduleWithinBudget,
           request,
         });
       }

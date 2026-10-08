@@ -149,6 +149,42 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('idle', true);
   });
 
+  it('stops scheduling onboarding once the sweep budget is spent', async () => {
+    const sources = ['a', 'b', 'c'].map((id) => makeSource({ id }));
+    const states = new Map<string, { revision?: string; onboardingScheduled: boolean }>();
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(async ({ sourceId, run }) => {
+        const state = states.get(sourceId) ?? { revision: undefined, onboardingScheduled: false };
+        states.set(sourceId, state);
+        return run({ ...state, lease: null }, async (patch) => {
+          Object.assign(state, patch);
+        });
+      }),
+      write: jest.fn(),
+    };
+    const scheduleSourceOnboarding = jest.fn(async () => true);
+
+    await reconcileSourceCatalog({
+      sourcesClient: {
+        ...makeSourcesClient(sources),
+        get: jest.fn(async (id: string) => ({ source: makeSource({ id }) })),
+      } as unknown as SourcesClient,
+      kiClient: makeKiClient(),
+      onboardingClient: onboardingWithRuns(['running-slug']),
+      sourceKnowledgeState,
+      scheduleSourceOnboarding,
+      maxScheduled: 2,
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    // One slot is taken by the run already going, so only one new source starts.
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(states.get('a')?.onboardingScheduled).toBe(true);
+    expect(states.get('b')?.onboardingScheduled).toBe(false);
+    expect(states.get('c')?.onboardingScheduled).toBe(false);
+  });
+
   it('cancels a disabled source run before waiting for its lease', async () => {
     const kiClient = makeKiClient(['disabled-source']);
     const order: string[] = [];

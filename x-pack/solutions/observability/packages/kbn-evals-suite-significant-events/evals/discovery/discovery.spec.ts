@@ -333,6 +333,8 @@ evaluate.describe(
                       esClient,
                       log,
                       streamName: input.source_id,
+                      sourceId: sourceForEvaluation.id,
+                      spaceId: 'default',
                       ruleUuid: rule.rule_uuid,
                       ruleName: rule.rule_name ?? rule.rule_uuid,
                       config: input.chronic_seed,
