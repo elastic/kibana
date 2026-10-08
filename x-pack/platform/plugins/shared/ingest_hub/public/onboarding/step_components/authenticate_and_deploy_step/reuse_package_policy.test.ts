@@ -6,7 +6,13 @@
  */
 
 import type { DeployGroup } from './deploy_groups';
-import { collectExtensionResults, planPolicyReuse } from './reuse_package_policy';
+import {
+  collectExtensionResults,
+  mergeExtensionResults,
+  newMembersByPolicy,
+  planPolicyReuse,
+} from './reuse_package_policy';
+import type { PolicyExtension } from './reuse_package_policy';
 
 function makeGroup(
   groupId: string,
@@ -150,5 +156,75 @@ describe('collectExtensionResults', () => {
     expect(outcome.policyIdsByInstance).toEqual({ s3: 'policy-A' });
     expect(outcome.failedInstances).toEqual(['x']);
     expect(outcome.errorsByInstance.x).toEqual(expect.any(String));
+  });
+});
+
+describe('newMembersByPolicy', () => {
+  const extension = (
+    policyId: string,
+    resolvedInstanceIds: string[],
+    memberInstanceIds = resolvedInstanceIds
+  ): PolicyExtension => ({
+    policyId,
+    group: makeGroup('aws', resolvedInstanceIds),
+    memberInstanceIds,
+    resolvedInstanceIds,
+  });
+
+  it('lists the instances that are not tracked yet, per policy', () => {
+    const result = newMembersByPolicy(
+      [extension('policy-A', ['elb', 's3']), extension('policy-B', ['x'])],
+      { elb: 'policy-A' }
+    );
+
+    expect(result).toEqual({ 'policy-A': ['s3'], 'policy-B': ['x'] });
+  });
+
+  it('leaves out a policy whose instances are all tracked already', () => {
+    expect(newMembersByPolicy([extension('policy-A', ['elb'])], { elb: 'policy-A' })).toEqual({});
+  });
+
+  it('joins the new instances of several extensions of the same policy', () => {
+    const result = newMembersByPolicy(
+      [extension('policy-A', ['a']), extension('policy-A', ['b'])],
+      {}
+    );
+
+    expect(result).toEqual({ 'policy-A': ['a', 'b'] });
+  });
+});
+
+describe('mergeExtensionResults', () => {
+  const extensionFor = (policyId: string): PolicyExtension => ({
+    policyId,
+    group: makeGroup('aws', [policyId]),
+    memberInstanceIds: [policyId],
+    resolvedInstanceIds: [policyId],
+  });
+
+  it('keeps the attempted results in place and treats policies written earlier as succeeded', () => {
+    const [written, failed, ok] = ['written', 'failed', 'ok'].map(extensionFor);
+    const reason = new Error('boom');
+
+    const merged = mergeExtensionResults(
+      [written, failed, ok],
+      [failed, ok],
+      [
+        { status: 'rejected', reason },
+        { status: 'fulfilled', value: undefined },
+      ]
+    );
+
+    expect(merged).toEqual([
+      { status: 'fulfilled', value: undefined },
+      { status: 'rejected', reason },
+      { status: 'fulfilled', value: undefined },
+    ]);
+  });
+
+  it('returns only successes when nothing was attempted', () => {
+    const merged = mergeExtensionResults([extensionFor('a'), extensionFor('b')], [], []);
+
+    expect(merged.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
   });
 });

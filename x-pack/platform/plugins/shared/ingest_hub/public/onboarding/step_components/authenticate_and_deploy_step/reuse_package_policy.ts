@@ -46,9 +46,10 @@ export function planPolicyReuse(
 ): PolicyReusePlan {
   const createGroups: DeployGroup[] = [];
   const extensions: PolicyExtension[] = [];
+  const groupsById = new Map(allGroups.map((g) => [g.groupId, g]));
 
   for (const group of groupsToDeploy) {
-    const fullGroup = allGroups.find((g) => g.groupId === group.groupId) ?? group;
+    const fullGroup = groupsById.get(group.groupId) ?? group;
     const policyId = fullGroup.isDuplicateGroup
       ? undefined
       : pickGroupPolicyId(fullGroup.instanceIds, policyIdsByInstance);

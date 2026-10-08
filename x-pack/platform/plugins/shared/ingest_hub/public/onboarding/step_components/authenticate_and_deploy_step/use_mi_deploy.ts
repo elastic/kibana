@@ -278,12 +278,15 @@ export function useMiDeploy({
       // secret refs from that policy; only the others become new policies.
       let createGroups: DeployGroup[] = [];
       let extensions: PolicyExtension[] = [];
+      // Instances joining each policy; written with it by whichever phase updates the policy.
+      let addedMembers: Record<string, string[]> = {};
       // A policy is written once per run, by the first phase that reaches it (dirty update,
       // cleanup, or the extension below). Every write is built from the current settings and
       // covers the surviving members plus the added ones, so later phases skip it.
       const claimedPolicyIds = new Set<string>();
       const planReuse = (groups: DeployGroup[]) => {
         ({ createGroups, extensions } = planPolicyReuse(groups, deployGroups, policyIdsByInstance));
+        addedMembers = newMembersByPolicy(extensions, policyIdsByInstance);
       };
 
       let groupsToDeploy: DeployGroup[];
@@ -362,8 +365,9 @@ export function useMiDeploy({
         // the others use that secret, so a replacement never leaves one secret per policy.
         // Services joining a policy are written with it; policies a cleanup already wrote have
         // everything this update would send.
-        const added = newMembersByPolicy(extensions, policyIdsByInstance);
-        for (const [policyId, ids] of Object.entries(added)) byPolicy.get(policyId)?.push(...ids);
+        for (const [policyId, ids] of Object.entries(addedMembers)) {
+          byPolicy.get(policyId)?.push(...ids);
+        }
         const items = [...byPolicy.entries()].filter(
           ([policyId]) => !claimedPolicyIds.has(policyId)
         );
@@ -514,7 +518,7 @@ export function useMiDeploy({
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
             servicesMap: servicesMap ?? new Map(),
-            extraMembersByPolicy: newMembersByPolicy(extensions, policyIdsByInstance),
+            extraMembersByPolicy: addedMembers,
             skipUpdatePolicyIds: claimedPolicyIds,
             ...connectorOverride,
           });
@@ -615,7 +619,7 @@ export function useMiDeploy({
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
             servicesMap: servicesMap ?? new Map(),
-            extraMembersByPolicy: newMembersByPolicy(extensions, policyIdsByInstance),
+            extraMembersByPolicy: addedMembers,
             skipUpdatePolicyIds: claimedPolicyIds,
             ...connectorOverride,
           });
