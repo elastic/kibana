@@ -39,8 +39,9 @@ const mockEvent = (
 
 describe('significant_event_status', () => {
   it('classifies active as needs-action', () => {
-    expect(NEEDS_ACTION_STATUSES).toEqual(['active']);
+    expect(NEEDS_ACTION_STATUSES).toEqual(['active', 'recovering']);
     expect(isNeedsActionStatus('active')).toBe(true);
+    expect(isNeedsActionStatus('recovering')).toBe(true);
     expect(isNeedsActionStatus('inactive')).toBe(false);
   });
 
@@ -111,6 +112,7 @@ describe('significant_event_status', () => {
 
   it('maps status to list dot color', () => {
     expect(getStatusColor('active')).toBe('danger');
+    expect(getStatusColor('recovering')).toBe('danger');
     expect(getStatusColor('inactive')).toBe('success');
   });
 

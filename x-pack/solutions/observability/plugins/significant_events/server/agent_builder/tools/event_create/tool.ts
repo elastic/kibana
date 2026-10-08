@@ -10,8 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
 import { lazySchema } from '@kbn/zod/v4';
+import {
+  significantEventManualStatusSchema,
+  significantEventSchema,
+} from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -23,9 +26,8 @@ import { createEventToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = lazySchema(() =>
+export const createEventSchema = lazySchema(() =>
   significantEventSchema.pick({
-    status: true,
     title: true,
     symptom_hypothesis: true,
     summary: true,
@@ -33,7 +35,7 @@ const createEventSchema = lazySchema(() =>
     severity: true,
     confidence: true,
   })
-);
+).extend({ status: significantEventManualStatusSchema });
 
 export function createEventTool({
   getScopedClients,

@@ -236,6 +236,9 @@ export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, str
   active: i18n.translate('xpack.significantEventsApp.significantEvent.status.active', {
     defaultMessage: 'Active',
   }),
+  recovering: i18n.translate('xpack.significantEventsApp.significantEvent.status.recovering', {
+    defaultMessage: 'Recovering',
+  }),
   inactive: i18n.translate('xpack.significantEventsApp.significantEvent.status.inactive', {
     defaultMessage: 'Inactive',
   }),

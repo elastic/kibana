@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS, severitySchema } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  severitySchema,
+} from '@kbn/significant-events-schema';
 
 // Trigger ids: kebab-case namespace, camelCase event.
 export const EVENT_CREATED_TRIGGER_ID = 'significant-events.eventCreated' as const;
@@ -21,7 +24,7 @@ const baseEventSchema = z.object({
   title: z.string().describe('Human-readable incident label.'),
   summary: z.string().describe('Short human-readable description of what is happening.'),
   status: z
-    .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
+    .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
     .describe('Current lifecycle status: "active" or "inactive".'),
   severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
   stream_names: z.array(z.string()).describe('Data streams associated with this event.'),
@@ -32,7 +35,7 @@ export type SignificantEventTriggerBasePayload = z.infer<typeof baseEventSchema>
 
 const eventStatusChangedSchema = baseEventSchema.extend({
   previous_status: z
-    .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
+    .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
     .describe('The status the event had before this change.'),
 });
 

@@ -7,12 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventManualStatus,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
 interface UpdateSignificantEventArgs {
   eventId: string;
-  status: SignificantEventStatus;
+  /** A person sets active or inactive; recovering belongs to the status workflow. */
+  status: SignificantEventManualStatus;
   assessmentNote?: string;
 }
 
