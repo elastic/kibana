@@ -104,7 +104,7 @@ export const createCustomMetricsAggregations = (
       return metric.field
         ? {
             ...acc,
-            ...createLastValueAggBucket(key, timeFieldName, metric.field),
+            ...createLastValueAggBucket(key, timeFieldName, metric.field, filterQuery),
             ...createLastValueAggBucketScript(key, metric.field),
           }
         : {

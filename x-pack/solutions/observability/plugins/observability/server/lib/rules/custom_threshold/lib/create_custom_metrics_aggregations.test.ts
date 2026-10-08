@@ -225,6 +225,21 @@ describe('createCustomMetricsAggregations', () => {
       expect(getBucketsPath(aggregations)).toEqual({ A: 'aggregatedValue_A' });
     });
 
+    it('applies the filter to the last_value bucket without changing its buckets path', () => {
+      const aggregations = createCustomMetricsAggregations(
+        'aggregatedValue',
+        [{ name: 'A', aggType: Aggregators.LAST_VALUE, field: 'metric', filter: KQL_FILTER }],
+        timeFrame,
+        '@timestamp'
+      );
+
+      expect(aggregations._aggregatedValue_A.filter.bool.must).toEqual([
+        { exists: { field: 'metric' } },
+        filterQuery,
+      ]);
+      expect(getBucketsPath(aggregations)).toEqual({ A: 'aggregatedValue_A' });
+    });
+
     it('throws when the filter is not valid KQL', () => {
       expect(() =>
         createCustomMetricsAggregations(
