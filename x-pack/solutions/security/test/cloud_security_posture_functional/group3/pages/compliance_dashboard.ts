@@ -60,6 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await cspSecurity.restoreDefaultUser();
       await cspDashboard.index.remove();
     });
 
@@ -77,8 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Access with custom roles', async () => {
       this.afterEach(async () => {
-        // force logout to prevent the next test from failing
-        await cspSecurity.logout();
+        await cspSecurity.restoreDefaultUser();
       });
       it('Access with valid user role', async () => {
         await cspSecurity.logout();
