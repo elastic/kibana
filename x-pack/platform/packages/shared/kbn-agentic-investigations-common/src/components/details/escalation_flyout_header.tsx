@@ -56,7 +56,7 @@ export const EscalationFlyoutHeader = ({
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiTitle size="s">
                 <h2>
                   <EuiTextTruncate text={title} />
