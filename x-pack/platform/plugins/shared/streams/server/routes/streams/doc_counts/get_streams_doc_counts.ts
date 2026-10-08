@@ -11,13 +11,13 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isNotFoundError } from '@kbn/es-errors';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getAllBackingIndicesByStream,
   getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
   getLastBackingIndexByStream,
   processAsyncInChunks,
 } from './utils';
@@ -46,14 +46,7 @@ export async function getDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
   if (!streams.length) {
     return [];
   }
@@ -141,14 +134,7 @@ export async function getDegradedDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { esClient, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
 
   if (!streams.length) {
     return [];
@@ -238,14 +224,7 @@ export async function getIngestionDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { esClient, streamsClient, start, end, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
 
   if (!streams.length) {
     return [];
@@ -375,14 +354,7 @@ export async function getFailedDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { esClient, start, end, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
 
   if (!streams.length) {
     return [];

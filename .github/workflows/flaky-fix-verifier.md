@@ -421,7 +421,7 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | `flaky-fix-check:started`      | A flaky test runner check has been triggered; verification is in progress.                                           |
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
 | `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch departs from the Fix guidelines without justification and no revision that follows them could be derived. |
-| `flaky-fix-check:inconclusive` | The failure could not be attributed, a related failure remains unresolved, or the run budget was exhausted without a clear verdict. |
+| `flaky-fix-check:inconclusive` | The diagnosis lacked supporting evidence, the failure could not be attributed, a related failure remains unresolved, or the run budget was exhausted without a clear verdict. |
 | `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
 Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `failed`, `inconclusive`, or `skipped`), **remove `flaky-fix-check:started`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments. Then decide whether the verdict earns a review (see [Opening the PR for review](#opening-the-pr-for-review)).
@@ -443,7 +443,7 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
 
    Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
-3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!IMPORTANT]` block (or `> [!NOTE]` on older PRs, or at the end when neither is present):
 
    ```markdown
    ## Release note
@@ -532,7 +532,7 @@ A green terminal verdict always needs the short release/backport-label rationale
 | Comment | Heading |
 | --- | --- |
 | Failed (fix did not hold) | `### ❌ Flaky-fix verification failed` |
-| Inconclusive (budget spent without a clear verdict) | `### ❓ Flaky-fix verification inconclusive` |
+| Inconclusive (insufficient evidence for a verdict) | `### ❓ Flaky-fix verification inconclusive` |
 | Skipped (runner not used) | `### ⏭️ Flaky-fix verification skipped` |
 | Rationale (why these configs, or what a pushed revision changed) | `### 🔍 Verifying the fix` |
 | Passed after >1 flaky run (an earlier fix didn't hold and you pushed a revision) | `### ✅ Flaky-fix verified` |
@@ -555,7 +555,9 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-3. **Screen the patch against the Fix guidelines.** Check `pr-diff.txt` against the [Fix guidelines](#fix-guidelines) before spending any runs. The items under **Don't hide the failure** are the gate: a patch that reduces coverage to make the failure go away, weakens or bends an assertion (or the product) just to pass, swallows errors so a flaky step passes, or widens a framework package's public surface must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Each of those items carries its own exception, so check the patch against the exception before failing it: a skip, a stripped deployment tag, or an environment exclusion is legitimate when the PR documents evidence that the environment doesn't support what the test exercises, just as correcting an assertion the product never promised, or tolerating a 404 to make teardown idempotent, is a fix rather than a mask. An undocumented claim doesn't clear the gate. A justified departure from the rest of the guidelines is fine. Derive a revision that follows the guidelines, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot, add `flaky-fix-check:failed`, post a failed comment naming the guideline it departs from, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+3. **Check the diagnosis and patch against the Fix guidelines.** Check the proposed cause against the failure evidence using the [Fix guidelines](#fix-guidelines). Identify the key assumption and look for evidence that would disprove it; could this patch pass while the underlying defect remains? Resolve any contradiction before accepting the fix. If the cause still cannot be supported, add `flaky-fix-check:inconclusive`, post a short comment naming the missing evidence, leave the PR as a draft, and stop.
+
+   Check `pr-diff.txt` against the guidelines before spending any runs. The items under **Don't hide the failure** are the gate: a patch that reduces coverage to make the failure go away, weakens or bends an assertion (or the product) just to pass, swallows errors so a flaky step passes, or widens a framework package's public surface must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Each of those items carries its own exception, so check the patch against the exception before failing it: a skip, a stripped deployment tag, or an environment exclusion is legitimate when the PR documents evidence that the environment doesn't support what the test exercises, just as correcting an assertion the product never promised, or tolerating a 404 to make teardown idempotent, is a fix rather than a mask. An undocumented claim doesn't clear the gate. A justified departure from the rest of the guidelines is fine. Derive a revision that follows the guidelines, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot, add `flaky-fix-check:failed`, post a failed comment naming the guideline it departs from, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
 4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) whose visible summary names which gate the fix missed and the labels applied, with the skip and label reasoning in the collapsed sections, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 

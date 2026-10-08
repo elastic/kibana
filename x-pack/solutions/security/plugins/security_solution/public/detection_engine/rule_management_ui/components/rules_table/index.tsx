@@ -14,7 +14,6 @@ import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrad
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RuleGapsCallout } from '../../../rule_gaps/components/rule_gaps_callout';
 import { GapSchedulerErrorsCallout } from '../../../rule_gaps/components/gap_scheduler_errors_callout';
-import { MitreVersionUpgradedCallout } from './mitre_version_upgraded_callout';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -31,7 +30,6 @@ export const AllRules = React.memo(() => {
   if (tabName !== AllRulesTabs.updates) {
     return (
       <>
-        <MitreVersionUpgradedCallout />
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
@@ -40,7 +38,6 @@ export const AllRules = React.memo(() => {
   } else {
     return (
       <UpgradePrebuiltRulesTableContextProvider>
-        <MitreVersionUpgradedCallout />
         <UpgradePrebuiltRulesTable />
       </UpgradePrebuiltRulesTableContextProvider>
     );

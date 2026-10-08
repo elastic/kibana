@@ -34,17 +34,16 @@ export const setLazySchemaDisabled = (value: boolean): void => {
  * lets the GC reclaim the materialized schema once no consumer is holding a
  * reference (see `lazyImmutableGCableObject`).
  *
- * When disabled via `setLazySchemaEnabled(false)`: calls the factory eagerly
+ * When disabled via `setLazySchemaDisabled(true)`: calls the factory eagerly
  * at wrap time and returns the real schema object, bypassing the Proxy and
  * GC-eligibility machinery entirely.
  *
  * Caveat (Proxy mode only): chaining e.g. Schema.optional().nullable() will
  * again retain the memory.
  *
- * Caveat (Proxy mode only): `instanceof z.ZodObject` / `instanceof z.ZodType`
- * on the returned value will be `false` because the Proxy target is an empty
- * object. Zod's own internals and typical consumers use structural `_zod` /
- * `.def` checks rather than `instanceof`, so this is safe in practice.
+ * `instanceof z.ZodObject` / `instanceof z.ZodType` keep working in Proxy mode:
+ * Zod resolves `instanceof` via `Symbol.hasInstance` against `_zod.traits`,
+ * and the Proxy forwards `_zod` to the materialized schema.
  */
 export const lazySchema = <T extends object>(factory: () => T): T =>
   disabled ? factory() : lazyImmutableGCableObject(factory);

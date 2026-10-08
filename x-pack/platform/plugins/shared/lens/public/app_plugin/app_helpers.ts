@@ -28,19 +28,11 @@ import type { RedirectToOriginProps } from './types';
 const VISUALIZE_APP_ID = 'visualize';
 
 /**
- * Returns true when the user navigated to Lens from an active container view (e.g. a Dashboard panel),
- * as opposed to a library listing page (e.g. the Dashboard Visualizations tab or the Visualize library).
- * Used to determine whether "Save and Return" should be shown and whether `isLinkedToOriginatingApp`
- * should be set on initial load.
+ * Returns true when Lens was opened to edit a panel in a container (e.g. Dashboard), indicating
+ * that "Save and Return" should be shown and `isLinkedToOriginatingApp` should be set on load.
  */
-export function isComingFromContainerView(
-  incomingState: EmbeddableEditorState | undefined
-): boolean {
-  return Boolean(
-    incomingState?.originatingApp &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
-  );
+export function isSaveAndReturn(incomingState: EmbeddableEditorState | undefined): boolean {
+  return Boolean(incomingState?.originatingApp && incomingState?.originatingPath);
 }
 
 export function isLegacyEditorEmbeddable(
@@ -110,21 +102,6 @@ export function setBreadcrumbsTitle(
       },
       text: originatingAppName,
     });
-  } else if (!originatingAppName) {
-    breadcrumbs.push(
-      {
-        text: i18n.translate('xpack.lens.breadcrumbsDashboards', {
-          defaultMessage: 'Dashboards',
-        }),
-        href: application.getUrlForApp('dashboards', { path: '#/list' }),
-      },
-      {
-        text: i18n.translate('xpack.lens.breadcrumbsVisualizations', {
-          defaultMessage: 'Visualizations',
-        }),
-        href: application.getUrlForApp('dashboards', { path: '#/list/visualizations' }),
-      }
-    );
   }
 
   const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };

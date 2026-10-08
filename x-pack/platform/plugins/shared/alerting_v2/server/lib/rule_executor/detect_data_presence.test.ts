@@ -13,7 +13,7 @@ import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
-import { buildGroupHash } from './build_alert_events';
+import { buildGroupHash, UNGROUPED_GROUP_HASH } from './build_alert_events';
 import type { RuleResponse } from '../rules_client';
 import { detectDataPresence } from './detect_data_presence';
 
@@ -22,7 +22,6 @@ const groupingFields = ['host.name'];
 const hostHash = buildGroupHash({
   rowDoc: { 'host.name': HOST },
   groupKeyFields: groupingFields,
-  fallbackSeed: 'unused',
 });
 
 describe('detectDataPresence', () => {
@@ -120,6 +119,27 @@ describe('detectDataPresence', () => {
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledTimes(1);
     expect(result).toEqual(new Set([hostHash]));
+  });
+
+  it('collapses an ungrouped rule to the single UNGROUPED_GROUP_HASH', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    // Several rows, no grouping fields: the presence set is the single series.
+    scopedEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse(
+        [{ name: 'host.name', type: 'keyword' }],
+        [['host-a'], ['host-b'], ['host-c']]
+      )
+    );
+
+    const result = await detectDataPresence({
+      queryService,
+      rule: buildRule({ grouping: undefined }),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    });
+
+    expect(result).toEqual(new Set([UNGROUPED_GROUP_HASH]));
   });
 
   it('records an empty set when the no-data query returns no rows', async () => {

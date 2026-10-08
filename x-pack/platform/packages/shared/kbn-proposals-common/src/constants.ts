@@ -26,6 +26,9 @@ export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as 
 export const PROPOSAL_REVISIONS_URL = `${PROPOSALS_INTERNAL_URL}/{proposalId}/revisions` as const;
 export const PROPOSAL_CHARTS_SUMMARY_URL = `${PROPOSALS_INTERNAL_URL}/charts-summary` as const;
 
+/** Agent Builder builtin tool through which an agent proposes an action in its conversation. */
+export const PROPOSALS_CREATE_TOOL_ID = 'proposals.create' as const;
+
 /**
  * Stand-in category for a proposal that carries no action and therefore has no
  * category of its own. Substituted on the read path rather than at write time:
