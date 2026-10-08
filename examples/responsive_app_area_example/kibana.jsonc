@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/responsive-app-area-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Showcases EUI breakpoints that follow the app area instead of the window",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "responsiveAppAreaExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}
