@@ -517,10 +517,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         })
       );
 
-      const detail = await apiServices.alertingV2.rules.getChangeHistoryEvent(
-        created.id,
-        list.items[0].id
-      );
+      const detail = await apiServices.alertingV2.rules.getChangeHistoryEvent(list.items[0].id);
 
       expect(detail.id).toBe(list.items[0].id);
       expect(detail.snapshot).toMatchObject({
@@ -529,6 +526,56 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       });
       expect(detail.version).toBe(updated.version);
       expect(detail.is_current).toBe(true);
+    }
+  );
+
+  apiTest(
+    'HTTP detail: resolves an older event from the change id alone, without a rule id',
+    async ({ apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-detail-original' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+      });
+
+      await apiServices.alertingV2.rules.upsert(
+        created.id,
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-detail-renamed' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleUpdate,
+      });
+
+      const list = await apiServices.alertingV2.rules.listChangeHistory(created.id);
+      const createItem = list.items.find(
+        ({ action }) => action === RuleChangesHistoryAction.ruleCreate
+      );
+
+      expect(createItem).toBeDefined();
+
+      const detail = await apiServices.alertingV2.rules.getChangeHistoryEvent(createItem?.id ?? '');
+
+      expect(detail).toMatchObject({
+        id: createItem?.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+        version: 1,
+        is_current: false,
+      });
+      expect(detail.snapshot).toMatchObject({
+        id: created.id,
+        metadata: expect.objectContaining({ name: 'change-history-http-detail-original' }),
+      });
     }
   );
 });

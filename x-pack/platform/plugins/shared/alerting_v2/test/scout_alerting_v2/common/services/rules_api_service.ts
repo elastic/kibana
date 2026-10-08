@@ -62,7 +62,7 @@ export interface RulesApiService {
     id: string,
     query?: Partial<ListRuleChangeHistoryRequest>
   ) => Promise<ListRuleChangeHistoryResponse>;
-  getChangeHistoryEvent: (id: string, eventId: string) => Promise<RuleChangeHistoryDetail>;
+  getChangeHistoryEvent: (eventId: string) => Promise<RuleChangeHistoryDetail>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -266,12 +266,11 @@ export const getRulesApiService = ({
         });
         return response.data;
       }),
-    getChangeHistoryEvent: (id, changeId) =>
+    getChangeHistoryEvent: (changeId) =>
       measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
         const response = await kbnClient.request<RuleChangeHistoryDetail>({
           method: 'GET',
           path: `${INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/${encodeURIComponent(changeId)}`,
-          query: { rule_id: id },
         });
         return response.data;
       }),
