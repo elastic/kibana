@@ -23,6 +23,7 @@ module.exports = eslintCompatPlugin({
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_conditional_saved_object_type_registration: require('./rules/no_conditional_saved_object_type_registration'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
+    no_unsafe_hash: require('./rules/no_unsafe_hash'),
     no_npx_playwright: require('./rules/no_npx_playwright'),
     no_unsafe_dynamic_http_path: require('./rules/no_unsafe_dynamic_http_path'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),

@@ -35,6 +35,10 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
     },
+    {
+      name: '@kbn/disable',
+      specifier: './packages/kbn-eslint-plugin-disable/oxlint_plugin.js',
+    },
   ],
   categories: {
     correctness: 'off',
