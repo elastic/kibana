@@ -68,7 +68,7 @@ describe('buildAlertBasedTilesQuery', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default', '7d');
     const renameIdx = query.indexOf('| RENAME effective_id AS `entity.id`');
     const secondJoinIdx = query.indexOf('| LOOKUP JOIN .entities-v1', renameIdx);
-    const newIdx = query.indexOf('| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 7d');
+    const newIdx = query.indexOf('| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 7 days');
     expect(secondJoinIdx).toBeGreaterThan(renameIdx);
     expect(newIdx).toBeGreaterThan(secondJoinIdx);
     expect(query).toContain('new_alerting_id = CASE(is_new, entity.id, null)');
@@ -84,11 +84,11 @@ describe('buildAlertBasedTilesQuery', () => {
 
   it('uses the provided time range in the WHERE clause', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default', '7d');
-    expect(query).toContain('@timestamp >= NOW() - 7d');
+    expect(query).toContain('@timestamp >= NOW() - 7 days');
   });
 
   it('defaults to 24h when no time range is given', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
-    expect(query).toContain('@timestamp >= NOW() - 24h');
+    expect(query).toContain('@timestamp >= NOW() - 1 days');
   });
 });

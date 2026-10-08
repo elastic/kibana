@@ -20,7 +20,7 @@ describe('buildNewlyHighCriticalCountQuery', () => {
 
   it('reads only the two hours of risk score docs before the boundary of each time range', () => {
     expect(buildNewlyHighCriticalCountQuery('default', '.entities-v1', '24h')).toContain(
-      '@timestamp >= NOW() - 24 hours - 2 hours AND @timestamp <= NOW() - 24 hours'
+      '@timestamp >= NOW() - 1 days - 2 hours AND @timestamp <= NOW() - 1 days'
     );
     expect(buildNewlyHighCriticalCountQuery('default', '.entities-v1', '7d')).toContain(
       '@timestamp >= NOW() - 7 days - 2 hours AND @timestamp <= NOW() - 7 days'
@@ -115,7 +115,7 @@ describe('buildNewlyHighCriticalCountQuery', () => {
 
   it('defaults to 24h when no time range is supplied', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
-    expect(query).toContain('@timestamp <= NOW() - 24 hours');
+    expect(query).toContain('@timestamp <= NOW() - 1 days');
   });
 
   it('deduplicates resolved entities and emits both value and entity_ids columns', () => {

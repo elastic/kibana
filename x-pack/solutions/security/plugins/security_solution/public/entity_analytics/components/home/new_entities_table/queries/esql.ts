@@ -14,7 +14,6 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
-  MS_PER_DAY,
   RESOLVED_TO_FIELD,
   TIME_RANGE_DAYS,
 } from '../common';
@@ -116,9 +115,12 @@ export const buildCombinedFilterClause = (
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
-/** ISO timestamp at the start of the time range. Alert and anomaly queries filter on it. */
-export const lookbackCutoff = (range: TimeRange): string =>
-  new Date(Date.now() - TIME_RANGE_DAYS[range] * MS_PER_DAY).toISOString();
+/**
+ * Start of the time range as ES|QL date math, e.g. `NOW() - 30 days`. Every grid and tile
+ * query filters on it, so they agree on the window, and ES|QL folds it into a constant that
+ * still pushes down to Lucene.
+ */
+export const esqlLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 

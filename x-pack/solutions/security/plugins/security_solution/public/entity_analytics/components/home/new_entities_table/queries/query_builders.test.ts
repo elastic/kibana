@@ -16,8 +16,6 @@ import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
 
-const NOW = new Date('2026-10-04T12:00:00.000Z');
-
 const BASE_ARGS: QueryArgs = {
   namespace: 'default',
   timeRange: '7d',
@@ -87,15 +85,6 @@ const cursorFor = (sortField: string): PageCursor => ({
 });
 
 describe('entities grid query builders', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   describe.each(SORT_QUERY_SPECS)(
     'sort by %s',
     (sortField, { buildSortQuery, buildCountQuery }) => {

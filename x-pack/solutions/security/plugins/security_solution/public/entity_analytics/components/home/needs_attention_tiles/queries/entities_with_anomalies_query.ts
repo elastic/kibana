@@ -10,8 +10,9 @@ import type { TimeRange } from '../../new_entities_table';
 // The query module, not the table index: the index also loads the grid components.
 import {
   ANOMALY_RECORD_FILTER,
-  ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
+  esqlLookback,
+  ML_ANOMALY_INDICES,
 } from '../../new_entities_table/queries/esql';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
@@ -34,9 +35,9 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ML_ANOMALY_INDICES}`);
   parts.push(
-    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= NOW() - ${timeRange} AND ${buildAnomalyJobFilter(
-      jobIds
-    )}`
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= ${esqlLookback(
+      timeRange
+    )} AND ${buildAnomalyJobFilter(jobIds)}`
   );
 
   for (const entityType of ENTITY_TYPES) {

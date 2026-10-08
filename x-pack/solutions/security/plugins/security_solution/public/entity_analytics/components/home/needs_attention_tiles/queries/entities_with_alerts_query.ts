@@ -7,7 +7,7 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../new_entities_table';
-import { alertsIndexOf } from '../../new_entities_table/queries/esql';
+import { alertsIndexOf, esqlLookback } from '../../new_entities_table/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 /**
@@ -42,7 +42,7 @@ export const buildAlertBasedTilesQuery = (
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${alertsIndexOf(spaceId)}`);
-  parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
+  parts.push(`| WHERE @timestamp >= ${esqlLookback(timeRange)}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
@@ -64,7 +64,7 @@ export const buildAlertBasedTilesQuery = (
   // The resolved entity's own doc, for its first_seen: an alias record carries its own.
   parts.push(`| RENAME effective_id AS \`entity.id\``);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
-  parts.push(`| EVAL is_new = entity.lifecycle.first_seen >= NOW() - ${timeRange}`);
+  parts.push(`| EVAL is_new = entity.lifecycle.first_seen >= ${esqlLookback(timeRange)}`);
 
   // Per-tile ids — null for entities outside the tile so COUNT_DISTINCT/VALUES ignore them.
   parts.push(`| EVAL severe_id = CASE(has_severe_alert, entity.id, null)`);

@@ -13,7 +13,6 @@ import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_que
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
 import { withFastEuidEsql } from './with_fast_euid_esql';
 
-const NOW = new Date('2026-10-04T12:00:00.000Z');
 const ENTITIES_INDEX = '.entities.v2.latest.default-00001';
 const ENTITY_FILTER_CLAUSES = ['asset.criticality IN ("high_impact", "extreme_impact")'];
 
@@ -21,15 +20,6 @@ const ENTITY_FILTER_CLAUSES = ['asset.criticality IN ("high_impact", "extreme_im
 const euid = withFastEuidEsql({ esql: {} } as unknown as EntityStoreEuid);
 
 describe('needs attention tile queries', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   describe.each([
     ['24h', []],
     ['30d', ENTITY_FILTER_CLAUSES],

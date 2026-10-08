@@ -12,10 +12,16 @@ import {
   getString,
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
-  TIME_RANGE_DAYS,
 } from '../common';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
-import { buildKeepClause, buildLookupJoinClause, esc, riskScoreIndexOf, toList } from './esql';
+import {
+  buildKeepClause,
+  buildLookupJoinClause,
+  esc,
+  esqlLookback,
+  riskScoreIndexOf,
+  toList,
+} from './esql';
 import { buildMergedForeignRows, buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, ColumnQuerySpec } from '../common';
 import type { MergedForeignRowsOptions } from './foreign_sort';
@@ -45,7 +51,7 @@ const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user
  * from reading all older history.
  */
 const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => {
-  const windowStart = `NOW() - ${TIME_RANGE_DAYS[timeRange]} day`;
+  const windowStart = esqlLookback(timeRange);
   return [
     `FROM ${riskScoreIndexOf(namespace)}`,
     `| WHERE \`@timestamp\` >= ${windowStart} - ${REFERENCE_WINDOW_HOURS} hours AND \`@timestamp\` <= ${windowStart}`,

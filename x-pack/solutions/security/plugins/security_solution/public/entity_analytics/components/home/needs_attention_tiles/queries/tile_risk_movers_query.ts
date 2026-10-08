@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '../../new_entities_table';
-import { riskScoreIndexOf } from '../../new_entities_table/queries/esql';
+import { esqlLookback, riskScoreIndexOf } from '../../new_entities_table/queries/esql';
 
 /**
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
@@ -31,13 +31,6 @@ import { riskScoreIndexOf } from '../../new_entities_table/queries/esql';
  * present in the index (e.g. only host docs → user.name is not in the mapping).
  */
 
-/** ES|QL duration of each time range; the boundary is this long before now. */
-const PERIOD: Record<TimeRange, string> = {
-  '24h': '24 hours',
-  '7d': '7 days',
-  '30d': '30 days',
-};
-
 /** Width of the boundary window: covers at least one hourly scoring run. */
 const BOUNDARY_WINDOW_HOURS = 2;
 
@@ -48,7 +41,7 @@ export const buildRiskMoversCountQuery = (
   entityFilterClauses: string[] = []
 ): string => {
   const index = riskScoreIndexOf(spaceId);
-  const boundary = `NOW() - ${PERIOD[timeRange]}`;
+  const boundary = esqlLookback(timeRange);
   return [
     `SET unmapped_fields="nullify";`,
     'FROM (',

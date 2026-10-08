@@ -3,7 +3,7 @@
 exports[`needs attention tile queries over 24h with filters [] builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 24h
+| WHERE @timestamp >= NOW() - 1 days
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -105,7 +105,7 @@ FROM .alerts-security.alerts-default
 | STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
 | RENAME effective_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 24h
+| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 1 days
 | EVAL severe_id = CASE(has_severe_alert, entity.id, null)
 | EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
 | EVAL new_alerting_id = CASE(is_new, entity.id, null)
@@ -121,7 +121,7 @@ FROM .alerts-security.alerts-default
 exports[`needs attention tile queries over 24h with filters [] builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 24h AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 1 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -216,7 +216,7 @@ exports[`needs attention tile queries over 24h with filters [] builds the newly 
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
-  | WHERE @timestamp >= NOW() - 24 hours - 2 hours AND @timestamp <= NOW() - 24 hours
+  | WHERE @timestamp >= NOW() - 1 days - 2 hours AND @timestamp <= NOW() - 1 days
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)
   | WHERE entity_euid IS NOT NULL
@@ -246,7 +246,7 @@ exports[`needs attention tile queries over 24h with filters [] builds the risk m
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
-  | WHERE @timestamp >= NOW() - 24 hours - 2 hours AND @timestamp <= NOW() - 24 hours
+  | WHERE @timestamp >= NOW() - 1 days - 2 hours AND @timestamp <= NOW() - 1 days
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
   | WHERE entity_euid IS NOT NULL
@@ -270,7 +270,7 @@ FROM (
 exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 30d
+| WHERE @timestamp >= NOW() - 30 days
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -373,7 +373,7 @@ asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
 | RENAME effective_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 30d
+| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 30 days
 | EVAL severe_id = CASE(has_severe_alert, entity.id, null)
 | EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
 | EVAL new_alerting_id = CASE(is_new, entity.id, null)
@@ -389,7 +389,7 @@ asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 30d AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 30 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),

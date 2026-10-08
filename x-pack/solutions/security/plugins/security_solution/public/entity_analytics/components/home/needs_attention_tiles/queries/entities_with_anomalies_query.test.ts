@@ -73,11 +73,11 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
 
   it('uses the provided time range', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '7d');
-    expect(query).toContain('@timestamp >= NOW() - 7d');
+    expect(query).toContain('@timestamp >= NOW() - 7 days');
   });
 
   it('defaults to 24h when no time range is given', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1');
-    expect(query).toContain('@timestamp >= NOW() - 24h');
+    expect(query).toContain('@timestamp >= NOW() - 1 days');
   });
 });

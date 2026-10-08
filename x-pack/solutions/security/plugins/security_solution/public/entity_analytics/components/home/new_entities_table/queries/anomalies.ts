@@ -11,7 +11,7 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookupJoinClause,
-  lookbackCutoff,
+  esqlLookback,
   toList,
 } from './esql';
 import { entityIdsOf, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
@@ -35,9 +35,9 @@ const buildAnomalyEntityRows = (
   identityPrefilter?: string
 ): string[] => [
   `FROM ${ML_ANOMALY_INDICES}`,
-  `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= "${lookbackCutoff(
+  `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= ${esqlLookback(
     timeRange
-  )}" AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
+  )} AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
   ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
   ...buildEuidStages(),
 ];

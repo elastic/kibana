@@ -31,7 +31,6 @@ export const GROUP_SIZE_FIELD = 'group_size';
 export const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
 export const RISK_SCORE_CHANGE_FIELD = 'risk_score_change';
 
-export const MS_PER_DAY = 86_400_000;
 export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 export const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
 

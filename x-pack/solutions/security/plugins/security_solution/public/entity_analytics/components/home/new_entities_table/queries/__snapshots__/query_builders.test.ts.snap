@@ -3,7 +3,7 @@
 exports[`entities grid query builders enrich queries alert_count builds its query from the page rows 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE \`@timestamp\` >= NOW() - 7 days
 | WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -107,7 +107,7 @@ exports[`entities grid query builders enrich queries anomaly_count builds its qu
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | WHERE user.name IN (\\"alice\\", \\"bob\\") OR host.id IN (\\"h-1\\") OR user.email IN (\\"bob@corp.com\\") OR host.name IN (\\"web-1\\", \\"web-2\\") OR service.name IN (\\"payments\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -208,7 +208,7 @@ Array [
 exports[`entities grid query builders enrich queries risk_score_change builds its query from the page rows 1`] = `
 Array [
   "FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE host.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR user.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR service.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
@@ -289,7 +289,7 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 
 exports[`entities grid query builders sort by alert_count builds the sort and count queries with entity filters and no search: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -407,7 +407,7 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 
 exports[`entities grid query builders sort by alert_count builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -525,7 +525,7 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 
 exports[`entities grid query builders sort by alert_count builds the sort and count queries: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -635,7 +635,7 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 
 exports[`entities grid query builders sort by alert_count builds the sort query with a cursor on an empty value: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -756,7 +756,7 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -866,7 +866,7 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -976,7 +976,7 @@ exports[`entities grid query builders sort by anomaly_count builds the sort and 
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1077,7 +1077,7 @@ exports[`entities grid query builders sort by anomaly_count builds the sort quer
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1604,7 +1604,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries with entity filters and no search: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1722,7 +1722,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1840,7 +1840,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1950,7 +1950,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with a cursor on an empty value: sort 1`] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2070,7 +2070,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 exports[`entities grid query builders sort by risk_score_change builds the sort and count queries with entity filters and no search: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -2104,7 +2104,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 exports[`entities grid query builders sort by risk_score_change builds the sort and count queries with filters and a cursor: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -2138,7 +2138,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 exports[`entities grid query builders sort by risk_score_change builds the sort and count queries: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -2163,7 +2163,7 @@ FROM entities-latest-default
 exports[`entities grid query builders sort by risk_score_change builds the sort query with a cursor on an empty value: sort 1`] = `
 "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -2189,7 +2189,7 @@ FROM entities-latest-default
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after a value with entity filters 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2292,7 +2292,7 @@ Array [
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2407,7 +2407,7 @@ Array [
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after an empty value 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2521,7 +2521,7 @@ Array [
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page ascending 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2629,7 +2629,7 @@ Array [
 | EVAL alert_count = TO_LONG(0), alert_critical = TO_LONG(0), alert_high = TO_LONG(0), alert_medium = TO_LONG(0), alert_low = TO_LONG(0), last_seen_alert = TO_DATETIME(null)
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2735,7 +2735,7 @@ Array [
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page descending 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2836,7 +2836,7 @@ Array [
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -2949,7 +2949,7 @@ Array [
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page with a search 1`] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -3062,7 +3062,7 @@ exports[`entities grid query builders sort page by anomaly_count on a large view
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3152,7 +3152,7 @@ FROM .ml-anomalies-shared*
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3254,7 +3254,7 @@ exports[`entities grid query builders sort page by anomaly_count on a large view
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3355,7 +3355,7 @@ exports[`entities grid query builders sort page by anomaly_count on a large view
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3443,7 +3443,7 @@ FROM .ml-anomalies-shared*
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3543,7 +3543,7 @@ exports[`entities grid query builders sort page by anomaly_count on a large view
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3631,7 +3631,7 @@ FROM .ml-anomalies-shared*
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3732,7 +3732,7 @@ Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
-| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND job_id IN (\\"security_auth_rare_user\\")
+| WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3951,7 +3951,7 @@ Array [
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after a value with entity filters 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4054,7 +4054,7 @@ Array [
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4169,7 +4169,7 @@ Array [
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after an empty value 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4283,7 +4283,7 @@ Array [
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page ascending 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4384,7 +4384,7 @@ Array [
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4497,7 +4497,7 @@ Array [
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page descending 1`] = `
 Array [
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4598,7 +4598,7 @@ Array [
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
   "FROM .alerts-security.alerts-default
-| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
+| WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4711,7 +4711,7 @@ Array [
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page with a search 1`] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\" AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -4824,7 +4824,7 @@ exports[`entities grid query builders sort page by risk_score_change on a large 
 Array [
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -4859,7 +4859,7 @@ FROM entities-latest-default
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -4896,7 +4896,7 @@ Array [
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -4924,7 +4924,7 @@ exports[`entities grid query builders sort page by risk_score_change on a large 
 Array [
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -4956,7 +4956,7 @@ FROM entities-latest-default
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -4983,7 +4983,7 @@ exports[`entities grid query builders sort page by risk_score_change on a large 
 Array [
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -5015,7 +5015,7 @@ FROM entities-latest-default
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -5042,7 +5042,7 @@ exports[`entities grid query builders sort page by risk_score_change on a large 
 Array [
   "FROM (
 FROM risk-score.risk-score-default
-| WHERE \`@timestamp\` >= NOW() - 7 day - 2 hours AND \`@timestamp\` <= NOW() - 7 day
+| WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`

@@ -11,7 +11,7 @@ import {
   alertsIndexOf,
   buildLookupJoinClause,
   entityAliasOf,
-  lookbackCutoff,
+  esqlLookback,
   toList,
 } from './esql';
 import {
@@ -121,11 +121,9 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
   return [
     `FROM ${alertsIndexOf(namespace)}, ${entityAliasOf(namespace)} METADATA _index`,
-    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= "${lookbackCutoff(
+    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${esqlLookback(
       timeRange
-    )}" AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc, ...entityConditions].join(
-      ' AND '
-    )})`,
+    )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc, ...entityConditions].join(' AND ')})`,
     ...buildAlertEuidPipeline({
       alertBranchCondition: `NOT ${isEntityDoc}`,
       extraBranch: [
@@ -148,7 +146,7 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
 /** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
 const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
   `FROM ${alertsIndexOf(namespace)}`,
-  `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}" AND (${ALERT_OPEN_STATUS_FILTER})`,
+  `| WHERE \`@timestamp\` >= ${esqlLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
 ];
 
@@ -187,7 +185,7 @@ const buildAlertsEnrichQuery = (
   const { namespace, timeRange } = args;
   return [
     `FROM ${alertsIndexOf(namespace)}`,
-    `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
+    `| WHERE \`@timestamp\` >= ${esqlLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
