@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { ENABLE_STATUS_ALERT } from '../../../overview/monitor_list/columns/translations';
 import { monitorStatusSelector } from '../../../../state/selectors';
 import { EnableMonitorAlert } from '../../../overview/monitor_list/columns/enable_alert';

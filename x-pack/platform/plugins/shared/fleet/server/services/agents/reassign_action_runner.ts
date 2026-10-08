@@ -14,6 +14,7 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { ActionRunner } from './action_runner';
 
@@ -51,7 +52,9 @@ export async function reassignBatch(
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents, {
+    spaceId: options.spaceId,
+  });
 
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
@@ -76,7 +79,9 @@ export async function reassignBatch(
     throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
-  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId);
+  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId, true, {
+    ...(spaceId === '*' ? { spaceId } : {}),
+  });
 
   await bulkUpdateAgents(
     esClient,
@@ -84,6 +89,7 @@ export async function reassignBatch(
       agentId: agent.id,
       data: {
         policy_id: options.newAgentPolicyId,
+        policy_base_id: removeVersionSuffixFromPolicyId(options.newAgentPolicyId),
         policy_revision: null,
         ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
       },
@@ -94,7 +100,11 @@ export async function reassignBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
   const now = new Date().toISOString();
-  const namespaces = spaceId ? [spaceId] : [];
+  // For cross-space task calls (spaceId === '*'), scope the action to the target policy's actual
+  // spaces. ALL_SPACES_ID ('*') in space_ids is valid here: Fleet's action query filter
+  // (query_namespaces_filtering.ts) includes '*' in every per-space terms query, so an action
+  // with namespaces: ['*'] surfaces in all spaces.
+  const namespaces = spaceId && spaceId !== '*' ? [spaceId] : newAgentPolicy?.space_ids ?? [];
 
   await createAgentAction(esClient, soClient, {
     id: actionId,

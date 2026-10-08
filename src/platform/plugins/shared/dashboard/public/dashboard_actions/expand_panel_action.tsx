@@ -48,7 +48,7 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.expandedPanelId$.value ? 'minimize' : 'expand';
+    return embeddable.parentApi.expandedPanelId$.value ? 'minimize' : 'maximize';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

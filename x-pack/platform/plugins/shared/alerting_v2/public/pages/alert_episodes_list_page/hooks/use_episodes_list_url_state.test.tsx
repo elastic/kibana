@@ -11,13 +11,13 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { EPISODES_LIST_APP_STATE_KEY } from '../utils/episodes_list_url_state';
+import { ALERTS_LIST_APP_STATE_KEY } from '../utils/episodes_list_url_state';
 import { useEpisodesListUrlState } from './use_episodes_list_url_state';
 
 const createMockTimefilter = () => dataPluginMock.createStartContract().query.timefilter.timefilter;
 
 describe('useEpisodesListUrlState', () => {
-  it('gets filter state from _a episodesList in the URL', async () => {
+  it('gets filter state from _a alertsList in the URL', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const urlStateStorage = createKbnUrlStateStorage({
       history,
@@ -29,7 +29,7 @@ describe('useEpisodesListUrlState', () => {
     await act(async () => {
       await urlStateStorage.set(
         '_a',
-        { [EPISODES_LIST_APP_STATE_KEY]: { status: 'active', ruleId: 'rule-123' } },
+        { [ALERTS_LIST_APP_STATE_KEY]: { status: 'active', ruleId: 'rule-123' } },
         { replace: true }
       );
     });
@@ -41,7 +41,7 @@ describe('useEpisodesListUrlState', () => {
     const { result } = renderHook(() => useEpisodesListUrlState(timefilter), { wrapper });
 
     expect(result.current.filterState).toEqual({
-      status: 'active',
+      status: ['active'],
       ruleId: 'rule-123',
     });
   });
@@ -56,12 +56,12 @@ describe('useEpisodesListUrlState', () => {
     const { result } = renderHook(() => useEpisodesListUrlState(timefilter), { wrapper });
 
     await act(async () => {
-      result.current.setFilterState({ status: 'recovering', ruleId: 'r9' });
+      result.current.setFilterState({ status: ['recovering'], ruleId: 'r9' });
     });
 
-    expect(result.current.filterState).toEqual({ status: 'recovering', ruleId: 'r9' });
+    expect(result.current.filterState).toEqual({ status: ['recovering'], ruleId: 'r9' });
     expect(history.location.search).toBe(
-      '?_a=(episodesList:(ruleId:r9,status:recovering,timeFrom:now-15m,timeTo:now))'
+      '?_a=(alertsList:(ruleId:r9,status:!(recovering),timeFrom:now-15m,timeTo:now))'
     );
   });
 });

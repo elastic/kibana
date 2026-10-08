@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import { once } from 'lodash';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { OnStart, Logger, PluginSetup, PluginStart } from '@kbn/core-di';
+import {
+  CoreStart,
+  PluginInitializer,
+  Request,
+  SavedObjectsClientFactory,
+} from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { AlertEventsClient } from '../lib/alert_events_client';
+import { EpisodesClient } from '../lib/episodes_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
@@ -24,7 +33,22 @@ import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
+import { EventOriginToken } from '../lib/event_origin/token';
+import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import {
+  RuleTemplatesClient,
+  RuleTemplateSavedObjectsClientToken,
+} from '../lib/rule_templates_client';
+import {
+  createChangeHistoryClient,
+  ChangeHistoryClientToken,
+  RuleChangesHistoryClient,
+  RuleChangesHistoryClientToken,
+  RuleChangesHistoryService,
+  RuleChangesHistoryServiceToken,
+} from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
@@ -51,6 +75,8 @@ import {
   ActionPolicySavedObjectServiceInternalToken,
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
+import { EsqlResponseFormatService } from '../lib/services/esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../lib/services/esql_response_format_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -78,22 +104,33 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
+import { LicenseService } from '../lib/services/license_service/license_service';
+import { LicenseServiceToken } from '../lib/services/license_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
+  bind(AlertEventsClient).toSelf().inRequestScope();
+  bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
+  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(EventOriginToken).toConstantValue('user');
+  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -111,6 +148,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
@@ -121,6 +159,18 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
+  bind(ChangeHistoryClientToken)
+    .toDynamicValue(({ get }) => {
+      const logger = get(Logger).get('rule_changes_history');
+      const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
+      return createChangeHistoryClient({ logger, kibanaVersion });
+    })
+    .inSingletonScope();
+  bind(RuleChangesHistoryService).toSelf().inSingletonScope();
+  bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
+  bind(RuleChangesHistoryClient).toSelf().inRequestScope();
+  bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
+
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
@@ -129,13 +179,23 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return uiSettings.globalAsScopedToClient(internalSoClient);
     })
     .inSingletonScope();
-  bind(SettingsService).toSelf().inSingletonScope();
+  bind(SettingsService).toSelf().inRequestScope();
   bind(SettingsServiceToken).toService(SettingsService);
+
+  bind(SpaceUiSettingsClientToken)
+    .toResolvedValue(
+      async (savedObjectsClientFactory, uiSettings) =>
+        uiSettings.asScopedToClient(await savedObjectsClientFactory()),
+      [SavedObjectsClientFactory, CoreStart('uiSettings')]
+    )
+    .inRequestScope();
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
+  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseServiceToken).toService(LicenseService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -163,16 +223,35 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
-  bind(TaskRunnerFactoryToken).toFactory((context) =>
-    createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
-    })
-  );
+  // Task Manager is a dependency of this plugin, so it can begin polling and run
+  // a task before this plugin's start lifecycle binds `CoreStart('injection')`.
+  // Resolving it eagerly would throw when the binding is not yet available. The
+  // promise resolves on the plugin's `OnStart` hook, at which point the injection
+  // service is guaranteed to be bound, so task runs wait until the plugin starts.
+  const injectionPromise = new Promise<CoreDiServiceStart>((resolve) => {
+    bind(OnStart).toConstantValue(
+      once((container) => {
+        resolve(container.get(CoreStart('injection')));
+      })
+    );
+  });
+
+  bind(TaskRunnerFactoryToken).toFactory(() => createTaskRunnerFactory({ injectionPromise }));
 
   bind(RuleSavedObjectsClientToken)
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  // The `alerting_rule_template` type is hidden and owned by the alerting (v1)
+  // plugin, so it has to be opted into explicitly here.
+  bind(RuleTemplateSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_TEMPLATE_SAVED_OBJECT_TYPE] }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
@@ -245,11 +324,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  // Singleton so the feature flag is subscribed to once per process, and every
+  // QueryService flavor plus the rule-executor step read the same resolved format.
+  bind(EsqlResponseFormatService).toSelf().inSingletonScope();
+  bind(EsqlResponseFormatServiceToken).toService(EsqlResponseFormatService);
+
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -258,7 +342,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -266,7 +350,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inSingletonScope();
 
@@ -296,6 +380,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
+  bind(PrivilegeChecker).toSelf().inRequestScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);

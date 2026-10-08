@@ -11,28 +11,23 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderShareAction } from '@kbn/app-header';
+import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInternalStateSelector } from '../../state_management/redux';
-import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
+import { useIsProjectChromeStyle } from './use_is_project_chrome_style';
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
-  titleAppend?: ReactNode;
-  isCollapsed?: boolean;
-  hasTabs?: boolean;
+  share?: AppHeaderShareAction;
+  tabsBar?: ReactNode;
 }
 
-export const ChromeAppHeader = ({
-  menu,
-  titleAppend,
-  isCollapsed,
-  hasTabs = false,
-}: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -49,22 +44,33 @@ export const ChromeAppHeader = ({
   }, [embeddableEditor]);
 
   const appMenu = useMemo(() => {
+    // Share is surfaced as the title-row action but also kept in the overflow menu. Sharing is
+    // effectively session-scoped (not tab-scoped), so per design it belongs in the first section
+    // right below "New session"/"Open" rather than leading the tab-scoped section. The fractional
+    // offset keeps share adjacent-below "New session" without colliding with any order.
+    const newSessionItem = menu?.items?.find((item) => item.id === AppMenuActionId.new);
+
     return {
       ...menu,
-      isCollapsed,
-      items: menu?.items?.map(
-        (item) =>
-          ({
-            ...item,
-            // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
-            // (Except switch language)
-            overflow: item.id !== AppMenuActionId.switchLanguageMode,
-          } as AppMenuItemType)
-      ),
-    };
-  }, [isCollapsed, menu]);
+      items: menu?.items?.map((item) => {
+        // We need more space for the tabs as the title is now in the same row. Move all items to the
+        // overflow menu. (Except switch language)
+        const overflow = item.id !== AppMenuActionId.switchLanguageMode;
 
-  if (!isChromeNextProjectHeader) {
+        if (item.id === AppMenuActionId.share && newSessionItem) {
+          return {
+            ...item,
+            overflow,
+            order: (newSessionItem.order ?? 0) + 0.5,
+          } as AppMenuItemType;
+        }
+
+        return { ...item, overflow } as AppMenuItemType;
+      }),
+    };
+  }, [menu]);
+
+  if (!isProjectChromeStyle) {
     return null;
   }
 
@@ -74,14 +80,14 @@ export const ChromeAppHeader = ({
         position: relative;
       `}
     >
-      <AppHeader
+      <DiscoverAppHeader
         title={title}
         back={back}
         menu={appMenu}
+        share={share}
         sticky={false}
-        padding="s"
-        titleAppend={titleAppend}
-        borderless={hasTabs}
+        spacing="compact"
+        tabsBar={tabsBar}
       />
     </div>
   );

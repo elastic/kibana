@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+  RootNodeDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
+import {
+  getAlertsNavPanel,
+  NightshiftNavigationIcon,
+  shouldIncludeStackManagementRules,
+} from '@kbn/observability-plugin/public';
 
-export function filterForFeatureAvailability(
-  node: NodeDefinition,
-  featureFlag: boolean = false
-): NodeDefinition[] {
+export function filterForFeatureAvailability<
+  T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
+>(node: T, featureFlag: boolean = false): T[] {
   if (!featureFlag) {
     return [];
   }
@@ -23,6 +33,7 @@ export function filterForFeatureAvailability(
 
 export const createNavigationTree = ({
   core,
+  significantEventsAvailable = false,
   streamsAvailable,
   overviewAvailable = true,
   genAiSettingsAvailable = true,
@@ -30,6 +41,7 @@ export const createNavigationTree = ({
   showAiAssistant = true,
 }: {
   core: CoreStart;
+  significantEventsAvailable?: boolean;
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   genAiSettingsAvailable?: boolean;
@@ -38,16 +50,30 @@ export const createNavigationTree = ({
 }): NavigationTreeDefinition => {
   return {
     body: [
+      ...filterForFeatureAvailability(
+        {
+          link: 'nightshift' as const,
+          icon: NightshiftNavigationIcon,
+        },
+        significantEventsAvailable
+      ),
       {
         id: 'observability_project_nav',
-        title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.observability', {
-          defaultMessage: 'Observability',
-        }),
-        renderAs: 'home',
-        icon: 'logoObservability',
-        link: overviewAvailable
-          ? ('observability-overview' as const)
-          : ('observabilityOnboarding' as const),
+        ...(overviewAvailable
+          ? {
+              title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                defaultMessage: 'Overview',
+              }),
+              icon: 'home',
+              link: 'observability-overview' as const,
+            }
+          : {
+              title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+                defaultMessage: 'Get started',
+              }),
+              icon: 'rocket',
+              link: 'observabilityOnboarding' as const,
+            }),
       },
       {
         title: i18n.translate('xpack.serverlessObservability.nav.discover', {
@@ -67,14 +93,11 @@ export const createNavigationTree = ({
         },
       },
       {
-        link: 'workflows',
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-      },
+      ...getWorkflowsNavPanel(core),
+      ...getAlertsNavPanel(core),
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
@@ -141,7 +164,12 @@ export const createNavigationTree = ({
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
-              { link: 'apm:dependencies' },
+              {
+                link: 'apm:dependencies',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                },
+              },
               { link: 'apm:settings', sideNavStatus: 'hidden' },
             ],
           },
@@ -255,6 +283,10 @@ export const createNavigationTree = ({
         },
         !showAiAssistant
       ),
+      {
+        icon: 'tableSparkles',
+        link: 'context_engine',
+      },
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
@@ -460,6 +492,7 @@ export const createNavigationTree = ({
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_federation' },
+              { link: 'management:esql_views' },
               { link: 'management:data_quality' },
               { link: 'management:data_usage' },
             ],
@@ -484,6 +517,7 @@ export const createNavigationTree = ({
             children: [
               { link: 'management:api_keys' },
               { link: 'management:application_connections' },
+              { link: 'management:service_accounts' },
               { link: 'management:roles' },
             ],
           },
@@ -504,7 +538,6 @@ export const createNavigationTree = ({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
@@ -515,8 +548,9 @@ export const createNavigationTree = ({
             ),
             breadcrumbStatus: 'hidden',
             children: [
-              { link: 'management:triggersActionsAlerts' },
-              { link: 'management:triggersActions' },
+              ...(shouldIncludeStackManagementRules(core)
+                ? [{ link: 'management:triggersActions' as const }]
+                : []),
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
@@ -577,10 +611,6 @@ export const createNavigationTree = ({
               children: [
                 {
                   link: 'management:genAiSettings' as const,
-                  breadcrumbStatus: 'hidden' as const,
-                },
-                {
-                  link: 'management:evals' as const,
                   breadcrumbStatus: 'hidden' as const,
                 },
                 ...(showAiAssistant

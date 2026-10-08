@@ -7,7 +7,7 @@
 
 import type { Ast, AstFunction } from '@kbn/interpreter';
 import type { TextBasedPrivateState } from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../common/types';
+import type { OriginalColumn } from '@kbn/lens-common';
 import { toExpression } from './to_expression';
 
 const findExpressionFunction = (
@@ -58,7 +58,6 @@ describe('toExpression', () => {
       id: 'a',
       label: '@timestamp',
       dataType: 'date',
-      operationType: 'literal',
     });
     expect(idMap['@timestamp'][0]).not.toHaveProperty('dropPartials');
   });
@@ -84,7 +83,6 @@ describe('toExpression', () => {
       label: '@timestamp',
       dropPartials: false,
       dataType: 'date',
-      operationType: 'literal',
     });
   });
 
@@ -109,7 +107,6 @@ describe('toExpression', () => {
       label: '@timestamp',
       dropPartials: true,
       dataType: 'date',
-      operationType: 'literal',
     });
   });
 });

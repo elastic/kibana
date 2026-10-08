@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-content-plugin",
+  "owner": ["@elastic/kibana-dashboards"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Custom content embeddable for dashboards",
+  "plugin": {
+    "id": "customContent",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "embeddable",
+      "data",
+      "esql",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "agentBuilder"
+    ]
+  }
+}

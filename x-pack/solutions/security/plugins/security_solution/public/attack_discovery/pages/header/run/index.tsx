@@ -13,9 +13,11 @@ import type { SettingsOverrideOptions } from '../../results/history/types';
 import * as i18n from './translations';
 
 interface Props {
+  /** `false` when the user lacks the Workflows Management `execute` privilege. */
+  hasWorkflowsExecute?: boolean;
+  isDisabled?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
-  isDisabled?: boolean;
 }
 
 const runButtonStyles = css`
@@ -24,24 +26,35 @@ const runButtonStyles = css`
   min-width: 74px;
 `;
 
-const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled }) => (
-  <EuiToolTip
-    content={isDisabled ? i18n.DISABLED_TOOLTIP : i18n.RUN_TOOLTIP}
-    data-test-subj="runTooltip"
-    position="bottom"
-  >
-    <EuiButton
-      color="primary"
-      css={runButtonStyles}
-      data-test-subj="run"
-      iconType="play"
-      isDisabled={isLoading || isDisabled}
-      onClick={() => onGenerate()}
-    >
-      {i18n.RUN}
-    </EuiButton>
-  </EuiToolTip>
-);
+const RunComponent: React.FC<Props> = ({
+  hasWorkflowsExecute = true,
+  isDisabled,
+  isLoading,
+  onGenerate,
+}) => {
+  const missingWorkflowsExecute = !hasWorkflowsExecute;
+
+  const tooltipContent = missingWorkflowsExecute
+    ? i18n.MISSING_WORKFLOWS_EXECUTE_TOOLTIP
+    : isDisabled
+    ? i18n.DISABLED_TOOLTIP
+    : i18n.RUN_TOOLTIP;
+
+  return (
+    <EuiToolTip content={tooltipContent} data-test-subj="runTooltip" position="bottom">
+      <EuiButton
+        color="primary"
+        css={runButtonStyles}
+        data-test-subj="run"
+        iconType="play"
+        isDisabled={isLoading || isDisabled || missingWorkflowsExecute}
+        onClick={() => onGenerate()}
+      >
+        {i18n.RUN}
+      </EuiButton>
+    </EuiToolTip>
+  );
+};
 
 RunComponent.displayName = 'Run';
 

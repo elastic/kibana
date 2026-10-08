@@ -16,6 +16,8 @@ import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_p
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
+import type { ServerlessInfo } from '../../types';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
 
 const SIZE = 1000;
 const ML_NOTIFICATIONS_INDEX_PREFIX = '.ml-notifications-';
@@ -62,7 +64,8 @@ export type JobAuditMessagesService = ReturnType<typeof jobAuditMessagesProvider
 
 export function jobAuditMessagesProvider(
   { asInternalUser }: IScopedClusterClient,
-  mlClient: MlClient
+  mlClient: MlClient,
+  serverless: ServerlessInfo
 ) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
@@ -159,6 +162,9 @@ export function jobAuditMessagesProvider(
         size: SIZE,
         sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
         query,
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -267,6 +273,9 @@ export function jobAuditMessagesProvider(
             },
           },
         },
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -489,6 +498,9 @@ export function jobAuditMessagesProvider(
             },
           },
         },
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );

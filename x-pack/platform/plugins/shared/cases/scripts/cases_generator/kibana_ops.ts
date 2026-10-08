@@ -138,41 +138,29 @@ interface TemplateBuildResult {
   summary: string;
 }
 
-// Builds the YAML body for one template request. Kitchen-sink mode hydrates
-// the canonical YAML once, overrides the name/description, and merges tags;
-// the synthesized path builds a definition from --templateFieldTypes.
+// Builds the YAML body for one template request. Template metadata
+// (name/description/tags) is sent at the top level, while the YAML carries only
+// case defaults + field definitions.
 // Extracted so createTemplates can stay focused on the API loop.
 function buildTemplateBody(template: TemplateInput): TemplateBuildResult {
   if (template.useKitchenSink) {
-    const definitionObj = getKitchenSinkDefinition();
-    definitionObj.name = template.name;
-    if (template.description) {
-      definitionObj.description = template.description;
-    }
-    const mergedTags = dedupe([
-      ...(definitionObj.tags ?? []),
-      ...(template.tags ?? []),
-      AUTO_GENERATED_TAG,
-    ]);
-    definitionObj.tags = mergedTags;
+    const kitchenSinkDefinition = getKitchenSinkDefinition();
+    const definitionObj = { ...kitchenSinkDefinition } as Record<string, unknown>;
+    delete definitionObj.name;
+    delete definitionObj.description;
+    delete definitionObj.tags;
+    const mergedTags = dedupe([...(template.tags ?? []), AUTO_GENERATED_TAG]);
     return {
       definitionYaml: yamlStringify(definitionObj),
       tags: mergedTags,
-      description: template.description ?? definitionObj.description,
-      summary: `with ${definitionObj.fields.length} kitchen-sink field(s)`,
+      description: template.description,
+      summary: `with ${kitchenSinkDefinition.fields.length} kitchen-sink field(s)`,
     };
   }
 
   const fields = template.fieldTypes.map((userType, index) => buildTemplateField(index, userType));
   const tags = dedupe([...(template.tags ?? []), AUTO_GENERATED_TAG]);
-  const definitionObj: Record<string, unknown> = {
-    name: template.name,
-    fields,
-    tags,
-  };
-  if (template.description) {
-    definitionObj.description = template.description;
-  }
+  const definitionObj: Record<string, unknown> = { fields };
   const summary =
     fields.length > 0
       ? `with ${fields.length} field(s): ${template.fieldTypes.join(', ')}`
@@ -214,6 +202,7 @@ export async function createTemplates({
   for (const template of templates) {
     const built = buildTemplateBody(template);
     const body: Record<string, unknown> = {
+      name: template.name,
       owner,
       definition: built.definitionYaml,
       tags: built.tags,

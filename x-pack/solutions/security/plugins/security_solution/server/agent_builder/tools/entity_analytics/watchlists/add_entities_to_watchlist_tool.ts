@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -20,26 +20,28 @@ import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlis
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
-import { formatEntityIdsForPrompt } from './entity_ids_preview';
+import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
-const schema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to add entities to. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
-    ),
-  entityIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENTITIES_PER_CALL)
-    .describe(
-      `EUIDs (entity unique ids) to add to the watchlist, e.g. ["user:jsmith123", "host:server01"]. Typically gathered from \`security.search_entities\` (use the \`entity.id\` field of each row) or supplied by the user. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger sets, direct the user to the CSV upload in the UI.`
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to add entities to. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
+      ),
+    entityIds: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(MAX_ENTITIES_PER_CALL)
+      .describe(
+        `EUIDs (entity unique ids) to add to the watchlist, e.g. ["user:jsmith123", "host:server01"]. Typically gathered from \`security.search_entities\` (use the \`entity.id\` field of each row) or supplied by the user. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger sets, direct the user to the CSV upload in the UI.`
+      ),
+  })
+);
 
 export const SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID = securityTool('add_entities_to_watchlist');
 
@@ -58,6 +60,13 @@ Use when the user asks to add entities to a named or known watchlist (e.g. "add 
 Entities not present in the entity store are reported as \`not_found\` in the result — the call as a whole still succeeds.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Add Entities to Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

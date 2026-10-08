@@ -148,6 +148,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableNewFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
+  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -170,6 +174,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableSiemReadiness': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the SIEM Readiness feature.' },
+  },
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -177,6 +185,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableAlertsAndAttacksAlignment': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAttackDiscoveryWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
+  },
+  'securitySolution:enableRuleChangesHistory': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -244,6 +260,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
   },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
@@ -530,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -553,16 +580,28 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'contextEngine:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Whether the Context Engine is enabled.' },
-  },
-  'agentBuilder:uiamOAuthClientManagement': {
+  'agentBuilder:apiDiscovery': {
     type: 'boolean',
     _meta: {
       description:
-        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
+  },
+  'agentBuilder:deductiveEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
+  },
+  'agentBuilder:deductiveEndpoint': {
+    type: 'keyword',
+    _meta: { description: 'Base URL of the external Deductive backend.' },
+  },
+  'agentBuilder:deductiveApiKey': {
+    type: 'keyword',
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
+  },
+  'contextEngine:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the Context Engine is enabled.' },
   },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
@@ -600,6 +639,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether to include tool call arguments and results in traces.',
     },
   },
+  'agentBuilder:tracing:includeUserData': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real user IDs and usernames in traces.',
+    },
+  },
   'agentBuilder:tracing:includeUserPrompts': {
     type: 'boolean',
     _meta: {
@@ -620,6 +665,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
   },
+  'workflows:executionFlyout:aiDiagnose:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the Diagnose with AI action is enabled on failed-step error panels.',
+    },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -634,26 +685,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'banners:backgroundColor': {
     type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:presentation:timeToPresent': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:byValueEmbeddable': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:useDataService': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:enable_ui': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
@@ -695,6 +726,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
   },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
@@ -793,25 +828,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Maximum number of cases the Cases connector can open during a single rule run.',
     },
   },
-  'observability:streamsEnableSignificantEvents': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable significant events in streams.',
-    },
-  },
-  'observability:streamsEnableSignificantEventsDiscovery': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Significant events discovery in Streams.',
-    },
-  },
-  'observability:streamsEnableSignificantEventsAlertingV2': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -863,6 +879,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Non-default value of the scheduled Significant Events detection interval (minutes).',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection bucket interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection lookback window (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events target coverage window (minutes).',
+    },
+  },
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
     type: 'long',
     _meta: {
@@ -888,10 +925,37 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Non-default value of the scheduled Significant Events maximum review passes.',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule detection threshold.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule probe interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule severity exemption.',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
       description: 'Enable diagnostic mode',
+    },
+  },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
     },
   },
   'genAiSettings:defaultAIConnector': {
@@ -966,6 +1030,20 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
     },
   },
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
+    },
+  },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
+    },
+  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
@@ -982,6 +1060,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable token usage tracking in Kibana',
+    },
+  },
+  'alerting:v1:showV1ObservabilityAlertsTable': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the V1 Observability alerts table is shown when Alerting v2 is enabled.',
     },
   },
 };

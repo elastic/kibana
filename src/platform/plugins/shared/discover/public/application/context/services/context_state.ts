@@ -314,7 +314,7 @@ function createInitialAppState(
   uiSettings: IUiSettingsClient
 ): AppState {
   const defaultState: AppState = {
-    columns: ['_source'],
+    columns: [],
     filters: [],
     predecessorCount: defaultSize,
     successorCount: defaultSize,

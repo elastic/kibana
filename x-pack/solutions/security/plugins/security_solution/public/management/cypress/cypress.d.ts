@@ -21,11 +21,6 @@ import type {
 } from '../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
-import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type {
-  HostPolicyResponse,
-  LogsEndpointActionResponse,
-} from '../../../common/endpoint/types';
 import type {
   HostActionResponse,
   IndexEndpointHostsCyTaskOptions,
@@ -191,22 +186,10 @@ declare global {
       ): Chainable<DeletedIndexedEndpointRuleAlerts>;
 
       task(
-        name: 'indexEndpointPolicyResponse',
-        arg: HostPolicyResponse,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<IndexedEndpointPolicyResponse>;
-
-      task(
-        name: 'deleteIndexedEndpointPolicyResponse',
-        arg: IndexedEndpointPolicyResponse,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
         name: 'sendHostActionResponse',
         arg: HostActionResponse,
         options?: Partial<Loggable & Timeoutable>
-      ): Chainable<LogsEndpointActionResponse>;
+      ): Chainable<null>;
 
       task(
         name: 'deleteAllEndpointData',

@@ -17,12 +17,16 @@ export const mainTranslations = {
       'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
   }),
 
-  technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
+  experimental: i18n.translate('xpack.dataFederation.technicalPreview', {
     defaultMessage: 'Technical Preview',
   }),
 
   docsLink: i18n.translate('xpack.dataFederation.docsLink', {
     defaultMessage: 'Learn more',
+  }),
+
+  quickstartLink: i18n.translate('xpack.dataFederation.quickstartLink', {
+    defaultMessage: 'Quickstart',
   }),
 
   columns: {
@@ -109,21 +113,15 @@ export const mainTranslations = {
       editAction: i18n.translate('xpack.dataFederation.setsTable.editAction', {
         defaultMessage: 'Edit',
       }),
-      editActionDescription: i18n.translate(
-        'xpack.dataFederation.setsTable.editActionDescription',
-        {
-          defaultMessage: 'Edit dataset',
-        }
-      ),
       deleteAction: i18n.translate('xpack.dataFederation.setsTable.deleteAction', {
         defaultMessage: 'Delete',
       }),
-      deleteActionDescription: i18n.translate(
-        'xpack.dataFederation.setsTable.deleteActionDescription',
-        {
-          defaultMessage: 'Delete dataset',
-        }
-      ),
+      discoverAction: i18n.translate('xpack.dataFederation.setsTable.discoverAction', {
+        defaultMessage: 'Open in Discover',
+      }),
+      moreActions: i18n.translate('xpack.dataFederation.setsTable.moreActions', {
+        defaultMessage: 'More actions',
+      }),
       caption: i18n.translate('xpack.dataFederation.setsTable.caption', {
         defaultMessage: 'Datasets',
       }),
@@ -158,9 +156,6 @@ export const mainTranslations = {
   },
 
   filters: {
-    dataSource: i18n.translate('xpack.dataFederation.filters.dataSource', {
-      defaultMessage: 'Data source',
-    }),
     allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
       defaultMessage: 'Data sources',
     }),
@@ -265,4 +260,15 @@ export const mainTranslations = {
       defaultMessage: 'Delete failed',
     }),
   },
+
+  refreshDataSetsErrorTitle: i18n.translate('xpack.dataFederation.refreshDataSets.errorTitle', {
+    defaultMessage: 'Could not refresh the datasets list',
+  }),
+
+  refreshDataSourcesErrorTitle: i18n.translate(
+    'xpack.dataFederation.refreshDataSources.errorTitle',
+    {
+      defaultMessage: 'Could not refresh the data sources list',
+    }
+  ),
 } as const;

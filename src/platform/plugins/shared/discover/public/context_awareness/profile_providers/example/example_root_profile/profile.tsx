@@ -14,7 +14,7 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../common/context_awareness';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',

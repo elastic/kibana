@@ -18,10 +18,12 @@ import {
   type TabPersistableState,
 } from './create_tab_persistable_state_observable';
 import { internalStateActions, selectTab, type DiscoverInternalState } from '../redux';
+import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
 
 describe('createTabPersistableStateObservable', () => {
   const setup = async () => {
     const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
     const toolkit = getDiscoverInternalStateMock({
       services,
       persistedDataViews: [dataViewMockWithTimeField],
@@ -197,18 +199,24 @@ describe('createTabPersistableStateObservable', () => {
     const subscription = observable$.subscribe((value) => {
       emittedValues.push(value);
     });
+    const profileState = {
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      persistentValue: 'primary',
+    };
 
     internalState.dispatch(
       internalStateActions.setProfileState({
         tabId,
-        key: 'testProfileState',
-        profileState: { color: 'primary' },
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState,
       })
     );
 
     expect(emittedValues).toHaveLength(1);
     expect(emittedValues[0].profileState).toEqual({
-      testProfileState: { color: 'primary' },
+      testProfileState: {
+        persistentValue: 'primary',
+      },
     });
 
     subscription.unsubscribe();

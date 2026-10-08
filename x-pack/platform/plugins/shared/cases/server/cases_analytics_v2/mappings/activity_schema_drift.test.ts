@@ -7,8 +7,12 @@
 
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
+import { CONNECTOR_ID_REFERENCE_NAME, COMMENT_REF_NAME } from '../../common/constants';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import { createCaseUserActionSavedObjectType } from '../../saved_object_types/user_actions';
@@ -39,7 +43,7 @@ import { ACTIVITY_INDEX_MAPPING } from './activity';
  * reads). The user-actions SO is `dynamic: false` on `payload`,
  * so payload sub-fields aren't mirrored. The surface fields the
  * builder reads (`type`, `action`, `created_at`, `created_by`,
- * `owner`) must still exist on the SO mapping.
+ * `owner`, `source`) must still exist on the SO mapping.
  */
 
 // ----- Mapping-walking helpers (mirrors cases drift test) -----
@@ -109,6 +113,7 @@ const baseAttrs = {
   created_at: '2026-05-01T10:00:00.000Z',
   created_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
   owner: 'securitySolution',
+  source: { type: 'workflow', id: 'wf-1', name: 'My Workflow', run_id: 'exec-1' },
 };
 
 const caseRef: SavedObjectReference = {
@@ -176,7 +181,16 @@ const PER_TYPE_FIXTURES: {
   comment: makeUserActionSO(
     'comment',
     { comment: { type: 'user', comment: 'A comment', owner: 'securitySolution' } },
-    { action: 'create' }
+    {
+      action: 'create',
+      // A comment user action references the created attachment SO in
+      // addition to the case, so the fixture exercises the `comment_id`
+      // extraction path (legacy `cases-comments` source type here).
+      references: [
+        caseRef,
+        { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, name: COMMENT_REF_NAME },
+      ],
+    }
   ),
   // Real persisted shape: `extractConnectorId` strips the id out of
   // `payload.connector` (leaving `{ name, type, fields }`) and stores it in
@@ -237,6 +251,14 @@ const PER_TYPE_FIXTURES: {
     { template: { id: 't-1', version: 1 } },
     { action: 'update' }
   ),
+  workflow: makeUserActionSO(
+    'workflow',
+    {
+      workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+      origin: { type: 'cases.case', id: 'case-1' },
+    },
+    { action: 'create' }
+  ),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----
@@ -280,6 +302,10 @@ describe('per-action-type curated extracts', () => {
     const doc = buildActivityDoc(PER_TYPE_FIXTURES.connector);
     expect(doc.action.connector_id_new).toBe('connector-1');
   });
+  it('comment: populates action.attachment_reference_id from the associated attachment reference', () => {
+    const doc = buildActivityDoc(PER_TYPE_FIXTURES.comment);
+    expect(doc.action.attachment_reference_id).toBe('comment-1');
+  });
   it('non-extract types do not leak any curated extract field', () => {
     // Spot-check — `description` carries no curated extract, so
     // every optional extract field on `action` should be undefined.
@@ -289,6 +315,7 @@ describe('per-action-type curated extracts', () => {
     expect(doc.action.assignees_changed).toBeUndefined();
     expect(doc.action.tags_changed).toBeUndefined();
     expect(doc.action.connector_id_new).toBeUndefined();
+    expect(doc.action.attachment_reference_id).toBeUndefined();
   });
 });
 
@@ -305,17 +332,11 @@ const SURFACE_FIELDS_THE_DOC_BUILDER_READS = [
   'created_at',
   'created_by',
   'owner',
+  'source',
 ];
 
 describe('SO mapping carries every surface field the activity doc-builder reads', () => {
-  const soType = createCaseUserActionSavedObjectType({
-    persistableStateAttachmentTypeRegistry: {
-      has: () => false,
-      get: () => undefined,
-      getAll: () => [],
-      register: () => undefined,
-    } as never,
-  } as never);
+  const soType = createCaseUserActionSavedObjectType();
   const soPaths = collectMappedPaths(soType.mappings as MappingTypeMapping);
   it.each(SURFACE_FIELDS_THE_DOC_BUILDER_READS)('SO mapping has %s', (field) => {
     expect(soPaths.has(field)).toBe(true);

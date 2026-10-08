@@ -92,8 +92,8 @@ export const EditFailedDataLifecycleFlyoutBody = ({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
+            <EuiFlexItem grow={false} css={styles.failureStoreHelpText}>
+              <EuiText size="xs" color="subdued">
                 {strings.enableFailureStoreHelpText}
               </EuiText>
             </EuiFlexItem>

@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { useKibana } from '../../../common/lib/kibana';
+import { FlyoutV2EventTypes, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -15,6 +16,7 @@ const mockStorage = {
   get: jest.fn(),
   set: jest.fn(),
 };
+const mockReportEvent = jest.fn();
 
 const validTabIds = ['overview', 'table', 'json'] as const;
 type TabId = (typeof validTabIds)[number];
@@ -23,7 +25,9 @@ const STORAGE_KEY = 'test.selectedTab';
 describe('useTabs (shared)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { storage: mockStorage } });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { storage: mockStorage, telemetry: { reportEvent: mockReportEvent } },
+    });
   });
 
   it('falls back to the first valid tab id when nothing else resolves', () => {
@@ -69,6 +73,29 @@ describe('useTabs (shared)', () => {
 
     expect(result.current.selectedTabId).toBe('json');
     expect(mockStorage.set).toHaveBeenCalledWith(STORAGE_KEY, 'json');
+  });
+
+  it('does not report tab-click telemetry when flyoutType is omitted', () => {
+    mockStorage.get.mockReturnValue(undefined);
+    const { result } = renderHook(() => useTabs<TabId>({ validTabIds, storageKey: STORAGE_KEY }));
+
+    act(() => result.current.setSelectedTabId('table'));
+
+    expect(mockReportEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports FlyoutTabClicked when flyoutType is provided', () => {
+    mockStorage.get.mockReturnValue(undefined);
+    const { result } = renderHook(() =>
+      useTabs<TabId>({ validTabIds, storageKey: STORAGE_KEY, flyoutType: FLYOUT_TYPE.DOCUMENT })
+    );
+
+    act(() => result.current.setSelectedTabId('table'));
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutTabClicked, {
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tabId: 'table',
+    });
   });
 
   it('syncs to a changed initialTabId without writing to storage', () => {

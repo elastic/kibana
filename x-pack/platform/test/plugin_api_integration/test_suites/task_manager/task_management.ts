@@ -101,6 +101,16 @@ export default function ({ getService }: FtrProviderContext) {
       return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
+    async function queryApiKeys(): Promise<Array<{ id: string }>> {
+      const response = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      return response.body.apiKeys;
+    }
+
     async function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
@@ -181,12 +191,13 @@ export default function ({ getService }: FtrProviderContext) {
               interval: number;
               tzid: string;
             };
-          }
+          },
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule })
+        .send({ taskIds, schedule, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -202,12 +213,13 @@ export default function ({ getService }: FtrProviderContext) {
               tzid: string;
             };
           },
-      regenerateApiKey: boolean = false
+      regenerateApiKey: boolean = false,
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule, regenerateApiKey })
+        .send({ taskIds, schedule, regenerateApiKey, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -239,6 +251,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ task })
         .expect(200)
         .then((response: { body: ConcreteTaskInstance }) => response.body);
+    }
+
+    function ensureTaskScheduledWithApiKey(task: Partial<ConcreteTaskInstance>) {
+      return supertest
+        .post('/api/sample_tasks/ensure_scheduled_with_api_key')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
     }
 
     function releaseTasksWaitingForEventToComplete(event: string) {
@@ -712,6 +733,50 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('grants a single API key when ensureScheduled is called repeatedly for the same task', async () => {
+      const apiKeysBefore = await queryApiKeys();
+
+      const task = {
+        id: 'test-task-for-sample-task-plugin-to-test-ensure-scheduled-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '1m' },
+      };
+
+      await ensureTaskScheduledWithApiKey(task);
+
+      const scheduled = await currentTask(task.id);
+      const grantedApiKeyId = scheduled.userScope?.apiKeyId;
+
+      expect(scheduled.apiKey).not.empty();
+      expect(grantedApiKeyId).not.to.be(undefined);
+      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+
+      // API keys are granted before the task document is written, so an ensureScheduled call for
+      // an existing task used to mint a key and then discard it on the version conflict.
+      await ensureTaskScheduledWithApiKey(task);
+      await ensureTaskScheduledWithApiKey(task);
+
+      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+
+      // The stored task keeps running on the key it was scheduled with.
+      const unchanged = await currentTask(task.id);
+      expect(unchanged.userScope?.apiKeyId).to.eql(grantedApiKeyId);
+
+      // No key was granted and thrown away, so none should be queued for invalidation either.
+      const pendingInvalidation = await es.search({
+        index: '.kibana_task_manager',
+        size: 100,
+        query: { term: { type: 'api_key_to_invalidate' } },
+      });
+
+      expect(
+        pendingInvalidation.hits.hits.filter(
+          (hit) => (hit._source as any).api_key_to_invalidate?.apiKeyId === grantedApiKeyId
+        ).length
+      ).to.eql(0);
+    });
+
     it('captures the requesting user name on userScope when scheduling with an API key', async () => {
       const scheduled = await scheduleTaskWithApiKey({
         id: 'test-task-for-sample-task-plugin-to-capture-user-name',
@@ -816,7 +881,11 @@ export default function ({ getService }: FtrProviderContext) {
         }).length
       ).eql(1);
 
-      // api_key_to_invalidate saved object should be created for the cloned key
+      // api_key_to_invalidate saved object should be created for the cloned key.
+      // The same key can be marked more than once (the one-shot task's completion
+      // removal races the explicit DELETE above, and each removal path creates a
+      // fresh un-deduped SO), so assert it was queued at least once rather than
+      // exactly once. Invalidation itself is verified below.
       await retry.try(async () => {
         const response = await es.search({
           index: '.kibana_task_manager',
@@ -828,10 +897,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(response.hits.hits.length).to.eql(1);
-        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
-          result.userScope?.apiKeyId
-        );
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).to.be.greaterThan(0);
       });
 
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
@@ -1857,6 +1927,57 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk update schedules for a running task and have the update survive completion when includeRunningTasks is true', async () => {
+      const releaseEvent = 'releaseRunningTaskWithUpdatedSchedule';
+      const runningTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { waitForEvent: releaseEvent },
+      });
+
+      await runTaskSoon({ id: runningTask.id });
+
+      // ensure task is running and capture when this execution was due
+      let dueRunAt: string;
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        dueRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([runningTask.id], { interval: '3h' }, true);
+
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // the running task's schedule is updated in place while it is still running, runAt is untouched
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expect(task.runAt).to.be(dueRunAt);
+      });
+
+      // the task writes its history doc right before it starts waiting for the release event
+      await retry.try(async () => {
+        expect((await historyDocs(runningTask.id)).length).to.eql(1);
+      });
+      await releaseTasksWaitingForEventToComplete(releaseEvent);
+
+      // once the run finishes, the next runAt is one 3h interval from this run's due time
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('idle');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expectReschedule(Date.parse(dueRunAt), task, 3 * 60 * 60 * 1000);
+      });
+    });
+
     it('should set status of recurring task back to idle when schedule interval is greater than timeout', async () => {
       const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskTimingOut',
@@ -1878,6 +1999,63 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.startedAt).to.be(null);
         expect(scheduledTask.retryAt).to.be(null);
+      });
+    });
+
+    it('does not surface a framework error when a non-cancellable recurring task overruns its retryAt and is reclaimed', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleRecurringTaskWhichOverrunsRetryAt',
+        schedule: { interval: '5s' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs(task.id);
+        expect(docs.length).to.be.greaterThan(1);
+      });
+
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana-event-log*',
+          size: 100,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.provider': 'taskManager' } },
+                { term: { 'event.action': 'task-run' } },
+                { term: { 'kibana.task.id': task.id } },
+              ],
+            },
+          },
+        });
+        expect(response.hits.hits.length).to.be.greaterThan(1);
+      });
+
+      // none of the completed runs should have failed with a version conflict.
+      const failures = await es.search({
+        index: '.kibana-event-log*',
+        size: 100,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.provider': 'taskManager' } },
+              { term: { 'event.action': 'task-run' } },
+              { term: { 'kibana.task.id': task.id } },
+              { term: { 'event.outcome': 'failure' } },
+            ],
+          },
+        },
+      });
+      const conflictFailures = failures.hits.hits.filter((hit) =>
+        ((hit._source as Record<string, any>)?.error?.message ?? '').includes('version conflict')
+      );
+      expect(conflictFailures.length).to.eql(0);
+
+      // clean up the event log entries for this task
+      await es.deleteByQuery({
+        index: '.kibana-event-log*',
+        query: { bool: { filter: [{ term: { 'kibana.task.id': task.id } }] } },
+        conflicts: 'proceed',
       });
     });
 

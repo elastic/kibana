@@ -31,7 +31,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure/get_connectors'));
-    loadTestFile(require.resolve('./attachments_framework/registered_unified_basic'));
+    loadTestFile(require.resolve('./registered_attachments'));
+    loadTestFile(require.resolve('./unregistered_type_reads'));
 
     /**
      * Telemetry

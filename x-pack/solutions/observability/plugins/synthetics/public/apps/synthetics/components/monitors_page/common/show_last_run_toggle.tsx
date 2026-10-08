@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { selectOverviewShowLastRun, setOverviewShowLastRunAction } from '../../../state';
 import { persistShowLastRun } from '../../../state/utils/get_initial_show_last_run';
 import { useOverviewStatusState } from '../hooks/use_overview_status';

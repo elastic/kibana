@@ -27,6 +27,7 @@ import {
 } from '@kbn/data-lifecycle-phases';
 
 import { DlmPhasesSelector } from '../../data_lifecycle';
+import { LookupLifecycleWarningCallout } from '../../shared';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../data_lifecycle';
 import { resolveLogisticsLifecycle } from '../../../../../common/lib';
 import { buildDataRetentionFromSerializedDlmPhases } from '../../data_lifecycle/dlm_phases_selector/utils/build_data_retention';
@@ -54,6 +55,7 @@ import {
   TIME_SERIES_MODE,
   LOGSDB_INDEX_MODE,
   LOOKUP_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
@@ -258,12 +260,25 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: LOOKUP_INDEX_MODE,
           inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-          'data-test-subj': 'index_mode_logsdb',
+          'data-test-subj': 'index_mode_lookup',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
                 <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: VECTOR_DB_INDEX_MODE,
+          inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
+          'data-test-subj': 'index_mode_vectordb_document',
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[VECTOR_DB_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
@@ -361,6 +376,9 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+    const {
+      config: { enableIndexMode },
+    } = useAppContext();
     const { form } = useForm({
       schema: schemas.logistics,
       defaultValue,
@@ -379,17 +397,24 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       updateFieldValues,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, indexPatterns: indexPatternsField, setIndexMode }] =
-      useFormData<{
-        addMeta: boolean;
-        doCreateDataStream: boolean;
-        indexPatterns: string[];
-        indexMode: string;
-        setIndexMode: boolean;
-      }>({
-        form,
-        watch: ['addMeta', 'doCreateDataStream', 'indexPatterns', 'indexMode', 'setIndexMode'],
-      });
+    const [
+      {
+        addMeta,
+        doCreateDataStream,
+        indexPatterns: indexPatternsField,
+        indexMode: indexModeValue,
+        setIndexMode,
+      },
+    ] = useFormData<{
+      addMeta: boolean;
+      doCreateDataStream: boolean;
+      indexPatterns: string[];
+      indexMode: string;
+      setIndexMode: boolean;
+    }>({
+      form,
+      watch: ['addMeta', 'doCreateDataStream', 'indexPatterns', 'indexMode', 'setIndexMode'],
+    });
 
     const {
       config: { isServerless: isDlmPhasesSelectorServerless },
@@ -419,6 +444,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     }, [lifecycle]);
 
     const isStepValid = isFormValid && (!doCreateDataStream || isDlmValid);
+
+    // Data stream templates always serialize a data lifecycle (see `resolveLogisticsLifecycle`),
+    // which ES ignores for lookup index mode, so warn without blocking.
+    const showLookupLifecycleWarning = Boolean(
+      setIndexMode && indexModeValue === LOOKUP_INDEX_MODE && doCreateDataStream
+    );
 
     const getData = useCallback(() => {
       const data = getFormData();
@@ -597,6 +628,19 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 'data-test-subj': 'dataLifecyclePhasesSelector',
               }}
             >
+              {showLookupLifecycleWarning && (
+                <>
+                  <LookupLifecycleWarningCallout
+                    description={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateForm.stepLogistics.lookupLifecycleWarningDescription"
+                        defaultMessage="Elasticsearch skips indices with the lookup index mode when running the data stream lifecycle. The data lifecycle configured here is not applied to the data of data streams created from this template."
+                      />
+                    }
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
               {isDlmPhasesSelectorServerless ? (
                 <ServerlessDlmPhasesSelector
                   defaultValue={dlmDefaultValue}
@@ -612,42 +656,44 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/* Index mode */}
-          <FormRow
-            title={indexMode.title}
-            description={
-              <>
-                {indexMode.description}
-                <EuiSpacer size="m" />
+          {enableIndexMode && (
+            <FormRow
+              title={indexMode.title}
+              description={
+                <>
+                  {indexMode.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="setIndexMode"
+                    component={ToggleField}
+                    componentProps={{
+                      'data-test-subj': 'toggleIndexMode',
+                      euiFieldProps: {
+                        label: i18n.translate(
+                          'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
+                          {
+                            defaultMessage: 'Set index mode',
+                          }
+                        ),
+                      },
+                    }}
+                  />
+                </>
+              }
+            >
+              {setIndexMode && (
                 <UseField
-                  path="setIndexMode"
-                  component={ToggleField}
+                  path="indexMode"
                   componentProps={{
-                    'data-test-subj': 'toggleIndexMode',
                     euiFieldProps: {
-                      label: i18n.translate(
-                        'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
-                        {
-                          defaultMessage: 'Set index mode',
-                        }
-                      ),
+                      'data-test-subj': indexMode.testSubject,
+                      options: indexMode.options,
                     },
                   }}
                 />
-              </>
-            }
-          >
-            {setIndexMode && (
-              <UseField
-                path="indexMode"
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': indexMode.testSubject,
-                    options: indexMode.options,
-                  },
-                }}
-              />
-            )}
-          </FormRow>
+              )}
+            </FormRow>
+          )}
 
           {/* Order */}
           {isLegacy && (

@@ -14,7 +14,7 @@
 import type { DeepPartial } from '@kbn/utility-types';
 
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { DashboardState } from './types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardCreateResponseBody } from './create';
 import type { DashboardReadResponseBody } from './read';
 import type { DashboardSearchResponseBody } from './search';
@@ -513,6 +513,30 @@ const dashboardSearchCodeSamples = [
     lang: 'Console',
     label: 'Search dashboards - Console',
     source: 'GET kbn:/api/dashboards?query=web+logs&per_page=10\n',
+  },
+  {
+    lang: 'cURL_tag_names',
+    label: 'Filter by tag name - cURL',
+    source:
+      'curl -X GET "${KIBANA_URL}/api/dashboards?tag_names=Security&tag_names=Observability" \\\n' +
+      '  -H "Authorization: ApiKey ${API_KEY}"\n',
+  },
+  {
+    lang: 'Console_tag_names',
+    label: 'Filter by tag name - Console',
+    source: 'GET kbn:/api/dashboards?tag_names=Security&tag_names=Observability\n',
+  },
+  {
+    lang: 'cURL_excluded_tag_names',
+    label: 'Exclude by tag name - cURL',
+    source:
+      'curl -X GET "${KIBANA_URL}/api/dashboards?excluded_tag_names=Deprecated" \\\n' +
+      '  -H "Authorization: ApiKey ${API_KEY}"\n',
+  },
+  {
+    lang: 'Console_excluded_tag_names',
+    label: 'Exclude by tag name - Console',
+    source: 'GET kbn:/api/dashboards?excluded_tag_names=Deprecated\n',
   },
 ];
 

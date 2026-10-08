@@ -27,6 +27,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { isSameDataset, type EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -45,7 +46,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
-  useCurrentDataView,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -60,6 +61,26 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
   'breakdownField',
   'timeInterval',
 ];
+
+/**
+ * A new source for the same dataset (revert → setDataView) is not a source change.
+ * Classic compares `id`. ES|QL compares `datasetKey`, because `id` is a query hash
+ * and changes when the query text changes even if FROM, time field, and project
+ * routing stay the same.
+ */
+function hasFetchParamChanged(
+  previous: UnifiedHistogramFetchParamsExternal,
+  next: UnifiedHistogramFetchParamsExternal,
+  key: keyof UnifiedHistogramFetchParamsExternal
+): boolean {
+  if (key === 'dataSource') {
+    if (!previous.dataSource && !next.dataSource) {
+      return false;
+    }
+    return !isSameDataset(previous.dataSource, next.dataSource);
+  }
+  return previous[key] !== next[key];
+}
 
 export interface UseUnifiedHistogramOptions {
   initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
@@ -198,7 +219,7 @@ export const useDiscoverHistogram = (
     searchSessionId,
   } = requestParams;
 
-  const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
@@ -207,7 +228,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const isApproximate = useAppStateSelector((state) => state.isApproximate);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
@@ -222,7 +243,7 @@ export const useDiscoverHistogram = (
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-      dataView,
+      dataSource: currentDataSource,
       query,
       filters,
       timeRange,
@@ -230,19 +251,19 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
-      isApproximate,
+      isApproximate: esqlApproximation,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,
     currentTabControlState,
-    dataView,
+    currentDataSource,
     esqlVariables,
-    isApproximate,
+    esqlApproximation,
     filters,
     inspectorAdapters.requests,
     isEsqlMode,
@@ -258,16 +279,18 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+      const dataSourceForColumns =
+        currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
-        isEsqlMode,
+        currentDataSource: dataSourceForColumns,
       });
 
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        columns: isEsqlMode ? esqlQueryColumns : undefined,
-        table: isEsqlMode ? table : undefined,
+        columns: dataSourceForColumns ? esqlQueryColumns : undefined,
+        table: dataSourceForColumns && !latestFetchDetails ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
@@ -298,12 +321,13 @@ export const useDiscoverHistogram = (
     if (!collectedFetchParams || !previousFetchParams) {
       return;
     }
-    const changedParams = Object.keys(collectedFetchParams).filter((key) => {
-      return (
-        collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
-        previousFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
-      );
-    });
+    const changedParams = Object.keys(collectedFetchParams).filter((key) =>
+      hasFetchParamChanged(
+        previousFetchParams,
+        collectedFetchParams,
+        key as keyof UnifiedHistogramFetchParamsExternal
+      )
+    );
 
     if (
       changedParams.length > 0 &&
@@ -471,30 +495,35 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 function getUnifiedHistogramTableForEsql({
   documentsValue,
-  isEsqlMode,
+  currentDataSource,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
-  isEsqlMode: boolean;
+  currentDataSource: EsqlSource | undefined;
 }) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
+  if (!currentDataSource) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
-  return {
-    table: {
-      type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
-      columns: esqlQueryColumns,
-      meta: { type: ESQL_TABLE_TYPE },
-    },
-    esqlQueryColumns,
-  };
+  // EsqlSource has columns from its eager LIMIT 0 query — no need to wait for documents.
+  const esqlQueryColumns = [...currentDataSource.resultColumns];
+
+  // Provide a pre-fetched data table only when documents are already available,
+  // so Lens can reuse the rows for suggestion enrichment without an extra request.
+  const isDocumentsComplete =
+    documentsValue?.result &&
+    [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus);
+
+  const table = isDocumentsComplete
+    ? {
+        type: 'datatable' as const,
+        rows: documentsValue!.result!.map((r) => r.raw),
+        columns: esqlQueryColumns,
+        meta: { type: ESQL_TABLE_TYPE },
+      }
+    : undefined;
+
+  return { table, esqlQueryColumns };
 }

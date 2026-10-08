@@ -8,12 +8,13 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retryDelay: 0 } },
     logger: { log: () => {}, warn: () => {}, error: () => {} },
   });
   return ({ children }: { children: React.ReactNode }) => (
@@ -21,121 +22,187 @@ const createWrapper = () => {
   );
 };
 
+const createHttpFetchError = ({
+  responseStatus,
+  bodyStatusCode,
+}: {
+  responseStatus?: number;
+  bodyStatusCode?: number;
+}): IHttpFetchError<ResponseErrorBody> =>
+  Object.assign(new Error('Forbidden'), {
+    request: {} as Request,
+    response: responseStatus === undefined ? undefined : ({ status: responseStatus } as Response),
+    body:
+      bodyStatusCode === undefined
+        ? undefined
+        : { message: 'Forbidden', statusCode: bodyStatusCode },
+  });
+
 describe('useMatchedActionPolicies', () => {
-  it('returns items from the API on success', async () => {
+  it('returns items and evaluation metadata from the API on success', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'global' }],
+      items: [{ action_policy: { id: 'ap-1', name: 'Policy 1' }, category: 'tags' }],
+      evaluated_count: 42,
+      is_truncated: false,
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, routingTags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isLoading).toBe(true);
+    expect(result.current.evaluatedCount).toBe(0);
+    expect(result.current.isTruncated).toBe(false);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.error).toBeNull();
     expect(result.current.items).toEqual(fakeResponse.items);
+    expect(result.current.evaluatedCount).toBe(fakeResponse.evaluated_count);
+    expect(result.current.isTruncated).toBe(fakeResponse.is_truncated);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
+      '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { id: 'rule-abc' } }),
+        body: JSON.stringify({ rule: { routing_tags: ['env:prod'] } }),
       })
     );
   });
 
   it('captures error when the API call fails', async () => {
     const http = httpServiceMock.createStartContract();
-    http.fetch.mockRejectedValueOnce(new Error('Network error'));
+    http.fetch.mockRejectedValue(new Error('Network error'));
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, routingTags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe('Network error');
     expect(result.current.items).toEqual([]);
+    expect(result.current.evaluatedCount).toBe(0);
+    expect(result.current.isTruncated).toBe(false);
+    expect(http.fetch).toHaveBeenCalledTimes(4);
   });
 
-  it('re-fetches when ruleId changes', async () => {
+  it.each([
+    ['response status', createHttpFetchError({ responseStatus: 403 })],
+    ['response body status code', createHttpFetchError({ bodyStatusCode: 403 })],
+  ])('does not retry a 403 exposed through the %s', async (_, forbiddenError) => {
     const http = httpServiceMock.createStartContract();
-    http.fetch
-      .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-1' }, category: 'global' }],
-      } as any)
-      .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-2' }, category: 'global-filtered' }],
-      } as any);
-
-    const { result, rerender } = renderHook(
-      ({ ruleId }: { ruleId: string }) => useMatchedActionPolicies({ http, ruleId }),
-      { wrapper: createWrapper(), initialProps: { ruleId: 'rule-1' } }
-    );
-
-    await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-1'));
-
-    rerender({ ruleId: 'rule-2' });
-    await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-2'));
-
-    expect(http.fetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('sends name and tags when ruleId is not provided', async () => {
-    const http = httpServiceMock.createStartContract();
-    const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'global' }],
-    };
-    http.fetch.mockResolvedValueOnce(fakeResponse as any);
-
-    const { result } = renderHook(
-      () => useMatchedActionPolicies({ http, name: 'My Rule', tags: ['env:prod'] }),
-      { wrapper: createWrapper() }
-    );
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.items).toEqual(fakeResponse.items);
-    expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ rule: { name: 'My Rule', tags: ['env:prod'] } }),
-      })
-    );
-  });
-
-  it('does not fire a request when all inputs are absent', async () => {
-    const http = httpServiceMock.createStartContract();
+    http.fetch.mockRejectedValue(forbiddenError);
 
     const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
       wrapper: createWrapper(),
     });
 
-    // Give it time in case the query fires unexpectedly
-    await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
+    expect(result.current.error).toBe(forbiddenError);
+    expect(http.fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('does not fire a request when name is an empty string', async () => {
+  it('re-fetches when routing tags change', async () => {
     const http = httpServiceMock.createStartContract();
+    http.fetch
+      .mockResolvedValueOnce({
+        items: [{ action_policy: { id: 'ap-1' }, category: 'tags' }],
+        evaluated_count: 1,
+        is_truncated: false,
+      } as any)
+      .mockResolvedValueOnce({
+        items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
+        evaluated_count: 1,
+        is_truncated: false,
+      } as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, name: '' }), {
+    const { result, rerender } = renderHook(
+      ({ routingTags }: { routingTags: string[] }) =>
+        useMatchedActionPolicies({ http, routingTags }),
+      { wrapper: createWrapper(), initialProps: { routingTags: ['env:prod'] } }
+    );
+
+    await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
+
+    rerender({ routingTags: ['env:staging'] });
+    await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-2'));
+
+    expect(http.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports previous matches while the query for new routing tags is still in flight', async () => {
+    const http = httpServiceMock.createStartContract();
+    let resolveNext: (value: unknown) => void = () => {};
+    http.fetch.mockResolvedValueOnce({
+      items: [{ action_policy: { id: 'ap-1' }, category: 'tags' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    } as any);
+    http.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveNext = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ routingTags }: { routingTags: string[] }) =>
+        useMatchedActionPolicies({ http, routingTags }),
+      { wrapper: createWrapper(), initialProps: { routingTags: ['env:prod'] } }
+    );
+
+    await waitFor(() => expect(result.current.items[0].action_policy.id).toBe('ap-1'));
+
+    rerender({ routingTags: ['env:staging'] });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(true));
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.items[0].action_policy.id).toBe('ap-1');
+
+    resolveNext({
+      items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
+      total: 1,
+      evaluated_count: 1,
+      is_truncated: false,
+    });
+
+    await waitFor(() => expect(result.current.isPreviousData).toBe(false));
+    expect(result.current.items[0].action_policy.id).toBe('ap-2');
+  });
+
+  it('fires a request with an empty rule body when no routing tags are provided', async () => {
+    const http = httpServiceMock.createStartContract();
+    const fakeResponse = {
+      items: [{ action_policy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch_all' }],
+      evaluated_count: 1,
+      is_truncated: false,
+    };
+    http.fetch.mockResolvedValueOnce(fakeResponse as any);
+
+    const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
       wrapper: createWrapper(),
     });
 
-    await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.items).toEqual([]);
-    expect(http.fetch).not.toHaveBeenCalled();
+    expect(result.current.items).toEqual(fakeResponse.items);
+    expect(http.fetch).toHaveBeenCalledWith(
+      '/internal/alerting/v2/action_policies/_match',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ rule: {} }),
+      })
+    );
   });
 });

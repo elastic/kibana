@@ -117,7 +117,9 @@ describe('SOR - search API', () => {
     });
 
     expect(documents.hits.total).toHaveProperty('value', 5);
-    expect(documents.hits.hits).toHaveProperty('0._source.test-type.name', 'John Doe');
+    expect(documents.hits.hits.map(({ _source }) => _source?.['test-type'])).toEqual(
+      expect.arrayContaining(users)
+    );
   });
 
   it('should perform objects search using bool query', async () => {

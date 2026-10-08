@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
-  getHistorySnapshotIndexPattern,
+  resolveHistorySnapshotIndexPatterns,
   getEntitiesAlias,
   ENTITY_LATEST,
 } from '@kbn/entity-store/server';
@@ -24,11 +24,11 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
+import { buildRenderAttachmentTag } from './attachment_utils';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import {
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
   ensureEntityAttachment,
@@ -73,171 +73,173 @@ const intervalToMinutes = (interval: string): number => {
   return Number(value) * minutesMap[unit];
 };
 
-const schema = z.object({
-  entityTypes: z
-    .array(IdentifierType)
-    .optional()
-    .describe('Filter by entity type(s): host, user, service, or generic.'),
-  riskScoreChangeInterval: z
-    .string()
-    .regex(
-      /^\d+[smhdwM]$/,
-      `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
-    )
-    .refine(
-      (val) => {
-        try {
-          return intervalToMinutes(val) >= MINUTES_PER_DAY;
-        } catch {
-          return false;
+const schema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(IdentifierType)
+      .optional()
+      .describe('Filter by entity type(s): host, user, service, or generic.'),
+    riskScoreChangeInterval: z
+      .string()
+      .regex(
+        /^\d+[smhdwM]$/,
+        `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
+      )
+      .refine(
+        (val) => {
+          try {
+            return intervalToMinutes(val) >= MINUTES_PER_DAY;
+          } catch {
+            return false;
+          }
+        },
+        {
+          message: 'riskScoreChangeInterval must be at least 1 day (e.g. "1d", "1w", "1M")',
         }
-      },
-      {
-        message: 'riskScoreChangeInterval must be at least 1 day (e.g. "1d", "1w", "1M")',
-      }
-    )
-    .describe(
-      `The time interval to search for risk score changes (e.g. '30d', '7d', '1w'). Must be at least 1 day. Intervals should be in format {value}{unit} where value is a number and unit is one of 'd' (day), 'w' (week), or 'M' (month)`
-    )
-    .optional(),
-  riskScoreMin: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Minimum normalized risk score (1-100). When >0, only returns entities with entity.risk.calculated_score_norm >= this value. ' +
-        'Pass 0 or omit this parameter to apply no lower bound. ' +
-        'Note: the default sort is "riskScore", which by itself already excludes entities whose score is NULL — ' +
-        'if the user wants unscored entities alongside scored ones, use sortBy: "criticality" instead of lowering riskScoreMin. ' +
-        'Only set a positive floor when the user explicitly asked for a score threshold (e.g. "above 70").'
-    ),
-  riskScoreMax: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Maximum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm <= this value.'
-    ),
-  riskLevels: z
-    .array(EntityRiskLevels)
-    .optional()
-    .describe('Filter by risk level(s). Valid values: Unknown, Low, Moderate, High, Critical.'),
-  criticalityLevels: z
-    .array(AssetCriticalityLevel)
-    .optional()
-    .describe(
-      'Filter by asset criticality level(s). Valid values: low_impact, medium_impact, high_impact, extreme_impact.'
-    ),
-  watchlists: z
-    .array(z.string().min(1))
-    .optional()
-    .describe(
-      'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
-    ),
-  sources: z
-    .array(z.string().min(1))
-    .optional()
-    .describe(
-      'Filter for entities whose multi-value `entity.source` field matches ANY of the given values either exactly ' +
-        'or as a "<value>.*" prefix. For example `sources: ["aws"]` matches entities with `entity.source` of ' +
-        '"aws", "aws.cloudtrail", "aws.guardduty", "aws.s3access", etc. Values are the raw lowercase integration ' +
-        'keys from the entity store (e.g. "crowdstrike", "okta", "entityanalytics_okta", "island_browser") — do ' +
-        'not pretty-print (pass "island_browser", not "Island Browser"). For user entities prefer the normalized ' +
-        '`namespaces` parameter when possible; fall back to `sources` when no canonical namespace exists or when ' +
-        'searching host/service/generic entities.'
-    ),
-  namespaces: z
-    .array(z.string().min(1))
-    .optional()
-    .describe(
-      'Filter user entities by normalized vendor namespace (`entity.namespace`). This is single-value and ' +
-        'collapses heterogeneous source keys into canonical names. Known canonical values: "okta" (from okta / ' +
-        'entityanalytics_okta), "entra_id" (from azure / entityanalytics_entra_id), "microsoft_365" (from o365 / ' +
-        'o365_metrics), "active_directory" (from entityanalytics_ad), "local" (non-IDP endpoint/system accounts), ' +
-        '"unknown" (missing source), plus pass-through of `event.module` for vendors without a dedicated mapping ' +
-        '(e.g. "aws", "gcp"). Only effective on user entities; host/service/generic rows do not have ' +
-        '`entity.namespace` and will be filtered out when this parameter is set.'
-    ),
-  managedOnly: z
-    .boolean()
-    .optional()
-    .describe('When true, only returns managed entities (entity.attributes.managed == true).'),
-  mfaEnabledOnly: z
-    .boolean()
-    .optional()
-    .describe(
-      'When true, only returns entities with MFA enabled (entity.attributes.mfa_enabled == true).'
-    ),
-  assetOnly: z
-    .boolean()
-    .optional()
-    .describe(
-      'When true, only returns entities that are assets (entity.attributes.asset == true).'
-    ),
-  firstSeenAfter: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities first seen after a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  firstSeenBefore: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities first seen before a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  lastSeenAfter: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities last seen after a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  lastSeenBefore: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities last seen before a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  maxResults: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of entities to return (1-100, default 10).'),
-  sortBy: z
-    .enum(['riskScore', 'criticality'])
-    .optional()
-    .describe(
-      'Field to order results by (always DESC). Defaults to "riskScore" (entity.risk.calculated_score_norm). ' +
-        'Sorting by "riskScore" (default or explicit) implicitly excludes entities whose ' +
-        'entity.risk.calculated_score_norm IS NULL — ranking is not meaningful for unscored entities. ' +
-        'Use sortBy: "criticality" if you need unscored entities to appear (their criticality_rank defaults to 0 so they land last). ' +
-        'Use "criticality" when the user explicitly asks to order, rank, sort, or list top-N entities BY criticality ' +
-        '(extreme_impact > high_impact > medium_impact > low_impact; entities with no asset.criticality land last; ' +
-        'risk score is the tiebreaker within a tier). ' +
-        'Do NOT pass all four criticalityLevels to simulate a sort — that is a no-op filter. ' +
-        'Ignored when riskScoreChangeInterval is set (that flow always sorts by risk_score_change DESC).'
-    ),
-});
+      )
+      .describe(
+        `The time interval to search for risk score changes (e.g. '30d', '7d', '1w'). Must be at least 1 day. Intervals should be in format {value}{unit} where value is a number and unit is one of 'd' (day), 'w' (week), or 'M' (month)`
+      )
+      .optional(),
+    riskScoreMin: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Minimum normalized risk score (1-100). When >0, only returns entities with entity.risk.calculated_score_norm >= this value. ' +
+          'Pass 0 or omit this parameter to apply no lower bound. ' +
+          'Note: the default sort is "riskScore", which by itself already excludes entities whose score is NULL — ' +
+          'if the user wants unscored entities alongside scored ones, use sortBy: "criticality" instead of lowering riskScoreMin. ' +
+          'Only set a positive floor when the user explicitly asked for a score threshold (e.g. "above 70").'
+      ),
+    riskScoreMax: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Maximum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm <= this value.'
+      ),
+    riskLevels: z
+      .array(EntityRiskLevels)
+      .optional()
+      .describe('Filter by risk level(s). Valid values: Unknown, Low, Moderate, High, Critical.'),
+    criticalityLevels: z
+      .array(AssetCriticalityLevel)
+      .optional()
+      .describe(
+        'Filter by asset criticality level(s). Valid values: low_impact, medium_impact, high_impact, extreme_impact.'
+      ),
+    watchlists: z
+      .array(z.string().min(1))
+      .optional()
+      .describe(
+        'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
+      ),
+    sources: z
+      .array(z.string().min(1))
+      .optional()
+      .describe(
+        'Filter for entities whose multi-value `entity.source` field matches ANY of the given values either exactly ' +
+          'or as a "<value>.*" prefix. For example `sources: ["aws"]` matches entities with `entity.source` of ' +
+          '"aws", "aws.cloudtrail", "aws.guardduty", "aws.s3access", etc. Values are the raw lowercase integration ' +
+          'keys from the entity store (e.g. "crowdstrike", "okta", "entityanalytics_okta", "island_browser") — do ' +
+          'not pretty-print (pass "island_browser", not "Island Browser"). For user entities prefer the normalized ' +
+          '`namespaces` parameter when possible; fall back to `sources` when no canonical namespace exists or when ' +
+          'searching host/service/generic entities.'
+      ),
+    namespaces: z
+      .array(z.string().min(1))
+      .optional()
+      .describe(
+        'Filter user entities by normalized vendor namespace (`entity.namespace`). This is single-value and ' +
+          'collapses heterogeneous source keys into canonical names. Known canonical values: "okta" (from okta / ' +
+          'entityanalytics_okta), "entra_id" (from azure / entityanalytics_entra_id), "microsoft_365" (from o365 / ' +
+          'o365_metrics), "active_directory" (from entityanalytics_ad), "local" (non-IDP endpoint/system accounts), ' +
+          '"unknown" (missing source), plus pass-through of `event.module` for vendors without a dedicated mapping ' +
+          '(e.g. "aws", "gcp"). Only effective on user entities; host/service/generic rows do not have ' +
+          '`entity.namespace` and will be filtered out when this parameter is set.'
+      ),
+    managedOnly: z
+      .boolean()
+      .optional()
+      .describe('When true, only returns managed entities (entity.attributes.managed == true).'),
+    mfaEnabledOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, only returns entities with MFA enabled (entity.attributes.mfa_enabled == true).'
+      ),
+    assetOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, only returns entities that are assets (entity.attributes.asset == true).'
+      ),
+    firstSeenAfter: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities first seen after a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    firstSeenBefore: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities first seen before a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    lastSeenAfter: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities last seen after a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    lastSeenBefore: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities last seen before a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    maxResults: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of entities to return (1-100, default 10).'),
+    sortBy: z
+      .enum(['riskScore', 'criticality'])
+      .optional()
+      .describe(
+        'Field to order results by (always DESC). Defaults to "riskScore" (entity.risk.calculated_score_norm). ' +
+          'Sorting by "riskScore" (default or explicit) implicitly excludes entities whose ' +
+          'entity.risk.calculated_score_norm IS NULL — ranking is not meaningful for unscored entities. ' +
+          'Use sortBy: "criticality" if you need unscored entities to appear (their criticality_rank defaults to 0 so they land last). ' +
+          'Use "criticality" when the user explicitly asks to order, rank, sort, or list top-N entities BY criticality ' +
+          '(extreme_impact > high_impact > medium_impact > low_impact; entities with no asset.criticality land last; ' +
+          'risk score is the tiebreaker within a tier). ' +
+          'Do NOT pass all four criticalityLevels to simulate a sort — that is a no-op filter. ' +
+          'Ignored when riskScoreChangeInterval is set (that flow always sorts by risk_score_change DESC).'
+      ),
+  })
+);
 type ToolParams = z.infer<typeof schema>;
 
 export const SECURITY_SEARCH_ENTITIES_TOOL_ID = securityTool('search_entities');
@@ -689,46 +691,24 @@ export const searchEntitiesTool = (
     When the user asks to show, open, view, or summarize the Entity Analytics dashboard/home/overview (built-in Security page), use these results (and optional security.get_entity) then call attachments.add with type "security.entity_analytics_dashboard" so the UI shows Preview→Canvas (see entity-analytics skill). Do not treat that as a request to compose a new Kibana saved dashboard.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
+    annotations: {
+      title: 'Search Entities',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-            if (!isEntityStoreV2Enabled) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 is not enabled.',
-              };
-            }
-
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-            const indexExists = await esClient.indices.exists({
-              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-            });
-
-            if (!indexExists) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 index does not exist for this space',
-              };
-            }
-          }
-
-          return availability;
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check entity store v2 index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
+        getEntityAnalyticsToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        }),
     },
     handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(
@@ -750,23 +730,22 @@ export const searchEntitiesTool = (
         const [, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
-        const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
+        const historyPatterns = await resolveHistorySnapshotIndexPatterns(client, spaceId);
 
-        const [snapshotIndexExists, grounding] = await Promise.all([
-          client.indices.exists({ index: entitySnapshotIndex }),
+        const [patternExistence, grounding] = await Promise.all([
+          Promise.all(historyPatterns.map((pattern) => client.indices.exists({ index: pattern }))),
           fetchRiskScoreGrounding({
             entityStore,
             namespace: spaceId,
             logger,
           }),
         ]);
+        const liveHistoryPatterns = historyPatterns.filter((_, i) => patternExistence[i]);
+        const entitySnapshotIndex =
+          liveHistoryPatterns.length > 0 ? liveHistoryPatterns.join(',') : undefined;
         const groundingResult = grounding ? [grounding] : [];
 
-        const query = buildQuery(
-          normalized,
-          entityIndex,
-          snapshotIndexExists ? entitySnapshotIndex : undefined
-        );
+        const query = buildQuery(normalized, entityIndex, entitySnapshotIndex);
 
         const { columns, values } = await executeEsql({ query, esClient: client });
 

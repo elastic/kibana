@@ -8,13 +8,19 @@
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
+import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
 
@@ -25,6 +31,13 @@ import { RuleSavedObjectsClientToken } from './tokens';
  */
 const SCHEDULE_INTERVAL_AGG_SIZE = 1000;
 
+/**
+ * Maximum terms-agg size for internal `findTags` / `getTags` callers.
+ * Not exposed on the HTTP route; server-side consumers that need broader
+ * enumeration (e.g. Significant Events stream discovery) may request up to this.
+ */
+const MAX_FIND_TAGS_SIZE = 10000;
+
 interface ScheduleEveryAggregationResult {
   schedule_intervals: {
     sum_other_doc_count: number;
@@ -32,12 +45,27 @@ interface ScheduleEveryAggregationResult {
   };
 }
 
+interface MatchCountAggregationResult {
+  match_count: { value: number };
+}
+
+/**
+ * Field counted by `countByQuery`'s `value_count` aggregation. `type` is a root
+ * field present on every saved object, so counting its (single) values per doc
+ * equals the number of matching rule documents.
+ */
+const MATCH_COUNT_AGG_FIELD = 'type';
+
+export interface RuleSavedObjectDoc {
+  id: string;
+  attributes: RuleSavedObjectAttributes;
+  version?: string;
+  /** Always populated by the real SO service; optional on test mocks. */
+  references?: SavedObjectReference[];
+}
+
 export type RulesSavedObjectsBulkGetResultItem =
-  | {
-      id: string;
-      attributes: RuleSavedObjectAttributes;
-      version?: string;
-    }
+  | RuleSavedObjectDoc
   | {
       id: string;
       error: SavedObjectError;
@@ -51,10 +79,26 @@ export type BulkUpdateResultItem =
   | { id: string; success: true }
   | { id: string; success: false; error: SavedObjectError };
 
-export interface RulesFindAllResultItem {
+export type BulkCreateResultItem =
+  | (RuleSavedObjectDoc & { error?: undefined })
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
+
+type RuleAttributeName = keyof RuleSavedObjectAttributes;
+
+export interface FindByIdsOptions<TField extends RuleAttributeName = RuleAttributeName> {
+  spaceId?: string;
+  fields?: TField[];
+}
+
+export interface RulesFindAllResultItem<TField extends RuleAttributeName = RuleAttributeName> {
   id: string;
-  attributes: RuleSavedObjectAttributes;
+  attributes: Pick<RuleSavedObjectAttributes, TField>;
   namespaces?: string[];
+  /** Always populated by the real SO service; optional on test mocks. */
+  references?: SavedObjectReference[];
 }
 
 interface RuleWriteResult {
@@ -62,22 +106,60 @@ interface RuleWriteResult {
   version?: string;
 }
 
+export interface GetRuleIdsByQueryParams {
+  filter?: string;
+  search?: string;
+  searchFields?: string[];
+  maxItems: number;
+}
+
+export interface CountByQueryParams {
+  filter?: string;
+  search?: string;
+  searchFields?: string[];
+}
+
+export interface FindTagsParams {
+  search?: string;
+  filter?: string;
+  size?: number;
+  /** The rule metadata field to aggregate. */
+  field?: 'tags' | 'routing_tags';
+}
+
 export interface RulesSavedObjectServiceContract {
-  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<RuleWriteResult>;
-  get(
-    id: string,
-    spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+  create(params: {
+    attrs: RuleSavedObjectAttributes;
+    id?: string;
+    references?: SavedObjectReference[];
+  }): Promise<RuleWriteResult>;
+  get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
-  findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
+  findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    options?: FindByIdsOptions<TField>
+  ): Promise<Array<RulesFindAllResultItem<TField>>>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult>;
   bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkUpdateResultItem[]>;
+  bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
   find(params: {
@@ -88,13 +170,19 @@ export interface RulesSavedObjectServiceContract {
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{
-    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
-    total: number;
-  }>;
-  findTags(params?: { filter?: string }): Promise<string[]>;
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>>;
+  getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
+  countByQuery(params: CountByQueryParams): Promise<number>;
+  findTags(params?: FindTagsParams): Promise<string[]>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
+
+/**
+ * Page size used by the PIT-based `getRuleIdsByQuery`. Larger pages reduce the
+ * number of round trips (a scan of ~10k rules completes in ~10 requests) while
+ * staying well within the response-payload limits of the SO client.
+ */
+const GET_RULE_IDS_BY_QUERY_PAGE_SIZE = 1000;
 
 @injectable()
 export class RulesSavedObjectService implements RulesSavedObjectServiceContract {
@@ -107,9 +195,11 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async create({
     attrs,
     id,
+    references,
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
     const result = await this.client.create<RuleSavedObjectAttributes>(
@@ -118,21 +208,59 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       {
         id: ruleId,
         overwrite: false,
+        ...(references ? { references } : {}),
       }
     );
     return { id: result.id, version: result.version };
   }
-  public async get(
-    id: string,
-    spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }> {
+
+  public async bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]> {
+    if (items.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkCreate<RuleSavedObjectAttributes>(
+      items.map((item) => ({
+        type: RULE_SAVED_OBJECT_TYPE,
+        id: item.id,
+        attributes: item.attrs,
+        ...(item.references ? { references: item.references } : {}),
+      })),
+      { overwrite: false }
+    );
+
+    return result.saved_objects.map((doc) => {
+      if (isSavedObjectErrorResult(doc)) {
+        return { id: doc.id, error: doc.error };
+      }
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
+    });
+  }
+
+  public async get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    return {
+      id: doc.id,
+      attributes: doc.attributes,
+      version: doc.version,
+      references: doc.references ?? [],
+    };
   }
 
   public async bulkGetByIds(
@@ -153,11 +281,19 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       if (isSavedObjectErrorResult(doc)) {
         return { id: doc.id, error: doc.error };
       }
-      return { id: doc.id, attributes: doc.attributes, version: doc.version };
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
     });
   }
 
-  public async findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]> {
+  public async findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    { spaceId, fields }: FindByIdsOptions<TField> = {}
+  ): Promise<Array<RulesFindAllResultItem<TField>>> {
     if (ruleIds.length === 0) {
       return [];
     }
@@ -167,19 +303,23 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
       .join(' OR ');
 
-    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+    const finder = this.client.createPointInTimeFinder<Pick<RuleSavedObjectAttributes, TField>>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 1000,
       namespaces: namespace ? [namespace] : ['*'],
       filter,
+      fields,
     });
 
-    const results: RulesFindAllResultItem[] = [];
+    const results: Array<RulesFindAllResultItem<TField>> = [];
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
-        if (!isSavedObjectErrorResult(doc)) {
-          results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
-        }
+        results.push({
+          id: doc.id,
+          attributes: doc.attributes,
+          namespaces: doc.namespaces,
+          references: doc.references ?? [],
+        });
       }
     }
     await finder.close();
@@ -190,10 +330,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const result = await this.client.update<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
@@ -202,13 +344,19 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       {
         ...(version ? { version } : {}),
         mergeAttributes: false,
+        ...(references ? { references } : {}),
       }
     );
     return { id: result.id, version: result.version };
   }
 
   public async bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkUpdateResultItem[]> {
     if (items.length === 0) {
       return [];
@@ -220,6 +368,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         id: item.id,
         attributes: item.attrs,
         ...(item.version ? { version: item.version } : {}),
+        ...(item.references ? { references: item.references } : {}),
       }))
     );
 
@@ -272,7 +421,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }) {
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>> {
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
@@ -282,6 +431,91 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       ...(filter ? { filter } : {}),
       ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
+  }
+
+  /**
+   * Streams rule ids matching the given filter/search through a PIT finder,
+   * stopping after `maxItems` ids. Deliberately does NOT count total matches
+   * — callers that need the count should call {@link countByQuery} first and
+   * use its result to decide whether streaming is worth it (e.g. skip when
+   * `total === 0`, reject before streaming when `total` exceeds a domain cap).
+   * Keeping count and stream separate lets rejects short-circuit without
+   * opening the PIT.
+   */
+  public async getRuleIdsByQuery({
+    filter,
+    search,
+    searchFields,
+    maxItems,
+  }: GetRuleIdsByQueryParams): Promise<string[]> {
+    if (maxItems === 0) {
+      return [];
+    }
+
+    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: GET_RULE_IDS_BY_QUERY_PAGE_SIZE,
+      ...(filter ? { filter } : {}),
+      ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
+    });
+
+    const ids: string[] = [];
+
+    try {
+      for await (const response of finder.find()) {
+        for (const doc of response.saved_objects) {
+          ids.push(doc.id);
+
+          if (ids.length >= maxItems) {
+            return ids;
+          }
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return ids;
+  }
+
+  /**
+   * Returns the exact number of rules matching the given filter/search.
+   *
+   * Uses a `value_count` aggregation instead of the `find` response `total`
+   * because Elasticsearch caps `hits.total` at 10,000 by default (SO's `find`
+   * never sets `track_total_hits`). Aggregations run over the full matching set,
+   * so the count stays accurate above 10k — which the `force` match-limit
+   * guardrail in the rules client relies on to reject over-cap requests rather
+   * than silently mutating only the first 10k matches. `type` is a root field
+   * present on every document, so counting its values equals the matching doc
+   * count.
+   *
+   * We deliberately do NOT use the lower-level `savedObjectsClient.search` API
+   * (which would expose `track_total_hits` directly): it takes raw Elasticsearch
+   * DSL and does not apply the KQL→DSL translation that `find`/PIT do under the
+   * hood — stripping `.attributes` from field paths, mapping `id` → `_id`, and
+   * injecting the `type` clause (see `validateConvertFilterToKueryNode` in
+   * `@kbn/core-saved-objects-api-server-internal`, which is not exported).
+   * Reproducing that translation by hand would be fragile, and any mismatch
+   * would make this count diverge from the ids that {@link getRuleIdsByQuery}
+   * resolves off the same filter. Keeping both on the KQL `find` path lets SO
+   * apply the identical translation, so the count stays consistent with the ids
+   * that would be mutated.
+   */
+  public async countByQuery({ filter, search, searchFields }: CountByQueryParams): Promise<number> {
+    const result = await this.client.find<RuleSavedObjectAttributes, MatchCountAggregationResult>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      ...(filter ? { filter } : {}),
+      ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
+      aggs: {
+        match_count: {
+          value_count: { field: MATCH_COUNT_AGG_FIELD },
+        },
+      },
+    });
+
+    return result.aggregations?.match_count.value ?? 0;
   }
 
   /**
@@ -318,7 +552,13 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
   }
 
-  public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
+  public async findTags({
+    search,
+    filter,
+    size = TAGS_RESPONSE_LIMIT,
+    field = 'tags',
+  }: FindTagsParams = {}): Promise<string[]> {
+    const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -326,9 +566,10 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       aggs: {
         tags: {
           terms: {
-            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-            size: 10000,
-            order: { _key: 'asc' },
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.${field}`,
+            size: resolvedSize,
+            order: { _count: 'desc' },
+            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
           },
         },
       },

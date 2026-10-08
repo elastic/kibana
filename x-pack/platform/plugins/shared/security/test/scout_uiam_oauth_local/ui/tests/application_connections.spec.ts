@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { deleteTestOAuthConnection, seedTestOAuthConnection } from '@kbn/mock-idp-utils';
 import { expect } from '@kbn/scout/ui';
 
@@ -26,12 +25,10 @@ test.describe(
     let authHeaders: Record<string, string>;
     let clientId: string;
     const connectionIds: string[] = [];
+    const revokedConnectionIds: string[] = [];
+    let expiredConnectionId: string;
 
-    test.beforeAll(async ({ apiClient, kbnClient, samlAuth, config: { organizationId } }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
-
+    test.beforeAll(async ({ apiClient, samlAuth, config: { organizationId } }) => {
       authHeaders = await createUiamAuthHeaders(samlAuth);
 
       const meResponse = await apiClient.get('internal/security/me', {
@@ -65,20 +62,59 @@ test.describe(
         }
         connectionIds.push(connectionId);
       }
+
+      // Seed three already-revoked connections: one for the individual delete
+      // test and two for the bulk delete test. Delete is only offered once a
+      // connection is revoked, so seeding them revoked keeps those tests focused.
+      for (let index = 0; index < 3; index++) {
+        const connectionId = `scout-conn-revoked-${Date.now()}-${index}`;
+        const result = await seedTestOAuthConnection({
+          connectionId,
+          clientId,
+          organizationId: organizationId!,
+          userId,
+          resource: MCP_RESOURCE,
+          name: `scout revoked connection ${index}`,
+          scopes: ['all'],
+          revoked: true,
+        });
+        if (!result.success) {
+          throw new Error(`Failed to seed revoked OAuth connection: ${result.message}`);
+        }
+        revokedConnectionIds.push(connectionId);
+      }
+
+      // Seed a separate expired (but not revoked) connection to verify the
+      // "Expired" status is surfaced and the connection remains revocable.
+      expiredConnectionId = `scout-conn-expired-${Date.now()}`;
+      const expiredResult = await seedTestOAuthConnection({
+        connectionId: expiredConnectionId,
+        clientId,
+        organizationId: organizationId!,
+        userId,
+        resource: MCP_RESOURCE,
+        name: 'scout expired connection',
+        scopes: ['all'],
+        expired: true,
+      });
+      if (!expiredResult.success) {
+        throw new Error(`Failed to seed expired OAuth connection: ${expiredResult.message}`);
+      }
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient, kbnClient }) => {
+    test.afterAll(async ({ apiClient }) => {
       await Promise.all(
-        connectionIds.map((connectionId) => deleteTestOAuthConnection({ connectionId, clientId }))
+        [...connectionIds, ...revokedConnectionIds, expiredConnectionId]
+          .filter(Boolean)
+          .map((connectionId) => deleteTestOAuthConnection({ connectionId, clientId }))
       );
       if (clientId) {
         await revokeOAuthClient(apiClient, authHeaders, clientId);
       }
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('shows connections in grouped and list views', async ({ page, pageObjects }) => {
@@ -132,6 +168,30 @@ test.describe(
       }).toPass();
     });
 
+    test('surfaces an "Expired" status for an expired connection that stays revocable', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      await pageObjects.applicationConnections.waitForListConnectionRow(expiredConnectionId);
+
+      await expect(async () => {
+        const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
+          expiredConnectionId
+        );
+        expect(rowText).toContain('Expired');
+      }).toPass();
+
+      await pageObjects.applicationConnections.revokeConnection(expiredConnectionId);
+
+      await expect(async () => {
+        const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
+          expiredConnectionId
+        );
+        expect(rowText).toContain('Revoked');
+      }).toPass();
+    });
+
     test('bulk revokes multiple selected connections', async ({ pageObjects }) => {
       const bulkConnectionIds = [connectionIds[4], connectionIds[5]];
 
@@ -151,6 +211,38 @@ test.describe(
           );
           expect(rowText).toContain('Revoked');
         }).toPass();
+      }
+    });
+
+    test('deletes an individual revoked connection', async ({ page, pageObjects }) => {
+      const connectionId = revokedConnectionIds[0];
+
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      await pageObjects.applicationConnections.waitForListConnectionRow(connectionId);
+      await pageObjects.applicationConnections.deleteConnection(connectionId);
+
+      await expect(
+        page.testSubj.locator(`applicationConnectionsListViewRow-${connectionId}`)
+      ).toHaveCount(0);
+    });
+
+    test('bulk deletes multiple selected revoked connections', async ({ page, pageObjects }) => {
+      const bulkConnectionIds = [revokedConnectionIds[1], revokedConnectionIds[2]];
+
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      for (const connectionId of bulkConnectionIds) {
+        await pageObjects.applicationConnections.waitForListConnectionRow(connectionId);
+        await pageObjects.applicationConnections.selectListConnectionRow(connectionId);
+      }
+
+      await pageObjects.applicationConnections.bulkDeleteSelected();
+
+      for (const connectionId of bulkConnectionIds) {
+        await expect(
+          page.testSubj.locator(`applicationConnectionsListViewRow-${connectionId}`)
+        ).toHaveCount(0);
       }
     });
   }

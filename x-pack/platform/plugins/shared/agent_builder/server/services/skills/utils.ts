@@ -29,6 +29,7 @@ export const internalToPublicDefinition = async (
   readonly: skill.readonly,
   plugin_id: skill.plugin_id,
   experimental: skill.experimental,
+  exclude_from_elastic_capabilities: skill.excludeFromElasticCapabilities,
 });
 
 /**
@@ -45,6 +46,7 @@ export const internalToPublicSummary = async (
   readonly: skill.readonly,
   plugin_id: skill.plugin_id,
   experimental: skill.experimental,
+  exclude_from_elastic_capabilities: skill.excludeFromElasticCapabilities,
   referenced_content_count: skill.referencedContentCount,
 });
 
@@ -81,7 +83,16 @@ export const resolveSkill = (
     const lastSlash = target.lastIndexOf('/');
     const basePath = target.slice(0, lastSlash);
     const name = target.slice(lastSlash + 1);
-    const match = allSkills.find((s) => s.name === name && s.basePath === basePath);
+    // Normalize both sides to strip leading/trailing slashes before comparing.
+    // Persisted skills store basePath as '/skills' (from MOUNT_POINTS) while
+    // built-ins use 'skills/...' (no leading slash). The input-derived basePath
+    // never has a leading slash (already stripped above), so without normalization
+    // persisted skills would never match a path lookup.
+    const stripSlashes = (p: string) => p.replace(/^\/+/, '').replace(/\/+$/, '');
+    const normalizedBase = stripSlashes(basePath);
+    const match = allSkills.find(
+      (s) => s.name === name && stripSlashes(s.basePath) === normalizedBase
+    );
     if (!match) {
       return { error: `Skill not found at path '${input}'.` };
     }

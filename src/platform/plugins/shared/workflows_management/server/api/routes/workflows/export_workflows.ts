@@ -65,14 +65,18 @@ export function registerExportWorkflowsRoute(deps: RouteDependencies) {
           const spaceId = spaces.getSpaceId(request);
           const { ids } = request.body;
 
-          const workflows = await api.getWorkflowsByIds(ids, spaceId);
+          const workflows = await api.getWorkflowsByIds(ids, spaceId, request);
           workflows.forEach((workflow) => assertCanReadManagedWorkflow(request, workflow));
 
           const entries: WorkflowExportEntry[] = workflows.map((workflow) => {
+            // Prefer the stored yaml source — it carries the authoritative enabled
+            // value and preserves user comments.  Fall back to re-serializing the
+            // parsed definition only when no yaml is stored (should not normally
+            // happen for valid workflows).
             const yaml =
-              typeof workflow.definition === 'object' && workflow.definition !== null
-                ? stringifyWorkflowDefinition(workflow.definition)
-                : workflow.yaml;
+              typeof workflow.yaml === 'string' && workflow.yaml.length > 0
+                ? workflow.yaml
+                : stringifyWorkflowDefinition(workflow.definition ?? {});
             return { id: workflow.id, yaml };
           });
 

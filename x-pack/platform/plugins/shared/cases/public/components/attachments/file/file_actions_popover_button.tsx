@@ -159,6 +159,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
   return (
     <>
       <EuiPopover
+        aria-label={i18n.FILE_ACTIONS_POPOVER_ARIA_LABEL}
         id={`cases-files-popover-${theFile.id}`}
         key={`cases-files-popover-${theFile.id}`}
         data-test-subj={`cases-files-popover-${theFile.id}`}

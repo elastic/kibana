@@ -7,24 +7,26 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 
-const generateInsightSchema = z.object({
-  problemDescription: z
-    .string()
-    .min(1)
-    .describe('A brief description of the original problem being diagnosed.'),
-  remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
-  endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
-  data: z
-    .array(z.object({}).catchall(z.unknown()))
-    .min(1)
-    .describe('Relevant raw unedited documents.'),
-});
+const generateInsightSchema = lazySchema(() =>
+  z.object({
+    problemDescription: z
+      .string()
+      .min(1)
+      .describe('A brief description of the original problem being diagnosed.'),
+    remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
+    endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
+    data: z
+      .array(z.object({}).catchall(z.unknown()))
+      .min(1)
+      .describe('Relevant raw unedited documents.'),
+  })
+);
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -58,7 +60,7 @@ This tool creates structured insights for persisting the results of the troubles
     schema: generateInsightSchema,
     handler: async (
       { problemDescription, remediation, endpointIds, data },
-      { spaceId, modelProvider, logger }
+      { spaceId, modelProvider, logger, esClient }
     ) => {
       try {
         await endpointAppContextService
@@ -66,6 +68,7 @@ This tool creates structured insights for persisting the results of the troubles
           .ensureInCurrentSpace({ agentIds: endpointIds });
 
         const model = await modelProvider.getDefaultModel();
+        const ccsEnabled = await endpointAppContextService.isCcsEnabled();
         const graph = createGenerateInsightGraph({
           model,
           problemDescription,
@@ -73,6 +76,8 @@ This tool creates structured insights for persisting the results of the troubles
           endpointIds,
           data,
           spaceId,
+          esClient: esClient.asInternalUser,
+          ccsEnabled,
         });
         const outState = await graph.invoke({});
 

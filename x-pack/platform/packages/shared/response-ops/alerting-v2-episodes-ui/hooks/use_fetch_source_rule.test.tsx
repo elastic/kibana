@@ -1,0 +1,173 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { type PropsWithChildren } from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClientProvider } from '@kbn/react-query';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { createTestQueryClient } from './test_utils';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
+import { useFetchSourceRule } from './use_fetch_source_rule';
+
+const mockRule = { id: 'r1', metadata: { name: 'Classic Rule' } } as unknown as RuleResponse;
+
+const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
+  const queryClient = createTestQueryClient();
+  const Wrapper = ({ children }: PropsWithChildren) => (
+    <QueryClientProvider client={queryClient}>
+      <EpisodeDataSourceProvider dataSource={dataSource}>{children}</EpisodeDataSourceProvider>
+    </QueryClientProvider>
+  );
+  return { Wrapper, queryClient };
+};
+
+const createHttp = () => {
+  const http = httpServiceMock.createStartContract();
+  http.basePath.prepend = jest.fn((path: string) => `/base${path}`);
+  return http;
+};
+
+describe('useFetchSourceRule', () => {
+  it('resolves a rule from the data source', async () => {
+    const http = createHttp();
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+      getRuleDetailsHref: (ruleId) => `/app/management/rule/${ruleId}`,
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(source.resolveRules).toHaveBeenCalledWith({
+      services: { http },
+      ids: ['r1'],
+    });
+    expect(result.current.rule).toEqual(mockRule);
+    expect(result.current.ruleDetailsHref).toBe('/base/app/management/rule/r1');
+  });
+
+  it('returns undefined rule when the source returns no matches', async () => {
+    const http = createHttp();
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([]),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.rule).toBeUndefined();
+  });
+
+  it('does not call resolveRules when ruleId is undefined', () => {
+    const http = createHttp();
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: undefined, http }), {
+      wrapper: Wrapper,
+    });
+
+    expect(source.resolveRules).not.toHaveBeenCalled();
+    expect(result.current.rule).toBeUndefined();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('does not call resolveRules when there is no data source', () => {
+    const http = createHttp();
+    const { Wrapper } = createWrapper(undefined);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current.rule).toBeUndefined();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('returns null ruleDetailsHref when the source does not provide getRuleDetailsHref', async () => {
+    const http = createHttp();
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.ruleDetailsHref).toBeNull();
+  });
+
+  it('uses initialRule immediately and still refreshes from the data source', async () => {
+    const http = createHttp();
+    const initialRule = { id: 'r1', metadata: { name: 'Cached Rule' } } as unknown as RuleResponse;
+    const fetchedRule = { id: 'r1', metadata: { name: 'Fetched Rule' } } as unknown as RuleResponse;
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([fetchedRule]),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http, initialRule }), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current.rule).toEqual(initialRule);
+
+    await waitFor(() => expect(result.current.rule).toEqual(fetchedRule));
+    expect(source.resolveRules).toHaveBeenCalledWith({
+      services: { http },
+      ids: ['r1'],
+    });
+  });
+
+  it('does not reuse a cached rule when the data source id changes', async () => {
+    const http = createHttp();
+    const ruleA = { id: 'r1', metadata: { name: 'Source A' } } as unknown as RuleResponse;
+    const ruleB = { id: 'r1', metadata: { name: 'Source B' } } as unknown as RuleResponse;
+    const sourceA = createTestEpisodeSource({
+      id: 'source-a',
+      resolveRules: jest.fn().mockResolvedValue([ruleA]),
+    });
+    const sourceB = createTestEpisodeSource({
+      id: 'source-b',
+      resolveRules: jest.fn().mockResolvedValue([ruleB]),
+    });
+    const queryClient = createTestQueryClient();
+    let dataSource = sourceA;
+    const Wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>
+        <EpisodeDataSourceProvider dataSource={dataSource}>{children}</EpisodeDataSourceProvider>
+      </QueryClientProvider>
+    );
+
+    const { result, rerender } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.rule).toEqual(ruleA));
+
+    dataSource = sourceB;
+    rerender();
+
+    await waitFor(() => expect(result.current.rule).toEqual(ruleB));
+    expect(sourceB.resolveRules).toHaveBeenCalled();
+  });
+});

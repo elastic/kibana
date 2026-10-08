@@ -19,7 +19,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .put({
@@ -39,6 +41,17 @@ export const createPrivilegeMonitoringIndicesRoute = (
             body: buildRouteValidationWithZod(CreatePrivilegesImportIndexRequestBody),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
 
       withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {

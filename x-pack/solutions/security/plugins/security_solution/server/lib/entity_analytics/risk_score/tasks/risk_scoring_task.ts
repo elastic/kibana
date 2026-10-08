@@ -14,6 +14,7 @@ import type {
   TaskManagerStartContract,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
@@ -41,6 +42,7 @@ import {
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
 import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -134,6 +136,7 @@ export const registerRiskScoringTask = ({
       createTaskRunner: createTaskRunnerFactory({
         logger,
         getRiskScoreService,
+        getStartServices,
         telemetry,
         entityAnalyticsConfig,
         experimentalFeatures,
@@ -398,6 +401,15 @@ export const runTask = async ({
     throw e;
   }
 };
+
+class RiskEngineAlreadyRunningError extends Error {
+  statusCode = 409;
+
+  constructor() {
+    super('The risk engine is already running');
+  }
+}
+
 export const scheduleNow = async ({
   logger,
   namespace,
@@ -415,6 +427,9 @@ export const scheduleNow = async ({
     await taskManager.runSoon(taskId);
   } catch (e) {
     logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    if (e instanceof TaskAlreadyRunningError) {
+      throw new RiskEngineAlreadyRunningError();
+    }
     throw e;
   }
 };
@@ -423,12 +438,14 @@ const createTaskRunnerFactory =
   ({
     logger,
     getRiskScoreService,
+    getStartServices,
     telemetry,
     entityAnalyticsConfig,
     experimentalFeatures,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
+    getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     telemetry: AnalyticsServiceSetup;
     entityAnalyticsConfig: EntityAnalyticsConfig;
     experimentalFeatures: ExperimentalFeatures;
@@ -437,16 +454,22 @@ const createTaskRunnerFactory =
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
-      run: async () =>
-        runTask({
-          getRiskScoreService,
-          isCancelled,
-          logger,
-          taskInstance,
-          telemetry,
-          entityAnalyticsConfig,
-          experimentalFeatures,
-        }),
+      run: async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK, taskInstance.id),
+          () =>
+            runTask({
+              getRiskScoreService,
+              isCancelled,
+              logger,
+              taskInstance,
+              telemetry,
+              entityAnalyticsConfig,
+              experimentalFeatures,
+            })
+        );
+      },
       cancel: async () => {
         cancelled = true;
       },

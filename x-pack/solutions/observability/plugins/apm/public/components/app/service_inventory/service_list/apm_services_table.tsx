@@ -6,16 +6,21 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
+import {
+  apmEnableServiceInventoryTableSearchBar,
+  apmMaxNumberOfServices,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
@@ -60,6 +65,7 @@ import {
 } from '../../../../../common/slo_indicator_types';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { listMetricColumnPreset } from '../../../../utils/column_presets';
 
@@ -78,6 +84,7 @@ export function getServiceColumns({
   link,
   serviceOverflowCount,
   onSloBadgeClick,
+  locators,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -90,6 +97,7 @@ export function getServiceColumns({
   link: any;
   serviceOverflowCount: number;
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
+  locators: SharePluginStart['url']['locators'] | undefined;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -141,6 +149,10 @@ export function getServiceColumns({
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
                     })}
+                    {...getEbtProps({
+                      action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                      element: SERVICE_INVENTORY_EBT_ELEMENTS.ALERTS_BADGE,
+                    })}
                   >
                     {alertsCount}
                   </EuiBadge>
@@ -177,6 +189,10 @@ export function getServiceColumns({
                   sloCount={sloCount}
                   serviceName={serviceName}
                   onClick={() => onSloBadgeClick(serviceName, agentName)}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.SLO_BADGE,
+                  }}
                 />
               );
             },
@@ -218,13 +234,20 @@ export function getServiceColumns({
                 <AnomaliesBadge
                   score={anomalyScore}
                   detectorType={detectorType}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.ANOMALIES_BADGE,
+                  }}
                   navigationProps={
-                    agentName && anomalyEnvironment
+                    agentName && anomalyEnvironment && locators
                       ? {
                           serviceName,
                           agentName,
                           anomalyEnvironment,
-                          query: { ...query, transactionType },
+                          transactionType,
+                          rangeFrom: query.rangeFrom,
+                          rangeTo: query.rangeTo,
+                          locators,
                         }
                       : undefined
                   }
@@ -398,7 +421,9 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
+  const maxServicesLimit: number = core.uiSettings.get(apmMaxNumberOfServices);
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
+  const locators = share?.url?.locators;
   const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { indexSettings = [] } = useApmIndexSettingsContext();
   const { link } = useApmRouter();
@@ -501,6 +526,7 @@ export function ApmServicesTable({
       link,
       serviceOverflowCount,
       onSloBadgeClick: openSloOverviewFlyout,
+      locators,
     });
   }, [
     query,
@@ -514,6 +540,7 @@ export function ApmServicesTable({
     link,
     serviceOverflowCount,
     openSloOverviewFlyout,
+    locators,
   ]);
 
   const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(
@@ -581,7 +608,8 @@ export function ApmServicesTable({
                 color="danger"
                 content={i18n.translate('xpack.apm.servicesTable.tooltip.maxCountExceededWarning', {
                   defaultMessage:
-                    'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
+                    'The limit of {maxServicesLimit} services is exceeded. Use the query bar to narrow down the results, create service groups, or raise the limit in Advanced Settings.',
+                  values: { maxServicesLimit },
                 })}
               />
             </EuiFlexItem>

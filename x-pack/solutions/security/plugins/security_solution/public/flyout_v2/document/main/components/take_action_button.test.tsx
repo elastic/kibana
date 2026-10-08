@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
@@ -16,9 +16,15 @@ import { useAlertTagsActions } from '../../../../detections/components/alerts_ta
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../common/constants/action_ids';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ACTION, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+
+const mockReportActionClicked = jest.fn();
+jest.mock('../../../shared/hooks/use_flyout_telemetry');
 
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
@@ -115,11 +121,31 @@ jest.mock(
   })
 );
 
+const mockIsOsqueryAvailable = jest.fn().mockReturnValue(false);
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      osquery: {
+        isOsqueryAvailable: mockIsOsqueryAvailable,
+      },
+    },
+  }),
+}));
+
+jest.mock('../../../../detections/components/osquery/osquery_flyout', () => ({
+  OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
+    <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
+      {`osquery-mock-${agentId}`}
+    </button>
+  ),
+}));
+
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
 const mockUseAlertExceptionActions = useAlertExceptionActions as jest.Mock;
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
 
 const createMockHit = (
   flattened: Record<string, unknown> = {},
@@ -186,6 +212,11 @@ describe('<TakeActionButton />', () => {
     mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
     mockUseResponderActionItem.mockReturnValue([]);
     mockUseHostIsolationAction.mockReturnValue([]);
+    mockIsOsqueryAvailable.mockReturnValue(false);
+    mockUseFlyoutTelemetry.mockReturnValue({
+      reportActionClicked: mockReportActionClicked,
+      reportHeaderItemClicked: jest.fn(),
+    });
   });
 
   it('should render the take action button', () => {
@@ -219,6 +250,119 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
     expect(document.querySelector('[data-test-subj="takeActionPanelMenu"]')).toBeInTheDocument();
+  });
+
+  it('renders explicitly ordered document actions with icons and separators', () => {
+    mockUseAddToCaseActions.mockReturnValue({
+      addToCaseActionItems: [
+        {
+          key: 'add-to-case-action',
+          name: 'Add to case',
+          'data-test-subj': 'add-to-case-action',
+        },
+      ],
+    });
+    mockUseAlertsActions.mockReturnValue({
+      actionItems: [
+        {
+          key: 'open',
+          name: 'Mark as open',
+          'data-test-subj': 'open-alert-status',
+        },
+      ],
+      panels: [],
+    });
+    mockUseAlertTagsActions.mockReturnValue({
+      alertTagsItems: [
+        {
+          key: 'manage-alert-tags',
+          name: 'Apply alert tags',
+          'data-test-subj': 'alert-tags-context-menu-item',
+        },
+      ],
+      alertTagsPanels: [],
+    });
+    mockUseAlertAssigneesActions.mockReturnValue({
+      alertAssigneesItems: [
+        {
+          key: ALERT_ASSIGNEE_ACTION_IDS.assign,
+          name: 'Assign alert',
+          'data-test-subj': 'alert-assignees-context-menu-item',
+        },
+      ],
+      alertAssigneesPanels: [],
+    });
+    mockUseAlertExceptionActions.mockReturnValue({
+      exceptionActionItems: [
+        {
+          key: 'add-endpoint-exception-menu-item',
+          name: 'Add endpoint exception',
+          'data-test-subj': 'add-endpoint-exception-menu-item',
+        },
+      ],
+    });
+    mockUseRunAlertWorkflowPanel.mockReturnValue({
+      runWorkflowMenuItem: [
+        {
+          key: 'run-workflow-action',
+          name: 'Run workflow',
+          'data-test-subj': 'run-workflow-action',
+        },
+      ],
+      runAlertWorkflowPanel: [],
+    });
+    mockUseHostIsolationAction.mockReturnValue([
+      {
+        key: 'isolate-host-action-item',
+        name: 'Isolate host',
+        'data-test-subj': 'isolate-host-action-item',
+      },
+    ]);
+    mockUseResponderActionItem.mockReturnValue([
+      {
+        key: 'endpointResponseActions-action-item',
+        name: 'Respond',
+        'data-test-subj': 'endpointResponseActions-action-item',
+      },
+    ]);
+    mockIsOsqueryAvailable.mockReturnValue(true);
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimelineActionItems: [
+        {
+          key: 'investigate-in-timeline-action-item',
+          name: 'Investigate in Timeline',
+          'data-test-subj': 'investigate-in-timeline-action-item',
+        },
+      ],
+    });
+    renderTakeActionButton({
+      ...defaultProps,
+      hit: createMockHit({ 'event.kind': 'signal' }),
+    });
+
+    fireEvent.click(screen.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+    expect(
+      screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
+    ).toEqual([
+      'open-alert-status',
+      'alert-assignees-context-menu-item',
+      'add-to-case-action',
+      'alert-tags-context-menu-item',
+      'add-endpoint-exception-menu-item',
+      'run-workflow-action',
+      'isolate-host-action-item',
+      'endpointResponseActions-action-item',
+      'osquery-action-item',
+      'investigate-in-timeline-action-item',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
+    expect(
+      screen.getByTestId('add-to-case-action').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
+    expect(
+      screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).not.toBeNull();
   });
 
   it('should call useAddToCaseActions with the correct arguments', () => {
@@ -429,6 +573,72 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
     expect(getByText('Respond')).toBeInTheDocument();
+  });
+
+  describe('Run Osquery', () => {
+    it('should include Run Osquery when osquery is available for local documents', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Run Osquery')).toBeInTheDocument();
+      expect(mockIsOsqueryAvailable).toHaveBeenCalledWith({ agentId: 'agent-1' });
+    });
+
+    it('should hide Run Osquery when osquery is not available', () => {
+      mockIsOsqueryAvailable.mockReturnValue(false);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Run Osquery')).not.toBeInTheDocument();
+    });
+
+    it('should hide Run Osquery for remote documents', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(
+          { 'event.kind': 'signal', 'agent.id': 'agent-1' },
+          'remote-cluster:.alerts-security.alerts-default'
+        ),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Run Osquery')).not.toBeInTheDocument();
+    });
+
+    it('should open and close the Osquery flyout from the menu item', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText, queryByTestId } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      expect(queryByTestId('osqueryFlyoutMock')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Run Osquery'));
+
+      expect(getByTestId('osqueryFlyoutMock')).toBeInTheDocument();
+      expect(getByText('osquery-mock-agent-1')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('osqueryFlyoutMock'));
+
+      expect(queryByTestId('osqueryFlyoutMock')).not.toBeInTheDocument();
+    });
   });
 
   it('should not include run workflow menu item when hook returns empty (no permissions)', () => {
@@ -741,17 +951,17 @@ describe('<TakeActionButton />', () => {
       expect(getByText('Isolate host')).toBeInTheDocument();
     });
 
-    it('should hide the isolate host item for non-alert documents', () => {
+    it('should include the isolate host item for non-alert documents', () => {
       mockUseHostIsolationAction.mockReturnValue([isolateMenuItem]);
 
-      const { getByTestId, queryByText } = renderTakeActionButton({
+      const { getByTestId, getByText } = renderTakeActionButton({
         ...defaultProps,
         hit: createMockHit({ 'event.kind': 'event' }),
       });
 
       fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
-      expect(queryByText('Isolate host')).not.toBeInTheDocument();
+      expect(getByText('Isolate host')).toBeInTheDocument();
     });
 
     it('should hide the isolate host item for remote alerts', () => {
@@ -808,6 +1018,131 @@ describe('<TakeActionButton />', () => {
       fireEvent.click(screen.getByTestId('hostIsolationMock-isolateHost'));
 
       expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('action telemetry', () => {
+    it('reports origin "footer_take_action" and action "add_note" when "Add note" is clicked', () => {
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Add note'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_NOTE,
+      });
+    });
+
+    it('reports action "isolate_host" when the isolate host item is clicked', () => {
+      mockUseHostIsolationAction.mockReturnValue([
+        {
+          key: 'isolate-host-action-item',
+          'data-test-subj': 'isolate-host-action-item',
+          name: 'Isolate host',
+          onClick: jest.fn(),
+        },
+      ]);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Isolate host'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ISOLATE_HOST,
+      });
+    });
+
+    it('reports action "run_osquery" when "Run Osquery" is clicked', () => {
+      mockIsOsqueryAvailable.mockReturnValue(true);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal', 'agent.id': 'agent-1' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Run Osquery'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.RUN_OSQUERY,
+      });
+    });
+
+    it('reports action "add_to_case" when "Add to case" is clicked', () => {
+      mockUseAddToCaseActions.mockReturnValue({
+        addToCaseActionItems: [
+          {
+            key: 'add-to-case-action',
+            'data-test-subj': 'add-to-case-action',
+            name: 'Add to case',
+            onClick: jest.fn(),
+          },
+        ],
+      });
+      const { getByTestId, getByText } = renderTakeActionButton();
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Add to case'));
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: FLYOUT_ACTION.ADD_TO_CASE,
+      });
+    });
+
+    it('reports action "status_closed" when "Mark as closed" is clicked, without breaking panel navigation', async () => {
+      // `alert-close-context-menu-item` is a pure panel-navigation item in production (it opens
+      // a closing-reason sub-panel) — no `onClick` of its own, just a `panel` id. EUI defers
+      // panel-navigation items' `onClick` to a `requestAnimationFrame` callback, so the report
+      // only shows up after that tick — hence `waitFor`.
+      mockUseAlertsActions.mockReturnValue({
+        actionItems: [
+          {
+            key: 'close-alert-with-reason',
+            'data-test-subj': 'alert-close-context-menu-item',
+            name: 'Mark as closed',
+            panel: 'ALERT_CLOSING_REASON_PANEL_ID',
+          },
+        ],
+        panels: [],
+      });
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Mark as closed'));
+
+      await waitFor(() => {
+        expect(mockReportActionClicked).toHaveBeenCalledWith({
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          action: FLYOUT_ACTION.STATUS_CLOSED,
+        });
+      });
+    });
+
+    it('does not report telemetry for items with no matching action (e.g. an unmocked custom item)', () => {
+      const customItem = { key: 'custom', 'data-test-subj': 'custom-item', name: 'Custom' };
+      mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [customItem] });
+
+      const { getByTestId, getByText } = renderTakeActionButton();
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Custom'));
+
+      expect(mockReportActionClicked).not.toHaveBeenCalled();
     });
   });
 });

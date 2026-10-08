@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { rootCertificates } from 'node:tls';
 
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
@@ -23,6 +24,7 @@ import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
+import { parseDuration } from './lib/parse_date';
 import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
 import {
@@ -38,7 +40,92 @@ enum AllowListingField {
   hostname = 'hostname',
 }
 
+export interface InboundEventAdmissionConfig {
+  enabled: boolean;
+  maxInFlight: number;
+  maxInFlightPerConnector: number;
+}
+
+export interface InboundEventRateLimitBudgetConfig {
+  limit: number;
+  windowMs: number;
+}
+
+export interface InboundEventRateLimitConfig {
+  enabled: boolean;
+  maxKeys: number;
+  remoteAddress: InboundEventRateLimitBudgetConfig;
+  connector: InboundEventRateLimitBudgetConfig;
+}
+
 export const DEFAULT_MAX_ATTEMPTS = 3;
+
+interface FileBasedSSLConfig {
+  verificationMode?: SSLSettings['verificationMode'];
+  certificate?: string;
+  key?: string;
+  certificateAuthorities?: string | readonly string[];
+}
+
+interface ResolveFileBasedSSLSettingsOptions {
+  ssl: FileBasedSSLConfig | undefined;
+  serviceName: string;
+  includeSystemCertificateAuthorities?: boolean;
+  allowPartialTrustChain?: boolean;
+}
+
+const resolveFileBasedSSLSettings = ({
+  ssl,
+  serviceName,
+  includeSystemCertificateAuthorities = false,
+  allowPartialTrustChain,
+}: ResolveFileBasedSSLSettingsOptions): SSLSettings => {
+  const readSSLFile = (filePath: string, configKey: string): Buffer => {
+    try {
+      return readFileSync(filePath);
+    } catch (err) {
+      throw new Error(
+        `${serviceName} SSL configuration error: failed to read ${configKey} file: ${err.message}`
+      );
+    }
+  };
+  const certificateAuthorityPaths = ssl?.certificateAuthorities
+    ? Array.isArray(ssl.certificateAuthorities)
+      ? ssl.certificateAuthorities
+      : [ssl.certificateAuthorities]
+    : [];
+  const certificateAuthorities = certificateAuthorityPaths.map((filePath) =>
+    readSSLFile(filePath, 'certificateAuthorities')
+  );
+  const settings: SSLSettings = {
+    ...getSSLSettingsFromConfig(ssl?.verificationMode),
+    cert: ssl?.certificate ? readSSLFile(ssl.certificate, 'certificate') : undefined,
+    key: ssl?.key ? readSSLFile(ssl.key, 'key') : undefined,
+    ca:
+      certificateAuthorities.length > 0
+        ? Buffer.concat([
+            ...(includeSystemCertificateAuthorities
+              ? [Buffer.from(`${rootCertificates.join('\n')}\n`)]
+              : []),
+            ...certificateAuthorities,
+          ])
+        : undefined,
+  };
+
+  if (allowPartialTrustChain !== undefined) {
+    settings.allowPartialTrustChain = allowPartialTrustChain;
+  }
+
+  return settings;
+};
+
+const createCachedSSLSettings = (resolve: () => SSLSettings): (() => SSLSettings) => {
+  let cache: SSLSettings | undefined;
+  return () => {
+    cache ??= resolve();
+    return cache;
+  };
+};
 
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
@@ -49,6 +136,7 @@ export interface ActionsConfigurationUtilities {
   ensureActionTypeEnabled: (actionType: string) => void;
   getSSLSettings: () => SSLSettings;
   getEARSSSLSettings: () => SSLSettings;
+  getRelaySSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -81,6 +169,11 @@ export interface ActionsConfigurationUtilities {
   getEarsUrl: () => string | undefined;
   isEarsEnabled: () => boolean;
   isEarsExperimentalEnabled: () => boolean;
+  isInboundEventsEnabled: () => boolean;
+  getInboundEventsMaxBodyBytes: () => number;
+  getInboundEventsMaxEmitted: () => number;
+  getInboundEventsAdmission: () => InboundEventAdmissionConfig;
+  getInboundEventsRateLimit: () => InboundEventRateLimitConfig;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -210,7 +303,20 @@ export function getActionsConfigurationUtilities(
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   const validatedEmailCurried = curry(validateEmails)(config);
-  let earsSSLSettingsCache: SSLSettings | null = null;
+  const getEARSSSLSettings = createCachedSSLSettings(() =>
+    resolveFileBasedSSLSettings({
+      ssl: config.auth.ears?.ssl,
+      serviceName: 'EARS',
+    })
+  );
+  const getRelaySSLSettings = createCachedSSLSettings(() =>
+    resolveFileBasedSSLSettings({
+      ssl: config.relay?.ssl,
+      serviceName: 'Relay',
+      includeSystemCertificateAuthorities: true,
+      allowPartialTrustChain: config.relay?.ssl ? true : undefined,
+    })
+  );
   return {
     isHostnameAllowed,
     isUriAllowed,
@@ -218,28 +324,8 @@ export function getActionsConfigurationUtilities(
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
-    getEARSSSLSettings: () => {
-      if (earsSSLSettingsCache !== null) {
-        return earsSSLSettingsCache;
-      }
-      const readSSLFile = (filePath: string, configKey: string): Buffer => {
-        try {
-          return readFileSync(filePath);
-        } catch (err) {
-          throw new Error(
-            `EARS SSL configuration error: failed to read ${configKey} file: ${err.message}`
-          );
-        }
-      };
-      earsSSLSettingsCache = {
-        ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
-        cert: config.auth.ears?.ssl?.certificate
-          ? readSSLFile(config.auth.ears.ssl.certificate, 'certificate')
-          : undefined,
-        key: config.auth.ears?.ssl?.key ? readSSLFile(config.auth.ears.ssl.key, 'key') : undefined,
-      };
-      return earsSSLSettingsCache;
-    },
+    getEARSSSLSettings,
+    getRelaySSLSettings,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -309,7 +395,27 @@ export function getActionsConfigurationUtilities(
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
     getEarsUrl: () => config.auth.ears?.url,
-    isEarsEnabled: () => config.auth.ears?.enabled ?? false,
+    isEarsEnabled: () => (config.auth.ears?.enabled ?? true) && !!config.auth.ears?.url,
     isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
+    isInboundEventsEnabled: () => config.inboundEvents.enabled,
+    getInboundEventsMaxBodyBytes: () => config.inboundEvents.maxBodyBytes.getValueInBytes(),
+    getInboundEventsMaxEmitted: () => config.inboundEvents.maxEmitted,
+    getInboundEventsAdmission: (): InboundEventAdmissionConfig => ({
+      enabled: config.inboundEvents.admission.enabled,
+      maxInFlight: config.inboundEvents.admission.maxInFlight,
+      maxInFlightPerConnector: config.inboundEvents.admission.maxInFlightPerConnector,
+    }),
+    getInboundEventsRateLimit: (): InboundEventRateLimitConfig => ({
+      enabled: config.inboundEvents.rateLimit.enabled,
+      maxKeys: config.inboundEvents.rateLimit.maxKeys,
+      remoteAddress: {
+        limit: config.inboundEvents.rateLimit.remoteAddress.limit,
+        windowMs: parseDuration(config.inboundEvents.rateLimit.remoteAddress.window),
+      },
+      connector: {
+        limit: config.inboundEvents.rateLimit.connector.limit,
+        windowMs: parseDuration(config.inboundEvents.rateLimit.connector.window),
+      },
+    }),
   };
 }

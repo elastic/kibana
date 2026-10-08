@@ -75,30 +75,13 @@ export const EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
   [LEGACY_INDICATOR_ATTACHMENT_TYPE]: INDICATOR_ATTACHMENT_TYPE,
 } as const;
 
-export const LEGACY_ATTACHMENT_TYPES = new Set([
+export const LEGACY_ATTACHMENT_TYPES = new Set<string>([
   LEGACY_ACTIONS_TYPE,
   LEGACY_ALERT_TYPE,
   LEGACY_EVENT_TYPE,
   LEGACY_EXTERNAL_REFERENCE_TYPE,
   LEGACY_PERSISTABLE_STATE_TYPE,
   LEGACY_USER_TYPE,
-]);
-
-export const UNIFIED_ATTACHMENT_TYPES = new Set([
-  COMMENT_ATTACHMENT_TYPE,
-  SECURITY_EVENT_ATTACHMENT_TYPE,
-  SECURITY_ALERT_ATTACHMENT_TYPE,
-  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-  STACK_ALERT_ATTACHMENT_TYPE,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-  FILE_ATTACHMENT_TYPE,
-  OSQUERY_ATTACHMENT_TYPE,
-  INDICATOR_ATTACHMENT_TYPE,
-  SECURITY_ENTITY_ATTACHMENT_TYPE,
-  SECURITY_TIMELINE_ATTACHMENT_TYPE,
-  DASHBOARD_ATTACHMENT_TYPE,
-  DISCOVER_SESSION_ATTACHMENT_TYPE,
-  MAP_ATTACHMENT_TYPE,
 ]);
 
 export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -158,27 +141,6 @@ export const UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
   [INDICATOR_ATTACHMENT_TYPE]: LEGACY_INDICATOR_ATTACHMENT_TYPE,
 } as const;
 
-/**
- * Attachment type identifiers that are migrated to unified read/write behavior.
- */
-export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
-  COMMENT_ATTACHMENT_TYPE,
-  SECURITY_EVENT_ATTACHMENT_TYPE,
-  SECURITY_ALERT_ATTACHMENT_TYPE,
-  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-  STACK_ALERT_ATTACHMENT_TYPE,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-  FILE_ATTACHMENT_TYPE,
-  OSQUERY_ATTACHMENT_TYPE,
-  INDICATOR_ATTACHMENT_TYPE,
-  SECURITY_ENTITY_ATTACHMENT_TYPE,
-  SECURITY_TIMELINE_ATTACHMENT_TYPE,
-  ...PERSISTABLE_ATTACHMENT_TYPES,
-  DASHBOARD_ATTACHMENT_TYPE,
-  DISCOVER_SESSION_ATTACHMENT_TYPE,
-  MAP_ATTACHMENT_TYPE,
-]);
-
 export const OWNER_TO_PREFIX_MAP: Partial<Record<string, string>> = {
   [SECURITY_SOLUTION_OWNER]: 'security',
   [OBSERVABILITY_OWNER]: 'observability',
@@ -189,4 +151,15 @@ export const PREFIX_TO_OWNER_MAP: Partial<Record<string, string>> = {
   security: SECURITY_SOLUTION_OWNER,
   observability: OBSERVABILITY_OWNER,
   stack: GENERAL_CASES_OWNER,
+};
+
+/**
+ * Registers an owner→prefix mapping so the owner's legacy `alert`/`event`
+ * attachments resolve to a valid unified type (e.g. `security.alert`). For
+ * dynamically registered owners (e.g. FTR fixtures); built-in solutions are
+ * seeded in {@link OWNER_TO_PREFIX_MAP}. Only the forward map is updated —
+ * `PREFIX_TO_OWNER_MAP` must stay unambiguous when owners share a prefix.
+ */
+export const registerOwnerPrefix = (owner: string, prefix: string): void => {
+  OWNER_TO_PREFIX_MAP[owner] = prefix;
 };

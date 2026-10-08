@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -22,8 +23,6 @@ import { alertingAuthorizationMock } from '../authorization/alerting_authorizati
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { RulesClientContext } from './types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const create = () => {
   const kibanaVersion = 'v8.17.0';
   const taskManager = taskManagerMock.createStart();
@@ -37,6 +36,7 @@ const create = () => {
   const backfillClient = backfillClientMock.create();
 
   const rulesClientParams: jest.Mocked<RulesClientContext> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
@@ -45,6 +45,7 @@ const create = () => {
     spaceId: 'default',
     namespace: 'default',
     getUserName: jest.fn(),
+    getProfileUid: jest.fn(),
     createAPIKey: jest.fn(),
     logger: loggingSystemMock.create().get(),
     internalSavedObjectsRepository,
@@ -67,8 +68,8 @@ const create = () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
-    featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
+    analytics: { reportEvent: jest.fn() },
   };
 
   return rulesClientParams;

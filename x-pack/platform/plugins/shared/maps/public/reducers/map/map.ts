@@ -31,8 +31,6 @@ import {
   UPDATE_SOURCE_PROP,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
-  SET_GOTO,
-  CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
@@ -66,9 +64,7 @@ import type { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
   executionContext: { name: APP_ID },
-  ready: false,
   mapInitError: null,
-  goto: null,
   openTooltips: [],
   mapState: {
     zoom: undefined, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
@@ -137,19 +133,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           ...state.mapState,
           mouseCoordinates: undefined,
         },
-      };
-    case SET_GOTO:
-      return {
-        ...state,
-        goto: {
-          center: action.center,
-          bounds: action.bounds,
-        },
-      };
-    case CLEAR_GOTO:
-      return {
-        ...state,
-        goto: null,
       };
     case SET_MAP_SETTINGS:
       return {

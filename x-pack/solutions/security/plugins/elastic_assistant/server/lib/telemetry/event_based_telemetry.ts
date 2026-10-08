@@ -258,10 +258,12 @@ interface AttackDiscoverySuccessTelemetryEvent {
   custom_retrieval_workflow_count?: number;
   dateRangeDuration: number;
   alert_retrieval_mode?: string;
+  default_alert_retrieval_mode?: string;
   discoveriesGenerated: number;
   duplicatesDroppedCount?: number;
   durationMs: number;
   execution_mode?: string;
+  hallucinations_filtered_count?: number;
   hasFilter: boolean;
   isDefaultDateRange: boolean;
   model?: string;
@@ -327,6 +329,13 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: true,
       },
     },
+    default_alert_retrieval_mode: {
+      type: 'keyword',
+      _meta: {
+        description: 'The alert retrieval mode (custom_query/esql/custom_only/provided)',
+        optional: true,
+      },
+    },
     discoveriesGenerated: {
       type: 'integer',
       _meta: {
@@ -352,6 +361,13 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
       type: 'keyword',
       _meta: {
         description: 'Execution mode (workflow/legacy)',
+        optional: true,
+      },
+    },
+    hallucinations_filtered_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of discoveries filtered out as hallucinations by the validation step',
         optional: true,
       },
     },

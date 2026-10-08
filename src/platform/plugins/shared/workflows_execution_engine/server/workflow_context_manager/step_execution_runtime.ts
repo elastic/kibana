@@ -15,23 +15,24 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
 
-import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
   node: GraphNodeUnion;
@@ -60,7 +61,7 @@ interface StepExecutionRuntimeInit {
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
-  private workflowGraph: WorkflowGraph;
+  private runtimeGraph: RuntimeGraphView;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -82,7 +83,7 @@ export class StepExecutionRuntime {
   }
 
   private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
+    return this.runtimeGraph.topologicalOrder;
   }
 
   private getStepName(): string {
@@ -102,7 +103,7 @@ export class StepExecutionRuntime {
   }
 
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
-    this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
+    this.runtimeGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
 
     // Use workflow execution ID as traceId for APM compatibility
@@ -112,6 +113,11 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
+  }
+
+  public get error(): ExecutionError | undefined {
+    const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
+    return errorInStep ? new ExecutionError(errorInStep) : undefined;
   }
 
   public stepExecutionExists(): boolean {
@@ -130,6 +136,45 @@ export class StepExecutionRuntime {
     };
   }
 
+  /**
+   * Brings the given step executions' outputs back into in-memory state so a
+   * subsequent {@link getCurrentStepResult} can read them.
+   *
+   * Needed by callers that read another step execution's output *directly*
+   * rather than through a template: the template path is pre-warmed by
+   * `StepIoService.prepareForRead`, which targets outputs by static template
+   * analysis and therefore cannot see a direct read. Resume-time `load()` marks
+   * every non-pinned step deferred, so without this a direct read of an output
+   * written in an earlier tick silently yields `{}`.
+   *
+   * Takes a list so a caller reading many outputs pays one ES round trip.
+   * No-op for ids that are already resident.
+   *
+   * Read-pins the whole requested set for `consumerId` before awaiting, and the
+   * caller MUST {@link releaseReadOutputPins} once its synchronous reads are
+   * done. Pinning is not bookkeeping: `rehydrateOutputs` snapshots only the ids
+   * that are evicted when it starts, so without a pin a *resident* id in the
+   * set can be flushed and evicted by the concurrent persistence loop during
+   * the ES round trip — after which it was neither fetched by that call nor
+   * still in memory, and reads back as `{}`. `prepareForRead` pins before its
+   * own await for exactly this reason.
+   */
+  public async rehydrateStepOutputs(
+    stepExecutionIds: ReadonlyArray<string>,
+    consumerId: string = this.stepExecutionId
+  ): Promise<void> {
+    this.stepIoService.pinOutputsForRead(consumerId, stepExecutionIds);
+    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
+  }
+
+  /**
+   * Releases the pins taken by {@link rehydrateStepOutputs}. Idempotent, so it
+   * is safe in a `finally`.
+   */
+  public releaseReadOutputPins(consumerId: string = this.stepExecutionId): void {
+    this.stepIoService.releaseReadPins(consumerId);
+  }
+
   public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
@@ -146,6 +191,9 @@ export class StepExecutionRuntime {
   public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
+    // Capture before upsert: the write below sets startedAt, so a later read cannot
+    // tell a first start from a durable poll resume of the same step execution.
+    const alreadyStarted = this.stepExecution?.startedAt != null;
 
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -156,11 +204,21 @@ export class StepExecutionRuntime {
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     });
-    this.logStepStart(stepId, this.stepExecutionId);
+    if (!alreadyStarted) {
+      this.logStepStart(stepId, this.stepExecutionId);
+    }
   }
 
   public setInput(input: Record<string, unknown>): void {
     this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+  }
+
+  /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */
+  public stampHitlAudit(hitl: NonNullable<EsWorkflowStepExecution['hitl']>): void {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      hitl,
+    });
   }
 
   /**
@@ -233,7 +291,6 @@ export class StepExecutionRuntime {
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
     // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
     const executionError = toExecutionError(error);
-    const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,
@@ -248,18 +305,14 @@ export class StepExecutionRuntime {
       : undefined;
 
     const usage = this.recordTokenUsage(partialOutput);
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      error: executionError.toSerializableObject(),
       finishedAt,
-      error: serializedError,
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
@@ -331,10 +384,6 @@ export class StepExecutionRuntime {
       });
     }
     return usage;
-  }
-
-  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
-    await this.stepLogger?.flushEvents(options);
   }
 
   /**

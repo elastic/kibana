@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { indexLifecyclePhaseSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
@@ -20,11 +20,13 @@ export interface StorageChartRouteResponse {
 
 export const storageChartRoute = defineRoute<StorageChartRouteResponse>()({
   endpoint: 'GET /internal/apm/storage_chart',
-  params: z.object({
-    query: indexLifecyclePhaseSchema
-      .merge(probabilitySchema)
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: indexLifecyclePhaseSchema
+        .merge(probabilitySchema)
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

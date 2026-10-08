@@ -6,6 +6,7 @@
  */
 
 import type { ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
 
 import {
   afterBeforeExitBoundary,
@@ -70,9 +71,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must be greater or equal than the previous step value (30d)',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('returns undefined when current after is greater than or equal to previous step', () => {
@@ -148,9 +147,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must be greater than and a multiple of the previous step value (5m)',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('returns undefined when current fixed_interval is greater and a multiple of the previous step', () => {
@@ -197,9 +194,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must not exceed the delete phase (30d).',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('fails against the frozen phase when one is configured', () => {
@@ -223,9 +218,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must not exceed the frozen phase (20d).',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('returns undefined when after is smaller than the boundary', () => {
@@ -311,9 +304,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must not exceed the frozen phase (40d).',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('fails against the delete phase when no frozen phase is configured', () => {
@@ -336,9 +327,7 @@ describe('streams DSL steps flyout validations', () => {
         })
       );
 
-      expect(result).toEqual({
-        message: 'Must not exceed the delete phase (30d).',
-      });
+      expect(result).toEqual({ message: BOUNDARY_VALIDATION_ERROR });
     });
 
     it('returns undefined when the interval is smaller than the boundary', () => {

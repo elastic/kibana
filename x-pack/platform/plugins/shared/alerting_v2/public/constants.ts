@@ -9,36 +9,44 @@ import { encode as encodeRison } from '@kbn/rison';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-} from '../common/management_apps';
+  ALERTING_V2_RULES_BASE_PATH,
+  ALERTING_V2_EPISODES_BASE_PATH,
+} from '@kbn/alerting-v2-constants';
 
-export {
-  ALERTING_V2_SECTION_ID,
-  ALERTING_V2_RULES_APP_ID,
-  ALERTING_V2_ACTION_POLICIES_APP_ID,
-  ALERTING_V2_EPISODES_APP_ID,
-  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-};
-
-export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_EPISODES_BASE_PATH };
+export const ALERTING_V2_RULE_LIBRARY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
-export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const ALERTING_V2_RULES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_RULE_LIBRARY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
 export const ALERTING_V2_EPISODES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const MANAGEMENT_APP_ID = 'management';
+
+/** Stable Content List `id` / query-key scope for the rules list page. */
+export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
+
+/** Stable Content List `id` / query-key scope for the rule library page. */
+export const RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v2-rule-templates';
+
 export {
   ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
+  ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
-  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
 } from '@kbn/alerting-v2-constants';
 
 export interface AlertEpisodesListLinkOptions {
@@ -54,40 +62,42 @@ export interface AlertEpisodesListLinkOptions {
      */
     groupingValues?: Record<string, string | null>;
   };
-  /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
+  /** Time range embedded in `_a.alertsList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
 }
-
-export const CREATE_WITH_AGENT_INITIAL_PROMPT =
-  'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
 
 export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/conversations/new';
 
 export const paths = {
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
+  ruleListCreateFromTemplate: (templateId: string) =>
+    `${ALERTING_V2_RULES_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
+  ruleLibraryCreateFromTemplate: (templateId: string) =>
+    `${ALERTING_V2_RULE_LIBRARY_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
+  sequenceRuleCreate: `${ALERTING_V2_RULES_BASE_PATH}/sequence/create`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   actionPolicyList: ALERTING_V2_ACTION_POLICIES_BASE_PATH,
   /** Plain base path — safe for `<Route path={...}>` definitions. */
-  alertEpisodesList: ALERTING_V2_EPISODES_BASE_PATH,
+  alertsList: ALERTING_V2_EPISODES_BASE_PATH,
   /**
-   * Builds a deep-link URL to the episodes list, optionally pre-seeding
-   * filters and time range via `_a.episodesList.*`.
+   * Builds a deep-link URL to the alerts list, optionally pre-seeding
+   * filters and time range via `_a.alertsList.*`.
    *
    * Shape MUST match what `readEpisodesListAppStateFromUrlStorage` reads:
-   * flat fields inside `_a.episodesList` (`ruleId`, `groupHash`,
+   * flat fields inside `_a.alertsList` (`ruleId`, `groupHash`,
    * `groupingValues`, `timeFrom`, `timeTo`). Time is NOT put in `_g` —
-   * the episodes list reads time from `_a.episodesList.{timeFrom,timeTo}`
+   * the alerts list reads time from `_a.alertsList.{timeFrom,timeTo}`
    * so that no Kibana global-time sync fires on mount and pushes a spurious
    * history entry.
    */
-  alertEpisodesListHref: (opts?: AlertEpisodesListLinkOptions): string => {
+  alertsListHref: (opts?: AlertEpisodesListLinkOptions): string => {
     if (!opts) return ALERTING_V2_EPISODES_BASE_PATH;
 
     const { filters, timeRange } = opts;
-    const episodesList = Object.fromEntries(
+    const alertsList = Object.fromEntries(
       Object.entries({
         ruleId: filters?.ruleId,
         groupHash: filters?.groupHash,
@@ -101,13 +111,14 @@ export const paths = {
       }).filter(([_key, value]) => value != null)
     );
 
-    if (Object.keys(episodesList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
+    if (Object.keys(alertsList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
 
     const search = new URLSearchParams();
-    search.set('_a', encodeRison({ episodesList }));
+    search.set('_a', encodeRison({ alertsList }));
     return `${ALERTING_V2_EPISODES_BASE_PATH}?${search.toString()}`;
   },
-  alertEpisodeDetails: (episodeId: string) =>
-    `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
+  alertDetails: (alertId: string) =>
+    `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(alertId)}`,
   executionHistoryList: ALERTING_V2_EXECUTION_HISTORY_BASE_PATH,
+  ruleLibraryList: ALERTING_V2_RULE_LIBRARY_BASE_PATH,
 };

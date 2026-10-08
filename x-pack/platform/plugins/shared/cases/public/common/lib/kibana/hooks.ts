@@ -50,13 +50,13 @@ export const useCasesConfig = () => {
       attachmentsEnabled: config?.attachments?.enabled ?? false,
       chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
-      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
+      runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
     }),
     [
       config?.attachments?.enabled,
       config?.chat?.enabled,
       config?.templates?.enabled,
-      config?.casesRedesign?.details,
+      config?.runWorkflows?.enabled,
     ]
   );
 };

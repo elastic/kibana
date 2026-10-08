@@ -53,7 +53,7 @@ properties:
   fieldCount:
     type: integer
     description: The number of fields defined in the template.
-  fieldNames:
+  fieldDefinitions:
     type: array
     description: Metadata about each field defined in the template.
     items:

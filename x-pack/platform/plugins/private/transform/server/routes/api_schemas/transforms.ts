@@ -19,6 +19,7 @@ import { transformStateSchema, runtimeMappingsSchema } from './common';
 // GET transform nodes
 export interface GetTransformNodesResponseSchema {
   count: number;
+  isCrossProjectEnabled: boolean;
 }
 
 // GET transforms
@@ -155,7 +156,7 @@ export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 
 
 export const putTransformQuerySchema = schema.object({
   createDataView: schema.boolean({ defaultValue: false }),
-  timeFieldName: schema.maybe(schema.string()),
+  timeFieldName: schema.maybe(schema.string({ maxLength: 1000 })),
   deferValidation: schema.boolean({ defaultValue: false }),
 });
 

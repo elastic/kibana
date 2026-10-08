@@ -11,7 +11,15 @@ import { pipeline } from 'stream/promises';
 import { createInterface } from 'readline';
 import { PassThrough } from 'stream';
 import crypto from 'crypto';
-import { faker } from '@faker-js/faker';
+import {
+  applyHostToDoc,
+  applyUserToDoc,
+  pickHostPool,
+  pickUserPool,
+  type CatalogHost,
+  type CatalogUser,
+} from './entities';
+import { enrichDocForGraph } from './graph_enrichment';
 import { isRecord, isString } from './type_guards';
 
 export interface EpisodeFileSet {
@@ -274,7 +282,7 @@ export interface ScaleEpisodesOptions {
 
 export interface ScaledDoc {
   doc: Record<string, unknown>;
-  kind: 'data' | 'endpoint_alert' | 'insights_alert';
+  kind: 'data' | 'endpoint_alert';
   episodeId: string;
 }
 
@@ -332,10 +340,10 @@ const shiftTimeFieldsInPlace = (doc: Record<string, unknown>, deltaMs: number) =
 const rewriteEntityIdsInPlace = (doc: Record<string, unknown>, cloneKey: string) => {
   const replacements = new Map<string, string>();
 
-  const rewrite = (value: unknown): unknown => {
-    if (typeof value !== 'string') return value;
+  const rewriteString = (value: string): string => {
     if (value.length < 8) return value;
-    if (replacements.has(value)) return replacements.get(value);
+    const cached = replacements.get(value);
+    if (cached !== undefined) return cached;
     // Heuristic: rewrite looks-like-IDs used in endpoint docs (base64-ish, uuid-ish, hex-ish)
     if (!/[A-Za-z0-9+/=_-]{8,}/.test(value)) return value;
     const next = `${cloneKey}:${hash(value)}`;
@@ -343,22 +351,33 @@ const rewriteEntityIdsInPlace = (doc: Record<string, unknown>, cloneKey: string)
     return next;
   };
 
-  const walk = (node: unknown): unknown => {
-    if (Array.isArray(node)) return node.map(walk);
-    if (!node || typeof node !== 'object') return rewrite(node);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const o: any = node;
+  const rewriteValue = (value: unknown): unknown => {
+    if (typeof value === 'string') return rewriteString(value);
+    if (Array.isArray(value)) return value.map(rewriteValue);
+    if (!value || typeof value !== 'object') return value;
+    const o = value as Record<string, unknown>;
     for (const k of Object.keys(o)) {
-      const v = o[k];
-      // Keep this intentionally narrow: avoid rewriting generic `id` fields which are common across ECS
-      // and may represent stable identifiers that should not be mutated.
-      if (k === 'entity_id' || k === 'ancestry') {
-        o[k] = walk(v);
-      } else if (typeof v === 'object') {
-        o[k] = walk(v);
-      }
+      o[k] = rewriteValue(o[k]);
     }
     return o;
+  };
+
+  const walk = (node: unknown): void => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item);
+      return;
+    }
+    const o = node as Record<string, unknown>;
+    for (const k of Object.keys(o)) {
+      const v = o[k];
+      // Only rewrite under identity fields. Do not rewrite ECS string arrays like related.* / roles.
+      if (k === 'entity_id' || k === 'ancestry') {
+        o[k] = rewriteValue(v);
+      } else if (v && typeof v === 'object') {
+        walk(v);
+      }
+    }
   };
 
   walk(doc);
@@ -366,91 +385,31 @@ const rewriteEntityIdsInPlace = (doc: Record<string, unknown>, cloneKey: string)
 
 const setHostAndUserInPlace = ({
   doc,
-  hostName,
-  userName,
-  hostId,
+  host,
+  user,
   agentId,
 }: {
   doc: Record<string, unknown>;
-  hostName: string;
-  userName: string;
-  hostId: string;
+  host: CatalogHost;
+  user: CatalogUser;
   agentId: string;
 }) => {
-  // Host
-  setNested(doc, ['host', 'name'], hostName);
-  setNested(doc, ['host', 'hostname'], hostName);
-  setNested(doc, ['host', 'id'], hostId);
-
-  // Agent
+  applyHostToDoc(doc, host);
+  applyUserToDoc(doc, user);
   setNested(doc, ['agent', 'id'], agentId);
   setNested(doc, ['elastic', 'agent', 'id'], agentId);
-  setNested(doc, ['user', 'name'], userName);
+  enrichDocForGraph(doc);
 };
 
-const normalizeMockNameToken = (value: string): string => {
-  const normalized = value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return normalized || 'unknown';
-};
-
-const deterministicIntFromHash = (input: string): number => {
-  const h = hash(input).slice(0, 8);
-  const n = Number.parseInt(h, 16);
-  return Number.isFinite(n) ? n : 0;
-};
-
-const buildDeterministicMockName = ({
-  kind,
-  seed,
-  index,
-  existing,
-}: {
-  kind: 'host' | 'user';
-  seed: string;
-  index: number;
-  existing: Set<string>;
-}): string => {
-  // Avoid consuming faker's global RNG state in an order-dependent way by seeding per name.
-  for (let attempt = 0; attempt < 25; attempt++) {
-    const attemptSeed = `${seed}:${kind}:${index}:${attempt}`;
-    faker.seed(deterministicIntFromHash(attemptSeed));
-
-    const token =
-      kind === 'user'
-        ? normalizeMockNameToken(faker.person.fullName())
-        : normalizeMockNameToken(faker.word.noun());
-
-    // Suffix format requested: 1..99, deterministic per (seed, kind, index, attempt)
-    const suffix = (deterministicIntFromHash(`${attemptSeed}:suffix`) % 99) + 1;
-    const name = `${token}-${suffix}`;
-
-    if (!existing.has(name)) {
-      existing.add(name);
-      return name;
-    }
+const stampEpisodeOwnershipTags = (doc: Record<string, unknown>, episodeId: string): void => {
+  const existing = Array.isArray(doc.tags) ? doc.tags.filter(isString) : [];
+  const next = new Set(existing);
+  next.add('data-generator');
+  // Noise fixtures are the episode-level false-positive / benign pool.
+  if (episodeId.startsWith('noise')) {
+    next.add('data-generator-fp');
   }
-
-  // Deterministic fallback in the extremely unlikely case we can't find a unique name quickly.
-  const fallback = `${kind}-${index + 1}`;
-  existing.add(fallback);
-  return fallback;
-};
-
-const generateHostPool = ({ count, seed }: { count: number; seed: string }): string[] => {
-  const existing = new Set<string>();
-  return Array.from({ length: count }, (_, i) =>
-    buildDeterministicMockName({ kind: 'host', seed, index: i, existing })
-  );
-};
-
-const generateUserPool = ({ count, seed }: { count: number; seed: string }): string[] => {
-  const existing = new Set<string>();
-  return Array.from({ length: count }, (_, i) =>
-    buildDeterministicMockName({ kind: 'user', seed, index: i, existing })
-  );
+  doc.tags = [...next];
 };
 
 export async function* scaleEpisodes(
@@ -461,34 +420,20 @@ export async function* scaleEpisodes(
   if (rangeMs <= 0) throw new Error('Invalid time range: end must be after start');
 
   const seed = opts.seed ?? 'seed';
-  const hosts = generateHostPool({ count: opts.hostCount, seed });
-  const users = generateUserPool({ count: opts.userCount, seed });
-
-  const riskyHostCount = Math.min(Math.max(opts.riskyHostCount ?? 2, 0), hosts.length);
-  const riskyUserCount = Math.min(Math.max(opts.riskyUserCount ?? 2, 0), users.length);
+  const riskyHostCount = Math.min(Math.max(opts.riskyHostCount ?? 2, 0), opts.hostCount);
+  const riskyUserCount = Math.min(Math.max(opts.riskyUserCount ?? 2, 0), opts.userCount);
   const riskyProbability = Math.min(Math.max(opts.riskyProbability ?? 0.7, 0), 1);
 
-  const riskyHosts = hosts.slice(0, riskyHostCount);
-  const riskyUsers = users.slice(0, riskyUserCount);
-  const nonRiskyHosts = hosts.slice(riskyHostCount);
-  const nonRiskyUsers = users.slice(riskyUserCount);
+  const hosts = pickHostPool({ count: opts.hostCount, seed, riskyCount: riskyHostCount });
+  const users = pickUserPool({ count: opts.userCount, seed, riskyCount: riskyUserCount });
 
-  const baseDocs: Array<{
-    episodeId: string;
-    kind: ScaledDoc['kind'];
-    doc: Record<string, unknown>;
-  }> = [];
-  for (const ep of episodes) {
-    for (const d of ep.dataDocs) baseDocs.push({ episodeId: ep.episodeId, kind: 'data', doc: d });
-    for (const a of ep.alertDocs)
-      baseDocs.push({ episodeId: ep.episodeId, kind: 'endpoint_alert', doc: a });
-  }
+  const riskyHosts = hosts.filter((h) => h.risky);
+  const riskyUsers = users.filter((u) => u.risky);
+  const nonRiskyHosts = hosts.filter((h) => !h.risky);
+  const nonRiskyUsers = users.filter((u) => !u.risky);
 
   // We scale based on data docs only (source events). Alerts are carried alongside each episode clone.
-  const baseDataDocs = episodes.flatMap((e) =>
-    e.dataDocs.map((d) => ({ episodeId: e.episodeId, doc: d }))
-  );
-  const baseDataCount = baseDataDocs.length;
+  const baseDataCount = episodes.reduce((sum, e) => sum + e.dataDocs.length, 0);
   if (baseDataCount === 0) throw new Error('No episode data docs found');
 
   // Ensure we actually exercise the requested host/user pools even when targetEvents is small
@@ -508,22 +453,21 @@ export async function* scaleEpisodes(
     const riskRoll = hashToUnitFloat(`${cloneKey}:risk`);
     const isRisky = riskyHosts.length > 0 && riskyUsers.length > 0 && riskRoll < riskyProbability;
 
-    const pickFrom = (pool: string[], salt: string, fallback: string[]): string => {
+    const pickFrom = <T>(pool: T[], salt: string, fallback: T[]): T => {
       const effective = pool.length > 0 ? pool : fallback;
       const idx =
         Math.floor(hashToUnitFloat(`${cloneKey}:${salt}`) * effective.length) % effective.length;
       return effective[idx];
     };
 
-    const hostName = isRisky
+    const host = isRisky
       ? pickFrom(riskyHosts, 'host', hosts)
       : pickFrom(nonRiskyHosts, 'host', hosts);
-    const userName = isRisky
+    const user = isRisky
       ? pickFrom(riskyUsers, 'user', users)
       : pickFrom(nonRiskyUsers, 'user', users);
 
-    const hostId = `host-${hash(`${cloneKey}:${hostName}`)}`;
-    const agentId = `agent-${hash(`${cloneKey}:${hostName}:${userName}`)}`;
+    const agentId = `agent-${hash(`${cloneKey}:${host.name}:${user.name}`)}`;
 
     // Place the episode clone in the time window. We spread clones evenly across the range.
     const anchor = opts.startMs + Math.floor((rangeMs * cloneIdx) / cloneCount);
@@ -544,8 +488,9 @@ export async function* scaleEpisodes(
 
         const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
-        setHostAndUserInPlace({ doc: cloned, hostName, userName, hostId, agentId });
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
+        setHostAndUserInPlace({ doc: cloned, host, user, agentId });
+        stampEpisodeOwnershipTags(cloned, ep.episodeId);
         producedDataDocs++;
         producedThisClone++;
         yield { doc: cloned, kind: 'data', episodeId: ep.episodeId };
@@ -554,13 +499,10 @@ export async function* scaleEpisodes(
       for (const doc of ep.alertDocs) {
         const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
-        setHostAndUserInPlace({ doc: cloned, hostName, userName, hostId, agentId });
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
+        setHostAndUserInPlace({ doc: cloned, host, user, agentId });
+        stampEpisodeOwnershipTags(cloned, ep.episodeId);
         yield { doc: cloned, kind: 'endpoint_alert', episodeId: ep.episodeId };
-
-        // Also write a copy into insights-alerts-* (Insights rule sources from there)
-        const insightsCopy: Record<string, unknown> = structuredClone(cloned);
-        yield { doc: insightsCopy, kind: 'insights_alert', episodeId: ep.episodeId };
       }
 
       if (producedDataDocs >= opts.targetEvents || producedThisClone >= perCloneTargetEvents) {

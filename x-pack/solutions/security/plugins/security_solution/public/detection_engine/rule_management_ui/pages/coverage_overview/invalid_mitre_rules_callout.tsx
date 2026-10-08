@@ -8,8 +8,8 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { InvalidMitreRulesModal } from './invalid_mitre_rules_modal';
 import * as i18n from './translations';
@@ -20,6 +20,9 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const {
     state: { data },
   } = useCoverageOverviewDashboardContext();
+  const { frameworkVersion } = useMitreConfiguration();
+  // The hook returns the version without the leading 'v', so re-add it at the display site.
+  const displayVersion = frameworkVersion ? `v${frameworkVersion}` : undefined;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -27,7 +30,8 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const { enabledRules = [], disabledRules = [] } = data?.invalidlyMappedRules ?? {};
   const invalidCount = enabledRules.length + disabledRules.length;
 
-  if (invalidCount === 0) {
+  // Without a resolved MITRE version there is nothing meaningful to compare against, so stay hidden.
+  if (invalidCount === 0 || !displayVersion) {
     return null;
   }
 
@@ -46,10 +50,10 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
             defaultMessage="You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK® IDs not present in the currently supported version ({version}). They may not appear correctly in the coverage matrix. {learnMoreLink}"
             values={{
               count: invalidCount,
-              version: MITRE_ATTACK_VERSION,
+              version: displayVersion,
               learnMoreLink: (
                 <EuiLink
-                  href={docLinks.links.siem.mitreCoverage}
+                  href={docLinks.links.siem.remapMitreAttack}
                   target="_blank"
                   data-test-subj="coverageOverviewInvalidMitreRulesLearnMoreLink"
                 >

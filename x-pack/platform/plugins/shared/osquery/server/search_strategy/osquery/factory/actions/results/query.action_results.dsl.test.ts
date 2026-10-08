@@ -7,6 +7,18 @@
 
 import moment from 'moment';
 import { buildActionResultsQuery } from './query.action_results.dsl';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
+const collectShouldClauses = (clauses: unknown[]): unknown[] =>
+  clauses.flatMap((clause) => (clause as { bool?: { should?: unknown[] } })?.bool?.should ?? []);
 import {
   Direction,
   type ActionResultsRequestOptions,
@@ -43,7 +55,7 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index: '.fleet-actions-results*',
+        index: ['.fleet-actions-results*'],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -54,7 +66,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-123',
                         },
                       },
@@ -93,8 +105,8 @@ describe('buildActionResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -133,7 +145,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['.logs-osquery_manager.action.responses*']);
     });
 
     it('should build query using new data stream when useNewDataStream is true', () => {
@@ -155,7 +167,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
     });
 
     it('should build query with kuery filter', () => {
@@ -182,12 +194,40 @@ describe('buildActionResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-kuery',
+              },
+            },
+            {
               query_string: {
-                query:
-                  'action_id: action-kuery AND agent.name: "test-agent" AND error.message: *timeout*',
+                query: 'agent.name: "test-agent" AND error.message: *timeout*',
               },
             },
           ],
+        },
+      });
+    });
+
+    it('builds a term filter for actionId', () => {
+      const result = buildActionResultsQuery({
+        actionId: 'action id',
+        spaceId: 'default',
+        pagination: {
+          activePage: 0,
+          querySize: 25,
+          cursorStart: 0,
+        },
+        sort: {
+          field: 'started_at',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: true,
+        useNewDataStream: false,
+      });
+
+      expect(result.query).toEqual({
+        bool: {
+          filter: [{ term: { action_id: 'action id' } }],
         },
       });
     });
@@ -227,8 +267,8 @@ describe('buildActionResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time-range',
+              term: {
+                action_id: 'action-time-range',
               },
             },
           ],
@@ -256,9 +296,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses-production,.logs-osquery_manager.action.responses-development'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-production',
+        '.logs-osquery_manager.action.responses-development',
+      ]);
     });
 
     it('should build query with all options combined', () => {
@@ -288,8 +329,10 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index:
-          'logs-osquery_manager.action.responses-staging,logs-osquery_manager.action.responses-qa',
+        index: [
+          'logs-osquery_manager.action.responses-staging',
+          'logs-osquery_manager.action.responses-qa',
+        ],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -300,7 +343,7 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-comprehensive',
                         },
                       },
@@ -347,9 +390,13 @@ describe('buildActionResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-comprehensive',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-comprehensive AND error.type: "timeout" OR status: "failed"',
+                  query: 'error.type: "timeout" OR status: "failed"',
                 },
               },
             ],
@@ -480,7 +527,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.fleet-actions-results*,*:.fleet-actions-results*');
+      expect(result.index).toEqual(['.fleet-actions-results*', '*:.fleet-actions-results*']);
     });
 
     it('should include remote cluster patterns when ccsEnabled is true and using component template index', () => {
@@ -496,9 +543,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses*,*:.logs-osquery_manager.action.responses*'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses*',
+        '*:.logs-osquery_manager.action.responses*',
+      ]);
     });
 
     it('should include remote cluster patterns when ccsEnabled is true and using new data stream', () => {
@@ -514,9 +562,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
-      );
+      expect(result.index).toEqual([
+        'logs-osquery_manager.action.responses*',
+        '*:logs-osquery_manager.action.responses*',
+      ]);
     });
 
     it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
@@ -533,9 +582,12 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses-default,.logs-osquery_manager.action.responses-ns1,*:.logs-osquery_manager.action.responses-default,*:.logs-osquery_manager.action.responses-ns1'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-default',
+        '.logs-osquery_manager.action.responses-ns1',
+        '*:.logs-osquery_manager.action.responses-default',
+        '*:.logs-osquery_manager.action.responses-ns1',
+      ]);
     });
 
     it('should not modify index when ccsEnabled is false', () => {
@@ -551,7 +603,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
     });
   });
 
@@ -588,7 +640,7 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(expectedIndex);
+      expect(result.index).toEqual([expectedIndex]);
     });
   });
 
@@ -605,18 +657,27 @@ describe('buildActionResultsQuery', () => {
     const getAggFilterMust = (result: any) =>
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
-    it('scopes the aggregation by space_id', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
-      expect(JSON.stringify(getAggFilterMust(result))).toContain('space_id');
-    });
-
     it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchActionDataSpaceId: true,
+      });
       const defaultClause = {
         bool: {
           should: [
             { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
+            // A response carrying action_data.space_id belongs to a known space, so
+            // the missing-field allowance must not treat it as unstamped.
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'space_id' } },
+                  { exists: { field: 'action_data.space_id' } },
+                ],
+              },
+            },
+            actionDataFallback('default'),
           ],
         },
       };
@@ -625,8 +686,80 @@ describe('buildActionResultsQuery', () => {
     });
 
     it('scopes the aggregation to the space exactly in a named space', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: true,
+      });
+      // Id-bound read: also matches the agent-carried action_data.space_id.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
+    });
+
+    it('uses a strict default-space term in aggregations when matchMissingSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchMissingSpaceId: false,
+        matchActionDataSpaceId: true,
+      });
+
+      // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
+      // present, exact-valued term, so it survives while the missing-field
+      // allowance is dropped.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
+        },
+      });
+      // The dropped allowance is the one that admits unstamped documents outright;
+      // the fallback's own `must_not` is paired with a required action_data term.
+      expect(collectShouldClauses(getAggFilterMust(result))).not.toContainEqual({
+        bool: { must_not: { exists: { field: 'space_id' } } },
+      });
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is omitted', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+      });
+
       expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: false,
+      });
+
+      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
+    });
+
+    it('omits the space filter from aggregations but keeps the action_id term when skipSpaceFilter is set', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: true,
+        skipSpaceFilter: true,
+      });
+
+      expect(getAggFilterMust(result)).toEqual([{ term: { action_id: 'action-123' } }]);
     });
   });
 });

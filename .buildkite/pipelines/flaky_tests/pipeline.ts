@@ -7,10 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groups } from './groups.json';
-import { TestSuiteType } from './constants';
+import { TestSuiteType } from './constants.ts';
+import { loadBuildkiteJson } from '../../pipeline-utils/load_buildkite_json.ts';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
+import {
+  expandAgentQueue,
+  collectEnvFromLabels,
+  getTrackedBranch,
+  retryOnPreemption,
+} from '#pipeline-utils';
+
+const { groups } = loadBuildkiteJson<typeof import('./groups.json')>(
+  'pipelines/flaky_tests/groups.json'
+);
+
+const TEST_STEP_TIMEOUT_MINUTES = 80;
 
 /**
  * Flaky runner JSON is passed on the Buildkite build via env vars set at trigger time (ci-stats UI,
@@ -50,8 +61,9 @@ const MAX_COUNT_PER_CONFIG = 50;
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 /**
- * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
- * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
+ * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
+ * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
+ * uses the agent image default; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;
@@ -60,7 +72,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : undefined,
+    diskSizeGb: undefined,
   };
 }
 
@@ -95,7 +107,7 @@ interface CommandTestSuite {
   scoutLabel?: string;
   agentQueue?: string;
   diskSizeGb?: number;
-  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  /** Package path (repo-relative) where `pnpm junit:merge` should run when it differs from `workingDirectory`. */
   junitMergeWorkingDirectory?: string;
 }
 
@@ -273,14 +285,16 @@ steps.push({
   label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
-  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+  // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
+  // depends_on: build, so skipping it skips those jobs. build_kibana.sh
+  // no-ops when the cached dist type matches.
 });
 
 if (hasScoutSuites) {
-  // Single step that bootstraps Kibana, runs Scout config discovery, and dynamically
-  // uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
-  // Discovery requires a full `yarn kbn bootstrap`, which is too heavy to run inside
-  // pipeline.ts itself; combining discovery + planning here avoids paying for an
+  // Single step that bootstraps Kibana, resolves ONLY the requested Scout configs, and
+  // dynamically uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
+  // Resolving requested configs requires a full `pnpm kbn bootstrap`, which is too heavy to
+  // run inside pipeline.ts itself; combining resolution + planning here avoids paying for an
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.
   const scoutFlakyRequests = testSuites.filter(
@@ -307,9 +321,7 @@ if (hasScoutSuites) {
       SCOUT_FLAKY_RESERVED_JOBS: String(reservedJobsForPlanner),
       SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
     },
-    retry: {
-      automatic: [{ exit_status: '-1', limit: 3 }],
-    },
+    retry: retryOnPreemption(2),
   });
 }
 
@@ -335,10 +347,8 @@ for (const testSuite of testSuites) {
         concurrency_method: 'eager',
         agents: expandAgentQueue('n2-4-spot'),
         depends_on: 'build',
-        timeout_in_minutes: 150,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+        retry: retryOnPreemption(2),
       });
       break;
 
@@ -359,14 +369,12 @@ for (const testSuite of testSuites) {
         agents: expandAgentQueue(agentQueue, diskSizeGb),
         key: `${TestSuiteType.COMMAND}-${suiteIndex++}`,
         depends_on: 'build',
-        timeout_in_minutes: 150,
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
-        },
+        retry: retryOnPreemption(2),
         env: {
           FLAKY_TEST_WORKING_DIRECTORY: testSuite.workingDirectory,
           FLAKY_TEST_COMMAND: testSuite.command,
@@ -397,14 +405,12 @@ for (const testSuite of testSuites) {
             agents: expandAgentQueue(agentQueue, diskSizeGb),
             key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
             depends_on: 'build',
-            timeout_in_minutes: 150,
+            timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
             parallelism: testSuite.count,
             concurrency,
             concurrency_group: process.env.UUID,
             concurrency_method: 'eager',
-            retry: {
-              automatic: [{ exit_status: '-1', limit: 3 }],
-            },
+            retry: retryOnPreemption(2),
             env: {
               // disable split of test cases between parallel jobs when running them in flaky test runner
               // by setting chunks vars to value 1, which means all test will run in one job
@@ -436,14 +442,11 @@ pipeline.steps.push({
 });
 
 pipeline.steps.push({
-  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  command: 'node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
   agents: expandAgentQueue('n2-4-spot'),
   timeout_in_minutes: 15,
-  retry: {
-    automatic: [{ exit_status: '-1', limit: 3 }],
-  },
-  soft_fail: true,
+  retry: retryOnPreemption(2),
 });
 
 console.log(JSON.stringify(pipeline, null, 2));

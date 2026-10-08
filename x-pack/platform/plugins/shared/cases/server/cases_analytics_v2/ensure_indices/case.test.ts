@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CASE_INDEX_NAME } from '../constants';
+import { CASE_INDEX_MAPPING } from '../mappings/case';
 import { ensureCaseIndex } from './case';
 
 const buildDeps = () => ({
@@ -20,94 +21,34 @@ describe('ensureCaseIndex', () => {
     jest.clearAllMocks();
   });
 
-  it('creates the index with the correct settings when it does not exist', async () => {
+  it('creates the index as a lookup index when it does not exist', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
     (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
-    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
     const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
     expect(call.index).toBe(CASE_INDEX_NAME);
-    expect(call.settings).toMatchObject({
+    expect(call.mappings).toBe(CASE_INDEX_MAPPING);
+    expect(call.settings).toEqual({
       'index.hidden': true,
       'index.mode': 'lookup',
+      'index.auto_expand_replicas': '0-1',
     });
   });
 
-  /**
-   * Without `auto_expand_replicas`, ES defaults to `number_of_replicas: 1`,
-   * costing 2 shards (1 primary + 1 replica) even on a single-node cluster.
-   * Environments already near the 1000-shard default hit a
-   * `validation_exception` and the bootstrap fails before the feature starts.
-   * `auto_expand_replicas: '0-1'` keeps the cost at 1 shard on single-node
-   * clusters (dev/CI) and automatically adds the replica on multi-node
-   * clusters (production) — no manual configuration required.
-   */
-  it('sets auto_expand_replicas to prevent max_shards_open failures on single-node clusters', async () => {
-    const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
-
-    await ensureCaseIndex({ esClient, logger });
-
-    const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.settings['index.auto_expand_replicas']).toBe('0-1');
-  });
-
-  it('skips creation and logs debug when the index already exists', async () => {
+  it('syncs properties and dynamic templates when the index already exists', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.putMapping as unknown as jest.Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
-    expect(esClient.indices.create).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('already exists; skipping bootstrap')
-    );
-  });
-
-  it('swallows resource_already_exists_exception from a concurrent bootstrap race', async () => {
-    const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    const err = Object.assign(new Error('already exists'), {
-      meta: { body: { error: { type: 'resource_already_exists_exception' } } },
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: CASE_INDEX_NAME,
+      properties: CASE_INDEX_MAPPING.properties,
+      dynamic_templates: CASE_INDEX_MAPPING.dynamic_templates,
     });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
-
-    await expect(ensureCaseIndex({ esClient, logger })).resolves.toBeUndefined();
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('throws an actionable message when the cluster shard limit is reached', async () => {
-    const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    const err = Object.assign(new Error('Validation Failed: 1: this action would add [2] shards'), {
-      meta: {
-        body: {
-          error: {
-            type: 'validation_exception',
-            reason:
-              'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [1000]/[1000] maximum normal shards open',
-          },
-        },
-      },
-    });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
-
-    await expect(ensureCaseIndex({ esClient, logger })).rejects.toThrow(
-      'cluster.max_shards_per_node'
-    );
-  });
-
-  it('throws on unexpected ES failure so the caller can handle it', async () => {
-    const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    const err = new Error('cluster_block_exception');
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
-
-    await expect(ensureCaseIndex({ esClient, logger })).rejects.toThrow('cluster_block_exception');
-    expect(logger.error).not.toHaveBeenCalled();
   });
 });

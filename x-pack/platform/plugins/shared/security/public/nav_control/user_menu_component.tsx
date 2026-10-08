@@ -28,7 +28,7 @@ export const UserMenuComponent = ({
     aria-expanded={isOpen}
     aria-haspopup={true}
     aria-label={USER_MENU_ARIA_LABEL}
-    data-test-subj="chromeNextUserMenuHeaderButton"
+    data-test-subj="userMenuButton"
   >
     {avatar}
   </HeaderActionButton>

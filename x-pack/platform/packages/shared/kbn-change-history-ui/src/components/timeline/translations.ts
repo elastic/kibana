@@ -63,7 +63,7 @@ export const SELECT_CHANGE_PROMPT = i18n.translate(
 );
 
 export const TRIGGER_LABEL = i18n.translate('xpack.changeHistoryUi.modal.triggerLabel', {
-  defaultMessage: 'Change history',
+  defaultMessage: 'History',
 });
 
 export const HISTORY_LIST_ITEM_LABEL = i18n.translate(

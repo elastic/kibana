@@ -56,9 +56,9 @@ export class NavigationServerPlugin
   ) {
     core.uiSettings.register(getUiSettings(core, plugins, this.logger));
 
-    // preload: true populates the client cache at page load so the navigation
-    // can read the stored customization synchronously on first paint. Without
-    // it, the customization applies a moment later, causing a brief flash.
+    // Seed-before-register ordering is structural (see navigation.initNavigation).
+    // preload: true is what makes the seed non-empty on first paint; without it
+    // the nav still renders default-then-customized on load.
     core.userStorage.register({
       [NAV_CUSTOMIZATION_STORAGE_KEY]: {
         schema: navCustomizationSchema,

@@ -6,116 +6,89 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ServiceNodeData } from '../../../../../common/service_map';
-import { ServiceFlyoutHeader } from '.';
-import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
+import type { ServiceFlyoutService } from '..';
+import { useServiceFlyoutTitle } from '.';
 
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: () => ({
-    overviewHref: '/app/apm/overview-href',
-    alertsHref: '/app/apm/alerts-href',
-  }),
+const mockUseServiceFlyoutLinks = jest.fn();
+jest.mock('../hooks/use_service_flyout_links', () => ({
+  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
 }));
 
-// `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
-// header renders it and forwards the right props.
-const mockServiceBadges = jest.fn();
-jest.mock('./service_badges', () => ({
-  ServiceBadges: (props: unknown) => {
-    mockServiceBadges(props);
-    return <div data-test-subj="serviceBadgesMock" />;
-  },
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
-const baseNodeData: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const baseNodeData: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
-function renderHeader({
-  nodeData = baseNodeData,
-  selectedTabId = SERVICE_FLYOUT_DEFAULT_TAB_ID,
-  onSelectedTabIdChange = jest.fn(),
-}: {
-  nodeData?: ServiceNodeData;
-  selectedTabId?: (typeof SERVICE_FLYOUT_TABS)[number]['id'];
-  onSelectedTabIdChange?: jest.Mock;
-} = {}) {
+function setupContext({ serviceNameLink = true }: { serviceNameLink?: boolean } = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue({
+    capabilities: {
+      loading: false,
+      error: undefined,
+      header: { serviceNameLink, badges: true },
+    },
+  });
+}
+
+function TitleHarness() {
+  return <>{useServiceFlyoutTitle(baseNodeData.name)}</>;
+}
+
+function renderTitle() {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutHeader
-        service={nodeData}
-        title={nodeData.label ?? nodeData.id}
-        titleId="title-id"
-        environment="production"
-        kuery=""
-        rangeFrom="now-15m"
-        rangeTo="now"
-        selectedTabId={selectedTabId}
-        onSelectedTabIdChange={onSelectedTabIdChange}
-      />
+      <TitleHarness />
     </IntlProvider>
   );
 }
 
-describe('ServiceFlyoutHeader', () => {
+describe('useServiceFlyoutTitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseServiceFlyoutLinks.mockReturnValue({
+      apm: { overviewTab: '/app/apm/overview-href' },
+      alerts: undefined,
+      slos: undefined,
+      discover: { traces: { href: undefined }, logs: { href: undefined } },
+    });
   });
 
-  it('renders the overview title link and the service badges', () => {
-    renderHeader();
+  it('renders the overview title link', () => {
+    setupContext();
+    renderTitle();
 
     const titleLink = screen.getByTestId('serviceFlyoutTitleLink');
     expect(titleLink).toHaveAttribute('href', '/app/apm/overview-href');
     expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
     expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
-    expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
+    expect(titleLink).toHaveTextContent(baseNodeData.name);
   });
 
-  it('forwards the service and query scope to ServiceBadges', () => {
-    renderHeader();
+  it('shows a tooltip describing the title link destination', async () => {
+    setupContext();
+    renderTitle();
 
-    expect(mockServiceBadges).toHaveBeenCalledWith(
-      expect.objectContaining({
-        service: baseNodeData,
-        environment: 'production',
-        kuery: '',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      })
-    );
-  });
+    const titleLink = screen.getByTestId('serviceFlyoutTitleLink');
+    const tooltipAnchor = titleLink.closest('.euiToolTipAnchor') ?? titleLink;
+    fireEvent.mouseEnter(tooltipAnchor);
+    fireEvent.mouseOver(tooltipAnchor);
 
-  it('renders a tab per definition and selects the active one', () => {
-    renderHeader();
-
-    SERVICE_FLYOUT_TABS.forEach(({ id }) => {
-      expect(screen.getByTestId(`serviceFlyoutTab-${id}`)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Open service overview');
     });
   });
 
-  it('instruments each tab with EBT click attributes carrying the tab id', () => {
-    renderHeader();
+  it('renders the title as plain text when serviceNameLink capability is disabled', () => {
+    setupContext({ serviceNameLink: false });
+    renderTitle();
 
-    SERVICE_FLYOUT_TABS.forEach(({ id }) => {
-      const tab = screen.getByTestId(`serviceFlyoutTab-${id}`);
-      expect(tab).toHaveAttribute('data-ebt-action', 'viewServiceFlyoutTab');
-      expect(tab).toHaveAttribute('data-ebt-element', 'serviceFlyoutTabs');
-      expect(tab).toHaveAttribute('data-ebt-detail', id);
-    });
-  });
-
-  it('calls onSelectedTabIdChange when a tab is clicked', () => {
-    const onSelectedTabIdChange = jest.fn();
-    renderHeader({ onSelectedTabIdChange });
-
-    const { id } = SERVICE_FLYOUT_TABS[0];
-    fireEvent.click(screen.getByTestId(`serviceFlyoutTab-${id}`));
-    expect(onSelectedTabIdChange).toHaveBeenCalledWith(id);
+    expect(screen.queryByTestId('serviceFlyoutTitleLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutTitle')).toHaveTextContent(baseNodeData.name);
   });
 });

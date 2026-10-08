@@ -26,8 +26,8 @@ jest.mock('../../../../../contexts', () => ({
 
 const mockDispatch = jest.fn();
 const mockSelectorReturns = new Map<unknown, unknown>();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,

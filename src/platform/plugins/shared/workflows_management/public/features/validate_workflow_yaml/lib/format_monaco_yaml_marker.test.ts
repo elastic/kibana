@@ -131,6 +131,39 @@ describe('formatMonacoYamlMarker', () => {
     expect(result.message).toBe('enriched message');
   });
 
+  it('classifies an array minimum marker as too_small', () => {
+    const marker = createMarker({
+      source: 'yaml-schema:workflow',
+      message: 'Array has too few items. Expected 1 or more.',
+    });
+    const yamlDoc = parseDocument('steps: []');
+    const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
+
+    expect(mockEnrichErrorMessage).toHaveBeenCalledWith(
+      [],
+      marker.message,
+      'too_small',
+      expect.objectContaining({ schema: dummySchema, yamlDocument: yamlDoc })
+    );
+    expect(result.message).toBe('enriched message');
+  });
+
+  it('does not treat a single unquoted expected number as a numeric enum', () => {
+    const marker = createMarker({
+      source: 'yaml-schema:workflow',
+      message: 'Expected 1 or more.',
+    });
+    const result = formatMonacoYamlMarker(
+      marker,
+      createEditorModel(),
+      dummySchema,
+      parseDocument('steps: []')
+    );
+
+    expect(mockEnrichErrorMessage).not.toHaveBeenCalled();
+    expect(result.message).toBe(marker.message);
+  });
+
   describe('numeric enum patterns', () => {
     it.each([
       'Expected "0 | 1 | 2"',

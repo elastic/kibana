@@ -29,8 +29,8 @@ const mockDispatch = jest.fn();
 const mockPingsState = jest.fn();
 const mockStatusFilter = jest.fn();
 let mockSelectorCallIndex = 0;
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,

@@ -133,7 +133,7 @@ describe('getData', () => {
     expect(response).toEqual(expectedNoDataResponse);
   });
 
-  it('returns no data when a grouped search has no buckets', async () => {
+  it('returns an empty result when a grouped search has no surviving composite buckets', async () => {
     const response = await callGetData(
       jest.fn().mockResolvedValue({
         aggregations: {
@@ -148,12 +148,186 @@ describe('getData', () => {
       'host.name'
     );
 
-    expect(response).toEqual(expectedNoDataResponse);
+    expect(response).toEqual({});
+    expect(response).not.toHaveProperty(UNGROUPED_FACTORY_KEY);
+  });
+
+  it('returns a fresh object for each no-data call so in-place mutation cannot leak across rules', async () => {
+    const search = jest.fn().mockResolvedValue({
+      _shards: { successful: 0 },
+    });
+
+    const first = await callGetData(search, 'host.name');
+    const second = await callGetData(search, 'host.name');
+
+    expect(first).toEqual(expectedNoDataResponse);
+    expect(second).toEqual(expectedNoDataResponse);
+    expect(first).not.toBe(second);
+
+    first[UNGROUPED_FACTORY_KEY].value = 42;
+    expect(second[UNGROUPED_FACTORY_KEY].value).toBeNull();
+  });
+
+  it('does not leak missingGroup entries from one grouped call into a subsequent call with different groupBy', async () => {
+    const searchWithMissingGroup = jest.fn().mockResolvedValue({
+      aggregations: {
+        groupings: {
+          buckets: [
+            {
+              key: { groupBy0: 'prod-host-1' },
+              doc_count: 0,
+              missingGroup: { value: 1 },
+              shouldWarn: { value: 0 },
+              shouldTrigger: { value: 0 },
+              currentPeriod: {
+                buckets: { all: { doc_count: 0, aggregatedValue: { value: null } } },
+              },
+            },
+          ],
+        },
+      },
+      _shards: { successful: 1 },
+    });
+
+    const firstResult = await callGetData(searchWithMissingGroup, 'host.name');
+    expect(firstResult).toHaveProperty('prod-host-1');
+    expect(firstResult['prod-host-1'].value).toBeNull();
+
+    const searchWithNormalBuckets = jest.fn().mockResolvedValue({
+      aggregations: {
+        groupings: {
+          buckets: [
+            {
+              key: { groupBy0: 'production' },
+              doc_count: 10,
+              shouldWarn: { value: 0 },
+              shouldTrigger: { value: 0 },
+              currentPeriod: {
+                buckets: { all: { doc_count: 10, aggregatedValue: { value: 10 } } },
+              },
+            },
+          ],
+        },
+      },
+      _shards: { successful: 1 },
+    });
+
+    const secondResult = await callGetData(searchWithNormalBuckets, 'environment');
+    expect(secondResult).toHaveProperty('production');
+    expect(secondResult).not.toHaveProperty('prod-host-1');
   });
 
   it('throws other Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch failed for another reason');
 
     await expect(callGetData(jest.fn().mockRejectedValue(error))).rejects.toThrow(error);
+  });
+
+  it('unflattens flat dotted additional context from top_hits _source', async () => {
+    const response = await callGetData(
+      jest.fn().mockResolvedValue({
+        aggregations: {
+          groupings: {
+            buckets: [
+              {
+                key: { groupBy0: 'host1' },
+                shouldWarn: { value: 0 },
+                shouldTrigger: { value: 1 },
+                currentPeriod: {
+                  buckets: {
+                    all: {
+                      aggregatedValue: { value: 100 },
+                    },
+                  },
+                },
+                additionalContext: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          'host.hostname': 'host1',
+                          'host.name': 'host1-name',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        _shards: {
+          successful: 1,
+        },
+      }),
+      'host.hostname'
+    );
+
+    expect(response.host1).toEqual(
+      expect.objectContaining({
+        trigger: true,
+        value: 100,
+        flattenGrouping: { 'host.hostname': 'host1' },
+        host: {
+          hostname: 'host1',
+          name: 'host1-name',
+        },
+      })
+    );
+  });
+
+  it('keeps already-nested additional context from top_hits _source', async () => {
+    const response = await callGetData(
+      jest.fn().mockResolvedValue({
+        aggregations: {
+          groupings: {
+            buckets: [
+              {
+                key: { groupBy0: 'host1' },
+                shouldWarn: { value: 0 },
+                shouldTrigger: { value: 1 },
+                currentPeriod: {
+                  buckets: {
+                    all: {
+                      aggregatedValue: { value: 100 },
+                    },
+                  },
+                },
+                additionalContext: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          host: {
+                            hostname: 'host1',
+                            name: 'host1-name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        _shards: {
+          successful: 1,
+        },
+      }),
+      'host.hostname'
+    );
+
+    expect(response.host1).toEqual(
+      expect.objectContaining({
+        trigger: true,
+        value: 100,
+        flattenGrouping: { 'host.hostname': 'host1' },
+        host: {
+          hostname: 'host1',
+          name: 'host1-name',
+        },
+      })
+    );
   });
 });

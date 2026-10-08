@@ -31,7 +31,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
@@ -45,6 +44,7 @@ import {
   useConnectorOAuthDisconnect,
 } from '@kbn/response-ops-oauth-hooks';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
+import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -65,6 +65,7 @@ import {
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
+import { DisplayOptions } from './display_options';
 
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
@@ -133,6 +134,7 @@ const ActionsConnectorsList = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+  const [showDeprecated, setShowDeprecated] = useState(false);
 
   const disabledActConnectorCss = css`
     .actConnectorsList__tableRowDisabled {
@@ -192,6 +194,21 @@ const ActionsConnectorsList = ({
         })
       : [];
   }, [actions, actionTypesIndex]);
+
+  const visibleItems = useMemo(() => {
+    if (showDeprecated) {
+      return actionConnectorTableItems;
+    }
+    return actionConnectorTableItems.filter((item) => !item.isConnectorTypeDeprecated);
+  }, [actionConnectorTableItems, showDeprecated]);
+
+  const onShowDeprecatedChange = useCallback((nextShowDeprecated: boolean) => {
+    setShowDeprecated(nextShowDeprecated);
+    setPageIndex(0);
+    if (!nextShowDeprecated) {
+      setSelectedItems((current) => current.filter((item) => !item.isConnectorTypeDeprecated));
+    }
+  }, []);
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
@@ -470,7 +487,7 @@ const ActionsConnectorsList = ({
 
         const actionType = actionTypesIndex[item.actionTypeId];
         const showFixButton = item.isMissingSecrets && actionType?.enabled;
-        const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
+        const isConnectorTestable = isConnectorTypeTestable(actionType);
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
@@ -525,7 +542,7 @@ const ActionsConnectorsList = ({
               <RunOperation
                 canExecute={
                   !isDisabledEarsConnector(item) &&
-                  isStackConnector &&
+                  isConnectorTestable &&
                   hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
                 item={item}
@@ -541,7 +558,7 @@ const ActionsConnectorsList = ({
   const table = (
     <EuiInMemoryTable
       loading={isLoadingActions || isLoadingActionTypes}
-      items={actionConnectorTableItems}
+      items={visibleItems}
       sorting={true}
       tableLayout="fixed"
       itemId={(item: ActionConnectorTableItem) =>
@@ -584,6 +601,7 @@ const ActionsConnectorsList = ({
       selection={
         canDelete
           ? {
+              selected: selectedItems,
               onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
@@ -632,6 +650,13 @@ const ActionsConnectorsList = ({
                   />
                 </EuiButton>,
               ],
+        toolsRight: [
+          <DisplayOptions
+            key="displayOptions"
+            showDeprecated={showDeprecated}
+            onChange={onShowDeprecatedChange}
+          />,
+        ],
       }}
     />
   );

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesListView } from './invalidate_rules_content_list';
 
 export const useToggleRuleEnabled = () => {
   const rulesApi = useService(RulesApi);
@@ -18,7 +19,7 @@ export const useToggleRuleEnabled = () => {
 
   return useMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
-      rulesApi.updateRule(id, { enabled }),
+      enabled ? rulesApi.enableRule(id) : rulesApi.disableRule(id),
     onSuccess: async (data, variables) => {
       toasts.addSuccess(
         variables.enabled
@@ -33,6 +34,7 @@ export const useToggleRuleEnabled = () => {
       );
 
       await Promise.all([
+        invalidateRulesListView(),
         queryClient.invalidateQueries(ruleKeys.lists()),
         queryClient.invalidateQueries(ruleKeys.detail(variables.id)),
       ]);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import type { Dispatch } from 'redux-v4';
+import { connect } from 'react-redux-v7';
 import { get } from 'lodash';
 import { encode } from '../../lib';
 // @ts-expect-error untyped local

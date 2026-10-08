@@ -12,12 +12,11 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 import {
-  formatDuration,
+  BOUNDARY_VALIDATION_ERROR,
   getTimingBoundHelpText,
-  getUnitSelectOptions,
-  useBlurCommitDraft,
   type HelpTextBound,
-} from '../../../shared';
+} from '@kbn/data-lifecycle-phases';
+import { formatDuration, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import { getMinAgeFieldsToValidateOnChange } from '../schema';
@@ -110,8 +109,15 @@ const MinAgeFieldControl = ({
     upper: toPhaseBound(upperBoundPhase),
   });
 
+  const isBoundaryError = isInvalid && errorMessage === BOUNDARY_VALIDATION_ERROR;
+
   return (
-    <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
+    <EuiFormRow
+      label={fieldLabel}
+      helpText={isBoundaryError ? undefined : helpText}
+      isInvalid={isInvalid}
+      error={isBoundaryError ? helpText : isInvalid ? errorMessage : null}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber

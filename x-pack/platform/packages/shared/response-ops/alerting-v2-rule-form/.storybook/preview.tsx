@@ -38,6 +38,18 @@ const buildContainer = () => {
     get$: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
   } as any);
 
+  container.bind(CoreStart('settings')).toConstantValue({
+    client: {
+      get: () => undefined,
+      set: async () => {},
+    },
+  } as any);
+
+  container.bind(CoreStart('docLinks')).toConstantValue({
+    links: {},
+    basePath: '',
+  } as any);
+
   container.bind(CoreStart('notifications')).toConstantValue({
     toasts: {
       addError: action('notifications.toasts.addError'),

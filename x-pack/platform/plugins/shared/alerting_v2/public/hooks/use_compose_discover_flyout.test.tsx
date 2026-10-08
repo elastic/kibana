@@ -12,16 +12,25 @@ import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
 const mockUpdateMutate = jest.fn();
-const mockSetupMutate = jest.fn();
 
 let capturedFlyoutProps: Record<string, unknown> = {};
+
+const mockParseState = jest.fn();
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
     capturedFlyoutProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
-  RULE_BUILDER_REGISTRY: {},
+  RULE_BUILDER_REGISTRY: {
+    threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
+  },
+}));
+
+jest.mock('@kbn/alerting-v2-schemas', () => ({
+  getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
+    query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
+  getRecoverEsqlQuery: () => undefined,
 }));
 
 jest.mock('./use_create_rule', () => ({
@@ -30,23 +39,35 @@ jest.mock('./use_create_rule', () => ({
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
 }));
-jest.mock('./use_setup_rule_notifications', () => ({
-  useSetupRuleNotifications: () => ({ mutate: mockSetupMutate, isLoading: false }),
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
+}));
+
+const mockActionPolicyGetRedirectUrl = jest.fn(
+  ({ actionPolicyId }: { actionPolicyId: string }) =>
+    `/app/alerting_v2/action-policies/edit/${actionPolicyId}`
+);
+jest.mock('../application/locator_context', () => ({
+  useAlertingLocators: () => ({
+    actionPolicyLocators: { getRedirectUrl: mockActionPolicyGetRedirectUrl },
+  }),
 }));
 
 const mockNavigateToUrl = jest.fn();
+const mockAddWarning = jest.fn();
 
 jest.mock('@kbn/core-di', () => ({
   PluginStart: (key: string) => `plugin:${key}`,
 }));
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `core:${key}`,
-  useService: (key: string) => {
+  useService: (key: unknown) => {
     switch (key) {
       case 'core:http':
         return { basePath: { prepend: (path: string) => path } };
       case 'core:notifications':
-        return { toasts: { addWarning: jest.fn(), addInfo: jest.fn() } };
+        return { toasts: { addWarning: mockAddWarning, addInfo: jest.fn() } };
       case 'core:application':
         return { navigateToUrl: mockNavigateToUrl };
       default:
@@ -62,26 +83,19 @@ const editRule = {
   metadata: { name: 'My rule' },
 } as unknown as RuleApiResponse;
 
-const updatedRule = {
-  id: 'rule-1',
-  metadata: { name: 'My rule (updated)' },
-} as unknown as RuleApiResponse;
-
-const createdRule = {
-  id: 'rule-new',
-  metadata: { name: 'My rule' },
-} as unknown as RuleApiResponse;
-
 const REDIRECT_PATH = '/app/alerting_v2/rules';
-
-const existingAction = { id: 'a1', source: 'existing' as const, workflowId: 'wf-1' };
 
 let hookApi: ReturnType<typeof useComposeDiscoverFlyout> | undefined;
 
 const Harness = ({ redirectPath }: { redirectPath?: string }) => {
   const api = useComposeDiscoverFlyout({ createSuccessRedirectPath: redirectPath });
   hookApi = api;
-  return <>{api.flyout}</>;
+  return (
+    <>
+      {api.flyout}
+      {api.confirmationModal}
+    </>
+  );
 };
 
 const renderAndOpenCreate = async (redirectPath?: string) => {
@@ -94,13 +108,10 @@ const renderAndOpenCreate = async (redirectPath?: string) => {
   });
 };
 
-const callOnCreateRule = (notifications?: unknown) => {
-  const onCreateRule = capturedFlyoutProps.onCreateRule as (
-    payload: unknown,
-    notifications?: unknown
-  ) => void;
+const callOnCreateRule = () => {
+  const onCreateRule = capturedFlyoutProps.onCreateRule as (payload: unknown) => void;
   act(() => {
-    onCreateRule({ metadata: { name: 'My rule' } }, notifications);
+    onCreateRule({ metadata: { name: 'My rule' } });
   });
 };
 
@@ -114,29 +125,23 @@ const renderAndOpenEdit = async () => {
   });
 };
 
-const callOnUpdateRule = (notifications?: unknown, notificationsDirty = false) => {
-  const onUpdateRule = capturedFlyoutProps.onUpdateRule as (
-    id: string,
-    payload: unknown,
-    notifications?: unknown,
-    notificationsDirty?: boolean
-  ) => void;
+const callOnUpdateRule = () => {
+  const onUpdateRule = capturedFlyoutProps.onUpdateRule as (id: string, payload: unknown) => void;
   act(() => {
-    onUpdateRule(
-      'rule-1',
-      { metadata: { name: 'My rule (updated)' } },
-      notifications,
-      notificationsDirty
-    );
+    onUpdateRule('rule-1', { metadata: { name: 'My rule (updated)' } });
   });
 };
+
+beforeEach(() => {
+  mockCreateActionPolicyDisabledReason = undefined;
+});
 
 describe('useComposeDiscoverFlyout — create submission wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.());
   });
 
   it('opens in create mode with no ruleId and provides onCreateRule', async () => {
@@ -147,51 +152,50 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     expect(capturedFlyoutProps.onCreateRule).toBeDefined();
   });
 
-  it('creates the rule then sets up notifications and redirects on success', async () => {
-    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
-
+  it('redirects and closes flyout after rule creation', async () => {
     await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule({ workflows: [existingAction] });
-
-    expect(mockCreateMutate).toHaveBeenCalledWith(
-      { metadata: { name: 'My rule' } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: createdRule, actions: [existingAction] },
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
-    );
-
-    await waitFor(() => {
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
-      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
-    });
-  });
-
-  it('still redirects when notification setup fails (unlike edit, which stays open)', async () => {
-    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onError?.(new Error('setup failed')));
-
-    await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule({ workflows: [existingAction] });
-
-    expect(mockSetupMutate).toHaveBeenCalledTimes(1);
-
-    await waitFor(() => {
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
-      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
-    });
-  });
-
-  it('redirects without setting up notifications when there are no actions', async () => {
-    await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule(undefined);
+    callOnCreateRule();
 
     expect(mockCreateMutate).toHaveBeenCalledTimes(1);
-    expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('useComposeDiscoverFlyout — action policy creation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('passes why action policy creation is disabled to the rule form services', async () => {
+    const disabledReason = 'Action policy creation is disabled';
+    mockCreateActionPolicyDisabledReason = disabledReason;
+
+    await renderAndOpenCreate();
+
+    expect(capturedFlyoutProps.services).toHaveProperty(
+      'createActionPolicyDisabledReason',
+      disabledReason
+    );
+  });
+
+  it('injects a host-aware action policy edit href builder into the rule form services', async () => {
+    await renderAndOpenCreate();
+
+    const services = capturedFlyoutProps.services as {
+      getActionPolicyEditHref: (id: string) => string;
+    };
+    expect(services.getActionPolicyEditHref('ap-1')).toBe(
+      '/app/alerting_v2/action-policies/edit/ap-1'
+    );
+    expect(mockActionPolicyGetRedirectUrl).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'ap-1',
     });
   });
 });
@@ -201,8 +205,7 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    // The rule update is an idempotent PATCH; default it to succeed with the updated rule.
-    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(updatedRule));
+    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
   });
 
   it('passes ruleId only in edit mode and provides onUpdateRule', async () => {
@@ -213,62 +216,106 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     expect(capturedFlyoutProps.onUpdateRule).toBeDefined();
   });
 
-  it('updates the rule then updates notifications and closes on success', async () => {
-    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
-
+  it('closes flyout after rule update', async () => {
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, true);
-
-    expect(mockUpdateMutate).toHaveBeenCalledWith(
-      { id: 'rule-1', payload: { metadata: { name: 'My rule (updated)' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: updatedRule, actions: [existingAction], onUpdate: true },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
-    });
-  });
-
-  it('keeps the flyout open when notification setup does not succeed', async () => {
-    mockSetupMutate.mockImplementation(() => undefined);
-
-    await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, true);
-
-    expect(mockSetupMutate).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
-  });
-
-  it('updates (with an empty list) when the user removed all simple actions', async () => {
-    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
-
-    await renderAndOpenEdit();
-    // The user cleared the seeded rows, so workflows is empty but dirty.
-    callOnUpdateRule({ workflows: [] }, true);
-
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: updatedRule, actions: [], onUpdate: true },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
-    });
-  });
-
-  it('closes without updating when notifications were not changed', async () => {
-    await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, false);
+    callOnUpdateRule();
 
     expect(mockUpdateMutate).toHaveBeenCalledTimes(1);
-    expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
+  const builderRule = {
+    id: 'rule-builder',
+    metadata: { name: 'Builder rule', builder: { type: 'threshold' } },
+    query: { base: 'FROM logs-* | STATS count() | WHERE count > 5' },
+    time_field: '@timestamp',
+  } as unknown as RuleApiResponse;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('shows confirmation modal when builder rule query cannot be parsed', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+  });
+
+  it('opens flyout in ES|QL mode after confirmation', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+
+    act(() => {
+      screen.getByText('Open in ES|QL mode').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBeUndefined();
+    expect(capturedFlyoutProps.mode).toBe('edit');
+  });
+
+  it('does not open flyout when user cancels confirmation', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+
+    act(() => {
+      screen.getByText('Cancel').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('opens directly in builder mode when parse succeeds', async () => {
+    mockParseState.mockReturnValue({ stats: [{ fn: 'count', alias: 'count' }] });
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBe('threshold');
+    expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
   });
 });

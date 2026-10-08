@@ -8,19 +8,25 @@
  */
 
 export {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
-  getMeta,
-  asCodeQuerySchema,
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeQuerySchema,
+  asCodeRelatedItemSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
+  getMeta,
   type AsCodeMeta,
   type AsCodeQuery,
+  type AsCodeRelatedItem,
 } from './src/schemas';
 
 export {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TITLE_LENGTH,
   PAGINATION_DEFAULT_PER_PAGE,
   PAGINATION_MAX_SIZE,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
 } from './src/constants';

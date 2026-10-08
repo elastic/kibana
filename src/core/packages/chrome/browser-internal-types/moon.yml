@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/browser-internal-types
 dependsOn:
+  - '@kbn/core-capabilities-common'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-http-browser'
   - '@kbn/core-mount-utils-browser'

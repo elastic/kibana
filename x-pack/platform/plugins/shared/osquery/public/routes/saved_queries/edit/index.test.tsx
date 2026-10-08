@@ -12,6 +12,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
 import { EditSavedQueryPage } from '.';
+import {
+  OsqueryPageHeaderProvider,
+  useOsqueryPageHeaderTitle,
+} from '../../../components/osquery_page_header_context';
+import { useSavedQuery } from '../../../saved_queries';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -33,14 +38,6 @@ jest.mock('../../../common/lib/kibana', () => ({
 
     return { onClick: jest.fn(), href: path };
   },
-}));
-
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-
-jest.mock('../../../common/experimental_features_context', () => ({
-  ...jest.requireActual('../../../common/experimental_features_context'),
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
 }));
 
 const mockMutateAsync = jest.fn().mockResolvedValue(undefined);
@@ -82,9 +79,6 @@ jest.mock('./form', () => ({
 }));
 
 jest.mock('../../../components/layouts', () => ({
-  WithHeaderLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="with-header-layout">{children}</div>
-  ),
   fullWidthFormContentCss: {},
 }));
 
@@ -93,12 +87,21 @@ const createTestQueryClient = () =>
     defaultOptions: { queries: { retry: false, cacheTime: 0 } },
   });
 
+const PublishedTitle = () => {
+  const title = useOsqueryPageHeaderTitle();
+
+  return <span data-test-subj="published-osquery-title">{title ?? ''}</span>;
+};
+
 const renderComponent = () =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={createTestQueryClient()}>
-          <EditSavedQueryPage />
+          <OsqueryPageHeaderProvider>
+            <EditSavedQueryPage />
+            <PublishedTitle />
+          </OsqueryPageHeaderProvider>
         </QueryClientProvider>
       </IntlProvider>
     </EuiProvider>
@@ -129,21 +132,14 @@ const setupKibana = (overrides: Record<string, unknown> = {}) => {
 describe('EditSavedQueryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     setupKibana();
     mockMutateAsync.mockResolvedValue(undefined);
   });
 
   describe('Duplicate query button', () => {
-    it('renders the Duplicate query button when queryHistoryRework is enabled and user has writeSavedQueries', () => {
+    it('renders the Duplicate query button when user has writeSavedQueries', () => {
       renderComponent();
       expect(screen.getByText('Duplicate query')).toBeInTheDocument();
-    });
-
-    it('does not render the Duplicate query button when queryHistoryRework is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      renderComponent();
-      expect(screen.queryByText('Duplicate query')).not.toBeInTheDocument();
     });
 
     it('does not render the Duplicate query button when user lacks writeSavedQueries', () => {
@@ -261,6 +257,20 @@ describe('EditSavedQueryPage', () => {
       fireEvent.click(screen.getByText('Duplicate query'));
 
       expect(screen.getByText('You have unsaved changes')).toBeInTheDocument();
+    });
+  });
+
+  describe('page chrome', () => {
+    it('publishes a fallback header title when the saved query fails to load', () => {
+      (useSavedQuery as jest.Mock).mockReturnValue({
+        isLoading: false,
+        data: undefined,
+        error: new Error('nope'),
+      });
+      renderComponent();
+
+      expect(screen.getByText('Failed to load saved query')).toBeInTheDocument();
+      expect(screen.getByTestId('published-osquery-title')).toHaveTextContent('Edit saved query');
     });
   });
 });

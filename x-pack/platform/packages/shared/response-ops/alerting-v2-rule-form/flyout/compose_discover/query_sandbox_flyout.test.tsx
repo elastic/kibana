@@ -11,19 +11,24 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { ComposedQuery, RuleQuery } from '../../form/types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { RuleQuery, RuleRecovery } from '../../form/types';
 import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 import type { QueryTab } from './types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 let mockFieldMap: DataViewFieldMap = {};
 jest.mock('../../form/hooks/use_data_fields', () => ({
   useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
+}));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
@@ -32,6 +37,7 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
     data: { search: { search: jest.fn() } },
     dataViews: {},
     application: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
   }),
 }));
 
@@ -86,20 +92,23 @@ jest.mock('./compose_discover_tabs', () => ({
 const mockField = (name: string, type: string) =>
   ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);
 
-const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
-  format: 'standalone',
-  breach: { query: breach },
+const unifiedQuery = (base = 'FROM test-index | LIMIT 10'): RuleQuery => ({
+  base,
+  breach: { segment: '' },
 });
 
-const composedQuery = (): ComposedQuery => ({
-  format: 'composed',
+const splitQuery = (): RuleQuery => ({
   base: 'FROM test-index',
   breach: { segment: '| WHERE cpu > 70' },
-  recovery: { segment: '| WHERE cpu <= 70' },
+});
+
+const conditionRecovery = (): RuleRecovery => ({
+  strategy: recoveryStrategy.condition,
+  segment: '| WHERE cpu <= 70',
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {
-  query: standaloneQuery(),
+  query: unifiedQuery(),
   onQueryChange: jest.fn(),
   timeField: '@timestamp',
   onTimeFieldChange: jest.fn(),
@@ -121,13 +130,13 @@ const renderSandbox = (overrides: Partial<QuerySandboxFlyoutProps> = {}) =>
     </QueryClientProvider>
   );
 
-describe('QuerySandboxFlyout — timefield auto-select', () => {
+describe('QuerySandboxFlyout — timefield selection', () => {
   beforeEach(() => {
     mockFieldMap = {};
     jest.clearAllMocks();
   });
 
-  it('auto-selects first date field when current timeField is not in the index', () => {
+  it('does not auto-select a field when current timeField is not in the index; offers the real fields', () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
@@ -137,17 +146,28 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    // sorted: event.end < event.start
-    expect(onTimeFieldChange).toHaveBeenCalledWith('event.end');
+    // The invalid `@timestamp` is cleared (never replaced with a real field); the
+    // user must pick from the offered options.
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    const select = screen.getByTestId('querySandboxTimeField');
+    expect(select).toHaveValue('');
+    expect(screen.getByRole('option', { name: 'event.end' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'event.start' })).toBeInTheDocument();
   });
 
-  it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {
+  it('clears the selection and shows no options when the index has no date field', async () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: 'event.start', onTimeFieldChange });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
+    // No date field to resolve to (after the API fallback settles): clear the
+    // value, don't fabricate `@timestamp`.
+    await waitFor(() => expect(onTimeFieldChange).toHaveBeenCalledWith(''));
+    const select = screen.getByTestId('querySandboxTimeField');
+    expect(select).toHaveValue('');
+    // No selectable date-field options are offered.
+    expect(screen.queryByRole('option', { name: 'event.start' })).not.toBeInTheDocument();
   });
 
   it('does not call onTimeFieldChange when current timeField exists in the index', () => {
@@ -162,16 +182,16 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
     expect(onTimeFieldChange).not.toHaveBeenCalled();
   });
 
-  it('does not reset when fieldMap is empty and timeField is already @timestamp', () => {
+  it('clears @timestamp (does not fabricate) when fieldMap is empty', async () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onTimeFieldChange).not.toHaveBeenCalled();
+    await waitFor(() => expect(onTimeFieldChange).toHaveBeenCalledWith(''));
   });
 
-  it('auto-selects when fieldMap changes and current selection is no longer valid', () => {
+  it('clears (does not auto-select) when fieldMap changes and current selection is no longer valid', () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
@@ -199,7 +219,10 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
       );
     });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('created_at');
+    // `event.start` is no longer on the index: clear it (never force `created_at`) —
+    // the user must pick it explicitly.
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    expect(screen.getByRole('option', { name: 'created_at' })).toBeInTheDocument();
   });
 });
 
@@ -210,9 +233,10 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base-only query when the Base tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({
       query,
+      recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'base',
       onTabChange: jest.fn(),
@@ -224,9 +248,10 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base+breach query when the Alert tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({
       query,
+      recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'alert',
       onTabChange: jest.fn(),
@@ -238,21 +263,34 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base+recover query when the Recovery tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
+    const recovery = conditionRecovery();
     renderSandbox({
       query,
+      recovery,
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'recovery',
       onTabChange: jest.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
-      expect.objectContaining({ query: getRecoverQuery(query) })
+      expect.objectContaining({ query: getRecoverQuery(query, recovery) })
     );
   });
 
+  it('runs an empty recovery query when no recovery block is provided', () => {
+    renderSandbox({
+      query: splitQuery(),
+      tabs: ['base', 'alert', 'recovery'],
+      activeTab: 'recovery',
+      onTabChange: jest.fn(),
+    });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(expect.objectContaining({ query: '' }));
+  });
+
   it('runs the base+breach query in unified (no-tabs) mode regardless of activeTab', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({ query, tabs: undefined, activeTab: 'recovery' });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(

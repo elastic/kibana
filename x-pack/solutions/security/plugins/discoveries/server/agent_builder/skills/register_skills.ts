@@ -5,35 +5,60 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 
-// Stub: the real Attack Discovery agent-builder skill registration is added by
-// a later PR in the stack (PR8 — Skills). Earlier PRs need `registerSkills` to
-// exist with a compatible signature so the plugin `setup` type-checks FF-off.
-// This is a no-op; the discoveries plugin is FF-gated upstream and the real
-// skills are registered by PR8. The `options` shape mirrors PR8's
-// `RegisterSkillsOptions` (only what earlier-PR callers pass) so the call site's
-// inline `workflowExecutionLookup.getWorkflowExecution` callback types resolve.
-interface WorkflowExecutionLookup {
-  getWorkflowExecution: (
-    executionId: string,
-    spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
-  ) => Promise<unknown>;
-}
+import type { DiscoveriesPluginStartDeps } from '../../types';
+import { alertRetrievalBuilderSkill } from './alert_retrieval_builder';
+import { createAttackDiscoveryGeneratorSkill } from './attack_discovery_generator';
+import type { WorkflowExecutionLookup } from './tools/get_attack_discovery_status_tool';
+import type { WorkflowFetcher } from './tools/get_workflow_health_check_tool';
+import type { RunAttackDiscoveryToolDeps } from './tools/run_attack_discovery_tool';
+import { createWorkflowTroubleshootingSkill } from './workflow_troubleshooting';
 
 interface RegisterSkillsOptions {
   getEventLogIndex?: () => Promise<string>;
-  getStartServices?: () => Promise<unknown>;
-  runAttackDiscoveryToolDeps?: Record<string, unknown>;
+  getStartServices?: () => Promise<{
+    coreStart: CoreStart;
+    pluginsStart: DiscoveriesPluginStartDeps;
+  }>;
+  runAttackDiscoveryToolDeps?: RunAttackDiscoveryToolDeps;
   workflowExecutionLookup?: WorkflowExecutionLookup;
-  workflowFetcher?: unknown;
+  workflowFetcher?: WorkflowFetcher;
 }
 
+/**
+ * Registers all Attack Discovery agent builder skills with the agentBuilder plugin.
+ *
+ * Skills registered here become globally available in the agent builder,
+ * including from the security_solution context.
+ */
 export const registerSkills = async (
-  _agentBuilder: unknown,
-  _logger: Logger,
-  _options?: RegisterSkillsOptions
+  agentBuilder: AgentBuilderPluginSetup,
+  logger: Logger,
+  options?: RegisterSkillsOptions
 ): Promise<void> => {
-  // no-op: real skills registered by PR8
+  await agentBuilder.skills.register(alertRetrievalBuilderSkill);
+
+  if (options?.getEventLogIndex != null && options.workflowExecutionLookup != null) {
+    await agentBuilder.skills.register(
+      createAttackDiscoveryGeneratorSkill({
+        getEventLogIndex: options.getEventLogIndex,
+        getStartServices: options.getStartServices,
+        runAttackDiscoveryToolDeps: options.runAttackDiscoveryToolDeps,
+        workflowExecutionLookup: options.workflowExecutionLookup,
+      })
+    );
+  } else {
+    logger.debug(
+      () =>
+        'discoveries: getEventLogIndex or workflowExecutionLookup not provided; skipping attack-discovery-generator skill registration'
+    );
+  }
+
+  if (options?.workflowFetcher != null) {
+    await agentBuilder.skills.register(createWorkflowTroubleshootingSkill(options.workflowFetcher));
+  }
+
+  logger.debug(() => 'discoveries: Skills registration complete');
 };

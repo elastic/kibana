@@ -17,7 +17,7 @@ jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
 }));
 
-import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils';
+import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils.ts';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 

@@ -17,6 +17,8 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 import { getAttacksVolumeAggregations } from './aggregations';
 import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
+const ATTACKS_VOLUME_QUERY_ID = 'attacks-kpi-attacks-volume';
+
 export interface UseAttacksVolumeDataProps {
   /** Optional array of filters to apply to the query */
   filters?: Filter[];
@@ -55,6 +57,7 @@ export const useAttacksVolumeData = ({ filters, query }: UseAttacksVolumeDataPro
     query,
     aggs,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+    uniqueQueryId: ATTACKS_VOLUME_QUERY_ID,
   });
 
   const attackIds = useMemo(() => {

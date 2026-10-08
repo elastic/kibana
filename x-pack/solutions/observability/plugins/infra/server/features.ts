@@ -25,14 +25,14 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     app: ['infra', 'metrics', 'kibana'],
     catalogue: ['infraops', 'metrics'],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     alerting: metricAlertingFeatures,
     privileges: {
       all: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
           read: ['index-pattern'],
@@ -49,14 +49,14 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
       read: {
         app: ['infra', 'metrics', 'kibana'],
         catalogue: ['infraops', 'metrics'],
-        api: ['infra', 'rac'],
+        api: ['infra', 'rac', 'bulkGetUserProfiles'],
         savedObject: {
           all: [],
           read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],
@@ -70,7 +70,7 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show'],
       },

@@ -90,14 +90,8 @@ export const getAlertingSectionBreadcrumb = (
   }
 };
 
-export const getRulesBreadcrumbWithHref = (
-  getUrlForApp: (appId: string, options?: { path?: string }) => string
-) => {
-  const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-  const breadcrumbHref = getUrlForApp('rules', { path: '/' });
-
-  return {
-    ...rulesBreadcrumb,
-    href: breadcrumbHref,
-  };
-};
+export const getRulesBreadcrumbWithHref = () => ({
+  ...getAlertingSectionBreadcrumb('rules'),
+  // Management scopes breadcrumb hrefs to the mounted app.
+  href: routeToHome,
+});

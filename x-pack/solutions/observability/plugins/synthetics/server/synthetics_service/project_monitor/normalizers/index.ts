@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../common/runtime_types';
 import { getNormalizeBrowserFields } from './browser_monitor';
+import { getNormalizeAPIFields } from './api_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
 import { getNormalizeHTTPFields } from './http_monitor';
@@ -20,6 +22,9 @@ export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   switch (type) {
     case MonitorTypeEnum.BROWSER:
       return getNormalizeBrowserFields(props);
+
+    case MonitorTypeEnum.API:
+      return getNormalizeAPIFields(props);
 
     case MonitorTypeEnum.HTTP:
       return getNormalizeHTTPFields(props);
@@ -41,6 +46,7 @@ export const normalizeProjectMonitors = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: {
   locations: Locations;
   privateLocations: PrivateLocationAttributes[];
@@ -48,6 +54,7 @@ export const normalizeProjectMonitors = ({
   projectId: string;
   namespace: string;
   version: string;
+  maintenanceWindows?: MaintenanceWindow[];
 }) => {
   return monitors.map((monitor) => {
     return normalizeProjectMonitor({
@@ -57,6 +64,7 @@ export const normalizeProjectMonitors = ({
       projectId,
       namespace,
       version,
+      maintenanceWindows,
     });
   });
 };

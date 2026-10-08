@@ -9,11 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { Footer } from './footer';
-import {
-  ADD_TO_NEW_CASE_TEST_ID,
-  ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../../../common/cases/attachments/entity/test_ids';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
@@ -45,18 +42,14 @@ jest.mock('../../../../flyout/entity_details/shared/components/take_action', () 
 jest.mock(
   '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
   () => ({
-    AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
+    AiAssistantButton: ({ entityName }: { entityName: string }) => (
+      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    ),
   })
 );
 
-// Render the real menu items but with minimal markup — footer tests only care about presence.
-jest.mock('../../../../cases/attachments/entity/components/add_to_new_case', () => ({
-  AddToNewCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={testSubj} />
-  ),
-}));
-jest.mock('../../../../cases/attachments/entity/components/add_to_existing_case', () => ({
-  AddToExistingCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
+jest.mock('../../../../cases/attachments/entity/components/add_to_case', () => ({
+  AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
     <div data-test-subj={testSubj} />
   ),
 }));
@@ -70,7 +63,8 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = HOST_IDENTITY_FIELDS
+  identityFields: Record<string, string> = HOST_IDENTITY_FIELDS,
+  hostName = 'host-alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
@@ -78,7 +72,7 @@ const renderFooter = (
       cases: {
         config: { attachmentsEnabled },
         helpers: {
-          canUseCases: () => ({ create: true, update: true, createComment: true }),
+          canUseCases: () => ({ create: true, update: true, createComment: true, read: true }),
         },
       },
     },
@@ -86,7 +80,7 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <Footer identityFields={identityFields} entity={entity} />
+      <Footer hostName={hostName} identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
@@ -94,38 +88,53 @@ const renderFooter = (
 describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders Add to new case and Add to existing case when all conditions are met', () => {
+  it('renders the Add to case action when all conditions are met', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD);
 
-    expect(screen.getByTestId(ADD_TO_NEW_CASE_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ADD_TO_CASE_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders no case actions when entityAttachmentsEnabled is false', () => {
     renderFooter(false, true, ENTITY_STORE_RECORD);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when cases attachmentsEnabled config is false', () => {
     renderFooter(true, false, ENTITY_STORE_RECORD);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when there is no entity store record (entityStoreId is undefined)', () => {
     renderFooter(true, true, undefined);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when hostName resolves to an empty string', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD, { 'host.name': '' });
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer – AiAssistantButton entity name', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('passes the raw hostName prop, not a value derived from identityFields', () => {
+    // Regression for security-team/kibana#277619: when identityFields resolves to a
+    // higher-ranked EUID field (e.g. host.id) with no host.name key at all, the footer must
+    // still send the flyout's display name to "Add to chat" — the same value the risk-score
+    // tab's AiAssistantButton sends for this entity — not the id.
+    renderFooter(
+      true,
+      true,
+      ENTITY_STORE_RECORD,
+      { 'host.id': 'f47ac10b-58cc-4372-a567-0e02b2c3d479' },
+      'host-alice'
+    );
+
+    expect(screen.getByTestId('mockAiAssistantButton')).toHaveTextContent('host-alice');
   });
 });

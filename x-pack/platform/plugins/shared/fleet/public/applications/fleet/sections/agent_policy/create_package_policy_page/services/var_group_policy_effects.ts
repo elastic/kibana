@@ -10,7 +10,10 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyConfigRecord,
 } from '../../../../../../../common';
-import { SUPPORTS_CLOUD_CONNECTORS_VAR_NAME } from '../../../../../../../common/constants';
+import {
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+  SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
+} from '../../../../../../../common/constants';
 import {
   getCloudConnectorOption,
   getAllCloudConnectorVarNames,
@@ -31,24 +34,40 @@ export type PolicyUpdateHandler = (
 // Registry of effect handlers for extensibility
 const policyUpdateHandlers: PolicyUpdateHandler[] = [];
 
+const SUPPORT_FLAG_VAR_NAMES = [
+  SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+] as const;
+
 /**
- * Builds a vars update that sets the supports_cloud_connectors package-level var.
- * Returns an empty object if the var doesn't exist in the current policy vars
+ * Finds which support-flag var (supports_identity_federation or supports_cloud_connectors)
+ * is present in the given vars record, or undefined if neither is declared.
+ */
+function findSupportFlagVarName(
+  vars: PackagePolicyConfigRecord
+): (typeof SUPPORT_FLAG_VAR_NAMES)[number] | undefined {
+  return SUPPORT_FLAG_VAR_NAMES.find((name) => name in vars);
+}
+
+/**
+ * Builds a vars update that sets the identity-federation / cloud-connector support flag.
+ * Returns an empty object if neither var exists in the current policy vars
  * (meaning the integration doesn't declare it in its manifest).
  */
 function buildSupportsCloudConnectorsVarsUpdate(
   currentVars: PackagePolicyConfigRecord | undefined,
   value: boolean
 ): { vars: PackagePolicyConfigRecord } | Record<string, never> {
-  if (!currentVars || !(SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in currentVars)) {
-    return {};
-  }
+  if (!currentVars) return {};
+
+  const varName = findSupportFlagVarName(currentVars);
+  if (!varName) return {};
 
   return {
     vars: {
       ...currentVars,
-      [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]: {
-        ...currentVars[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+      [varName]: {
+        ...currentVars[varName],
         value,
       },
     },
@@ -105,12 +124,10 @@ function buildDeactivatePackageVarsUpdate(
     }
   }
 
-  if (
-    SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in updated &&
-    updated[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME].value !== false
-  ) {
-    updated[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME] = {
-      ...updated[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+  const supportFlagName = findSupportFlagVarName(updated);
+  if (supportFlagName && updated[supportFlagName].value !== false) {
+    updated[supportFlagName] = {
+      ...updated[supportFlagName],
       value: false,
     };
     changed = true;
@@ -173,7 +190,10 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
   varGroups
 ) => {
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
-  const currentVarValue = packagePolicy.vars?.[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]?.value;
+  const supportFlagVar = packagePolicy.vars
+    ? findSupportFlagVarName(packagePolicy.vars)
+    : undefined;
+  const currentVarValue = supportFlagVar ? packagePolicy.vars?.[supportFlagVar]?.value : undefined;
 
   if (cloudConnectorOption.isSelected) {
     // Only update if supports_cloud_connector flag or the var need to change.

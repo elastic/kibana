@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -19,6 +20,11 @@ import { BUMP_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
 import { runWithCache } from '../epm/packages/cache';
 
 const TASK_TYPE = 'fleet:bump_agent_policies_by_id';
+
+interface BumpAgentPoliciesByIdTaskParams {
+  agentPolicyIdsWithSpace: Array<{ id: string; spaceId: SpaceId }>;
+  user?: AuthenticatedUser;
+}
 
 export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerSetupContract) {
   taskManagerSetup.registerTaskDefinitions({
@@ -36,13 +42,21 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
         ),
         user: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       }),
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         return {
           async run() {
-            const { agentPolicyIdsWithSpace, user } = taskInstance.params as {
+            const rawParams = taskInstance.params as {
               agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }>;
               user?: AuthenticatedUser;
             };
+            const params: BumpAgentPoliciesByIdTaskParams = {
+              user: rawParams.user,
+              agentPolicyIdsWithSpace: rawParams.agentPolicyIdsWithSpace.map(({ id, spaceId }) => ({
+                id,
+                spaceId: brandSpaceId(spaceId),
+              })),
+            };
+            const { agentPolicyIdsWithSpace, user } = params;
 
             if (!agentPolicyIdsWithSpace.length) {
               return;
@@ -67,7 +81,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPolicyIdsIndexedBySpace
               )) {
-                if (abortController.signal.aborted) {
+                if (signal.aborted) {
                   appContextService
                     .getLogger()
                     .warn('Bump agent policies task was cancelled before completing all spaces');

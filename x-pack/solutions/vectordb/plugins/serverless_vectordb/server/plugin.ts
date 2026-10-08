@@ -18,6 +18,8 @@ import { VECTORDB_PROJECT_SETTINGS } from '@kbn/serverless-vectordb-settings';
 import type { ServerlessVectordbConfig } from './config';
 import { registerCreateApiKeyRoute } from './routes/api_key';
 import { registerDeploymentStatsRoute } from './routes/deployment_stats';
+import { registerStarredDashboardsCountRoute } from './routes/starred_dashboards_count';
+import { registerSearchSkills } from './skills/register_search_skills';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
@@ -43,11 +45,30 @@ export class ServerlessVectordbPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDependencies>, { serverless }: SetupDependencies) {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { serverless, agentBuilder, cloud, features }: SetupDependencies
+  ) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
+    registerSearchSkills({ agentBuilder, cloud, logger: this.logger });
+
+    // Exposes the vector count privilege as a UI capability so the home page can render that tile
+    // before the stats request resolves. Declared as an Elasticsearch feature, which resolves it
+    // within the privilege call Security already makes. The stats route authorizes the count.
+    features.registerElasticsearchFeature({
+      id: 'vectordbIndexStats',
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: { '*': ['monitor'] },
+          ui: ['canMonitorAllIndices'],
+        },
+      ],
+    });
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);
+    registerStarredDashboardsCountRoute(router, this.logger);
     registerCreateApiKeyRoute(router, this.logger);
 
     return {};

@@ -74,6 +74,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     afterEach(async () => {
+      await toasts.dismissAll();
       await objectRemover.removeAll();
     });
 
@@ -247,7 +248,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
+
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -353,8 +359,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
@@ -475,8 +485,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
@@ -542,7 +556,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
           await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
-        ).to.equal(' Error found in 1 rule. Show rule with error');
+        ).to.equal('Error found in 1 rule. Show rule with error');
       });
 
       await retry.try(async () => {
@@ -575,13 +589,21 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });
-      await refreshAlertsList();
       await testSubjects.click('expandRulesError');
-      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
-      expect(expandedRow).to.have.length(1);
-      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).to.equal(
-        'Error from last run\nFailed to execute alert type'
+      let expandedRowText = '';
+      await retry.waitForWithTimeout(
+        'expanded rule error row to render its content',
+        30000,
+        async () => {
+          const expandedRows = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+          if (expandedRows.length !== 1) {
+            return false;
+          }
+          expandedRowText = await (await expandedRows[0].findByTagName('div')).getVisibleText();
+          return expandedRowText === 'Error from last run\nFailed to execute alert type';
+        }
       );
+      expect(expandedRowText).to.equal('Error from last run\nFailed to execute alert type');
     });
 
     it('should filter alerts by the alert type', async () => {

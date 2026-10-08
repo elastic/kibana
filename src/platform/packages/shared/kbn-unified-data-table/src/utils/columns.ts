@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocumentsDisplayMode } from '../types';
 
 export const SOURCE_COLUMN = '_source';
 
@@ -16,12 +17,26 @@ export const SOURCE_COLUMN = '_source';
 // new columns, and thus performing worse than using the same array over multiple renders.
 const SOURCE_ONLY = [SOURCE_COLUMN];
 
+export const getShowSummaryColumn = (columns: string[]): boolean => columns.includes(SOURCE_COLUMN);
+
+export const isSummaryOnlyColumn = (columns: string[]): boolean =>
+  columns.length === 1 && columns[0] === SOURCE_COLUMN;
+
 /**
  * Function to provide fallback when
  * 1) no columns are given
  * 2) Just one column is given, which is the configured timefields
  */
-export function getDisplayedColumns(stateColumns: string[] = [], dataView: DataView) {
+export function getDisplayedColumns(
+  stateColumns: string[] = [],
+  dataView: DataView,
+  documentsDisplayMode: DocumentsDisplayMode = 'table'
+) {
+  // JSON mode is a single JSON cell; selected fields filter that cell instead of becoming their own
+  // columns, so always show just the source column.
+  if (documentsDisplayMode === 'json') {
+    return SOURCE_ONLY;
+  }
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)

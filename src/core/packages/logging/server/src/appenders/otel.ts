@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Attributes } from '@opentelemetry/api';
+import type { Duration } from 'moment-timezone';
+
 import type { LayoutConfigType } from '../layout';
 
 /**
@@ -77,6 +80,18 @@ export interface OtelAppenderConfig {
    */
   headers?: Record<string, string>;
   /**
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * Max log records buffered in memory; once full, new records are dropped. Must be at least
+   * `512` (the SDK's export batch size). Defaults to `15000` on serverless (SDK default: `2048`).
+   */
+  maxQueueSize?: number;
+  /**
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * How long failed exports are retried (transient errors only) before the batch is dropped.
+   * When unset, only the SDK's built-in ~13s retry applies. Defaults to `2m` on serverless.
+   */
+  maxElapsedTime?: Duration;
+  /**
    * Controls how the log record body is serialised.
    *
    * - `pattern` (**default**): the message is formatted to a human-readable string
@@ -100,10 +115,65 @@ export interface OtelAppenderConfig {
    * as `service.name`. Because Kibana expands dotted YAML keys into nested
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
+   *
+   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
+   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
    */
   attributes?: Record<string, string>;
+  /**
+   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
+   * (include every auto-detected and configured attribute — the standard OTel resource).
+   *
+   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
+   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
+   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
+   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
+   * cloud/k8s/process/host fields excluded.
+   *
+   * An explicit allowlist fully governs the resource: a listed key is kept even if
+   * {@link OtelAppenderPluginConfig.dropResourceAttributes} also names it.
+   * `dropResourceAttributes` only shapes the resource in the default `['*']` case.
+   */
+  includeResources?: string[];
+  /**
+   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
+   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
+   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
+   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
+   * pair with `includeResources` to keep it out of the resource and only on records. Only
+   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
+   */
+  promoteResourceAttributes?: string[];
   /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
   ssl?: OtelAppenderTlsConfig;
+}
+
+/**
+ * Maps a log record's fully-flattened per-record OTel attributes (including promoted resource
+ * attributes and, for pattern layout, flattened `log.meta`) to the attributes to emit.
+ *
+ * @public
+ */
+export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
+
+/**
+ * Plugin-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
+ * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
+ *
+ * @public
+ */
+export interface OtelAppenderPluginConfig extends OtelAppenderConfig {
+  /**
+   * Applied to the flattened attributes just before emit. Use for output-shaping too specific
+   * to belong in serializable config (e.g. audit log field mappings).
+   */
+  transformAttributes?: OtelAttributesTransform;
+  /**
+   * Resource-attribute keys removed at appender construction, only when
+   * {@link OtelAppenderConfig.includeResources} is the default `['*']` (an explicit allowlist
+   * takes precedence). Async-detected values (e.g. `host.id`) are preserved unless dropped here.
+   */
+  dropResourceAttributes?: string[];
 }

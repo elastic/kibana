@@ -9,7 +9,7 @@ import React from 'react';
 import { createBrowserHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import type { Subject } from 'rxjs';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { SyntheticsSharedContext } from '../synthetics/contexts/synthetics_shared_context';
 import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts/synthetics_embeddable_context';
 import { getSyntheticsAppProps } from '../synthetics/render_app';
@@ -19,12 +19,18 @@ export const SyntheticsEmbeddableContext: React.FC<
   React.PropsWithChildren<{
     reload$: Subject<boolean>;
     reduxStore?: Store;
+    onAutoRefresh?: () => void;
   }>
-> = ({ reload$, children, reduxStore }) => {
+> = ({ reload$, children, reduxStore, onAutoRefresh }) => {
   const props = getSyntheticsAppProps();
 
   return (
-    <SyntheticsSharedContext {...props} reload$={reload$} reduxStore={reduxStore}>
+    <SyntheticsSharedContext
+      {...props}
+      reload$={reload$}
+      reduxStore={reduxStore}
+      onAutoRefresh={onAutoRefresh}
+    >
       <SyntheticsEmbeddableStateContextProvider>
         <Router history={createBrowserHistory()}>
           <SyntheticsSettingsContextProvider {...props}>

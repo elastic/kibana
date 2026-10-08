@@ -8,6 +8,7 @@
 import { unset } from 'lodash';
 
 import type { SavedObjectsBulkResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { V2_NOOP_ATTACHMENTS_WRITER } from '../../cases_analytics_v2';
@@ -22,15 +23,17 @@ import {
   persistableStateAttachmentAttributes,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { createErrorSO, createSOFindResponse } from '../test_utils';
+import { createErrorSO, createSOFindResponse, mockPointInTimeFinder } from '../test_utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  LEGACY_ALERT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { ConfigType } from '../../config';
 
 const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =>
@@ -1289,6 +1292,61 @@ describe('AttachmentService', () => {
       });
     });
 
+    describe('bulkDelete return value', () => {
+      it('returns only the ids whose SO delete succeeded in this call', async () => {
+        const svc = makeService(makeMirrorWriter());
+        // id-1: legacy delete succeeded → deleted.
+        // id-2: legacy delete failed with a 500 → the SO may survive, not deleted.
+        // id-3: both types 404 → already gone before this call, not deleted by it.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2', 'id-3'], refresh: false })
+        ).resolves.toEqual(['id-1']);
+      });
+
+      it('returns an empty array without calling the SO client when there are no ids', async () => {
+        const svc = makeService(makeMirrorWriter());
+
+        await expect(svc.bulkDelete({ savedObjectIds: [], refresh: false })).resolves.toEqual([]);
+        expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      });
+    });
+
     describe('fire-and-forget: a throwing analytics writer never breaks the primary SO write', () => {
       it('create: swallows a synchronous writer throw and still returns the created attachment', async () => {
         const writer = makeMirrorWriter();
@@ -1349,9 +1407,9 @@ describe('AttachmentService', () => {
           ],
         });
 
-        await expect(
-          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
-        ).resolves.toBeUndefined();
+        await expect(svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })).resolves.toEqual(
+          ['id-1']
+        );
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining('attachments mirror dispatch threw')
         );
@@ -1557,7 +1615,11 @@ describe('AttachmentService', () => {
           comments: [{ savedObjectId: '1', updatedAttributes: attachment.attributes }],
         });
 
-        expect(res.saved_objects[0].attributes.owner).toBe(attachment.attributes.owner);
+        const [updated] = res.saved_objects;
+        if (isSavedObjectErrorResult(updated)) {
+          throw new Error('Expected a successful saved object result');
+        }
+        expect(updated.attributes.owner).toBe(attachment.attributes.owner);
       });
 
       it('throws Boom 400 for unified-only types when the attachments flag is off', async () => {
@@ -1853,7 +1915,6 @@ describe('AttachmentService', () => {
       );
 
       await service.find({
-        mode: 'legacy',
         options: {
           page: 1,
           perPage: 10,
@@ -1870,7 +1931,7 @@ describe('AttachmentService', () => {
       );
     });
 
-    it('transforms unified comment find results to legacy output', async () => {
+    it('keeps unified comment find results in unified shape', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
@@ -1900,18 +1961,17 @@ describe('AttachmentService', () => {
         ])
       );
 
-      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+      const res = await serviceWithFlagOn.find({});
 
       expect(res.saved_objects[0].attributes).toMatchObject({
-        type: 'user',
-        comment: 'from unified',
+        type: 'comment',
+        data: { content: 'from unified' },
         owner: SECURITY_SOLUTION_OWNER,
       });
     });
 
-    // A Lens-by-reference attachment has no legacy form, so a legacy-mode read
-    // must return it in the unified shape instead of throwing or corrupting it.
-    it('returns a Lens-by-reference attachment in unified shape for legacy mode reads', async () => {
+    // A Lens-by-reference attachment has no legacy form, so it stays unified.
+    it('returns a Lens-by-reference attachment in unified shape', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
@@ -1941,7 +2001,7 @@ describe('AttachmentService', () => {
         ])
       );
 
-      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+      const res = await serviceWithFlagOn.find({});
 
       expect(res.saved_objects[0].attributes).toMatchObject({
         type: LENS_ATTACHMENT_TYPE,
@@ -1956,7 +2016,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
         );
 
-        await expect(service.find({ mode: 'legacy' })).resolves.not.toThrow();
+        await expect(service.find({})).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -1964,12 +2024,17 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment({ foo: 'bar' }), score: 0 }])
         );
 
-        const res = await service.find({ mode: 'legacy' });
+        const res = await service.find({});
 
-        expect(res).toStrictEqual(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
+        expect(res.saved_objects[0].attributes).toMatchObject({
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
+          owner: SECURITY_SOLUTION_OWNER,
+        });
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('foo');
       });
 
-      it('throws when the response is missing the attributes.rule.name field', async () => {
+      it('maps a missing comment field to empty unified content', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
 
@@ -1977,9 +2042,11 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...invalidAttachment, score: 0 }])
         );
 
-        await expect(service.find({ mode: 'legacy' })).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
-        );
+        const res = await service.find({});
+        expect(res.saved_objects[0].attributes).toMatchObject({
+          type: 'comment',
+          data: { content: '' },
+        });
       });
     });
   });
@@ -2094,7 +2161,136 @@ describe('AttachmentService', () => {
       expect(unifiedCallArgs.type).toBe('cases-attachments');
 
       const filterAsString = JSON.stringify(unifiedCallArgs.filter);
+      expect(filterAsString).toMatch(/"value":\s*"security.endpoint"/);
+      expect(filterAsString).toMatch(/"value":\s*"osquery"/);
+      expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsAttachedToCase', () => {
+    const mockFinder = mockPointInTimeFinder(unsecuredSavedObjectsClient);
+
+    it('counts unique origin alert ids', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'b', index: 'origin-index' }), score: 0 },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(2);
+    });
+
+    it('excludes alerts from linked-project indices', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(1);
+    });
+
+    it('returns 0 when every attached alert is a linked-project index', async () => {
+      mockFinder(
+        createSOFindResponse([
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(0);
+    });
+
+    it('counts linked-project alerts when originOnly is false', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+        originOnly: false,
+      });
+
+      expect(res).toBe(2);
+    });
+
+    it('counts unified alert attachments with a missing metadata.index instead of throwing', async () => {
+      mockFinder(
+        createSOFindResponse([
+          {
+            id: '1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: {
+              type: toUnifiedAttachmentType(LEGACY_ALERT_TYPE, SECURITY_SOLUTION_OWNER),
+              attachmentId: ['a', 'b'],
+              owner: SECURITY_SOLUTION_OWNER,
+              created_at: '2019-11-25T21:55:00.177Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: '2019-11-25T21:55:00.177Z',
+              updated_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+            },
+            references: [],
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(2);
     });
   });
 });

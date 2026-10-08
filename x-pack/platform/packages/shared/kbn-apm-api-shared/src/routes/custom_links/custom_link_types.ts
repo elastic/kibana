@@ -4,27 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const filterOptionsRt = t.partial({
-  'service.name': t.string,
-  'service.environment': t.string,
-  'transaction.name': t.string,
-  'transaction.type': t.string,
-});
+export const filterOptionsSchema = z
+  .object({
+    'service.name': z.string().max(1024),
+    'service.environment': z.string().max(1024),
+    'transaction.name': z.string().max(1024),
+    'transaction.type': z.string().max(1024),
+  })
+  .partial();
 
-export const payloadRt = t.intersection([
-  t.type({
-    label: t.string,
-    url: t.string,
-  }),
-  t.partial({
-    id: t.string,
-    filters: t.array(
-      t.type({
-        key: t.union([t.literal(''), t.keyof(filterOptionsRt.props)]),
-        value: t.string,
-      })
-    ),
-  }),
+const filterKeySchema = z.union([
+  z.literal(''),
+  z.enum(['service.name', 'service.environment', 'transaction.name', 'transaction.type']),
 ]);
+
+export const payloadSchema = z
+  .object({
+    label: z.string().max(1024),
+    url: z.string().max(2048),
+  })
+  .merge(
+    z
+      .object({
+        id: z.string().max(1024),
+        filters: z.array(
+          z.object({
+            key: filterKeySchema,
+            value: z.string().max(1024),
+          })
+        ),
+      })
+      .partial()
+  );

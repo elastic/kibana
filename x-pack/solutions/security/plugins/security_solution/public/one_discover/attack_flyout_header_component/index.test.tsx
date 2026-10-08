@@ -10,12 +10,20 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { AttackFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockAttackHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -26,6 +34,7 @@ const mockAttackHeader = jest.fn((props: unknown) => {
     </button>
   );
 });
+const mockReportEvent = jest.fn();
 
 jest.mock('../../flyout_v2/attack/main/header', () => ({
   Header: (props: unknown) => mockAttackHeader(props),
@@ -74,7 +83,10 @@ describe('AttackFlyoutHeader', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: {
+      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+    },
+    telemetry: { reportEvent: mockReportEvent },
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
@@ -197,6 +209,13 @@ describe('AttackFlyoutHeader', () => {
         size: 'm',
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      flyoutType: FLYOUT_TYPE.ATTACK,
+      tool: FLYOUT_TOOL.NOTES,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+    });
   });
 
   it('uses Security history key when opened inside the Security app', async () => {

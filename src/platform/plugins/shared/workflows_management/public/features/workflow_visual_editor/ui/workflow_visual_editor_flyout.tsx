@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import {
   WorkflowVisualEditorFlyout as SharedWorkflowVisualEditorFlyout,
   type WorkflowVisualEditorFlyoutTarget,

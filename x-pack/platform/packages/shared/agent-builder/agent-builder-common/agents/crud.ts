@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import type { AgentDefinition, AgentConfiguration } from './definition';
+import type { AgentDefinition, AgentConfigurationInput } from './definition';
 import type { AgentAccessControl } from './access_control';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentListOptions {}
+export interface AgentListOptions {
+  /**
+   * When true, agents of a managed (non-chat) type are included in the results.
+   * Defaults to false.
+   */
+  includeManaged?: boolean;
+}
 
 export type AgentCreateRequest = Omit<
   AgentDefinition,
-  'type' | 'readonly' | 'created_by' | 'access_control'
+  'type' | 'readonly' | 'created_by' | 'access_control' | 'configuration'
 > & {
+  /**
+   * Id of a registered agent type. Defaults to the chat type (empty base).
+   */
+  type?: string;
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
+  configuration: AgentConfigurationInput;
 };
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
-  configuration?: Partial<AgentConfiguration>;
+  configuration?: Partial<AgentConfigurationInput>;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;

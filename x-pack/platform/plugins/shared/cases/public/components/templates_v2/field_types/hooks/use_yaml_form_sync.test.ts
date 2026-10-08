@@ -42,12 +42,14 @@ const createParsedFields = (
     type: string;
     control: string;
     defaultValue?: FieldDefaultValue;
+    required?: boolean;
   }>
 ): FieldInfo[] =>
   fields.map((f) => ({
     name: f.name,
     type: f.type,
     control: f.control,
+    validation: f.required ? { required: true } : undefined,
     metadata: f.defaultValue !== undefined ? { default: f.defaultValue } : undefined,
   }));
 
@@ -95,6 +97,44 @@ describe('useYamlToFormSync', () => {
     expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
       '100',
+      expect.any(Object)
+    );
+  });
+
+  it('converts boolean defaults to strings', () => {
+    const fields = createParsedFields([
+      {
+        name: 'requires_escalation',
+        type: 'boolean',
+        control: 'TOGGLE',
+        defaultValue: true,
+      },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(setValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_boolean`,
+      'true',
+      expect.any(Object)
+    );
+  });
+
+  it('normalizes required toggle without YAML default to false', () => {
+    const fields = createParsedFields([
+      {
+        name: 'requires_escalation',
+        type: 'boolean',
+        control: 'TOGGLE',
+        required: true,
+      },
+    ]);
+
+    renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
+
+    expect(setValue).toHaveBeenCalledWith(
+      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_boolean`,
+      'false',
       expect.any(Object)
     );
   });
@@ -515,6 +555,25 @@ describe('useFormToYamlSync', () => {
     expect(mockOnChange).toHaveBeenCalledTimes(1);
     expect(mockOnChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
   });
+
+  it('serializes boolean form values for TOGGLE fields', () => {
+    const fields = createParsedFields([
+      { name: 'requires_escalation', type: 'boolean', control: 'TOGGLE', defaultValue: false },
+    ]);
+    yamlDefaultsRef.current = { requires_escalation: 'false' };
+
+    renderHook(() =>
+      useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
+    );
+
+    act(() => {
+      fireWatch({
+        [CASE_EXTENDED_FIELDS]: { requires_escalation_as_boolean: true },
+      });
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('requires_escalation', 'true', 'TOGGLE');
+  });
 });
 
 describe('useYamlFormSync (composed)', () => {
@@ -556,6 +615,23 @@ describe('useYamlFormSync (composed)', () => {
     expect(result.current.yamlDefaults).toEqual({
       summary: 'Default',
       count: '5',
+    });
+  });
+
+  it('normalizes required toggle without default to false in yamlDefaults', () => {
+    const fields = createParsedFields([
+      {
+        name: 'requires_escalation',
+        type: 'boolean',
+        control: 'TOGGLE',
+        required: true,
+      },
+    ]);
+
+    const { result } = renderHook(() => useYamlFormSync(mockForm, fields));
+
+    expect(result.current.yamlDefaults).toEqual({
+      requires_escalation: 'false',
     });
   });
 

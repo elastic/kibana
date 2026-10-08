@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    ".storybook/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -17,7 +18,23 @@
     "@kbn/core-http-browser",
     "@kbn/cloud-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/app-header",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-ui-settings-server",
+    "@kbn/management-settings-ids",
+    "@kbn/ui-callout",
+    "@kbn/storybook",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/esql-language",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

@@ -45,6 +45,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
+  /**
+   * Purpose: Links panel create/edit smoke test
+   *
+   * Migration: migrate to scout - move to links plugin
+   */
   // Failing: See https://github.com/elastic/kibana/issues/274890
   describe.skip('links panel create and edit', () => {
     describe('creation', () => {
@@ -64,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await openLinksPanelEditor();
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
-        expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
+        await testSubjects.existOrFail('links--linkDestination--error', { timeout: 5000 });
         await dashboardLinks.clickLinkEditorCloseButton();
         await dashboardLinks.clickPanelEditorCloseButton();
       });

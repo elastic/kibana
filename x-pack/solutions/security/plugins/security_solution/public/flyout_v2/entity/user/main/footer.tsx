@@ -20,14 +20,22 @@ import type { EntityToAttach } from '../../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
 
 export interface FooterProps {
+  /**
+   * Display name the flyout was opened with. Used for the "Add to chat" attachment so it
+   * matches the identifier the risk-score tab's AiAssistantButton sends for the same entity —
+   * `identityFields` can resolve to a non-name field (e.g. user.email for non-local users)
+   * when the entity's higher-ranked EUID field is populated, which would make the two
+   * "Add to chat" buttons disagree.
+   */
+  userName: string;
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
 }
 
-export const Footer = ({ identityFields, entity }: FooterProps) => {
+export const Footer = ({ userName, identityFields, entity }: FooterProps) => {
   const isInSecurityApp = useIsInSecurityApp();
-  const userName = useMemo(
+  const identityUserName = useMemo(
     () => identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '',
     [identityFields]
   );
@@ -46,8 +54,8 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
   const riskScore = risk?.calculated_score_norm;
 
   const entityToAttach = useMemo<EntityToAttach>(
-    () => ({ id: entityStoreId ?? '', name: userName, type: 'user', riskLevel, riskScore }),
-    [entityStoreId, userName, riskLevel, riskScore]
+    () => ({ id: entityStoreId ?? '', name: identityUserName, type: 'user', riskLevel, riskScore }),
+    [entityStoreId, identityUserName, riskLevel, riskScore]
   );
   const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
 
@@ -62,8 +70,8 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TakeAction
-          isDisabled={!userName || !isInSecurityApp}
-          kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}
+          isDisabled={!identityUserName || !isInSecurityApp}
+          kqlQuery={euidEntityFilter ?? `user.name: "${identityUserName}"`}
           additionalItems={additionalItems}
         />
       </EuiFlexItem>

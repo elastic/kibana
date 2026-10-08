@@ -8,8 +8,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, type EuiFlyoutMenuAction } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
@@ -26,7 +27,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type CellRenderersSearchContext } from '../../context_awareness';
 
 export interface InlineEditing {
   isActive: boolean;
@@ -50,12 +51,22 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  searchContext?: CellRenderersSearchContext;
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  dataSource?: DataSource;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
+  const {
+    enableDocumentViewer,
+    inlineEditing,
+    interceptedWarnings,
+    searchContext,
+    flyoutMenuTrailingActions,
+    ...gridProps
+  } = props;
   const { euiTheme } = useEuiTheme();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
 
@@ -83,6 +94,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         query={props.query}
         filters={props.filters}
         docViewerRef={props.docViewerRef}
+        flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         hideFilteringOnComputedColumns={true}
       />
     ),
@@ -97,6 +109,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onRemoveColumn,
       props.query,
       props.savedSearchId,
+      flyoutMenuTrailingActions,
     ]
   );
 
@@ -124,12 +137,16 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      searchContext,
+      isDataLoading: props.loadingState === DiscoverGridLoadingState.loading,
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.loadingState,
+    searchContext,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);

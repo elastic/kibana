@@ -9,13 +9,13 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -25,27 +25,48 @@ import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
-import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
+import {
+  setActiveTab,
+  setExecution,
+  setIsTestModalOpen,
+  setReplayExecutionId,
+  setYamlString,
+} from '../../../entities/workflows/store';
 import {
   selectActiveTab,
+  selectWorkflowDefinition,
   selectWorkflowId,
   selectWorkflowName,
+  selectWorkflowTags,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
-import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
-import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
+import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
+import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
+import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  useWorkflowUrlState,
+  type WorkflowUrlUpdateOptions,
+} from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
+
+/**
+ * `location.state` the page can arrive with: list-navigation state (back
+ * link) and, on `/create`, the cross-app initial-content contract
+ * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ */
+type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -63,31 +84,38 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
-  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const location = useLocation<WorkflowDetailLocationState | undefined>();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
+  const workflowTags = useSelector(selectWorkflowTags);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
 
-  const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
   const {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
+    updateUrlState,
     setActiveTab: setUrlTab,
+    replayExecutionId,
+    replayIsTestRun,
+    clearReplayExecutionId,
   } = useWorkflowUrlState();
 
   useEffect(() => {
     if (!canReadWorkflowExecution) {
       if (activeTab === 'executions') {
-        setUrlTab('workflow');
+        setUrlTab('workflow', { replace: true });
       }
       if (selectedExecutionId) {
-        setSelectedExecution(null);
+        setSelectedExecution(null, { replace: true });
       }
     }
   }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
@@ -109,15 +137,34 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     loadWorkflows(); // dispatch load workflows on mount
   }, [loadConnectors, loadWorkflows]);
 
+  // Seed the editor once per create-session: tracks whether the editor was
+  // already seeded so URL-state churn and re-renders never clobber in-progress
+  // edits or re-fire telemetry.
+  const seededRef = useRef(false);
+
+  // A navigation can hand `/create` its initial content through history
+  // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+  // "Remix with AI" passes the rendered template. The state travels on the
+  // history entry, not the URL, so plain `/create` links and shared URLs
+  // fall back to the default YAML. The effect below depends on this value, not
+  // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
+  const { initialYaml } = location.state ?? {};
+
   // Load workflow when id changes
   useEffect(() => {
     if (id) {
+      seededRef.current = false;
       loadWorkflow({ id }); // sets loaded yaml string
-    } else {
-      dispatch(setYamlString(workflowDefaultYaml));
-      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+      return;
     }
-  }, [loadWorkflow, id, dispatch, telemetry]);
+    if (seededRef.current) {
+      return;
+    }
+    seededRef.current = true;
+
+    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
+    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+  }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -125,6 +172,33 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       dispatch(setActiveTab(activeTab));
     }
   }, [activeTab, activeTabInStore, dispatch]);
+
+  useEffect(() => {
+    if (
+      !isReady ||
+      !replayExecutionId ||
+      !canExecuteWorkflow ||
+      !workflowDefinition ||
+      !id ||
+      workflowId !== id
+    ) {
+      return;
+    }
+
+    dispatch(setReplayExecutionId({ executionId: replayExecutionId, isTestRun: replayIsTestRun }));
+    dispatch(setIsTestModalOpen(true));
+    clearReplayExecutionId();
+  }, [
+    canExecuteWorkflow,
+    clearReplayExecutionId,
+    dispatch,
+    id,
+    isReady,
+    replayExecutionId,
+    replayIsTestRun,
+    workflowDefinition,
+    workflowId,
+  ]);
 
   // Load execution when selectedExecutionId changes
   useEffect(() => {
@@ -135,10 +209,66 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
+  const [isExecutionListOpen, setIsExecutionListOpen] = useState(false);
+
+  // If the page loads with an execution already selected (e.g. direct URL), open the list too
+  // so that closing the detail navigates back to the list rather than closing everything.
+  useEffect(() => {
+    if (selectedExecutionId) {
+      setIsExecutionListOpen(true);
+    }
+    // intentionally runs only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
+  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
+  const clearSelectedExecution = useCallback(
+    (options?: WorkflowUrlUpdateOptions) => {
+      if (isExecutionsViewEnabled) {
+        updateUrlState(
+          {
+            tab: 'workflow',
+            executionId: undefined,
+            stepExecutionId: undefined,
+            stepId: undefined,
+          },
+          options
+        );
+        return;
+      }
+      setSelectedExecution(null, options);
+    },
+    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
+  );
+
+  // Both handlers also close the list, which is local state rather than URL state. They must
+  // replace, or Back restores the execution while the list stays shut.
+  const onOpenExecutionList = useCallback(() => {
+    if (isExecutionListOpen || selectedExecutionId) {
+      setIsExecutionListOpen(false);
+      clearSelectedExecution({ replace: true });
+      return;
+    }
+    setIsExecutionListOpen(true);
+  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
+
+  const onCloseExecutionList = useCallback(() => {
+    setIsExecutionListOpen(false);
+    clearSelectedExecution({ replace: true });
+  }, [clearSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    // Clear the selected execution but keep the list open so the user goes back to the list.
+    // Push so Back reopens the run.
+    clearSelectedExecution({ replace: false });
+  }, [clearSelectedExecution]);
+
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
 
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
@@ -174,6 +304,22 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
+  // The list needs a saved workflow id. The detail flyout only needs the selected
+  // execution, including a test run of a workflow that has not been saved yet.
+  const canShowExecutionUi = isExecutionsViewEnabled && canReadWorkflowExecution;
+  const sidebarExecutionList =
+    !isExecutionsViewEnabled &&
+    id &&
+    activeTab === 'executions' &&
+    !selectedExecutionId &&
+    canReadWorkflowExecution ? (
+      <WorkflowExecutionList workflowId={id} />
+    ) : null;
+  const sidebarExecutionDetail =
+    !isExecutionsViewEnabled && selectedExecutionId && canReadWorkflowExecution ? (
+      <WorkflowExecutionDetail executionId={selectedExecutionId} onClose={onCloseExecutionDetail} />
+    ) : null;
+
   const pageContent = (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
@@ -181,31 +327,40 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
+          onOpenExecutionList={canShowExecutionUi && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
         {!isReady ? (
           <WorkflowDetailLoadingState />
         ) : (
-          <WorkflowEditorLayout
-            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
-            executionList={
-              id &&
-              activeTab === 'executions' &&
-              !selectedExecutionId &&
-              canReadWorkflowExecution ? (
-                <WorkflowExecutionList workflowId={id} />
-              ) : null
-            }
-            executionDetail={
-              selectedExecutionId && canReadWorkflowExecution ? (
-                <WorkflowExecutionDetail
-                  executionId={selectedExecutionId}
-                  onClose={onCloseExecutionDetail}
+          <>
+            <WorkflowEditorLayout
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
                 />
-              ) : null
-            }
-          />
+              }
+              executionList={sidebarExecutionList}
+              executionDetail={sidebarExecutionDetail}
+            />
+            {canShowExecutionUi && id && isExecutionListOpen && (
+              <WorkflowExecutionListFlyout
+                workflowId={id}
+                onClose={onCloseExecutionList}
+                isHidden={Boolean(selectedExecutionId)}
+              />
+            )}
+            {canShowExecutionUi && selectedExecutionId && (
+              <WorkflowExecutionFlyout
+                executionId={selectedExecutionId}
+                workflowName={workflowName ?? ''}
+                workflowTags={workflowTags}
+                onClose={onCloseExecutionDetail}
+              />
+            )}
+          </>
         )}
         <WorkflowDetailTestModal />
         <WorkflowDetailTestStepModal />

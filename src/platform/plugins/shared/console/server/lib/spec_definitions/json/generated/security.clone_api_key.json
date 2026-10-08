@@ -11,6 +11,12 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "api_key": "",
+      "name": "",
+      "expiration": "",
+      "metadata": {}
+    },
     "methods": [
       "POST",
       "PUT"

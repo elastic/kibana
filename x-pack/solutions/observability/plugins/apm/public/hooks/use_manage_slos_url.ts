@@ -11,8 +11,8 @@ import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { sloListLocatorID } from '@kbn/deeplinks-observability';
-import { ALL_VALUE } from '@kbn/slo-schema';
-import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../common/es_fields/apm';
 import { APM_SLO_INDICATOR_TYPES } from '../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
@@ -54,15 +54,23 @@ export function getManageSlosUrl(
   if (params?.serviceName) {
     filters.push({
       meta: {
-        alias: null,
+        alias: i18n.translate('xpack.apm.manageSlosUrl.serviceFilterLabel', {
+          defaultMessage: 'service.name: {serviceName}',
+          values: { serviceName: params.serviceName },
+        }),
         disabled: false,
-        key: 'service.name',
+        key: SERVICE_NAME,
         negate: false,
-        params: { query: params.serviceName },
-        type: 'phrase',
+        type: 'custom',
       },
       query: {
-        match_phrase: { 'service.name': params.serviceName },
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { match_phrase: { [SERVICE_NAME]: params.serviceName } },
+            { match_phrase: { [`${SLO_GROUPINGS_PREFIX}${SERVICE_NAME}`]: params.serviceName } },
+          ],
+        },
       },
     });
   }

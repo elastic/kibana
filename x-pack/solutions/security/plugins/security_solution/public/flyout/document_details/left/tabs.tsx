@@ -70,12 +70,12 @@ export const investigationTab: LeftPanelTabType = {
 };
 
 const ResponseTab = () => {
-  const { searchHit, isRulePreview } = useDocumentDetailsContext();
+  const { searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
     <EuiPanel data-test-subj={RESPONSE_TAB_CONTENT_TEST_ID} hasShadow={false}>
-      <ResponseDetailsContent hit={hit} isRulePreview={isRulePreview} />
+      <ResponseDetailsContent hit={hit} />
     </EuiPanel>
   );
 };

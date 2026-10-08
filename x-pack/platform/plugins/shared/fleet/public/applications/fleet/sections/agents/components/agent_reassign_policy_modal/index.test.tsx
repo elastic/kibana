@@ -94,12 +94,78 @@ describe('AgentReassignAgentPolicyModal', () => {
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
     });
 
+    describe('versioned policy_id (e.g. policy-a#9.4)', () => {
+      const versionedAgent = [{ id: 'agent-1', policy_id: 'policy-a#9.4' } as any];
+
+      it('pre-selects the base policy in the dropdown', () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        // The combobox pill should show the base policy name, not an empty string
+        expect(utils.getByRole('combobox')).toBeInTheDocument();
+        expect(utils.getByText('Policy A')).toBeInTheDocument();
+      });
+
+      it('confirm button is disabled when the base policy is already selected', () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      });
+
+      it('confirm button is enabled after selecting a different policy', async () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        const combobox = utils.getByRole('combobox');
+        act(() => {
+          fireEvent.change(combobox, { target: { value: 'Policy B' } });
+        });
+        const optionB = await utils.findByText('Policy B');
+        act(() => {
+          fireEvent.click(optionB);
+        });
+
+        expect(utils.getByTestId('confirmModalConfirmButton')).not.toBeDisabled();
+      });
+
+      it('calls sendPostAgentReassign with the selected base policy id', async () => {
+        mockSendPostAgentReassign.mockResolvedValue({});
+        const { utils } = render({ agents: versionedAgent });
+
+        const combobox = utils.getByRole('combobox');
+        act(() => {
+          fireEvent.change(combobox, { target: { value: 'Policy B' } });
+        });
+        const optionB = await utils.findByText('Policy B');
+        act(() => {
+          fireEvent.click(optionB);
+        });
+
+        act(() => {
+          fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+        });
+
+        await waitFor(() => {
+          expect(mockSendPostAgentReassign).toHaveBeenCalledWith('agent-1', {
+            policy_id: 'policy-b',
+          });
+        });
+      });
+    });
+
     it('shows the singular agent count in the description', () => {
       const { utils } = render({ agents: singleAgent, agentCount: 1 });
 
       expect(
         utils.getByText('Choose a new agent policy to assign the selected agent to.')
       ).toBeInTheDocument();
+    });
+
+    it('shows the singular agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: singleAgent, agentCount: 1 });
+
+      expect(utils.getByText('Assign new policy to agent')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to agent'
+      );
     });
 
     it('calls sendPostAgentReassign when a different policy is selected', async () => {
@@ -207,6 +273,15 @@ describe('AgentReassignAgentPolicyModal', () => {
       ).toBeInTheDocument();
     });
 
+    it('shows the agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
+
+      expect(utils.getByText('Assign new policy to 2 agents')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to 2 agents'
+      );
+    });
+
     it('shows "in progress" success toast for bulk agent array', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
       const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
@@ -250,6 +325,15 @@ describe('AgentReassignAgentPolicyModal', () => {
       ).toBeInTheDocument();
     });
 
+    it('shows the query-based agent count in the title and confirm button', () => {
+      const { utils } = render({ agents: kuery, agentCount: 5 });
+
+      expect(utils.getByText('Assign new policy to 5 agents')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+        'Assign policy to 5 agents'
+      );
+    });
+
     it('shows "in progress" success toast for kuery-based bulk reassignment', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
       const { utils } = render({ agents: kuery, agentCount: 5 });
@@ -275,6 +359,24 @@ describe('AgentReassignAgentPolicyModal', () => {
         expect(mockSendPostBulkAgentReassign).toHaveBeenCalled();
       });
       expect(mockSendPostAgentReassign).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('policy ordering', () => {
+    it('lists policies alphabetically, case-insensitive', async () => {
+      mockPolicies([
+        { id: 'p-c', name: 'charlie', is_managed: false },
+        { id: 'p-a', name: 'Alpha', is_managed: false },
+        { id: 'p-b', name: 'bravo', is_managed: false },
+      ]);
+      const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'p-a' } as any] });
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('comboBoxToggleListButton'));
+      });
+
+      const options = await utils.findAllByRole('option');
+      expect(options.map((o) => o.textContent)).toEqual(['Alpha', 'bravo', 'charlie']);
     });
   });
 });

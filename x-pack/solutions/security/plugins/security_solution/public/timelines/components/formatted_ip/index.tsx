@@ -10,19 +10,15 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { useKibana } from '../../../common/lib/kibana';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
-import { Network } from '../../../flyout_v2/network/main';
-import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 
 const tryStringify = (value: string | object | null | undefined): string => {
@@ -62,12 +58,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   title,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const { openNetworkFlyout } = useFlyoutApi();
 
   const eventContext = useContext(StatefulEventContext);
 
@@ -82,18 +74,9 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         : FlowTargetSourceDest.source;
 
       if (enableNewFlyout) {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Network ip={ip} flowTarget={flowTarget} />,
-          }),
-          {
-            ...defaultDocumentFlyoutProperties,
-            session: 'start',
-          }
-        );
+        // This branch only renders when `Component` is provided, i.e. from the alerts/timeline
+        // table's `EuiDataGrid` cell (see the `content` memo below) — not from inside a flyout.
+        openNetworkFlyout({ ip, flowTarget, origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK });
       } else if (eventContext) {
         openFlyout({
           right: {
@@ -107,18 +90,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         });
       }
     },
-    [
-      onClick,
-      eventContext,
-      fieldName,
-      openFlyout,
-      enableNewFlyout,
-      defaultDocumentFlyoutProperties,
-      overlays,
-      services,
-      store,
-      history,
-    ]
+    [onClick, eventContext, fieldName, openFlyout, enableNewFlyout, openNetworkFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

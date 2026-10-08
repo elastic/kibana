@@ -59,13 +59,6 @@ function ChatContent({
   initialMessages: Message[];
   connectorId: string;
 }) {
-  const {
-    services: {
-      plugins: {
-        start: { evals },
-      },
-    },
-  } = useKibana();
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
   const scopes = chatService.getScopes();
@@ -89,25 +82,6 @@ function ChatContent({
     messages.slice(initialMessagesRef.current.length + 1),
     MessageRole.Assistant
   );
-  const addToDatasetAction =
-    evals?.getAddToDatasetAction && lastAssistantResponse
-      ? evals.getAddToDatasetAction({
-          initialExample: {
-            input: {
-              initialMessages,
-              connectorId,
-              scopes,
-            },
-            output: {
-              content: lastAssistantResponse.message.content,
-            },
-            metadata: {
-              source: 'observability_ai_assistant',
-              timestamp: lastAssistantResponse['@timestamp'],
-            },
-          },
-        })
-      : null;
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -162,17 +136,6 @@ function ChatContent({
                   }
                 }}
               />
-              {addToDatasetAction ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType={addToDatasetAction.iconType}
-                    onClick={addToDatasetAction.onClick}
-                  >
-                    {addToDatasetAction.label}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {

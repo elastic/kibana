@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
@@ -20,6 +21,7 @@ import {
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -28,7 +30,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { getDatasets } from '@kbn/esql-utils';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
+import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
@@ -55,14 +60,21 @@ import {
   isStatFieldValid,
   generateId,
   getAvailableMetricLabels,
+  reconcileSeverity,
+  isSeveritySupported,
+  hasReservedSeverityLabel,
+  getReservedSeverityLabelSources,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
+import { SeveritySection } from './severity_section';
 import { splitQuery } from '../../use_heuristic_split';
+import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  SEVERITY_RESERVED_LABEL_NOTICE,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
@@ -75,20 +87,28 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
+  const thresholdValuesRef = useRef(thresholdValues);
+  thresholdValuesRef.current = thresholdValues;
   const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
     http: services.http,
     application: services.application,
+    getDatasets: () => getDatasets(services.http),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
-  const { data: fieldMap } = useDataFields({
+  const {
+    data: fieldMap,
+    isError: isFieldMapError,
+    isLoading: isLoadingFieldMap,
+  } = useDataFields({
     query: fromQuery,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const numericFields = useMemo(
@@ -112,20 +132,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [fieldMap]
   );
 
-  const dateFields = useMemo(() => {
-    const dates = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (dates.length === 0) return ['@timestamp'];
-    return dates;
-  }, [fieldMap]);
+  const handleTimeFieldChange = useCallback(
+    (field: string) => {
+      onThresholdValuesChange({ ...thresholdValuesRef.current, timeField: field });
+    },
+    [onThresholdValuesChange]
+  );
 
-  useEffect(() => {
-    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
-      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
-    }
-  }, [dateFields, thresholdValues, onThresholdValuesChange]);
+  // Two-step time-field resolution: ES|QL column introspection first, then the
+  // getESQLTimeFieldFromQuery API fallback when introspection yields no date columns.
+  // This mirrors the compose/discover flow and correctly handles federated sources
+  // whose temporal column might not appear in a standard field-caps response.
+  const { timeFieldOptions } = useResolveTimeField({
+    query: fromQuery,
+    timeField: thresholdValues.timeField,
+    onTimeFieldChange: handleTimeFieldChange,
+    http: services.http,
+    dataViews: services.dataViews,
+    search: services.data.search.search,
+  });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
@@ -142,16 +167,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
-      setValue('query', {
-        format: 'composed',
-        base,
-        breach: {
-          segment: alertBlock,
-        },
-        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
-      });
+      setValue('query', { base, breach: { segment: alertBlock } });
+      if (recoveryBlock) {
+        setValue('recovery', { strategy: recoveryStrategy.condition, segment: recoveryBlock });
+      }
     } else {
-      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
+      setValue('query', { base: esqlQuery, breach: { segment: '' } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {
@@ -176,6 +197,26 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const update = useCallback(
     <K extends keyof ThresholdFormValues>(field: K, value: ThresholdFormValues[K]) => {
       onThresholdValuesChange({ ...thresholdValues, [field]: value });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
+  const updateGroupByFields = useCallback(
+    (groupByFields: string[]) => {
+      // A group-by field named `severity` collides with the generated column, so clear severity.
+      onThresholdValuesChange({
+        ...thresholdValues,
+        groupByFields,
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          thresholdValues.alertConditions,
+          hasReservedSeverityLabel(
+            thresholdValues.stats,
+            thresholdValues.evaluations,
+            groupByFields
+          )
+        ),
+      });
     },
     [thresholdValues, onThresholdValuesChange]
   );
@@ -218,6 +259,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        // Renaming a stat to `severity` collides with the generated column, so severity clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(next, thresholdValues.evaluations, thresholdValues.groupByFields)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -317,6 +364,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        // Renaming an evaluation to `severity` collides with the generated column, so it clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(thresholdValues.stats, next, thresholdValues.groupByFields)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -386,71 +439,102 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     (index: number, updates: Partial<AlertCondition>) => {
       const next = [...thresholdValues.alertConditions];
       next[index] = { ...next[index], ...updates };
-      onThresholdValuesChange({ ...thresholdValues, alertConditions: next });
-    },
-    [thresholdValues, onThresholdValuesChange]
-  );
-
-  const addCondition = useCallback(() => {
-    onThresholdValuesChange({
-      ...thresholdValues,
-      alertConditions: [
-        ...thresholdValues.alertConditions,
-        { id: generateId(), ...DEFAULT_ALERT_CONDITION },
-      ],
-    });
-  }, [thresholdValues, onThresholdValuesChange]);
-
-  const removeCondition = useCallback(
-    (index: number) => {
-      const next = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      // Severity inherits the condition's comparator, so re-check it stays applicable. Its
+      // thresholds are independent of the condition threshold (no coupling).
       onThresholdValuesChange({
         ...thresholdValues,
-        alertConditions: next.length ? next : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
       });
     },
     [thresholdValues, onThresholdValuesChange]
   );
 
+  const addCondition = useCallback(() => {
+    const next = reconcileAlertConditionMetrics(
+      [...thresholdValues.alertConditions, { id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+      thresholdValues.stats,
+      thresholdValues.evaluations
+    );
+    onThresholdValuesChange({
+      ...thresholdValues,
+      alertConditions: next,
+      severity: reconcileSeverity(thresholdValues.severity, next),
+    });
+  }, [thresholdValues, onThresholdValuesChange]);
+
+  const removeCondition = useCallback(
+    (index: number) => {
+      const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      const next = reconcileAlertConditionMetrics(
+        filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        thresholdValues.stats,
+        thresholdValues.evaluations
+      );
+      onThresholdValuesChange({
+        ...thresholdValues,
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
+      });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
+  const updateSeverity = useCallback(
+    (severity: ThresholdFormValues['severity']) => {
+      onThresholdValuesChange({ ...thresholdValues, severity });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
+  const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
+  // A stat/evaluation/group-by field named `severity` collides with the generated column, so
+  // severity is not configurable until it is renamed. Track the exact source(s) to name them.
+  const reservedSeverityLabelSources = getReservedSeverityLabelSources(
+    thresholdValues.stats,
+    thresholdValues.evaluations,
+    thresholdValues.groupByFields
+  );
+  const severityLabelConflict = reservedSeverityLabelSources.length > 0;
+
   return (
     <>
-      {/* ── Header with preview icon ── */}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.ruleBuilder.dataSource.title"
-                defaultMessage="Data source"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.ruleBuilder.alertCondition.previewTooltip', {
-              defaultMessage: 'Preview results',
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleBuilder.dataSource.title"
+            defaultMessage="Data source"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+
+      {/* ── Field-load error ── */}
+      {isFieldMapError && !isLoadingFieldMap && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.fieldLoadErrorTitle', {
+              defaultMessage: 'Could not load fields for this data source',
             })}
           >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={state.childOpen}
-              onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-              data-test-subj="ruleBuilderOpenPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleBuilder.fieldLoadErrorBody"
+                defaultMessage="Field suggestions for group-by, stat field, and time field are unavailable. You can still configure the rule manually."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {/* ── Data Source ── */}
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.indexLabel', {
-          defaultMessage: 'Index',
+        label={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceLabel', {
+          defaultMessage: 'Data source',
         })}
         fullWidth
       >
@@ -468,14 +552,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
             return true;
           }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
-          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
-            defaultMessage: 'Use {searchValue} as an index pattern',
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceCustomOption', {
+            defaultMessage: 'Use {searchValue} as a data source',
             // EuiComboBox replaces {searchValue} at render time; pass the literal token through
             // i18n so FormatJS does not treat it as an ICU variable without a value.
             values: { searchValue: '{searchValue}' },
           })}
-          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
-            defaultMessage: 'Enter index pattern (e.g. logs-*)',
+          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourcePlaceholder', {
+            defaultMessage: 'Select a data source or enter an index pattern',
           })}
           data-test-subj="ruleBuilderIndexField"
         />
@@ -491,7 +575,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <EuiSelect
           fullWidth
           compressed
-          options={dateFields.map((name) => ({ value: name, text: name }))}
+          options={timeFieldOptions}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
           data-test-subj="ruleBuilderTimeField"
@@ -510,13 +594,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           compressed
           options={allFields.map((name) => ({ label: name }))}
           selectedOptions={thresholdValues.groupByFields.map((f) => ({ label: f }))}
-          onChange={(opts) =>
-            update(
-              'groupByFields',
-              opts.map((o) => o.label)
-            )
-          }
-          onCreateOption={(val) => update('groupByFields', [...thresholdValues.groupByFields, val])}
+          onChange={(opts) => updateGroupByFields(opts.map((o) => o.label))}
+          onCreateOption={(val) => updateGroupByFields([...thresholdValues.groupByFields, val])}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.groupByPlaceholder', {
             defaultMessage: 'Add group-by fields',
           })}
@@ -527,8 +606,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
       <EuiFormRow
         label={i18n.translate('xpack.alertingV2.ruleBuilder.filterLabel', {
-          defaultMessage: 'Filter (optional)',
+          defaultMessage: 'Filter',
         })}
+        labelAppend={OPTIONAL_LABEL}
         fullWidth
       >
         <EuiFieldText
@@ -544,7 +624,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFormRow>
 
       {/* ── Stats ── */}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage id="xpack.alertingV2.ruleBuilder.statsTitle" defaultMessage="Stats" />
@@ -680,8 +760,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
               <EuiSpacer size="xs" />
               <EuiFormRow
                 label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
-                  defaultMessage: 'Filter (optional)',
+                  defaultMessage: 'Filter',
                 })}
+                labelAppend={OPTIONAL_LABEL}
                 fullWidth
               >
                 <EuiFieldText
@@ -703,7 +784,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addStat}
         data-test-subj="ruleBuilderAddStat"
       >
@@ -719,7 +800,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <h4>
           <FormattedMessage
             id="xpack.alertingV2.ruleBuilder.evaluationsTitle"
-            defaultMessage="Evaluations (optional)"
+            defaultMessage="Evaluations"
           />
         </h4>
       </EuiTitle>
@@ -789,7 +870,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       ))}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addEvaluation}
         data-test-subj="ruleBuilderAddEvaluation"
       >
@@ -944,6 +1025,26 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+              {severitySupported &&
+                (severityLabelConflict ? (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiCallOut
+                      announceOnMount
+                      size="s"
+                      color="primary"
+                      iconType="info"
+                      title={SEVERITY_RESERVED_LABEL_NOTICE(reservedSeverityLabelSources)}
+                      data-test-subj="ruleBuilderSeverityReservedLabelCallout"
+                    />
+                  </>
+                ) : (
+                  <SeveritySection
+                    severity={thresholdValues.severity}
+                    alertConditions={thresholdValues.alertConditions}
+                    onChange={updateSeverity}
+                  />
+                ))}
             </EuiPanel>
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -951,7 +1052,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addCondition}
         data-test-subj="ruleBuilderAddCondition"
       >
@@ -960,6 +1061,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
+
+      {/* ── Non-configurable severity notice ── */}
+      {!severitySupported && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.severity.singleConditionOnly', {
+              defaultMessage:
+                'Severity is not configurable when multiple threshold conditions are defined.',
+            })}
+            data-test-subj="ruleBuilderSeverityDisabledCallout"
+          />
+        </>
+      )}
     </>
   );
 };

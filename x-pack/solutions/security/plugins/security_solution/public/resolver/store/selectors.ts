@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect-v4';
 import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
@@ -260,6 +260,16 @@ export const ariaLevel: (state: ResolverState) => (nodeID: string) => number | n
 export const originID: (state: ResolverState) => string | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.originID
+);
+
+/**
+ * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
+ * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
+ * document timestamp.
+ */
+export const originTimestamp: (state: ResolverState) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originTimestamp
 );
 
 /**

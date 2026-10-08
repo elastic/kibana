@@ -80,7 +80,7 @@ describe('uiSettings', () => {
       const client = createDefaultsClient();
       expect(client).toBeInstanceOf(UiSettingsDefaultsClient);
 
-      expect(MockUiSettingsDefaultsClientConstructor).toBeCalledTimes(1);
+      expect(MockUiSettingsDefaultsClientConstructor).toHaveBeenCalledTimes(1);
       const [[constructorArgs]] = MockUiSettingsDefaultsClientConstructor.mock.calls;
       expect(constructorArgs).toMatchObject({ overrides, defaults: {} });
       expect(constructorArgs.overrides).toBe(overrides);
@@ -338,7 +338,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
       });
 
@@ -346,7 +346,7 @@ describe('uiSettings', () => {
         await service.setup(setupDeps);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
       });
@@ -357,7 +357,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
@@ -369,7 +369,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.globalAsScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].type).toBe('config-global');
       });
 
@@ -378,7 +378,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.globalAsScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].overrides).toEqual(
           globalOverrides
         );
@@ -390,7 +390,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.globalAsScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });

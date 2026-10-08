@@ -18,9 +18,9 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiLink,
-  EuiCallOut,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { FormHook, ValidationFunc, FieldConfig } from '../../shared_imports';
 import { useForm, useFormData, Form, UseField, TextField, CodeEditor } from '../../shared_imports';
@@ -226,23 +226,22 @@ const RuntimeFieldFormComp = ({
       {existingConcreteFields.find((field) => field.name === name) && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
               defaultMessage: 'Field shadowing',
             })}
-            color="warning"
-            iconType="pin"
             size="s"
             data-test-subj="shadowingFieldCallout"
-          >
-            <div>
-              {i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutDescription', {
-                defaultMessage:
-                  'This field shares the name of a mapped field. Values for this field will be returned in search results.',
-              })}
-            </div>
-          </EuiCallOut>
+            text={
+              <div>
+                {i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutDescription', {
+                  defaultMessage:
+                    'This field shares the name of a mapped field. Values for this field will be returned in search results.',
+                })}
+              </div>
+            }
+          />
         </>
       )}
 

@@ -13,7 +13,6 @@ import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,12 +23,12 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
@@ -96,18 +95,14 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     }
 
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleLabel"
             defaultMessage="This dashboard already exists"
           />
         }
-        color="warning"
-        data-test-subj="duplicateTitleWarningMessage"
-        id={DUPLICATE_TITLE_CALLOUT_ID}
-      >
-        <p>
+        text={
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
             defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -115,8 +110,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               title: localSettings.title,
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+        data-test-subj="duplicateTitleWarningMessage"
+        id={DUPLICATE_TITLE_CALLOUT_ID}
+      />
     );
   };
 
@@ -126,6 +123,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
     return (
       <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
+        compressed
         initialSelection={localSettings.tags ?? []}
         onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
       />
@@ -135,7 +133,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.embeddableApi.showSettings.flyout.title"
@@ -148,6 +146,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
         {renderDuplicateTitleCallout()}
         <EuiForm data-test-subj="dashboardSettingsPanel">
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.form.panelTitleFormRowLabel"
@@ -156,6 +155,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             }
           >
             <EuiFieldText
+              compressed
+              fullWidth
               autoFocus
               id="dashboardTitleInput"
               className="dashboardTitleInputText"
@@ -178,6 +179,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             />
           </EuiFormRow>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.form.panelDescriptionFormRowLabel"
@@ -186,6 +188,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             }
           >
             <EuiTextArea
+              compressed
+              fullWidth
               id="dashboardDescriptionInput"
               className="dashboardDescriptionInputText"
               data-test-subj="dashboardDescriptionInput"
@@ -210,6 +214,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             }
           >
             <EuiSwitch
+              compressed
               data-test-subj="storeTimeWithDashboard"
               checked={localSettings.time_restore}
               onChange={(event) => updateDashboardSetting({ time_restore: event.target.checked })}
@@ -231,6 +236,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               }
             >
               <EuiSwitch
+                compressed
                 data-test-subj="storeProjectRoutingWithDashboard"
                 checked={localSettings.project_routing_restore}
                 onChange={(event) =>
@@ -247,6 +253,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           )}
           <EuiFormRow>
             <EuiSwitch
+              compressed
               label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel',
                 {
@@ -261,6 +268,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
           <EuiFormRow>
             <EuiSwitch
+              compressed
               label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelTitlesSwitchLabel',
                 {
@@ -277,6 +285,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
           <EuiFormRow>
             <EuiSwitch
+              compressed
               label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelBordersSwitchLabel',
                 {
@@ -299,6 +308,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             <>
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={i18n.translate(
                     'dashboard.embeddableApi.lyout.form.autoApplyFiltersSwitchLabel',
                     {
@@ -326,8 +336,9 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             <>
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={
-                    <EuiText size="s">
+                    <>
                       {i18n.translate(
                         'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
                         {
@@ -365,7 +376,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                         size="s"
                         type="question"
                       />
-                    </EuiText>
+                    </>
                   }
                   checked={localSettings.sync_colors}
                   onChange={(event) =>
@@ -376,6 +387,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               </EuiFormRow>
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={i18n.translate(
                     'dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel',
                     {
@@ -396,6 +408,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               </EuiFormRow>
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={i18n.translate(
                     'dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel',
                     {

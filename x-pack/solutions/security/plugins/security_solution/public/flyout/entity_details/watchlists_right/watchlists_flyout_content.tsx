@@ -13,6 +13,7 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { WatchlistsFlyoutFooter } from './footer';
 import { WatchlistForm } from './watchlist_form';
 import { WatchlistsFlyoutHeader } from './watchlists_flyout_header';
+import type { useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 
 export interface WatchlistsFlyoutContentProps {
   title: string;
@@ -30,7 +31,7 @@ export interface WatchlistsFlyoutContentProps {
   onSave: () => void;
   isLoading: boolean;
   isDisabled: boolean;
-  onSourceValidationChange: (valid: boolean) => void;
+  ruleBasedSource: ReturnType<typeof useRuleBasedSourceState>;
 }
 
 export const WatchlistsFlyoutContent = ({
@@ -46,7 +47,7 @@ export const WatchlistsFlyoutContent = ({
   onSave,
   isLoading,
   isDisabled,
-  onSourceValidationChange,
+  ruleBasedSource,
 }: WatchlistsFlyoutContentProps) => {
   return (
     <>
@@ -62,7 +63,7 @@ export const WatchlistsFlyoutContent = ({
           isNameTooLong={isNameTooLong}
           isDescriptionTooLong={isDescriptionTooLong}
           isRiskModifierInvalid={isRiskModifierInvalid}
-          onSourceValidationChange={onSourceValidationChange}
+          ruleBasedSource={ruleBasedSource}
         />
       </FlyoutBody>
       <WatchlistsFlyoutFooter onSave={onSave} isLoading={isLoading} isDisabled={isDisabled} />

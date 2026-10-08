@@ -1,5 +1,8 @@
 {
-  "sha1": "494b4ceee5efce568fe97077741564ad2c7b206e",
+  "sha1": "8c5061bb157a14ef3ad0dd1fe8fcc4df2aa1b6fe",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "adc95c83352db02-9a16baae7c78495",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 113,
+        "column": 76
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 121,
+        "column": 15
       }
     },
     {
@@ -36,8 +39,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 140,
+        "column": 73
+      }
+    },
+    {
+      "id": "adc95c83352db02-595b9fbb5601d93",
+      "title": "[NON-MKI] Security — Application Connections management surfaces an \"Expired\" status for an expired connection that stays revocable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 151,
+        "column": 25
       }
     },
     {
@@ -49,8 +65,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 135,
-        "column": 9
+        "line": 168,
+        "column": 18
+      }
+    },
+    {
+      "id": "adc95c83352db02-997f8e09f19dfe3",
+      "title": "[NON-MKI] Security — Application Connections management deletes an individual revoked connection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 195,
+        "column": 65
+      }
+    },
+    {
+      "id": "adc95c83352db02-883b502a0ad9601",
+      "title": "[NON-MKI] Security — Application Connections management bulk deletes multiple selected revoked connections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 203,
+        "column": 7
       }
     }
   ]

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
+import { ECH_AGENTLESS_OUTPUT_ID } from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -37,6 +38,36 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     let mockApiServer: http.Server;
+    describe('Managed integrations route path', () => {
+      // The deprecated agentless_policies public paths are aliased to the same handlers as
+      // managed_integrations, so an empty body fails validation with 400 — proving the path
+      // still resolves (a 404 would mean the alias is gone).
+      it('still serves the deprecated agentless_policies public path as an alias', async () => {
+        await supertest
+          .post('/api/fleet/agentless_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('serves the new managed_integrations public path', async () => {
+        await supertest
+          .post('/api/fleet/managed_integrations')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('does not alias the internal sync path under agentless_policies', async () => {
+        await supertest
+          .post('/internal/fleet/agentless_policies/_sync')
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .send({})
+          .expect(404);
+      });
+    });
+
     describe('Create Agentless Policy', () => {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
@@ -101,6 +132,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const agentPolicy = await apiClient.getAgentPolicy(policy.item.id);
         expect(agentPolicy.item.supports_agentless).to.be(true);
+        // Managed bulk is disabled in this suite's config (config.agentless.ts): agentless
+        // policies must keep using the direct-ES output.
+        expect(agentPolicy.item.data_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
+        expect(agentPolicy.item.monitoring_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
 
         expect(apiCalls.length).to.be(1);
         expect(apiCalls[0].url).to.be('/agentless-api/api/v1/ess/deployments');
@@ -1423,14 +1458,12 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the agentless policies API./
+          /400 "Bad Request" To update managed integrations, use the managed integrations API./
         );
       });
     });
 
-    describe.skip('Agentless Policy with Cloud Connectors', () => {
-      // See individual tests for more details
-      // Will be resolved in https://github.com/elastic/security-team/issues/14864
+    describe('Agentless Policy with Cloud Connectors', () => {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
         mockApiServer = await mockAgentlessApiService.listen(8089);
@@ -1451,37 +1484,28 @@ export default function (providerContext: FtrProviderContext) {
         await cleanFleetIndices(es);
       });
 
-      it.skip('should create agentless policy with AWS cloud connector (requires cloud connector support in test package)', async () => {
-        // Will be resolved in https://github.com/elastic/security-team/issues/14864
-        // Note: This test is skipped because the test_agentless package doesn't support cloud connectors
-        // To enable this test, we would need to:
-        // 1. Create a test package with cloud connector support in the deployment_modes
-        // 2. Configure the agent policy to enable cloud connectors with target_csp: 'aws'
-        // 3. Provide the necessary vars (role_arn, external_id) in the inputs
-
+      it('should create agentless policy with AWS cloud connector', async () => {
         const id = uuidv4();
+        const roleArn = `arn:aws:iam::123456789012:role/TestRole-${id.slice(0, 8)}`;
 
         const policy = await apiClient.createAgentlessPolicy({
           id,
           package: {
-            name: 'cloud_security_posture', // Would need to use a real CSP package or create test package
-            version: '3.1.1',
+            name: 'cspm',
+            version: '1.0.0',
           },
           name: `cspm-aws-${Date.now()}`,
           description: 'test agentless policy with AWS cloud connector',
           namespace: 'default',
+          cloud_connector: { enabled: true, target_csp: 'aws' },
           inputs: {
-            'cspm-cloudbeat/cis_aws': {
+            'cis_aws-cloudbeat/cis_aws': {
               enabled: true,
               streams: {
-                'cloud_security_posture.findings': {
+                'cspm.findings': {
                   enabled: true,
                   vars: {
-                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
-                    external_id: {
-                      id: 'test-external-id',
-                      isSecretRef: true,
-                    },
+                    role_arn: roleArn,
                   },
                 },
               },
@@ -1495,38 +1519,28 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicy.item.cloud_connector_id).not.to.be(undefined);
       });
 
-      it.skip('should decrement cloud connector package count when deleting agentless policy (requires cloud connector setup)', async () => {
-        // Will be resolved in https://github.com/elastic/security-team/issues/14864
-        // Note: This test is skipped for the same reasons as above
-        // This would test:
-        // 1. Create an agentless policy with cloud connector
-        // 2. Verify cloud connector packagePolicyCount is 1
-        // 3. Delete the agentless policy
-        // 4. Verify cloud connector packagePolicyCount is decremented to 0
-
+      it('should decrement cloud connector package count when deleting agentless policy', async () => {
         const id = uuidv4();
+        const roleArn = `arn:aws:iam::123456789012:role/TestRole-${id.slice(0, 8)}`;
 
         const policy = await apiClient.createAgentlessPolicy({
           id,
           package: {
-            name: 'cloud_security_posture',
-            version: '3.1.1',
+            name: 'cspm',
+            version: '1.0.0',
           },
           name: `cspm-aws-${Date.now()}`,
           description: 'test agentless policy with AWS cloud connector',
           namespace: 'default',
+          cloud_connector: { enabled: true, target_csp: 'aws' },
           inputs: {
-            'cspm-cloudbeat/cis_aws': {
+            'cis_aws-cloudbeat/cis_aws': {
               enabled: true,
               streams: {
-                'cloud_security_posture.findings': {
+                'cspm.findings': {
                   enabled: true,
                   vars: {
-                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
-                    external_id: {
-                      id: 'test-external-id',
-                      isSecretRef: true,
-                    },
+                    role_arn: roleArn,
                   },
                 },
               },
@@ -1537,7 +1551,6 @@ export default function (providerContext: FtrProviderContext) {
         const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
         const cloudConnectorId = packagePolicy.item.cloud_connector_id;
 
-        // Get cloud connector before deletion
         const cloudConnectorBefore = await supertest
           .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -1545,10 +1558,8 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(cloudConnectorBefore.body.item.packagePolicyCount).to.be(1);
 
-        // Delete the agentless policy
         await apiClient.deleteAgentlessPolicy(id);
 
-        // Get cloud connector after deletion
         const cloudConnectorAfter = await supertest
           .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
           .set('kbn-xsrf', 'xxxx')

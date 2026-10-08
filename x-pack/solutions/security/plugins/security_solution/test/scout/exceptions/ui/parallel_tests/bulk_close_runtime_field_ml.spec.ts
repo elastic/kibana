@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
+import { AddExceptionButtonType, INTERNAL_API_HEADERS, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { BULK_CLOSE_TEST_ROLE } from '../fixtures/bulk_close_role';
 
@@ -75,7 +75,7 @@ spaceTest.describe(
       await kbnClient.request({
         method: 'PUT',
         path: `/s/${scoutSpace.id}/internal/ml/anomaly_detectors/${jobId}`,
-        headers: { 'elastic-api-version': '1' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           description: `Scout coverage stub for kibana#253666 — ${scoutSpace.id}`,
           // `security` group is required for the job to be recognised as a
@@ -234,7 +234,7 @@ spaceTest.describe(
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
           await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 180_000);
           await page.reload();
-          await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+          await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         });
 
         await spaceTest.step('open the add-rule-exception flyout', async () => {

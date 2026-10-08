@@ -10,20 +10,33 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
+import { buildRedirectUrlTool } from './build_redirect_url_tool';
 import {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
   deleteWatchlistTool,
   entityRiskScoreTool,
   getEntityTool,
+  getEntityGraphTool,
+  getEntityRiskScoreHistoryTool,
+  entityRelationshipHistoryTool,
   listWatchlistsTool,
+  getWatchlistIdTool,
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  removeWatchlistRuleBasedDataSourceTool,
+  listWatchlistDataSourcesTool,
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
   setAssetCriticalityTool,
+  getResolutionGroupTool,
+  linkEntitiesTool,
+  unlinkEntitiesTool,
+  listResolutionRulesTool,
+  setResolutionRulesTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -31,12 +44,15 @@ import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
+import { registerSiemMigrationTools } from './siem_migrations';
 import { runRulePreviewTool } from './run_rule_preview_tool';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../plugin_contract';
+import type { ProductFeaturesService } from '../../lib/product_features_service';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -50,6 +66,7 @@ export const registerTools = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
+  productFeaturesService: ProductFeaturesService,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
@@ -61,19 +78,43 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
+  agentBuilder.tools.register(
+    getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
+  );
+  agentBuilder.tools.register(
+    getEntityRiskScoreHistoryTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
+  agentBuilder.tools.register(entityRelationshipHistoryTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
     deleteWatchlistTool(core, logger, experimentalFeatures, hasEncryptionKey)
   );
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(getWatchlistIdTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    removeWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    listWatchlistDataSourcesTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+
+  agentBuilder.tools.register(getResolutionGroupTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(unlinkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(listResolutionRulesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(setResolutionRulesTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
@@ -93,5 +134,17 @@ export const registerTools = (
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
-  registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  }
+
+  // SIEM Migration agent builder tools: gated by the Automatic Migration feature flag
+  // (`siemMigrationsDisabled`) and the dedicated agent-builder experimental flag, so tools and the
+  // follow-up skills (#18761+) ship in lockstep — no skill registered without its tools.
+  if (
+    !experimentalFeatures.siemMigrationsDisabled &&
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
+  ) {
+    registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger);
+  }
 };

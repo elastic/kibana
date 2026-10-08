@@ -45,7 +45,7 @@ export const ContextRow = ({ row, onClick }: ContextRowProps) => {
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="arrowRight" size="m" color="subdued" aria-hidden={true} />
+        <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

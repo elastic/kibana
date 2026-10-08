@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { Query } from '@kbn/es-query';
 import { appSelectors } from '../store';
 import { appActions } from '../store/app';

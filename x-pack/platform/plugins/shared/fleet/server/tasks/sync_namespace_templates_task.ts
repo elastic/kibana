@@ -33,7 +33,7 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
       // bounded; failures are retried up to maxAttempts.
       timeout: '15m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         const { spaceId, packageName, addedNamespaces, removedNamespaces } =
           taskInstance.params as SyncNamespaceTemplatesTaskParams;
         return {
@@ -57,7 +57,7 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
                 packageName,
                 addedNamespaces,
                 removedNamespaces,
-                abortController,
+                signal,
               });
             } catch (err) {
               logger.error(

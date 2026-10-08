@@ -19,7 +19,7 @@ const workflowConfigSchema = {
   alert_retrieval_mode: {
     type: 'keyword',
     _meta: {
-      description: 'The alert retrieval mode (custom_query/esql/custom_only)',
+      description: 'The alert retrieval mode (skill/custom_query/esql/custom_only)',
       optional: false,
     },
   },
@@ -80,7 +80,7 @@ export const attackDiscoveryAlertRetrievalModeChangedEvent: AttackDiscoveryTelem
     mode: {
       type: 'keyword',
       _meta: {
-        description: 'The alert retrieval mode selected (custom_query/esql/custom_only)',
+        description: 'The alert retrieval mode selected (skill/custom_query/esql/custom_only)',
         optional: false,
       },
     },

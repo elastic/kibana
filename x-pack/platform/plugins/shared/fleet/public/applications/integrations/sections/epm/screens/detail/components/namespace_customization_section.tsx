@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -201,24 +201,24 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       {removedNamespacesWithIlm.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             size="s"
-            iconType="warning"
-            color="warning"
             title={i18n.translate(
               'xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedTitle',
               { defaultMessage: 'ILM policy will be removed' }
             )}
-          >
-            <FormattedMessage
-              id="xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedBody"
-              defaultMessage="Removing {namespaces} will also clear the ILM policy assigned to {count, plural, one {that namespace} other {those namespaces}}."
-              values={{
-                namespaces: <strong>{removedNamespacesWithIlm.join(', ')}</strong>,
-                count: removedNamespacesWithIlm.length,
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedBody"
+                defaultMessage="Removing {namespaces} will also clear the ILM policy assigned to {count, plural, one {that namespace} other {those namespaces}}."
+                values={{
+                  namespaces: <strong>{removedNamespacesWithIlm.join(', ')}</strong>,
+                  count: removedNamespacesWithIlm.length,
+                }}
+              />
+            }
+          />
         </>
       )}
 

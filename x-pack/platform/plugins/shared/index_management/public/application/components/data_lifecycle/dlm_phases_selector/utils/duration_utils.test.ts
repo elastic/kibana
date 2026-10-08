@@ -225,10 +225,10 @@ describe('duration_utils', () => {
   describe('getDurationUnitSelectOptions', () => {
     it('returns UI units when the current unit is selectable', () => {
       expect(getDurationUnitSelectOptions('d').map((unit) => unit.value)).toEqual([
-        'd',
-        'h',
-        'm',
         's',
+        'm',
+        'h',
+        'd',
       ]);
     });
 

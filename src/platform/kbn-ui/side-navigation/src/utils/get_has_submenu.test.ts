@@ -9,7 +9,7 @@
 
 import type { MenuItem } from '../../types';
 
-import { getHasSubmenu } from './get_has_submenu';
+import { getHasMoreSubmenu, getHasSubmenu } from './get_has_submenu';
 
 const createItem = (sections?: MenuItem['sections']): MenuItem => ({
   id: 'id',
@@ -39,5 +39,46 @@ describe('getHasSubmenu', () => {
     ]);
 
     expect(getHasSubmenu(item)).toBe(true);
+  });
+
+  it('returns true when the item has popover-only sections', () => {
+    expect(
+      getHasSubmenu({
+        ...createItem(),
+        popoverSections: [
+          {
+            id: 'recent',
+            items: [{ id: 'child-1', label: 'Child', href: '/child' }],
+          },
+        ],
+      })
+    ).toBe(true);
+  });
+});
+
+describe('getHasMoreSubmenu', () => {
+  it('returns true only for tree sections, not hover lists', () => {
+    expect(getHasMoreSubmenu(createItem())).toBe(false);
+    expect(
+      getHasMoreSubmenu({
+        ...createItem(),
+        popoverSections: [
+          {
+            id: 'recent',
+            items: [{ id: 'child-1', label: 'Child', href: '/child' }],
+          },
+        ],
+      })
+    ).toBe(false);
+    expect(
+      getHasMoreSubmenu(
+        createItem([
+          {
+            id: 'section-1',
+            items: [{ id: 'child-1', label: 'Child', href: '/child' }],
+          },
+        ])
+      )
+    ).toBe(true);
   });
 });

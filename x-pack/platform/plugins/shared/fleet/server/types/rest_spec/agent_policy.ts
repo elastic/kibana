@@ -54,6 +54,13 @@ export const GetAgentPoliciesRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({
+        defaultValue: true,
+        meta: {
+          description:
+            'When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.',
+        },
+      }),
       noAgentCount: schema.maybe(
         schema.boolean({
           meta: { description: 'use withAgentCount instead', deprecated: true },
@@ -145,9 +152,12 @@ export const CreateAgentPolicyRequestSchema = {
 };
 
 export const CreateAgentAndPackagePolicyRequestSchema = {
-  body: CreateAgentPolicyRequestSchema.body.extends({
-    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
-  }),
+  body: CreateAgentPolicyRequestSchema.body.extends(
+    {
+      package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
+    },
+    { meta: { id: 'create_agent_and_package_policy_request_body' } }
+  ),
   query: schema.intersection([
     CreateAgentPolicyRequestSchema.query,
     CreatePackagePolicyRequestSchema.query,
@@ -156,10 +166,13 @@ export const CreateAgentAndPackagePolicyRequestSchema = {
 
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
-  body: NewAgentPolicySchema.extends({
-    force: schema.maybe(schema.boolean()),
-    bumpRevision: schema.maybe(schema.boolean()),
-  }),
+  body: NewAgentPolicySchema.extends(
+    {
+      force: schema.maybe(schema.boolean()),
+      bumpRevision: schema.maybe(schema.boolean()),
+    },
+    { meta: { id: 'update_agent_policy_request_body' } }
+  ),
 };
 
 export const CopyAgentPolicyRequestSchema = {

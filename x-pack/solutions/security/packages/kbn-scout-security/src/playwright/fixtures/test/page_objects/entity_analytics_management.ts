@@ -17,8 +17,6 @@ export class EntityAnalyticsManagementPage {
   public managementPage: Locator;
   public pageTitle: Locator;
   public entityAnalyticsSwitch: Locator;
-  public entityAnalyticsHealth: Locator;
-  public statusLoading: Locator;
   public errorPanel: Locator;
 
   // Tabs
@@ -41,6 +39,7 @@ export class EntityAnalyticsManagementPage {
   // Asset Criticality tab
   public assetCriticalityInfoPanel: Locator;
   public assetCriticalityFileUploadSection: Locator;
+  public assetCriticalityFilePicker: Locator;
   public assetCriticalityDocLink: Locator;
   public assetCriticalityInsufficientPrivilegesCallout: Locator;
   public assetCriticalityIssueCallout: Locator;
@@ -54,15 +53,13 @@ export class EntityAnalyticsManagementPage {
 
   constructor(private readonly page: ScoutPage) {
     // Page header
-    this.managementPage = this.page.testSubj.locator('entityAnalyticsManagementPage');
-    this.pageTitle = this.page.testSubj.locator('entityAnalyticsManagementPageTitle');
+    this.managementPage = this.page.testSubj.locator('appHeader');
+    this.pageTitle = this.page.testSubj.locator('appHeaderTitle');
     this.entityAnalyticsSwitch = this.page.testSubj.locator('entity-analytics-switch');
-    this.entityAnalyticsHealth = this.page.testSubj.locator('entity-analytics-health');
-    this.statusLoading = this.page.testSubj.locator('entity-analytics-status-loading');
     this.errorPanel = this.page.testSubj.locator('entity-analytics-error-panel');
 
     // Tabs
-    this.tabs = this.page.testSubj.locator('entityAnalyticsManagementTabs');
+    this.tabs = this.page.testSubj.locator('appHeaderTabs');
     this.riskScoreTab = this.page.testSubj.locator('riskScoreTab');
     this.assetCriticalityTab = this.page.testSubj.locator('assetCriticalityTab');
     this.engineStatusTab = this.page.testSubj.locator('engineStatusTab');
@@ -83,6 +80,7 @@ export class EntityAnalyticsManagementPage {
     this.assetCriticalityFileUploadSection = this.page.testSubj.locator(
       'asset-criticality-file-upload-section'
     );
+    this.assetCriticalityFilePicker = this.page.testSubj.locator('asset-criticality-file-picker');
     this.assetCriticalityDocLink = this.page.testSubj.locator('asset-criticality-doc-link');
     this.assetCriticalityInsufficientPrivilegesCallout = this.page.testSubj.locator(
       'asset-criticality-insufficient-privileges'
@@ -140,7 +138,18 @@ export class EntityAnalyticsManagementPage {
   }
 
   async waitForStatusLoaded() {
-    await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
-    await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
+    // `entity-analytics-switch` is rendered only after the status query settles.
+    // While loading, the control is mounted under a different test id, disabled,
+    // and labeled "Disabled", so visibility of this locator is the terminal signal.
+    await this.entityAnalyticsSwitch.waitFor({ state: 'visible', timeout: 30000 });
+  }
+
+  async clearEntityData() {
+    const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('app-menu-overflow-button').click();
+    await this.page.testSubj.locator('clear-entity-data-button').click();
+    await modal.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 }

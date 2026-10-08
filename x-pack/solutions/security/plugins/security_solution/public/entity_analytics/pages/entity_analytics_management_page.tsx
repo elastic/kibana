@@ -6,20 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 
-import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
-import { ENTITY_ANALYTICS } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
@@ -28,40 +17,21 @@ import { AssetCriticalityTab } from '../components/asset_criticality/asset_criti
 import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
 import { EntityResolutionTab } from '../components/entity_resolution';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
+import { EntityStoreMissingStopPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_stop_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
-import {
-  useDeleteEntityStoreMutation,
-  useEntityStoreStatus,
-} from '../components/entity_store/hooks/use_entity_store';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
-import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
-import {
-  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
-  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
-  ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID,
-  RISK_SCORE_TAB_TEST_ID,
-  ASSET_CRITICALITY_TAB_TEST_ID,
-  WATCHLISTS_TAB_TEST_ID,
-  ENGINE_STATUS_TAB_TEST_ID,
-} from '../test_ids';
+import { userHasRiskEngineReadPermissions, userHasEntityStoreStopPrivileges } from '../common';
+import { EntityAnalyticsManagementHeader, TabId } from './entity_analytics_management_header';
 
-export enum TabId {
-  RiskScore = 'risk_score',
-  AssetCriticality = 'asset_criticality',
-  Watchlists = 'watchlists',
-  EntityResolution = 'entity_resolution',
-  Status = 'status',
-}
+export { TabId };
 
 const VALID_TABS = Object.values(TabId);
 
 const isEntityStoreInstalled = (status?: string) => status && status !== 'not_installed';
-const canDeleteEntityEngine = (status?: string) =>
-  !['not_installed', 'installing'].includes(status || '');
 
 export const EntityAnalyticsManagementPage = () => {
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
@@ -93,23 +63,8 @@ export const EntityAnalyticsManagementPage = () => {
   const entityStoreStatus = useEntityStoreStatus();
   const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
     useEntityEnginePrivileges();
-  const deleteEntityStoreMutation = useDeleteEntityStoreMutation();
 
-  const userHasRiskEnginePrivileges =
-    !riskEnginePrivileges.isLoading &&
-    'hasAllRequiredPrivileges' in riskEnginePrivileges &&
-    riskEnginePrivileges.hasAllRequiredPrivileges;
-
-  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
-  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
-
-  const canRunEngine =
-    (!riskEnginePrivileges.isLoading &&
-      (riskEnginePrivileges.hasAllRequiredPrivileges ||
-        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
-          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
-
+  const hasStopPrivileges = userHasEntityStoreStopPrivileges(entityEnginePrivileges);
   const hasReadPermissions = userHasRiskEngineReadPermissions(riskEnginePrivileges);
 
   const shouldDisplayEngineStatusTab =
@@ -150,38 +105,29 @@ export const EntityAnalyticsManagementPage = () => {
     history,
   ]);
 
-  const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
+  const isEntityAnalyticsOn = entityStoreStatus.data?.status === 'running' || false;
+  const showEntityStoreEnablementCallout =
+    !isEntityAnalyticsOn &&
+    !!entityEnginePrivileges &&
+    !entityEnginePrivileges.has_install_permissions;
+  const showStopPrivilegesCallout =
+    isEntityAnalyticsOn && !isLoadingPrivileges && !hasStopPrivileges;
 
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
-      <EuiPageHeader
-        data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID}
-        pageTitle={
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem
-              data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID}
-              grow={false}
-            >
-              {ENTITY_ANALYTICS}
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
-                <EntityAnalyticsToggle
-                  selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  onSaveSettings={handleSaveToggleSettings}
-                  isSavingSettings={saveSelectedSettingsMutation.isLoading}
-                  hasAllRequiredPrivileges={hasAllRequiredPrivileges}
-                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+      <EntityAnalyticsManagementHeader
+        selectedTabId={selectedTabId}
+        onTabChange={handleTabChange}
+        isWatchlistsEnabled={isWatchlistsEnabled}
+        hasEntityResolutionLicense={hasEntityResolutionLicense}
+        shouldDisplayEngineStatusTab={!!shouldDisplayEngineStatusTab}
+        selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
+        onSaveSettings={handleSaveToggleSettings}
+        isSavingSettings={saveSelectedSettingsMutation.isLoading}
       />
 
-      {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
+      {showEntityStoreEnablementCallout && (
         <>
           <EuiSpacer size="l" />
           <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
@@ -189,113 +135,18 @@ export const EntityAnalyticsManagementPage = () => {
         </>
       )}
 
-      {deleteError && (
+      {showStopPrivilegesCallout && entityEnginePrivileges && (
         <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.errors.deleteErrorTitle"
-                defaultMessage="There was a problem deleting the entity store"
-              />
-            }
-            color="danger"
-            iconType="alert"
-          >
-            <p>{deleteError}</p>
-          </EuiCallOut>
+          <EuiSpacer size="l" />
+          <EntityStoreMissingStopPrivilegesCallout privileges={entityEnginePrivileges} />
+          <EuiSpacer size="l" />
         </>
       )}
 
-      {canDeleteEntityEngine(entityStoreStatus.data?.status) &&
-        entityEnginePrivileges?.has_all_required && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <ClearEntityDataButton
-                  onDelete={async () => {
-                    await deleteEntityStoreMutation.mutateAsync();
-                  }}
-                  isDeleting={deleteEntityStoreMutation.isLoading}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-
       <EuiSpacer size="m" />
-
-      <EuiTabs data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID}>
-        <EuiTab
-          key={TabId.RiskScore}
-          isSelected={selectedTabId === TabId.RiskScore}
-          onClick={() => handleTabChange(TabId.RiskScore)}
-          data-test-subj={RISK_SCORE_TAB_TEST_ID}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.riskScore.tabTitle"
-            defaultMessage="Entity Risk Score"
-          />
-        </EuiTab>
-        <EuiTab
-          key={TabId.AssetCriticality}
-          isSelected={selectedTabId === TabId.AssetCriticality}
-          onClick={() => handleTabChange(TabId.AssetCriticality)}
-          data-test-subj={ASSET_CRITICALITY_TAB_TEST_ID}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.tabTitle"
-            defaultMessage="Asset Criticality"
-          />
-        </EuiTab>
-        {isWatchlistsEnabled && (
-          <EuiTab
-            key={TabId.Watchlists}
-            isSelected={selectedTabId === TabId.Watchlists}
-            onClick={() => handleTabChange(TabId.Watchlists)}
-            data-test-subj={WATCHLISTS_TAB_TEST_ID}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.watchlists.tabTitle"
-              defaultMessage="Watchlists"
-            />
-          </EuiTab>
-        )}
-        {hasEntityResolutionLicense && (
-          <EuiTab
-            key={TabId.EntityResolution}
-            isSelected={selectedTabId === TabId.EntityResolution}
-            onClick={() => handleTabChange(TabId.EntityResolution)}
-            data-test-subj="entityResolutionTab"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.entityResolution.tabTitle"
-              defaultMessage="Entity Resolution"
-            />
-          </EuiTab>
-        )}
-        {shouldDisplayEngineStatusTab && (
-          <EuiTab
-            key={TabId.Status}
-            isSelected={selectedTabId === TabId.Status}
-            onClick={() => handleTabChange(TabId.Status)}
-            data-test-subj={ENGINE_STATUS_TAB_TEST_ID}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.engineStatus.tabTitle"
-              defaultMessage="Engine Status"
-            />
-          </EuiTab>
-        )}
-      </EuiTabs>
-
-      <EuiSpacer size="s" />
 
       <div hidden={selectedTabId !== TabId.RiskScore}>
         <RiskScoreTab
-          canRunEngine={canRunEngine}
           hasReadPermissions={hasReadPermissions}
           isPrivilegesLoading={riskEnginePrivileges.isLoading}
           savedRiskEngineSettings={savedRiskEngineSettings}

@@ -92,6 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
+          // Leave the unsaved new dashboard via in-app navigation to unmount the editor and remove its `beforeunload` handler before the next suite navigates (discard and view-mode are disabled on a never-saved dashboard).
+          await PageObjects.dashboard.gotoDashboardLandingPage();
           await ml.api.cleanMlIndices();
         });
 

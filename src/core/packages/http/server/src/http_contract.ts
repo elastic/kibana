@@ -21,11 +21,14 @@ import type {
   OnPreResponseHandler,
   OnPreRoutingHandler,
 } from './lifecycle';
+import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
+import type { ApiVersion } from './versioning';
+import type { KibanaRequest } from './router';
 
 /**
  * @public
@@ -41,6 +44,95 @@ export interface HttpAuth {
    * {@link IsAuthenticated}
    */
   isAuthenticated: IsAuthenticated;
+}
+
+/** @public */
+export interface HttpSelfFetchQuery {
+  [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
+}
+
+/** @public */
+export interface HttpSelfFetchHeaders {
+  [name: string]: string | string[] | undefined;
+}
+
+/** @public */
+export interface HttpSelfFetchOptions<TRequestBody = unknown> {
+  /** Forces the configured local listener instead of the global self HTTP target. */
+  target?: 'local';
+  /** HTTP method. Defaults to `GET`. */
+  method?: string;
+  /** Query string parameters to append to the target path. */
+  query?: HttpSelfFetchQuery;
+  /** JSON-serializable or text request body. */
+  body?: TRequestBody | string | null;
+  /** Buffered non-JSON request body (mutually exclusive with `body`). */
+  rawBody?: FormData | Blob | URLSearchParams | ArrayBuffer | ArrayBufferView<ArrayBuffer> | null;
+  /** Non-auth, non-Core-owned headers to send with the request. */
+  headers?: HttpSelfFetchHeaders;
+  /**
+   * When `true`, forwards a Core-owned allowlist of safe headers from the incoming
+   * request. Protected routing, auth, and Core-owned headers are never forwarded.
+   */
+  forwardRequestHeaders?: boolean;
+  /** API version string used to populate the `elastic-api-version` header. */
+  version?: ApiVersion;
+  /** Abort signal for cancelling the outbound request, including in-flight redirect hops. */
+  signal?: AbortSignal | null;
+  /**
+   * Timeout in milliseconds for the entire outbound call, including any same-origin
+   * redirects Core follows. Defaults to 60 seconds.
+   */
+  timeout?: number;
+  /**
+   * When `true` (default), prefix `path` with the scoped request's base path (server
+   * base path plus space). Fake requests use `server.basePath` and the request's space.
+   * When `false`, `path` is used as-is and must already include `server.basePath` when
+   * one is configured. Core does not add that prefix a second time.
+   */
+  prependBasePath?: boolean;
+  /** When `true`, return response details instead of only the parsed response body. */
+  asResponse?: boolean;
+  /** When `true`, return the raw `Response` without parsing its body. Requires `asResponse: true`. */
+  rawResponse?: boolean;
+  /** Internal APIs are inaccessible unless explicitly requested. Defaults to `public`. */
+  access?: 'public' | 'internal';
+}
+
+/** @public */
+export interface HttpSelfResponse<TResponseBody = unknown, TRequestBody = unknown> {
+  readonly fetchOptions: Readonly<HttpSelfFetchOptions<TRequestBody> & { path: string }>;
+  /** The outbound Request that produced `response` (the last hop when Core followed redirects). */
+  readonly request: Readonly<Request>;
+  readonly response: Readonly<Response>;
+  readonly body?: TResponseBody;
+}
+
+/** @public */
+export interface HttpSelfScopedClient {
+  fetch<TResponseBody = unknown, TRequestBody = unknown>(
+    path: string,
+    options: HttpSelfFetchOptions<TRequestBody> & { asResponse: true }
+  ): Promise<HttpSelfResponse<TResponseBody, TRequestBody>>;
+
+  fetch<TResponseBody = unknown, TRequestBody = unknown>(
+    path: string,
+    options?: HttpSelfFetchOptions<TRequestBody>
+  ): Promise<TResponseBody>;
+}
+
+/**
+ * Creates scoped clients for calling Kibana's own HTTP routes.
+ *
+ * Self calls do not support mTLS. Calls fail when Kibana's current
+ * `server.ssl.clientAuthentication` is `optional` or `required`. Core cannot detect
+ * mTLS configured only on an external proxy or public URL, so callers must not use
+ * this client with such a target.
+ *
+ * @public
+ */
+export interface HttpSelfService {
+  asScoped(request: KibanaRequest): HttpSelfScopedClient;
 }
 
 /**
@@ -374,6 +466,15 @@ export interface HttpServiceSetup<
    * @returns {RouterDeprecatedApiDetails[]}
    */
   getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+
+  /**
+   * Set the {@link HttpSelfUnauthorizedErrorHandler | handler} consulted when a Kibana self HTTP
+   * call is rejected by the authentication lifecycle, giving its owner a chance to refresh a
+   * short-lived credential so the call can be replayed once.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
 }
 
 /** @public */
@@ -400,6 +501,11 @@ export interface HttpServiceStart {
    * Provides common {@link HttpServerInfo | information} about the running http server.
    */
   getServerInfo: () => HttpServerInfo;
+
+  /**
+   * Make outbound HTTP calls to Kibana's own APIs on behalf of the current request user.
+   */
+  selfClient: HttpSelfService;
 }
 
 /**

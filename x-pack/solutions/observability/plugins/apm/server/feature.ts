@@ -30,14 +30,14 @@ export const APM_FEATURE: KibanaFeatureConfig = {
   app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
   catalogue: [APM_SERVER_FEATURE_ID],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac', 'bulkGetUserProfiles'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
@@ -55,13 +55,13 @@ export const APM_FEATURE: KibanaFeatureConfig = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'rac'],
+      api: [APM_SERVER_FEATURE_ID, 'rac', 'bulkGetUserProfiles'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
@@ -76,7 +76,7 @@ export const APM_FEATURE: KibanaFeatureConfig = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['show', 'alerting:show'],
     },

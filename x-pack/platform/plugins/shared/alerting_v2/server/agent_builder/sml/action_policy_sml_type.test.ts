@@ -6,17 +6,17 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ACTION_POLICY_ATTACHMENT_TYPE, ACTION_POLICY_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createActionPolicySmlType } from './action_policy_sml_type';
 
 const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
@@ -24,21 +24,15 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   description: 'Route every critical-priority alert to #oncall',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
-  matcher: 'alert.severity = "critical"',
-  groupingMode: 'per_episode',
-  tags: ['oncall', 'critical'],
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  matcher: { expression: 'alert.severity = "critical"' },
+  groupingMode: 'per_alert',
+  apiKeyOwner: 'elastic',
+  apiKeyCreatedByUser: true,
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as ActionPolicySavedObjectAttributes;
-
-const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
-  esClient: {} as ElasticsearchClient,
-  savedObjectsClient: {} as SavedObjectsClientContract,
-  logger,
-});
 
 const buildToAttachmentContext = () => ({
   request: {} as KibanaRequest,
@@ -48,33 +42,40 @@ const buildToAttachmentContext = () => ({
 
 describe('createActionPolicySmlType', () => {
   let getActionPolicy: jest.Mock;
-  let getRepoSo: jest.Mock;
-  let createFinder: jest.Mock;
-  let repository: ISavedObjectsRepository;
+  let getIsAlertingV2Enabled: jest.Mock;
+  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let actionPolicyClient: ActionPolicyClient;
+
+  const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
+    esClient: {} as ElasticsearchClient,
+    savedObjectsClient: soClient,
+    logger,
+  });
+
+  const stubFinder = (find: () => AsyncGenerator<unknown>) => {
+    const close = jest.fn().mockResolvedValue(undefined);
+    soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
+      typeof soClient.createPointInTimeFinder
+    >);
+    return close;
+  };
 
   beforeEach(() => {
     getActionPolicy = jest.fn();
-    getRepoSo = jest.fn();
-    createFinder = jest.fn();
-
-    repository = {
-      get: getRepoSo,
-      createPointInTimeFinder: createFinder,
-    } as unknown as ISavedObjectsRepository;
-
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
+    soClient = savedObjectsClientMock.create();
     actionPolicyClient = { getActionPolicy } as unknown as ActionPolicyClient;
   });
 
   const buildDefinition = () =>
     createActionPolicySmlType({
       getScopedActionPolicyClient: () => actionPolicyClient,
-      getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared ACTION_POLICY_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(ACTION_POLICY_SML_TYPE);
+    it('uses the shared ACTION_POLICY_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(ACTION_POLICY_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -94,8 +95,7 @@ describe('createActionPolicySmlType', () => {
     };
 
     it('yields items from the saved objects finder and closes it when done', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield {
           saved_objects: [
             {
@@ -111,7 +111,6 @@ describe('createActionPolicySmlType', () => {
           ],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -123,7 +122,7 @@ describe('createActionPolicySmlType', () => {
         },
         { id: 'policy-2', updatedAt: '2026-04-11T00:00:00.000Z', spaces: ['default'] },
       ]);
-      expect(createFinder).toHaveBeenCalledWith(
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
           namespaces: ['*'],
@@ -137,13 +136,11 @@ describe('createActionPolicySmlType', () => {
       // Some legacy saved objects pre-date the cross-space update —
       // `namespaces` and `updated_at` can both be absent. The crawler
       // must not crash on those: we substitute safe defaults instead.
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      stubFinder(async function* () {
         yield {
           saved_objects: [{ id: 'policy-no-meta' }],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -159,86 +156,104 @@ describe('createActionPolicySmlType', () => {
     it('closes the finder even if iteration throws', async () => {
       // PIT-based finders must release the PIT regardless of how the
       // generator unwinds — verifying the `finally` block.
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield { saved_objects: [{ id: 'policy-1' }] };
         throw new Error('boom');
       });
-      createFinder.mockReturnValue({ find, close });
 
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(soClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
   });
 
-  describe('getSmlData', () => {
-    it('returns a single chunk built from action policy metadata', async () => {
+  describe('getSmlEntry', () => {
+    it('returns a single entry built from action policy metadata', async () => {
       // Title is the policy name; content is the searchable corpus an
       // agent reasons over (name + description + matcher + grouping +
       // destinations + tags). The fields are pinned so a refactor
       // that quietly drops one (and silently degrades search recall)
       // shows up as a diff.
-      getRepoSo.mockResolvedValueOnce({ id: 'policy-1', attributes: baseActionPolicyAttrs });
+      soClient.get.mockResolvedValueOnce({
+        id: 'policy-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: baseActionPolicyAttrs,
+      });
 
-      const result = await buildDefinition().getSmlData('policy-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
 
-      expect(getRepoSo).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
+      expect(soClient.get).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: 'Critical alerts → Slack',
-            content: [
-              'Critical alerts → Slack',
-              'Route every critical-priority alert to #oncall',
-              'alert.severity = "critical"',
-              'per_episode',
-              'workflow:wf-critical-route',
-              'oncall, critical',
-            ].join('\n'),
-          },
-        ],
+        type: ACTION_POLICY_KI_TYPE,
+        title: 'Critical alerts → Slack',
+        content: [
+          'Critical alerts → Slack',
+          'Route every critical-priority alert to #oncall',
+          'expression: "alert.severity = "critical""',
+          'per_alert',
+          'workflow:wf-critical-route',
+        ].join('\n'),
       });
     });
 
     it('falls back to originId for title when attributes.name is missing', async () => {
-      getRepoSo.mockResolvedValueOnce({
+      soClient.get.mockResolvedValueOnce({
         id: 'policy-bare',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
         attributes: undefined as unknown as ActionPolicySavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('policy-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('policy-bare');
+      expect(result?.title).toBe('policy-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
-      // getSmlData is called by the crawler per-origin — a single
+      // getSmlEntry is called by the crawler per-origin — a single
       // missing SO must NOT abort the whole crawl. We swallow the
       // error and log it so other origins can still be indexed.
-      getRepoSo.mockRejectedValueOnce(new Error('not found'));
+      soClient.get.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('policy-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('policy-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML action policy: failed to get data for 'policy-missing'")
       );
     });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
   });
 
   describe('getPermissions', () => {
-    it('returns the action-policies-read API privilege', () => {
+    it('returns the registered ai_index read action for action policies', () => {
       // This is the security-critical assertion the original review
       // flagged as missing. The action policies API gates reads on
-      // `api:read_action_policies` (via ALERTING_V2_API_PRIVILEGES);
-      // the SML chunk MUST stamp the same privilege so a user without
-      // it cannot see policy chunks in agent context.
+      // `ai_index:<kiType>/read` (via ALERTING_V2_API_PRIVILEGES);
+      // the SML entry MUST stamp the same privilege so a user without
+      // it cannot see policy entries in agent context.
       //
       // Regression history: prior iterations of analogous SML types
       // shipped with hand-rolled privilege strings that didn't map to
-      // any registered Kibana privilege — chunks were silently
+      // any registered Kibana privilege — entries were silently
       // invisible to every caller (including superusers) because
       // `checkPrivilegesDynamicallyWithRequest` reported "unknown".
       // Pinning the privilege resolution against
@@ -247,9 +262,8 @@ describe('createActionPolicySmlType', () => {
       const permissions = buildDefinition().getPermissions!('policy-1', buildSmlContext());
       expect(permissions).toEqual({
         kibana: {
-          privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+          privileges: { name: [`ai_index:${ACTION_POLICY_KI_TYPE}/read`] },
         },
-        elasticsearch: { indices: [] },
       });
     });
   });
@@ -258,22 +272,33 @@ describe('createActionPolicySmlType', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'policy-1';
       return {
-        id: 'sml-1',
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
-        origin_id: originId,
-        origin: { uri: `${ACTION_POLICY_SML_TYPE}://${originId}` },
         content: '',
-        created_at: '2026-04-10T00:00:00.000Z',
+        permissions: { kibana: { privileges: [] } },
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',
-        spaces: ['default'],
-        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
-        ingestion_method: 'crawled' as const,
+        references: [
+          { uri: `${ACTION_POLICY_KI_TYPE}://${originId}`, relation: 'derived_from' as const },
+        ],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
+        },
       };
     };
 
     it('returns an attachment input wrapping the parsed action policy', async () => {
-      // `toAttachment` is the bridge from indexed chunk -> agent
+      // `toAttachment` is the bridge from indexed entry -> agent
       // builder attachment payload. It MUST use the scoped client
       // (carries the caller's request) — not the internal repository
       // — so the read goes through the user's authorization context.
@@ -293,7 +318,7 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('returns undefined when getActionPolicy throws', async () => {
-      // The chunk surfaces in search results but the policy itself
+      // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
       // as "no attachment" rather than 500-ing the whole reply.
       // `actionPolicyAttachmentDataSchema` is `.partial()`, so the
@@ -310,22 +335,29 @@ describe('createActionPolicySmlType', () => {
       expect(result).toBeUndefined();
     });
 
-    it('uses an empty string when the SML document has no origin_id', async () => {
-      // Defensive contract: `toAttachment` is invoked via the SML
-      // service which currently always sets `origin_id`, but the type
-      // is `string | undefined` and a missing value used to crash the
-      // call. Verifying the helper gracefully threads an empty string
-      // down to `getActionPolicy` so a refactor that loosens that
-      // invariant fails loud rather than 500-ing in production.
+    it('uses an empty string when the origin uri carries no id', async () => {
       getActionPolicy.mockResolvedValueOnce({ ...baseActionPolicyAttrs, id: '' });
 
       const document = buildSmlDocument();
-      // @ts-expect-error — intentionally clearing origin_id for the test
-      delete document.origin_id;
+      document.references = [
+        { uri: `${ACTION_POLICY_KI_TYPE}://`, relation: 'derived_from' as const },
+      ];
 
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
       expect(getActionPolicy).toHaveBeenCalledWith({ id: '' });
+    });
+
+    it('returns undefined without calling the action policy client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getActionPolicy).not.toHaveBeenCalled();
     });
   });
 });

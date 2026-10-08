@@ -158,6 +158,29 @@ describe('CustomTimeRangePanel', () => {
     });
   });
 
+  describe('apply', () => {
+    it('applies the typed absolute range as ISO bounds', () => {
+      const onChange = jest.fn();
+      renderCustomTimeRangePanel({ defaultValue: '2024-01-01 to 2024-02-01', onChange });
+      openCustomPanel();
+
+      fireEvent.change(within(getStartFieldset()).getByLabelText('Start date absolute date'), {
+        target: { value: 'Jan 1, 2025, 00:00' },
+      });
+      fireEvent.change(within(getEndFieldset()).getByLabelText('End date absolute date'), {
+        target: { value: 'Mar 1, 2025, 00:00' },
+      });
+      fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Apply' }));
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: new Date(2025, 0, 1).toISOString(),
+          end: new Date(2025, 2, 1).toISOString(),
+        })
+      );
+    });
+  });
+
   describe('validation', () => {
     it('shows end-before-start error and disables Apply when end < start', () => {
       renderCustomTimeRangePanel({ defaultValue: '2025-06-01 to 2025-01-01' });

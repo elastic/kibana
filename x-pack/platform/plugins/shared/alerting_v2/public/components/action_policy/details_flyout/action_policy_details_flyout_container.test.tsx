@@ -10,11 +10,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { paths } from '../../../constants';
 import { ActionPolicyDetailsFlyoutContainer } from './action_policy_details_flyout_container';
 
-const mockNavigateToUrl = jest.fn();
-const mockBasePathPrepend = jest.fn((p: string) => p);
+const mockNavigateSync = jest.fn();
 const mockUseFetchActionPolicy = jest.fn();
 const mockCreateActionPolicy = jest.fn();
 const mockDeleteActionPolicy = jest.fn();
@@ -25,14 +23,30 @@ const mockUnsnoozePolicy = jest.fn();
 const mockUpdateApiKey = jest.fn();
 const mockOnClose = jest.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') return { navigateToUrl: mockNavigateToUrl };
-    if (token === 'http') return { basePath: { prepend: mockBasePathPrepend } };
-    return {};
-  },
-  CoreStart: (key: string) => key,
+jest.mock('../../../application/locator_context', () => ({
+  useAlertingLocators: () => ({
+    actionPolicyLocators: { navigateSync: mockNavigateSync },
+  }),
 }));
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({
+          capabilities: { alerting_v2_action_policies: { read: true, all: true } },
+        });
+      }
+      if (token === 'application') return { navigateToUrl: jest.fn() };
+      if (token === 'http') return { basePath: { prepend: jest.fn((p: string) => p) } };
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('../../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
@@ -67,8 +81,54 @@ jest.mock('../../../hooks/use_update_action_policy_api_key', () => ({
   useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateApiKey, isLoading: false }),
 }));
 
+jest.mock('../../loading_flyout', () => ({
+  LoadingFlyout: ({
+    type,
+    session,
+    ownFocus,
+  }: {
+    type?: string;
+    session?: string;
+    ownFocus?: boolean;
+  }) => (
+    <div
+      data-test-subj="loadingFlyout"
+      data-flyout-type={type}
+      data-session={session}
+      data-own-focus={String(ownFocus)}
+    />
+  ),
+}));
+
+jest.mock('../../entity_not_found_flyout', () => ({
+  EntityNotFoundFlyout: ({
+    type,
+    session,
+    ownFocus,
+    onClose,
+  }: {
+    type?: string;
+    session?: string;
+    ownFocus?: boolean;
+    onClose: () => void;
+  }) => (
+    <div
+      data-test-subj="entityNotFoundFlyout"
+      data-flyout-type={type}
+      data-session={session}
+      data-own-focus={String(ownFocus)}
+    >
+      <button type="button" data-test-subj="entityNotFoundFlyoutCloseButton" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
+}));
+
 interface FlyoutMockProps {
   policy: ActionPolicyResponse;
+  session?: string;
+  size?: string;
   onClose: () => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
@@ -82,7 +142,7 @@ interface FlyoutMockProps {
 
 jest.mock('./action_policy_details_flyout', () => ({
   ActionPolicyDetailsFlyout: (props: FlyoutMockProps) => (
-    <div data-test-subj="mockFlyout">
+    <div data-test-subj="mockFlyout" data-session={props.session} data-size={props.size}>
       <button
         data-test-subj="flyout-edit"
         onClick={() => props.onEdit(props.policy.id)}
@@ -184,19 +244,23 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     name: 'My Policy',
     description: 'desc',
     destinations: [{ type: 'connector', id: 'c-1' }],
-    groupingMode: 'per_episode',
+    grouping_mode: 'per_alert',
     enabled: true,
-    tags: ['t1'],
     matcher: undefined,
-    groupBy: undefined,
+    group_by: undefined,
     throttle: undefined,
     ...overrides,
   } as ActionPolicyResponse);
 
-const renderContainer = () =>
+const renderContainer = (session?: 'start' | 'inherit', size?: 's' | 'm') =>
   render(
     <I18nProvider>
-      <ActionPolicyDetailsFlyoutContainer policyId="policy-1" onClose={mockOnClose} />
+      <ActionPolicyDetailsFlyoutContainer
+        policyId="policy-1"
+        onClose={mockOnClose}
+        session={session}
+        size={size}
+      />
     </I18nProvider>
   );
 
@@ -208,16 +272,48 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
   it('renders the loading flyout while the policy is loading', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
     renderContainer();
-    expect(screen.getByTestId('loadingFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-flyout-type', 'overlay');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-session', 'start');
     expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityNotFoundFlyout')).not.toBeInTheDocument();
+  });
+
+  it('keeps the summary flyout session while the policy is loading or missing', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
+    const { rerender } = renderContainer('inherit');
+
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-flyout-type', 'overlay');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-session', 'inherit');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-own-focus', 'false');
+
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    rerender(
+      <I18nProvider>
+        <ActionPolicyDetailsFlyoutContainer
+          policyId="policy-1"
+          onClose={mockOnClose}
+          session="inherit"
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute(
+      'data-flyout-type',
+      'overlay'
+    );
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-session', 'inherit');
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-own-focus', 'false');
   });
 
   it('renders the not-found flyout when the fetch errors out', async () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
     renderContainer();
 
-    expect(screen.getByTestId('entityNotFoundFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute(
+      'data-flyout-type',
+      'overlay'
+    );
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-session', 'start');
 
     await userEvent.click(screen.getByTestId('entityNotFoundFlyoutCloseButton'));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -234,7 +330,20 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
   it('renders the flyout once the policy is loaded', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
-    expect(screen.getByTestId('mockFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'start');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-size', 'm');
+  });
+
+  it('keeps an inherited session when opened from another flyout', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+    renderContainer('inherit');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'inherit');
+  });
+
+  it('forwards an explicit size override to the flyout (e.g. "s" when nested)', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+    renderContainer('inherit', 's');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-size', 's');
   });
 
   it('navigates to the edit page and calls onClose on edit', async () => {
@@ -243,8 +352,10 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
     await userEvent.click(screen.getByTestId('flyout-edit'));
 
-    expect(mockBasePathPrepend).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
+    expect(mockNavigateSync).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'policy-1',
+    });
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
@@ -258,7 +369,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
       expect.objectContaining({
         name: 'My Policy [clone]',
         description: 'desc',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_alert',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -266,7 +377,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
   it('clones a rule-scoped policy carrying over the matcher', async () => {
     mockUseFetchActionPolicy.mockReturnValue({
-      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
+      data: buildPolicy({ matcher: { tags: ['rule-1'] } }),
     });
     renderContainer();
 
@@ -275,7 +386,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockCreateActionPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'My Policy [clone]',
-        matcher: 'rule.id: "rule-1"',
+        matcher: { tags: ['rule-1'] },
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

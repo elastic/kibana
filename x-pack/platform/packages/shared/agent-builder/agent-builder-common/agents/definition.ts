@@ -10,8 +10,13 @@ import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * ID of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -23,17 +28,23 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * ID of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */
@@ -55,6 +66,18 @@ export interface AgentDefinition {
    * Agent owner metadata.
    */
   created_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -90,7 +113,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 
@@ -105,6 +128,11 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
+   */
+  post_execution_workflow_ids?: string[];
+
+  /**
    * Optional list of plugin IDs assigned to this agent.
    * Skills contributed by these plugins will be available to the agent during execution.
    */
@@ -116,18 +144,42 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
+
+  /**
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
+   * */
+  ai_indices?: string[];
+
+  /**
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
+   */
+  subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
 }
+
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<AgentConfiguration, 'inference_feature_id'>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<AgentConfigurationInput>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
  * are internal implementation details.
  *
  * This type is used for:
@@ -136,5 +188,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

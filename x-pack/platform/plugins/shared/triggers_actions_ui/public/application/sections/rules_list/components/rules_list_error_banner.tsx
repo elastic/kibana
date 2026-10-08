@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 interface RulesListErrorBannerProps {
@@ -37,8 +37,6 @@ export const RulesListErrorBanner = (props: RulesListErrorBannerProps) => {
     <>
       <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
         <p>
-          <EuiIcon color="danger" type="warning" aria-hidden={true} />
-          &nbsp;
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
             defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."

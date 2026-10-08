@@ -321,6 +321,63 @@ describe('PossibleDegradedFieldMitigations', () => {
     });
   });
 
+  describe('accordion aria-controls', () => {
+    const expectValidAriaControls = (container: HTMLElement) => {
+      const elementsWithAriaControls = Array.from(container.querySelectorAll('[aria-controls]'));
+
+      expect(elementsWithAriaControls.length).toBeGreaterThan(0);
+
+      elementsWithAriaControls.forEach((element) => {
+        const ariaControls = element.getAttribute('aria-controls') as string;
+
+        // `aria-controls` is a space separated list of ID references, so a single
+        // ID must not contain whitespace, otherwise it cannot be resolved.
+        expect(ariaControls).not.toMatch(/\s/);
+        expect(container.ownerDocument.getElementById(ariaControls)).not.toBeNull();
+      });
+    };
+
+    it('references valid ids for the field character limit mitigations', () => {
+      mockUseQualityIssues.mockReturnValue({
+        ...defaultQualityIssuesData,
+        degradedFieldAnalysisFormattedResult: {
+          isFieldLimitIssue: false,
+          isFieldCharacterLimitIssue: true,
+          isFieldMalformedIssue: false,
+        },
+      });
+
+      mockUseDatasetQualityDetailsState.mockReturnValue({
+        ...defaultDetailsState,
+        view: 'wired',
+      });
+
+      const { container } = renderWithI18n(<PossibleDegradedFieldMitigations />);
+
+      expectValidAriaControls(container);
+    });
+
+    it('references valid ids for the manual and field limit mitigations', () => {
+      mockUseQualityIssues.mockReturnValue({
+        ...defaultQualityIssuesData,
+        degradedFieldAnalysisFormattedResult: {
+          isFieldLimitIssue: true,
+          isFieldCharacterLimitIssue: false,
+          isFieldMalformedIssue: false,
+        },
+        degradedFieldAnalysis: {
+          totalFieldLimit: 1000,
+        },
+        totalFieldsLimit: 1000,
+        totalFieldCount: 1200,
+      });
+
+      const { container } = renderWithI18n(<PossibleDegradedFieldMitigations />);
+
+      expectValidAriaControls(container);
+    });
+  });
+
   describe('field malformed issue', () => {
     it('should render FieldMalformed when isFieldMalformedIssue is true and view is not dataQuality', () => {
       mockUseQualityIssues.mockReturnValue({

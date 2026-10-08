@@ -6,14 +6,15 @@
  */
 
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 const getAdminSettingsNode = (
   options: Parameters<typeof createNavigationTree>[0]
 ): NodeDefinition => {
-  const { footer } = createNavigationTree(options);
+  const { footer } = createNavigationTree(options) as NavigationTreeDefinition;
   const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
 
   if (!adminSettingsNode) {
@@ -37,13 +38,47 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Observability',
+      title: 'Overview',
+      icon: 'home',
       link: 'observability-overview',
     });
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const accessSection = adminSettingsNode.children?.find((item) => item.id === 'access');
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
+  it('shows Nightshift first when significant events are available', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: true,
+    });
+
+    expect(navigation.body[0]).toMatchObject({
+      link: 'nightshift',
+      icon: NightshiftNavigationIcon,
+    });
+    expect(navigation.body[1]).toMatchObject({
+      link: 'observability-overview',
+    });
+  });
+
+  it('hides Nightshift when significant events are unavailable', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: false,
+    });
+
+    expect(navigation.body.find((item) => item.link === 'nightshift')).toBeUndefined();
+  });
+
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
-    const { body } = createNavigationTree({ core });
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const mlNode = body.find((item) => item.id === 'machine_learning-landing');
     const anomalySection = mlNode?.children?.find(
       (item) => item.id === 'category-anomaly_detection'
@@ -67,26 +102,41 @@ describe('Navigation Tree', () => {
         },
       ])
     );
+    expect(navigation.body[0]).toMatchObject({
+      title: 'Get started',
+      icon: 'rocket',
+      link: 'observabilityOnboarding',
+    });
   });
 
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
-    const { body } = createNavigationTree({ core });
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeDefined();
     expect(agentsNode).toBeUndefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
   });
 
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
-    const { body } = createNavigationTree({ core, showAiAssistant: false });
+    const { body } = createNavigationTree({
+      core,
+      showAiAssistant: false,
+    }) as NavigationTreeDefinition;
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
+    const agentsIndex = body.findIndex((item) => item.link === 'agent_builder');
+    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
+    expect(contextEngineIndex).toBe(agentsIndex + 1);
   });
 
   it('hides GenAI Settings in admin settings when unavailable', () => {
@@ -114,10 +164,8 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
-    const { body } = createNavigationTree({ core });
+  it('uses a single Alerts link to classic Observability alerts when alerting v2 is disabled', () => {
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
@@ -128,12 +176,131 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
+        title: 'Alerts',
       })
+    );
+    expect(flatAlerts).not.toHaveProperty('renderAs');
+  });
+
+  it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_alerts: { read: true },
+      alerting_v2_rules: { read: true },
+      alerting_v2_action_policies: { read: true },
+      alerting_v2_execution_history: { read: true },
+      observabilityAlerts: { show: true },
+      management: {
+        ...core.application.capabilities.management,
+        insightsAndAlerting: {
+          ...core.application.capabilities.management?.insightsAndAlerting,
+          triggersActionsAlerts: true,
+          triggersActionsRules: true,
+          maintenanceWindows: true,
+        },
+      },
+    };
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        id: 'alerting',
+        title: 'Alerting',
+        icon: 'warning',
+        renderAs: 'panelOpener',
+      })
+    );
+    expect(alertsPanel).not.toHaveProperty('link');
+    expect(alertsPanel?.children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Rule Management',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({
+              link: 'observabilityAlerting:rules-v1',
+              sideNavStatus: 'hidden',
+            }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Notifications and Suppressions',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:action-policies' }),
+            expect.objectContaining({ link: 'management:maintenanceWindows' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Operations',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+          ]),
+        }),
+      ])
+    );
+  });
+
+  it('omits Alerting V2 Preview from Admin and Settings when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const adminSettingsNode = getAdminSettingsNode({ core });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerting_v2_panel' })])
+    );
+    expect(adminSettingsNode.children).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerts_and_insights' })])
+    );
+  });
+
+  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
+        'management:triggersActions',
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
+    );
+  });
+
+  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
     );
   });
 
   it('includes Data Federation under Data management > Indices and data streams', () => {
-    const { footer } = createNavigationTree({ core });
+    const { footer } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const dataManagement = footer?.find((item: any) => item.title === 'Data management');
     const indicesSection = dataManagement?.children?.find((item: any) => {
       return (

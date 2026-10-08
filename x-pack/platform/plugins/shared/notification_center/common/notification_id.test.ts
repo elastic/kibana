@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import { buildEventNotificationId, buildStaticStateNotificationId } from './notification_id';
+import { buildTimeseriesNotificationId, buildStateNotificationId } from './notification_id';
 
-describe('buildStaticStateNotificationId', () => {
-  it('joins producer, entity and state as <producer>:<entity>:<state>', () => {
+describe('buildStateNotificationId', () => {
+  it('joins the parts as <namespace>:<type>:<entity>:<state>', () => {
     expect(
-      buildStaticStateNotificationId({
-        producer: 'inference',
+      buildStateNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         entity: 'my-endpoint',
         state: 'deprecated',
       })
-    ).toBe('inference:my-endpoint:deprecated');
+    ).toBe('inference:modelStatus:my-endpoint:deprecated');
   });
 
   it('is deterministic: same parts produce the same id (collapse-friendly)', () => {
-    const parts = { producer: 'inference', entity: 'my-endpoint', state: 'deprecated' };
-    expect(buildStaticStateNotificationId(parts)).toBe(buildStaticStateNotificationId(parts));
+    const parts = {
+      namespace: 'inference',
+      type: 'modelStatus',
+      entity: 'my-endpoint',
+      state: 'deprecated',
+    };
+    expect(buildStateNotificationId(parts)).toBe(buildStateNotificationId(parts));
   });
 
   it('produces a different id when the state changes', () => {
     expect(
-      buildStaticStateNotificationId({
-        producer: 'inference',
+      buildStateNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         entity: 'my-endpoint',
         state: 'deprecated',
       })
     ).not.toBe(
-      buildStaticStateNotificationId({
-        producer: 'inference',
+      buildStateNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         entity: 'my-endpoint',
         state: 'available',
       })
@@ -41,38 +49,51 @@ describe('buildStaticStateNotificationId', () => {
 
   it('rejects empty segments', () => {
     expect(() =>
-      buildStaticStateNotificationId({ producer: 'inference', entity: '', state: 'deprecated' })
+      buildStateNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
+        entity: '',
+        state: 'deprecated',
+      })
     ).toThrow(/non-empty/);
   });
 
   it('rejects segments containing the separator', () => {
     expect(() =>
-      buildStaticStateNotificationId({ producer: 'inference', entity: 'a:b', state: 'deprecated' })
+      buildStateNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
+        entity: 'a:b',
+        state: 'deprecated',
+      })
     ).toThrow(/separator/);
   });
 });
 
-describe('buildEventNotificationId', () => {
-  it('joins producer, event and epochMs as <producer>:<event>:<epochMs>', () => {
+describe('buildTimeseriesNotificationId', () => {
+  it('joins the parts as <namespace>:<type>:<event>:<epochMs>', () => {
     expect(
-      buildEventNotificationId({
-        producer: 'autoOps',
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         event: 'memoryLimit',
         epochMs: 1750118400000,
       })
-    ).toBe('autoOps:memoryLimit:1750118400000');
+    ).toBe('inference:modelStatus:memoryLimit:1750118400000');
   });
 
   it('produces a unique id per occurrence via the epochMs segment', () => {
     expect(
-      buildEventNotificationId({
-        producer: 'autoOps',
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         event: 'memoryLimit',
         epochMs: 1750118400000,
       })
     ).not.toBe(
-      buildEventNotificationId({
-        producer: 'autoOps',
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
         event: 'memoryLimit',
         epochMs: 1750118401000,
       })
@@ -81,21 +102,32 @@ describe('buildEventNotificationId', () => {
 
   it('rejects empty segments', () => {
     expect(() =>
-      buildEventNotificationId({ producer: 'autoOps', event: '', epochMs: 1750118400000 })
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
+        event: '',
+        epochMs: 1750118400000,
+      })
     ).toThrow(/non-empty/);
   });
 
   it.each([NaN, Infinity, -Infinity])('rejects non-finite epochMs (%s)', (epochMs) => {
     expect(() =>
-      buildEventNotificationId({ producer: 'autoOps', event: 'memoryLimit', epochMs })
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
+        event: 'memoryLimit',
+        epochMs,
+      })
     ).toThrow(/finite/);
   });
 
   it('rejects segments containing the separator', () => {
     expect(() =>
-      buildEventNotificationId({
-        producer: 'auto:Ops',
-        event: 'memoryLimit',
+      buildTimeseriesNotificationId({
+        namespace: 'inference',
+        type: 'modelStatus',
+        event: 'memory:Limit',
         epochMs: 1750118400000,
       })
     ).toThrow(/separator/);

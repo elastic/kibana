@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
-import { AI_SUMMARY_EVENT_ACTION } from '@kbn/entity-store/common';
+import {
+  AI_SUMMARY_EVENT_ACTION,
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+} from '@kbn/entity-store/common';
 import {
   capEntitySummaryContent,
   MAX_ENTITY_ID_LENGTH,
@@ -21,52 +27,72 @@ import {
   MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
   MAX_SUMMARY_VARIANT_ID_LENGTH,
 } from '@kbn/entity-store/common/entity_summary';
+import { formatBulkDropSummary } from '@kbn/entity-store/server';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 
-const AiSummaryHighlightItem = z.object({
-  title: z.string().max(MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH),
-  text: z.string().max(MAX_SUMMARY_TEXT_LENGTH),
-});
+const AiSummaryHighlightItem = lazySchema(() =>
+  z.object({
+    title: z.string().max(MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH),
+    text: z.string().max(MAX_SUMMARY_TEXT_LENGTH),
+  })
+);
 
-const EntitySummaryStalenessSnapshotSchema = z.object({
-  risk_score: z.number().nullable().optional(),
-});
+const EntitySummaryStalenessSnapshotSchema = lazySchema(() =>
+  z.object({
+    risk_score: z.number().nullable().optional(),
+  })
+);
 
-const EntitySummaryStalenessSchema = z.object({
-  enabled_signals: z.array(z.literal('risk_score')),
-  snapshot: EntitySummaryStalenessSnapshotSchema,
-});
+const EntitySummaryStalenessSchema = lazySchema(() =>
+  z.object({
+    enabled_signals: z.array(z.literal('risk_score')),
+    snapshot: EntitySummaryStalenessSnapshotSchema,
+  })
+);
 
-const SaveAiSummaryRequestBody = z.object({
-  entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
-  entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH),
-  summary: z.object({
-    highlights: z.array(AiSummaryHighlightItem),
-    recommended_actions: z.array(z.string().max(MAX_SUMMARY_TEXT_LENGTH)).nullable().optional(),
-    generated_at: z.number(),
-    // generated_by is intentionally excluded from the request body —
-    // it is derived server-side from the authenticated user to prevent spoofing.
-    anomaly_job_ids: z.array(z.string().max(MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH)).optional(),
-    variant_id: z.string().max(MAX_SUMMARY_VARIANT_ID_LENGTH).optional(),
-    staleness: EntitySummaryStalenessSchema,
-  }),
-  // Raw counts of what the model produced, captured client-side before capping. Used only
-  // for overshoot telemetry — the persisted `summary` above is already capped by the client
-  // and re-capped here, so the server cannot observe overshoot on its own.
-  modelOutputCounts: z
-    .object({
-      highlights: z.number(),
-      recommendedActions: z.number(),
-    })
-    .optional(),
-});
+const SaveAiSummaryRequestBody = lazySchema(() =>
+  z.object({
+    entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
+    entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH),
+    summary: z.object({
+      highlights: z.array(AiSummaryHighlightItem),
+      recommended_actions: z.array(z.string().max(MAX_SUMMARY_TEXT_LENGTH)).nullable().optional(),
+      generated_at: z.number(),
+      // generated_by is intentionally excluded from the request body —
+      // it is derived server-side from the authenticated user to prevent spoofing.
+      anomaly_job_ids: z.array(z.string().max(MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH)).optional(),
+      variant_id: z.string().max(MAX_SUMMARY_VARIANT_ID_LENGTH).optional(),
+      staleness: EntitySummaryStalenessSchema,
+    }),
+    // Raw counts of what the model produced, captured client-side before capping. Used only
+    // for overshoot telemetry — the persisted `summary` above is already capped by the client
+    // and re-capped here, so the server cannot observe overshoot on its own.
+    modelOutputCounts: z
+      .object({
+        highlights: z.number(),
+        recommendedActions: z.number(),
+      })
+      .optional(),
+  })
+);
 
 type SaveAiSummaryRequestBody = z.infer<typeof SaveAiSummaryRequestBody>;
 
+/**
+ * Persists a client-generated AI summary to the entity metadata datastream.
+ *
+ * For now this route does **not** run the LLM — generation happens client-side
+ * (`inference.output` in the flyout hook). The request body already contains the
+ * highlights / recommended actions; this handler enforces the structural size
+ * limits again (in case the client omitted them), authorizes metadata read,
+ * writes via asInternalUser, and reports telemetry.
+ *
+ * Longer-term intent is to move generation fully server-side.
+ */
 export const entityDetailsAiSummaryRoute = ({
   router,
   getStartServices,
@@ -96,13 +122,29 @@ export const entityDetailsAiSummaryRoute = ({
         try {
           const { entityId, entityType, summary, modelOutputCounts } = request.body;
 
-          const [coreStart, { entityStore }] = await getStartServices();
+          const [coreStart, { entityStore, security }] = await getStartServices();
           const coreContext = await context.core;
           const securitySolution = await context.securitySolution;
           const spaceId = securitySolution.getSpaceId();
 
+          // Persistence requires metadata-index *read* access: without it, other read-capable
+          // users must not receive a summary authored by a user who cannot themselves read
+          // the datastream. Summary is still generated and returned but the write is skipped.
+          //
+          // The write itself still uses asInternalUser — end users are not expected to hold
+          // metadata-index write (entity-store indices are system-written). Reaching this
+          // route already requires the entity-analytics feature privilege + Enterprise
+          // license. `generated_by` is derived server-side; item counts are capped above.
+          if (!(await hasMetadataReadPrivilege({ request, security, spaceId }))) {
+            return response.ok({ body: { created: false } });
+          }
+
           // Derive the author server-side — never trust the client-supplied value.
-          const generatedBy = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
+          // Username is the last-resort display fallback; profile_uid enables
+          // human-friendly name resolution at read time.
+          const currentUser = coreContext.security.authc.getCurrentUser();
+          const generatedBy = currentUser?.username ?? 'unknown';
+          const authorProfileUid = currentUser?.profile_uid;
 
           // Enforce the structural caps at the authoritative persistence boundary so every
           // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
@@ -113,15 +155,6 @@ export const entityDetailsAiSummaryRoute = ({
             recommended_actions: summary.recommended_actions,
           });
 
-          // Write via the internal ES client so the user's own metadata index write
-          // privilege is not required (access-control point from the design thread: a user
-          // who can trigger generation should be able to persist, regardless of their
-          // metadata-index write privilege). The summary is model-generated via the
-          // assistant inference call and relayed here through the client; `generated_by` is
-          // derived server-side (not trusted from the body) and item counts are capped
-          // below. Reaching this route already requires the entity-analytics feature
-          // privilege + Enterprise license.
-          //
           // TODO(follow-up): move generation fully server-side so the content never
           // round-trips through the client. Today the LLM call runs client-side
           // (`inference.output` in the flyout hook) — an inherited pattern from the original
@@ -141,6 +174,7 @@ export const entityDetailsAiSummaryRoute = ({
             'entity.id': entityId,
             'entity.type': entityType,
             'Ai_summary.generated_by': generatedBy,
+            ...(authorProfileUid != null && { 'Ai_summary.author_profile_uid': authorProfileUid }),
             'Ai_summary.generated_at': summary.generated_at,
             'Ai_summary.highlights': highlights,
             ...(recommendedActions != null && {
@@ -155,9 +189,13 @@ export const entityDetailsAiSummaryRoute = ({
 
           // A dropped doc resolves (not throws) as `failed > 0`; treat it as a hard failure so
           // we don't report success for a summary that was never written.
-          const { failed } = await metadataClient.bulkAppendMetadata([doc]);
+          const { failed, dropsByType } = await metadataClient.bulkAppendMetadata([doc]);
           if (failed > 0) {
-            throw new Error('AI summary document was dropped from the metadata bulk write');
+            throw new Error(
+              `AI summary document was dropped from the metadata bulk write: ${formatBulkDropSummary(
+                dropsByType
+              )}`
+            );
           }
 
           // Emit the model's raw (pre-cap) output sizes so we can measure how often and by how
@@ -184,4 +222,31 @@ export const entityDetailsAiSummaryRoute = ({
         }
       })
     );
+};
+
+const hasMetadataReadPrivilege = async ({
+  request,
+  security,
+  spaceId,
+}: {
+  request: KibanaRequest;
+  security: SecurityPluginStart;
+  spaceId: string;
+}): Promise<boolean> => {
+  const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
+  const { hasAllRequested } = await checkPrivileges({
+    elasticsearch: {
+      cluster: [],
+      // Same bare datastream name the GET read authorizes against via the metadata
+      // client (`getMetadataEntitiesDataStreamName` → `getEntityIndexPattern`)
+      index: {
+        [getEntityIndexPattern({
+          schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+          dataset: ENTITY_METADATA,
+          namespace: spaceId,
+        })]: ['read'],
+      },
+    },
+  });
+  return hasAllRequested;
 };

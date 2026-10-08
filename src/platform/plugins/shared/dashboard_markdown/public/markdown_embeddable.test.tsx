@@ -307,11 +307,13 @@ describe('MarkdownEmbeddable', () => {
 
   describe('unsaved chnages', () => {
     it('should have unsaved changes when content has changed', async () => {
-      const lastSavedState = markdownEmbeddableSchema.validate({
+      const lastSavedState = markdownEmbeddableSchema.parse({
         content: 'hello',
+        settings: {},
       });
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'goodbye',
+        settings: {},
       });
       const { embeddable } = await renderEmbeddable(initialState, lastSavedState);
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
@@ -319,8 +321,9 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by value state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'hello',
+        settings: {},
       });
       const { embeddable } = await renderEmbeddable(initialState);
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
@@ -328,7 +331,7 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by reference state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         ref_id: '1234',
       });
       const { embeddable } = await renderEmbeddable(initialState);
@@ -341,8 +344,9 @@ describe('MarkdownEmbeddable', () => {
     let embeddableApi: MarkdownEditorApi;
     beforeEach((done) => {
       renderEmbeddable(
-        markdownEmbeddableSchema.validate({
+        markdownEmbeddableSchema.parse({
           content: 'hello',
+          settings: {},
         })
       )
         .then(({ embeddable }) => {

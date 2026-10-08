@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, type Observable } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -23,12 +23,9 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 
 import { DocTitleService } from './services/doc_title';
-import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
@@ -65,16 +62,15 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
-  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new ReplaySubject<void>(1);
-  private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private docTitleParts$!: Observable<readonly string[]>;
   private readonly projectNavigation: ProjectNavigationService;
   private readonly sidebar: SidebarService;
   private readonly logger: Logger;
@@ -88,8 +84,9 @@ export class ChromeService {
   }
 
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
-    const docTitle = this.docTitle.setup({ document: window.document });
-    registerAnalyticsContextProvider(analytics, docTitle.title$);
+    const { title$, titleParts$ } = this.docTitle.setup({ document: window.document });
+    this.docTitleParts$ = titleParts$;
+    registerAnalyticsContextProvider(analytics, title$);
 
     return {
       sidebar: this.sidebar.setup(),
@@ -107,7 +104,6 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
-    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -120,8 +116,6 @@ export class ChromeService {
       kibanaVersion: this.params.kibanaVersion,
       headerBanner$: state.headerBanner.$,
       isVisible$: state.visibility.isVisible$,
-      chromeStyle$: state.style.chromeStyle.$,
-      actionMenu$: application.currentActionMenu$,
       stop$: this.stop$,
     });
     handleEuiFullScreenChanges({
@@ -146,7 +140,6 @@ export class ChromeService {
     });
 
     // 4. Start sub-services
-    const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -164,7 +157,6 @@ export class ChromeService {
       },
       logger: this.logger,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
-      isNextChrome: isNextChrome(featureFlags),
     });
 
     const sidebar = this.sidebar.start();
@@ -181,17 +173,17 @@ export class ChromeService {
     const chrome = createChromeApi({
       state,
       services: {
-        navControls,
         navLinks,
         recentlyAccessed,
         docTitle,
         projectNavigation,
       },
       sidebar,
-      featureFlags,
       componentDeps: {
         basePath: http.basePath,
         legacyActionMenu$: application.currentActionMenu$,
+        capabilities: application.capabilities,
+        docTitleParts$: this.docTitleParts$,
       },
     });
 
@@ -199,7 +191,6 @@ export class ChromeService {
   }
 
   public stop() {
-    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
     this.sidebar.stop();

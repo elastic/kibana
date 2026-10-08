@@ -9,13 +9,12 @@ import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getFlyoutFooterWithRetentionWarningStyles } from './styles';
 import { getIlmPolicySummaryStats } from '../edit_data_lifecycle_flyout/ilm_policy_summary_stats';
 import type { IlmPolicyForFlyout } from '../edit_data_lifecycle_flyout/types';
@@ -47,6 +46,11 @@ export const useRetentionWarning = ({
   }, [ilmPolicies, selectedIlmPolicyName, canUseDownsampling, inheritLifecycle]);
 };
 
+/**
+ * Selects the downsampling warning body copy based on where the excluded steps come from:
+ * - `import_stream`: steps from the lifecycles imported from another stream (default).
+ * - `ilm_policy`: steps from the ILM policy selected in this flyout.
+ */
 export type DownsamplingWarningType = 'import_stream' | 'ilm_policy';
 
 export interface FlyoutFooterWithRetentionWarningProps {
@@ -86,16 +90,15 @@ export const FlyoutFooterWithRetentionWarning = ({
   return (
     <EuiFlyoutFooter>
       {showWarning && (
-        <EuiCallOut
-          title={footerStrings.downsamplingNotAppliedTitle}
-          color="primary"
-          size="s"
-          announceOnMount
-          css={styles.callout}
-          data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
-        >
-          <EuiText size="s">{warningBody}</EuiText>
-        </EuiCallOut>
+        <div css={styles.callout}>
+          <KbnInfoCallout
+            title={footerStrings.downsamplingNotAppliedTitle}
+            text={warningBody}
+            size="s"
+            announceOnMount
+            data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
+          />
+        </div>
       )}
 
       <EuiFlexGroup
@@ -108,6 +111,7 @@ export const FlyoutFooterWithRetentionWarning = ({
           <EuiButtonEmpty
             onClick={onCancel}
             flush="left"
+            size="s"
             data-test-subj="dataLifecycleFlyoutCancelButton"
           >
             {cancelLabel}
@@ -117,6 +121,7 @@ export const FlyoutFooterWithRetentionWarning = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            size="s"
             onClick={onApply}
             disabled={isApplyDisabled}
             data-test-subj="dataLifecycleFlyoutApplyButton"

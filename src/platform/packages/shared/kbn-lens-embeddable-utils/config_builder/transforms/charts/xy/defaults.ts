@@ -25,6 +25,8 @@ export const DEFAULT_POINTS_VISIBILITY = 'auto' as const;
 export const DEFAULT_LINES_INTERPOLATION = 'linear' as const;
 export const DEFAULT_BARS_MINIMUM_HEIGHT = 1;
 export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
+export const DEFAULT_AREAS_FILL = 'solid' as const;
+export const DEFAULT_REFERENCE_LINE_AXIS = 'y' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
   palette: 'elastic_line_optimized',

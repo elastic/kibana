@@ -100,7 +100,7 @@ Canonical MITRE tactics (Enterprise ATT&CK):
 | TA0002 | Execution |
 | TA0003 | Persistence |
 | TA0004 | Privilege Escalation |
-| TA0005 | Defense Evasion |
+| TA0005 | Stealth |
 | TA0006 | Credential Access |
 | TA0007 | Discovery |
 | TA0008 | Lateral Movement |
@@ -110,10 +110,12 @@ Canonical MITRE tactics (Enterprise ATT&CK):
 | TA0040 | Impact |
 | TA0042 | Resource Development |
 | TA0043 | Reconnaissance |
+| TA0112 | Defense Impairment |
 
 Examples:
 - "rules for T1059" -> \`{ mitreTechnique: "T1059" }\`
-- "rules for Defense Evasion" -> \`{ mitreTactic: "TA0005" }\`
+- "rules for Stealth" -> \`{ mitreTactic: "TA0005" }\`
+- "rules for Defense Impairment" -> \`{ mitreTactic: "TA0112" }\`
 - "rules for TA0006" -> \`{ mitreTactic: "TA0006" }\`
 - "rules for phishing" (technique-flavored, no exact name) -> \`{ searchTerm: "phishing" }\`
 

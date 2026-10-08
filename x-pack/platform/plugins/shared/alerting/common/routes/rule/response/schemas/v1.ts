@@ -9,7 +9,7 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
-import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { rRuleResponseSchemaV1 } from '@kbn/response-ops-schedule-schema';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
   MAX_SNOOZED_INSTANCE_CONDITIONS,
@@ -752,6 +752,20 @@ export const ruleResponseInternalSchema = schema.object(
         },
       })
     ),
+    created_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that created the rule.' },
+        })
+      )
+    ),
+    updated_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that last updated the rule.' },
+        })
+      )
+    ),
     created_at: schema.string({
       meta: {
         description: 'The date and time that the rule was created.',
@@ -769,6 +783,16 @@ export const ruleResponseInternalSchema = schema.object(
             'The owner of the API key that is associated with the rule and used to run background tasks.',
         },
       })
+    ),
+    api_key_owner_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'The identifier for the profile that owns the API key associated with the rule.',
+          },
+        })
+      )
     ),
     api_key_created_by_user: schema.maybe(
       schema.nullable(

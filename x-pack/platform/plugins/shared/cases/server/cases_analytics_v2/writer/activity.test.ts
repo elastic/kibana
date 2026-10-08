@@ -187,7 +187,7 @@ describe('CasesActivityV2Writer', () => {
   });
 
   describe('bulkDeleteActionsByCaseIds', () => {
-    it('issues a delete_by_query with a terms filter on cases.id', async () => {
+    it('issues a delete_by_query with a terms filter on case.id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
       (esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValue({ deleted: 3 });
 
@@ -199,7 +199,7 @@ describe('CasesActivityV2Writer', () => {
       expect(arg.index).toBe(ACTIVITY_INDEX_NAME);
       expect(arg.refresh).toBe(false);
       expect(arg.conflicts).toBe('proceed');
-      expect(arg.query).toEqual({ terms: { 'cases.id': ['case-1', 'case-2'] } });
+      expect(arg.query).toEqual({ terms: { 'case.id': ['case-1', 'case-2'] } });
     });
 
     it('skips dispatch on empty input', async () => {

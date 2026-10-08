@@ -18,10 +18,11 @@ export class ConsolePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public async getTextArea() {
     const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
-    return await codeEditor.findByTagName('textarea');
+    return await codeEditor.findByCssSelector('textarea[aria-roledescription="editor"]');
   }
 
   public async getEditorText() {
@@ -71,9 +72,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getOutputText() {
-    const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
-    const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
-    return await outputViewDiv.getVisibleText();
+    return await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoOutput');
   }
 
   public async pressEnter() {
@@ -82,8 +81,22 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async enterText(text: string) {
+    if (!text) return;
     const textArea = await this.getTextArea();
     await textArea.type(text);
+  }
+
+  /**
+   * Explicitly ask Monaco to evaluate completions at the current cursor position,
+   * without inserting any text. Use this after multi-line enterText calls where
+   * the ending text is a trigger character (e.g. triple-quote for ESQL).
+   */
+  public async triggerSuggest() {
+    await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
+  }
+
+  public async appendText(text: string) {
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
   }
 
   public async promptAutocomplete(letter = 'b') {
@@ -103,10 +116,13 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAutocompleteSuggestion(index: number) {
-    await this.retry.waitFor(
-      'verify suggestions widget is displayed',
-      async () => await this.isAutocompleteVisible()
-    );
+    await this.retry.waitFor('suggestions widget has items', async () => {
+      if (!(await this.isAutocompleteVisible())) return false;
+      const widget = await this.monacoEditor.getCodeEditorSuggestWidget().catch(() => null);
+      if (!widget) return false;
+      const items = await widget.findAllByClassName('monaco-list-row');
+      return items.length > 0;
+    });
 
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
@@ -119,7 +135,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAllAutocompleteSuggestions() {
-    const suggestionsWidget = await this.find.byClassName('suggest-widget');
+    const suggestionsWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const labels = await Promise.all(
       suggestions.map(async (suggestion) => {
@@ -150,6 +166,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -157,6 +180,7 @@ export class ConsolePageObject extends FtrService {
       Key.SPACE,
     ]);
   }
+
   public async pressCtrlEnter() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -199,9 +223,19 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async selectAllRequests() {
-    const textArea = await this.getTextArea();
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, 'a']);
+    await this.monacoEditor.selectAllCodeEditorValue('consoleMonacoEditor');
+  }
+
+  public async getSelectedRequestsCount() {
+    const container = await this.testSubjects.find('consoleMonacoEditorContainer');
+    const count = await container.getAttribute('data-currently-selected-requests');
+    return Number(count ?? 0);
+  }
+
+  public async waitForSelectedRequestsCount(expectedCount: number) {
+    await this.retry.waitFor(`editor to recognize ${expectedCount} selected requests`, async () => {
+      return (await this.getSelectedRequestsCount()) === expectedCount;
+    });
   }
 
   public async getEditor() {
@@ -228,15 +262,26 @@ export class ConsolePageObject extends FtrService {
     return await editorViewDiv.getComputedStyle('font-size');
   }
 
-  public async pasteClipboardValue() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'v']);
-  }
-
   public async copyRequestsToClipboard() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    // Ctrl+A / Ctrl+C on the textarea no longer works reliably in Monaco 0.54 EditContext mode,
+    // so we read the value via the Monaco API and write it to the clipboard programmatically.
+    const content = await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoEditor');
+    const clipboardError = await this.browser.executeAsync(
+      (text: string, done: (errorMessage: string | null) => void) => {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => done(null))
+          .catch((error) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            done(errorMessage);
+          });
+      },
+      content
+    );
+
+    if (clipboardError) {
+      throw new Error(`Failed to copy requests to clipboard: ${clipboardError}`);
+    }
   }
 
   public async isA11yOverlayVisible() {
@@ -248,28 +293,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    await this.clickPlay();
-
-    // Try to catch the in-flight loading state. Fast requests (or identical repeated requests)
-    // may complete before we poll, so we tolerate never seeing the loading indicators — as long
-    // as output and a status badge are present when we check.
-    await this.retry
-      .tryForTime(5000, async () => {
-        const inFlight =
-          (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-          (await this.testSubjects.exists('consoleRequestInProgressBadge'));
-        if (!inFlight) throw new Error('Waiting for request to start');
-      })
-      .catch(async () => {
-        // We didn't catch the in-progress state — verify that output is already available,
-        // which means the request completed before we could observe it loading.
-        if (
-          !(await this.testSubjects.exists('consoleMonacoOutput')) ||
-          !(await this.testSubjects.exists('consoleResponseStatusBadge'))
-        ) {
-          throw new Error('Console request did not start or produce output');
-        }
-      });
+    // Retry the Play click until the request starts. A single click can be a no-op if the editor
+    // hasn't finished registering the current request (see #240147).
+    await this.retry.try(async () => {
+      await this.clickPlay();
+      const started =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
+        (await this.testSubjects.exists('consoleMonacoOutput'));
+      if (!started) throw new Error('Console request did not start after clicking Play');
+    });
 
     // Wait for loading indicators to clear and output to be present.
     await this.waitForRequestToComplete();
@@ -416,6 +449,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {
@@ -494,15 +532,23 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', {
+      timeout: 2000,
+    });
     if (tourShown) {
       await this.clickSkipTour();
     }
   }
 
   public async clickContextMenu() {
-    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
-    await contextMenu.click();
+    if (await this.isContextMenuOpen()) return;
+    await this.retry.tryForTime(5000, async () => {
+      const contextMenu = await this.testSubjects.find('toggleConsoleMenu', 1000);
+      await contextMenu.scrollIntoViewIfNecessary();
+      await contextMenu.moveMouseTo();
+      await contextMenu.click();
+      await this.testSubjects.existOrFail('consoleMenu', { timeout: 1500 });
+    });
   }
 
   public async isContextMenuOpen() {
@@ -521,7 +567,7 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyToLanguageButtonVisible() {
+  public async isCopyAsButtonVisible() {
     return await this.testSubjects.exists('consoleMenuCopyAsButton');
   }
 
@@ -535,41 +581,32 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    // Click "Select language" menu item to open language selector modal
+    // Open the language selector modal from the context menu
     await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Wait for the modal to open
-    await this.retry.waitFor('language selector modal to open', async () => {
-      return await this.testSubjects.exists(`languageOption-${language}`);
-    });
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
 
-    // Select the language option
-    await this.testSubjects.click(`languageOption-${language}`);
-
-    // Click "Copy code" button to copy with the selected language
-    await this.testSubjects.click('copyAsLanguageSubmit');
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
   }
 
   public async changeDefaultLanguage(language: string) {
-    // Click "Select language" menu item to open language selector modal
+    // Open the language selector modal from the context menu
     await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Wait for the modal to open
-    await this.retry.waitFor('language selector modal to open', async () => {
-      return await this.testSubjects.exists(`languageOption-${language}`);
-    });
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
 
-    // Select the language option
-    await this.testSubjects.click(`languageOption-${language}`);
-
-    // Click "Set as default" button (moves the badge)
+    // Mark the selected language as the new default
     await this.testSubjects.click('setAsDefaultLanguage');
 
-    // Click "Cancel" to close modal and save the default
-    await this.testSubjects.click('closeCopyAsModal');
+    // Close the modal — this persists the new default to storage
+    const closeModalButton = await this.testSubjects.find('closeCopyAsModal');
+    await closeModalButton.click();
   }
 
-  public async clickCopyToLanguageButton() {
+  public async clickCopyAsButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }

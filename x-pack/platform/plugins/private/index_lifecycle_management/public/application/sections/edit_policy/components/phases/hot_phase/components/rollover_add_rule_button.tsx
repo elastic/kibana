@@ -48,7 +48,12 @@ export const RolloverAddRuleButton = <T extends RolloverField>({
   if (availableFields.length === 0) {
     return (
       <EuiToolTip content={allFieldsInUseMessage}>
-        <EuiButton iconType="arrowDown" iconSide="right" isDisabled data-test-subj={dataTestSubj}>
+        <EuiButton
+          iconType="chevronSingleDown"
+          iconSide="right"
+          isDisabled
+          data-test-subj={dataTestSubj}
+        >
           {addButtonLabel}
         </EuiButton>
       </EuiToolTip>
@@ -60,7 +65,7 @@ export const RolloverAddRuleButton = <T extends RolloverField>({
       aria-label={addButtonLabel}
       button={
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           data-test-subj={dataTestSubj}

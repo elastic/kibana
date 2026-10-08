@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const AgentBuilderPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
+export const AgentInstallPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
   @media (max-width: ${euiTheme.breakpoint.m}px) {
     border-top: ${euiTheme.border.thin};
   }
@@ -16,3 +16,22 @@ export const AgentBuilderPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
     border-left: ${euiTheme.border.thin};
   }
 `;
+
+export const AgentBuilderPanelContainer = AgentInstallPanelContainer;
+
+// The AI tool logos are bundled as SVG URLs, so `EuiIcon` renders them as `<img>` and its
+// `color` prop is ignored. Must mask the SVG and color it with `textSubdued`, which is aware of
+// color mode.
+export const brandIcon =
+  (icon: string) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css`
+      display: inline-block;
+      inline-size: ${euiTheme.size.base};
+      block-size: ${euiTheme.size.base};
+      background-color: ${euiTheme.colors.textSubdued};
+      mask-image: url(${icon});
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+    `;

@@ -75,9 +75,10 @@ export async function bulkChangePrivilegeAgentsBatch(
         );
         return;
       }
-      if (agent?.policy_id) {
+      if (agent?.policy_base_id) {
         const allPackagePolicies =
-          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
+          // policy_base_id is always the base policy id, matching the key used by findAllForAgentPolicy.
+          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_base_id)) || [];
         const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
         // Create error if agent contains an integration that requires root privilege.
         if (packagesWithRootPrivilege.length > 0) {

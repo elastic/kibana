@@ -404,6 +404,48 @@ describe('When calling package policy', () => {
       });
     });
 
+    describe('when the caller is limited to a set of packages', () => {
+      it('should reject an update that retargets the policy to a package outside the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['endpoint'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).toHaveBeenCalledWith({
+          body: { message: `Update for package name osquery_manager is not authorized.` },
+        });
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject an update when the existing package is outside the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['osquery_manager'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).toHaveBeenCalledWith({
+          body: { message: `Update for package name endpoint is not authorized.` },
+        });
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should allow an update that keeps the policy within the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['endpoint'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).not.toHaveBeenCalled();
+        expect(packagePolicyServiceMock.update).toHaveBeenCalled();
+      });
+    });
+
     it('should update var_group_selections when provided', async () => {
       const newData = {
         var_group_selections: { auth_method: 'oauth' },
@@ -600,7 +642,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies.*Offending package policy: 1\./
+          /To update managed integrations.*Offending ID: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -612,7 +654,7 @@ describe('When calling package policy', () => {
             getUpdateKibanaRequest({ supports_agentless: true } as any),
             response
           )
-        ).rejects.toThrow(/To update agentless package policies/);
+        ).rejects.toThrow(/To update managed integrations/);
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
 
@@ -628,7 +670,7 @@ describe('When calling package policy', () => {
             response
           )
         ).rejects.toThrow(
-          /To add integrations to an agentless agent policy.*Agentless agent policies: agentless\./
+          /To add integrations to a managed integration.*Offending IDs: agentless\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -640,7 +682,7 @@ describe('When calling package policy', () => {
 
         await expect(
           routeHandler(context, getUpdateKibanaRequest({ policy_id: 'agentless' } as any), response)
-        ).rejects.toThrow(/To add integrations to an agentless agent policy/);
+        ).rejects.toThrow(/To add integrations to a managed integration/);
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
 
@@ -650,7 +692,7 @@ describe('When calling package policy', () => {
         ]);
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies.*Offending package policy: 1\./
+          /To update managed integrations.*Offending ID: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -877,7 +919,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless package policies, use the agentless policies API./
+        /To create managed integrations, use the managed integrations API./
       );
     });
 
@@ -928,7 +970,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /only supports agentless deployment/
+          /can only be used as a managed integration/
         );
         // The rejection happens before anything is installed or created, so the
         // catch-block rollback must not run — even when a concurrent request has
@@ -949,7 +991,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To add integrations to an agentless agent policy/
+          /To add integrations to a managed integration/
         );
       });
 
@@ -1196,7 +1238,7 @@ describe('When calling package policy', () => {
 
         // Only the offending id is named, so a batch owner can self-remediate.
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To upgrade agentless package policies.*Agentless package policies in this request: 2\./
+          /To upgrade managed integrations.*Offending IDs: 2\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });
@@ -1216,7 +1258,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /Agentless package policies in this request: 1\./
+          /Offending IDs: 1\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });
@@ -1382,7 +1424,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(dryRunUpgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To upgrade agentless package policies/
+        /To upgrade managed integrations/
       );
       expect(packagePolicyServiceMock.getUpgradeDryRunDiff).not.toHaveBeenCalled();
     });

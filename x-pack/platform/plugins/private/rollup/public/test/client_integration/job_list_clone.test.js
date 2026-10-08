@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 

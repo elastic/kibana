@@ -23,24 +23,21 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
+import { MlAppHeader, useAnomalyDetectionSettingsBack } from '../../../components/ml_app_header';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
   const docsUrl = kibana.services.docLinks.links.ml.customRules;
+  const settingsBack = useAnomalyDetectionSettingsBack();
   return (
     <React.Fragment>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
-              defaultMessage="Filter Lists"
-            />
-          }
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.settings.filterLists.listHeader.filterListsTitle', {
+          defaultMessage: 'Filter Lists',
+        })}
+        back={settingsBack}
+      />
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>

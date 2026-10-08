@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export interface InvalidateAgentKeyResponse {
@@ -13,7 +13,9 @@ export interface InvalidateAgentKeyResponse {
 
 export const invalidateAgentKeyRoute = defineRoute<InvalidateAgentKeyResponse>()({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  params: z.object({
-    body: z.object({ id: z.string() }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ id: z.string() }),
+    })
+  ),
 });

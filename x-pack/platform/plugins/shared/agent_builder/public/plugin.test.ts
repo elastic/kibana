@@ -15,7 +15,16 @@ import type {
   AgentBuilderStartDependencies,
   ConfigSchema,
 } from './types';
-import { setSidebarRuntimeContext } from './sidebar';
+import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar';
+import { AgentBuilderAccessChecker } from './services';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
+
+jest.mock('./services/access', () => ({
+  ...jest.requireActual('./services/access'),
+  AgentBuilderAccessChecker: jest.fn(),
+}));
+
+const MockAgentBuilderAccessChecker = jest.mocked(AgentBuilderAccessChecker);
 
 jest.mock('@kbn/shared-ux-utility', () => ({
   dynamic: jest.fn(() => () => null),
@@ -25,8 +34,20 @@ jest.mock('./services', () => ({
   AgentService: jest.fn(),
   AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
+  ConversationEventsService: jest.fn(() => ({
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
+  ConversationTemplatesService: jest.fn(() => ({
+    registerTab: jest.fn(),
+    getTab: jest.fn(),
+    registerTemplateUIDefinition: jest.fn(),
+    getTemplateUIDefinition: jest.fn(),
+  })),
   DocLinksService: jest.fn(),
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
@@ -35,6 +56,7 @@ jest.mock('./services', () => ({
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),
+  SpaceSettingsService: jest.fn(),
   AgentBuilderAccessChecker: jest.fn(),
 }));
 
@@ -42,8 +64,16 @@ jest.mock('./services/attachments', () => ({
   createPublicAttachmentContract: jest.fn(() => ({})),
 }));
 
+jest.mock('./services/conversation_templates', () => ({
+  createPublicConversationTemplatesContract: jest.fn(() => ({})),
+}));
+
 jest.mock('./services/renderers', () => ({
   createPublicRenderersContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_events', () => ({
+  createPublicConversationEventsContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/tools', () => ({
@@ -94,7 +124,23 @@ const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> 
     },
   } as unknown as PluginInitializerContext<ConfigSchema>);
 
-const createMockSidebarApp = () => ({ open: jest.fn(), close: jest.fn() });
+const createMockSidebarApp = () => {
+  const isOpen$ = new BehaviorSubject(false);
+
+  return {
+    open: jest.fn(() => {
+      isOpen$.next(true);
+    }),
+    close: jest.fn(() => {
+      isOpen$.next(false);
+    }),
+    isOpen: jest.fn(() => isOpen$.getValue()),
+    isOpen$: jest.fn(() => isOpen$),
+    setIsOpen: (nextIsOpen: boolean) => {
+      isOpen$.next(nextIsOpen);
+    },
+  };
+};
 
 const createMockCoreSetup = (): CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart> =>
   ({
@@ -109,10 +155,21 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     http: {},
     docLinks: { links: {} },
     application: {
-      capabilities: { agentBuilder: { show: false } },
+      getUrlForApp: jest.fn(
+        (appId: string, { path = '' }: { path?: string } = {}) =>
+          `http://localhost:5601/app/${appId}${path}`
+      ),
+      navigateToApp: jest.fn(),
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        agentBuilder: { show: false },
+      },
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
+      controls: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
@@ -127,12 +184,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
+    files: { registerFileKind: jest.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
+    files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
@@ -154,6 +213,7 @@ const openSidebarAndRegisterCallbacks = (
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
     addAttachment: jest.fn(),
+    removeAttachmentById: jest.fn(),
   });
   return { mockUpdateProps };
 };
@@ -161,6 +221,144 @@ const openSidebarAndRegisterCallbacks = (
 describe('AgentBuilderPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    MockAgentBuilderAccessChecker.mockImplementation(
+      () =>
+        ({
+          getAgentBuilderAccess: jest.fn().mockResolvedValue({
+            hasRequiredLicense: true,
+            hasLlmConnector: true,
+          }),
+        } as unknown as AgentBuilderAccessChecker)
+    );
+  });
+
+  describe('getAgentBuilderAccess', () => {
+    it('delegates to accessChecker.getAgentBuilderAccess when show privilege is granted', async () => {
+      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+        hasRequiredLicense: true,
+        hasLlmConnector: true,
+      });
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        agentBuilder: { show: true },
+      };
+
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: true,
+        hasLlmConnector: true,
+      });
+
+      expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
+
+    it('returns denied access without calling getAgentBuilderAccess when show privilege is missing', async () => {
+      const getAgentBuilderAccess = jest.fn();
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+
+      expect(getAgentBuilderAccess).not.toHaveBeenCalled();
+    });
+
+    it('returns denied access when accessChecker.getAgentBuilderAccess resolves denied', async () => {
+      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        agentBuilder: { show: true },
+      };
+
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+
+      expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
+  });
+
+  describe('conversation template context', () => {
+    const startAndGetContext = () => {
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      plugin.start(coreStart, createMockStartDeps());
+
+      const [{ context }] = jest.mocked(createPublicConversationTemplatesContract).mock.calls[0];
+      return { context, coreStart, sidebarApp };
+    };
+
+    it('builds the absolute URL of an agent-scoped conversation', () => {
+      const { context, coreStart } = startAndGetContext();
+
+      expect(context.getConversationUrl({ conversationId: 'conv-1', agentId: 'agent-1' })).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1'
+      );
+      expect(coreStart.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
+        path: '/agents/agent-1/conversations/conv-1',
+        absolute: true,
+      });
+    });
+
+    it('adds the details flag when asked to open the details flyout', () => {
+      const { context } = startAndGetContext();
+
+      expect(
+        context.getConversationUrl({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          openDetails: true,
+        })
+      ).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1?openConversationDetails=true'
+      );
+    });
+
+    it('navigates to the same path the URL is built from', async () => {
+      const { context, coreStart, sidebarApp } = startAndGetContext();
+      const location = { conversationId: 'conv-1', agentId: 'agent-1', openDetails: true };
+
+      await context.openFullscreenConversation(location);
+
+      expect(sidebarApp.close).toHaveBeenCalledTimes(1);
+      expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+        path: '/agents/agent-1/conversations/conv-1?openConversationDetails=true',
+      });
+    });
   });
 
   describe('openChat when sidebar is already open', () => {
@@ -180,6 +378,37 @@ describe('AgentBuilderPlugin', () => {
         newConversation: true,
         attachments: [mockGroup],
       });
+    });
+  });
+
+  describe('when another sidebar app replaces Agent Builder', () => {
+    it('opens on the first toggle', () => {
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+
+      start.openChat();
+      sidebarApp.setIsOpen(false);
+      start.toggleChat();
+
+      expect(sidebarApp.open).toHaveBeenCalledTimes(2);
+      expect(sidebarApp.close).not.toHaveBeenCalled();
+    });
+
+    it('clears runtime state when another sidebar app replaces Agent Builder', () => {
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+      const { mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
+      jest.mocked(clearSidebarRuntimeContext).mockClear();
+
+      sidebarApp.setIsOpen(false);
+      start.setChatConfig({ newConversation: true });
+
+      expect(clearSidebarRuntimeContext).toHaveBeenCalledTimes(1);
+      expect(mockUpdateProps).not.toHaveBeenCalled();
     });
   });
 });

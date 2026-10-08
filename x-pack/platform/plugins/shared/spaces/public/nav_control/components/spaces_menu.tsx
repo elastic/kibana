@@ -87,6 +87,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
               compressed: true,
               isClearable: true,
               id: 'headerSpacesMenuListSearch',
+              'data-test-subj': 'spacesMenuSearchInput',
             },
           }
         : {

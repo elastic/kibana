@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiFilterButton, EuiPopover } from '@elastic/eui';
-import {
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_FILTER_NONE,
-  getEpisodeSeverityLabel,
-} from '../severity/severity_utils';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFilterButton, EuiPopover, EuiHealth, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EPISODE_SEVERITY_FILTER_NONE } from '../severity/severity_utils';
+import { useSeverityRegistry } from '../../hooks/use_severity_registry';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
-const SEVERITY_FILTER_OPTIONS: Array<{ label: string; value: string }> = [
-  ...EPISODE_SEVERITIES.map((severity) => ({
-    label: getEpisodeSeverityLabel(severity),
-    value: severity,
-  })),
-  {
-    label: i18n.SEVERITY_FILTER_NONE_LABEL,
-    value: EPISODE_SEVERITY_FILTER_NONE,
-  },
-];
+type SeverityDotColorKey = Extract<keyof EuiThemeComputed['colors'], `text${string}`>;
 
 interface AlertEpisodesSeverityFilterProps {
   selectedSeverities?: string[] | null;
@@ -38,8 +27,30 @@ export function AlertEpisodesSeverityFilter({
   'data-test-subj': dataTestSubj = 'severityFilter',
 }: AlertEpisodesSeverityFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const { entries } = useSeverityRegistry();
 
-  const options = SEVERITY_FILTER_OPTIONS;
+  const resolveDotColor = useCallback(
+    (colorKey?: string) =>
+      euiTheme.colors[(colorKey ?? 'textSubdued') as SeverityDotColorKey] ?? colorKey,
+    [euiTheme]
+  );
+
+  const options = useMemo(
+    () => [
+      ...entries.map(({ label, value, filterDotColor }) => ({
+        label,
+        value,
+        prepend: <EuiHealth color={resolveDotColor(filterDotColor)} />,
+      })),
+      {
+        label: i18n.SEVERITY_FILTER_NONE_LABEL,
+        value: EPISODE_SEVERITY_FILTER_NONE,
+        prepend: <EuiHealth color={resolveDotColor()} />,
+      },
+    ],
+    [resolveDotColor, entries]
+  );
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
@@ -56,7 +67,7 @@ export function AlertEpisodesSeverityFilter({
       aria-label={i18n.SEVERITY_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}

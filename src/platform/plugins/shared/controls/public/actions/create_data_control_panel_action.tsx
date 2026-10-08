@@ -33,7 +33,7 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
   grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
@@ -53,6 +53,7 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
         values_source: ControlValuesSource.FIELD,
       },
       parentApi: embeddable,
+      returnFocus,
       setLastUsedDataViewId: (dataViewId) => {
         lastUsedDataViewId = dataViewId;
       },

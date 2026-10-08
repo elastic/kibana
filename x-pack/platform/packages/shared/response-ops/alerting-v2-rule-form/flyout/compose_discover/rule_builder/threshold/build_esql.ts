@@ -12,8 +12,10 @@ import {
   Aggregation,
   Comparator,
   AGGREGATIONS_REQUIRING_FIELD,
+  sortLevelsBySeverity,
   type StatDefinition,
   type AlertCondition,
+  type SeverityConfig,
   type ThresholdFormValues,
 } from './form_types';
 
@@ -114,6 +116,38 @@ const buildConditionExpr = (condition: AlertCondition): ESQLSingleAstItem => {
   ]);
 };
 
+/**
+ * Build the right-hand side of `EVAL severity = <rhs>`. Single mode emits a
+ * constant `"<level>"`; multi mode emits a `CASE(...)` evaluated most-to-least
+ * severe, where every level is a band tested against its own threshold. The CASE
+ * has no default branch: a breaching row below the least-severe band gets no
+ * severity (null). The breach WHERE is driven by the alert condition alone, so
+ * severity is a pure enrichment layer. Returns `null` when multi mode cannot be
+ * represented (range comparator or no levels).
+ */
+const buildSeverityEvalRhs = (
+  severity: SeverityConfig,
+  condition: AlertCondition
+): string | null => {
+  if (severity.mode === 'single') {
+    return `"${severity.singleLevelSeverity}"`;
+  }
+
+  const operator = COMPARATOR_OP[condition.comparator];
+  if (!operator || severity.levels.length === 0) return null;
+  // A band mid-edit can hold a non-finite threshold; skip severity until every band is valid
+  // rather than emitting `<column> > NaN`.
+  if (severity.levels.some((level) => !Number.isFinite(level.threshold))) return null;
+
+  const column = escapeField(condition.metric);
+  // Emit every level as a band, most-severe first, with no trailing default.
+  const branches = sortLevelsBySeverity(severity.levels)
+    .reverse()
+    .map((level) => `${column} ${operator} ${level.threshold}, "${level.severity}"`);
+
+  return `CASE(${branches.join(', ')})`;
+};
+
 const isStatValid = (stat: StatDefinition): boolean => {
   if (!stat.label) return false;
   if (AGGREGATIONS_REQUIRING_FIELD.includes(stat.aggregation) && !stat.field) return false;
@@ -174,8 +208,16 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
     }
   }
 
-  // WHERE (alert conditions)
+  // WHERE (alert conditions). Severity only applies to a single condition and is a pure
+  // enrichment layer (its band thresholds are independent of the condition), so the WHERE is
+  // always built straight from the alert conditions.
   const validConditions = values.alertConditions.filter((c) => c.metric && c.threshold.length > 0);
+  const singleCondition = validConditions.length === 1 ? validConditions[0] : undefined;
+  const severityEvalRhs =
+    values.severity && singleCondition
+      ? buildSeverityEvalRhs(values.severity, singleCondition)
+      : null;
+
   if (validConditions.length > 0) {
     const conditionExprs = validConditions.map(buildConditionExpr);
     const joiner = values.conditionOperator === 'OR' ? 'or' : 'and';
@@ -183,6 +225,21 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
       Builder.expression.func.binary(joiner, [left, right])
     );
     commands.push(Builder.command({ name: 'where', args: [combined] }));
+  }
+
+  // EVAL severity (after the breach WHERE, so it enriches breached rows).
+  if (severityEvalRhs) {
+    const exprAst = parseFragment(severityEvalRhs);
+    if (exprAst) {
+      commands.push(
+        Builder.command({
+          name: 'eval',
+          args: [
+            Builder.expression.func.binary('=', [Builder.expression.column('severity'), exprAst]),
+          ],
+        })
+      );
+    }
   }
 
   const root = Builder.expression.query(commands);

@@ -11,7 +11,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import {
   getBaseConnectorType,
-  HardcodedIcons,
+  HardcodedIconDataUrls,
   resolveIconToDataUrl,
   resolveRegisteredStepIcon,
 } from '../../../components/step_icons';
@@ -39,12 +39,12 @@ export async function getTypeIconDataUrl({
   actionTypeRegistry,
 }: GetTypeIconDataUrlParams): Promise<string> {
   if (kind === 'trigger') {
-    const hardcoded = HardcodedIcons[type];
+    const hardcoded = HardcodedIconDataUrls[type];
     if (hardcoded) {
       return hardcoded;
     }
     const extensionIcon = workflowsExtensions.getTriggerDefinition(type)?.icon;
-    return resolveIconToDataUrl(extensionIcon, HardcodedIcons.trigger);
+    return resolveIconToDataUrl(extensionIcon, HardcodedIconDataUrls.trigger);
   }
 
   const baseType = getBaseConnectorType(type);
@@ -61,10 +61,12 @@ export async function getTypeIconDataUrl({
   }
 
   const hardcoded =
-    HardcodedIcons[type] ?? HardcodedIcons[baseType] ?? HardcodedIcons[`.${baseType}`];
+    HardcodedIconDataUrls[type] ??
+    HardcodedIconDataUrls[baseType] ??
+    HardcodedIconDataUrls[`.${baseType}`];
   if (hardcoded) {
     return hardcoded;
   }
 
-  return HardcodedIcons.default;
+  return HardcodedIconDataUrls.default;
 }

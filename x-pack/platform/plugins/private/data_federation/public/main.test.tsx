@@ -7,161 +7,219 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
-import type { HttpSetup, ToastsStart } from '@kbn/core/public';
-import { DATA_SETS_LIST_ROUTE_PATH, DATA_SOURCES_LIST_ROUTE_PATH } from '../common';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
+import type { DataSetWithName, DataSource } from '../common';
 
-const createToastsMock = (): ToastsStart =>
-  ({
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
-  } as unknown as ToastsStart);
+jest.mock('./datasets_tab_content', () => ({
+  DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
+}));
 
-const createHttpMock = (): Pick<HttpSetup, 'get' | 'put' | 'delete'> => ({
-  get: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+jest.mock('./data_sources_tab_content', () => ({
+  DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
+}));
+
+jest.mock('./create_dataset_wizard', () => ({
+  CreateDatasetWizardPage: ({ initialDataSet }: { initialDataSet?: { name: string } }) => (
+    <div data-test-subj="createDatasetWizard">
+      {initialDataSet ? `edit:${initialDataSet.name}` : 'create'}
+    </div>
+  ),
+}));
+
+const createToastsMock = () => ({
+  addSuccess: jest.fn(),
+  addDanger: jest.fn(),
+});
+
+const createServicesMock = ({
+  dataSources,
+  dataSets,
+}: {
+  dataSources: DataSource[];
+  dataSets: DataSetWithName[];
+}) => ({
+  dataSourcesClient: {
+    get: jest.fn().mockResolvedValue(dataSources),
+  },
+  datasetsClient: {
+    get: jest.fn().mockResolvedValue(dataSets),
+  },
+  toasts: createToastsMock(),
+  docLinks: {
+    links: {
+      dataFederation: {
+        overview: '',
+        quickstart: '',
+        dataSources: '',
+        datasets: '',
+        datasetSettings: '',
+        authentication: '',
+        staticCredentials: '',
+        federatedIdentity: '',
+        querying: '',
+        security: '',
+      },
+    },
+  },
 });
 
 describe('Main', () => {
-  it('defaults to the data sources tab when both lists are empty', async () => {
-    const http = createHttpMock();
-    (http.get as jest.Mock).mockImplementation(async (path: string) => {
-      if (path === DATA_SOURCES_LIST_ROUTE_PATH) {
-        return { data_sources: [] };
-      }
-      if (path === DATA_SETS_LIST_ROUTE_PATH) {
-        return { data_sets: [] };
-      }
-      throw new Error(`Unexpected GET: ${path}`);
+  it('stays on the datasets tab when both lists are empty', async () => {
+    const services = createServicesMock({ dataSources: [], dataSets: [] });
+
+    const { getByRole, getByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(services.dataSourcesClient.get).toHaveBeenCalled();
+    expect(services.datasetsClient.get).toHaveBeenCalled();
+
+    await act(async () => {
+      await Promise.all([
+        services.dataSourcesClient.get.mock.results[0].value,
+        services.datasetsClient.get.mock.results[0].value,
+      ]);
     });
+
+    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(getByRole('tab', { name: mainTranslations.tabs.sets })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('switches tabs when user clicks a tab', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'my-source', type: 's3', description: '', settings: {} }],
+      dataSets: [],
+    });
+
+    const { getByRole, getByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+
+    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sources }));
+
+    await waitFor(() => {
+      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
+    });
+
+    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('keeps the create wizard visible when both lists are empty', async () => {
+    const services = createServicesMock({ dataSources: [], dataSets: [] });
 
     const { getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/create']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 
-    // Starts on the sets tab, but should switch to sources once both requests complete.
-    expect(queryByTestId('dataSetsCreateButton')).toBeNull();
+    expect(getByTestId('createDatasetWizard')).toHaveTextContent('create');
 
     await waitFor(() => {
-      expect(getByTestId('dataSetsCreateButton')).toBeInTheDocument();
+      expect(services.dataSourcesClient.get).toHaveBeenCalled();
+      expect(services.datasetsClient.get).toHaveBeenCalled();
     });
+
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(queryByTestId('appHeaderTabs')).toBeNull();
+    expect(queryByTestId('appHeaderTitle')).toBeNull();
+    expect(getByTestId('createDatasetWizard')).toHaveTextContent('create');
   });
 
-  it('disables "Add dataset" when there are no data sources', async () => {
-    const http = createHttpMock();
-    (http.get as jest.Mock).mockImplementation(async (path: string) => {
-      if (path === DATA_SOURCES_LIST_ROUTE_PATH) {
-        return { data_sources: [] };
-      }
-      if (path === DATA_SETS_LIST_ROUTE_PATH) {
-        return { data_sets: [] };
-      }
-      throw new Error(`Unexpected GET: ${path}`);
+  it('opens the wizard with the matching dataset on the edit route', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [
+        {
+          name: 'logs-dataset',
+          data_source: 'source-1',
+          resource: 'bucket/*',
+          description: '',
+        },
+      ],
     });
 
-    const { getByRole, getByTestId } = render(
+    const { findByTestId, queryByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/edit/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 
-    // Wait until the tab auto-switch runs so we can reliably click from a stable state.
-    await waitFor(() => {
-      expect(getByTestId('dataSetsCreateButton')).toBeInTheDocument();
-    });
-
-    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sets }));
-
-    await waitFor(() => {
-      expect(getByTestId('dataSetsSetsCreateButton')).toBeDisabled();
-    });
+    expect(await findByTestId('createDatasetWizard')).toHaveTextContent('edit:logs-dataset');
+    expect(queryByTestId('appHeaderTabs')).toBeNull();
+    expect(queryByTestId('appHeaderTitle')).toBeNull();
   });
 
-  it('disables the edit action for a data source with an unsupported type', async () => {
-    const http = createHttpMock();
-    (http.get as jest.Mock).mockImplementation(async (path: string) => {
-      if (path === DATA_SOURCES_LIST_ROUTE_PATH) {
-        return {
-          data_sources: [
-            { name: 'supported', type: 's3', description: '', settings: {} },
-            // The backend can return a type outside DataSourceType (e.g. added on the ES
-            // side before the UI knows about it), which is what the edit action guards against.
-            { name: 'unsupported', type: 'http', description: '', settings: {} },
-          ],
-        };
-      }
-      if (path === DATA_SETS_LIST_ROUTE_PATH) {
-        return { data_sets: [] };
-      }
-      throw new Error(`Unexpected GET: ${path}`);
+  it('redirects to the datasets tab when the edit route dataset is missing', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [
+        {
+          name: 'other-dataset',
+          data_source: 'source-1',
+          resource: 'bucket/*',
+          description: '',
+        },
+      ],
     });
 
-    const { getByRole, getAllByTestId } = render(
+    const { findByTestId, queryByTestId } = render(
       <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/edit/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 
-    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sources }));
-
-    let editButtons: HTMLElement[] = [];
-    await waitFor(() => {
-      editButtons = getAllByTestId('dataSetsEditButton');
-      expect(editButtons).toHaveLength(2);
-    });
-
-    expect(editButtons[0]).toBeEnabled();
-    expect(editButtons[1]).toBeDisabled();
-  });
-
-  it('disables the delete action for a data source with connected datasets', async () => {
-    const http = createHttpMock();
-    (http.get as jest.Mock).mockImplementation(async (path: string) => {
-      if (path === DATA_SOURCES_LIST_ROUTE_PATH) {
-        return {
-          data_sources: [
-            { name: 'connected', type: 's3', description: '', settings: {} },
-            { name: 'unconnected', type: 's3', description: '', settings: {} },
-          ],
-        };
-      }
-      if (path === DATA_SETS_LIST_ROUTE_PATH) {
-        return {
-          data_sets: [{ name: 'my-dataset', data_source: 'connected', resource: 'bucket/*' }],
-        };
-      }
-      throw new Error(`Unexpected GET: ${path}`);
-    });
-
-    const { getByRole, getByTestId, getAllByTestId, findByText } = render(
-      <EuiProvider>
-        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
-      </EuiProvider>
-    );
-
-    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sources }));
-
-    let deleteButtons: HTMLElement[] = [];
-    await waitFor(() => {
-      deleteButtons = getAllByTestId('dataSetsDeleteIconButton');
-      expect(deleteButtons).toHaveLength(2);
-    });
-
-    expect(deleteButtons[0]).toBeDisabled();
-    expect(deleteButtons[1]).toBeEnabled();
-
-    fireEvent.mouseOver(deleteButtons[0]);
-    await findByText(mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription);
-
-    const connectedCheckbox = getByTestId('checkboxSelectRow-connected');
-    expect(connectedCheckbox).toBeDisabled();
-    fireEvent.mouseOver(connectedCheckbox);
-    await findByText(mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription);
+    expect(await findByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizard')).toBeNull();
   });
 });

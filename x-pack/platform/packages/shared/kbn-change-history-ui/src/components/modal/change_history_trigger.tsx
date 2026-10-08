@@ -6,16 +6,42 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiHeaderLink, type EuiHeaderLinkProps } from '@elastic/eui';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import * as i18n from '../timeline/translations';
 
-export function ChangeHistoryTrigger(): JSX.Element {
+type ChangeHistoryHeaderLinkProps = Pick<
+  EuiHeaderLinkProps,
+  'size' | 'iconSide' | 'iconSize' | 'color' | 'isDisabled' | 'isLoading' | 'aria-label'
+>;
+
+export interface ChangeHistoryTriggerProps {
+  label?: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+  headerLinkProps?: ChangeHistoryHeaderLinkProps;
+}
+
+export function ChangeHistoryTrigger({
+  label = i18n.TRIGGER_LABEL,
+  iconType = 'clock',
+  'data-test-subj': dataTestSubj = 'changeHistoryTrigger',
+  headerLinkProps,
+}: ChangeHistoryTriggerProps): JSX.Element {
   const { openModal } = useChangeHistoryModal();
 
   return (
-    <EuiButton iconType="clock" onClick={openModal} data-test-subj="changeHistoryTrigger">
-      {i18n.TRIGGER_LABEL}
-    </EuiButton>
+    <EuiHeaderLink
+      iconType={iconType}
+      size="s"
+      iconSide="left"
+      iconSize="m"
+      color="text"
+      onClick={openModal}
+      data-test-subj={dataTestSubj}
+      {...headerLinkProps}
+    >
+      {label}
+    </EuiHeaderLink>
   );
 }

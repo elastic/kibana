@@ -23,6 +23,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { useOAuthClients } from '../../hooks/oauth_clients/use_oauth_clients';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useKibana } from '../../hooks/use_kibana';
 import { useMcpClientsActions } from '../../context/mcp_clients_provider';
 import { labels } from '../../utils/i18n';
@@ -62,6 +63,7 @@ export const McpClientsTable = memo(() => {
   const {
     services: { analytics },
   } = useKibana();
+  const { docLinksService } = useAgentBuilderServices();
   const { clients, isLoading, error } = useOAuthClients();
   const { createMcpClient } = useMcpClientsActions();
   const [pageIndex, setPageIndex] = useState(0);
@@ -162,8 +164,7 @@ export const McpClientsTable = memo(() => {
                   >
                     {labels.tools.mcpClients.addMcpClientOAuthButtonLabel}
                   </EuiButton>,
-                  /* TODO: Documentation link when available */
-                  <EuiLink href={'#'} target="_blank">
+                  <EuiLink href={docLinksService.applicationConnections} target="_blank" external>
                     {labels.tools.mcpClients.noItemsPromptLearnMoreLinkLabel}
                   </EuiLink>,
                 ]}

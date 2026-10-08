@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type {
-  AgentHandlerContext,
-  ScopedRunnerRunAgentParams,
-  RunAgentReturn,
+import {
+  type AgentHandlerContext,
+  type ScopedRunnerRunAgentParams,
+  type RunAgentReturn,
 } from '@kbn/agent-builder-server';
 import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
+import { resolveTelemetryOrigin } from '../utils/pending_round';
 import {
   createAgentEventEmitter,
   forkContextForAgentRun,
@@ -21,6 +22,7 @@ import {
   createToolProvider,
   createSkillsService,
   createFilesystemServices,
+  resolveDeploymentContext,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -37,11 +39,13 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    http,
     savedObjects,
     modelProvider,
     toolsService,
     attachmentsService,
     renderersService,
+    conversationEventsService,
     resultStore,
     skillsStore,
     attachmentStateManager,
@@ -55,10 +59,24 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     analyticsService,
     trackingService,
     experimentalFeatures,
+    projectRouting,
+    conversationTemplates,
+    deductive,
+    deploymentInfo,
+    licensing,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+  const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
+  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  const deployment = await resolveDeploymentContext({
+    deploymentInfo,
+    request,
+    spaces,
+    licensing,
+    logger,
+  });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
@@ -70,10 +88,19 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   return {
     request,
     spaceId,
+    deployment,
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
-    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
+    selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
     toolRegistry,
@@ -103,17 +130,25 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationEvents: conversationEventsService,
+    conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    agentRegistry,
+    conversationClient,
+    ...(deductive ? { deductive } : {}),
     analyticsService,
     trackingService,
     filesystemService,
     bashService,
+    aiIndexResolver: manager.deps.agentsService.getAiIndexResolver(),
   };
 };
 
@@ -125,29 +160,45 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
+  const { agentsService, request, modelProvider } = parentManager.deps;
+
+  const resolveAgent = async () => {
+    const agentRegistry = await agentsService.getRegistry({ request });
+    const resolvedAgent = await agentRegistry.get(agentId, { access: 'use' });
+    // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+    const agentWithOverrides = {
+      ...resolvedAgent,
+      configuration: {
+        ...resolvedAgent.configuration,
+        ...(agentParams.configurationOverrides || {}),
+      },
+    };
+    const configuration = await agentsService.resolveAgentConfiguration({
+      agent: agentWithOverrides,
+      request,
+    });
+    return { agent: resolvedAgent, effectiveConfiguration: configuration };
+  };
+
+  const [{ agent, effectiveConfiguration }, { chatModel }] = await Promise.all([
+    resolveAgent(),
+    modelProvider.getDefaultModel(),
+  ]);
+  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
     agentId,
+    agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: resolveTelemetryOrigin({
+      conversation: agentParams.conversation,
+      requestOrigin: agentParams.origin?.type,
+    }),
   });
   const manager = parentManager.createChild(forkedContext);
-
-  const { agentsService, request } = manager.deps;
-  const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
-
-  // Single merge point for runtime overrides — consumed by both the agent handler
-  // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).
-  const effectiveConfiguration = {
-    ...agent.configuration,
-    ...(agentParams.configurationOverrides || {}),
-  };
   manager.deps.agentConfiguration = effectiveConfiguration;
-
-  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
-  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const agentResult = await withAgentSpan(
     { agent, conversationId: agentParams.conversation?.id, providerName },

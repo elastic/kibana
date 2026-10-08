@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -20,21 +20,18 @@ export function InfrastructureTabHelpPopover() {
     <HelpPopover
       anchorPosition="leftUp"
       button={
-        <EuiToolTip
-          content={
+        <HelpPopoverButton
+          tooltipContent={
             <span data-test-subj="apmInfrastructureTabHelpPopoverTooltipContent">
               {i18n.translate('xpack.apm.infraOverview.helpPopover.tooltipContent', {
                 defaultMessage: 'Infrastructure tab information',
               })}
             </span>
           }
-        >
-          <HelpPopoverButton
-            onClick={() => {
-              setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
-            }}
-          />
-        </EuiToolTip>
+          onClick={() => {
+            setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
+          }}
+        />
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}

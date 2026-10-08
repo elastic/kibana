@@ -43,11 +43,11 @@ export const User = lazySchema(() =>
     /**
      * User id.
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('User id.'),
     /**
      * User name.
      */
-    name: z.string().optional(),
+    name: z.string().optional().describe('User name.'),
   })
 );
 export type User = z.infer<typeof User>;
@@ -68,7 +68,7 @@ export const ScreenContext = lazySchema(() =>
     /**
      * The local timezone of the user.
      */
-    timeZone: z.string().optional(),
+    timeZone: z.string().optional().describe('The local timezone of the user.'),
   })
 );
 export type ScreenContext = z.infer<typeof ScreenContext>;
@@ -78,19 +78,19 @@ export const BulkCrudActionSummary = lazySchema(() =>
     /**
      * The number of failed actions.
      */
-    failed: z.number().int(),
+    failed: z.number().int().describe('The number of failed actions.'),
     /**
      * The number of skipped actions.
      */
-    skipped: z.number().int(),
+    skipped: z.number().int().describe('The number of skipped actions.'),
     /**
      * The number of successfully performed actions.
      */
-    succeeded: z.number().int(),
+    succeeded: z.number().int().describe('The number of successfully performed actions.'),
     /**
      * The total number of actions attempted.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('The total number of actions attempted.'),
   })
 );
 export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
@@ -100,11 +100,11 @@ export const BulkActionBase = lazySchema(() =>
     /**
      * Query to filter the bulk action.
      */
-    query: z.string().optional(),
+    query: z.string().optional().describe('Query to filter the bulk action.'),
     /**
      * Array of IDs to apply the action to.
      */
-    ids: z.array(z.string()).min(1).optional(),
+    ids: z.array(z.string()).min(1).optional().describe('Array of IDs to apply the action to.'),
   })
 );
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
@@ -117,11 +117,11 @@ export const PromptIds = lazySchema(() =>
     /**
      * The unique identifier for a specific prompt.
      */
-    promptId: z.string(),
+    promptId: z.string().describe('The unique identifier for a specific prompt.'),
     /**
      * The unique identifier for a group of prompts.
      */
-    promptGroupId: z.string(),
+    promptGroupId: z.string().describe('The unique identifier for a group of prompts.'),
   })
 );
 export type PromptIds = z.infer<typeof PromptIds>;

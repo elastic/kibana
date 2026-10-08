@@ -176,6 +176,9 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
+            aria-label={i18n.translate('xpack.infra.customDashboards.selectDashboard.ariaLabel', {
+              defaultMessage: 'Select dashboard',
+            })}
             placeholder={i18n.translate(
               'xpack.infra.customDashboards.selectDashboard.placeholder',
               {

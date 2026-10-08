@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { InputTextFieldSchema, RadioGroupFieldSchema, TextareaFieldSchema } from './fields';
+import {
+  ConditionRuleSchema,
+  FieldSchema,
+  InputTextFieldSchema,
+  MarkdownFieldSchema,
+  RadioGroupFieldSchema,
+  RefFieldSchema,
+  TextareaFieldSchema,
+  ToggleFieldSchema,
+} from './fields';
 
 const baseField = {
   name: 'env',
@@ -23,6 +32,12 @@ const baseInputTextField = {
   name: 'resolution',
   control: 'INPUT_TEXT' as const,
   type: 'keyword' as const,
+};
+
+const baseToggleField = {
+  name: 'requires_escalation',
+  control: 'TOGGLE' as const,
+  type: 'boolean' as const,
 };
 
 describe('ValidationSchema — required_on_close', () => {
@@ -79,6 +94,17 @@ describe('ValidationSchema — required_on_close', () => {
       expect(result.data.validation?.required).toBeUndefined();
       expect(result.data.validation?.required_on_close).toBe(true);
     }
+  });
+});
+
+describe('ConditionRuleSchema', () => {
+  it('accepts boolean literals in value', () => {
+    const result = ConditionRuleSchema.safeParse({
+      field: 'requires_escalation',
+      operator: 'eq',
+      value: true,
+    });
+    expect(result.success).toBe(true);
   });
 });
 
@@ -229,5 +255,115 @@ describe('TextareaFieldSchema', () => {
       metadata: { markdown: true, custom_key: 'value' },
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe('ToggleFieldSchema', () => {
+  it('accepts a toggle without metadata', () => {
+    const result = ToggleFieldSchema.safeParse(baseToggleField);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts metadata default: true', () => {
+    const result = ToggleFieldSchema.safeParse({
+      ...baseToggleField,
+      metadata: { default: true },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.default).toBe(true);
+    }
+  });
+
+  it('accepts metadata default: false', () => {
+    const result = ToggleFieldSchema.safeParse({
+      ...baseToggleField,
+      metadata: { default: false },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.default).toBe(false);
+    }
+  });
+
+  it('rejects non-boolean default values', () => {
+    const result = ToggleFieldSchema.safeParse({
+      ...baseToggleField,
+      metadata: { default: 'true' },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('RefFieldSchema — display/validation overrides', () => {
+  const showWhen = {
+    combine: 'all' as const,
+    rules: [{ field: 'open_tuning_request', operator: 'eq' as const, value: true }],
+  };
+
+  it('preserves a local display.show_when override authored alongside $ref', () => {
+    const result = RefFieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      display: { show_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.display?.show_when).toEqual(showWhen);
+    }
+  });
+
+  it('preserves a local validation.required_when override authored alongside $ref', () => {
+    const result = RefFieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      validation: { required_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required_when).toEqual(showWhen);
+    }
+  });
+
+  it('resolves a $ref entry with display through the top-level FieldSchema union', () => {
+    const result = FieldSchema.safeParse({
+      $ref: 'tuning_request_detail',
+      display: { show_when: showWhen },
+    });
+    expect(result.success).toBe(true);
+    if (result.success && '$ref' in result.data) {
+      expect(result.data.display?.show_when).toEqual(showWhen);
+    }
+  });
+});
+
+describe('MarkdownFieldSchema', () => {
+  it('defaults `type` to keyword when omitted (display-only fields never author a type)', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      metadata: { content: 'Follow these steps.' },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.type).toBe('keyword');
+    }
+  });
+
+  it('accepts an explicit type of keyword', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      type: 'keyword',
+      metadata: { content: 'Follow these steps.' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('requires metadata.content', () => {
+    const result = MarkdownFieldSchema.safeParse({
+      name: 'instructions',
+      control: 'MARKDOWN',
+      metadata: {},
+    });
+    expect(result.success).toBe(false);
   });
 });

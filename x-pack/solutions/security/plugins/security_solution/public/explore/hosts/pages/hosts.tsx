@@ -15,17 +15,17 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
-import { LastEventTime } from '../../../common/components/last_event_time';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
-import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -83,8 +83,9 @@ const HostsComponent = () => {
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const hasFullScreenContent = useHasFullScreenContent();
   const capabilities = useMlCapabilities();
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, docLinks } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === HostsTableType.events) {
@@ -100,7 +101,7 @@ const HostsComponent = () => {
   }, [globalFilters, severitySelection, tabName]);
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
 
   const [globalFilterQuery, kqlError] = useMemo(
@@ -168,23 +169,21 @@ const HostsComponent = () => {
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-          </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <Display show={!globalFullScreen}>
-              <HeaderPage
-                subtitle={
-                  <LastEventTime
-                    hostName={''}
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
-                }
+            {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+            {!hasFullScreenContent && (
+              <LastEventTimeHeader
                 title={i18n.PAGE_TITLE}
-                border
+                docLink={docLinks.links.securitySolution.entityAnalytics.explore.hostsPage}
+                indexKey={LastEventIndexKey.hosts}
+                indexNames={selectedPatterns}
               />
+            )}
+            <Display show={!globalFullScreen && !hasFullScreenContent}>
+              <SearchWithDataView dataView={dataView} />
+
+              <EuiSpacer size="l" />
 
               <HostsKpiComponent from={from} to={to} />
 

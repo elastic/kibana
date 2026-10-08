@@ -614,6 +614,13 @@ export async function loadIndexDocCount(indexName: string) {
   });
 }
 
+export async function loadIndexVectorCount(indexName: string) {
+  return sendRequest<{ vectorCount: number | null }>({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/vector_count`,
+    method: 'get',
+  });
+}
+
 export function useLoadIndexMappings(indexName: string) {
   return useRequest<MappingsResponse>({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
@@ -635,7 +642,7 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string, indexMode: string) {
+export function createIndex(indexName: string, indexMode?: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',

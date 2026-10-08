@@ -35,7 +35,7 @@ export interface AttachmentAnalyticsDoc {
   // and activity surfaces. `space_id` is singular — an attachment lives in
   // exactly one space. See `mappings/attachments.ts`.
   space_id: string;
-  cases: {
+  case: {
     id: string;
   };
   owner: string;
@@ -97,7 +97,7 @@ interface AttachmentUserDoc {
  * analytics index byte-for-byte equivalent regardless of which source
  * type an attachment was written as.
  *
- * For unmigrated externalReference / persistableState subtypes that
+ * For unmapped externalReference / persistableState subtypes that
  * have no entry in `EXTERNAL_REFERENCE_TYPE_MAP`, the transformer
  * falls back to `passThroughTransformer` which casts the legacy
  * attributes through unchanged. The doc-builder still works against
@@ -139,7 +139,7 @@ export function buildAttachmentDoc(
     // Top-level singular scoping field for implicit-privileges DLS. Attachment
     // SOs are space-isolated, so take the first namespace (default `default`).
     space_id: so.namespaces?.[0] ?? 'default',
-    cases: { id: caseId },
+    case: { id: caseId },
     owner: unified.owner,
     created_at: unified.created_at,
     created_by: toUser(unified.created_by),

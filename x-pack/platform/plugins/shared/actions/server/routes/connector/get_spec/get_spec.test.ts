@@ -90,6 +90,8 @@ describe('getConnectorSpecRoute', () => {
           secrets: { type: 'object', properties: {} },
         },
       },
+      isTestable: true,
+      actions: [{ name: 'listIncidents', description: 'List incidents', isTool: true }],
     };
     const responseBody = {
       metadata: {
@@ -101,6 +103,8 @@ describe('getConnectorSpecRoute', () => {
         is_technical_preview: true,
       },
       schema: clientResult.schema,
+      is_testable: true,
+      actions: [{ name: 'listIncidents', description: 'List incidents', is_tool: true }],
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 
@@ -124,6 +128,41 @@ describe('getConnectorSpecRoute', () => {
     });
   });
 
+  it('maps isTestable false to is_testable false in the response body', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsConfigUtils = createActionsConfigUtilsMock();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue({
+      metadata: {
+        id: 'test-connector',
+        displayName: 'Test Connector',
+        description: 'A test connector',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: {},
+      isTestable: false,
+      actions: [],
+    } as never);
+
+    getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: 'test-connector' } },
+      ['ok', 'notFound']
+    );
+
+    const result = await handler(context, req, res);
+
+    expect(result).toEqual({
+      body: expect.objectContaining({ is_testable: false }),
+    });
+  });
+
   it('passes configuration utilities from route registration to getConnectorSpec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -141,6 +180,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actions: [],
     } as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
@@ -202,6 +242,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actions: [],
     } as never);
 
     getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());

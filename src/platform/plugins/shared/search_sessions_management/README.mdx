@@ -1,0 +1,9 @@
+# searchSessionsManagement
+
+UI for search sessions (background search). The session core — `SessionService`, `SessionsClient`, server routes, saved objects and the `data.search.sessions.*` config — lives in the `data` plugin. This plugin sits on top of `data` and provides:
+
+- the **Background Search** management app (`management/kibana/search_sessions`)
+- the **Background searches** flyout, exposed as `searchSessionsManagement.openFlyout()` on the start contract
+- the toast notifier that tells users when a background search completes or fails
+
+Keeping this UI out of `data` means `data` doesn't depend on `management`.

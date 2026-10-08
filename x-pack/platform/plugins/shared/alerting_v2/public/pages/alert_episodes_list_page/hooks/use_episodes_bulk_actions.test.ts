@@ -77,4 +77,59 @@ describe('useEpisodesBulkActions', () => {
     result.current[0].isAvailable!({ selectedDocIds: ['0'] } as any);
     expect(action.isCompatible).toHaveBeenCalledWith({ episodes: [] });
   });
+
+  it('excludes rows with supports_actions=false from bulk action episode resolution', () => {
+    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
+    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
+    const action = stubAction();
+
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [action],
+        episodesData: [v2Episode, classicEpisode] as any,
+        onSuccess: jest.fn(),
+      })
+    );
+
+    result.current[0].isAvailable!({ selectedDocIds: ['0', '1'] } as any);
+    const compatibleCall = (action.isCompatible as jest.Mock).mock.calls[0][0];
+    const resolvedIds = compatibleCall.episodes.map((ep: any) => ep['episode.id']);
+    expect(resolvedIds).not.toContain('classic-ep');
+  });
+
+  it('onClick passes only actionable episodes when mixed rows are selected', () => {
+    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
+    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
+    const onSuccess = jest.fn();
+    const action = stubAction();
+
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [action],
+        episodesData: [v2Episode, classicEpisode] as any,
+        onSuccess,
+      })
+    );
+
+    result.current[0].onClick!({ selectedDocIds: ['0', '1'] } as any);
+    const executeCall = (action.execute as jest.Mock).mock.calls[0][0];
+    const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
+    expect(resolvedIds).not.toContain('classic-ep');
+  });
+
+  it('filters out actions with supportsBulk set to false', () => {
+    const bulkAction = stubAction({ id: 'BULK_ACTION' });
+    const singleOnlyAction = stubAction({ id: 'SINGLE_ONLY', supportsBulk: false });
+
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [bulkAction, singleOnlyAction],
+        episodesData: [],
+        onSuccess: jest.fn(),
+      })
+    );
+
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].key).toBe('BULK_ACTION');
+  });
 });

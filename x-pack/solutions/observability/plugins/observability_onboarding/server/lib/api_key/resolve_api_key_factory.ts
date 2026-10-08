@@ -12,12 +12,16 @@ import { createManagedOtlpServiceApiKey } from './create_managed_otlp_service_ap
 import { createPrometheusApiKey } from './create_prometheus_api_key';
 import { createEsOtlpApiKey } from './create_es_otlp_api_key';
 
-type ApiKeyFactory = (esClient: ElasticsearchClient, name: string) => Promise<{ encoded: string }>;
+type ApiKeyFactory = (
+  esClient: ElasticsearchClient,
+  name: string
+) => Promise<{ id: string; encoded: string }>;
 
 export interface ApiKeyFactoryContext {
   isManagedOtlpServiceAvailable: boolean;
   isServerless: boolean;
   managedOtlpPrwEndpointEnabled: boolean;
+  isManagedElasticsearchBulkEndpointAvailable: boolean;
 }
 
 export function resolveApiKeyFactory(
@@ -26,6 +30,7 @@ export function resolveApiKeyFactory(
     isManagedOtlpServiceAvailable,
     isServerless,
     managedOtlpPrwEndpointEnabled,
+    isManagedElasticsearchBulkEndpointAvailable,
   }: ApiKeyFactoryContext
 ): ApiKeyFactory {
   switch (id) {
@@ -36,6 +41,11 @@ export function resolveApiKeyFactory(
         ? createManagedOtlpServiceApiKey
         : createPrometheusApiKey;
     case ApiEndpointId.Elasticsearch:
-      return (esClient, name) => createShipperApiKey(esClient, name, true);
+      return isManagedElasticsearchBulkEndpointAvailable
+        ? createManagedOtlpServiceApiKey
+        : (esClient, name) => createShipperApiKey(esClient, name, true);
+    case ApiEndpointId.Supabase:
+    case ApiEndpointId.Vercel:
+      return createManagedOtlpServiceApiKey;
   }
 }

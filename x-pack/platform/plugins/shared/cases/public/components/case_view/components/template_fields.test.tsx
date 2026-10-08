@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
@@ -17,6 +17,12 @@ import { TemplateFields } from './template_fields';
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+}));
+
+// The field renderer reads update permissions from the cases context; this suite renders without
+// the CasesProvider, so supply the context directly.
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'], permissions: { update: true } }),
 }));
 
 const mockUseGetFieldDefinitions = jest.fn();
@@ -79,6 +85,7 @@ const defaultProps = {
 describe('TemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    onUpdateField.mockImplementation(({ onSuccess }) => onSuccess?.());
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },
@@ -96,10 +103,17 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Priority')).toBeInTheDocument();
   });
 
+  it('does not render the Extended fields heading when showHeader is false', () => {
+    render(<TemplateFields {...defaultProps} showHeader={false} />);
+
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+  });
+
   it('fetches the template with the correct id and version', () => {
     render(<TemplateFields {...defaultProps} />);
 
-    expect(mockUseGetTemplate).toHaveBeenCalledWith('template-1', 1);
+    expect(mockUseGetTemplate).toHaveBeenCalledWith('template-1', 1, { includeDeleted: true });
   });
 
   it('renders nothing when template is loading', () => {
@@ -112,7 +126,7 @@ describe('TemplateFields', () => {
 
   it('renders nothing when template has no fields', () => {
     mockUseGetTemplate.mockReturnValue({
-      data: { ...mockTemplate, definition: { name: 'Empty', fields: [] } },
+      data: { ...mockTemplate, definition: { fields: [] } },
       isLoading: false,
     });
 
@@ -125,7 +139,7 @@ describe('TemplateFields', () => {
     const templateWithoutLabels: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         fields: [{ name: 'hostname', control: FieldType.INPUT_TEXT, type: 'keyword' }],
       },
     };
@@ -140,7 +154,7 @@ describe('TemplateFields', () => {
     const templateWithUnknown: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: [{ name: 'unknownField', control: 'UNKNOWN_TYPE' as any, type: 'keyword' }],
       },
@@ -173,22 +187,44 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Effort')).toBeInTheDocument();
   });
 
+  /**
+   * The case view renders fields read-only with an explicit per-field Edit control
+   * (FieldsRenderer view mode), so every interaction must open the field's editor first.
+   */
+  const openFieldEditor = async (user: ReturnType<typeof userEvent.setup>, fieldName: string) => {
+    await user.click(screen.getByTestId(`template-field-edit-${fieldName}`));
+  };
+
   describe('text field inline-edit confirm/cancel', () => {
     const getSummaryInput = (): HTMLInputElement =>
       within(screen.getByTestId('template-field-summary')).getByRole('textbox') as HTMLInputElement;
 
-    it('does NOT show confirm/cancel buttons before the field is focused', () => {
+    it('does NOT show confirm/cancel buttons before the field is changed', () => {
       render(<TemplateFields {...defaultProps} />);
 
       expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
       expect(screen.queryByTestId('template-field-cancel-summary')).not.toBeInTheDocument();
     });
 
-    it('shows confirm and cancel buttons when the text field is focused', async () => {
+    it('does NOT show confirm/cancel buttons from focus alone, without a change', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       await user.click(getSummaryInput());
+
+      expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-field-cancel-summary')).not.toBeInTheDocument();
+    });
+
+    it('shows confirm and cancel buttons after the user types a change', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
 
       expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
       expect(screen.getByTestId('template-field-cancel-summary')).toBeInTheDocument();
@@ -198,8 +234,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
 
@@ -210,19 +246,80 @@ describe('TemplateFields', () => {
       });
       const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
       expect(lastCall.key).toBe('extended_fields');
-      expect(lastCall.value).toEqual(
-        expect.objectContaining({
-          summary_as_keyword: 'updated summary',
-        })
-      );
+      expect(lastCall.value).toEqual({ summary_as_keyword: 'updated summary' });
+    });
+
+    it('disables the confirm action and shows a spinner while saving', async () => {
+      let completeUpdate: (() => void) | undefined;
+      onUpdateField.mockImplementation(({ onSuccess }) => {
+        completeUpdate = onSuccess;
+      });
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+      await user.click(screen.getByTestId('template-field-confirm-summary'));
+
+      const confirmButton = screen.getByTestId('template-field-confirm-summary');
+      expect(confirmButton).toBeDisabled();
+      expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
+      expect(summary).toBeDisabled();
+      expect(screen.getByTestId('template-field-cancel-summary')).toBeDisabled();
+
+      act(() => completeUpdate?.());
+
+      // A successful save closes the editor and the row returns to its read view.
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
+      });
+      expect(screen.getByTestId('template-field-edit-summary')).toBeInTheDocument();
+    });
+
+    it('sends only the confirmed field, not the rest of the form', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+
+      await user.click(screen.getByTestId('template-field-confirm-summary'));
+
+      await waitFor(() => {
+        expect(onUpdateField).toHaveBeenCalled();
+      });
+      const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
+      // Exact equality: the payload carries the confirmed field alone, not the other saved values.
+      expect(lastCall.value).toEqual({ summary_as_keyword: 'updated summary' });
+      expect(lastCall.value).not.toHaveProperty('notes_as_keyword');
+    });
+
+    it('keeps the field dirty when the update fails', async () => {
+      onUpdateField.mockImplementation(({ onError }) => onError?.());
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+      await user.click(screen.getByTestId('template-field-confirm-summary'));
+
+      expect(summary.value).toBe('updated summary');
+      expect(summary).toBeEnabled();
+      expect(screen.getByTestId('template-field-confirm-summary')).toBeEnabled();
     });
 
     it('does NOT call onUpdateField when cancel button is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'discarded value');
 
@@ -235,8 +332,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'discarded value');
 
@@ -244,8 +341,11 @@ describe('TemplateFields', () => {
 
       await user.click(screen.getByTestId('template-field-cancel-summary'));
 
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(summary.value).toBe('test summary');
+        expect(screen.getByTestId('template-field-value-text-summary')).toHaveTextContent(
+          'test summary'
+        );
       });
     });
 
@@ -253,7 +353,10 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
-      await user.click(getSummaryInput());
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
 
       await user.click(screen.getByTestId('template-field-confirm-summary'));
@@ -267,7 +370,10 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
-      await user.click(getSummaryInput());
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-cancel-summary')).toBeInTheDocument();
 
       await user.click(screen.getByTestId('template-field-cancel-summary'));
@@ -281,8 +387,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'typed but not confirmed');
       // Tab away without clicking confirm
@@ -291,21 +397,20 @@ describe('TemplateFields', () => {
       expect(onUpdateField).not.toHaveBeenCalled();
     });
 
-    it('hides confirm/cancel buttons when the field loses focus (tab away)', async () => {
+    it('keeps confirm/cancel buttons visible when the field loses focus (tab away) while dirty', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
-      await user.click(getSummaryInput());
+      await openFieldEditor(user, 'summary');
+      const summary = getSummaryInput();
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
 
       await user.tab();
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-cancel-summary')).not.toBeInTheDocument();
-      });
+      expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-summary')).toBeInTheDocument();
     });
   });
 
@@ -315,18 +420,32 @@ describe('TemplateFields', () => {
         'textbox'
       ) as HTMLTextAreaElement;
 
-    it('does NOT show confirm/cancel buttons before the field is focused', () => {
+    it('does NOT show confirm/cancel buttons before the field is changed', () => {
       render(<TemplateFields {...defaultProps} />);
 
       expect(screen.queryByTestId('template-field-confirm-notes')).not.toBeInTheDocument();
       expect(screen.queryByTestId('template-field-cancel-notes')).not.toBeInTheDocument();
     });
 
-    it('shows confirm and cancel buttons when the textarea is focused', async () => {
+    it('does NOT show confirm/cancel buttons from focus alone, without a change', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       await user.click(getNotesInput());
+
+      expect(screen.queryByTestId('template-field-confirm-notes')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-field-cancel-notes')).not.toBeInTheDocument();
+    });
+
+    it('shows confirm and cancel buttons after the user types a change', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'notes');
+      const notes = getNotesInput();
+      await user.clear(notes);
+      await user.type(notes, 'updated notes');
 
       expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
       expect(screen.getByTestId('template-field-cancel-notes')).toBeInTheDocument();
@@ -336,8 +455,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'updated notes');
 
@@ -353,38 +472,54 @@ describe('TemplateFields', () => {
       );
     });
 
+    it('disables the textarea while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'notes');
+      const notes = getNotesInput();
+      await user.clear(notes);
+      await user.type(notes, 'updated notes');
+      await user.click(screen.getByTestId('template-field-confirm-notes'));
+
+      expect(notes).toBeDisabled();
+    });
+
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'discarded notes');
 
       await user.click(screen.getByTestId('template-field-cancel-notes'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(notes.value).toBe('some notes');
+        expect(screen.getByTestId('template-field-value-text-notes')).toHaveTextContent(
+          'some notes'
+        );
       });
     });
 
-    it('hides confirm/cancel buttons when the textarea loses focus', async () => {
+    it('keeps confirm/cancel buttons visible when the textarea loses focus while dirty', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
-      await user.click(getNotesInput());
+      await openFieldEditor(user, 'notes');
+      const notes = getNotesInput();
+      await user.clear(notes);
+      await user.type(notes, 'updated notes');
       expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
 
       await user.tab();
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-confirm-notes')).not.toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-cancel-notes')).not.toBeInTheDocument();
-      });
+      expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-notes')).toBeInTheDocument();
     });
   });
 
@@ -394,18 +529,32 @@ describe('TemplateFields', () => {
         'spinbutton'
       ) as HTMLInputElement;
 
-    it('does NOT show confirm/cancel buttons before the field is focused', () => {
+    it('does NOT show confirm/cancel buttons before the field is changed', () => {
       render(<TemplateFields {...defaultProps} />);
 
       expect(screen.queryByTestId('template-field-confirm-effort')).not.toBeInTheDocument();
       expect(screen.queryByTestId('template-field-cancel-effort')).not.toBeInTheDocument();
     });
 
-    it('shows confirm and cancel buttons when the number field is focused', async () => {
+    it('does NOT show confirm/cancel buttons from focus alone, without a change', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       await user.click(getEffortInput());
+
+      expect(screen.queryByTestId('template-field-confirm-effort')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('template-field-cancel-effort')).not.toBeInTheDocument();
+    });
+
+    it('shows confirm and cancel buttons after the user types a change', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'effort');
+      const effort = getEffortInput();
+      await user.clear(effort);
+      await user.type(effort, '10');
 
       expect(screen.getByTestId('template-field-confirm-effort')).toBeInTheDocument();
       expect(screen.getByTestId('template-field-cancel-effort')).toBeInTheDocument();
@@ -415,8 +564,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '10');
 
@@ -430,38 +579,52 @@ describe('TemplateFields', () => {
       expect(lastCall.value).toEqual(expect.objectContaining({ effort_as_integer: '10' }));
     });
 
+    it('disables the number input while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'effort');
+      const effort = getEffortInput();
+      await user.clear(effort);
+      await user.type(effort, '10');
+      await user.click(screen.getByTestId('template-field-confirm-effort'));
+
+      expect(effort).toBeDisabled();
+    });
+
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '99');
 
       await user.click(screen.getByTestId('template-field-cancel-effort'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(effort.value).toBe('5');
+        expect(screen.getByTestId('template-field-value-text-effort')).toHaveTextContent('5');
       });
     });
 
-    it('hides confirm/cancel buttons when the number field loses focus', async () => {
+    it('keeps confirm/cancel buttons visible when the number field loses focus while dirty', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
-      await user.click(getEffortInput());
+      await openFieldEditor(user, 'effort');
+      const effort = getEffortInput();
+      await user.clear(effort);
+      await user.type(effort, '10');
       expect(screen.getByTestId('template-field-confirm-effort')).toBeInTheDocument();
 
       await user.tab();
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-confirm-effort')).not.toBeInTheDocument();
-      });
-      await waitFor(() => {
-        expect(screen.queryByTestId('template-field-cancel-effort')).not.toBeInTheDocument();
-      });
+      expect(screen.getByTestId('template-field-confirm-effort')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-effort')).toBeInTheDocument();
     });
   });
 
@@ -482,6 +645,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
 
       expect(screen.getByTestId('template-field-confirm-priority')).toBeInTheDocument();
@@ -492,6 +656,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
       await user.click(screen.getByTestId('template-field-confirm-priority'));
 
@@ -503,18 +668,35 @@ describe('TemplateFields', () => {
       expect(lastCall.value).toEqual(expect.objectContaining({ priority_as_keyword: 'high' }));
     });
 
+    it('disables the select while saving', async () => {
+      onUpdateField.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await openFieldEditor(user, 'priority');
+      const priority = getPrioritySelect();
+      await user.selectOptions(priority, 'high');
+      await user.click(screen.getByTestId('template-field-confirm-priority'));
+
+      expect(priority).toBeDisabled();
+    });
+
     it('does NOT call onUpdateField and reverts value when cancel is clicked', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       const select = getPrioritySelect();
       await user.selectOptions(select, 'low');
 
       await user.click(screen.getByTestId('template-field-cancel-priority'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(select.value).toBe('medium');
+        expect(screen.getByTestId('template-field-value-text-priority')).toHaveTextContent(
+          'medium'
+        );
       });
     });
 
@@ -522,6 +704,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
       expect(screen.getByTestId('template-field-confirm-priority')).toBeInTheDocument();
 
@@ -536,6 +719,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'low');
       expect(screen.getByTestId('template-field-cancel-priority')).toBeInTheDocument();
 

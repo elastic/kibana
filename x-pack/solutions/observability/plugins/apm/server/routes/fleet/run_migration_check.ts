@@ -4,13 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RunMigrationCheckResponse } from '@kbn/apm-api-shared';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getApmPackagePolicy, getCloudAgentPolicy } from './get_cloud_apm_package_policy';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { isSuperuser } from './is_superuser';
+
+export interface RunMigrationCheckResponse {
+  has_cloud_agent_policy: boolean;
+  has_cloud_apm_package_policy: boolean;
+  cloud_apm_migration_enabled: boolean;
+  has_required_role: boolean | undefined;
+  cloud_apm_package_policy: PackagePolicy | undefined;
+  has_apm_integrations: boolean;
+  latest_apm_package_version: string;
+}
 
 export async function runMigrationCheck({
   config,

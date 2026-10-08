@@ -19,6 +19,8 @@ import { AIValueReportLayout } from './ai_value_report_layout';
 import { SAMPLE_VALUE_METRICS, SAMPLE_VALUE_METRICS_COMPARE } from './sample_data';
 import type { StartServices } from '../../../types';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
+import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useSecuritySolutionLinkProps } from '../../../common/components/links';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -49,6 +51,10 @@ jest.mock('../../../common/components/links', () => ({
     href: '/mock-attack-discovery',
     onClick: jest.fn(),
   })),
+}));
+
+jest.mock('../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
+  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
 }));
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -115,6 +121,7 @@ describe('AIValueReport', () => {
     ));
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
+    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
 
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
@@ -195,6 +202,30 @@ describe('AIValueReport', () => {
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
     expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
     expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(true);
+  });
+
+  it('renders the sample layout with Attacks link when the advanced setting is enabled', () => {
+    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
+      isLoading: false,
+      valueMetrics: {
+        ...mockValueMetrics,
+        attackDiscoveryCount: 0,
+      },
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+    mockuseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: false,
+      isLoading: false,
+    });
+
+    render(<AIValueReport {...defaultProps} />);
+
+    expect(screen.getByTestId('aiValueSampleAttackDiscoveryBanner')).toBeInTheDocument();
+    expect(screen.getByText('Go to Attacks')).toBeInTheDocument();
+    expect(useSecuritySolutionLinkProps).toHaveBeenCalledWith({ deepLinkId: 'attacks' });
   });
 
   it('renders the empty state when the feature was used before but the window has no discoveries', () => {

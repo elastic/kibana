@@ -51,7 +51,7 @@ describe('useDeleteMaintenanceWindow', () => {
 
     result.current.mutate({ maintenanceWindowId: '123' });
 
-    await waitFor(() => expect(mockAddSuccess).toBeCalledWith('Deleted maintenance window'));
+    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalledWith('Deleted maintenance window'));
   });
 
   it('should call onError if api fails', async () => {
@@ -64,7 +64,7 @@ describe('useDeleteMaintenanceWindow', () => {
     result.current.mutate({ maintenanceWindowId: '123' });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to delete maintenance window.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to delete maintenance window.')
     );
   });
 });

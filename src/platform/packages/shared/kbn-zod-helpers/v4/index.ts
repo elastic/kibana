@@ -11,6 +11,7 @@ export * from './kbn_zod_types';
 export * from './array_from_string';
 export * from './expect_parse_error';
 export * from './expect_parse_success';
+export * from './expect_pretty_error';
 export * from './is_valid_date_math';
 export * from './required_optional';
 export * from './safe_parse_result';

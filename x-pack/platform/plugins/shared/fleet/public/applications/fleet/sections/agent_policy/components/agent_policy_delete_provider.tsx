@@ -8,7 +8,6 @@
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiConfirmModal,
-  EuiCallOut,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
@@ -16,6 +15,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -215,11 +215,9 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       >
         {packagePoliciesWithMultiplePolicies && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               data-test-subj="deleteAgentPolicySharedIntegrationPoliciesCallout"
-              color="primary"
-              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deleteAgentPolicy.confirmModal.warningSharedIntegrationPolicies"
@@ -236,31 +234,28 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
             defaultMessage="Checking amount of affected agents…"
           />
         ) : isDeleteBlockedByAgents ? (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj="deleteAgentPolicyAgentsInUseCallout"
-            color="danger"
-            iconType="warning"
             title={i18n.translate(
               'xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
               {
                 defaultMessage: 'Policy in use',
               }
             )}
-          >
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
-              values={{ agentsCount }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
+                values={{ agentsCount }}
+              />
+            }
+          />
         ) : (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               data-test-subj="deleteAgentPolicyWarningCallout"
-              color="warning"
-              iconType="warning"
               title={
                 agentPolicy?.supports_agentless ? (
                   <FormattedMessage

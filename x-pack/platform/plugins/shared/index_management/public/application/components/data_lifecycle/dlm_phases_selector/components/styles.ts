@@ -15,6 +15,17 @@ export const usePhaseCardStyles = () => {
     titleText: css`
       font-weight: ${euiTheme.font.weight.bold};
     `,
+    disabledText: css`
+      color: ${euiTheme.colors.disabledText};
+    `,
+    disabledBadgeText: css`
+      .euiBadge__text {
+        color: ${euiTheme.colors.disabledText};
+      }
+    `,
+    titleItem: css`
+      min-width: 0;
+    `,
     fields: css`
       max-width: 100%;
     `,

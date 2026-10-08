@@ -8,8 +8,6 @@ import { hasApmPoliciesRoute } from './has_apm_policies';
 import { fleetAgentsRoute } from './fleet_agents';
 import { saveApmServerSchemaRoute } from './save_apm_server_schema';
 import { unsupportedApmServerSchemaRoute } from './unsupported_apm_server_schema';
-import { migrationCheckRoute } from './migration_check';
-import { cloudApmPackagePolicyRoute } from './cloud_apm_package_policy';
 import { javaAgentVersionsRoute } from './java_agent_versions';
 
 export const fleetRouteDefinitions = {
@@ -17,8 +15,6 @@ export const fleetRouteDefinitions = {
   agents: fleetAgentsRoute,
   saveSchema: saveApmServerSchemaRoute,
   unsupportedSchema: unsupportedApmServerSchemaRoute,
-  migrationCheck: migrationCheckRoute,
-  cloudApmPackagePolicy: cloudApmPackagePolicyRoute,
   javaAgentVersions: javaAgentVersionsRoute,
 };
 
@@ -28,6 +24,4 @@ export type {
   UnsupportedApmServerSchema,
   UnsupportedApmServerSchemaResponse,
 } from './unsupported_apm_server_schema';
-export type { RunMigrationCheckResponse } from './migration_check';
-export type { CloudApmPackagePolicyResponse } from './cloud_apm_package_policy';
 export type { JavaAgentVersionsResponse } from './java_agent_versions';
