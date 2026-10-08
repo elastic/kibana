@@ -65,6 +65,7 @@ describe('gap signals', () => {
 
     it('fires when there is no logon data and points at the System integration', () => {
       const gap = buildGapB1(registry, new Set(['okta']));
+      expect(buildGapB1(registry, new Set(['okta_system', 'system_security']))).toBeUndefined();
       expect(gap?.title).toBe(
         'Relationships unavailable: no logon data (Elastic Defend or System)'
       );
@@ -97,6 +98,25 @@ describe('gap signals', () => {
         value: 1,
         entityEuids: ['host:lonely'],
       });
+    });
+
+    it('counts an entity that is the target of another entity relationship', () => {
+      const gap = buildGapB4(
+        registry,
+        entityContext({
+          storylineEuids: ['user:golden', 'host:jump', 'host:lonely'],
+          docs: [
+            doc('user:alias@h@local', {
+              resolvedTo: 'user:golden',
+              hasRelationships: true,
+              relationshipTargets: ['host:jump'],
+            }),
+            doc('host:jump'),
+            doc('host:lonely'),
+          ],
+        })
+      );
+      expect(gap?.entityEuids).toEqual(['host:lonely']);
     });
 
     it('does nothing without storyline entities or an entity index', () => {

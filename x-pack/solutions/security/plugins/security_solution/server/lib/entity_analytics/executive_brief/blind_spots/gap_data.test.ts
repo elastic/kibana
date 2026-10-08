@@ -24,6 +24,7 @@ describe('summarizeEntityDoc', () => {
     ).toEqual({
       euid: 'user:alice',
       hasRelationships: true,
+      relationshipTargets: ['host:a'],
       resolvedTo: 'user:golden',
       criticality: 'high_impact',
     });
@@ -35,7 +36,7 @@ describe('summarizeEntityDoc', () => {
         'entity.id': ['host:b'],
         'entity.relationships.owns.ids': ['user:x'],
       })
-    ).toEqual({ euid: 'host:b', hasRelationships: true });
+    ).toEqual({ euid: 'host:b', hasRelationships: true, relationshipTargets: ['user:x'] });
   });
 
   it('does not count resolution or empty relationship arrays as relationships', () => {

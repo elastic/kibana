@@ -44,6 +44,8 @@ export interface EntityDocSummary {
   /** Golden euid this doc is an alias of, if any. */
   resolvedTo?: string;
   hasRelationships: boolean;
+  /** Entity ids this doc points at through any `entity.relationships.<kind>.ids`. */
+  relationshipTargets?: string[];
   criticality?: string;
 }
 
@@ -165,6 +167,14 @@ export const RELATIONSHIP_SOURCES: readonly RelationshipSource[] = [
     pattern: 'logs-entityanalytics_okta.*',
   },
   {
+    // The Okta system log integration is the common source of Okta identity data.
+    id: 'okta_system',
+    kind: 'idp',
+    label: 'Okta (system logs)',
+    pkg: 'okta',
+    pattern: 'logs-okta.system-*',
+  },
+  {
     id: 'entra_id',
     kind: 'idp',
     label: 'Microsoft Entra ID',
@@ -267,9 +277,12 @@ export const buildGapB4 = (
 ): BlindSpotGap | undefined => {
   if (storylineEuids.length === 0 || !entities.indexExists) return undefined;
   const grouped = groupByGolden(storylineEuids, entities.docs);
-  const without = storylineEuids.filter(
-    (euid) => !(grouped.get(euid) ?? []).some(({ hasRelationships }) => hasRelationships)
-  );
+  // Hosts usually only appear as the target of a user's access / communication relationship.
+  const targets = new Set(entities.docs.flatMap((doc) => doc.relationshipTargets ?? []));
+  const without = storylineEuids.filter((euid) => {
+    const group = grouped.get(euid) ?? [];
+    return !group.some(({ euid: id, hasRelationships }) => hasRelationships || targets.has(id));
+  });
   if (without.length === 0) return undefined;
   return makeGap(registry, 'B4', 'attribution_gap', 'info', {
     title: `${without.length} storyline ${plural(

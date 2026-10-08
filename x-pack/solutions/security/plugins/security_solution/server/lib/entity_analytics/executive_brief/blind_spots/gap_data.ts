@@ -73,12 +73,13 @@ export const summarizeEntityDoc = (source: object): EntityDocSummary | undefined
     readField(source, 'entity.relationships.resolution.resolved_to')
   );
   const [criticality] = asStringArray(readField(source, 'asset.criticality'));
-  const hasRelationships = RELATIONSHIP_KINDS.some(
-    (kind) => asStringArray(readField(source, `entity.relationships.${kind}.ids`)).length > 0
+  const relationshipTargets = RELATIONSHIP_KINDS.flatMap((kind) =>
+    asStringArray(readField(source, `entity.relationships.${kind}.ids`))
   );
   return {
     euid,
-    hasRelationships,
+    hasRelationships: relationshipTargets.length > 0,
+    ...(relationshipTargets.length > 0 ? { relationshipTargets } : {}),
     ...(resolvedTo ? { resolvedTo } : {}),
     ...(criticality ? { criticality } : {}),
   };
@@ -102,6 +103,10 @@ export const fetchEntityDocs = async (
           should: [
             { terms: { 'entity.id': [...euids] } },
             { terms: { 'entity.relationships.resolution.resolved_to': [...euids] } },
+            // Entities that point at the storyline entities (their outbound relationships).
+            ...RELATIONSHIP_KINDS.map((kind) => ({
+              terms: { [`entity.relationships.${kind}.ids`]: [...euids] },
+            })),
           ],
           minimum_should_match: 1,
         },
