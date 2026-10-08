@@ -124,9 +124,12 @@ describe('user extraction modes share identity logic', () => {
   });
 
   it('gates priority on the declared gate and nonPriority on its complement', () => {
-    expect(priority.extractionGate).toBe(single.priorityExtractionGate);
+    expect(priority.extractionGate).toBe(single.extraction.priorityExtractionGate);
     expect(nonPriority.extractionGate).toEqual({
-      or: [{ field: 'event.kind', exists: false }, { not: single.priorityExtractionGate }],
+      or: [
+        { field: 'event.kind', exists: false },
+        { not: single.extraction.priorityExtractionGate },
+      ],
     });
   });
 });

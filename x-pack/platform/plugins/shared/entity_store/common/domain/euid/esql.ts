@@ -8,14 +8,18 @@
 import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
 import { castField } from '../../esql/cast';
 import type {
-  EntityDefinitionOfAnyType,
+  EntityDefinitionWithoutId,
   EntityDefinitionType,
   EuidRankingBranch,
   FieldEvaluation,
   EuidAttribute,
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import {
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
@@ -38,6 +42,7 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
+  getFieldEvaluations,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
@@ -66,7 +71,7 @@ export function collectRankingFields(branches: EuidRankingBranch[]): Set<string>
  * identifying information or fails the definition's pipeline gate.
  */
 export function getEuidEsqlFilterBasedOnDocument(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: any
 ): string | undefined {
   if (!doc) {
@@ -89,11 +94,13 @@ export function getEuidEsqlFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  const preAggFieldOverrides = getPreAggFieldOverrides(entityDefinition);
+  if (preAggFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, preAggFieldOverrides);
   }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  const postStatsFieldOverrides = getPostStatsFieldOverrides(entityDefinition);
+  if (postStatsFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, postStatsFieldOverrides);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;
@@ -383,11 +390,11 @@ export function getHostScopedUserEuidEsql(): {
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity definition.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsql(definition: EntityDefinitionOfAnyType): string | undefined {
+export function getFieldEvaluationsEsql(definition: EntityDefinitionWithoutId): string | undefined {
   // Use only top-level shared evaluations (e.g. entity.source).
   // Identity-specific evaluations (e.g. entity.namespace) are emitted by
   // getEuidEsqlEvaluation directly, co-located with the EUID expression.
-  const evaluations = definition.fieldEvaluations ?? [];
+  const evaluations = getFieldEvaluations(definition);
   if (evaluations.length === 0) {
     return undefined;
   }
@@ -411,7 +418,7 @@ export function getFieldEvaluationsEsql(definition: EntityDefinitionOfAnyType): 
  * @param definition - The entity definition
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
-export function getEuidEsqlDocumentsContainsIdFilter(definition: EntityDefinitionOfAnyType) {
+export function getEuidEsqlDocumentsContainsIdFilter(definition: EntityDefinitionWithoutId) {
   const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -437,7 +444,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(definition: EntityDefinitio
  * Lookup-only options (such as `excludedUserNames`) are already applied to the definition passed in.
  */
 export function getEuidEsqlEvaluation(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   outputColumn: string,
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ): string {
