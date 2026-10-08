@@ -110,10 +110,13 @@ export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
   }
 );
 
-export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
-  defaultMessage:
-    'AlertZero automatically investigates security alerts and proposes actions. Ask an administrator to enable a Watch worker to start receiving investigations.',
-});
+export const ONBOARDING_CONTINUE_REQUIRES_WRITE = i18n.translate(
+  'xpack.alertzero.onboarding.continueRequiresWrite',
+  {
+    defaultMessage:
+      'You need the AlertZero All privilege to set up Watches. Ask an administrator to enable them.',
+  }
+);
 
 // Onboarding-specific one-line descriptions, separate from the technical worker descriptions used
 // on the Watch settings page.
