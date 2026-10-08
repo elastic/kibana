@@ -14,7 +14,11 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
-import { createDataSource } from '../../../../../common/data_sources';
+import {
+  createDataSource,
+  createEsqlDataSource,
+  isEsqlSource,
+} from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
@@ -35,10 +39,14 @@ export const fromSavedObjectTabToAppState = ({
       grid: tab.grid,
       hideChart: tab.hideChart,
       hideTable: tab.hideTable,
-      dataSource: createDataSource({
-        query: tab.serializedSearchSource.query,
-        dataView: tab.serializedSearchSource.index,
-      }),
+      dataSource:
+        isOfAggregateQueryType(tab.serializedSearchSource.query) &&
+        tab.esqlTimeFieldName !== undefined
+          ? createEsqlDataSource(tab.esqlTimeFieldName)
+          : createDataSource({
+              query: tab.serializedSearchSource.query,
+              dataView: tab.serializedSearchSource.index,
+            }),
       query: tab.serializedSearchSource.query,
       sort: tab.sort,
       viewMode: tab.viewMode,
@@ -210,6 +218,11 @@ export const fromTabStateToSavedObjectTab = ({
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
     esqlApproximation: isTextBasedQuery ? tab.appState.esqlApproximation : undefined,
+    ...(isTextBasedQuery &&
+      isEsqlSource(tab.appState.dataSource) &&
+      tab.appState.dataSource.timeFieldName !== undefined && {
+        esqlTimeFieldName: tab.appState.dataSource.timeFieldName,
+      }),
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,

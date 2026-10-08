@@ -96,6 +96,24 @@ describe('EsqlSource', () => {
       expect(a.id).not.toBe(b.id);
     });
 
+    it('keeps an explicit choice of no time field separate from a detected time field', async () => {
+      const query = 'FROM logs-* | KEEP @timestamp';
+      const withTime = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const withoutTime = await EsqlSource.create({
+        query,
+        resultColumns: [],
+        timeFieldName: null,
+      });
+
+      expect(withoutTime.timeFieldName).toBeUndefined();
+      expect(withoutTime.isTimeBased()).toBe(false);
+      expect(withoutTime.id).not.toBe(withTime.id);
+    });
+
     it('produces a different id when the title differs', async () => {
       const a = await EsqlSource.create({
         query: 'FROM logs-*',
@@ -537,6 +555,18 @@ describe('EsqlSource', () => {
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
         { name: 'bytes', type: 'number', esType: 'long', source: 'index' },
       ]);
+    });
+
+    it('does not detect a time field when none is explicitly selected', async () => {
+      const http = createHttp({ timeField: '@timestamp' });
+      const source = await EsqlSource.create({
+        query: 'FROM logs-http-no-time-*',
+        http,
+        timeFieldName: null,
+      });
+
+      expect(postedPaths(http)).toEqual([SOURCE_INFO_ROUTE]);
+      expect(source.timeFieldName).toBeUndefined();
     });
 
     it('marks STATS/EVAL columns as computed', async () => {

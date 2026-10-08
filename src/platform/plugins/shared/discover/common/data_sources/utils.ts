@@ -25,8 +25,9 @@ export const createDataViewDataSource = ({
   dataViewId,
 });
 
-export const createEsqlDataSource = (): EsqlDataSource => ({
+export const createEsqlDataSource = (timeFieldName?: string | null): EsqlDataSource => ({
   type: DataSourceType.Esql,
+  ...(timeFieldName !== undefined ? { timeFieldName } : {}),
 });
 
 export const createDataSource = ({

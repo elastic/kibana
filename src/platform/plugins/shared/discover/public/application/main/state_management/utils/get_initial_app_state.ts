@@ -92,6 +92,15 @@ export function getInitialAppState({
     mergedState.dataSource = createEsqlDataSource();
   }
 
+  if (
+    isOfAggregateQueryType(mergedState.query) &&
+    isEsqlSource(mergedState.dataSource) &&
+    mergedState.dataSource.timeFieldName === undefined &&
+    persistedTab?.esqlTimeFieldName !== undefined
+  ) {
+    mergedState.dataSource = createEsqlDataSource(persistedTab.esqlTimeFieldName);
+  }
+
   return handleSourceColumnState(mergedState, services.uiSettings);
 }
 
@@ -218,10 +227,13 @@ function getDefaultAppState({
   const chartHidden = getChartHidden(storage, 'discover');
   const tableHidden = getTableHidden(storage, 'discover');
   const sidebarHidden = getSidebarHidden(storage, 'discover');
-  const dataSource = createDataSource({
-    dataView: dataView ?? persistedTab?.serializedSearchSource.index,
-    query,
-  });
+  const dataSource =
+    isEsqlQuery && persistedTab?.esqlTimeFieldName !== undefined
+      ? createEsqlDataSource(persistedTab.esqlTimeFieldName)
+      : createDataSource({
+          dataView: dataView ?? persistedTab?.serializedSearchSource.index,
+          query,
+        });
 
   const defaultState: DiscoverAppState = {
     query,

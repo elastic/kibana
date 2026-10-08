@@ -27,7 +27,7 @@ import { appendAdHocDataViews } from './data_views';
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
-import { isDataViewSource } from '../../../../../../common/data_sources';
+import { isDataViewSource, isEsqlSource } from '../../../../../../common/data_sources';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -204,6 +204,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       resolveEsqlSource({
         esql,
         services,
+        timeFieldName:
+          isEsqlSource(urlAppState.dataSource) && urlAppState.dataSource.timeFieldName !== undefined
+            ? urlAppState.dataSource.timeFieldName
+            : persistedTab?.esqlTimeFieldName,
         esqlVariables: initialEsqlVariables,
         timeRange:
           urlGlobalState?.time ??

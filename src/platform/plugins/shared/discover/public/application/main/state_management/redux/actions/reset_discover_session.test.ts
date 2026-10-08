@@ -267,6 +267,7 @@ describe('resetDiscoverSession', () => {
       },
       attributesOverrides: { controlGroupState: mockControlState },
     });
+    persistedTab.esqlTimeFieldName = null;
     const resolveSpy = jest
       .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
       .mockResolvedValue(await createResolvedMockEsqlSource());
@@ -283,6 +284,7 @@ describe('resetDiscoverSession', () => {
       expect.objectContaining({
         esql: 'FROM logs-* | WHERE host == ?foo',
         esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+        timeFieldName: null,
       })
     );
     resolveSpy.mockRestore();

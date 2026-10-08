@@ -151,7 +151,7 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
   ) {
     dispatch(internalStateSlice.actions.setEsqlVariables({ tabId, esqlVariables }));
 
-    const query = selectTab(getState(), tabId).appState.query;
+    const { query, dataSource } = selectTab(getState(), tabId).appState;
     if (isNonEmptyEsqlQuery(query)) {
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
@@ -159,6 +159,9 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
         esql: query.esql,
         services,
         esqlVariables,
+        timeFieldName: isDataSourceType(dataSource, DataSourceType.Esql)
+          ? dataSource.timeFieldName
+          : undefined,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });

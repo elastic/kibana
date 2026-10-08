@@ -14,7 +14,9 @@ import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHideFor,
+  EuiSelect,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -33,6 +35,11 @@ import {
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
 import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  createEsqlDataSource,
+  DataSourceType,
+  isDataSourceType,
+} from '../../../../../common/data_sources';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -392,6 +399,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const dispatch = useInternalStateDispatch();
   const hideSidebar = useAppStateSelector((state) => state.hideSidebar ?? false);
+  const appDataSource = useAppStateSelector((state) => state.dataSource);
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
 
   useEffect(() => {
     const visibility = unifiedFieldListSidebarContainerApi?.sidebarVisibility;
@@ -430,6 +439,90 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [dispatch, setFieldListExistingFieldsInfoUiState]
   );
 
+  const isEsqlMode = isDataSourceType(appDataSource, DataSourceType.Esql);
+  const detectedTimeField =
+    sidebarState.dataSource?.kind === 'esql'
+      ? sidebarState.dataSource.timeFieldName
+      : selectedDataView?.timeFieldName;
+  const selectedTimeField = isEsqlMode
+    ? appDataSource.timeFieldName === undefined
+      ? detectedTimeField
+      : appDataSource.timeFieldName
+    : undefined;
+  const [sourceDateFields, setSourceDateFields] = useState<string[]>([]);
+  useEffect(() => {
+    const source = sidebarState.dataSource;
+    if (source?.kind !== 'esql') {
+      setSourceDateFields([]);
+      return;
+    }
+    setSourceDateFields([]);
+    let active = true;
+    source
+      .getFilterableFields(services.http)
+      .then((fields) => {
+        if (active) {
+          setSourceDateFields(fields.filter(({ type }) => type === 'date').map(({ name }) => name));
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setSourceDateFields([]);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [sidebarState.dataSource, services.http]);
+
+  const dateFields = Array.from(
+    new Set([
+      ...sourceDateFields,
+      ...(sidebarState.allFields ?? selectedDataView?.fields.getAll() ?? [])
+        .filter(({ type }) => type === 'date')
+        .map(({ name }) => name),
+    ])
+  );
+  if (selectedTimeField && !dateFields.includes(selectedTimeField)) {
+    dateFields.push(selectedTimeField);
+  }
+  dateFields.sort();
+
+  const timeFieldSelector = isEsqlMode ? (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('discover.fieldChooser.esqlTimeFieldLabel', {
+        defaultMessage: 'Time field',
+      })}
+    >
+      <EuiSelect
+        fullWidth
+        compressed
+        data-test-subj="discoverEsqlTimeFieldSelect"
+        aria-label={i18n.translate('discover.fieldChooser.esqlTimeFieldAriaLabel', {
+          defaultMessage: 'Choose a time field',
+        })}
+        options={[
+          {
+            value: 'none',
+            text: i18n.translate('discover.fieldChooser.noTimeFieldDropDownOptionLabel', {
+              defaultMessage: 'No time field',
+            }),
+          },
+          ...dateFields.map((name) => ({ value: `field:${name}`, text: name })),
+        ]}
+        value={selectedTimeField ? `field:${selectedTimeField}` : 'none'}
+        onChange={(event) => {
+          const timeFieldName =
+            event.target.value === 'none' ? null : event.target.value.slice('field:'.length);
+          dispatch(
+            updateAppState({ appState: { dataSource: createEsqlDataSource(timeFieldName) } })
+          );
+        }}
+      />
+    </EuiFormRow>
+  ) : null;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -457,7 +550,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onFieldEdited={onFieldEdited}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}
-            prependInFlyout={prependDataViewPickerForMobile}
+            prepend={timeFieldSelector}
+            prependInFlyout={() => (
+              <>
+                {prependDataViewPickerForMobile()}
+                {timeFieldSelector}
+              </>
+            )}
             ref={initializeUnifiedFieldListSidebarContainerApi}
             services={services}
             showFieldList={showFieldList}

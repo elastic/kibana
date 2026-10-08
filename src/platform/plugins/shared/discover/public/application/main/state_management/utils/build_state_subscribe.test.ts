@@ -242,6 +242,35 @@ describe('buildStateSubscribe', () => {
     expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
+  it('resolves and fetches when the ES|QL time field changes without changing the query', async () => {
+    const appState = {
+      query: { esql: 'FROM logs-*' },
+      dataSource: { type: DataSourceType.Esql as const },
+    };
+    const setAppState = toolkit.injectCurrentTab(internalStateActions.setAppState);
+    toolkit.internalState.dispatch(setAppState({ appState }));
+    toolkit.internalState.dispatch(setAppState({ appState }));
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(
+        await createResolvedMockEsqlSource([], [], 'event.created', 'FROM logs-*')
+      );
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql, timeFieldName: 'event.created' },
+        },
+      })
+    );
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ timeFieldName: 'event.created' })
+    );
+    expect(dataState.refetch$.next).toHaveBeenCalled();
+  });
+
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);

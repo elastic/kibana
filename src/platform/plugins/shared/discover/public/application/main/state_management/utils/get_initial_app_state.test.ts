@@ -360,6 +360,29 @@ describe('getInitialAppState', () => {
     );
   });
 
+  test('restores a saved ES|QL time field choice', () => {
+    const services = createDiscoverServicesMock();
+    const args = {
+      initialUrlState: undefined,
+      persistedTab: {
+        ...getPersistedTab({ services }),
+        esqlTimeFieldName: null,
+        serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+      },
+      dataView: undefined,
+      services,
+    };
+    const appState = getInitialAppState(args);
+
+    expect(appState.dataSource).toEqual(createEsqlDataSource(null));
+    expect(
+      getInitialAppState({
+        ...args,
+        initialUrlState: { dataSource: createEsqlDataSource() },
+      }).dataSource
+    ).toEqual(createEsqlDataSource(null));
+  });
+
   test('should return expected dataSource', () => {
     const services = createDiscoverServicesMock();
     const actualForEsql = getInitialAppState({
