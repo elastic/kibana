@@ -13,6 +13,9 @@ import { validateValue } from './schema_violations';
 import type { ContractOperation, Violation } from './types';
 import { validateContent } from './validate_content';
 
+/** The query parameter that selects the page in opaque next-page URLs the mock issues. */
+export const MOCK_PAGE_PARAM = 'contract-mock-page';
+
 export interface RequestInput extends ParameterInput {
   /** Parsed JSON, or the raw text for other media types. */
   readonly body?: unknown;
@@ -45,6 +48,7 @@ const checkQueryEncoding = (
   const undeclared = Object.keys(query)
     .filter(
       (key) =>
+        key !== MOCK_PAGE_PARAM &&
         !declared.some(
           ({ name, style }) =>
             key === name || (style === 'deepObject' && key.startsWith(`${name}[`))

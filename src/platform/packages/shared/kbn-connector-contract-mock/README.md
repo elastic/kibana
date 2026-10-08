@@ -59,7 +59,7 @@ Operations listed in `pagination` (method, path template and a descriptor from t
 - `cursor`: the next cursor is written at `nextPath` in the body, or in the `nextPath` header with `response.in: 'header'` (and at `hasMorePath`, if given); the last page signals the end as the vendor does (`empty_string`, `null` or `missing`). Cursors are opaque positions; a cursor the mock didn't issue gets **400**.
 - `offset` and `page`: the total is written at `totalPath`, if given.
 - `link`: the next page's URL is sent in a `Link: <url>; rel="next"` header, as on GitHub, and left out on the last page.
-- `next_url`: the next page's URL is written at `nextPath` in the body, as with Microsoft Graph's `@odata.nextLink`, and is `null` or missing on the last page.
+- `next_url`: the next page's URL is written at `nextPath` in the body, as with Microsoft Graph's `@odata.nextLink`, and is `null` or missing on the last page. Leave out `request` when the URL is opaque and no source names its page parameter, as with Azure's `nextLink`: the mock then selects pages with its own `contract-mock-page` query parameter, which request validation ignores.
 
 Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`. An empty `itemsPath` means the body is the collection itself, as with Datadog's `GET /api/v1/monitor`; such a body has no room for a next cursor, URL or total, so these operations page by offset, page number, `Link` header or a cursor in a header.
 

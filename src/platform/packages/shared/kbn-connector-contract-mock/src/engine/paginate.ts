@@ -11,6 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
+import { MOCK_PAGE_PARAM } from '../openapi/validate_request';
 import type { ContractOperation } from '../openapi/types';
 import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
 import { toOperationKey } from './response_engine';
@@ -90,7 +91,11 @@ export type PaginationDescriptor =
   | {
       /** The next page's URL is in the body, e.g. Microsoft Graph's `@odata.nextLink`. */
       readonly style: 'next_url';
-      readonly request: NextUrlRequest;
+      /**
+       * Omitted when the URL is opaque, as Azure's `nextLink` is: clients follow it as given, so
+       * the mock selects the page with a query parameter of its own, `contract-mock-page`.
+       */
+      readonly request?: NextUrlRequest;
       readonly response: { readonly itemsPath: string; readonly nextPath: string };
       readonly end?: 'null' | 'missing';
       readonly defaultSize?: number;
@@ -123,6 +128,8 @@ type RequestParameters = Pick<ContractRequest, 'query' | 'headers' | 'body'>;
 const DEFAULT_COLLECTION_SIZE = 3;
 const DEFAULT_PAGE_SIZE = 10;
 const CURSOR_PREFIX = 'contract-mock:';
+// Opaque next-page URLs carry the mock's own cursor.
+const OPAQUE_REQUEST: CursorRequest = { cursorParam: MOCK_PAGE_PARAM };
 
 const encodeCursor = (position: number): string =>
   Buffer.from(`${CURSOR_PREFIX}${position}`).toString('base64url');
@@ -156,17 +163,20 @@ const toInteger = (value: unknown): number | undefined => {
   return Number.isInteger(number) ? number : undefined;
 };
 
+const requestOf = (pagination: PaginationDescriptor): NextUrlRequest & Located =>
+  pagination.request ?? OPAQUE_REQUEST;
+
 // Next-page URLs carry their parameters in the query.
 const parameterLocation = (pagination: PaginationDescriptor): PaginationParameterLocation =>
   pagination.style === 'link' || pagination.style === 'next_url'
     ? 'query'
-    : pagination.request.in ?? 'query';
+    : requestOf(pagination).in ?? 'query';
 
 const readPageSize = (
   pagination: PaginationDescriptor,
   read: (name: string) => unknown
 ): number => {
-  const { sizeParam } = pagination.request;
+  const { sizeParam } = requestOf(pagination);
   return (
     (sizeParam === undefined ? undefined : toInteger(read(sizeParam))) ??
     pagination.defaultSize ??
@@ -273,11 +283,12 @@ const readRecordedNext = (
   } else if (pagination.style === 'next_url') {
     url = isRecord(body) ? get(body, pagination.response.nextPath) : undefined;
   }
-  if (typeof url !== 'string' || !('cursorParam' in pagination.request)) {
+  const request = requestOf(pagination);
+  if (typeof url !== 'string' || !('cursorParam' in request)) {
     return undefined;
   }
   try {
-    return new URL(url).searchParams.get(pagination.request.cursorParam) ?? undefined;
+    return new URL(url).searchParams.get(request.cursorParam) ?? undefined;
   } catch {
     return undefined;
   }
@@ -310,11 +321,12 @@ const readRecordedPage = (
     body: request.body,
   };
   const read = (name: string) => readParameter(parameters, parameterLocation(pagination), name);
-  const cursor = 'cursorParam' in pagination.request ? read(pagination.request.cursorParam) : '';
+  const pageRequest = requestOf(pagination);
+  const cursor = 'cursorParam' in pageRequest ? read(pageRequest.cursorParam) : '';
   const next = readRecordedNext(pagination, response);
   return typeof cursor === 'string' && cursor !== ''
     ? [{ items, cursor, next }]
-    : [{ items, start: readStart(pagination.request, read, readPageSize(pagination, read)), next }];
+    : [{ items, start: readStart(pageRequest, read, readPageSize(pagination, read)), next }];
 };
 
 /**
@@ -406,7 +418,7 @@ const paginate = (
   }
   const read = (name: string) => readParameter(request, parameterLocation(pagination), name);
   const size = readPageSize(pagination, read);
-  const start = readStart(pagination.request, read, size, recorded?.positions);
+  const start = readStart(requestOf(pagination), read, size, recorded?.positions);
   if (start === undefined) {
     return BAD_CURSOR;
   }
@@ -423,7 +435,7 @@ const paginate = (
   const nextUrl =
     next === undefined || cursor === undefined
       ? undefined
-      : toNextUrl(request, pagination.request, { start: next, size, cursor });
+      : toNextUrl(request, requestOf(pagination), { start: next, size, cursor });
   let { headers } = response;
 
   switch (pagination.style) {
