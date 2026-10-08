@@ -25017,8 +25017,8 @@ packages:
     resolution: {integrity: sha512-o5sIvza+ygxvws5TAtDX/SwMzgyS5YaeGpNkPd0TFVtYTNQp2nRpC/o7YU4A/zP6Hp4hDrLOgaZUKNc3c4huMQ==}
     engines: {node: '>=8.0'}
 
-  traverse@0.6.11:
-    resolution: {integrity: sha512-vxXDZg8/+p3gblxB6BhhG5yWVn1kGRlaL8O78UDXc3wRnPizB5g83dcvWV1jpDMIPnjZjOFuxlMmE82XJ4407w==}
+  traverse@0.6.14:
+    resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
     engines: {node: '>= 0.4'}
 
   tree-dump@1.1.0:
@@ -25202,8 +25202,8 @@ packages:
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
 
-  typedarray.prototype.slice@1.0.5:
-    resolution: {integrity: sha512-q7QNVDGTdl702bVFiI5eY4l/HkgCM6at9KhcFbgUAzezHFbOVy4+0O/lCjsABEQwbZPravVfBIiBVGo89yzHFg==}
+  typedarray.prototype.slice@1.0.6:
+    resolution: {integrity: sha512-r+7YvGfM5TkTiDQ5EqWi/Z4L4KP3jUI+YCmTtWg1tmTHUw6xladLJqzR2heMaHBIM0TTFLZmn/EkIaEHYs/bIA==}
     engines: {node: '>= 0.4'}
 
   typedarray@0.0.7:
@@ -29610,7 +29610,7 @@ snapshots:
       '@mapbox/extent': 0.4.0
       '@mapbox/geojson-coords': 0.0.2
       rw: 0.1.4
-      traverse: 0.6.11
+      traverse: 0.6.14
 
   '@mapbox/geojson-normalize@0.0.1': {}
 
@@ -44956,11 +44956,13 @@ snapshots:
     dependencies:
       stack-chain: 2.0.0
 
-  traverse@0.6.11:
+  traverse@0.6.14:
     dependencies:
+      define-data-property: 1.1.4
+      es-to-primitive: 1.3.4
       gopd: 1.2.0
-      typedarray.prototype.slice: 1.0.5
-      which-typed-array: 1.1.22
+      typedarray.prototype.slice: 1.0.6
+      which-typed-array: 1.1.24
 
   tree-dump@1.1.0(tslib@2.8.1):
     dependencies:
@@ -45135,7 +45137,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedarray.prototype.slice@1.0.5:
+  typedarray.prototype.slice@1.0.6:
     dependencies:
       call-bind: 1.0.9
       define-properties: 1.2.1
