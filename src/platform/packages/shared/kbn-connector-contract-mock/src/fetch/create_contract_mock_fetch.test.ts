@@ -82,6 +82,18 @@ describe('createContractMockFetch', () => {
     ]);
   });
 
+  it('sends no body with 204 responses, even when the responder gives one', async () => {
+    const { fetch } = createContractMockFetch({
+      specs: [spec],
+      respond: () => ({ statusCode: 204, headers: json, body: { name: 'a' } }),
+    });
+
+    const response = await fetch(`${BASE_URL}/items`);
+
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe('');
+  });
+
   it('answers unmatched requests with 404 naming the request', async () => {
     const { fetch } = createContractMockFetch({ specs: [spec], respond: listResponder });
 
