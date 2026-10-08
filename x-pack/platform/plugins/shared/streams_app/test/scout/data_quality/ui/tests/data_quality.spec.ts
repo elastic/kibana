@@ -11,6 +11,7 @@ import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 import {
   getQualityIssueRow,
+  navigateAndWaitForDateRangePresets,
   openDegradedFieldFlyout,
   saveFailureStoreChanges,
   waitForFailedDocsCard,
@@ -107,9 +108,11 @@ test.describe(
         .toBeGreaterThan(0);
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoDataQualityTab(TEST_STREAM);
+      await navigateAndWaitForDateRangePresets(page, () =>
+        pageObjects.streams.gotoDataQualityTab(TEST_STREAM)
+      );
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -138,10 +141,13 @@ test.describe(
     });
 
     test('date picker should show same time range as Streams Main page', async ({
+      page,
       pageObjects,
     }) => {
       // Go to Main page
-      await pageObjects.streams.gotoStreamMainPage();
+      await navigateAndWaitForDateRangePresets(page, () =>
+        pageObjects.streams.gotoStreamMainPage()
+      );
       await pageObjects.streams.expectStreamsTableVisible();
       const mainTimeRange = {
         from: 'Sep 20, 2023 @ 00:00:00.000',

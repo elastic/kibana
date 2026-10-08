@@ -7,8 +7,37 @@
 
 import { type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { Request } from '@playwright/test';
 
 const FAILED_DOCS_ISSUE = 'Documents indexing failed';
+const DATE_RANGE_PRESETS_URL = '/internal/user_storage/data%3AdateRangePicker%3Apresets';
+
+/**
+ * Runs navigation and waits for the date picker and its optional persisted presets request.
+ */
+export async function navigateAndWaitForDateRangePresets(
+  page: ScoutPage,
+  navigate: () => Promise<void>
+): Promise<void> {
+  const presetResponses: Array<Promise<unknown>> = [];
+  const onRequest = (request: Request) => {
+    if (request.url().includes(DATE_RANGE_PRESETS_URL)) {
+      presetResponses.push(request.response());
+    }
+  };
+
+  page.on('request', onRequest);
+  try {
+    await navigate();
+    await page
+      .getByTestId('dateRangePickerControlButton')
+      .or(page.getByTestId('superDatePickerToggleQuickMenuButton'))
+      .waitFor({ state: 'visible' });
+  } finally {
+    page.off('request', onRequest);
+  }
+  await Promise.all(presetResponses);
+}
 
 /**
  * Saves failure store changes in the shared failure store modal
