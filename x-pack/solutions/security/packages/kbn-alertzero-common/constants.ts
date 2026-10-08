@@ -50,7 +50,7 @@ export const buildWorkerUrl = (workerId: string) =>
 export const ALERTZERO_PROPOSALS_CATEGORY_URL =
   `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
 
-/** Proposals decided in the last 72 h (any non-pending status, including expired). */
+/** Proposals decided in the last 24 h (any non-pending status, including expired). */
 export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposals/closed` as const;
 
 /** Action catalog — category-scoped discovery of installed action workflows. */

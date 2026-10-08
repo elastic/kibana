@@ -52,6 +52,19 @@ describe('ConversationQueue', () => {
     expect(trigger()).toHaveTextContent('42');
   });
 
+  it('shows the window label beside the count when the queue is bounded', () => {
+    renderQueue({ count: 42, windowLabel: 'Last 24h' });
+
+    expect(trigger()).toHaveTextContent('Last 24h');
+    expect(trigger()).toHaveTextContent('42');
+  });
+
+  it('shows no window label by default', () => {
+    renderQueue({ count: 42 });
+
+    expect(screen.queryByTestId('conversationQueueWindow-respond')).not.toBeInTheDocument();
+  });
+
   it('counts the matching rows while filtered, as a floor when more can load', () => {
     renderQueue({ count: 42, isFiltered: true, remaining: 5 });
 

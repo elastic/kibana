@@ -9,6 +9,9 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 export const CLOSED_GROUP_KEY = 'closed' as const;
 
+/** Decisions older than this drop out of the closed queue. */
+export const CLOSED_WINDOW_HOURS = 24;
+
 export interface ProposalItem extends ProposalWithMetadata {
   // Absent when the server cannot read the conversation (access control, not found, etc.)
   conversationTitle?: string;

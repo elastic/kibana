@@ -49,6 +49,8 @@ interface ConversationQueueProps {
    * response, since 0 would read as empty and then jump.
    */
   count?: number;
+  /** Names the time window bounding the queue, shown beside the title. */
+  windowLabel?: string;
   /** Controlled: the caller drives its fetch from this, so EuiAccordion must not
    * keep a second copy to drift from. */
   isOpen: boolean;
@@ -111,6 +113,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     briefingType,
     briefingList,
     count,
+    windowLabel,
     isOpen,
     onToggle,
     loadingRows = 0,
@@ -166,6 +169,17 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             <h3>{CONVERSATION_QUEUE_LABELS[briefingType]}</h3>
           </EuiTitle>
         </EuiFlexItem>
+        {windowLabel ? (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj={`conversationQueueWindow-${briefingType}`}
+            >
+              {windowLabel}
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           {isCountUnavailable ? null : badgeCount === undefined ? (
             <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />

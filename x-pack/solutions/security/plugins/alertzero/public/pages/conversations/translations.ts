@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CLOSED_WINDOW_HOURS } from '../../../common/proposals/list';
 
 export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
@@ -26,4 +27,9 @@ export const COPY_LINK_TOASTS = Object.freeze({
   failed: i18n.translate('xpack.alertzero.queue.copyLinkFailed', {
     defaultMessage: 'Could not copy the link',
   }),
+});
+
+export const CLOSED_WINDOW_LABEL = i18n.translate('xpack.alertzero.queue.closedWindowLabel', {
+  defaultMessage: 'Last {hours}h',
+  values: { hours: CLOSED_WINDOW_HOURS },
 });

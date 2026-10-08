@@ -46,6 +46,7 @@ export const QueueSection = ({
     proposals,
     total,
     id,
+    windowLabel,
     isOpen,
     onToggle,
     loadingRows,
@@ -89,6 +90,7 @@ export const QueueSection = ({
       briefingType={id}
       briefingList={briefingList}
       count={total}
+      windowLabel={windowLabel}
       isOpen={isOpen}
       onToggle={onToggle}
       loadingRows={loadingRows}
