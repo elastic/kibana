@@ -17,6 +17,7 @@ export {
 } from './src/components/escalation_queue';
 
 export { ActionButton } from './src/components/actions/action_button';
+export { getCopyLinkFlyoutAction } from './src/components/actions/copy_link_action';
 export {
   BaseActions,
   type BaseActionsProps,
@@ -60,19 +61,18 @@ export {
 } from './src/components/details/proposed_action_button';
 
 export {
-  AttachmentSummarySection,
-  type AttachmentSummarySectionProps,
-  AttachmentSummaryList,
-  type AttachmentSummaryListProps,
-  AttachmentSummaryGroup,
-  type AttachmentSummaryGroupProps,
-  DEFAULT_COLLAPSED_COUNT,
-  AttachmentSummaryRow,
-  type AttachmentSummaryRowProps,
-  selectSummaryAttachments,
-  SUMMARY_ATTACHMENT_TYPES,
-  type SummaryAttachmentType,
-} from './src/components/attachment_summary';
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+  GroupedAttachmentRow,
+  GroupedAttachmentsSection,
+  type FlyoutGroupedAttachmentDefinition,
+  type FlyoutGroupedAttachmentRendererProps,
+  type FlyoutGroupedAttachmentsRegistry,
+  type GroupedAttachmentRowAction,
+  type GroupedAttachmentRowProps,
+  type GroupedAttachmentsSectionProps,
+  type RegisterFlyoutGroupedAttachment,
+} from './src/components/grouped_attachments';
 
 export {
   registerAgenticInvestigationTemplateUI,
@@ -88,6 +88,8 @@ export {
   type RenderStatus,
   type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
+  type RenderSyncIndicator,
+  type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
 } from './src/template_ui/types';
 export {
@@ -111,6 +113,8 @@ export {
   impactPills,
   investigationEntityIds,
   matchesEntityFilter,
+  useEntityFilter,
+  type ImpactFilterable,
   type ImpactPill,
 } from './src/components/filters/impact';
 

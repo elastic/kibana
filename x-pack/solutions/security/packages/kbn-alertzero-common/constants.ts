@@ -6,6 +6,10 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import {
+  REVIEW_GATED_AUTONOMY_LEVELS,
+  WORKER_AUTONOMY_LEVELS,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -27,6 +31,12 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
+
+/** Security's service-account directory. The id is opaque and may contain `/`. */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account' as const;
+
+export const buildServiceAccountUrl = (serviceAccountId: string) =>
+  `${SECURITY_SERVICE_ACCOUNT_URL}/${encodeURIComponent(serviceAccountId)}`;
 
 /** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
@@ -118,14 +128,13 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
  * watch, composed with per-callable gates and the org-wide floor. Only the *selected* level varies
  * per watch. See https://github.com/elastic/security-team/issues/18718.
  */
-export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
+export const WATCH_AUTONOMY_LEVELS = WORKER_AUTONOMY_LEVELS;
 
 /**
  * The review-gated subset of the dial: every action passes a human review gate, so the Worker
- * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
- * never leave these declarations behind.
+ * offers no unattended (supervised) level.
  */
-export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+export const WATCH_AUTONOMY_REVIEW_GATED = REVIEW_GATED_AUTONOMY_LEVELS;
 
 /**
  * Presentation metadata for the managed watch catalog.

@@ -67,6 +67,38 @@ describe('getResearchAgentPrompt', () => {
     referencedContent: [],
   };
 
+  describe('conversation metadata section', () => {
+    const templateParams = (conversationMetadataWritable: boolean) =>
+      makeParams({
+        processedConversation: {
+          ...makeParams().processedConversation,
+          template_id: 'investigation',
+          metadata: { severity: 'high' },
+        },
+        conversationTemplates: {
+          get: jest.fn().mockResolvedValue({
+            name: 'Investigation',
+            fields: { severity: { input_type: 'TEXT' }, owner: { input_type: 'TEXT' } },
+          }),
+        },
+        conversationMetadataWritable,
+      });
+
+    it('asks to write unset fields back when metadata is writable', async () => {
+      const system = asText((await getResearchAgentPrompt(templateParams(true)))[0]);
+      expect(system).toContain('## CONVERSATION METADATA');
+      expect(system).toContain('- `severity` (TEXT): **high**');
+      expect(system).toContain('`set_conversation_metadata`');
+    });
+
+    it('renders the fields without the write-back instruction when metadata is read-only', async () => {
+      const system = asText((await getResearchAgentPrompt(templateParams(false)))[0]);
+      expect(system).toContain('## CONVERSATION METADATA');
+      expect(system).toContain('- `owner` (TEXT): _not yet set_');
+      expect(system).not.toContain('set_conversation_metadata');
+    });
+  });
+
   it('does not render the current date in the system message and forwards conversationTimestamp', async () => {
     const messages = await getResearchAgentPrompt(makeParams());
 
@@ -222,7 +254,7 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
-    expect(system).toContain('FROM sml-main');
+    expect(system).toContain('ES|QL target: sml-main');
     expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
@@ -243,8 +275,10 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).toContain('`elastic` (FROM sml-main)');
-    expect(system).toContain('`my-custom` (FROM ai-index-idx-custom) — Support tickets');
+    expect(system).toContain('Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(system).toContain(
+      'Registry ID: `my-custom`; ES|QL target: ai-index-idx-custom — Support tickets'
+    );
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {

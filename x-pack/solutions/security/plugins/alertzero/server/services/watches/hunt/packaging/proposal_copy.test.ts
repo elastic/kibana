@@ -62,6 +62,7 @@ const withTechnique: ProcessSelector = {
 const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
+  sseCount: 1,
   hasConfirmedHit: true,
   titles: ['Hunt: PowerShell (T1059.001) [ti-repor]'],
   evidenceLines: [],

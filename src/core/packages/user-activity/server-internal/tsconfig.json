@@ -11,6 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/config",
     "@kbn/config-mocks",
     "@kbn/config-schema",
     "@kbn/core-base-server-internal",

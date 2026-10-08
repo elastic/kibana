@@ -81,9 +81,11 @@ jest.mock('./timeline', () => ({
 const conversationId = 'conv-1';
 const chatEvents$ = new Subject<ChatEvent>();
 const streamEnded$ = new Subject<void>();
+const streamStarted$ = new Subject<string>();
 const mockStreamService = new ConversationStreamService({
   getChatEvents$: () => chatEvents$.asObservable() as Observable<BrowserChatEvent>,
   getStreamEnded$: () => streamEnded$.asObservable(),
+  getStreamStarted$: () => streamStarted$.asObservable(),
 });
 
 const pendingAttachments = {

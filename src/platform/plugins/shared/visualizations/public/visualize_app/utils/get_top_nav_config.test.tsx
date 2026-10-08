@@ -129,6 +129,7 @@ describe('getTopNavConfig', () => {
       {
         ...defaultParams,
         originatingApp: 'dashboards',
+        originatingPath: '#/view/mock-dashboard-id',
         visInstance: vis,
       } as unknown as TopNavConfigParams,
       novisSaveServices as unknown as VisualizeServices
@@ -299,6 +300,7 @@ describe('getTopNavConfig', () => {
       {
         ...defaultParams,
         originatingApp: 'dashboards',
+        originatingPath: '#/view/mock-dashboard-id',
         visInstance: vis,
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
@@ -329,6 +331,7 @@ describe('getTopNavConfig', () => {
       {
         ...defaultParams,
         originatingApp: 'dashboards',
+        originatingPath: '#/view/mock-dashboard-id',
         visInstance: vis,
       } as unknown as TopNavConfigParams,
       services as unknown as VisualizeServices
@@ -359,6 +362,7 @@ describe('getTopNavConfig', () => {
       {
         ...defaultParams,
         originatingApp: 'dashboards',
+        originatingPath: '#/view/mock-dashboard-id',
         visInstance: vis,
         displayEditInLensItem: true,
         hideLensBadge: false,

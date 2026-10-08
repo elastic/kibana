@@ -96,6 +96,35 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
+  it('does not treat an unknown event id failure as a produced discovery', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-unknown-id',
+        params: {
+          items: [{ event_id: 'unknown-id', title: 'Rejected continuation', status: 'open' }],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'unknown-id',
+                  written: false,
+                  reason: 'unknown_event_id',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
+  });
+
   it('treats existing_active_event and unchanged_outcome as produced discoveries', () => {
     const steps: ConverseStep[] = [
       {

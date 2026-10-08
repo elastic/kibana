@@ -82,7 +82,7 @@ export const generateEsqlTool = ({
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
     description:
-      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+      'Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
@@ -100,7 +100,7 @@ export const generateEsqlTool = ({
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
+      { esClient, modelProvider, logger, events, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -111,10 +111,11 @@ export const generateEsqlTool = ({
         execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
         includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });
