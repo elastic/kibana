@@ -153,7 +153,8 @@ export function registerStatus(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Get Entity Store status',
       description:
-        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.',
+        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details. ' +
+        'Each engine reports the log extraction settings that apply to its entity type.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },

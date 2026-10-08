@@ -23,10 +23,11 @@ export function registerInstall(router: EntityStorePluginRouter) {
       summary: 'Install the Entity Store',
       description:
         'Install the Entity Store and create engines for the specified entity types. ' +
-        'A single `logExtraction` configuration is shared across all entity types. ' +
+        '`logExtraction` sets overrides that apply to all entity types, on top of built-in defaults per entity type. ' +
+        'The default `frequency` is 1m for `host` and `user`, 10m for `service` and 30m for `generic`. ' +
         'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
         'Omitting a field leaves it unchanged. ' +
-        'Sending `null` for a field clears that override and reverts to the default value. ' +
+        'Sending `null` for a field clears that override and reverts to the entity type default. ' +
         'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],

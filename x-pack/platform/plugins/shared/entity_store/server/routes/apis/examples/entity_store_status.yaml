@@ -6,7 +6,7 @@ responses:
         examples:
           runningStatusExample:
             summary: "Entity Store running"
-            description: "The Entity Store is running with two started engines using default settings."
+            description: "The Entity Store is running with three started engines using default settings. Each engine reports the log extraction settings for its entity type, so the default frequency is 1m for host and user, and 10m for service."
             value:
               status: running
               engines:
@@ -14,14 +14,14 @@ responses:
                   status: started
                   filter: ""
                   delay: "1m"
-                  timeout: "25s"
-                  frequency: "30s"
+                  timeout: "59s"
+                  frequency: "1m"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
-                  maxLogsPerPage: 40000
+                  maxLogsPerPage: 50000
                   maxTimeWindowSize: "15m"
-                  maxLogsPerWindow: 500000
-                  maxLogsPerWindowCapBehavior: "defer"
+                  maxLogsPerWindow: 100000
+                  maxLogsPerWindowCapBehavior: "drop"
                   docsPerSecond: -1
                   indexPattern: ""
                   enrichPolicyExecutionInterval: null
@@ -32,14 +32,14 @@ responses:
                   status: started
                   filter: ""
                   delay: "1m"
-                  timeout: "25s"
-                  frequency: "30s"
+                  timeout: "59s"
+                  frequency: "1m"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
-                  maxLogsPerPage: 40000
+                  maxLogsPerPage: 50000
                   maxTimeWindowSize: "15m"
-                  maxLogsPerWindow: 500000
-                  maxLogsPerWindowCapBehavior: "defer"
+                  maxLogsPerWindow: 100000
+                  maxLogsPerWindowCapBehavior: "drop"
                   docsPerSecond: -1
                   indexPattern: ""
                   enrichPolicyExecutionInterval: null
@@ -51,6 +51,25 @@ responses:
                     error: null
                     lastExecutionTimestamp: "2026-04-10T08:26:00.000Z"
                     samplingRate: null
+                - type: service
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "59s"
+                  frequency: "10m"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  maxLogsPerPage: 50000
+                  maxTimeWindowSize: "15m"
+                  maxLogsPerWindow: 100000
+                  maxLogsPerWindowCapBehavior: "drop"
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+              excludedUserNames: []
           notInstalledExample:
             summary: "Entity Store not installed"
             description: "The Entity Store has not been installed."
