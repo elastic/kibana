@@ -476,7 +476,7 @@ describe('buildFieldsZodValidator', () => {
 
     const validator = buildFieldsZodValidator(mergedInputs);
     const invalid = validator.safeParse({
-      notificationGroup: { episodes: [] },
+      notificationGroup: { alerts: [] },
     });
     expect(invalid.success).toBe(false);
 
@@ -485,15 +485,15 @@ describe('buildFieldsZodValidator', () => {
         id: 'group-1',
         policyId: 'policy-1',
         groupKey: {},
-        episodes: [
+        alerts: [
           {
             last_event_timestamp: '2024-01-01T00:00:00Z',
             rule_id: 'rule-1',
             source: 'internal',
             space_id: 'default',
             group_hash: 'hash-1',
-            episode_id: 'episode-1',
-            episode_status: 'active',
+            alert_id: 'alert-1',
+            alert_status: 'active',
           },
         ],
         rules: {},

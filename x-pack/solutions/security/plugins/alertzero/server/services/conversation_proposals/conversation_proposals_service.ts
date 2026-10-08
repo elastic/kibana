@@ -149,14 +149,10 @@ export class ConversationProposalsService {
     conversationIds: string[],
     request: KibanaRequest
   ): Promise<Map<string, string[]>> {
-    const uniqueIds = [...new Set(conversationIds)];
-    if (uniqueIds.length === 0) return new Map();
+    if (conversationIds.length === 0) return new Map();
 
     try {
-      const impacts = await this.getImpactClient(request).listByConversationIds(uniqueIds);
-      return new Map(
-        impacts.map((impact) => [impact.conversationId, impact.entities.map((entity) => entity.id)])
-      );
+      return await this.getImpactClient(request).getEntityIdsByConversationId(conversationIds);
     } catch (err) {
       this.logger.debug(`Could not resolve investigation impact: ${err}`);
       return new Map();

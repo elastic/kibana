@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -23,7 +26,7 @@ const bootstrapCleanupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -63,7 +66,7 @@ const pauseRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -91,7 +94,7 @@ const resumeRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -117,11 +120,12 @@ const resetRoute = createServerRoute({
     description:
       'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
       'This is a deployment-wide control (agnostic saved object), not per-space. Authorization requires the caller’s space-scoped Nightshift manage and configure privileges; there is no separate cluster-level privilege today. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
-      'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status.',
+      'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status. ' +
+      'NOTE: Significant Events documents stored in `.rule-events` (owned by alerting_v2) are NOT cleared by this operation. Alerting v2 does not yet expose a scoped delete-by-source API; a direct deleteByQuery on the shared stream would bypass the owner abstraction and require delete privileges not granted by the Nightshift manage+configure role, failing silently for non-admins. Track the follow-up in the alerting_v2 team.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),

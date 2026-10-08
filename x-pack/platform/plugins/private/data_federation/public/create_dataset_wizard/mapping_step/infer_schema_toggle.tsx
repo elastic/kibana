@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -16,6 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SchemaResolutionField } from '../components/fields/schema_resolution_field';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+
+const fillFlexItemStyles = css({ flexGrow: 1 });
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
@@ -30,6 +33,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
                 <strong>{createDatasetWizardStrings.inferSchemaLabel}</strong>
@@ -53,6 +57,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardDefineSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
                 <strong>{createDatasetWizardStrings.defineSchemaLabel}</strong>

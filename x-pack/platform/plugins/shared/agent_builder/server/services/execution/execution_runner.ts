@@ -27,6 +27,8 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
@@ -75,7 +77,7 @@ import {
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -95,6 +97,8 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
@@ -241,10 +245,19 @@ const handleConversationExecution = async ({
   // resolution moved inside this guard too, so a run that fails to resolve one still gets a
   // terminal recorded next to the message that was already persisted.
   try {
+    // Captured once, before the first model call, so every EIS call in this round (including
+    // the title-generation and default-connector lookups below, which run ahead of the
+    // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
+    // active when the model-provider's (memoized) telemetry metadata was first resolved.
+    const roundTraceId = getCurrentTraceId();
+    const roundTelemetryMetadata = roundTraceId
+      ? { ...telemetryMetadata, traceId: roundTraceId }
+      : telemetryMetadata;
+
     const { modelProvider, selectedConnectorId } = await resolveServices({
       agentId,
       connectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
     });
@@ -262,7 +275,7 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       defaultConnectorId: selectedConnectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
       reasoningLevel,
       runAgent,
@@ -277,13 +290,28 @@ const handleConversationExecution = async ({
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
     const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
+      [
+        needsTitle
+          ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
+          : undefined,
+        modelProvider.getDefaultModel(),
+        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        loadTracingPrivacySettings({
+          uiSettingsClient: deps.uiSettings.asScopedToClient(
+            deps.savedObjects.getScopedClient(request)
+          ),
+          logger,
+          spaceId,
+        }),
+      ]
+    );
+    const connectorProvider = getConnectorProvider(chatModel.getConnector());
+
     const title$ = (
-      needsTitle
-        ? generateTitle({
-            chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
-            conversation,
-            nextInput,
-          })
+      titleChatModel
+        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput })
         : of(conversation.title)
     ).pipe(shareReplay(1));
 
@@ -303,12 +331,6 @@ const handleConversationExecution = async ({
       ? executionStartedEvents$({ conversation, agentEvents$ })
       : EMPTY;
 
-    const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-    const connectorProvider = getConnectorProvider(chatModel.getConnector());
-
-    const agentRegistry = await agentService.getRegistry({ request });
-    const { name: agentName } = await agentRegistry.get(agentId);
-
     const { headers } = request;
     const opikTraceId = headers.opik_trace_id as string | undefined;
     const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -316,15 +338,6 @@ const handleConversationExecution = async ({
       opikTraceId && opikParentSpanId
         ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
         : undefined;
-
-    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-    const privacySettings = await loadTracingPrivacySettings({
-      uiSettingsClient: deps.uiSettings.asScopedToClient(
-        deps.savedObjects.getScopedClient(request)
-      ),
-      logger,
-      spaceId,
-    });
 
     return withConverseSpan(
       {
@@ -471,16 +484,22 @@ export const collectAndWriteEvents = ({
       await executionClient.appendEvents(execution.executionId, batch);
     };
 
+    let lastFlushAt = 0;
+
+    // Leading edge: the first event after an idle period is written on the next tick, while
+    // flushes still start at most once per batch interval.
     const scheduleFlush = () => {
       if (flushTimer === undefined) {
+        const delay = Math.max(0, lastFlushAt + EVENT_BATCH_INTERVAL_MS - Date.now());
         flushTimer = setTimeout(() => {
           flushTimer = undefined;
+          lastFlushAt = Date.now();
           flushInProgress = flush().catch((err) => {
             logger.error(
               `Failed to flush events for execution ${execution.executionId}: ${err.message}`
             );
           });
-        }, EVENT_BATCH_INTERVAL_MS);
+        }, delay);
       }
     };
 
@@ -608,10 +627,17 @@ const handleStandaloneExecution = async ({
   const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
     execution.agentParams;
 
+  // See the matching comment in handleConversationExecution: captured once, ahead of the first
+  // model call, so every EIS call in this execution reports the same trace id.
+  const roundTraceId = getCurrentTraceId();
+  const roundTelemetryMetadata = roundTraceId
+    ? { ...telemetryMetadata, traceId: roundTraceId }
+    : telemetryMetadata;
+
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
   });
@@ -624,7 +650,7 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
     reasoningLevel,
     runAgent,

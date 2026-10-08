@@ -47,11 +47,15 @@ export async function resolveEsqlSource({
 
   if (previousSourceId && previousSourceId !== esqlSource.id) {
     services.dataSourceService.unregisterEsqlSource(previousSourceId);
-    unregisterFromDataViewsCache(services.dataViews, previousSourceId);
+    unregisterFromDataViewsCache(previousSourceId);
   }
 
   services.dataSourceService.registerEsqlSource(esqlSource);
-  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+  const dataView = await registerEsqlSourceInDataViewsCache(
+    services.dataViews,
+    esqlSource,
+    services.http
+  );
 
   return { esqlSource, dataView };
 }

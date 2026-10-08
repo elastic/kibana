@@ -47,6 +47,7 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { OPAMP_POLICY_NAME } from '../../agents/agent_list_page/components/add_collector_flyout';
 
 import { CreateAgentPolicyFlyout } from './components';
+import { getAgentPoliciesKuery } from './get_agent_policies_kuery';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
@@ -88,16 +89,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
-  // Hide agentless policies by default unless showAgentless toggle is enabled
-  const getSearchWithDefaults = (newSearch: string) => {
-    const kueryHideOpAMP = `NOT ${agentPolicySavedObjectType}.name:"${OPAMP_POLICY_NAME}"`;
-    if (showAgentless) {
-      return newSearch.trim() ? `(${kueryHideOpAMP}) AND (${newSearch})` : kueryHideOpAMP;
-    }
-    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true AND (${kueryHideOpAMP})`;
-    return newSearch.trim() ? `(${defaultSearch}) AND (${newSearch})` : defaultSearch;
-  };
-
   // Fetch agent policies
   const {
     isLoading,
@@ -108,10 +99,21 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
-    kuery: getSearchWithDefaults(search),
+    kuery: getAgentPoliciesKuery({
+      search,
+      fieldPrefix: agentPolicySavedObjectType,
+      hiddenPolicyName: OPAMP_POLICY_NAME,
+    }),
+    showAgentless,
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
+
+  // Free text searches can't be combined with the OpAMP exclusion, so hide it from the results
+  // The total is kept as returned by the server so that no page becomes unreachable
+  const visiblePolicies = (agentPolicyData?.items ?? []).filter(
+    (policy) => policy.name !== OPAMP_POLICY_NAME
+  );
 
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {
@@ -392,7 +394,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
           defaultMessage: 'List of agent policies',
         })}
-        items={agentPolicyData ? agentPolicyData.items : []}
+        items={visiblePolicies}
         itemId="id"
         columns={columns}
         pagination={{

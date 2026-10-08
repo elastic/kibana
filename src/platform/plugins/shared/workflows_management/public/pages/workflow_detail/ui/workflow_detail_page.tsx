@@ -52,7 +52,10 @@ import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_execut
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  useWorkflowUrlState,
+  type WorkflowUrlUpdateOptions,
+} from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -99,6 +102,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
+    updateUrlState,
     setActiveTab: setUrlTab,
     replayExecutionId,
     replayIsTestRun,
@@ -217,26 +221,48 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
+  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
+  const clearSelectedExecution = useCallback(
+    (options?: WorkflowUrlUpdateOptions) => {
+      if (isExecutionsViewEnabled) {
+        updateUrlState(
+          {
+            tab: 'workflow',
+            executionId: undefined,
+            stepExecutionId: undefined,
+            stepId: undefined,
+          },
+          options
+        );
+        return;
+      }
+      setSelectedExecution(null, options);
+    },
+    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
+  );
+
   // Both handlers also close the list, which is local state rather than URL state. They must
   // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null, { replace: true });
+      clearSelectedExecution({ replace: true });
       return;
     }
     setIsExecutionListOpen(true);
-  }, [isExecutionListOpen, selectedExecutionId, setSelectedExecution]);
+  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null, { replace: true });
-  }, [setSelectedExecution]);
+    clearSelectedExecution({ replace: true });
+  }, [clearSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    // Push so Back reopens the run.
+    clearSelectedExecution({ replace: false });
+  }, [clearSelectedExecution]);
 
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
@@ -272,7 +298,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  // The list needs a saved workflow id. The detail flyout only needs the selected
+  // execution, including a test run of a workflow that has not been saved yet.
+  const canShowExecutionUi = isExecutionsViewEnabled && canReadWorkflowExecution;
   const sidebarExecutionList =
     !isExecutionsViewEnabled &&
     id &&
@@ -293,7 +321,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
+          onOpenExecutionList={canShowExecutionUi && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -306,14 +334,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {showExecutionFlyouts && id && isExecutionListOpen && (
+            {canShowExecutionUi && id && isExecutionListOpen && (
               <WorkflowExecutionListFlyout
                 workflowId={id}
                 onClose={onCloseExecutionList}
                 isHidden={Boolean(selectedExecutionId)}
               />
             )}
-            {showExecutionFlyouts && selectedExecutionId && (
+            {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
                 workflowName={workflowName ?? ''}
