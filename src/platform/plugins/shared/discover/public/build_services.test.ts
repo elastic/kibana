@@ -60,7 +60,7 @@ describe('discoverFeatureFlags', () => {
     );
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
   });
 
   it('returns the fallback when the observable emits after subscribe returns', () => {
