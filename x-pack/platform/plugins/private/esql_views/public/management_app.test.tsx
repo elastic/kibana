@@ -443,9 +443,9 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
-    expect(screen.getByText('ES|QL Query Results')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query results')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('2 preview rows');
     expect(mockEsqlDataGrid).toHaveBeenCalledWith(
@@ -473,7 +473,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(screen.getByText('No results yet')).toBeInTheDocument();
     expect(
@@ -504,8 +504,8 @@ describe('ManagementApp', () => {
         'Changes affect every dashboard, alert, and other saved object that uses this view.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
-    expect(screen.getByText('Name and describe the view.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'ES|QL view details' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Name and describe the view.')).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText('e.g. my-view')).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -578,6 +578,11 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 
     expect(await screen.findByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
+    expect(
+      screen.queryByText(
+        'Must not match an existing index, data stream, alias, external dataset, or view.'
+      )
+    ).not.toBeInTheDocument();
     fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
       target: { value: 'Production logs' },
     });
