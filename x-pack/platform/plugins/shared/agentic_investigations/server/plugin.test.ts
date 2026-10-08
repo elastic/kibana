@@ -282,6 +282,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getSubjectsClient).toEqual(expect.any(Function));
+      expect(contract.getInvestigationsClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
     });
 

@@ -56,11 +56,10 @@ outputs:
       type: boolean
 
 consts:
-  # Common system workflow to append a plain message to the investigation
-  # without waking its agent (`trigger_mode: never`). Used for the narrative this run
-  # produces about itself — what it could not do and why
-  # Installed in the same global set as this workflow, so it is always resolvable.
-  journal_note: system-alertzero-journal-note
+  # Journal notes call `system-alertzero-journal-note` by literal id, not a const:
+  # `run-as-mode: inherit` runs the note as this workflow's service account, and the
+  # engine only allows that for a literal `workflow-id`.
+
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
   # Fallback when the KI carries no `attributes.autonomy`.
@@ -228,7 +227,8 @@ steps:
         type: workflow.execute
         if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}"
         with:
-          workflow-id: "{{ consts.journal_note }}"
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
@@ -268,7 +268,8 @@ steps:
             on-failure:
               continue: true
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -603,7 +604,8 @@ steps:
             on-failure:
               continue: true
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -629,7 +631,8 @@ steps:
             on-failure:
               continue: true
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -657,7 +660,8 @@ steps:
             on-failure:
               continue: true
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -671,7 +675,8 @@ steps:
             # sweep retries this lookup, which is still before the agent.
             if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id != blank }}"
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
@@ -694,7 +699,8 @@ steps:
         on-failure:
           continue: true
         with:
-          workflow-id: "{{ consts.journal_note }}"
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
@@ -786,7 +792,8 @@ steps:
     on-failure:
       continue: true
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
@@ -816,6 +823,7 @@ steps:
           # The bridge rather than the gate: it owns `origin`, so a Worker
           # cannot stamp someone else's queue and lose the proposal.
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.resolve_request.output.investigation_id }}"
             comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"
@@ -880,7 +888,8 @@ steps:
     on-failure:
       continue: true
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
@@ -918,7 +927,8 @@ steps:
     on-failure:
       continue: true
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-

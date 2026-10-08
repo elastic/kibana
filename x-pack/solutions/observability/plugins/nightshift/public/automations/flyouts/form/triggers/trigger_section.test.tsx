@@ -73,7 +73,7 @@ describe('AutomationTriggerSection', () => {
     expect(screen.getByText('New message')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.'
+        "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history."
       )
     ).toBeInTheDocument();
   });

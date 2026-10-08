@@ -164,9 +164,8 @@ authorized and before any write, resolves the carried id to the chain head. An
 approval therefore carries the `actionInput` of the revision the approver was
 shown, not the one the Worker first proposed.
 
-Chains predating this field have `rootProposalId` on neither row; the term query
-misses and the fallback returns the row asked about, which is the correct answer
-for a chain of one. The plugin is unshipped, so there is nothing to migrate.
+Every stored proposal carries `rootProposalId` and `revision`. The plugin is
+unshipped, so legacy records without these fields are not supported.
 
 ### Architecture
 

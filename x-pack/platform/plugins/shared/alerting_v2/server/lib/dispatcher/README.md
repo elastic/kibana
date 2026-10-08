@@ -2,16 +2,16 @@
 
 > **Prerequisite:** Read the [server-level README](../../README.md) first for the plugin-wide architecture and terminology.
 
-The dispatcher is the action dispatch pipeline for alerting v2. It reads alert episodes from `.rule-events`, reads user/system action history from `.alert-actions`, decides what should dispatch now, dispatches eligible groups, and records the outcome back into `.alert-actions`.
+The dispatcher is the action dispatch pipeline for alerting v2. It reads alerts from `.rule-events`, reads user/system action history from `.alert-actions`, decides what should dispatch now, dispatches eligible groups, and records the outcome back into `.alert-actions`.
 
 It runs on its own Task Manager schedule, separate from per-rule execution.
 
 ## What the dispatcher owns
 
-- Loading candidate alert episodes for the current execution window
+- Loading candidate alerts for the current execution window
 - Applying suppression semantics from alert actions
-- Matching episodes to action policies
-- Grouping matched episodes
+- Matching alerts to action policies
+- Grouping matched alerts
 - Throttling repeated delivery
 - Dispatching to destinations
 - Recording the final decision set in `.alert-actions`
@@ -20,7 +20,7 @@ It runs on its own Task Manager schedule, separate from per-rule execution.
 
 - Running ES|QL for rules
 - Creating breach, recovery, or no-data events
-- Calculating episode state transitions
+- Calculating alert state transitions
 
 Those responsibilities are intentionally upstream in the rule executor and director.
 
@@ -28,7 +28,7 @@ Those responsibilities are intentionally upstream in the rule executor and direc
 
 ```text
 Rule executor / director               Dispatcher
-    writes episodes                    reads episodes + actions
+    writes alerts                      reads alerts + actions
            |                                   |
            v                                   v
      `.rule-events` ----------------> policy evaluation
@@ -38,16 +38,16 @@ Rule executor / director               Dispatcher
                            durable suppression / throttle / outcome history
 ```
 
-Signal events never enter this pipeline. The dispatcher only processes alert-type rule events that carry `episode.*` state.
+Signal events never enter this pipeline. The dispatcher only processes alert-type rule events that carry `alert.*` state.
 
-### Episode identity: the subject
+### Alert identity: the subject
 
-Episodes are keyed by a `subject`, computed identically in ES|QL (`SUBJECT_EVAL` in `queries.ts`) and in TypeScript (`episodeSubject` in `steps/utils/subject.ts`):
+Alerts are keyed by a `subject`, computed identically in ES|QL (`SUBJECT_EVAL` in `queries.ts`) and in TypeScript (`alertSubject` in `steps/utils/subject.ts`):
 
-- internal episodes (`source` is `internal` or absent): `subject = rule_id`
-- external episodes (any other `source`): `subject = ${space_id}::${source}`
+- internal alerts (`source` is `internal` or absent): `subject = rule_id`
+- external alerts (any other `source`): `subject = ${space_id}::${source}`
 
-The subject, not `group_hash`, is what makes a series unique. `group_hash` is only a grouping key — `buildGroupHash` hashes the grouping fields and their values, so the same hash occurs across rules and spaces. A rule id is a globally unique saved-object id and therefore implies a space; a vendor name does not, so the space is folded into external subjects to keep episode aggregation, throttling and suppression isolated per space.
+The subject, not `group_hash`, is what makes a series unique. `group_hash` is only a grouping key — `buildGroupHash` hashes the grouping fields and their values, so the same hash occurs across rules and spaces. A rule id is a globally unique saved-object id and therefore implies a space; a vendor name does not, so the space is folded into external subjects to keep alert aggregation, throttling and suppression isolated per space.
 
 ## How one execution works
 
@@ -60,12 +60,12 @@ windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_
 
 The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
 
-`eventWatermark` is a **content-addressed** progress marker — it advances only after episodes in the window have received `.alert-actions` records, never based on wall-clock alone:
+`eventWatermark` is a **content-addressed** progress marker — it advances only after alerts in the window have received `.alert-actions` records, never based on wall-clock alone:
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
-| `no_episodes` or `no_actions` halt              | `windowEnd`                                         |
+| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned alert   |
+| `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
 | Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
@@ -74,16 +74,16 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 Cold start (no persisted watermark) is logged as `DISPATCHER_COLD_START` and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
 
-The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which episodes are new or still relevant without blindly replaying everything on every run.
+The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which alerts are new or still relevant without blindly replaying everything on every run.
 
 The pipeline then moves through these phases:
 
 1. Wait for plugin resources to be ready
-2. Fetch candidate episodes (keys-only scan — no `data` payload)
+2. Fetch candidate alerts (keys-only scan — no `data` payload)
 3. Fetch suppression facts
-4. Split into dispatchable vs suppressed episodes
-5. Hydrate `data` payload for dispatchable episodes only
-6. Load rule metadata for dispatchable episodes
+4. Split into dispatchable vs suppressed alerts
+5. Hydrate `data` payload for dispatchable alerts only
+6. Load rule metadata for dispatchable alerts
 7. Load enabled action policies
 8. Evaluate policy matchers
 9. Build action groups
@@ -93,14 +93,14 @@ The pipeline then moves through these phases:
 
 ### Decision outcomes written to `.alert-actions`
 
-By the end of a dispatcher run, every episode that reached the later pipeline stages falls into one of these buckets:
+By the end of a dispatcher run, every alert that reached the later pipeline stages falls into one of these buckets:
 
 | Outcome      | What happened                                                                                              | Action documents written                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `dispatch`   | The episode matched a policy, survived suppression and throttling, and was selected for delivery.          | `fire` per episode, plus `notified` per action group |
-| `throttled`  | The episode matched a policy, but the action group was held back by throttling.                            | `suppress` with a throttle-related reason            |
-| `suppressed` | The episode was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics. | `suppress` with the suppression reason               |
-| `unmatched`  | The episode remained dispatchable but matched no enabled action policy.                                    | `unmatched`                                          |
+| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per action group   |
+| `throttled`  | The alert matched a policy, but the action group was held back by throttling.                              | `suppress` with a throttle-related reason            |
+| `suppressed` | The alert was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics.   | `suppress` with the suppression reason               |
+| `unmatched`  | The alert remained dispatchable but matched no enabled action policy.                                      | `unmatched`                                          |
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -126,10 +126,10 @@ DispatcherService
 DispatcherPipeline
    |
    +--> WaitForResourcesStep
-   +--> FetchEpisodesStep           (keys-only scan)
+   +--> FetchAlertsStep             (keys-only scan)
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
-   +--> HydrateEpisodeDataStep      (lazy data fetch for survivors)
+   +--> HydrateAlertDataStep        (lazy data fetch for survivors)
    +--> FetchRulesStep
    +--> ApplyMaintenanceWindowStep
    +--> FetchPoliciesStep
@@ -148,18 +148,20 @@ Unlike the rule executor, the dispatcher is not streaming. Each step receives on
 
 ## Action policy model
 
-An action policy is a saved object scoped to a Kibana space. Policies are not embedded into the rule. Instead, the dispatcher loads enabled policies for the space and evaluates each policy against the candidate episodes.
+An action policy is a saved object scoped to a Kibana space. Policies are not embedded into the rule. Instead, the dispatcher loads enabled policies for the space and evaluates each policy against the candidate alerts.
 
 Each policy defines:
 
-- `matcher`: optional KQL filter evaluated against the episode context and `data.*`
-- `groupBy` and `groupingMode`: how matched episodes are batched
+- `matcher`: optional KQL filter evaluated against the alert context and `data.*`
+- `groupBy` and `groupingMode`: how matched alerts are batched
 - `throttle`: when repeated actions are allowed
 - `destinations`: where matching groups should go
 - `snoozedUntil`: optional time-based suppression
 - `apiKey`: optional credential used to dispatch
 
 An empty matcher is a catch-all.
+
+`BuildGroupsStep` derives each action group's `groupKey` from `groupingMode`: `per_alert` keys on `{ groupHash, alertId }` (one group per alert), `per_field` keys on the `groupBy` field values, and `all` uses `{}` (one group per policy). The group id is a hash of the policy id and `groupKey`, so changing the key shape changes the ids that throttling compares against.
 
 ## Operational parameters
 
@@ -168,12 +170,12 @@ An empty matcher is a catch-all.
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
 | Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
 | Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated episode scan advances the watermark to the last returned row, not to `now`                                                        |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated alert scan advances the watermark to the last returned row, not to `now`                                                          |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
-| Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window                                                                                                               |
+| Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known alerts and lag exceeds this, skip the unread window                                                                                                                 |
 | Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
 
@@ -184,16 +186,16 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | Field              | Type               | Produced by                                                                        | Meaning                                                                                                                                                        |
 | ------------------ | ------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `input`            | plain object       | Pipeline                                                                            | Window anchors (`eventWatermark`, `windowStart`, `windowEnd`) and execution context.                                                                            |
-| `scan`             | `EpisodeScan`      | `FetchEpisodesStep`                                                                 | Candidate episodes fetched within `[windowStart, windowEnd]` plus the truncation flag; `truncationEdge()` is the watermark target on a truncated tick.          |
-| `suppressions`     | `SuppressionIndex` | `FetchSuppressionsStep`                                                             | Suppression facts from `.alert-actions`, indexed for per-episode reason lookup.                                                                                 |
-| `triage`           | `EpisodeTriage`    | `ApplySuppressionStep`; enriched by `HydrateEpisodeDataStep` (`mapDispatchable`), re-partitioned by `ApplyMaintenanceWindowStep` (`suppressDispatchableWhere`) | The evolving verdict: episodes that may still notify (`dispatchable`) vs those that must not (`suppressed`, with reasons).                                      |
-| `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-episode guard.                                                                                       |
+| `scan`             | `AlertScan`        | `FetchAlertsStep`                                                                   | Candidate alerts fetched within `[windowStart, windowEnd]` plus the truncation flag; `truncationEdge()` is the watermark target on a truncated tick.            |
+| `suppressions`     | `SuppressionIndex` | `FetchSuppressionsStep`                                                             | Suppression facts from `.alert-actions`, indexed for per-alert reason lookup.                                                                                   |
+| `triage`           | `AlertTriage`      | `ApplySuppressionStep`; enriched by `HydrateAlertDataStep` (`mapDispatchable`), re-partitioned by `ApplyMaintenanceWindowStep` (`suppressDispatchableWhere`)   | The evolving verdict: alerts that may still notify (`dispatchable`) vs those that must not (`suppressed`, with reasons).                                        |
+| `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-alert guard.                                                                                         |
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
-| `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(episode, policy)` matches.                                                                                                                          |
+| `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(alert, policy)` matches.                                                                                                                            |
 | `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` episodes that landed in no group.                                            |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` alerts that landed in no group.                                              |
 | `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
-| `recordedEpisodes` | plain number       | `StoreActionsStep`                                                                  | Count of episodes that received an `.alert-actions` record this tick.                                                                                          |
+| `recordedAlerts`   | plain number       | `StoreActionsStep`                                                                  | Count of alerts that received an `.alert-actions` record this tick.                                                                                            |
 
 ## Execution steps
 
@@ -202,14 +204,14 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | #   | Step                         | Responsibility                                                                                   |
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
 | 1   | `WaitForResourcesStep`       | Block the run until the dispatcher's required plugin resources are ready.                        |
-| 2   | `FetchEpisodesStep`          | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result.         |
+| 2   | `FetchAlertsStep`            | Load alerts via a keys-only scan (no `_source`/`data` payload). Halts on empty result.           |
 | 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions (see [Suppression queries](#suppression-queries)). |
-| 4   | `ApplySuppressionStep`       | Mark each episode as dispatchable or suppressed, preserving reasons.                             |
-| 5   | `HydrateEpisodeDataStep`     | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
+| 4   | `ApplySuppressionStep`       | Mark each alert as dispatchable or suppressed, preserving reasons.                               |
+| 5   | `HydrateAlertDataStep`       | Fetch `data` payloads for the surviving dispatchable alerts only, via `getAlertDataQueries`.     |
 | 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
-| 7   | `ApplyMaintenanceWindowStep` | Suppress episodes whose timestamp falls within an active maintenance window in the same space.   |
+| 7   | `ApplyMaintenanceWindowStep` | Suppress alerts whose timestamp falls within an active maintenance window in the same space.     |
 | 8   | `FetchPoliciesStep`          | Load enabled action policies for the space.                                                      |
-| 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each episode context.                                       |
+| 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 11  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
 | 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
@@ -222,18 +224,18 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | Query                           | Scope   | Actions                                        | Filter                                  | Grouped by                          |
 | ------------------------------- | ------- | ---------------------------------------------- | --------------------------------------- | ----------------------------------- |
-| `getEpisodeSuppressionsQueries` | episode | `ack` / `unack`, `deactivate` / `activate`     | `alert_id IN (<batch episode ids>)`     | `subject`, `group_hash`, `alert_id` |
+| `getAlertSuppressionsQueries`   | alert   | `ack` / `unack`, `deactivate` / `activate`     | `alert_id IN (<batch alert ids>)`       | `subject`, `group_hash`, `alert_id` |
 | `getSeriesSuppressionsQueries`  | series  | `snooze` / `unsnooze`                          | `(rule_id \| source, group_hash)` pairs of the batch, `alert_id IS NULL` | `subject`, `group_hash`             |
 
-Neither query has a time bound: an indefinite snooze or an ack stays in effect however old it is. Each query returns at most one row per literal of its `IN` chunk, so result size is bounded by the batch, not by how much history `.alert-actions` has accumulated. Episode ids are chunked up to `ESQL_QUERY_ROW_LIMIT` per request; series pairs are chunked by `SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES` to stay under the ES|QL statement size cap. Reaching the row limit on any chunk logs `FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED`, which indicates that invariant broke.
+Neither query has a time bound: an indefinite snooze or an ack stays in effect however old it is. Each query returns at most one row per literal of its `IN` chunk, so result size is bounded by the batch, not by how much history `.alert-actions` has accumulated. Alert ids are chunked up to `ESQL_QUERY_ROW_LIMIT` per request; series pairs are chunked by `SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES` to stay under the ES|QL statement size cap. Reaching the row limit on any chunk logs `FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED`, which indicates that invariant broke.
 
-When both an episode-level and a series-level record suppress an episode, `SuppressionIndex` reports the episode-level reason: an acked episode on a snoozed series reports `ack`.
+When both an alert-level and a series-level record suppress an alert, `SuppressionIndex` reports the alert-level reason: an acked alert on a snoozed series reports `ack`.
 
 ## Halt reasons
 
 | Reason                   | Meaning                                                                                                                                                          |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no_episodes`            | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
+| `no_alerts`              | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
 | `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
@@ -251,13 +253,13 @@ The invariant maintained across all ticks:
 If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (default 10, ~50 s), the dispatcher:
 
 1. Logs `DISPATCHER_WATERMARK_STUCK` at error level.
-2. Force-records all blocking episodes as `unmatched` in `.alert-actions` so the content-addressed dedup mark advances past them.
+2. Force-records all blocking alerts as `unmatched` in `.alert-actions` so the content-addressed dedup mark advances past them.
 3. Advances `nextWatermark` to `input.windowEnd`.
 4. Resets the stuck-tick counter to 0.
 
-The blocking episodes are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable episode that would otherwise stall the dispatcher indefinitely.
+The blocking alerts are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable alert that would otherwise stall the dispatcher indefinitely.
 
-If no episodes were fetched (the pipeline was aborted before or during `FetchEpisodesStep`, or the scan was rejected with `inline_stats_too_large`), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so the scan can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever. Both logs include the tick's `halt_reason`.
+If no alerts were fetched (the pipeline was aborted before or during `FetchAlertsStep`, or the scan was rejected with `inline_stats_too_large`), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so the scan can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever. Both logs include the tick's `halt_reason`.
 
 #### `inline_stats_too_large` recovery timeline (on-call reference)
 
@@ -269,18 +271,18 @@ When cardinality exceeds the Serverless INLINE STATS sub-plan cap (~20.4 MB), th
 | First hatch fire (lag ≤ 15 min) | 10 | ~50 s | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK` (`halt_reason: inline_stats_too_large`) — counter resets, watermark held |
 | Hatch fires again every 10 stuck ticks while lag ≤ 15 min | 20, 30, … | grows | same |
 | First force-advance (lag > 15 min on a hatch-firing tick) | ~190 | ~15–16 min after freeze | `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` — watermark advances to `windowEnd`, i.e. by `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` (5 min); unread events skipped |
-| Steady state while the error persists | every ~60 | every ~5 min | same force-advance; lag oscillates between ~10 and ~16 min; no episodes dispatched |
+| Steady state while the error persists | every ~60 | every ~5 min | same force-advance; lag oscillates between ~10 and ~16 min; no alerts dispatched   |
 
-Episodes in the skipped window are **not dispatched** (accepted data loss). Once the query succeeds again, the dispatcher catches up normally from `eventWatermark − OVERLAP_WINDOW_MINUTES`. The root fix is reducing cardinality or splitting the INLINE STATS query.
+Alerts in the skipped window are **not dispatched** (accepted data loss). Once the query succeeds again, the dispatcher catches up normally from `eventWatermark − OVERLAP_WINDOW_MINUTES`. The root fix is reducing cardinality or splitting the INLINE STATS query.
 
 ## Delivery guarantees and limits
 
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The episode query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The alert query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
-- Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
+- Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `alert_count`, `stuck_ticks`.
 
 ## When to add a new dispatcher step
 
@@ -303,7 +305,7 @@ Do **not** add a step when:
 ```typescript
 import { injectable } from 'inversify';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -318,13 +320,13 @@ export class MyNewStep implements DispatcherStep {
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     // Every state VO has an `empty()` null object, so steps never null-check state fields.
-    const { scan = EpisodeScan.empty() } = state;
+    const { scan = AlertScan.empty() } = state;
     if (scan.isEmpty()) {
-      this.logger.debug({ message: `[${this.name}] No episodes available` });
+      this.logger.debug({ message: `[${this.name}] No alerts available` });
       return { type: 'continue' };
     }
 
-    const myResult = await this.doSomething(scan.episodes);
+    const myResult = await this.doSomething(scan.alerts);
 
     return {
       type: 'continue',
@@ -332,7 +334,7 @@ export class MyNewStep implements DispatcherStep {
     };
   }
 
-  private async doSomething(_episodes: readonly AlertEpisode[]): Promise<string> {
+  private async doSomething(_alerts: readonly Alert[]): Promise<string> {
     return 'ok';
   }
 }
@@ -342,14 +344,14 @@ The pipeline hands each step a logger already labelled with the step name and th
 
 ### Step 2: Extend pipeline state if needed
 
-If the step produces new state, add a field to `DispatcherPipelineState` in `types.ts`. Prefer a value object (a class under `state/` with a private constructor and static factories, like `EpisodeScan` or `DispatchPlan`) when the new state groups related data or carries behavior; a plain field is fine for a single scalar or pass-through array:
+If the step produces new state, add a field to `DispatcherPipelineState` in `types.ts`. Prefer a value object (a class under `state/` with a private constructor and static factories, like `AlertScan` or `DispatchPlan`) when the new state groups related data or carries behavior; a plain field is fine for a single scalar or pass-through array:
 
 ```typescript
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  readonly scan?: EpisodeScan;
+  readonly scan?: AlertScan;
   readonly suppressions?: SuppressionIndex;
-  readonly triage?: EpisodeTriage;
+  readonly triage?: AlertTriage;
   readonly rules?: RuleCatalog;
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
@@ -367,7 +369,7 @@ Export the step from `steps/index.ts`, then register it in `setup/bind_dispatche
 ```typescript
 import { MyNewStep } from '../lib/dispatcher/steps';
 
-bind(DispatcherExecutionStepsToken).to(FetchEpisodesStep).inSingletonScope();
+bind(DispatcherExecutionStepsToken).to(FetchAlertsStep).inSingletonScope();
 bind(DispatcherExecutionStepsToken).to(MyNewStep).inSingletonScope();
 bind(DispatcherExecutionStepsToken).to(FetchSuppressionsStep).inSingletonScope();
 ```
@@ -379,18 +381,18 @@ Binding order is execution order.
 ```typescript
 import { MyNewStep } from './my_new_step';
 import {
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
 
 describe('MyNewStep', () => {
-  it('adds state when episodes exist', async () => {
+  it('adds state when alerts exist', async () => {
     const step = new MyNewStep();
 
     const result = await step.execute(
       createDispatcherPipelineState({
-        episodes: [createAlertEpisode({ rule_id: 'rule-1' })],
+        alerts: [createAlert({ rule_id: 'rule-1' })],
       }),
       createStepLogger()
     );
