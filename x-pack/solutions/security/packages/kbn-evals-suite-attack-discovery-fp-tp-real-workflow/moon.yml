@@ -18,11 +18,10 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/scout'
+  - '@kbn/evals-suite-attack-discovery-fp-tp'
   - '@kbn/tooling-log'
-  - '@kbn/core'
   - '@kbn/workflows'
-  - '@kbn/gen-ai-functional-testing'
+  - '@kbn/core'
 tags:
   - functional-tests
   - package
