@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/apm-ui-shared'
   - '@kbn/key-value-metadata-table'
+  - '@kbn/genai-common'
 tags:
   - shared-browser
   - package
