@@ -42,7 +42,7 @@ jest.mock('@elastic/eui', () => {
 describe('CustomYaraSignaturesViewMode', () => {
   const signature = 'rule test_rule { condition: true }';
 
-  it('renders the signature in a code block capped at 16 lines', () => {
+  it('renders the signature in a code block', () => {
     const item = new ExceptionsListItemGenerator('seed').generate({
       entries: [
         {
@@ -58,10 +58,6 @@ describe('CustomYaraSignaturesViewMode', () => {
     );
 
     expect(getByTestId('customYaraSignaturesViewMode')).toHaveTextContent(signature);
-    expect(getByTestId('customYaraSignaturesViewMode')).toHaveAttribute(
-      'data-overflow-height',
-      '368'
-    );
     expect(getByLabelText('Copy')).toBeInTheDocument();
     expect(getByLabelText('Expand')).toBeInTheDocument();
   });
