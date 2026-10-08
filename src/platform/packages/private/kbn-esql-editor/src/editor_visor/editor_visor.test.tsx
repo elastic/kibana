@@ -20,6 +20,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
+import { clearInferenceConnectorCache } from './use_nl_generation';
+import { clearNlToEsqlLicenseCache } from '../hooks/use_nl_to_esql_check';
 
 jest.mock('@kbn/data-source', () => ({
   ...jest.requireActual('@kbn/data-source'),
@@ -56,6 +58,8 @@ describe('Quick search visor', () => {
 
   let props: QuickSearchVisorProps;
   beforeEach(() => {
+    clearNlToEsqlLicenseCache();
+    clearInferenceConnectorCache();
     window.localStorage.clear();
     (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
