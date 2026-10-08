@@ -204,6 +204,31 @@ describe('create-investigation-proposal workflow', () => {
     });
   });
 
+  describe('a caller-supplied proposalId', () => {
+    it('takes an optional proposalId and forwards it to the create step', () => {
+      const manual = workflow.triggers.find(({ type }) => type === 'manual');
+      const input = manual?.inputs?.properties?.proposalId as { type?: string } | undefined;
+
+      expect(input?.type).toBe('string');
+      expect(manual?.inputs?.required).not.toContain('proposalId');
+      expect(String(findStep(workflow.steps, 'create_proposal')?.with?.proposalId)).toContain(
+        'inputs.proposalId'
+      );
+    });
+
+    it('adds no branch of its own: a duplicate id fails the create step, before any gate', () => {
+      // A duplicate is an error from the service, and the workflow does not
+      // interpret it. Nothing before the create step could park a gate or
+      // record a proposal id, so a failed create has nothing to settle.
+      expect(findStep(workflow.steps, 'stop_if_reused')).toBeUndefined();
+      expect(workflow.outputs?.map(({ name }) => name)).toEqual([
+        'proposalId',
+        'status',
+        'decision',
+      ]);
+    });
+  });
+
   describe('timeouts', () => {
     it('gates on waitForApproval so the release signal is fail-closed', () => {
       expect(gate().type).toBe('waitForApproval');
