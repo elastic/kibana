@@ -116,23 +116,76 @@ export const buildEmptyRowsQuery = (
   ].join('\n');
 
 /**
- * Empty rows when the value rows come from a list query: the empty rows are the entities
- * in view that are not in the list. `null` when the list doesn't fit in one response.
+ * Empty rows when the value rows come from a list of entities: the empty rows are the
+ * entities in view that are not in the list. `null` when the list doesn't fit in one response.
  */
-export const runEmptyRowsExcludingValueIds = async (
+const runEmptyRowsExcludingValueIds = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
-  valueIdsQuery: string,
+  /** Entities with a value, one row per `entity.id`. */
+  valueEntities: readonly string[],
   options: Omit<EmptyRowsOptions, 'excludeIds'>,
   afterId: string | null,
   limit: number
 ): Promise<Row[] | null> => {
-  const ids = (await runQuery(valueIdsQuery))
+  const valueIdsQuery = [...valueEntities, '| KEEP `entity.id`', `| LIMIT ${MAX_VALUE_ROWS + 1}`];
+  const ids = (await runQuery(valueIdsQuery.join('\n')))
     .map(getEntityId)
     .filter((id): id is string => id != null);
   if (ids.length > MAX_VALUE_ROWS) return null;
   return runQuery(buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit));
 };
+
+export interface EntityListSortOptions {
+  sortField: string;
+  emptyValue: SplitSortPlan['emptyValue'];
+  /**
+   * Entities in view with a value, with their entity docs: the foreign rows, `groupBy`
+   * (a `STATS … BY entity.id`), the LOOKUP JOIN and the in-view conditions.
+   */
+  buildEntitiesWithValues: (args: QueryArgs, groupBy: string) => string[];
+  /** STATS aggregations of the foreign columns. */
+  aggregations: readonly string[];
+  /** Foreign columns the rows carry. */
+  columns: readonly string[];
+  /** `EVAL` that sets the foreign columns of an empty row. */
+  emptyColumns: string;
+  buildSortQuery: (args: QueryArgs) => string;
+}
+
+/**
+ * Split sort plan for a foreign index that lists the entities with a value (alerts,
+ * anomalies): value rows aggregate the list, empty rows are the entities not in it.
+ */
+export const buildEntityListSortPlan = ({
+  sortField,
+  emptyValue,
+  buildEntitiesWithValues,
+  aggregations,
+  columns,
+  emptyColumns,
+  buildSortQuery,
+}: EntityListSortOptions): SplitSortPlan => ({
+  sortField,
+  emptyValue,
+  buildValueRowsQuery: (args, limit) =>
+    [
+      ...buildEntitiesWithValues(args, `| STATS ${aggregations.join(', ')} BY \`entity.id\``),
+      ...buildValueCursorClause(args.cursor),
+      ...buildValueSortSuffix(args, sortField, limit),
+      buildKeepClause(args, ...columns),
+    ].join('\n'),
+  runEmptyRows: (args, runQuery, afterId, limit) =>
+    runEmptyRowsExcludingValueIds(
+      args,
+      runQuery,
+      buildEntitiesWithValues(args, '| STATS BY `entity.id`'),
+      { emptyColumns, columns },
+      afterId,
+      limit
+    ),
+  buildSortQuery,
+});
 
 /**
  * One page of rows plus one, read as value rows and empty rows. Falls back to the general

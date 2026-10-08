@@ -17,7 +17,6 @@ import {
   buildEuidStages,
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
-  buildKeepClause,
   buildLookupJoinClause,
   buildMergedForeignSortQuery,
   lookbackCutoff,
@@ -25,13 +24,7 @@ import {
   toList,
 } from '../common';
 import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
-import {
-  MAX_VALUE_ROWS,
-  buildValueCursorClause,
-  buildValueSortSuffix,
-  runEmptyRowsExcludingValueIds,
-  runSplitSortPage,
-} from './split_sort';
+import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
@@ -71,42 +64,23 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
 /** Entities in view with anomalies, with their entity docs. */
-const buildAnomalousEntitiesInView = (args: QueryArgs, stats: string): string[] => [
+const buildAnomalousEntitiesInView = (args: QueryArgs, groupBy: string): string[] => [
   SET_UNMAPPED_NULLIFY,
   ...buildAnomalyEntityRows(args),
-  stats,
+  groupBy,
   buildLookupJoinClause(args.concreteEntityIndexName),
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
 ];
 
-export const anomalySplitSortPlan: SplitSortPlan = {
+export const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
   sortField: ANOMALY_COUNT_FIELD,
   emptyValue: null,
-  buildValueRowsQuery: (args, limit) =>
-    [
-      ...buildAnomalousEntitiesInView(
-        args,
-        `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``
-      ),
-      ...buildValueCursorClause(args.cursor),
-      ...buildValueSortSuffix(args, ANOMALY_COUNT_FIELD, limit),
-      buildKeepClause(args, ANOMALY_COUNT_FIELD),
-    ].join('\n'),
-  runEmptyRows: (args, runQuery, afterId, limit) =>
-    runEmptyRowsExcludingValueIds(
-      args,
-      runQuery,
-      [
-        ...buildAnomalousEntitiesInView(args, '| STATS BY `entity.id`'),
-        '| KEEP `entity.id`',
-        `| LIMIT ${MAX_VALUE_ROWS + 1}`,
-      ].join('\n'),
-      { emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`, columns: [ANOMALY_COUNT_FIELD] },
-      afterId,
-      limit
-    ),
+  buildEntitiesWithValues: buildAnomalousEntitiesInView,
+  aggregations: [`${ANOMALY_COUNT_FIELD} = COUNT(*)`],
+  columns: [ANOMALY_COUNT_FIELD],
+  emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
   buildSortQuery: buildAnomalyCountSortQuery,
-};
+});
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 

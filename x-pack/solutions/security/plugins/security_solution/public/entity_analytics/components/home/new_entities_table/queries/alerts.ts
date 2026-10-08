@@ -19,7 +19,6 @@ import {
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
   buildForeignSortPageSteps,
-  buildKeepClause,
   buildLookupJoinClause,
   entityAliasOf,
   IN_VIEW_FIELD,
@@ -28,13 +27,7 @@ import {
   toList,
 } from '../common';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
-import {
-  MAX_VALUE_ROWS,
-  buildValueCursorClause,
-  buildValueSortSuffix,
-  runEmptyRowsExcludingValueIds,
-  runSplitSortPage,
-} from './split_sort';
+import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
@@ -157,9 +150,9 @@ const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[]
 ];
 
 /** Entities in view with open alerts, with their entity docs. */
-const buildAlertedEntitiesInView = (args: QueryArgs, aggregations: string[]): string[] => [
+const buildAlertedEntitiesInView = (args: QueryArgs, groupBy: string): string[] => [
   ...buildOpenAlertEntityRows(args),
-  `| STATS ${aggregations.join(', ')} BY \`entity.id\``,
+  groupBy,
   buildLookupJoinClause(args.concreteEntityIndexName),
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
 ];
@@ -169,34 +162,17 @@ const ALERT_EMPTY_COLUMNS = [
   `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
 ].join(', ');
 
-export const alertSplitSortPlan = (sortField: string): SplitSortPlan => ({
-  sortField,
-  // Entities without alerts count 0, so they sort first ascending; their last alert is null.
-  emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
-  buildValueRowsQuery: (args, limit) =>
-    [
-      ...buildAlertedEntitiesInView(args, buildAlertAggregations()),
-      ...buildValueCursorClause(args.cursor),
-      ...buildValueSortSuffix(args, sortField, limit),
-      buildKeepClause(args, sortField, ...ALERT_FIELDS),
-    ].join('\n'),
-  runEmptyRows: (args, runQuery, afterId, limit) =>
-    runEmptyRowsExcludingValueIds(
-      args,
-      runQuery,
-      [
-        ...buildAlertedEntitiesInView(args, []).map((line) =>
-          line.startsWith('| STATS') ? '| STATS BY `entity.id`' : line
-        ),
-        '| KEEP `entity.id`',
-        `| LIMIT ${MAX_VALUE_ROWS + 1}`,
-      ].join('\n'),
-      { emptyColumns: ALERT_EMPTY_COLUMNS, columns: [sortField, ...ALERT_FIELDS] },
-      afterId,
-      limit
-    ),
-  buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
-});
+export const alertSplitSortPlan = (sortField: string): SplitSortPlan =>
+  buildEntityListSortPlan({
+    sortField,
+    // Entities without alerts count 0, so they sort first ascending; their last alert is null.
+    emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
+    buildEntitiesWithValues: buildAlertedEntitiesInView,
+    aggregations: buildAlertAggregations(),
+    columns: [sortField, ...ALERT_FIELDS],
+    emptyColumns: ALERT_EMPTY_COLUMNS,
+    buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
+  });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
