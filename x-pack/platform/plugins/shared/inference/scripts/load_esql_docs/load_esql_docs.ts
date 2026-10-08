@@ -13,10 +13,15 @@ import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql';
-import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
-import { getServiceUrls } from '../util/get_service_urls';
+import {
+  connectorIdOption,
+  elasticsearchOption,
+  inferenceIdOption,
+  kibanaOption,
+  resolveInferenceId,
+} from '../util/cli_options';
+import { assertChatCompletionInferenceEndpoint, getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
-import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
 import { generateDoc } from './generate_doc';
@@ -46,31 +51,41 @@ yargs(process.argv.slice(2))
         })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
-        .option('connectorId', connectorIdOption),
+        .option('inferenceId', inferenceIdOption)
+        .option('connectorId', {
+          ...connectorIdOption,
+          describe: 'Deprecated alias for --inferenceId',
+        }),
     (argv) => {
       run(
         async ({ log }) => {
+          const inferenceId = resolveInferenceId({
+            inferenceId: argv.inferenceId,
+            connectorId: argv.connectorId,
+            log,
+          });
+          if (!inferenceId) {
+            throw new Error(
+              'Pass --inferenceId with an Elasticsearch chat_completion inference endpoint id'
+            );
+          }
+
           const serviceUrls = await getServiceUrls({
             log,
             elasticsearch: argv.elasticsearch,
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
-
-          const connectors = await kibanaClient.getConnectors();
-          if (!connectors.length) {
-            throw new Error('No connectors found');
-          }
-          const connector = await selectConnector({
-            connectors,
-            preferredId: argv.connectorId,
-            log,
+          await assertChatCompletionInferenceEndpoint({
+            esUrl: serviceUrls.esUrl,
+            inferenceId,
           });
-          log.info(`Using connector ${connector.connectorId}`);
+
+          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
+          log.info(`Using inference endpoint ${inferenceId}`);
 
           const inferenceClient = kibanaClient.createInferenceClient({
-            connectorId: connector.connectorId,
+            connectorId: inferenceId,
           });
 
           const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
