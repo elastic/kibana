@@ -196,6 +196,7 @@ export class NightshiftInvestigationsPlugin
         workflowsManagement: this.workflowsManagement,
         spaces: this.spaces,
       }),
+      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
       logger: this.logger.get('onboarding'),
     });
 

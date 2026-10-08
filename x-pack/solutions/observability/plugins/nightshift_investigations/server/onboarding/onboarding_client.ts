@@ -18,9 +18,10 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { OnboardingUnavailableError } from './errors';
+import { OnboardingValidationError } from './validation_error';
 import { parseSuggestions } from './parse_suggestions';
 
-export { OnboardingUnavailableError };
+export { OnboardingUnavailableError, OnboardingValidationError };
 
 export interface OnboardingClientDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -33,7 +34,7 @@ export interface OnboardingClientDeps {
  */
 export interface OnboardingClient {
   get: (request: KibanaRequest) => Promise<GetOnboardingResponse>;
-  /** Starts an exploration run of the investigation agent. */
+  /** Starts an exploration run of the investigation agent; needs at least one sandbox secret. */
   start: (request: KibanaRequest) => Promise<StartOnboardingSuggestionsResponse>;
 }
 
@@ -67,9 +68,12 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
 /** Creates the client for the per-space Nightshift onboarding state. */
 export const createOnboardingClient = ({
   getDeps,
+  listSandboxSecretKeys,
   logger,
 }: {
   getDeps: () => OnboardingClientDeps;
+  /** The sandbox secret names the caller's sandbox commands may request in the space. */
+  listSandboxSecretKeys: (request: KibanaRequest) => Promise<string[]>;
   logger: Logger;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
@@ -109,6 +113,12 @@ export const createOnboardingClient = ({
     },
 
     start: async (request) => {
+      // The secrets are what the investigation agent explores beyond the cluster's telemetry.
+      if ((await listSandboxSecretKeys(request)).length === 0) {
+        throw new OnboardingValidationError(
+          'Add at least one sandbox secret (credential) before looking for first investigations'
+        );
+      }
       const { management } = getWorkflowsManagement();
       const spaceId = getSpaceId(request);
       const workflow = await management.getWorkflow(

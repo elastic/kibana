@@ -34,6 +34,7 @@ import {
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
+import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
@@ -77,6 +78,9 @@ export function NightshiftOnboarding({
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
+  // The exploration needs at least one saved sandbox secret; the server enforces it too.
+  const hasSecret = (useFetchSandboxSecrets().data?.keys.length ?? 0) > 0;
+
   const execution = data?.execution;
   // Step 1 is done once an exploration run exists.
   const isConnected = execution != null;
@@ -118,11 +122,15 @@ export function NightshiftOnboarding({
       status: step === 'connect' ? 'current' : 'complete',
       onClick: step !== 'connect' ? () => setStepOverride('connect') : undefined,
       hint:
-        step === 'connect'
+        step !== 'connect'
+          ? undefined
+          : hasSecret
           ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Credentials, Slack and hints are optional',
+              defaultMessage: 'Slack and hints are optional',
             })
-          : undefined,
+          : i18n.translate('xpack.nightshift.onboarding.steps.connectSecretRequiredHint', {
+              defaultMessage: 'Save at least one credential',
+            }),
     },
     investigate: {
       status: step === 'investigate' ? 'current' : latestInvestigation ? 'complete' : 'disabled',
@@ -153,6 +161,7 @@ export function NightshiftOnboarding({
           size="s"
           iconType="sortRight"
           iconSide="right"
+          isDisabled={!hasSecret}
           isLoading={startSuggestions.isLoading}
           onClick={() => startSuggestions.mutate()}
           data-test-subj="nightshiftOnboardingContinueButton"

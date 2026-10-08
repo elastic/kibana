@@ -62,13 +62,14 @@ export function OnboardingConnectStep(): React.ReactElement {
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connect.description', {
             defaultMessage:
-              "Nightshift already sees this deployment's telemetry. Everything below is optional: add credentials for other tools it should look at, and connect Slack to work with Nightshift from your channels.",
+              "Nightshift already sees this deployment's telemetry. Give it credentials for at least one other tool to look at. Connecting Slack and describing your system are optional.",
           })}
         </p>
       </EuiText>
 
       <EuiSpacer size="m" />
-      <OptionalSectionTitle
+      <SectionTitle
+        isRequired
         title={i18n.translate('xpack.nightshift.onboarding.secrets.title', {
           defaultMessage: 'Credentials for your tools',
         })}
@@ -77,7 +78,7 @@ export function OnboardingConnectStep(): React.ReactElement {
         <p>
           {i18n.translate('xpack.nightshift.onboarding.secrets.description', {
             defaultMessage:
-              "Nightshift works from a sandbox. Add a GitHub token, another Elastic deployment's URL and API key, or any other credential, and it can look there too. Values are stored encrypted and never shown again.",
+              "Nightshift works from a sandbox. Save at least one credential, such as a GitHub token or another Elastic deployment's URL and API key, and it looks there too. Values are stored encrypted and never shown again.",
           })}
         </p>
       </EuiText>
@@ -105,7 +106,13 @@ export function OnboardingConnectStep(): React.ReactElement {
   );
 }
 
-function OptionalSectionTitle({ title }: { title: string }): React.ReactElement {
+function SectionTitle({
+  title,
+  isRequired = false,
+}: {
+  title: string;
+  isRequired?: boolean;
+}): React.ReactElement {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -115,9 +122,13 @@ function OptionalSectionTitle({ title }: { title: string }): React.ReactElement 
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">
-          {i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
-            defaultMessage: 'Optional',
-          })}
+          {isRequired
+            ? i18n.translate('xpack.nightshift.onboarding.requiredBadge', {
+                defaultMessage: 'Required',
+              })
+            : i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
+                defaultMessage: 'Optional',
+              })}
         </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -135,7 +146,7 @@ function OnboardingHintsSection(): React.ReactElement | null {
   return (
     <div data-test-subj="nightshiftOnboardingHints">
       <EuiSpacer size="l" />
-      <OptionalSectionTitle
+      <SectionTitle
         title={i18n.translate('xpack.nightshift.onboarding.hints.title', {
           defaultMessage: 'Tell Nightshift about your system',
         })}
