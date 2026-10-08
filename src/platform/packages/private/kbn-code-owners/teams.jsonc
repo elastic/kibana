@@ -497,6 +497,18 @@
     }
   },
   {
+    "id": "nightshift",
+    "name": "Nightshift",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift",
+      "label": "Team:nightshift"
+    },
+    "responsibilities": [
+      "Nightshift"
+    ]
+  },
+  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
@@ -650,6 +662,21 @@
       "Distributed tracing",
       "Service maps",
       "APM data access"
+    ]
+  },
+  {
+    "id": "obs-signals-ai-o11y",
+    "name": "Obs Signals AI O11y",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-ai-o11y",
+      "label": "Team:obs-signals-ai-o11y"
+    },
+    "responsibilities": [
+      "GenAI tab",
+      "AI observability"
     ]
   },
   {
@@ -832,7 +859,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
@@ -879,16 +907,6 @@
     "responsibilities": [
       "Entity Analytics features in Kibana: Entity Risk Scoring, Privileged User monitoring, Explore pages, Asset Criticality"
     ]
-  },
-  {
-    "id": "security-genai-research-and-development",
-    "name": "Security Genai Research And Development",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-genai-research-and-development"
-    }
   },
   {
     "id": "security-generative-ai",
@@ -1143,6 +1161,17 @@
     "github": {
       "team": "elastic/threat-research-and-detection-engineering",
       "label": "Team:TRaDE"
+    }
+  },
+  {
+    "id": "security-investigations",
+    "name": "Security Investigations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/security-investigations",
+      "label": "Team:Security Investigations"
     }
   }
 ]

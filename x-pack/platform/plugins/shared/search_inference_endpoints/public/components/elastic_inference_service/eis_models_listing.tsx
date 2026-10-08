@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
   EuiButtonGroup,
@@ -14,13 +14,14 @@ import {
   type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ContentList, ContentListToolbar } from '@kbn/content-list';
+import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import type { EisDisplayOptions } from '../../utils/eis_utils';
 import { useDisplayOptionsTour } from '../../hooks/use_display_options_tour';
 import { DisplayOptions } from './display_options';
 import { EisCardGrid } from './eis_card_grid';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
-import { ModelFamilyFilterPart, TaskTypeFilterPart } from './eis_model_filters';
+import { ModelTypeFilterPart, ModelFamilyFilterPart } from './eis_model_filters';
+import { RegionFilterPart } from './region_filter';
 import { EisTable } from './eis_table';
 
 export type EisViewMode = 'card' | 'table';
@@ -32,6 +33,8 @@ interface EisModelsListingProps {
   displayOptions: EisDisplayOptions;
   onApplyDisplayOptions: (next: EisDisplayOptions) => void;
   hasBlockedModels: boolean;
+  viewMode: EisViewMode;
+  onViewModeChange: (viewMode: EisViewMode) => void;
 }
 
 const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
@@ -61,8 +64,9 @@ export const EisModelsListing = ({
   displayOptions,
   onApplyDisplayOptions,
   hasBlockedModels,
+  viewMode,
+  onViewModeChange,
 }: EisModelsListingProps) => {
-  const [viewMode, setViewMode] = useState<EisViewMode>('card');
   const { isTourOpen, dismissTour, hideTour } = useDisplayOptionsTour(hasBlockedModels);
 
   return (
@@ -71,8 +75,9 @@ export const EisModelsListing = ({
         <EuiFlexItem>
           <ContentListToolbar>
             <ContentListToolbar.Filters>
+              <ModelTypeFilterPart />
               <ModelFamilyFilterPart />
-              <TaskTypeFilterPart />
+              <RegionFilterPart />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
         </EuiFlexItem>
@@ -85,7 +90,7 @@ export const EisModelsListing = ({
             idSelected={viewMode}
             onChange={(id) => {
               if (isEisViewMode(id)) {
-                setViewMode(id);
+                onViewModeChange(id);
               }
             }}
             // `m` is form-control height, matching the toolbar's search box and filter buttons.
@@ -109,6 +114,7 @@ export const EisModelsListing = ({
       ) : (
         <EisCardGrid {...{ onViewModelDetails }} />
       )}
+      {viewMode === 'table' && <ContentListFooter />}
     </ContentList>
   );
 };

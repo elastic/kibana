@@ -71,11 +71,13 @@ export const createCasesEventBusMock = (): CasesEventBus =>
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitAttachmentsDeleted: jest.fn(),
     emitObservablesAdded: jest.fn(),
     emitAlertStatusChanged: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
+    onAttachmentsDeleted: jest.fn(),
     onObservablesAdded: jest.fn(),
     onAlertStatusChanged: jest.fn(),
     hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
@@ -184,7 +186,9 @@ const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock =>
     getFieldDefinitions: jest.fn(),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
+    validateCreateFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),
+    validateUpdateFieldDefinition: jest.fn(),
     deleteFieldDefinition: jest.fn(),
   });
 };
@@ -236,7 +240,7 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   const factory: PublicMethodsOf<CasesClientFactory> = {
     initialize: jest.fn(),
     create: jest.fn(),
-    createWorkflowRunAuthorizer: jest.fn(),
+    createWorkflowRunContext: jest.fn(),
   };
 
   return factory as unknown as CasesClientFactoryMock;

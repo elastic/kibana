@@ -1,7 +1,6 @@
 {
   "_no_owner": {
-    "oas_docs/pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
-    "oas_docs/pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
+    "oas_docs": "'oas_docs' should be kebab-case",
     "packages/kbn-tsconfig": "'kbn-tsconfig' should be snake_case",
     "pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
     "pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
@@ -213,7 +212,7 @@
     "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
   "@elastic/kibana-discover": {
-    "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
+    "src/platform/packages/shared/esql/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
   },
   "@elastic/kibana-management": {
     "src/platform/packages/shared/kbn-management/autoops_promotion_callout": "'autoops_promotion_callout' should be kebab-case",
@@ -452,9 +451,6 @@
   "@elastic/workflows-eng": {
     "src/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step": "'fallback-step' should be snake_case",
     "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/step-level": "'step-level' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration": "'parse-duration' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.test.ts": "'parse-duration.test.ts' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.ts": "'parse-duration.ts' should be snake_case"
+    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case"
   }
 }

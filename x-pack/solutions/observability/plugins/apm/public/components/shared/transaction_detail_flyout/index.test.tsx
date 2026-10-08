@@ -6,9 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { TransactionDetailFlyout } from '.';
+
+const mockUseResolvedApmIndices = jest.fn((_args: unknown): APMIndices | null | undefined => null);
+jest.mock('../../../hooks/use_apm_indices', () => ({
+  useResolvedApmIndices: (args: unknown) => mockUseResolvedApmIndices(args),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -33,8 +39,25 @@ jest.mock('./red_metrics', () => ({
   ),
 }));
 jest.mock('./trace_sample', () => ({
-  TransactionDetailFlyoutTraceSample: () => (
-    <div data-test-subj="transactionDetailFlyoutSection-traceSample">trace sample</div>
+  TransactionDetailFlyoutTraceSample: () => {
+    const { useTransactionDetailFlyoutContext } = jest.requireActual(
+      './transaction_detail_flyout_context'
+    );
+    const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
+    return (
+      <button
+        type="button"
+        data-test-subj="openFullTraceMock"
+        onClick={() => openFullTraceFlyout({ traceId: 'trace-1', contextSpanIds: ['span-1'] })}
+      >
+        open full trace
+      </button>
+    );
+  },
+}));
+jest.mock('./summary', () => ({
+  TransactionDetailFlyoutSummary: () => (
+    <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
   ),
 }));
 jest.mock('./footer', () => ({
@@ -43,8 +66,24 @@ jest.mock('./footer', () => ({
   ),
 }));
 
+const mockTraceWaterfallFlyout = jest.fn((_props: unknown) => (
+  <div data-test-subj="traceWaterfallFlyoutMock" />
+));
+jest.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout', () => ({
+  TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
+}));
+
+const http = { fetch: jest.fn() };
+
 const DEPS = {
-  core: {} as CoreStart,
+  core: {
+    http,
+    application: {
+      capabilities: {
+        apm: {},
+      },
+    },
+  } as unknown as CoreStart,
 };
 
 const FILTERS = {
@@ -54,6 +93,8 @@ const FILTERS = {
   environment: 'oteldemo',
   rangeFrom: '2026-08-20T10:00:00.000Z',
   rangeTo: '2026-08-21T10:43:35.610Z',
+  start: '2026-08-20T10:00:00.000Z',
+  end: '2026-08-21T10:43:35.610Z',
 };
 
 const BASE_PROPS = {
@@ -62,7 +103,21 @@ const BASE_PROPS = {
   onClose: jest.fn(),
 };
 
+const PARENT_INDICES = {
+  transaction: 'traces-parent*',
+  span: 'traces-parent*',
+  error: 'logs-parent*',
+  metric: 'metrics-parent*',
+  onboarding: 'apm-*',
+  sourcemap: 'apm-*',
+} as APMIndices;
+
 describe('TransactionDetailFlyout', () => {
+  beforeEach(() => {
+    mockUseResolvedApmIndices.mockReturnValue(null);
+    mockTraceWaterfallFlyout.mockClear();
+  });
+
   it('renders the transaction name in the header and flyout content', () => {
     render(<TransactionDetailFlyout {...BASE_PROPS} />);
 
@@ -74,6 +129,7 @@ describe('TransactionDetailFlyout', () => {
     expect(
       screen.getByTestId('transactionDetailFlyoutSection-latencyDistribution')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('openFullTraceMock')).toBeInTheDocument();
     expect(screen.getByTestId('transactionDetailFlyoutFooter')).toBeInTheDocument();
   });
 
@@ -81,5 +137,102 @@ describe('TransactionDetailFlyout', () => {
     render(<TransactionDetailFlyout {...BASE_PROPS} isOpen={false} />);
 
     expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
+  });
+
+  it('shows a stale-filters callout when isFiltersStale is true', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} isFiltersStale />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutStaleFiltersCallout')).toHaveTextContent(
+      "This transaction isn't available with the current filters. Showing previous data."
+    );
+  });
+
+  it('hides the stale-filters callout when isFiltersStale is false', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(
+      screen.queryByTestId('transactionDetailFlyoutStaleFiltersCallout')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a spinner next to the title while filters are pending', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} isFiltersPending />);
+
+    expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
+  });
+
+  it('opens the full-trace waterfall with absolute start/end and relative locator ranges', () => {
+    render(
+      <TransactionDetailFlyout
+        {...BASE_PROPS}
+        filters={{
+          ...FILTERS,
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: '2026-08-20T10:00:00.000Z',
+          end: '2026-08-21T10:43:35.610Z',
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('openFullTraceMock'));
+
+    expect(mockTraceWaterfallFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        traceId: 'trace-1',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        start: '2026-08-20T10:00:00.000Z',
+        end: '2026-08-21T10:43:35.610Z',
+        contextSpanIds: ['span-1'],
+        indicesSource: { indices: null },
+      })
+    );
+  });
+
+  it('fetches indices when opened without a parent source', () => {
+    render(<TransactionDetailFlyout {...BASE_PROPS} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: undefined,
+    });
+  });
+
+  it('reuses parent indices and passes that same source into the full-trace flyout', () => {
+    mockUseResolvedApmIndices.mockReturnValue(PARENT_INDICES);
+
+    render(<TransactionDetailFlyout {...BASE_PROPS} indicesSource={{ indices: PARENT_INDICES }} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: { indices: PARENT_INDICES },
+    });
+
+    fireEvent.click(screen.getByTestId('openFullTraceMock'));
+
+    expect(mockTraceWaterfallFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indicesSource: { indices: PARENT_INDICES },
+      })
+    );
+  });
+
+  it('keeps the full-trace flyout on the parent source while those indices are still loading', () => {
+    mockUseResolvedApmIndices.mockReturnValue(undefined);
+
+    render(<TransactionDetailFlyout {...BASE_PROPS} indicesSource={{ indices: undefined }} />);
+
+    fireEvent.click(screen.getByTestId('openFullTraceMock'));
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http,
+      indicesSource: { indices: undefined },
+    });
+    expect(mockTraceWaterfallFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indicesSource: { indices: undefined },
+      })
+    );
   });
 });

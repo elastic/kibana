@@ -6,12 +6,16 @@
  */
 
 import {
-  EuiButtonIcon,
+  EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -19,38 +23,51 @@ import {
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React from 'react';
+import { useQueryClient } from '@kbn/react-query';
+import React, { Fragment, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { FormValues } from '../../../form/types';
+import { RoutingTagsField } from '../../../form/fields/routing_tags_field';
 import { MatchedPolicyReason } from './matched_policy_reason';
-import { useMatchedActionPolicies } from './use_matched_action_policies';
+import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
+import {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from './use_matched_action_policies';
+import { WorkflowConnectorIcons } from './workflow_connector_icons';
 
 const actionPoliciesTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.title',
   { defaultMessage: 'Action policies' }
 );
 
-const matchingSubtext = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.matchingSubtext',
+const actionPoliciesDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.description',
   {
     defaultMessage:
-      'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.',
+      'Routing tags determine which action policies apply. Catch-all action policies match all alerts.',
   }
+);
+
+const appliedPoliciesTitle = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.appliedPoliciesTitle',
+  { defaultMessage: 'Applied policies' }
+);
+
+const createActionPolicyLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createLink',
+  { defaultMessage: 'Create action policy' }
 );
 
 const emptyStateLabel = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
-  { defaultMessage: 'No matching action policies found.' }
+  { defaultMessage: 'No action policies match yet.' }
 );
 
 const errorTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.errorTitle',
   { defaultMessage: 'Failed to load linked action policies' }
 );
-
-// TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
-//       once exported from the plugin or moved to a shared package.
-const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
 
 const getEditLabel = (name: string) =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.editPolicyLink', {
@@ -60,14 +77,35 @@ const getEditLabel = (name: string) =>
 
 interface Props {
   http: HttpStart;
+  createActionPolicyDisabledReason?: string;
+  CreateActionPolicyFormFlyout?: React.ComponentType<{
+    onClose: () => void;
+    onSuccess: () => void;
+  }>;
+  /**
+   * Builds a host-aware href to an action policy's edit page. Injected by the host
+   * plugin from the action policies locator; absent → the policy name renders as
+   * plain text instead of a link.
+   */
+  getActionPolicyEditHref?: (actionPolicyId: string) => string;
 }
 
-export const LinkedActionPoliciesStep = ({ http }: Props) => {
+export const LinkedActionPoliciesStep = ({
+  http,
+  createActionPolicyDisabledReason,
+  CreateActionPolicyFormFlyout,
+  getActionPolicyEditHref,
+}: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
-  const tags = metadata?.tags;
+  const routingTags = metadata?.routingTags;
+  const queryClient = useQueryClient();
+  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
 
-  const { isLoading, error, items } = useMatchedActionPolicies({ http, tags });
-  const ruleTags = tags ?? [];
+  const { isLoading, error, items } = useMatchedActionPolicies({ http, routingTags });
+
+  const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(
+    items.map(({ action_policy: actionPolicy }) => actionPolicy)
+  );
 
   return (
     <>
@@ -75,73 +113,142 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
         <h3>{actionPoliciesTitle}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        <p>{actionPoliciesDescription}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <RoutingTagsField />
+      <EuiSpacer size="m" />
 
-      {isLoading && <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />}
+      <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h4>{appliedPoliciesTitle}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {!isLoading && !error && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" data-test-subj="linkedActionPoliciesCount">
+                    {items.length}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {CreateActionPolicyFormFlyout && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={createActionPolicyDisabledReason} position="top">
+                <EuiButtonEmpty
+                  size="s"
+                  flush="right"
+                  onClick={() => setIsCreateFlyoutOpen(true)}
+                  isDisabled={Boolean(createActionPolicyDisabledReason)}
+                  hasAriaDisabled
+                  data-test-subj="linkedActionPoliciesCreateLink"
+                >
+                  {createActionPolicyLabel}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
 
-      {error && (
-        <KbnDangerCallout
-          announceOnMount
-          title={errorTitle}
-          data-test-subj="linkedActionPoliciesError"
-          text={error.message}
-        />
-      )}
+        {isLoading && <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />}
 
-      {!isLoading &&
-        !error &&
-        (items.length === 0 ? (
-          <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
+        {error && (
+          <KbnDangerCallout
+            announceOnMount
+            title={errorTitle}
+            data-test-subj="linkedActionPoliciesError"
+            text={error.message}
+          />
+        )}
+
+        {!isLoading && !error && items.length === 0 && (
+          <EuiText
+            size="s"
+            color="subdued"
+            textAlign="center"
+            data-test-subj="linkedActionPoliciesEmpty"
+          >
             <p>{emptyStateLabel}</p>
           </EuiText>
-        ) : (
-          <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="linkedActionPoliciesList">
-            <EuiText size="s" color="subdued">
-              <p>{matchingSubtext}</p>
-            </EuiText>
-            {items.map(({ actionPolicy, category }) => {
+        )}
+
+        {!isLoading && !error && items.length > 0 && (
+          <EuiSplitPanel.Outer
+            hasBorder
+            hasShadow={false}
+            data-test-subj="linkedActionPoliciesList"
+          >
+            {items.map(({ action_policy: actionPolicy, category }, index) => {
               const editLabel = getEditLabel(actionPolicy.name);
+              const connectorTypes = connectorTypesByPolicy.get(actionPolicy.id) ?? [];
+              const editHref = getActionPolicyEditHref?.(actionPolicy.id);
               return (
-                <EuiFlexItem key={actionPolicy.id}>
-                  <EuiPanel
-                    hasBorder
-                    hasShadow={false}
+                <Fragment key={actionPolicy.id}>
+                  {index > 0 && <EuiHorizontalRule margin="none" />}
+                  <EuiSplitPanel.Inner
                     paddingSize="s"
                     data-test-subj={`linkedActionPolicyRow-${actionPolicy.id}`}
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <strong>{actionPolicy.name}</strong>
-                        </EuiText>
+                      <EuiFlexItem grow={false}>
+                        {editHref ? (
+                          <EuiLink
+                            href={editHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            external={false}
+                            aria-label={editLabel}
+                            data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
+                          >
+                            {actionPolicy.name}
+                          </EuiLink>
+                        ) : (
+                          <EuiText
+                            size="s"
+                            data-test-subj={`linkedActionPolicyName-${actionPolicy.id}`}
+                          >
+                            {actionPolicy.name}
+                          </EuiText>
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow>
+                        <WorkflowConnectorIcons
+                          types={connectorTypes}
+                          data-test-subj={`linkedActionPolicyConnectorIcons-${actionPolicy.id}`}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <MatchedPolicyReason
                           category={category}
                           matcher={actionPolicy.matcher}
-                          ruleTags={ruleTags}
+                          routingTags={routingTags ?? []}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={editLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="external"
-                            href={http.basePath.prepend(
-                              `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={editLabel}
-                            data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
                     </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiFlexItem>
+                  </EuiSplitPanel.Inner>
+                </Fragment>
               );
             })}
-          </EuiFlexGroup>
-        ))}
+          </EuiSplitPanel.Outer>
+        )}
+      </EuiPanel>
+
+      {CreateActionPolicyFormFlyout && isCreateFlyoutOpen && (
+        <CreateActionPolicyFormFlyout
+          onClose={() => setIsCreateFlyoutOpen(false)}
+          onSuccess={() => {
+            setIsCreateFlyoutOpen(false);
+            queryClient.invalidateQueries({ queryKey: matchedActionPoliciesQueryKey });
+          }}
+        />
+      )}
     </>
   );
 };

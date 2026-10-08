@@ -24,7 +24,6 @@ export const triggerTestNowMonitor = async ({
   const res = await apiService.post<TestNowResponse>(
     SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${configId}`,
     undefined,
-    undefined,
     {
       spaceId,
     }
@@ -41,12 +40,7 @@ export const runOnceMonitor = async ({
   id: string;
   spaceId?: string;
 }): Promise<{ errors: ServiceLocationErrors }> => {
-  return await apiService.post(
-    SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`,
-    monitor,
-    undefined,
-    {
-      spaceId,
-    }
-  );
+  return await apiService.post(SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor, {
+    spaceId,
+  });
 };

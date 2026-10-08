@@ -11,39 +11,39 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { Main } from './main';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import type { DataFederationKibanaServices, FederatedDataFeatureFlags } from './types';
 import { DataSourcesClient } from './data_sources_client';
 import { DatasetsClient } from './datasets_client';
+import { getDiscoverLocator } from './get_discover_locator';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element, history }: ManagementAppMountParams,
   {
     cloudInfo,
-    isCloudEnabled = false,
+    share,
     featureFlags: {
-      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
       enableAzureDataSourceType = false,
     } = {},
   }: {
     cloudInfo?: FederatedIdentityClusterInfo;
-    isCloudEnabled?: boolean;
+    share?: SharePluginStart;
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
-  const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
   const services: DataFederationKibanaServices = {
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
     toasts: coreStart.notifications.toasts,
     docLinks: coreStart.docLinks,
+    discoverLocator: getDiscoverLocator(coreStart.application.capabilities, share),
     cloudInfo,
     featureFlags: {
-      enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
     },

@@ -51,7 +51,7 @@ export interface SignificantEventListProps {
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
   onCloseClick?: (event: SignificantEvent) => void;
-  closingEventUuid?: string;
+  closingEventId?: string;
   sectionRef?: React.Ref<HTMLElement>;
 }
 
@@ -66,7 +66,7 @@ export function SignificantEventList({
   onEventClick,
   onChatClick,
   onCloseClick,
-  closingEventUuid,
+  closingEventId,
   sectionRef,
 }: SignificantEventListProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -165,7 +165,7 @@ export function SignificantEventList({
         >
           {events.map((event, index) => (
             <li
-              key={event.event_uuid}
+              key={event.event_id}
               css={
                 index < events.length - 1
                   ? css`
@@ -180,11 +180,11 @@ export function SignificantEventList({
                   event,
                   investigationStatuses
                 )}
-                isSelected={event.event_uuid === selectedEventUuid}
+                isSelected={event.event_id === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
                 onCloseClick={onCloseClick}
-                isClosing={event.event_uuid === closingEventUuid}
+                isClosing={event.event_id === closingEventId}
               />
             </li>
           ))}

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { RegisterFlyoutGroupedAttachment } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -14,7 +16,16 @@ export interface AgenticInvestigationsPublicSetupDependencies {
 
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
+  proposals?: ProposalsPublicPluginStart;
 }
 
-export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
+/** The part of `xpack.agenticInvestigations` exposed to the browser. */
+export interface AgenticInvestigationsPublicConfig {
+  /** Escalations are AlertZero-only for now; off on Observability serverless. */
+  escalations: { enabled: boolean };
+}
+
+export interface AgenticInvestigationsPublicPluginSetup {
+  registerFlyoutGroupedAttachment: RegisterFlyoutGroupedAttachment;
+}
 export type AgenticInvestigationsPublicPluginStart = Record<string, never>;

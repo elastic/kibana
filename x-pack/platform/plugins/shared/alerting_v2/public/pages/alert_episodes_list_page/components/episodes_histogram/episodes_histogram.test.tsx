@@ -50,6 +50,7 @@ const mockServices = {
 } as any;
 
 const mockDataView = {
+  id: 'mock-data-view-id',
   fields: [],
 } as any;
 
@@ -134,6 +135,27 @@ describe('EpisodesHistogram', () => {
   it('renders the histogram chart when initialized', () => {
     render(<EpisodesHistogram {...defaultProps} />);
     expect(screen.getByTestId('unifiedHistogramChart')).toBeInTheDocument();
+  });
+
+  it('hides Lens chart actions', () => {
+    render(<EpisodesHistogram {...defaultProps} />);
+    expect(mockUseUnifiedHistogram).toHaveBeenCalledWith(
+      expect.objectContaining({ withLensActions: false })
+    );
+  });
+
+  it('fetches the chart with an AbortController', () => {
+    const fetch = jest.fn();
+    mockUseUnifiedHistogram.mockReturnValue({
+      isInitialized: true,
+      api: { fetch } as any,
+      chartProps: {} as any,
+      layoutProps: {} as any,
+    });
+    render(<EpisodesHistogram {...defaultProps} />);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.objectContaining({ abortController: expect.any(AbortController) })
+    );
   });
 
   it('does not render the chart when not yet initialized', () => {

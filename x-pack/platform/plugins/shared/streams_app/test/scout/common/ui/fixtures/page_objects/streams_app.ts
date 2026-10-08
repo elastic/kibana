@@ -7,9 +7,11 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
+import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
 import {
   AppMenu,
+  EsqlEditor,
   KibanaCodeEditorWrapper,
   type EuiDataGridObject,
   type Locator,
@@ -38,6 +40,7 @@ export class StreamsApp {
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
   public readonly kibanaMonacoEditor;
+  private readonly esqlEditor: EsqlEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
@@ -56,6 +59,7 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
+  public readonly canvasViewport;
   public readonly canvasZoomControls;
   public readonly canvasZoomIn;
   public readonly canvasZoomOut;
@@ -71,6 +75,8 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   public readonly canvasEmptyState;
+  public readonly canvasSearch;
+  public readonly canvasSearchNoMatches;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -97,6 +103,7 @@ export class StreamsApp {
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+    this.esqlEditor = new EsqlEditor(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
@@ -123,6 +130,7 @@ export class StreamsApp {
     );
     // Canvas locators
     this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasViewport = this.canvasTab.locator('.react-flow__viewport');
     this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
     this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
     this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
@@ -138,6 +146,8 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
+    this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
+    this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -201,6 +211,27 @@ export class StreamsApp {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
+  /** Opens the canvas with its search pre-filled from the URL. */
+  async gotoCanvasSearch(query: string) {
+    await this.page.gotoApp('streams/new-experience/canvas', {
+      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    });
+  }
+
+  getDestinationShowOnCanvasButton(destinationName: string) {
+    return this.streamsDestinationsTable
+      .getByRole('row')
+      .filter({ hasText: destinationName })
+      .getByTestId('streamsShowOnCanvasAction');
+  }
+
+  getSourceShowOnCanvasButton(sourceName: string) {
+    return this.streamsSourcesTable
+      .getByRole('row')
+      .filter({ hasText: sourceName })
+      .getByTestId('streamsShowOnCanvasAction');
+  }
+
   // Canvas utility methods
   getCanvasSourceNode(streamName: string) {
     return this.page.testSubj.locator('streamsCanvasSourceNode').filter({ hasText: streamName });
@@ -218,6 +249,28 @@ export class StreamsApp {
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  /**
+   * React Flow's viewport transform, which encodes both pan and zoom.
+   */
+  async getCanvasViewportTransform(): Promise<string> {
+    return this.canvasViewport.evaluate((element) => window.getComputedStyle(element).transform);
+  }
+
+  /** Current canvas zoom, read the way React Flow itself reads it (`@xyflow/system`). */
+  async getCanvasZoom(): Promise<number> {
+    return this.canvasViewport.evaluate((element) => {
+      const { transform } = window.getComputedStyle(element);
+      return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).m22;
+    });
+  }
+
+  /** Zooms in once, resolving when the viewport reflects the higher zoom. */
+  async zoomInCanvas() {
+    const previousZoom = await this.getCanvasZoom();
+    await this.canvasZoomIn.click();
+    await expect.poll(() => this.getCanvasZoom()).toBeGreaterThan(previousZoom);
   }
 
   /**
@@ -864,25 +917,18 @@ export class StreamsApp {
   }
 
   async fillGrokPatternInput(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternExpression').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternExpression',
+      value
+    );
   }
 
   async fillGrokPatternDefinitionsInput(value: string) {
     await this.page.getByRole('button', { name: 'Advanced settings' }).click();
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppPatternDefinitionsEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternDefinitionsEditor',
+      value
+    );
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -914,15 +960,10 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppCustomSamplesDataSourceEditor',
+      value
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {
@@ -1403,14 +1444,14 @@ export class StreamsApp {
 
   async expectAttachmentDetailsFlyoutDescription(description: string) {
     // The description is shown in the first InfoPanel - scope to the flyout
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const descriptionText = flyout.getByText(description);
     await expect(descriptionText).toBeVisible();
   }
 
   async expectAttachmentDetailsFlyoutType(typeLabel: string) {
     // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const typeBadge = flyout.getByText(typeLabel, { exact: true });
     await expect(typeBadge).toBeVisible();
   }
@@ -1546,19 +1587,18 @@ export class StreamsApp {
   async createRootQueryStream(name: string, esqlQuery: string) {
     await this.clickCreateQueryStreamButton();
     await this.fillRoutingRuleName(name);
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
     await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
     await this.clickQueryModeCreateQueryStreamButton();
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
     await this.fillRoutingRuleName(childName);
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
   }
 
   async saveChildQueryStream() {

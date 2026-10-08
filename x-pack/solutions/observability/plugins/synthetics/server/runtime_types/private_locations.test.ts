@@ -7,32 +7,21 @@
 
 import { PrivateLocationAttributesCodec } from './private_locations';
 
-const classic = {
+const location = {
   label: 'Loc',
   id: 'loc-1',
   agentPolicyId: 'ap-1',
   isServiceManaged: false,
 };
 
-describe('PrivateLocationAttributesCodec isAgentSharding', () => {
-  it('decodes a classic location without the flag', () => {
-    expect(PrivateLocationAttributesCodec.safeParse(classic).success).toBe(true);
+describe('PrivateLocationAttributesCodec', () => {
+  it('decodes a location', () => {
+    expect(PrivateLocationAttributesCodec.safeParse(location).success).toBe(true);
   });
 
-  it('decodes a scalable location with the flag', () => {
-    const result = PrivateLocationAttributesCodec.safeParse({
-      ...classic,
-      isAgentSharding: true,
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.isAgentSharding).toBe(true);
-    }
-  });
-
-  it('rejects a non-boolean flag', () => {
+  it('still decodes saved objects written with the removed isAgentSharding attribute', () => {
     expect(
-      PrivateLocationAttributesCodec.safeParse({ ...classic, isAgentSharding: 'yes' }).success
-    ).toBe(false);
+      PrivateLocationAttributesCodec.safeParse({ ...location, isAgentSharding: true }).success
+    ).toBe(true);
   });
 });
