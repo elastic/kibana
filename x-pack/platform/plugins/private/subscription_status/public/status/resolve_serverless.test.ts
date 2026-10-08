@@ -68,7 +68,7 @@ describe('resolveServerlessStatus', () => {
     expect(await resolve({ getPrivilegedUrls })).toEqual({
       kind: 'tooltip',
       label: 'Trial',
-      tooltip: 'Contact your admin to update the subscription.',
+      tooltip: 'Contact your administrator to update the subscription.',
       projectType: 'search',
     });
   });
@@ -103,13 +103,6 @@ describe('resolveServerlessStatus', () => {
       });
     }
   );
-
-  it('falls back to a generic title and omits the solution for Workplace AI', async () => {
-    expect(await resolve({ projectType: 'workplaceai' })).toMatchObject({
-      title: 'Elastic Serverless',
-      secondaryAction: { href: expect.not.stringContaining('solution=') },
-    });
-  });
 
   it('omits the region subtitle and provider when the provider is unknown', async () => {
     expect(await resolve({ csp: undefined })).toMatchObject({

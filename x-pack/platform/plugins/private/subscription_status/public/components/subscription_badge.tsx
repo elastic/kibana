@@ -138,7 +138,11 @@ export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadg
       return (
         // The tooltip is only linked to the badge while visible, so the message is also rendered as
         // hidden text for screen readers in browse mode.
-        <EuiToolTip content={status.tooltip} disableScreenReaderOutput>
+        <EuiToolTip
+          content={status.tooltip}
+          disableScreenReaderOutput
+          data-test-subj="subscriptionStatusTooltip"
+        >
           <EuiBadge
             color={euiTheme.colors.primary}
             tabIndex={0}

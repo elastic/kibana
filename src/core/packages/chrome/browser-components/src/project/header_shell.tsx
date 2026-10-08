@@ -81,7 +81,7 @@ const useChromeHeaderStyles = () => {
       display: flex;
       align-items: center;
       flex-shrink: 0;
-      margin-inline-start: ${euiTheme.size.s};
+      margin-inline: ${euiTheme.size.s};
     `;
 
     const separator = css`

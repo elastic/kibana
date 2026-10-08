@@ -58,9 +58,11 @@ const getPricingSolution = (projectType?: ProjectType): string | undefined => {
     case 'search':
       return 'elasticsearch';
     case 'observability':
+      return 'observability';
     case 'security':
+      return 'security';
     case 'vectordb':
-      return projectType;
+      return 'vectordb';
     case 'workplaceai':
     case undefined:
       return undefined;
@@ -120,7 +122,7 @@ export const resolveServerlessStatus = async ({
       kind: 'tooltip',
       label,
       tooltip: i18n.translate('xpack.subscriptionStatus.serverless.noBillingAccessTooltip', {
-        defaultMessage: 'Contact your admin to update the subscription.',
+        defaultMessage: 'Contact your administrator to update the subscription.',
       }),
       projectType,
     };

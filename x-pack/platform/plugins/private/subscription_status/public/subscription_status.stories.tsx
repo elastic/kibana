@@ -24,13 +24,7 @@ interface ScenarioProps {
   baseUrl?: string;
 }
 
-const PROJECT_TYPES: ProjectType[] = [
-  'search',
-  'observability',
-  'security',
-  'vectordb',
-  'workplaceai',
-];
+const PROJECT_TYPES: ProjectType[] = ['search', 'observability', 'security', 'vectordb'];
 
 const SubscriptionStatusScenario = ({
   projectType,
@@ -106,10 +100,6 @@ export const ObservabilityOnGcp: Story = {
 
 export const VectorDbOnAzure: Story = {
   args: { projectType: 'vectordb', csp: 'azure', region: 'eastus2' },
-};
-
-export const WorkplaceAiFallback: Story = {
-  args: { projectType: 'workplaceai' },
 };
 
 export const UnknownRegion: Story = {
