@@ -27,11 +27,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
-  EvidenceChart as EvidenceChartSpec,
   InvestigationRecommendation,
   InvestigationState,
 } from '@kbn/significant-events-schema';
-import { EvidenceItem } from './evidence_list';
 
 const hasVisibleText = (text?: string): text is string => Boolean(text?.trim());
 
@@ -207,19 +205,11 @@ export const FinalResults: React.FC<{
   state: InvestigationState;
   /** Put a "Conclusion" heading above the conclusion, for layouts where every section is titled. */
   showConclusionTitle?: boolean;
-  /** Chart backing the conclusion, e.g. the evidence of the confirmed hypothesis. */
-  conclusionChart?: EvidenceChartSpec;
   /** Rendered between the conclusion and the proposed actions. */
   afterConclusion?: React.ReactNode;
   /** Truncate the conclusion text to this many lines, with a toggle to read it all. */
   conclusionMaxLines?: number;
-}> = ({
-  state,
-  showConclusionTitle = false,
-  conclusionChart,
-  afterConclusion,
-  conclusionMaxLines,
-}) => {
+}> = ({ state, showConclusionTitle = false, afterConclusion, conclusionMaxLines }) => {
   const { conclusion, recommendations } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
@@ -253,12 +243,6 @@ export const FinalResults: React.FC<{
             <ClampedMarkdown text={conclusion} maxLines={conclusionMaxLines} />
           ) : (
             <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
-          )}
-          {conclusionChart && (
-            <div data-test-subj="investigationOutputConclusionChart">
-              <EuiSpacer size="m" />
-              <EvidenceItem evidence={{ chart: conclusionChart }} />
-            </div>
           )}
         </EuiFlexItem>
       )}

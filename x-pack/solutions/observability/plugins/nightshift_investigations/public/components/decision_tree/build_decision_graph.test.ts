@@ -17,7 +17,6 @@ import {
   DECISION_TREE_NODE_WIDTH,
   DECISION_TREE_ROW_GAP,
   DECISION_TREE_SIBLING_GAP,
-  DECISION_TREE_WIDE_CONCLUSION_WIDTH,
   layoutDecisionGraph,
 } from './layout_decision_graph';
 
@@ -90,28 +89,15 @@ describe('buildDecisionGraph', () => {
     );
   });
 
-  it('gives the conclusion the winning hypothesis as its root cause', () => {
-    const findConclusion = (state: InvestigationState) =>
-      buildDecisionGraph({
-        trigger,
-        state,
-        isRunning: false,
-        isHypothesesExpanded: false,
-      }).nodes.find(({ id }) => id === DECISION_TREE_NODE_IDS.conclusion)?.data;
+  it('puts the conclusion text on the conclusion node', () => {
+    const conclusion = buildDecisionGraph({
+      trigger,
+      state: completedState,
+      isRunning: false,
+      isHypothesesExpanded: false,
+    }).nodes.find(({ id }) => id === DECISION_TREE_NODE_IDS.conclusion)?.data;
 
-    expect(findConclusion(completedState)).toMatchObject({
-      kind: 'conclusion',
-      rootCause: { candidate: 'Pool exhaustion' },
-    });
-    expect(
-      findConclusion({
-        ...completedState,
-        hypotheses: completedState.hypotheses.map((hypothesis) => ({
-          ...hypothesis,
-          status: 'dismissed' as const,
-        })),
-      })
-    ).toMatchObject({ kind: 'conclusion', rootCause: undefined });
+    expect(conclusion).toEqual({ kind: 'conclusion', conclusion: 'The pool was too small.' });
   });
 
   it('holds back the conclusion and actions while the run is in progress', () => {
@@ -224,18 +210,16 @@ describe('layoutDecisionGraph', () => {
     ).toBe(DECISION_TREE_NODE_WIDTH.hypothesis + DECISION_TREE_SIBLING_GAP);
   });
 
-  it('widens the conclusion only when it has a root cause to show', () => {
-    const conclusionWidth = (state: InvestigationState) =>
-      layoutDecisionGraph(
-        buildDecisionGraph({ trigger, state, isRunning: false, isHypothesesExpanded: false })
-      ).find(({ id }) => id === DECISION_TREE_NODE_IDS.conclusion)?.width;
-
-    expect(conclusionWidth(completedState)).toBe(DECISION_TREE_WIDE_CONCLUSION_WIDTH);
-    expect(
-      conclusionWidth({
-        ...completedState,
-        hypotheses: [{ candidate: 'DNS failure', confidence: 0.1, status: 'dismissed' }],
+  it('keeps the conclusion at its normal width', () => {
+    const conclusionWidth = layoutDecisionGraph(
+      buildDecisionGraph({
+        trigger,
+        state: completedState,
+        isRunning: false,
+        isHypothesesExpanded: false,
       })
-    ).toBe(DECISION_TREE_NODE_WIDTH.conclusion);
+    ).find(({ id }) => id === DECISION_TREE_NODE_IDS.conclusion)?.width;
+
+    expect(conclusionWidth).toBe(DECISION_TREE_NODE_WIDTH.conclusion);
   });
 });

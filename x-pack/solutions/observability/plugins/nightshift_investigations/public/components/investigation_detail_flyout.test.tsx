@@ -98,7 +98,7 @@ describe('InvestigationDetailFlyout', () => {
     expect(screen.getByText('The pool size change caused the spike')).toBeInTheDocument();
   });
 
-  it('backs the conclusion with the chart of the confirmed hypothesis', () => {
+  it('does not show a chart under the conclusion', () => {
     const chart = {
       type: 'line' as const,
       title: 'Active connections',
@@ -123,7 +123,7 @@ describe('InvestigationDetailFlyout', () => {
       }),
     });
 
-    expect(screen.getByTestId('investigationOutputConclusionChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOutputConclusionChart')).not.toBeInTheDocument();
   });
 
   it('offers all hypotheses between the conclusion and the proposed actions', () => {
@@ -142,19 +142,6 @@ describe('InvestigationDetailFlyout', () => {
     const actions = screen.getByTestId('investigationOutputRecommendations');
     expect(conclusion.compareDocumentPosition(card)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(card.compareDocumentPosition(actions)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-
-  it('shows no conclusion chart when no hypothesis was confirmed', () => {
-    renderFlyout({
-      inv: investigation({
-        status: 'completed',
-        completed_at: '2026-09-15T12:10:00.000Z',
-        hypotheses: [{ candidate: 'DNS failure', confidence: 0.2, status: 'dismissed' }],
-        conclusion: 'Nothing conclusive',
-      }),
-    });
-
-    expect(screen.queryByTestId('investigationOutputConclusionChart')).not.toBeInTheDocument();
   });
 
   it('keeps the persisted result when a late snapshot arrives after completion', () => {

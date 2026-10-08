@@ -6,9 +6,7 @@
  */
 
 import type {
-  EvidenceChart,
   InvestigationHypothesis,
-  InvestigationImpact,
   InvestigationRecommendation,
   InvestigationState,
 } from '@kbn/significant-events-schema';
@@ -41,10 +39,7 @@ export type DecisionTreeNodeData =
     }
   | {
       kind: 'conclusion';
-      conclusion?: string;
-      impact?: InvestigationImpact;
-      /** The confirmed hypothesis the conclusion settled on, if any. */
-      rootCause?: InvestigationHypothesis;
+      conclusion: string;
     }
   | {
       kind: 'actions';
@@ -106,20 +101,6 @@ export const sortRecommendations = (
 ): InvestigationRecommendation[] =>
   [...recommendations].sort((first, second) => second.confidence - first.confidence);
 
-/** The first chart in a hypothesis's evidence, which visualises the proof for it. */
-export const getHypothesisChart = (
-  hypothesis?: InvestigationHypothesis
-): EvidenceChart | undefined => hypothesis?.evidence?.find(({ chart }) => chart)?.chart;
-
-/** The chart of the highest-confidence confirmed hypothesis, if it has one. */
-export const getRootCauseChart = (
-  hypotheses: readonly InvestigationHypothesis[]
-): EvidenceChart | undefined =>
-  getHypothesisChart(hypotheses[getWinningHypothesisIndex(hypotheses)]);
-
-const hasImpactContent = (impact?: InvestigationImpact): boolean =>
-  Boolean(impact?.summary?.trim() || impact?.evidence || impact?.entities?.length);
-
 const createEdge = (source: string, target: string, isHappyPath: boolean): DecisionGraphEdge => ({
   id: `${source}->${target}`,
   source,
@@ -145,7 +126,7 @@ export const buildDecisionGraph = ({
   isHypothesesExpanded: boolean;
   isActionsExpanded?: boolean;
 }): DecisionGraph => {
-  const { hypotheses, conclusion, impact } = state;
+  const { hypotheses, conclusion } = state;
   const recommendations = sortRecommendations(state.recommendations ?? []);
   const winnerIndex = getWinningHypothesisIndex(hypotheses);
   const hasWinner = !isRunning && winnerIndex !== -1;
@@ -198,15 +179,14 @@ export const buildDecisionGraph = ({
       ? id === getHypothesisNodeId(winnerIndex)
       : id === DECISION_TREE_NODE_IDS.hypotheses);
 
-  const hasConclusion = Boolean(conclusion?.trim()) || hasImpactContent(impact);
-  if (hasConclusion) {
+  const conclusionText = conclusion?.trim();
+  const hasConclusion = Boolean(conclusionText);
+  if (conclusionText) {
     nodes.push({
       id: DECISION_TREE_NODE_IDS.conclusion,
       data: {
         kind: 'conclusion',
-        conclusion,
-        impact,
-        rootCause: hasWinner ? hypotheses[winnerIndex] : undefined,
+        conclusion: conclusionText,
       },
     });
     feedingIds.forEach((id) =>

@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiText,
   useEuiTheme,
@@ -281,11 +282,47 @@ const BodyText = ({
   </EuiText>
 );
 
-const SectionLabel = ({ children }: { children: React.ReactNode }): React.ReactElement => (
-  <EuiText size="xs" color="subdued">
-    <strong>{children}</strong>
-  </EuiText>
-);
+/**
+ * Clamped markdown. Plain `text` nodes inside code blocks do not get a token class, so the code
+ * font is set on the block itself — the same treatment as the investigation flyout.
+ */
+const ClampedMarkdown = ({
+  text,
+  lines,
+  color,
+}: {
+  text: string;
+  lines: number;
+  color?: 'subdued';
+}): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiText
+      size="s"
+      color={color}
+      css={css`
+        line-height: ${BODY_LINE_HEIGHT}px;
+        min-height: ${lines * BODY_LINE_HEIGHT}px;
+        ${clampLines(lines)}
+        ${codeBlockTextCss(euiTheme.font.familyCode, euiTheme.colors.textParagraph)}
+      `}
+    >
+      <EuiMarkdownFormat textSize="s">{text}</EuiMarkdownFormat>
+    </EuiText>
+  );
+};
+
+const codeBlockTextCss = (fontFamily: string, color: string) => css`
+  .euiCodeBlock__code,
+  .euiCodeBlock__line,
+  .euiCodeBlock__lineText,
+  pre code,
+  code[data-code-language] {
+    font-family: ${fontFamily};
+    color: ${color};
+  }
+`;
 
 const TRIGGER_ICON: Record<InvestigationSubjectType, IconType> = {
   alert: 'bell',
@@ -332,15 +369,6 @@ const conclusionLabel = i18n.translate(
   'xpack.nightshiftInvestigations.visualiser.conclusionLabel',
   { defaultMessage: 'Conclusion' }
 );
-const summaryLabel = i18n.translate('xpack.nightshiftInvestigations.visualiser.summaryLabel', {
-  defaultMessage: 'Summary',
-});
-const rootCauseLabel = i18n.translate('xpack.nightshiftInvestigations.visualiser.rootCauseLabel', {
-  defaultMessage: 'Root cause',
-});
-const impactLabel = i18n.translate('xpack.nightshiftInvestigations.visualiser.impactLabel', {
-  defaultMessage: 'Impact',
-});
 
 export const HypothesisStatusBadge = ({
   status,
@@ -630,16 +658,12 @@ const DecisionTreeNodeComponent = ({
             <BodyText lines={2} bold>
               {data.hypothesis.candidate}
             </BodyText>
-            <BodyText lines={3} color="subdued">
-              {data.hypothesis.reason ?? ''}
-            </BodyText>
+            <ClampedMarkdown text={data.hypothesis.reason ?? ''} lines={3} color="subdued" />
           </EuiFlexGroup>
         </NodeShell>
       );
 
-    case 'conclusion': {
-      const impactSummary = data.impact?.summary?.trim();
-      const { rootCause } = data;
+    case 'conclusion':
       return (
         <NodeShell
           kind="conclusion"
@@ -647,42 +671,9 @@ const DecisionTreeNodeComponent = ({
           width={getDecisionTreeNodeWidth(data)}
           {...shellProps}
         >
-          <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-            {data.conclusion && (
-              <EuiFlexItem grow={false}>
-                <SectionLabel>{summaryLabel}</SectionLabel>
-                <BodyText lines={3}>{data.conclusion}</BodyText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="l" responsive={false}>
-                {impactSummary && (
-                  <EuiFlexItem
-                    css={css`
-                      min-width: 0;
-                    `}
-                  >
-                    <SectionLabel>{impactLabel}</SectionLabel>
-                    <BodyText lines={2}>{impactSummary}</BodyText>
-                  </EuiFlexItem>
-                )}
-                {rootCause && (
-                  <EuiFlexItem
-                    data-test-subj="nightshiftDecisionTreeConclusionRootCause"
-                    css={css`
-                      min-width: 0;
-                    `}
-                  >
-                    <SectionLabel>{rootCauseLabel}</SectionLabel>
-                    <BodyText lines={2}>{rootCause.candidate}</BodyText>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ClampedMarkdown text={data.conclusion} lines={4} />
         </NodeShell>
       );
-    }
 
     case 'actions':
       return (

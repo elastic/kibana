@@ -25,14 +25,8 @@ export const DECISION_TREE_NODE_WIDTH: Record<DecisionTreeNodeKind, number> = {
   actions: 360,
 };
 
-/** Room for the impact and root cause summaries side by side (charts live in the detail panel). */
-export const DECISION_TREE_WIDE_CONCLUSION_WIDTH = 880;
-
-/** Width of one node; a conclusion with a root cause is widened to show it next to the impact. */
 export const getDecisionTreeNodeWidth = (data: DecisionTreeNodeData): number =>
-  data.kind === 'conclusion' && data.rootCause
-    ? DECISION_TREE_WIDE_CONCLUSION_WIDTH
-    : DECISION_TREE_NODE_WIDTH[data.kind];
+  DECISION_TREE_NODE_WIDTH[data.kind];
 
 /** Used until the rendered node has been measured. Hypothesis cards render at exactly this height. */
 export const DECISION_TREE_ESTIMATED_NODE_HEIGHT: Record<DecisionTreeNodeKind, number> = {

@@ -35,7 +35,7 @@ import {
 } from '../../common';
 import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 import { formatDate, formatDuration } from './utils';
-import { getRootCauseChart, type DecisionTreeTrigger } from './decision_tree/build_decision_graph';
+import type { DecisionTreeTrigger } from './decision_tree/build_decision_graph';
 import { DecisionTreeCard } from './decision_tree/decision_tree_card';
 
 const LazyInvestigationVisualiserFlyout = React.lazy(async () => {
@@ -280,7 +280,6 @@ export function InvestigationDetailFlyout({
               state={invState}
               showConclusionTitle
               conclusionMaxLines={4}
-              conclusionChart={getRootCauseChart(invState.hypotheses)}
               afterConclusion={decisionTreeCard}
             />
             <EuiSpacer size="l" />

@@ -47,12 +47,11 @@ import {
 import '@xyflow/react/dist/style.css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EvidenceChart, EvidenceList, ImpactSection } from '@kbn/investigation-output';
+import { EvidenceList } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import {
   buildDecisionGraph,
   DECISION_TREE_NODE_IDS,
-  getHypothesisChart,
   getPathToNode,
   type DecisionTreeNodeData,
   type DecisionTreeTrigger,
@@ -192,73 +191,8 @@ const NodeDetail = ({
         </>
       );
     }
-    case 'conclusion': {
-      const rootCauseChart = getHypothesisChart(data.rootCause);
-      return (
-        <>
-          {data.conclusion && <EuiMarkdownFormat textSize="s">{data.conclusion}</EuiMarkdownFormat>}
-          {data.impact && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiTitle size="xxs">
-                <h4>
-                  {i18n.translate('xpack.nightshiftInvestigations.visualiser.detail.impactTitle', {
-                    defaultMessage: 'Impact',
-                  })}
-                </h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <ImpactSection impact={data.impact} />
-            </>
-          )}
-          {data.rootCause && (
-            <div data-test-subj="nightshiftInvestigationVisualiserRootCause">
-              <EuiSpacer size="m" />
-              <EuiTitle size="xxs">
-                <h4>
-                  {i18n.translate(
-                    'xpack.nightshiftInvestigations.visualiser.detail.rootCauseTitle',
-                    {
-                      defaultMessage: 'Root cause',
-                    }
-                  )}
-                </h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s">
-                <strong>{data.rootCause.candidate}</strong>
-              </EuiText>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.nightshiftInvestigations.visualiser.detail.confidence"
-                  defaultMessage="Confidence {confidence, number, percent}"
-                  values={{ confidence: data.rootCause.confidence }}
-                />
-              </EuiText>
-              {data.rootCause.reason && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiMarkdownFormat textSize="s">{data.rootCause.reason}</EuiMarkdownFormat>
-                </>
-              )}
-              {rootCauseChart && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiPanel
-                    hasBorder
-                    hasShadow={false}
-                    paddingSize="s"
-                    data-test-subj="nightshiftInvestigationVisualiserRootCauseChart"
-                  >
-                    <EvidenceChart chart={rootCauseChart} />
-                  </EuiPanel>
-                </>
-              )}
-            </div>
-          )}
-        </>
-      );
-    }
+    case 'conclusion':
+      return <EuiMarkdownFormat textSize="s">{data.conclusion}</EuiMarkdownFormat>;
     case 'actions': {
       const total = data.recommendations.length;
       const index = Math.min(selectedActionIndex ?? 0, total - 1);
@@ -636,11 +570,24 @@ const DecisionTreeCanvas = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <NodeDetail
-                data={selectedNode.data}
-                selectedActionIndex={selectedActionIndex}
-                onChangeAction={changeAction}
-              />
+              <div
+                css={css`
+                  .euiCodeBlock__code,
+                  .euiCodeBlock__line,
+                  .euiCodeBlock__lineText,
+                  pre code,
+                  code[data-code-language] {
+                    font-family: ${euiTheme.font.familyCode};
+                    color: ${euiTheme.colors.textParagraph};
+                  }
+                `}
+              >
+                <NodeDetail
+                  data={selectedNode.data}
+                  selectedActionIndex={selectedActionIndex}
+                  onChangeAction={changeAction}
+                />
+              </div>
             </EuiPanel>
           </Panel>
         )}
