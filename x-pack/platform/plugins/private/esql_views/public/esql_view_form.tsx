@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType, FormEvent, FunctionComponent, ReactNode } from 'react';
-import React, { Suspense, useId, useState } from 'react';
+import React, { Suspense, useId, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -38,12 +38,15 @@ import {
   type EsqlViewNameValidationError,
   validateEsqlViewName,
 } from '@kbn/esql-utils';
+import { EsqlViewPreviewResults } from './esql_view_preview_results';
 import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
 import { translations } from './translations';
+import { useEsqlViewPreview, type EsqlViewPreviewDependencies } from './use_esql_view_preview';
 
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -71,6 +74,7 @@ const getNameValidationMessage = (
 export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
   EsqlEditor,
+  previewDependencies,
   view,
   onClose,
   onSave,
@@ -81,11 +85,14 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [name, setName] = useState(view?.name ?? '');
   const [description, setDescription] = useState(view?.description ?? '');
   const [query, setQuery] = useState(view?.query ?? DEFAULT_ESQL_VIEW_QUERY);
+  const queryRef = useRef(query);
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [queryError, setQueryError] = useState<string>();
   const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const preview = useEsqlViewPreview(previewDependencies);
 
   const handleClose = () => {
     if (!isSaving) {
@@ -99,6 +106,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
     description.length > MAX_ESQL_VIEW_DESCRIPTION_LENGTH
       ? translations.descriptionTooLongErrorMessage
       : undefined;
+  const isQueryEmpty = query.trim().length === 0;
 
   const nameError: ReactNode =
     nameConflict?.type === 'existingView' ? (
@@ -293,25 +301,51 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               }
             >
               <EsqlEditor
+                allowQueryCancellation={!isQueryEmpty}
                 dataTestSubj="esqlViewQueryEditor"
                 disableAutoFocus
+                disableSubmitAction={isQueryEmpty}
                 editorIsInline
-                errors={queryError ? [new Error(queryError)] : []}
+                errors={[
+                  ...(queryError ? [new Error(queryError)] : []),
+                  ...(preview.error ? [preview.error] : []),
+                ]}
                 hasOutline
-                hideQueryHistory
-                hideRunQueryButton
                 isDisabled={isSaving}
+                isLoading={preview.isLoading}
                 mergeExternalMessages
                 onTextLangQueryChange={(nextQuery) => {
+                  queryRef.current = nextQuery.esql;
                   setQuery(nextQuery.esql);
                   setQueryError(undefined);
                   setSaveError(undefined);
+                  preview.resetPreviewIfQueryChanged(nextQuery.esql);
                 }}
-                onTextLangQuerySubmit={async () => {}}
+                onTextLangQuerySubmit={async (_submittedQuery, abortController) => {
+                  const currentQuery = queryRef.current;
+                  if (currentQuery.trim().length === 0) {
+                    return;
+                  }
+
+                  setIsPreviewOpen(true);
+                  await preview.runPreview({ esql: currentQuery }, abortController);
+                }}
                 query={{ esql: query }}
+                queryStats={preview.result?.queryStats}
               />
             </Suspense>
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
+
+          <EsqlViewPreviewResults
+            error={preview.error}
+            hasRun={preview.hasRun}
+            isLoading={preview.isLoading}
+            isOpen={isPreviewOpen}
+            onToggle={setIsPreviewOpen}
+            result={preview.result}
+          />
 
           {saveError && (
             <>

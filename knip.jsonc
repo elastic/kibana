@@ -22,6 +22,8 @@
     "^@elastic/",
     "^@babel/plugin-",
     "^babel-plugin-",
+    // babel-jest is a transitive dependency of eslint-jest-plugin
+    "babel-jest",
     "^eslint-plugin-",
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.

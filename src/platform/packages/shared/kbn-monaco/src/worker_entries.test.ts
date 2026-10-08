@@ -9,8 +9,11 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { monaco } from './monaco_imports';
-import { CONSOLE_LANG_ID, PAINLESS_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from './languages';
+import { jsonDefaults } from './monaco_imports';
+import { ID as XJSON_LANG_ID } from './languages/definitions/xjson/constants';
+import { ID as PAINLESS_LANG_ID } from './languages/definitions/painless/constants';
+import { CONSOLE_LANG_ID } from './languages/definitions/console/constants';
+import { ID as YAML_LANG_ID } from './languages/definitions/yaml/constants';
 import {
   DEFAULT_WORKER_ID,
   LANG_SPECIFIC_WORKER_IDS,
@@ -20,7 +23,7 @@ import {
 describe('MONACO_WORKER_ENTRIES', () => {
   it('matches the language ids that request a dedicated worker', () => {
     expect(LANG_SPECIFIC_WORKER_IDS).toEqual([
-      monaco.languages.json.jsonDefaults.languageId,
+      jsonDefaults.languageId,
       XJSON_LANG_ID,
       PAINLESS_LANG_ID,
       YAML_LANG_ID,
@@ -35,10 +38,12 @@ describe('MONACO_WORKER_ENTRIES', () => {
     ]);
   });
 
-  it('points package workers at files that exist', () => {
+  it('points every worker entry at a file that exists', () => {
     for (const entry of Object.values(MONACO_WORKER_ENTRIES)) {
-      if (!entry.startsWith('src/')) continue;
-      expect(Fs.existsSync(Path.resolve(__dirname, '..', entry))).toBe(true);
+      const path = entry.startsWith('src/')
+        ? Path.resolve(__dirname, '..', entry)
+        : require.resolve(entry);
+      expect(Fs.existsSync(path)).toBe(true);
     }
   });
 });

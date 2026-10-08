@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import { execFileSync } from 'child_process';
+import { runInNewContext } from 'vm';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -294,6 +295,49 @@ describe('rspack compile integration', () => {
       expect(bundleContent).toMatch(/MY_CONSTANT/);
       expect(bundleContent).toMatch(/SomeComponent/);
     }, 120_000);
+
+    it.each([
+      { dist: false, mode: 'development' },
+      { dist: true, mode: 'production' },
+    ])(
+      'preserves raw CSS imports as source text in $mode mode',
+      ({ dist }) => {
+        const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
+        const outputDir = Path.join(tmpDir, 'output');
+        const css = '.animation-probe { animation-duration: 0s !important; }\n';
+
+        Fs.writeFileSync(Path.join(pluginDir, 'public', 'styles.css'), css);
+        Fs.writeFileSync(
+          Path.join(pluginDir, 'public', 'index.ts'),
+          "export { default as rawCss } from './styles.css?raw';\n"
+        );
+
+        const result = compileInWorker({ pluginDir, pluginId, outputDir, dist, dllManifestPath });
+        expect(result.errors).toEqual([]);
+        expect(result.success).toBe(true);
+
+        let rawCss: string | undefined;
+        const bundle = Fs.readFileSync(Path.join(outputDir, `${pluginId}.plugin.js`), 'utf-8');
+        // a minimal bundle registry lets us read the plugin's exports without starting kibana
+        runInNewContext(
+          bundle,
+          {
+            __kbnBundles__: {
+              define: (id: string, getExports: () => { rawCss: string }) => {
+                if (id === `plugin/${pluginId}/public`) {
+                  rawCss = getExports().rawCss;
+                }
+              },
+            },
+          },
+          { timeout: 1_000 }
+        );
+
+        // catch the regression where ?raw returns javascript for injecting styles instead of css
+        expect(rawCss).toBe(css);
+      },
+      120_000
+    );
 
     it('fails when browser code imports a plugin not declared in the manifest', () => {
       const { pluginDir, pluginId } = createDependentFixturePlugin(tmpDir, {

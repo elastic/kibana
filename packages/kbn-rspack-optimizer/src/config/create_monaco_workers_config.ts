@@ -63,7 +63,21 @@ export function createMonacoWorkersConfig({
           options: swcOptions,
         },
         {
-          test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+          test: /(monaco-worker-manager|monaco-yaml)\/.*m?(t|j)sx?$/,
+          resolve: {
+            alias: {
+              // monaco-editor 0.56 remaps subpaths via "exports"; these deps still import
+              // the old monaco-editor/esm/vs/... specifiers.
+              'monaco-editor/esm/vs': Path.resolve(
+                require.resolve('monaco-editor/editor/editor.api.js'),
+                '..',
+                '..'
+              ),
+            },
+          },
+        },
+        {
+          test: /(monaco-editor\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
           loader: 'builtin:swc-loader',
           options: swcOptions,
         },
@@ -72,12 +86,7 @@ export function createMonacoWorkersConfig({
     optimization: dist
       ? {
           minimize: true,
-          minimizer: [
-            new rspack.SwcJsMinimizerRspackPlugin({
-              exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map\.js/,
-              extractComments: false,
-            }),
-          ],
+          minimizer: [new rspack.SwcJsMinimizerRspackPlugin({ extractComments: false })],
         }
       : {
           minimize: false,

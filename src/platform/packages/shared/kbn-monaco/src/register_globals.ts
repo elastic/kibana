@@ -8,31 +8,126 @@
  */
 
 import { monaco } from './monaco_imports';
-import { DEFAULT_WORKER_ID, LANG_SPECIFIC_WORKER_IDS } from './worker_entries';
+import type { CustomLangModuleType } from './types';
+import { getWorker } from './languages/worker_factory';
 
-export { DEFAULT_WORKER_ID };
-export type { LangSpecificWorkerIds } from './worker_entries';
-
-const langSpecificWorkerIds: readonly string[] = LANG_SPECIFIC_WORKER_IDS;
-
-declare module 'monaco-editor/esm/vs/editor/editor.api' {
+declare module 'monaco-editor/editor/editor.api' {
   export interface Environment {
     // add typing for exposing monaco on the MonacoEnvironment property
+    // passed for use in functional and unit tests so that we can verify values from 'editor'
     monaco: typeof monaco;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
+  export namespace editor {
+    // Define overloads for the getContribution method to allow for
+    // better typing of the editor contributions of concerns to us
+    export interface ICodeEditor {
+      getContribution(id: 'editor.contrib.suggestController'):
+        | (editor.IEditorContribution & {
+            // add type augmentation for the suggestController contribution for the widget property
+            widget?: {
+              value?: {
+                // these methods are not documented in monaco but are available on the vscode upstream,
+                // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts#L149-L150
+                onDidHide?: monaco.Emitter<void>['event'];
+                onDidShow?: monaco.Emitter<void>['event'];
+              };
+            };
+          })
+        | null;
+      getContribution(id: 'editor.contrib.messageController'):
+        | (editor.IEditorContribution & {
+            // add type augmentation for the messageController contribution for the showMessage property,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/message/browser/messageController.ts#L62
+            showMessage?: (message: string, position: monaco.Position | null) => void;
+          })
+        | undefined;
+      getContribution(id: 'editor.contrib.contentHover'):
+        | (editor.IEditorContribution & {
+            // add type augmentations for methods on the contentHover contribution,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/hover/browser/contentHoverController.ts#L41C64-L46
+            shouldKeepOpenOnEditorMouseMoveOrLeave: boolean;
+            hideContentHover: () => void;
+            readonly _onHoverContentsChanged?: monaco.Emitter<void>;
+            readonly isHoverVisible: boolean | undefined;
+            readonly _contentWidget?: {
+              getDomNode: () => HTMLElement;
+              // The states Monaco's own `_shouldKeepCurrentHover` refuses to dismiss on,
+              // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/hover/browser/contentHoverController.ts#L149-L151
+              readonly isFocused?: boolean;
+              readonly isResizing?: boolean;
+              readonly isVisibleFromKeyboard?: boolean;
+            };
+          })
+        | undefined;
+      getContribution(id: 'editor.contrib.inspectTokens'):
+        | (editor.IEditorContribution & {
+            // add type augmentation for the inspectTokens contribution for the _widget property,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/d52f2195fba39dbf8eeed219d735f11b8b49a057/src/vs/editor/standalone/browser/inspectTokens/inspectTokens.ts#L35
+            _widget: {
+              getDomNode: () => HTMLElement;
+            } | null;
+          })
+        | undefined;
+    }
+
+    /**
+     * @description Registers language theme definition for a language
+     */
+    function registerLanguageThemeResolver(
+      langId: string,
+      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
+      forceOverride?: boolean
+    ): void;
+    /**
+     * @description Returns the registered language theme definition for the provided id
+     */
+    function getLanguageThemeResolver(
+      langId: string
+    ): CustomLangModuleType['languageThemeResolver'];
   }
 }
 
-const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
-
 window.MonacoEnvironment = {
-  // passed for use in functional and unit tests so that we can verify values from 'editor'
   monaco,
-  getWorkerUrl: monacoBundleDir
-    ? (_: string, languageId: string) => {
-        const workerId = langSpecificWorkerIds.includes(languageId)
-          ? languageId
-          : DEFAULT_WORKER_ID;
-        return `${monacoBundleDir}${workerId}.editor.worker.js`;
+  getWorker: (_moduleId, languageId) => {
+    return getWorker(languageId);
+  },
+} satisfies typeof MonacoEnvironment;
+
+const languageThemeResolverDefinitions = new Map<
+  string,
+  CustomLangModuleType['languageThemeResolver']
+>();
+
+// add custom methods to monaco editor
+Object.defineProperties(monaco.editor, {
+  /**
+   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
+   */
+  registerLanguageThemeResolver: {
+    value: ((langId, languageThemeDefinition, forceOverride) => {
+      if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
+        throw new Error(`Language theme resolver for ${langId} is already registered`);
       }
-    : () => '',
-};
+      languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
+    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
+    enumerable: true,
+    configurable: false,
+  },
+  /**
+   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
+   */
+  getLanguageThemeResolver: {
+    value: ((langId) =>
+      languageThemeResolverDefinitions.get(
+        langId
+      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
+    enumerable: true,
+    configurable: false,
+  },
+});

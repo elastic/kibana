@@ -145,6 +145,56 @@ describe('ruleModelVersions', () => {
     });
   });
 
+  describe('v8 to v9 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV8RuleDocument = (): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'] },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 8,
+      });
+
+    it('leaves existing rules unchanged, since routing_tags is optional', () => {
+      const document = createV8RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 8, toVersion: 9 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+
+    it('accepts routing tags in the v9 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['9']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata.routing_tags
+      ).toEqual(['sre']);
+    });
+
+    it('drops routing tags when a v8 node reads a v9 rule', () => {
+      const forwardCompatibility = ruleModelVersions['8']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...(createV8RuleDocument().attributes as Record<string, unknown>),
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      };
+
+      expect(
+        (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
+          .metadata
+      ).toEqual({ name: 'test-rule', tags: ['prod'] });
+    });
+  });
+
   // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
   // attributes schema reaches it. It does: config-schema maps the option to Joi's
   // `stripUnknown`, which cascades to children that do not override it. Without

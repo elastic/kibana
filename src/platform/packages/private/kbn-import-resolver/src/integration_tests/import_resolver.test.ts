@@ -12,6 +12,7 @@ import { Package } from '@kbn/repo-packages';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { ImportResolver } from '../import_resolver';
+import { getRelativeImportReq } from '../helpers/import_req';
 
 const FIXTURES_DIR = Path.resolve(__dirname, '../__fixtures__');
 
@@ -163,5 +164,32 @@ describe('#getAbsolutePackageDir()', () => {
   });
   it('returns null for unknown packages', () => {
     expect(resolver.getAbsolutePackageDir('@kbn/invalid')).toMatchInlineSnapshot(`null`);
+  });
+});
+
+describe('getRelativeImportReq()', () => {
+  it('prefixes requests into dot-prefixed directories with ./', () => {
+    expect(
+      getRelativeImportReq({
+        dirname: '/repo',
+        absolute: '/repo/.oxlint/index.mts',
+        type: 'esm',
+        preserveFileExtensions: true,
+      })
+    ).toBe('./.oxlint/index.mts');
+  });
+
+  it('keeps parent-directory requests unprefixed', () => {
+    expect(
+      getRelativeImportReq({
+        dirname: '/repo/src',
+        absolute: '/repo/.oxlint/index.mts',
+        type: 'esm',
+        preserveFileExtensions: true,
+      })
+    ).toBe('../.oxlint/index.mts');
+    expect(
+      getRelativeImportReq({ dirname: '/repo/src/a', absolute: '/repo/src', type: 'esm' })
+    ).toBe('..');
   });
 });

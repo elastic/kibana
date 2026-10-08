@@ -77,9 +77,12 @@ export function createSharedSrcConfig({
           options: swcOptions,
         },
         {
-          test: /(monaco-editor\/esm\/vs\/|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
+          test: /(monaco-editor|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
           loader: 'builtin:swc-loader',
           options: swcOptions,
+          // Stops monaco-editor's unused `new URL('editorWebWorkerMain.js', import.meta.url)`
+          // from being emitted as a broken asset; workers come from MonacoEnvironment.getWorker.
+          parser: { url: false },
         },
         {
           test: /\.(ttf)(\?|$)/,
@@ -102,6 +105,8 @@ export function createSharedSrcConfig({
           '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/lib/services/theme/warning$':
           '@elastic/eui/optimize/es/services/theme/warning',
+        // Dedupe bare `monaco-editor` imports onto the API module @kbn/monaco already uses.
+        'monaco-editor$': 'monaco-editor/editor/editor.api.js',
         moment: momentSource,
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',

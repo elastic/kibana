@@ -18,6 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
+  - prefetch-same-team-fix-prs.yml
 
 permissions:
   contents: read
@@ -28,10 +29,10 @@ permissions:
   models: read
 
 # Activation rules:
-# - Manual runs always activate.
+# - Every trigger requires an open, in-repository PR authored by kibanamachine
+#   (checked by check_pr_eligibility).
+# - Manual runs request verification subject to the same PR validation.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`.
-#   NOTE: not checking the author is a temporary measure for testing; tighten it
-#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -77,6 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  SAME_TEAM_FIX_PRS_ARTIFACT_NAME: &same_team_fix_prs_artifact_name same-team-fix-prs-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -127,6 +129,44 @@ checkout:
   fetch-depth: 2
 
 jobs:
+  activation:
+    needs: [check_pr_eligibility]
+  check_pr_eligibility:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr_number: ${{ steps.check.outputs.pr_number }}
+    steps:
+      # No checkout: validation must run before any PR code or agent tools.
+      - name: Check flaky fix PR eligibility
+        id: check
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: *pr_number
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!/^[1-9][0-9]*$/.test(process.env.PR_NUMBER ?? '') || !Number.isSafeInteger(prNumber)) {
+              throw new Error('A positive integer PR number is required.');
+            }
+
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (pr.state !== 'open') {
+              throw new Error('The flaky fix verifier requires an open PR.');
+            }
+            if (pr.head.repo?.full_name !== `${owner}/${repo}`) {
+              throw new Error(`The flaky fix verifier requires a branch in ${owner}/${repo}.`);
+            }
+            if (pr.user.login !== 'kibanamachine') {
+              throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
+            }
+
+            core.setOutput('pr_number', String(prNumber));
+            core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
   prefetch_pr_context:
     permissions:
       contents: read
@@ -137,12 +177,28 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
+  prefetch_same_team_fix_prs:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-same-team-fix-prs.yml
+    with:
+      pr_number: *pr_number
+      artifact_name: *same_team_fix_prs_artifact_name
 
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
+  - name: Download same-team fix PRs
+    # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
+    continue-on-error: true
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.SAME_TEAM_FIX_PRS_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
@@ -165,20 +221,6 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Detect duplicate fix PRs
-    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
-    # team as this PR, so the agent triages a short, relevant set instead of blind-searching.
-    # Non-fatal: a detection failure must not block verification — the agent treats a missing
-    # file as "no candidates".
-    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-    with:
-      script: |
-        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
-        try {
-          await writeDuplicateCandidates({ github, core, prNumber: Number(process.env.PR_NUMBER) });
-        } catch (err) {
-          core.warning(`Duplicate detection failed: ${err.message}`);
-        }
 
 safe-outputs:
   activation-comments: false
@@ -371,7 +413,7 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 ## Prefetched PR context
 
-A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
 
 - `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
 - `pr-diff.txt` — unified diff of every changed file.
@@ -421,7 +463,7 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | `flaky-fix-check:started`      | A flaky test runner check has been triggered; verification is in progress.                                           |
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
 | `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch departs from the Fix guidelines without justification and no revision that follows them could be derived. |
-| `flaky-fix-check:inconclusive` | The failure could not be attributed, a related failure remains unresolved, or the run budget was exhausted without a clear verdict. |
+| `flaky-fix-check:inconclusive` | The diagnosis lacked supporting evidence, the failure could not be attributed, a related failure remains unresolved, or the run budget was exhausted without a clear verdict. |
 | `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
 Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `failed`, `inconclusive`, or `skipped`), **remove `flaky-fix-check:started`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments. Then decide whether the verdict earns a review (see [Opening the PR for review](#opening-the-pr-for-review)).
@@ -443,7 +485,7 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
 
    Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
-3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!IMPORTANT]` block (or `> [!NOTE]` on older PRs, or at the end when neither is present):
 
    ```markdown
    ## Release note
@@ -532,7 +574,7 @@ A green terminal verdict always needs the short release/backport-label rationale
 | Comment | Heading |
 | --- | --- |
 | Failed (fix did not hold) | `### ❌ Flaky-fix verification failed` |
-| Inconclusive (budget spent without a clear verdict) | `### ❓ Flaky-fix verification inconclusive` |
+| Inconclusive (insufficient evidence for a verdict) | `### ❓ Flaky-fix verification inconclusive` |
 | Skipped (runner not used) | `### ⏭️ Flaky-fix verification skipped` |
 | Rationale (why these configs, or what a pushed revision changed) | `### 🔍 Verifying the fix` |
 | Passed after >1 flaky run (an earlier fix didn't hold and you pushed a revision) | `### ✅ Flaky-fix verified` |
@@ -555,7 +597,9 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-3. **Screen the patch against the Fix guidelines.** Check `pr-diff.txt` against the [Fix guidelines](#fix-guidelines) before spending any runs. The items under **Don't hide the failure** are the gate: a patch that reduces coverage to make the failure go away, weakens or bends an assertion (or the product) just to pass, swallows errors so a flaky step passes, or widens a framework package's public surface must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Each of those items carries its own exception, so check the patch against the exception before failing it: a skip, a stripped deployment tag, or an environment exclusion is legitimate when the PR documents evidence that the environment doesn't support what the test exercises, just as correcting an assertion the product never promised, or tolerating a 404 to make teardown idempotent, is a fix rather than a mask. An undocumented claim doesn't clear the gate. A justified departure from the rest of the guidelines is fine. Derive a revision that follows the guidelines, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot, add `flaky-fix-check:failed`, post a failed comment naming the guideline it departs from, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+3. **Check the diagnosis and patch against the Fix guidelines.** Check the proposed cause against the failure evidence using the [Fix guidelines](#fix-guidelines). Identify the key assumption and look for evidence that would disprove it; could this patch pass while the underlying defect remains? Resolve any contradiction before accepting the fix. If the cause still cannot be supported, add `flaky-fix-check:inconclusive`, post a short comment naming the missing evidence, leave the PR as a draft, and stop.
+
+   Check `pr-diff.txt` against the guidelines before spending any runs. The items under **Don't hide the failure** are the gate: a patch that reduces coverage to make the failure go away, weakens or bends an assertion (or the product) just to pass, swallows errors so a flaky step passes, or widens a framework package's public surface must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Each of those items carries its own exception, so check the patch against the exception before failing it: a skip, a stripped deployment tag, or an environment exclusion is legitimate when the PR documents evidence that the environment doesn't support what the test exercises, just as correcting an assertion the product never promised, or tolerating a 404 to make teardown idempotent, is a fix rather than a mask. An undocumented claim doesn't clear the gate. A justified departure from the rest of the guidelines is fine. Derive a revision that follows the guidelines, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot, add `flaky-fix-check:failed`, post a failed comment naming the guideline it departs from, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
 4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) whose visible summary names which gate the fix missed and the labels applied, with the skip and label reasoning in the collapsed sections, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
