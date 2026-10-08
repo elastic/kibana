@@ -14,13 +14,18 @@ import type {
   ServiceAccountWorkloadBinding,
 } from '@kbn/core-security-server';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
+import type {
+  AuditLogger,
+  CheckPrivileges,
+  CheckPrivilegesResponse,
+} from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingStore } from './bindings';
 import { ServiceAccountsManagement } from './service_accounts_management';
 import { serviceAccountsServiceMock } from './service_accounts_service.mock';
 import type { ServiceAccountsBackend } from './types';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 
 const SERVICE_ACCOUNT_ID = 'service-account-id';
 
@@ -61,10 +66,15 @@ describe('ServiceAccountsManagement', () => {
   let license: ReturnType<typeof licenseMock.create>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let request: KibanaRequest;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: jest.Mocked<AuditLogger>;
   let workloadTypes: jest.MockedObjectDeep<CoreSecurityDelegateServiceAccounts>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
+    audit = auditServiceMock.create();
+    auditLogger = auditLoggerMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
     license = licenseMock.create();
     license.isEnabled.mockReturnValue(true);
     backend = serviceAccountsServiceMock.createStart()
@@ -85,6 +95,7 @@ describe('ServiceAccountsManagement', () => {
       backend,
       store,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      audit,
       workloadTypes,
     });
   });
@@ -278,6 +289,7 @@ describe('ServiceAccountsManagement', () => {
         output: { statusCode: 403 },
       });
       expect(store.findByServiceAccountId).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
@@ -391,6 +403,135 @@ describe('ServiceAccountsManagement', () => {
       await expect(
         management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+
+    it('checks `manage_security` itself when forced', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(backend.delete).not.toHaveBeenCalled();
+    });
+
+    describe('audit', () => {
+      const deleteEvent = (outcome: 'unknown' | 'failure', message: string) =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_delete',
+            category: ['iam'],
+            type: ['user', 'deletion'],
+            outcome,
+          }),
+          user: { target: { id: SERVICE_ACCOUNT_ID } },
+          message,
+        });
+
+      it('logs `unknown` scoped to the request before the backend deletes the account', async () => {
+        backend.delete.mockImplementation(async () => {
+          expect(auditLogger.log).toHaveBeenCalledTimes(1);
+          return { warnings: [] };
+        });
+
+        await management.delete(request, SERVICE_ACCOUNT_ID, { force: false });
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          deleteEvent('unknown', `User is deleting service account [id=${SERVICE_ACCOUNT_ID}]`)
+        );
+        expect(backend.delete).toHaveBeenCalledTimes(1);
+      });
+
+      it('records a forced delete in the message', async () => {
+        await management.delete(request, SERVICE_ACCOUNT_ID, { force: true });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          deleteEvent(
+            'unknown',
+            `User is deleting service account [id=${SERVICE_ACCOUNT_ID}] [force=true]`
+          )
+        );
+      });
+
+      it('logs `failure` without reading the bindings when the caller lacks `manage_security`', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(store.findByServiceAccountId).not.toHaveBeenCalled();
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          deleteEvent(
+            'failure',
+            `Failed attempt to delete service account [id=${SERVICE_ACCOUNT_ID}]`
+          )
+        );
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              code: 'Error',
+              message:
+                'Cannot delete a service account: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+      });
+
+      it('logs `failure` with force when a forced delete is refused', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          deleteEvent(
+            'failure',
+            `Failed attempt to delete service account [id=${SERVICE_ACCOUNT_ID}] [force=true]`
+          )
+        );
+      });
+
+      it('logs nothing when the account is still bound', async () => {
+        const bound = binding();
+        store.findByServiceAccountId.mockResolvedValue([bound]);
+        store.getVerified.mockResolvedValue(bound);
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+        ).resolves.toMatchObject({ deleted: false });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        license.isEnabled.mockReturnValue(false);
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing further when the backend delete fails', async () => {
+        backend.delete.mockRejectedValue(Boom.notFound('Service account was not found'));
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          deleteEvent('unknown', `User is deleting service account [id=${SERVICE_ACCOUNT_ID}]`)
+        );
+      });
     });
   });
 });

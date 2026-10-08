@@ -103,6 +103,8 @@ import {
 } from './agent_builder/attachment_types';
 import { registerAlertsFlyoutGroupedAttachment } from './agent_builder/attachment_types/alerts';
 import { registerAttacksFlyoutGroupedAttachment } from './agent_builder/attachment_types/attack_discovery/register_attacks_flyout_grouped_attachment';
+import { registerIocsFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_iocs/register_iocs_flyout_grouped_attachment';
+import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_timeline/register_timeline_flyout_grouped_attachment';
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -574,6 +576,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       application: core.application,
       resolveSecurityCanvasContext,
     });
+    if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+      registerTimelineFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+      registerIocsFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+    }
   }
 
   public async registerDiscoverSharedFeatures(

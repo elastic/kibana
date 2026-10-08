@@ -8,9 +8,11 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
@@ -18,6 +20,7 @@ import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsService } from './service_accounts_service';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -44,6 +47,7 @@ describe('ServiceAccountsService', () => {
       license: licenseMock.create(),
       uiam: uiamServiceMock.create(),
       checkPrivilegesWithRequest: jest.fn(),
+      audit: auditServiceMock.create(),
       getCurrentUser: jest.fn(),
       cloudProjectContext: {
         organizationId: 'organization-id',
@@ -152,6 +156,46 @@ describe('ServiceAccountsService', () => {
         })
       ).resolves.toBeNull();
     });
+
+    it.each([
+      ['UIAM', { isServerless: true }],
+      ['Elasticsearch', { isServerless: false }],
+    ])(
+      'hands the audit service to the %s backend, the bindings and management',
+      async (_name, overrides) => {
+        const params = startParams({ serviceAccounts: { enabled: true } }, overrides);
+        params.license.isEnabled.mockReturnValue(true);
+        params.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+        params.checkPrivilegesWithRequest.mockReturnValue({
+          globally: jest.fn().mockResolvedValue({ hasAllRequested: false }),
+        });
+        const start = service.start(params)!;
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer essu_token' },
+        });
+
+        // A refused create, bind and delete all audit through the scoped logger, so a denial on
+        // each path proves the same `audit` reached the backend, the bindings and management.
+        await expect(
+          start.backend.create(request, { name: 'relay', roles: ['viewer'] })
+        ).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+        await expect(
+          start.workloads.bindWorkload('alerting', request, {
+            serviceAccountId: 'sa',
+            workloadType: 'rule',
+            workloadId: 'rule-id',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        await expect(
+          start.management.delete(request, 'sa', { force: false })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(params.audit.asScoped).toHaveBeenCalledTimes(3);
+        expect(params.audit.asScoped).toHaveBeenCalledWith(request);
+      }
+    );
 
     it('exposes real workload bindings on the Elasticsearch backend', async () => {
       const params = startParams({ serviceAccounts: { enabled: true } }, { isServerless: false });

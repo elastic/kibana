@@ -563,6 +563,7 @@ export class SecurityPlugin
       license: this.securityLicense!,
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+      audit: this.auditSetup!,
       cloudProjectContext: this.cloudProjectContext,
       clusterClient,
       savedObjects: core.savedObjects,
