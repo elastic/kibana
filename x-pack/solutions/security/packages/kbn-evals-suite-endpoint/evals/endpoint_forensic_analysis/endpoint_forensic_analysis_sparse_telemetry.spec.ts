@@ -44,7 +44,7 @@ const NO_FABRICATION_CRITERIA = [
  * accepts a labelled, separated skeleton (the right behaviour when the analyst opted in).
  */
 const NO_UNREQUESTED_SKELETON_CRITERION =
-  'Does not include any expected, typical, or hypothetical attack-stage sequence for WKSTN-QUIET-12, even in a separately labelled section, because the analyst did not ask for one. The response contains only what the endpoint telemetry shows plus the statement that it shows no attack-chain activity (or is sparse/inconclusive). A labelled skeleton fails this criterion for this request';
+  'Does not include any expected, typical, or hypothetical attack-stage sequence for WKSTN-QUIET-12, even in a separately labelled section, because the analyst did not ask for one. Observed activity is limited to what the endpoint telemetry shows, and the response states that the telemetry shows no attack-chain activity (or is sparse/inconclusive). Clearly labelled investigation next steps (what to query or check next) are allowed and do not fail this criterion; a labelled expected/hypothetical attack-stage sequence does fail it for this request';
 
 /**
  * Same shape as NO_FABRICATION_CRITERIA but for the adversarial host.
