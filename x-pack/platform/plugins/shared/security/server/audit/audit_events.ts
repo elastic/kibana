@@ -401,6 +401,7 @@ export function spaceAuditEvent({
 }
 
 export enum ServiceAccountAuditAction {
+  ASSUME = 'service_account_assume',
   CREATE = 'service_account_create',
   DELETE = 'service_account_delete',
   WORKLOAD_BIND = 'service_account_workload_bind',
@@ -408,6 +409,7 @@ export enum ServiceAccountAuditAction {
 }
 
 const serviceAccountAuditVerbs: Record<ServiceAccountAuditAction, VerbsTuple> = {
+  service_account_assume: ['assume', 'assuming', 'assumed'],
   service_account_create: ['create', 'creating', 'created'],
   service_account_delete: ['delete', 'deleting', 'deleted'],
   service_account_workload_bind: ['bind', 'binding', 'bound'],
@@ -418,6 +420,7 @@ const serviceAccountAuditCategories: Record<
   ServiceAccountAuditAction,
   ArrayElement<EcsEvent['category']>
 > = {
+  service_account_assume: 'authentication',
   service_account_create: 'iam',
   service_account_delete: 'iam',
   service_account_workload_bind: 'iam',
@@ -428,6 +431,7 @@ const serviceAccountAuditTypes: Record<
   ServiceAccountAuditAction,
   ArrayElement<EcsEvent['type']>
 > = {
+  service_account_assume: 'start',
   service_account_create: 'creation',
   service_account_delete: 'deletion',
   service_account_workload_bind: 'change',
@@ -439,11 +443,20 @@ export interface ServiceAccountAuditEventParams {
   /**
    * The account the event targets, recorded as ECS `user.target`. Omitted when it is unknown or
    * cannot be trusted: an unbind addresses the binding by its coordinates and never reads the
-   * account it names, and a create that failed before validation may carry a name Kibana rejected.
+   * account it names, a create that failed before validation may carry a name Kibana rejected,
+   * and a binding that failed integrity verification may name any account.
+   *
+   * For {@link ServiceAccountAuditAction.ASSUME} the account is the actor instead, so it is recorded
+   * as `user` itself and not as a target.
    */
   serviceAccount?: { id?: string; name?: string };
-  /** The workload a binding event addresses. */
+  /** The workload a binding or execution event addresses. */
   workload?: NonNullable<AuditEvent['kibana']>['workload'];
+  /**
+   * The space of an event logged without a request. A scoped logger takes the space from the
+   * request instead, and would have it overwritten by any `kibana.space_id` the event carries.
+   */
+  spaceId?: string;
   /**
    * Whether a delete skips the check for bound workloads, which it leaves behind. Recorded in the
    * message only.
@@ -457,10 +470,20 @@ export function serviceAccountAuditEvent({
   action,
   serviceAccount,
   workload,
+  spaceId,
   force,
   outcome,
   error,
 }: ServiceAccountAuditEventParams): AuditEvent {
+  if (action === ServiceAccountAuditAction.ASSUME) {
+    return serviceAccountAssumeEvent({
+      serviceAccountId: serviceAccount?.id,
+      workload,
+      spaceId,
+      error,
+    });
+  }
+
   const target = serviceAccount
     ? {
         ...(serviceAccount.id ? { id: serviceAccount.id } : {}),
@@ -509,3 +532,59 @@ export function serviceAccountAuditEvent({
     },
   };
 }
+
+/**
+ * A workload starting to run as its service account, or failing to. The account is the actor, so
+ * the event names it as `user` itself. A scoped logger replaces that with the same account, read
+ * from the fake request, but an event logged without a request has nothing else to go on.
+ */
+const serviceAccountAssumeEvent = ({
+  serviceAccountId,
+  workload,
+  spaceId,
+  error,
+}: {
+  serviceAccountId?: string;
+  workload?: NonNullable<AuditEvent['kibana']>['workload'];
+  spaceId?: string;
+  error?: Error;
+}): AuditEvent => {
+  const workloadDoc = workload
+    ? `Workload [${workload.plugin_id}/${workload.type}/${workload.id}]`
+    : 'Workload';
+  const accountDoc = serviceAccountId
+    ? `service account [id=${serviceAccountId}]`
+    : 'its service account';
+
+  return {
+    message: error
+      ? `${workloadDoc} failed to execute as ${accountDoc}`
+      : `${workloadDoc} is executing as ${accountDoc}`,
+    event: {
+      action: ServiceAccountAuditAction.ASSUME,
+      category: [serviceAccountAuditCategories[ServiceAccountAuditAction.ASSUME]],
+      type: [serviceAccountAuditTypes[ServiceAccountAuditAction.ASSUME]],
+      outcome: error ? 'failure' : 'success',
+    },
+    ...(serviceAccountId
+      ? {
+          user: {
+            id: serviceAccountId,
+            name: serviceAccountId,
+          },
+        }
+      : {}),
+    ...(workload || spaceId !== undefined
+      ? {
+          kibana: {
+            ...(workload ? { workload } : {}),
+            ...(spaceId !== undefined ? { space_id: spaceId } : {}),
+          },
+        }
+      : {}),
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};

@@ -61,9 +61,16 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
             // renewal. UIAM exchange tokens live at least one minute (PT1M, plus 2s of clock skew),
             // and the stateful config set expires Elasticsearch tokens after 15s.
             waitMs: schema.number({ min: 0, max: 70000, defaultValue: 0 }),
-            action: schema.oneOf([schema.literal('authenticate'), schema.literal('read_role')], {
-              defaultValue: 'authenticate',
-            }),
+            action: schema.oneOf(
+              [
+                schema.literal('authenticate'),
+                schema.literal('read_role'),
+                schema.literal('get_saved_object'),
+              ],
+              { defaultValue: 'authenticate' }
+            ),
+            // The dashboard `get_saved_object` reads as the service account.
+            savedObjectId: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
             revoke: schema.oneOf(
               [
                 schema.literal('none'),
@@ -86,7 +93,7 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
         const [start] = await core.getStartServices();
         const api = start.security.serviceAccounts;
         const workload = { workloadType: 'job', workloadId: request.params.workloadId };
-        const { operation, serviceAccountId, waitMs, action, revoke } = request.body;
+        const { operation, serviceAccountId, waitMs, action, revoke, savedObjectId } = request.body;
         try {
           if (operation === 'bind') {
             if (!serviceAccountId) return response.badRequest();
@@ -100,6 +107,19 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
           const result = await api.withScopedRequestForWorkload(
             { ...workload, spaceId: request.spaceId ?? 'default' },
             async (fakeRequest) => {
+              if (action === 'get_saved_object') {
+                if (!savedObjectId) throw Boom.badRequest();
+                try {
+                  await start.savedObjects
+                    .getScopedClient(fakeRequest)
+                    .get('dashboard', savedObjectId);
+                  return { savedObjectStatus: 200 };
+                } catch (error) {
+                  return {
+                    savedObjectStatus: Boom.isBoom(error) ? error.output.statusCode : 500,
+                  };
+                }
+              }
               const client = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
               const initialAuthorization = fakeRequest.headers.authorization;
               const principal = start.security.authc.getPrincipal(fakeRequest);

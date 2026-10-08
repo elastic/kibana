@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 
 import type { ServiceAccountMintOptions } from './fake_requests';
 import {
+  isTerminalMintFailure,
   SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS,
   ServiceAccountFakeRequests,
 } from './fake_requests';
@@ -611,5 +612,31 @@ describe('ServiceAccountFakeRequests', () => {
       // Nothing will ever ask this entry to refresh again, so there is no failure to report.
       expect(logger.warn).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('isTerminalMintFailure', () => {
+  it.each([
+    ['a client error', Boom.forbidden('re-bound'), true],
+    ['a missing binding', Boom.notFound('unbound'), true],
+    ['a rate limit', Boom.tooManyRequests('slow down'), false],
+    ['a server error', Boom.serverUnavailable('store unavailable'), false],
+    ['an unexpected exception', new Error('boom'), false],
+  ])('treats %s raised by the interceptor as terminal: %s', (_name, error, terminal) => {
+    expect(isTerminalMintFailure(error, { raisedByInterceptor: true })).toBe(terminal);
+  });
+
+  it('treats any failure not raised by the interceptor as terminal, unless the exchange says otherwise', () => {
+    expect(isTerminalMintFailure(new Error('boom'), { raisedByInterceptor: false })).toBe(true);
+    expect(
+      isTerminalMintFailure(new ServiceAccountTokenExchangeError(new Error('503'), true), {
+        raisedByInterceptor: false,
+      })
+    ).toBe(false);
+    expect(
+      isTerminalMintFailure(new ServiceAccountTokenExchangeError(new Error('revoked'), false), {
+        raisedByInterceptor: true,
+      })
+    ).toBe(true);
   });
 });

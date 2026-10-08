@@ -31,7 +31,7 @@ export interface AuditKibana {
     name?: string;
   };
   /**
-   * Workload a service account is bound to as part of this event.
+   * Workload a service account is bound to, or is executing for, as part of this event.
    */
   workload?: {
     plugin_id: string;
