@@ -638,12 +638,12 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
             ],
             current: [
               {
-                name: 'fieldB',
+                name: 'fieldA',
                 type: 'string',
                 ecs: false,
               },
               {
-                name: 'fieldA',
+                name: 'fieldB',
                 type: 'string',
                 ecs: false,
               },

@@ -31,7 +31,6 @@ import {
   type RuleResponse,
 } from '../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../rule_schema';
-import { areRequiredFieldsEqual } from '../../../prebuilt_rules/logic/diff/calculation/required_fields_utils';
 
 export const toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
@@ -244,27 +243,12 @@ export const hasOnlyReadAuthEditableChanges = (
     const existingValue = normalizedExistingRule[key as keyof typeof normalizedExistingRule];
 
     // If values are different, check if this field is read auth editable
-    if (!isRuleFieldEqual(key, existingValue, updateValue) && !isReadAuthEditField(key)) {
+    if (!isEqual(existingValue, updateValue) && !isReadAuthEditField(key)) {
       return false;
     }
   }
 
   return true;
-};
-
-/**
- * Required fields are compared as sets the same way as in the two-way diff algorithm,
- * so their order and duplicates don't count as a change.
- */
-const isRuleFieldEqual = (key: string, existingValue: unknown, updateValue: unknown): boolean => {
-  if (key === 'required_fields') {
-    return areRequiredFieldsEqual({
-      left: existingValue as RuleResponse['required_fields'],
-      right: updateValue as RuleResponse['required_fields'],
-    });
-  }
-
-  return isEqual(existingValue, updateValue);
 };
 
 /**

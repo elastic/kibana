@@ -19,11 +19,10 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine';
-import { dedupeRequiredFields, toRequiredFieldKeySet } from '../required_fields_utils';
 
 /**
- * Diff algorithm for `required_fields`. Compares versions as sets of `name` and `type` pairs
- * ignoring order and `ecs`, and resolves conflicts in favour of the target version.
+ * Diff algorithm for `required_fields`. Versions are expected to be normalized (sorted and deduplicated)
+ * so they are compared by value. Conflicts are resolved in favour of the target version.
  */
 export const requiredFieldsDiffAlgorithm = (
   versions: ThreeVersionsOf<RequiredFieldArray>,
@@ -35,11 +34,7 @@ export const requiredFieldsDiffAlgorithm = (
     target_version: targetVersion,
   } = versions;
 
-  const diffOutcome = determineDiffOutcome(
-    baseVersion === MissingVersion ? MissingVersion : toRequiredFieldKeySet(baseVersion),
-    toRequiredFieldKeySet(currentVersion),
-    toRequiredFieldKeySet(targetVersion)
-  );
+  const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
   const hasBaseVersion = baseVersion !== MissingVersion;
@@ -84,8 +79,6 @@ const mergeVersions = ({
   diffOutcome,
   isRuleCustomized,
 }: MergeArgs): MergeResult => {
-  const dedupedTargetVersion = dedupeRequiredFields(targetVersion);
-
   switch (diffOutcome) {
     // The current version is returned as-is so that `merged_version` matches `current_version`
     // whenever `has_update` is false
@@ -101,7 +94,7 @@ const mergeVersions = ({
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
       return {
         conflict: ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedTargetVersion,
+        mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
@@ -111,7 +104,7 @@ const mergeVersions = ({
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       return {
         conflict: ThreeWayDiffConflict.SOLVABLE,
-        mergedVersion: dedupedTargetVersion,
+        mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
@@ -122,7 +115,7 @@ const mergeVersions = ({
     case ThreeWayDiffOutcome.MissingBaseNoUpdate: {
       return {
         conflict: ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedTargetVersion,
+        mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
@@ -134,7 +127,7 @@ const mergeVersions = ({
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
       return {
         conflict: isRuleCustomized ? ThreeWayDiffConflict.SOLVABLE : ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedTargetVersion,
+        mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }

@@ -23,7 +23,6 @@ import type { RuleResponse } from '../../../../../../../common/api/detection_eng
 import type { TwoWayFieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/two_way_diff/two_way_diff_outcome';
 import { deepEqualityDiffAlgorithm } from './two_way_diff_algorithms/deep_equality_diff_algorithm';
 import { orderAgnosticArrayDiffAlgorithm } from './two_way_diff_algorithms/order_agnostic_array_diff_algorithm';
-import { requiredFieldsDiffAlgorithm } from './two_way_diff_algorithms/required_fields_diff_algorithm';
 
 /**
  * Determines the diff between two rule response objects and returns a list of every rule field
@@ -89,7 +88,7 @@ const commonFieldComparators: TwoWayFieldsDiffAlgorithmsFor<TwoWayRuleDiffCommon
   note: deepEqualityDiffAlgorithm,
   setup: deepEqualityDiffAlgorithm,
   related_integrations: deepEqualityDiffAlgorithm,
-  required_fields: requiredFieldsDiffAlgorithm,
+  required_fields: deepEqualityDiffAlgorithm,
   from: deepEqualityDiffAlgorithm,
   to: deepEqualityDiffAlgorithm,
   interval: deepEqualityDiffAlgorithm,

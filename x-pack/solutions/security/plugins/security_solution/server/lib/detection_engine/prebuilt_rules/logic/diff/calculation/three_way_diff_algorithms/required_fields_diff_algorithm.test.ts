@@ -84,7 +84,7 @@ describe('requiredFieldsDiffAlgorithm', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one'), field('two')],
         current_version: [field('one'), field('three')],
-        target_version: [field('three'), field('one')],
+        target_version: [field('one'), field('three')],
       };
 
       const result = requiredFieldsDiffAlgorithm(mockVersions, true);
@@ -104,14 +104,14 @@ describe('requiredFieldsDiffAlgorithm', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one'), field('two')],
         current_version: [field('one'), field('three')],
-        target_version: [field('one'), field('four'), field('four')],
+        target_version: [field('four'), field('one')],
       };
 
       const result = requiredFieldsDiffAlgorithm(mockVersions, true);
 
       expect(result).toEqual(
         expect.objectContaining({
-          merged_version: [field('one'), field('four')],
+          merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
           conflict: ThreeWayDiffConflict.SOLVABLE,
@@ -125,7 +125,7 @@ describe('requiredFieldsDiffAlgorithm', () => {
         const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
           base_version: MissingVersion,
           current_version: [field('one'), field('two')],
-          target_version: [field('two'), field('one')],
+          target_version: [field('one'), field('two')],
         };
 
         const result = requiredFieldsDiffAlgorithm(mockVersions, false);
@@ -188,46 +188,6 @@ describe('requiredFieldsDiffAlgorithm', () => {
   });
 
   describe('edge cases', () => {
-    it('invariant fields order', () => {
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [field('one'), field('two')],
-        current_version: [field('two'), field('one')],
-        target_version: [field('one'), field('two')],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-          has_update: false,
-        })
-      );
-    });
-
-    it('"ecs" has no impact in diffing', () => {
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [field('one', true), field('two', false)],
-        current_version: [field('one', false), field('two', true)],
-        target_version: [field('one', true), field('three', true)],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
-          has_update: true,
-        })
-      );
-    });
-
     it('treats fields with the same name and a different type as different', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one')],
@@ -240,26 +200,6 @@ describe('requiredFieldsDiffAlgorithm', () => {
       expect(result).toEqual(
         expect.objectContaining({
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          has_update: true,
-        })
-      );
-    });
-
-    it('deduplicates the target version when updating', () => {
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [field('one')],
-        current_version: [field('one')],
-        target_version: [field('two'), field('two')],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: [field('two')],
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
           has_update: true,
         })
       );
