@@ -46,8 +46,7 @@ import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
 import {
   GraphDisplayOptionsContext,
   useGraphDisplayOptions,
-  useNodeDisplayOverrides,
-  type GraphDisplayOptions,
+  useSetGraphDisplayOptions,
 } from '../graph/graph_display_options_context';
 import { LayersPanel } from '../controls/layers_panel';
 
@@ -589,11 +588,13 @@ const SingleEntityMetadataPanel = memo<{
   const { entity: opts } = useGraphDisplayOptions();
   return (
     <>
-      {/* Sub Type — always visible (no checkbox) */}
-      <MetadataItem euiTheme={euiTheme}>
-        <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
-        {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
-      </MetadataItem>
+      {/* Sub Type — hidden when toggled off */}
+      {opts.subType && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
+          {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
+        </MetadataItem>
+      )}
       {/* Data Source — hidden when toggled off */}
       {opts.dataSource && (
         <MetadataItem euiTheme={euiTheme}>
@@ -820,11 +821,8 @@ interface ToolbarButtonRowProps {
   style?: React.CSSProperties;
   /** Additional Emotion CSS merged into the wrapper div (e.g. absolute positioning for grouped nodes). */
   extraCss?: ReturnType<typeof css>;
-  /** When provided, renders a Layers button at the end of the toolbar with a per-node LayersPanel. */
-  nodeLayersButton?: {
-    displayOptions: GraphDisplayOptions;
-    onChange: (opts: GraphDisplayOptions) => void;
-  };
+  /** When true, renders a Layers button that controls the global display options. */
+  showLayersButton?: boolean;
 }
 
 /** Shared toolbar button row used by both single and grouped entity nodes. */
@@ -835,8 +833,10 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
   onMouseLeave,
   style,
   extraCss,
-  nodeLayersButton,
+  showLayersButton,
 }) => {
+  const globalOpts = useGraphDisplayOptions();
+  const setGlobalOpts = useSetGraphDisplayOptions();
   const [isLayersOpen, setIsLayersOpen] = useState(false);
 
   return (
@@ -861,7 +861,7 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
         extraCss,
       ]}
     >
-      {/* Render items before position 5 (index 4), then the layers button, then the rest */}
+      {/* Items before position 5 (indices 0–3) */}
       {items.slice(0, 4).map((item, idx) => (
         <EuiToolTip
           key={idx}
@@ -881,7 +881,8 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
           />
         </EuiToolTip>
       ))}
-      {nodeLayersButton && (
+      {/* Layers button is always the 5th button */}
+      {showLayersButton && (
         <EuiPopover
           aria-label={NodeLayersLabel}
           isOpen={isLayersOpen}
@@ -902,13 +903,10 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
             </EuiToolTip>
           }
         >
-          <LayersPanel
-            displayOptions={nodeLayersButton.displayOptions}
-            onChange={nodeLayersButton.onChange}
-            showEventMetadata={false}
-          />
+          <LayersPanel displayOptions={globalOpts} onChange={setGlobalOpts} />
         </EuiPopover>
       )}
+      {/* Remaining items after position 5 (index 4+) */}
       {items.slice(4).map((item, idx) => (
         <EuiToolTip
           key={idx + 4}
@@ -959,15 +957,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
   const globalOpts = useGraphDisplayOptions();
-  const { overrides, setNodeOverride } = useNodeDisplayOverrides();
-
-  // Merge global options with per-node entity overrides.
-  // Event fields are not overridable per-node (the node Layers panel hides them).
-  const nodeOpts = overrides.get(props.id);
-  const effectiveOpts: GraphDisplayOptions = {
-    entity: { ...globalOpts.entity, ...nodeOpts?.entity },
-    event: globalOpts.event,
-  };
   // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
   // the card into the toolbar, which lives in a separate DOM subtree (portal).
@@ -1061,6 +1050,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               isHovered={isHovered}
               onMouseEnter={showToolbar}
               onMouseLeave={handleToolbarMouseLeave}
+              showLayersButton={!isGrouped}
               extraCss={css`
                 position: absolute;
                 bottom: calc(100% + 4px);
@@ -1068,26 +1058,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 transform: translateX(-50%);
                 z-index: ${euiTheme.levels.content};
               `}
-              nodeLayersButton={
-                !isGrouped
-                  ? {
-                      displayOptions: effectiveOpts,
-                      onChange: (updatedOpts) => {
-                        // Only persist entity fields that differ from global so future
-                        // global changes are inherited for fields the user hasn't touched.
-                        const entityDelta: Partial<GraphDisplayOptions['entity']> = {};
-                        for (const k of Object.keys(updatedOpts.entity) as Array<
-                          keyof GraphDisplayOptions['entity']
-                        >) {
-                          if (updatedOpts.entity[k] !== globalOpts.entity[k]) {
-                            entityDelta[k] = updatedOpts.entity[k];
-                          }
-                        }
-                        setNodeOverride(props.id, { entity: entityDelta });
-                      },
-                    }
-                  : undefined
-              }
             />
           )}
           <EntityCardWrapper euiTheme={euiTheme} shadow={shadow}>
@@ -1108,7 +1078,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
             {/* Metadata panel — hidden in preview (non-interactive) mode and for grouped nodes */}
             {interactive && !isGrouped && (
-              <GraphDisplayOptionsContext.Provider value={effectiveOpts}>
+              <GraphDisplayOptionsContext.Provider value={globalOpts}>
                 <EntityCardMetadata
                   data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
                   euiTheme={euiTheme}

@@ -10,6 +10,7 @@ import { createContext, useContext } from 'react';
 /** Controls which metadata fields are rendered on entity/event nodes in the graph. */
 export interface GraphDisplayOptions {
   entity: {
+    subType: boolean;
     assetCriticality: boolean;
     dataSource: boolean;
     ipAddress: boolean;
@@ -21,20 +22,10 @@ export interface GraphDisplayOptions {
   };
 }
 
-/**
- * Per-node display overrides — only entity fields are overridable per-node
- * (the node Layers panel does not expose event metadata options).
- * Each field is independently optional so that only explicitly changed fields
- * shadow the global setting; untouched fields continue to inherit from the
- * graph-level GraphDisplayOptions.
- */
-export interface NodeDisplayOverrides {
-  entity?: Partial<GraphDisplayOptions['entity']>;
-}
-
 /** All fields visible — used as the initial/default state. */
 export const DEFAULT_GRAPH_DISPLAY_OPTIONS: GraphDisplayOptions = {
   entity: {
+    subType: true,
     assetCriticality: true,
     dataSource: true,
     ipAddress: true,
@@ -53,15 +44,9 @@ export const GraphDisplayOptionsContext = createContext<GraphDisplayOptions>(
 /** Consume the current graph display options inside any node component. */
 export const useGraphDisplayOptions = () => useContext(GraphDisplayOptionsContext);
 
-export interface NodeDisplayOverridesContextValue {
-  overrides: Map<string, NodeDisplayOverrides>;
-  setNodeOverride: (nodeId: string, opts: NodeDisplayOverrides) => void;
-}
+export const GraphDisplayOptionsSetterContext = createContext<(opts: GraphDisplayOptions) => void>(
+  () => {}
+);
 
-export const NodeDisplayOverridesContext = createContext<NodeDisplayOverridesContextValue>({
-  overrides: new Map(),
-  setNodeOverride: () => {},
-});
-
-/** Consume and set per-node display overrides inside any node component. */
-export const useNodeDisplayOverrides = () => useContext(NodeDisplayOverridesContext);
+/** Consume the global display-options setter inside any node component. */
+export const useSetGraphDisplayOptions = () => useContext(GraphDisplayOptionsSetterContext);

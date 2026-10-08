@@ -54,10 +54,9 @@ import { Controls } from '../controls/controls';
 import { LayersPanel } from '../controls/layers_panel';
 import {
   GraphDisplayOptionsContext,
-  NodeDisplayOverridesContext,
+  GraphDisplayOptionsSetterContext,
   DEFAULT_GRAPH_DISPLAY_OPTIONS,
   type GraphDisplayOptions,
-  type NodeDisplayOverrides,
 } from './graph_display_options_context';
 import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ID } from '../test_ids';
 
@@ -166,27 +165,7 @@ export const Graph = memo<GraphProps>(
       event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
     };
     const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
-
-    // Per-node display overrides — keyed by node ID, only entity fields.
-    const [nodeOverridesMap, setNodeOverridesMap] = useState<Map<string, NodeDisplayOverrides>>(
-      () => new Map()
-    );
-    const setNodeOverride = useCallback((nodeId: string, opts: NodeDisplayOverrides) => {
-      setNodeOverridesMap((prev) => new Map(prev).set(nodeId, opts));
-    }, []);
-    const setDisplayOptions = (opts: GraphDisplayOptions) => {
-      setStoredDisplayOptions(opts);
-      // Overrides only store differences from global, so drop any that now match it.
-      setNodeOverridesMap((prev) => {
-        const next = new Map<string, NodeDisplayOverrides>();
-        prev.forEach((override, nodeId) => {
-          next.set(nodeId, {
-            entity: omitMatching(override.entity, opts.entity),
-          });
-        });
-        return next;
-      });
-    };
+    const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
@@ -337,9 +316,7 @@ export const Graph = memo<GraphProps>(
     );
 
     return (
-      <NodeDisplayOverridesContext.Provider
-        value={{ overrides: nodeOverridesMap, setNodeOverride }}
-      >
+      <GraphDisplayOptionsSetterContext.Provider value={setDisplayOptions}>
         <GraphDisplayOptionsContext.Provider value={displayOptions}>
           <div {...rest}>
             <SvgDefsMarker />
@@ -429,7 +406,7 @@ export const Graph = memo<GraphProps>(
             <GlobalGraphStyles />
           </div>
         </GraphDisplayOptionsContext.Provider>
-      </NodeDisplayOverridesContext.Provider>
+      </GraphDisplayOptionsSetterContext.Provider>
     );
   }
 );
@@ -511,19 +488,3 @@ const processGraph = (
 
 const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
   size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
-
-const omitMatching = <T extends Record<string, boolean>>(
-  override: Partial<T> | undefined,
-  global: T
-): Partial<T> => {
-  const result: Partial<T> = {};
-  if (!override) {
-    return result;
-  }
-  for (const key of Object.keys(override) as Array<keyof T>) {
-    if (override[key] !== global[key]) {
-      result[key] = override[key];
-    }
-  }
-  return result;
-};

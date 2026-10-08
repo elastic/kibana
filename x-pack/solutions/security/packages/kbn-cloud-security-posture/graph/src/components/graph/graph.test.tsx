@@ -6,13 +6,13 @@
  */
 
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import React, { useState, type RefAttributes } from 'react';
+import React, { type RefAttributes } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 import type { NodeViewModel, EdgeViewModel } from '../types';
 import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/react';
-import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID } from '../test_ids';
+import { GRAPH_CONTROLS_LAYERS_ID } from '../test_ids';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
@@ -23,9 +23,6 @@ jest.mock('../constants', () => ({
 // Graph uses useLocalStorage to persist display options; return undefined so the
 // DEFAULT_GRAPH_DISPLAY_OPTIONS merge produces all-visible options in tests.
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([undefined, jest.fn()]));
-
-// Stateful stand-in for useLocalStorage, for tests where global changes must re-render the graph.
-const useStatefulLocalStorage = <T,>(_key: string, initialValue: T) => useState(initialValue);
 
 // Mock ReactFlow's fitView function
 let mockFitView = jest.fn();
@@ -933,143 +930,6 @@ describe('<Graph />', () => {
           event: expect.objectContaining({ sourceIpAddress: false }),
         })
       );
-    });
-  });
-
-  describe('node layers panel', () => {
-    const singleNode: NodeViewModel[] = [
-      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
-    ];
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
-    });
-
-    it('should render the node layers button in the toolbar for a single interactive node', async () => {
-      const { getByTestId } = renderGraphPreview({
-        nodes: singleNode,
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() =>
-        expect(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID)).toBeInTheDocument()
-      );
-    });
-
-    it('should not render the node layers button when interactive is false', async () => {
-      const { queryByTestId } = renderGraphPreview({
-        nodes: singleNode,
-        edges: [],
-        interactive: false,
-      });
-
-      await waitFor(() =>
-        expect(queryByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID)).not.toBeInTheDocument()
-      );
-    });
-
-    it('should open the node layers panel with only entity checkboxes (no event metadata)', async () => {
-      const { getByTestId, getByRole, queryByRole } = renderGraphPreview({
-        nodes: singleNode,
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() =>
-        expect(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID)).toBeInTheDocument()
-      );
-
-      fireEvent.click(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID));
-
-      await waitFor(() => {
-        // Entity fields are present
-        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument();
-        expect(getByRole('checkbox', { name: 'Data source' })).toBeInTheDocument();
-        expect(getByRole('checkbox', { name: 'IP address' })).toBeInTheDocument();
-        expect(getByRole('checkbox', { name: 'Geolocation' })).toBeInTheDocument();
-        // Event metadata is absent in the per-node panel
-        expect(queryByRole('checkbox', { name: 'Source IP address' })).not.toBeInTheDocument();
-        expect(queryByRole('checkbox', { name: 'Source geolocation' })).not.toBeInTheDocument();
-      });
-    });
-
-    it('should apply a node-level override without affecting the global display options setter', async () => {
-      const mockSetStored = jest.fn();
-      (useLocalStorage as jest.Mock).mockReturnValue([undefined, mockSetStored]);
-
-      const { getByTestId, getByRole } = renderGraphPreview({
-        nodes: singleNode,
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() =>
-        expect(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID)).toBeInTheDocument()
-      );
-
-      fireEvent.click(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID));
-
-      await waitFor(() =>
-        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument()
-      );
-
-      fireEvent.click(getByRole('checkbox', { name: 'Asset criticality' }));
-
-      // The global localStorage setter must NOT be called — the per-node override
-      // is held in in-memory state inside Graph, not persisted.
-      expect(mockSetStored).not.toHaveBeenCalled();
-    });
-
-    it('should follow the global setting again once a node override matches it', async () => {
-      (useLocalStorage as jest.Mock).mockImplementation(useStatefulLocalStorage);
-
-      const { getByTestId, getByRole, queryByRole } = renderGraphPreview({
-        nodes: singleNode,
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() =>
-        expect(getByTestId(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID)).toBeInTheDocument()
-      );
-
-      // Only one panel is open at a time, so the "Asset criticality" checkbox is unambiguous.
-      const openPanel = (buttonTestId: string) => {
-        fireEvent.click(getByTestId(buttonTestId));
-        return waitFor(
-          () => getByRole('checkbox', { name: 'Asset criticality' }) as HTMLInputElement
-        );
-      };
-      const closePanel = async (buttonTestId: string) => {
-        fireEvent.click(getByTestId(buttonTestId));
-        await waitFor(() =>
-          expect(queryByRole('checkbox', { name: 'Asset criticality' })).not.toBeInTheDocument()
-        );
-      };
-      const toggleAssetCriticality = async (buttonTestId: string) => {
-        fireEvent.click(await openPanel(buttonTestId));
-        await closePanel(buttonTestId);
-      };
-      const isNodeAssetCriticalityChecked = async () => {
-        const { checked } = await openPanel(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID);
-        await closePanel(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID);
-        return checked;
-      };
-
-      await toggleAssetCriticality(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID); // node off
-      expect(await isNodeAssetCriticalityChecked()).toBe(false);
-
-      await toggleAssetCriticality(GRAPH_CONTROLS_LAYERS_ID); // global off
-      await toggleAssetCriticality(GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID); // node on
-      expect(await isNodeAssetCriticalityChecked()).toBe(true);
-
-      await toggleAssetCriticality(GRAPH_CONTROLS_LAYERS_ID); // global on, matches node
-      expect(await isNodeAssetCriticalityChecked()).toBe(true);
-
-      await toggleAssetCriticality(GRAPH_CONTROLS_LAYERS_ID); // global off, node follows
-      expect(await isNodeAssetCriticalityChecked()).toBe(false);
     });
   });
 });

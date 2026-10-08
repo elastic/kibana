@@ -23,6 +23,10 @@ const entityMetadataHeading = i18n.translate(
   { defaultMessage: 'Entity metadata' }
 );
 
+const subTypeLabel = i18n.translate('securitySolutionPackages.csp.graph.layersPanel.subType', {
+  defaultMessage: 'Sub type',
+});
+
 const assetCriticalityLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.layersPanel.assetCriticality',
   { defaultMessage: 'Asset criticality' }
@@ -60,16 +64,10 @@ const sourceGeolocationLabel = i18n.translate(
 export interface LayersPanelProps {
   displayOptions: GraphDisplayOptions;
   onChange: (options: GraphDisplayOptions) => void;
-  /** When false, the Event metadata section is hidden. Defaults to true. */
-  showEventMetadata?: boolean;
 }
 
 /** Popover panel content shown when the graph Layers button is clicked. */
-export const LayersPanel = ({
-  displayOptions,
-  onChange,
-  showEventMetadata = true,
-}: LayersPanelProps) => {
+export const LayersPanel = ({ displayOptions, onChange }: LayersPanelProps) => {
   const { euiTheme } = useEuiTheme();
   // Each mounted instance gets a unique prefix so label clicks always resolve
   // to the correct <input> even when multiple LayersPanels exist in the DOM.
@@ -109,6 +107,14 @@ export const LayersPanel = ({
       >
         <EuiFlexItem grow={false}>
           <EuiCheckbox
+            id={`${id}EntitySubType`}
+            label={subTypeLabel}
+            checked={displayOptions.entity.subType}
+            onChange={(e) => setEntityOption('subType', e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
             id={`${id}EntityAssetCriticality`}
             label={assetCriticalityLabel}
             checked={displayOptions.entity.assetCriticality}
@@ -141,43 +147,39 @@ export const LayersPanel = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {/* Event metadata section — omitted in per-node panels */}
-      {showEventMetadata && (
-        <>
-          <EuiText
-            size="s"
-            css={css`
-              margin-top: ${euiTheme.size.m};
-            `}
-          >
-            <strong>{eventMetadataHeading}</strong>
-          </EuiText>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="xs"
-            css={css`
-              margin-top: ${euiTheme.size.xs};
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiCheckbox
-                id={`${id}EventSourceIpAddress`}
-                label={sourceIpAddressLabel}
-                checked={displayOptions.event.sourceIpAddress}
-                onChange={(e) => setEventOption('sourceIpAddress', e.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCheckbox
-                id={`${id}EventSourceGeolocation`}
-                label={sourceGeolocationLabel}
-                checked={displayOptions.event.sourceGeolocation}
-                onChange={(e) => setEventOption('sourceGeolocation', e.target.checked)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+      {/* Event metadata section */}
+      <EuiText
+        size="s"
+        css={css`
+          margin-top: ${euiTheme.size.m};
+        `}
+      >
+        <strong>{eventMetadataHeading}</strong>
+      </EuiText>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        css={css`
+          margin-top: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={`${id}EventSourceIpAddress`}
+            label={sourceIpAddressLabel}
+            checked={displayOptions.event.sourceIpAddress}
+            onChange={(e) => setEventOption('sourceIpAddress', e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={`${id}EventSourceGeolocation`}
+            label={sourceGeolocationLabel}
+            checked={displayOptions.event.sourceGeolocation}
+            onChange={(e) => setEventOption('sourceGeolocation', e.target.checked)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
