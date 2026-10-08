@@ -629,7 +629,7 @@ src/platform/packages/shared/kbn-ftr-benchmarks @elastic/kibana-operations
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/workchat-eng
-src/platform/packages/shared/kbn-genai-common @elastic/obs-signals-ai-o11y
+src/platform/packages/shared/kbn-genai-common @elastic/obs-signals-traces
 src/platform/packages/shared/kbn-grok-ui @elastic/streams-ui
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
@@ -3799,9 +3799,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/synthetics_monitor_config.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
-# Team: obs-signals-ai-o11y
+# Team: obs-signals-traces
 # GenAI tab shared component — sub-path override, no separate kibana.jsonc
-src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs-signals-ai-o11y
+src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs-signals-traces
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
