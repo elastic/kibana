@@ -823,6 +823,34 @@ describe('upsertQueryRoute', () => {
     expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
   });
 
+  it('edits the query of source_id when another source holds the same query id', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          list: makeSourcesList('logs.test', 'logs.other'),
+          get: jest.fn().mockResolvedValue({ source }),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          // The other source's link comes first, which used to win the lookup.
+          getQueryLinks: makeGetQueryLinks([
+            makeQueryLink('q1', 40, 'logs.other'),
+            makeQueryLink('q1', 40, 'logs.test'),
+          ]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
+  });
+
   it('throws 404 when the query belongs to a different source than source_id', async () => {
     const upsertQuery = jest.fn();
     const sourcesGet = jest.fn();

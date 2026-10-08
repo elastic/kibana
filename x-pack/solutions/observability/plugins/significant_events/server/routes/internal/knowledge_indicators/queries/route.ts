@@ -802,7 +802,12 @@ const upsertQueryRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const existingLink = await findExistingQueryLink({ kiClient, sourcesClient, queryId });
+    const existingLink = await findExistingQueryLink({
+      kiClient,
+      sourcesClient,
+      queryId,
+      preferredSourceId: requestedSourceId,
+    });
     const sourceId = requestedSourceId ?? existingLink?.source_id;
     if (!sourceId) {
       throw new QueryNotFoundError(`Query [${queryId}] not found`);
@@ -855,18 +860,23 @@ async function findExistingQueryLink({
   kiClient,
   sourcesClient,
   queryId,
+  preferredSourceId,
 }: {
   kiClient: KnowledgeIndicatorClient;
   sourcesClient: SourcesClient;
   queryId: string;
+  /** The source the caller asked for; its link wins when the id exists on several sources. */
+  preferredSourceId?: string;
 }): Promise<QueryLink | undefined> {
   // Include expired and unbacked so an existing query is found whatever its state.
-  const [existing] = await getQueryLinksAcrossSources({
+  const links = await getQueryLinksAcrossSources({
     kiClient,
     sourcesClient,
     filters: { queryIds: [queryId], ruleUnbacked: 'include', includeExpired: true },
   });
-  return existing;
+  // The reader returns links in no useful order, so the first hit may belong to another source
+  // than the one being edited. Falling back to it keeps the cross-source guard in the handler.
+  return links.find((link) => link.source_id === preferredSourceId) ?? links[0];
 }
 
 export const internalKIQueriesRoutes = {
