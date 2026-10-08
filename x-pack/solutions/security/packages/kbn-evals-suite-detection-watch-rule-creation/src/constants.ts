@@ -24,9 +24,16 @@ export { ALERTZERO_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from
  */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
+/**
+ * Public Agent Builder API version (`Elastic-Api-Version` header), used to create the
+ * investigation conversation the workflow records its proposal on.
+ */
+export const AGENT_BUILDER_API_VERSION = '2023-10-31';
+
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
-export const REVIEW_STEP_ID = 'review_creation';
+/** The step that hands the draft to the proposal gate and parks until an analyst decides. */
+export const PROPOSE_STEP_ID = 'propose_creation';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Consumed by the

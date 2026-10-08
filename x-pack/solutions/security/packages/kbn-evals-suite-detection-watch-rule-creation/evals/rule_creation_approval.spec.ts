@@ -135,7 +135,7 @@ evaluate.describe(
         // test fails mid-flight, afterEach still knows what to sweep by name.
         createdRuleName = result.rule?.name;
 
-        if (!result.pendingApproval) {
+        if (!result.proposalId) {
           // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
           // winnable gap, so a skip here means the quality gate is over-refusing, not that
           // the approval plumbing broke.
@@ -153,7 +153,7 @@ evaluate.describe(
 
         const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
-          stepExecutions: result.stepExecutions,
+          proposalId: result.proposalId,
           approved: true,
         });
 
@@ -189,7 +189,7 @@ evaluate.describe(
         // if this test dies before its own non-existence check completes.
         createdRuleName = result.rule?.name;
 
-        if (!result.pendingApproval) {
+        if (!result.proposalId) {
           // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
           // winnable gap, so a skip here means the quality gate is over-refusing, not that
           // the approval plumbing broke.
@@ -207,7 +207,7 @@ evaluate.describe(
 
         const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
-          stepExecutions: result.stepExecutions,
+          proposalId: result.proposalId,
           approved: false,
         });
 

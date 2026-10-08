@@ -25,8 +25,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/core'
   - '@kbn/zod'
-  - '@kbn/inbox-common'
   - '@kbn/agent-builder-common'
+  - '@kbn/proposals-common'
 tags:
   - functional-tests
   - package
