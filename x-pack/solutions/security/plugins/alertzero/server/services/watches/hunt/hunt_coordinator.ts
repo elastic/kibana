@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type {
   HuntBehaviorArticleContext,
   HuntCompleteness,
@@ -186,6 +187,7 @@ const MAX_MATCHED_INDICES = 50;
 export interface HuntCoordinatorClients {
   esClient: ElasticsearchClient;
   reportsEsClient: ElasticsearchClient;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const clampHuntReportText = (value: string | undefined): string | undefined => {
@@ -434,7 +436,7 @@ const coordinatorGaps = ({
 };
 
 const huntCoordinatorCore = async (
-  { esClient, reportsEsClient }: HuntCoordinatorClients,
+  { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
   model: ScopedModel | undefined,
   logger: Logger,
   params: HuntCoordinatorParams,
@@ -856,7 +858,8 @@ const huntCoordinatorCore = async (
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
       },
-      esClient
+      esClient,
+      mitreDataClient
     );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);

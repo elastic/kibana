@@ -5,18 +5,53 @@
  * 2.0.
  */
 
+import type { MitreEntity } from '@kbn/security-mitre-attack-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
-import { getMitreCatalog } from './mitre_catalog';
+import { buildMitreCatalog } from './mitre_catalog';
+
+/**
+ * A small ATT&CK Enterprise entity set for tests that need real-looking technique ids, plus 30
+ * filler techniques: enough to exceed Tier 2's per-report generation budget.
+ */
+// A hoisted function declaration (mock-prefixed) so the jest.mock factory below can call it.
+function mockBuildEnterpriseFixture(): MitreEntity[] {
+  const { buildMockMitreTechnique, buildMockMitreSubtechnique, buildMockMitreEntities } =
+    jest.requireActual<typeof import('@kbn/security-mitre-attack-common')>(
+      '@kbn/security-mitre-attack-common'
+    );
+  return [
+    buildMockMitreTechnique({ id: 'T1566', name: 'Phishing', tactic_ids: ['TA0001'] }),
+    buildMockMitreTechnique({ id: 'T1078', name: 'Valid Accounts', tactic_ids: ['TA0001'] }),
+    buildMockMitreSubtechnique({
+      id: 'T1078.004',
+      name: 'Cloud Accounts',
+      technique_id: 'T1078',
+      tactic_ids: ['TA0001'],
+    }),
+    ...buildMockMitreEntities(30),
+  ];
+}
+
+// The catalog now comes from the managed MITRE data client; serve a fixed ATT&CK Enterprise
+// catalog instead so these tests do not need a data client.
+jest.mock('./mitre_catalog', () => {
+  const actual = jest.requireActual('./mitre_catalog');
+  const { buildMitreCatalog: build } = actual;
+  const catalog = build(mockBuildEnterpriseFixture());
+  return { ...actual, getMitreCatalog: jest.fn(async () => catalog) };
+});
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
 }));
+
+const enterpriseCatalog = buildMitreCatalog(mockBuildEnterpriseFixture());
 
 const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
@@ -798,7 +833,7 @@ describe('huntBehavior', () => {
     });
 
     /** Real catalog ids, so none are dropped as unknown before generation. */
-    const catalogIds = () => [...getMitreCatalog().techniqueById.keys()].slice(0, OVER_BUDGET);
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, OVER_BUDGET);
 
     /** Ascending confidence, so the lowest-confidence ids are the ones over budget. */
     const ascendingCandidates = () =>

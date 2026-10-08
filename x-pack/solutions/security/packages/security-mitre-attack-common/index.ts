@@ -59,3 +59,18 @@ export type {
   GetMitreEntitiesRequestParams,
   GetMitreEntitiesResponse,
 } from './src/api';
+
+// Test-only builders; the package is side-effect free so exporting them here is safe.
+export {
+  buildMockMitreTactic,
+  buildMockMitreTechnique,
+  buildMockMitreSubtechnique,
+  buildMockMitreEntities,
+  buildMockAtlasTactic,
+  buildMockAtlasTechnique,
+  buildMockAtlasSubtechnique,
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+  buildMockMitreEntitySummaryBuckets,
+} from './src/mitre_entity_builders';

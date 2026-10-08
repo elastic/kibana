@@ -100,7 +100,7 @@ export const registerHuntCoordinatorRoute = ({
           // with the internal user and scoped by the explicit space filter.
           const esClient = core.elasticsearch.client.asCurrentUser;
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
-          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
@@ -140,25 +140,30 @@ export const registerHuntCoordinatorRoute = ({
           // The Worker fan-out supplies a run id so one sweep's children share it,
           // which is what the packaging barrier and conclusion dedupe key off. Only
           // mint one when the caller has no sweep to tie the run to.
-          const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
-            report_id,
-            spaceId,
-            text,
-            iocs,
-            techniques,
-            time_range,
-            size,
-            max_assets,
-            llm_confidence_threshold,
-            tier2_when,
-            max_tier2_sample_events,
-            trigger,
-            indexPatterns,
-            // The Worker fan-out supplies a run id so one sweep's children share it,
-            // which is what the packaging barrier and conclusion dedupe key off. Only
-            // mint one when the caller has no sweep to tie the run to.
-            run_id: run_id ?? randomUUID(),
-          });
+          const result = await huntCoordinator(
+            { esClient, reportsEsClient, mitreDataClient },
+            model,
+            logger,
+            {
+              report_id,
+              spaceId,
+              text,
+              iocs,
+              techniques,
+              time_range,
+              size,
+              max_assets,
+              llm_confidence_threshold,
+              tier2_when,
+              max_tier2_sample_events,
+              trigger,
+              indexPatterns,
+              // The Worker fan-out supplies a run id so one sweep's children share it,
+              // which is what the packaging barrier and conclusion dedupe key off. Only
+              // mint one when the caller has no sweep to tie the run to.
+              run_id: run_id ?? randomUUID(),
+            }
+          );
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.

@@ -323,7 +323,8 @@ describe('huntCoordinator', () => {
       expect.objectContaining({
         allowed_indices: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-default*'],
       }),
-      esClient
+      esClient,
+      undefined
     );
   });
 
@@ -1062,7 +1063,8 @@ describe('huntCoordinator', () => {
           time_range: { from: 'now-7d', to: 'now' },
         }),
       }),
-      esWithSearch
+      esWithSearch,
+      undefined
     );
   });
 
@@ -1126,7 +1128,8 @@ describe('huntCoordinator', () => {
           ],
         }),
       }),
-      esClient
+      esClient,
+      undefined
     );
   });
 
@@ -1212,7 +1215,8 @@ describe('huntCoordinator', () => {
             matched_indices: ['.ds-logs-okta.system-default-2026.09.01-000001'],
           }),
         }),
-        esClient
+        esClient,
+        undefined
       );
     });
 
@@ -1334,7 +1338,8 @@ describe('huntCoordinator', () => {
         mockModel,
         logger,
         expect.objectContaining({ allowed_indices: ['logs-aws.cloudtrail-*'] }),
-        esClient
+        esClient,
+        undefined
       );
     });
 

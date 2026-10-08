@@ -17,6 +17,7 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -560,7 +561,8 @@ export const huntBehavior = async (
   model: ScopedModel,
   logger: Logger,
   params: HuntBehaviorParams,
-  esClient?: ElasticsearchClient
+  esClient?: ElasticsearchClient,
+  mitreDataClient?: MitreAttackDataClient
 ): Promise<HuntBehaviorResult> => {
   const {
     text,
@@ -613,7 +615,10 @@ export const huntBehavior = async (
   const droppedIds: string[] = [];
   const ungroundedQuoteIds: string[] = [];
 
-  const { techniqueById, subtechniqueById } = getMitreCatalog();
+  const { techniqueById, subtechniqueById } = await getMitreCatalog({
+    mitreDataClient,
+    logger,
+  });
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);
