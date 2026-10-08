@@ -27,9 +27,12 @@ const indexHasTimestamp = async (
   index: string,
   projectRouting?: string
 ): Promise<boolean> =>
-  (await getDateFieldNames(esClient.asCurrentUser, index, projectRouting)).includes(
-    DEFAULT_TIME_FIELD
-  );
+  (
+    await getDateFieldNames(esClient.asCurrentUser, index, {
+      fields: DEFAULT_TIME_FIELD,
+      projectRouting,
+    })
+  ).includes(DEFAULT_TIME_FIELD);
 
 /**
  * Resolve the time field used for the default time range.
