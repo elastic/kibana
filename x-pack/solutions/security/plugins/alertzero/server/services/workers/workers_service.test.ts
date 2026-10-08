@@ -248,6 +248,15 @@ describe('WorkersService', () => {
     ).toBe(true);
   });
 
+  it('does not check Alert Analysis dependencies while listing Workers', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+
+    const response = await service.list(request, SPACE);
+    expect(response.workers.find(({ id }) => id === TRIAGE)?.enabled).toBe(false);
+    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
+  });
+
   it('rejects enabling a worker that has no service account', async () => {
     const harness = createPersistentHarness();
     const result = await harness.createService().update(TRIAGE, { enabled: true }, SPACE, request);

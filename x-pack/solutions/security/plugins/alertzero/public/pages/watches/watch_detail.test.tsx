@@ -42,6 +42,11 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
@@ -292,6 +297,9 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       const section = screen.getByTestId(`alertZeroWatchWorkerSection-${worker.id}`);
+      expect(
+        within(section).getByTestId(`alertZeroWorkerDependencies-settings-${worker.id}`)
+      ).toBeInTheDocument();
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();

@@ -31,6 +31,12 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
+
 const mockEnsureWorkerServiceAccounts = jest.fn();
 jest.mock('../../service_accounts/ensure_worker_service_accounts', () => ({
   ensureWorkerServiceAccounts: (...args: unknown[]) => mockEnsureWorkerServiceAccounts(...args),
@@ -400,11 +406,13 @@ describe('OnboardingPage', () => {
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
-    it('shows the Attack Discovery workflows note', () => {
+    it('shows the Attack Discovery dependency callout', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByTestId('alertZeroOnboardingAttackDiscoveryNote')).toHaveTextContent(
-        'Turning this on also enables the Attack Discovery workflows in Settings.'
-      );
+      expect(
+        screen.getByTestId(
+          `alertZeroWorkerDependencies-onboarding-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+        )
+      ).toBeInTheDocument();
     });
 
     it('does not render the Before you enable panel', () => {
