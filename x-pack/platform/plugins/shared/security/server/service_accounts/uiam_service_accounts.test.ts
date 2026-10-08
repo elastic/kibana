@@ -29,9 +29,9 @@ import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from '../../common/service_accounts';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -43,6 +43,8 @@ describe('UiamServiceAccounts', () => {
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
   let logger: Logger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: ReturnType<typeof auditLoggerMock.create>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
     hasAllRequested: authorized,
@@ -115,6 +117,9 @@ describe('UiamServiceAccounts', () => {
       globally: jest.fn().mockResolvedValue(clusterPrivilegesResponse(true)),
     };
     mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+    auditLogger = auditLoggerMock.create();
+    audit = auditServiceMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
 
     serviceAccounts = new UiamServiceAccounts({
       logger,
@@ -122,6 +127,7 @@ describe('UiamServiceAccounts', () => {
       license: mockLicense,
       uiam: mockUiam,
       checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+      audit,
       getCurrentUser,
       cloudProjectContext: {
         organizationId: 'organization-id',
@@ -340,8 +346,8 @@ describe('UiamServiceAccounts', () => {
       }
     );
 
-    // Kibana neither consumes nor reports the rest of UIAM's payload, so drift there is not
-    // Kibana's to detect and must not fail a creation that already succeeded.
+    // The response is taken as typed. By the time it arrives the account exists, so refusing to
+    // report it would describe a failure that did not happen, to the caller and in the audit log.
     it.each<{ name: string; result: UiamServiceAccount }>([
       {
         name: 'an unsupported `assumable_by` principal',
@@ -369,39 +375,6 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).resolves.toEqual(createdAccount);
       expect(logger.error).not.toHaveBeenCalled();
-    });
-
-    // The id and the name are the only fields that cross the contract boundary, so these are the
-    // only ones worth refusing over: handing back an id Kibana just rejected would be worse than
-    // failing, even though the account does exist upstream.
-    it.each<{ name: string; result: UiamServiceAccount }>([
-      { name: 'the name is missing', result: { id: 'service-account-id' } as UiamServiceAccount },
-      {
-        name: 'the id is missing',
-        result: { ...validResponse, id: undefined } as never,
-      },
-      {
-        name: 'the id is too long',
-        result: { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
-      },
-      {
-        name: 'the name is not a string',
-        result: { ...validResponse, name: 123 } as never,
-      },
-    ])('rejects with a 502 when $name', async ({ result }) => {
-      mockUiam.createServiceAccount.mockResolvedValue(result);
-
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toMatchObject({ output: { statusCode: 502 } });
-
-      // Named in the log, since the account exists upstream and nothing else can find it now,
-      // and logged once: this is not also a failure to create the account.
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM reported the created service account [nightshift-relay]')
-      );
-      expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
     });
 
     it(`accepts ${UIAM_SERVICE_ACCOUNT_MAX_ROLES} distinct roles, UIAM's cap`, async () => {
@@ -555,6 +528,107 @@ describe('UiamServiceAccounts', () => {
 
       expect(created).not.toHaveProperty('description');
       expect(mockUiam.createServiceAccount.mock.calls[0][1]).not.toHaveProperty('description');
+    });
+
+    describe('audit', () => {
+      const createEvent = (outcome: 'success' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_create',
+            category: ['iam'],
+            type: ['user', 'creation'],
+            outcome,
+          }),
+        });
+
+      it('logs a `success` event naming the account UIAM created, scoped to the request', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+        const request = createMockRequest('Bearer essu_my_token');
+
+        await serviceAccounts.create(request, createParams);
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { id: 'service-account-id', name: 'nightshift-relay' } },
+          })
+        );
+      });
+
+      it('logs a `success` event without `user.target.id` when UIAM omits the id', async () => {
+        mockUiam.createServiceAccount.mockResolvedValue({
+          ...validResponse,
+          id: undefined,
+        } as never);
+
+        await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams);
+
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({ user: { target: { name: 'nightshift-relay' } } })
+        );
+      });
+
+      it('logs a `failure` event with the name when the caller is not authorized', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toThrow();
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { name: 'nightshift-relay' } },
+            error: {
+              code: 'Error',
+              message:
+                'Cannot create a service account: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+      });
+
+      it('logs nothing when the request carries no authorization header', async () => {
+        await expect(serviceAccounts.create(createMockRequest(), createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        mockLicense.isEnabled.mockReturnValue(false);
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when UIAM refuses the create', async () => {
+        mockUiam.createServiceAccount.mockRejectedValue(uiamRefusal('0xF448ED', 409));
+
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+        ).rejects.toMatchObject({ output: { statusCode: 409 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name did not validate', async () => {
+        await expect(
+          serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+            ...createParams,
+            name: 'not valid!',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+      });
     });
   });
 

@@ -26,6 +26,7 @@ const ruleCoverage: Worker = {
   state: 'ok',
   settingsRevision: 1,
   workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}-default`,
+  blockingReasons: [],
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
     autonomy: 'manual',
