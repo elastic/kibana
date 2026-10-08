@@ -18,6 +18,7 @@ import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatc
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
@@ -25,11 +26,14 @@ import type {
 } from './types';
 
 export type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
+
+const ROUTING_TAG_SOURCES_PER_PAGE = 1000;
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -186,6 +190,42 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     await finder.close();
 
     return results;
+  }
+
+  public async findRoutingTagSources({ maxPolicies }: { maxPolicies: number }): Promise<{
+    policies: ActionPolicyRoutingTagSource[];
+    isTruncated: boolean;
+  }> {
+    const finder = await this.client.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      perPage: ROUTING_TAG_SOURCES_PER_PAGE,
+      fields: ['name', 'enabled', 'matcher'],
+    });
+
+    const policies: ActionPolicyRoutingTagSource[] = [];
+    let isTruncated = false;
+
+    try {
+      for await (const { saved_objects: savedObjects, total } of finder.find()) {
+        for (const { id, attributes } of savedObjects) {
+          policies.push({
+            id,
+            name: attributes.name,
+            enabled: attributes.enabled,
+            matcher: attributes.matcher,
+          });
+        }
+
+        if (policies.length >= maxPolicies) {
+          isTruncated = total > maxPolicies;
+          break;
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return { policies: policies.slice(0, maxPolicies), isTruncated };
   }
 
   public async delete({ id }: { id: string }): Promise<void> {

@@ -723,6 +723,7 @@
     "security.attack-discovery.persistDiscoveries",
     "security.attack-discovery.run",
     "security.buildAlertEntityGraph",
+    "security.buildExceptionEntriesFilter",
     "security.createExceptionListItem",
     "security.createNote",
     "security.createRule",
@@ -730,6 +731,7 @@
     "security.deleteNote",
     "security.disableRule",
     "security.enableRule",
+    "security.getAlertEntities",
     "security.getNotes",
     "security.patchRule",
     "security.renderAlertNarrative",
@@ -820,6 +822,7 @@
     "slack2.resolveChannelId",
     "slack2.searchMessages",
     "slack2.sendMessage",
+    "slack2.updateMessage",
     "slack2.whoAmI",
     "slack_api.postBlockkit",
     "slack_api.postMessage",
@@ -972,6 +975,7 @@
     "alerting.ruleExecutionFailed",
     "alerting.ruleUpdated",
     "cases.attachmentsAdded",
+    "cases.attachmentsDeleted",
     "cases.caseCreated",
     "cases.caseStatusUpdated",
     "cases.caseUpdated",
@@ -1000,11 +1004,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "3ce2e68e83a342335ed1d0507016aba0e7f8876380b00ebaa57dde18d6c07e72"
+      "sha256": "ce69086fc8e904b17c40506718fec3cc6076c30111be1e583150aadef1700065"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "e8eeface077a49c308e7d1c4bfef67dfd4837c4f46857e82c6ca507105a4fb41"
+      "sha256": "707806a9d24c316e50e7fd74257de50943c732449b290ed5e5e481ecb9feeb9d"
     }
   }
 }

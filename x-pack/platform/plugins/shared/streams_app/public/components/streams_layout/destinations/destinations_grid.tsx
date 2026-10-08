@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -14,15 +14,27 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiLoadingSpinner,
+  EuiScreenReaderOnly,
   EuiTitle,
 } from '@elastic/eui';
-import type { EuiDataGridColumn, EuiDataGridProps, EuiDataGridSorting } from '@elastic/eui';
+import type {
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridProps,
+  EuiDataGridSorting,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
 import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
 export type DestinationsGridStatus = 'loading' | 'ready' | 'unavailable';
+
+const DESTINATION_ACTIONS_LABEL = i18n.translate(
+  'xpack.streams.destinations.table.rowActionsTitle',
+  { defaultMessage: 'Destination actions' }
+);
 
 const DESTINATION_GRID_COLUMNS: EuiDataGridColumn[] = [
   {
@@ -51,6 +63,8 @@ interface DestinationsGridProps {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
   onSortingChange: (columns: EuiDataGridSorting['columns']) => void;
   onOpenDestination: (destinationId: string) => void;
+  onShowOnCanvas: (destination: DestinationViewModel) => void;
+  onRequestDelete: (destination: DestinationViewModel) => void;
 }
 
 export const getDestinationSortableValue = (
@@ -77,8 +91,37 @@ export const DestinationsGrid = ({
   onPaginationChange,
   onSortingChange,
   onOpenDestination,
+  onShowOnCanvas,
+  onRequestDelete,
 }: DestinationsGridProps) => {
-  const renderCellValue = React.useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
+  const trailingControlColumns = useMemo<EuiDataGridControlColumn[]>(
+    () => [
+      {
+        id: 'rowActions',
+        width: ROW_ACTIONS_COLUMN_WIDTH,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>{DESTINATION_ACTIONS_LABEL}</span>
+          </EuiScreenReaderOnly>
+        ),
+        rowCellRender: ({ rowIndex }) => {
+          const destination = destinations[rowIndex];
+          return destination ? (
+            <RowActionsMenu
+              entityName={destination.name}
+              tooltip={DESTINATION_ACTIONS_LABEL}
+              buttonTestSubj="streamsDestinationRowActionsButton"
+              deleteTestSubj="streamsDestinationDeleteAction"
+              onShowOnCanvas={() => onShowOnCanvas(destination)}
+              onDelete={() => onRequestDelete(destination)}
+            />
+          ) : null;
+        },
+      },
+    ],
+    [destinations, onRequestDelete, onShowOnCanvas]
+  );
+  const renderCellValue = useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
     ({ rowIndex, columnId }) => {
       const destination = destinations[rowIndex];
       if (!destination) {
@@ -161,6 +204,7 @@ export const DestinationsGrid = ({
           setVisibleColumns: onVisibleColumnsChange,
           canDragAndDropColumns: false,
         }}
+        trailingControlColumns={trailingControlColumns}
         rowCount={destinations.length}
         renderCellValue={renderCellValue}
         sorting={{ columns: sortingColumns, onSort: onSortingChange }}
