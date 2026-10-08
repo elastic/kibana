@@ -1486,7 +1486,6 @@ _alertzero_alert_triage:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
@@ -1535,7 +1534,6 @@ _alertzero_attack_discovery:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
@@ -1621,7 +1619,6 @@ _alertzero_endpoint_analysis:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
@@ -1678,7 +1675,6 @@ _alertzero_threat_hunt:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
@@ -1727,7 +1723,6 @@ _alertzero_rule_tuning:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
@@ -1796,7 +1791,6 @@ _alertzero_rule_coverage:
     - names:
         - .ai-index-idx-elastic-index
       privileges:
-        - read
         - view_index_metadata
       allow_restricted_indices: false
     - names:
