@@ -64,6 +64,7 @@ outputs:
 steps:
   - name: draft_creation
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_reasoning
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -72,6 +73,16 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        # detection-rule-edit calls security.find_rules, an inline tool of
+        # find-security-rules, when it looks up an existing rule.
+        skill_ids:
+          - detection-rule-edit
+          - find-security-rules
       message: |-
         Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
         security.create_detection_rule to create a new ES|QL rule draft now. The
@@ -91,6 +102,9 @@ steps:
         strings for interval, from and to, empty lists for threat and tags),
         and give the reason in one sentence under "reason". Leave "reason"
         empty when the tool returned a rule.
+
+        Write the name, the description and the reason in ASD-STE100 Simplified
+        Technical English.
       schema:
         type: object
         additionalProperties: false
@@ -268,7 +282,7 @@ steps:
           **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
 
           **On approval**
-          The rule is created disabled under your identity; review and enable it from the rules page. Dismissing discards the draft.
+          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low
