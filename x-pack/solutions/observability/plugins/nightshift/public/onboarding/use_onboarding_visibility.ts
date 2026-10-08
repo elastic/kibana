@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   INVESTIGATION_STATUSES,
   type InvestigationStatus,
@@ -13,8 +14,13 @@ import {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useFetchAutomations } from '../automations/hooks/use_automations';
 import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
+import { useKibana } from '../hooks/use_kibana';
 
 const ALL_INVESTIGATION_STATUSES: InvestigationStatus[] = [...INVESTIGATION_STATUSES];
+
+/** Per space: the base path carries the space prefix (`/s/<space id>`). */
+const getDismissedStorageKey = (basePath: string): string =>
+  `nightshift.onboarding.dismissed:${basePath || 'default'}`;
 
 /** Keeps the trial investigation's status fresh while onboarding shows it. */
 const TRIAL_INVESTIGATION_REFETCH_INTERVAL_MS = 5_000;
@@ -25,7 +31,7 @@ export interface OnboardingVisibility {
   showOnboarding: boolean;
   /** The space's most recent investigation: the trial investigation of steps 2 and 3. */
   latestInvestigation?: ListInvestigationItem;
-  /** "I'll do it later": hides onboarding until the page reloads. */
+  /** "I'll do it later": hides onboarding in this space and browser (local storage). */
   dismiss: () => void;
 }
 
@@ -44,11 +50,15 @@ export const useOnboardingVisibility = ({
   /** `?onboarding=1` */
   forceOnboarding: boolean;
 }): OnboardingVisibility => {
-  const [isDismissed, setIsDismissed] = useState(false);
+  const { http } = useKibana().services;
+  const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(
+    getDismissedStorageKey(http.basePath.get()),
+    false
+  );
   const automations = useFetchAutomations({ enabled: isEnabled && canUseAutomations });
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
   const isOnboardingCandidate =
-    isEnabled && !isDismissed && (forceOnboarding || (canUseAutomations && !hasAutomation));
+    isEnabled && (forceOnboarding || (!isDismissed && canUseAutomations && !hasAutomation));
 
   const investigations = useFetchInvestigations({
     statuses: ALL_INVESTIGATION_STATUSES,
@@ -64,11 +74,11 @@ export const useOnboardingVisibility = ({
     ? automations.isError || hasAutomation
     : investigations.error != null || latestInvestigation != null;
 
-  const dismiss = useCallback(() => setIsDismissed(true), []);
+  const dismiss = useCallback(() => setIsDismissed(true), [setIsDismissed]);
 
   return {
     isLoading,
-    showOnboarding: isEnabled && !isDismissed && (forceOnboarding || (!isLoading && !isDone)),
+    showOnboarding: isEnabled && (forceOnboarding || (!isDismissed && !isLoading && !isDone)),
     latestInvestigation,
     dismiss,
   };

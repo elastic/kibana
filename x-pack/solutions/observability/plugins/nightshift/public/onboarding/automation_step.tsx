@@ -189,7 +189,7 @@ function TrialInvestigationCard({
             <EuiLoadingSpinner size="m" />
           ) : (
             <EuiIcon
-              type={status === 'completed' ? 'checkInCircleFilled' : 'warning'}
+              type={status === 'completed' ? 'checkCircleFill' : 'warning'}
               color={status === 'completed' ? 'success' : 'warning'}
               aria-hidden={true}
             />

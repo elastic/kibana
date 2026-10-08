@@ -12,6 +12,9 @@ import { useOnboardingVisibility } from './use_onboarding_visibility';
 
 jest.mock('../automations/hooks/use_automations');
 jest.mock('../hooks/use_fetch_investigations');
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { http: { basePath: { get: () => '/s/team-a' } } } }),
+}));
 
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
@@ -47,6 +50,8 @@ const setup = ({
 };
 
 describe('useOnboardingVisibility', () => {
+  beforeEach(() => window.localStorage.clear());
+
   it('onboards a space without automations, even with investigations', () => {
     const { result } = setup({ investigations: [investigation] });
     expect(result.current.showOnboarding).toBe(true);
@@ -71,15 +76,22 @@ describe('useOnboardingVisibility', () => {
     ).toBe(false);
   });
 
+  it('remembers "I\'ll do it later" per space in local storage', () => {
+    const { result } = setup();
+    act(() => result.current.dismiss());
+    expect(result.current.showOnboarding).toBe(false);
+    expect(window.localStorage.getItem('nightshift.onboarding.dismissed:/s/team-a')).toBe('true');
+    expect(setup().result.current.showOnboarding).toBe(false);
+  });
+
+  it('still forces onboarding with ?onboarding=1 after a dismiss', () => {
+    window.localStorage.setItem('nightshift.onboarding.dismissed:/s/team-a', 'true');
+    expect(setup({ forceOnboarding: true }).result.current.showOnboarding).toBe(true);
+  });
+
   it('never onboards when disabled', () => {
     expect(setup({ isEnabled: false, forceOnboarding: true }).result.current.showOnboarding).toBe(
       false
     );
-  });
-
-  it('hides onboarding after dismiss', () => {
-    const { result } = setup({ forceOnboarding: true });
-    act(() => result.current.dismiss());
-    expect(result.current.showOnboarding).toBe(false);
   });
 });
