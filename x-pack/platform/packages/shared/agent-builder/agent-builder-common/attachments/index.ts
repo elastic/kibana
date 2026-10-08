@@ -70,6 +70,7 @@ export {
   isAttachmentGroup,
   getLatestVersion,
   getVersion,
+  resolveAttachmentVersion,
   createVersionId,
   parseVersionId,
   isAttachmentActive,

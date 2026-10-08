@@ -7,10 +7,15 @@
 
 import {
   getVersion,
+  resolveAttachmentVersion,
   type AttachmentVersionRef,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
+import {
+  getCustomElementAttribute,
+  renderAttachmentElement,
+  splitCustomElements,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
   AttachmentIsomerComposition,
   IsomerMarkdownNode,
@@ -21,19 +26,13 @@ import type { AttachmentNode, CompositionNode } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
-const createTagPattern = () => new RegExp(`<${tagName}\\b[^>]*\\/?>`, 'gi');
-
-/** Matches the attribute at the start or after whitespace, so `id` doesn't match `field-id`. */
-const getAttribute = (tag: string, name: string): string | undefined =>
-  tag.match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`, 'i'))?.[1];
-
 const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
-  const attachmentId = getAttribute(tag, attributes.attachmentId);
+  const attachmentId = getCustomElementAttribute(tag, attributes.attachmentId);
   if (!attachmentId) {
     return;
   }
 
-  const version = Number(getAttribute(tag, attributes.version));
+  const version = Number(getCustomElementAttribute(tag, attributes.version));
 
   return {
     type: 'attachment',
@@ -47,54 +46,15 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
  */
-export const toCompositionNodes = (message: string): CompositionNode[] => {
-  const nodes: CompositionNode[] = [];
-  let cursor = 0;
-
-  const pushMarkdown = (text: string) => {
-    const trimmed = text.trim();
-    if (trimmed) {
-      nodes.push({ type: 'markdown', text: trimmed });
-    }
-  };
-
-  for (const match of message.matchAll(createTagPattern())) {
-    pushMarkdown(message.slice(cursor, match.index));
-
-    const node = toAttachmentNode(match[0]);
-    if (node) {
-      nodes.push(node);
+export const toCompositionNodes = (message: string): CompositionNode[] =>
+  splitCustomElements(message, tagName).flatMap((segment): CompositionNode[] => {
+    if (segment.type === 'text') {
+      return [{ type: 'markdown', text: segment.text.trim() }];
     }
 
-    cursor = match.index + match[0].length;
-  }
-
-  pushMarkdown(message.slice(cursor));
-
-  return nodes;
-};
-
-export interface ResolveAttachmentNodeOptions {
-  /** The conversation's attachments, as carried by `round_complete`. */
-  attachments: VersionedAttachment[];
-  /** The round's attachment refs, which pick the version of tags without one. */
-  attachmentRefs?: AttachmentVersionRef[];
-  attachmentsService: AttachmentServiceStart;
-  logger: Logger;
-}
-
-/**
- * Resolves a tag's version like the Kibana UI does: its own version, else the round's ref, else
- * the latest version.
- */
-const resolveVersion = (
-  { attachmentId, version }: AttachmentNode,
-  attachment: VersionedAttachment,
-  attachmentRefs: AttachmentVersionRef[] = []
-): number | undefined =>
-  version ??
-  attachmentRefs.find((ref) => ref.attachment_id === attachmentId)?.version ??
-  attachment.versions.at(-1)?.version;
+    const node = toAttachmentNode(segment.tag);
+    return node ? [node] : [];
+  });
 
 const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): IsomerMarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
@@ -107,7 +67,19 @@ const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): Isomer
  */
 export const resolveAttachmentNode = (
   node: AttachmentNode,
-  { attachments, attachmentRefs, attachmentsService, logger }: ResolveAttachmentNodeOptions
+  {
+    attachments,
+    attachmentRefs,
+    attachmentsService,
+    logger,
+  }: {
+    /** The conversation's attachments, as carried by `round_complete`. */
+    attachments: VersionedAttachment[];
+    /** The round's attachment refs, which pick the version of tags without one. */
+    attachmentRefs?: AttachmentVersionRef[];
+    attachmentsService: AttachmentServiceStart;
+    logger: Logger;
+  }
 ): IsomerMarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
   if (!attachment) {
@@ -115,7 +87,12 @@ export const resolveAttachmentNode = (
     return [];
   }
 
-  const version = resolveVersion(node, attachment, attachmentRefs);
+  const version = resolveAttachmentVersion({
+    explicitVersion: node.version,
+    attachmentId: node.attachmentId,
+    attachmentRefs,
+    attachment,
+  });
   const attachmentVersion = version === undefined ? undefined : getVersion(attachment, version);
   if (!attachmentVersion) {
     logger.warn(`Leaving out attachment "${attachment.id}": version ${version} not found`);

@@ -9,11 +9,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
-import {
-  resolveAttachmentNode,
-  toCompositionNodes,
-  type ResolveAttachmentNodeOptions,
-} from './composition';
+import { resolveAttachmentNode, toCompositionNodes } from './composition';
 import type { AttachmentNode } from './pack';
 
 describe('toCompositionNodes', () => {
@@ -73,6 +69,8 @@ describe('toCompositionNodes', () => {
 });
 
 type ToIsomerComposition = NonNullable<AttachmentTypeDefinition['toIsomerComposition']>;
+
+type ResolveAttachmentNodeOptions = Parameters<typeof resolveAttachmentNode>[1];
 
 describe('resolveAttachmentNode', () => {
   const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({

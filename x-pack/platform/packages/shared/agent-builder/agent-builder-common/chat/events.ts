@@ -368,10 +368,7 @@ export type RoundCompleteEvent = ChatEventBase<
   ChatEventType.roundComplete,
   RoundCompleteEventData
 > & {
-  /**
-   * The response message ready to post on the round's surface, such as Slack. Added at callback
-   * delivery and never stored.
-   */
+  /** The response message rendered for the round's surface, added at callback delivery. */
   surface_payload?: SurfacePayload;
 };
 
