@@ -197,7 +197,7 @@ describe('selectProcessActions', () => {
   describe('rule 3: destructive technique', () => {
     it.each(['T1486', 'T1485', 'T1490', 'T1489', 'T1561'])('kills on confirmed %s', (id) => {
       const decision = selectProcessActions({
-        selector: selector(),
+        selector: selector({ techniqueId: id, techniqueIds: [id] }),
         host: host(['memdump_process']),
         state: state(confirmed(id)),
       });
@@ -210,7 +210,7 @@ describe('selectProcessActions', () => {
 
     it('matches a sub-technique on its prefix', () => {
       const decision = selectProcessActions({
-        selector: selector(),
+        selector: selector({ techniqueId: 'T1486.001', techniqueIds: ['T1486.001'] }),
         host: host(),
         state: state(confirmed('T1486.001')),
       });
@@ -276,9 +276,18 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('destructive_technique');
     });
 
+    it('does not kill an unattributed process just because the run confirmed a destructive technique', () => {
+      const decision = selectProcessActions({
+        selector: selector(),
+        host: host(),
+        state: state(confirmed('T1486')),
+      });
+      expect(decision.rule).toBe('suspend_only');
+    });
+
     it('beats a critical IOC match (order: 3 before 4)', () => {
       const decision = selectProcessActions({
-        selector: selector({ iocMatched: true }),
+        selector: selector({ iocMatched: true, techniqueId: 'T1486', techniqueIds: ['T1486'] }),
         host: host(),
         state: state({ severity: 'critical', ...confirmed('T1486') }),
       });
@@ -366,6 +375,7 @@ describe('selectHostActions', () => {
         host: host(['isolation']),
         state: state(confirmed(id)),
         activeProcessCount: 1,
+        hostTechniqueIds: [id],
       });
       expect(decision.rule).toBe('lateral_or_c2_technique');
       expect(decision.isolate).toBe(true);
@@ -377,7 +387,8 @@ describe('selectHostActions', () => {
     const decision = selectHostActions({
       host: host(['isolation']),
       state: state(confirmed('T1021.002')),
-      activeProcessCount: 0,
+      activeProcessCount: 1,
+      hostTechniqueIds: ['T1021.002'],
     });
     expect(decision.rule).toBe('lateral_or_c2_technique');
     expect(decision.why).toContain('T1021.002');
@@ -387,6 +398,7 @@ describe('selectHostActions', () => {
     const decision = selectHostActions({
       host: host(['isolation']),
       state: state(),
+      hostTechniqueIds: [],
       activeProcessCount: 2,
     });
     expect(decision.rule).toBe('multiple_processes');
@@ -400,6 +412,7 @@ describe('selectHostActions', () => {
     const decision = selectHostActions({
       host: host(['isolation']),
       state: state({ severity: 'critical' }),
+      hostTechniqueIds: [],
       activeProcessCount: 1,
     });
     expect(decision.rule).toBe('critical_severity');
@@ -411,12 +424,14 @@ describe('selectHostActions', () => {
       host: host(['isolation']),
       state: state({ severity: 'critical', ...confirmed('T1021') }),
       activeProcessCount: 3,
+      hostTechniqueIds: ['T1021'],
     });
     expect(all.rule).toBe('lateral_or_c2_technique');
 
     const countAndSeverity = selectHostActions({
       host: host(['isolation']),
       state: state({ severity: 'critical' }),
+      hostTechniqueIds: [],
       activeProcessCount: 3,
     });
     expect(countAndSeverity.rule).toBe('multiple_processes');
@@ -426,12 +441,13 @@ describe('selectHostActions', () => {
     const decision = selectHostActions({
       host: host(['isolation']),
       state: state({ severity: 'high', ...confirmed('T1059.001') }),
+      hostTechniqueIds: [],
       activeProcessCount: 1,
     });
     expect(decision.rule).toBe('not_warranted');
     expect(decision.isolate).toBe(false);
     expect(decision.heldBack).toBe(
-      'Isolate host WIN-ANALYST01 was not proposed: 1 suspicious process, no lateral movement, C2, or exfiltration technique confirmed, severity high'
+      'Isolate host WIN-ANALYST01 was not proposed: 1 suspicious process, no lateral movement, C2, or exfiltration technique confirmed on this host, severity high'
     );
   });
 
@@ -439,6 +455,7 @@ describe('selectHostActions', () => {
     const decision = selectHostActions({
       host: host(['isolation']),
       state: state(),
+      hostTechniqueIds: [],
       activeProcessCount: 0,
     });
     expect(decision.heldBack).toContain('0 suspicious processes');
@@ -449,6 +466,7 @@ describe('selectHostActions', () => {
       host: host(['memdump_process']),
       state: state(confirmed('T1071')),
       activeProcessCount: 1,
+      hostTechniqueIds: ['T1071'],
     });
     expect(decision.rule).toBe('isolation_unsupported');
     expect(decision.isolate).toBe(false);
@@ -457,8 +475,34 @@ describe('selectHostActions', () => {
   });
 
   it('does not add an isolation hold-back when isolate was not warranted anyway', () => {
-    const decision = selectHostActions({ host: host(), state: state(), activeProcessCount: 1 });
+    const decision = selectHostActions({
+      host: host(),
+      state: state(),
+      activeProcessCount: 1,
+      hostTechniqueIds: [],
+    });
     expect(decision.rule).toBe('not_warranted');
     expect(decision.heldBack).not.toContain('isolation');
+  });
+
+  it('does not isolate a host for a technique that was only attributed to another host', () => {
+    const decision = selectHostActions({
+      host: host(['isolation']),
+      state: state(confirmed('T1071')),
+      activeProcessCount: 1,
+      hostTechniqueIds: [],
+    });
+    expect(decision.rule).toBe('not_warranted');
+    expect(decision.isolate).toBe(false);
+  });
+
+  it('does not isolate on critical severity alone when the host has no live process evidence', () => {
+    const decision = selectHostActions({
+      host: host(['isolation']),
+      state: state({ severity: 'critical' }),
+      activeProcessCount: 0,
+      hostTechniqueIds: [],
+    });
+    expect(decision.rule).toBe('not_warranted');
   });
 });

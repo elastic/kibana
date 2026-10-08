@@ -82,39 +82,40 @@ const basename = (path: string): string => path.split(/[\\/]/).pop() ?? path;
 /** `T1021.002` matches `T1021`: compare on the id before the first `.`. */
 const techniqueRoot = (techniqueId: string): string => techniqueId.split('.')[0].toUpperCase();
 
-/** Confirmed means executed Tier 2 behaviors with a hit, never the report's own SKI list. */
-const findConfirmedTechnique = (
-  state: CurrentRunState,
-  techniques: readonly string[]
-): string | undefined =>
-  state.evidence.tier2Confirmed
-    .map((t) => t.techniqueId)
-    .find((techniqueId) => techniques.includes(techniqueRoot(techniqueId)));
-
-/**
- * A process attributed to techniques is judged on those alone, so one process's
- * destructive evidence cannot escalate an unrelated process. Only a selector with no
- * attribution falls back to the run-wide check.
- */
-const findDestructiveTechniqueFor = (
-  selector: ProcessSelector,
-  state: CurrentRunState
-): string | undefined => {
-  const attributed = selector.techniqueIds?.length
+/** Every technique this process's refs were attributed to; empty for a plain sample ref. */
+export const attributedTechniqueIds = (selector: ProcessSelector): string[] =>
+  selector.techniqueIds?.length
     ? selector.techniqueIds
     : selector.techniqueId
     ? [selector.techniqueId]
     : [];
-  if (attributed.length === 0) {
-    return findConfirmedTechnique(state, DESTRUCTIVE_TECHNIQUES);
-  }
-  // Roots on both sides, as `findConfirmedTechnique` does: `T1486` is confirmed by `T1486.001`.
-  return attributed.find(
+
+/**
+ * The first of `techniqueIds` that is in `techniques` and confirmed by Tier 2, comparing roots on
+ * both sides: `T1486` is confirmed by `T1486.001`. Confirmed means executed Tier 2 behaviors with
+ * a hit, never the report's own SKI list.
+ */
+const findConfirmedAmong = (
+  techniqueIds: readonly string[],
+  techniques: readonly string[],
+  state: CurrentRunState
+): string | undefined =>
+  techniqueIds.find(
     (id) =>
-      (DESTRUCTIVE_TECHNIQUES as readonly string[]).includes(techniqueRoot(id)) &&
+      techniques.includes(techniqueRoot(id)) &&
       state.evidence.tier2Confirmed.some((t) => techniqueRoot(t.techniqueId) === techniqueRoot(id))
   );
-};
+
+/**
+ * Kill needs evidence tied to this process: one of its own attributed techniques must be
+ * destructive and confirmed. An unattributed process never inherits the run's destructive
+ * technique, because kill is irreversible and nothing says this process did it.
+ */
+const findDestructiveTechniqueFor = (
+  selector: ProcessSelector,
+  state: CurrentRunState
+): string | undefined =>
+  findConfirmedAmong(attributedTechniqueIds(selector), DESTRUCTIVE_TECHNIQUES, state);
 
 const isProtectedProcess = (selector: ProcessSelector): boolean =>
   (selector.pid !== undefined && (PROTECTED_PIDS as readonly number[]).includes(selector.pid)) ||
@@ -206,25 +207,30 @@ export const selectProcessActions = ({
 };
 
 /**
- * Whether isolate host is warranted. Evaluated in order, first match wins; pure, no I/O.
- * `activeProcessCount` is the number of selectors on this host whose process decision was not
- * `stale` (protected processes count: a system process being implicated is suspicious).
+ * Whether isolate host is warranted, on evidence local to this host. Evaluated in order, first
+ * match wins; pure, no I/O.
+ * `activeProcessCount` is the number of non-stale selectors on this host (protected processes
+ * count: a system process being implicated is suspicious). `hostTechniqueIds` are the techniques
+ * those selectors were attributed to. Nothing here reads run-wide technique or severity alone: a
+ * host with no live evidence of its own is never isolated for another host's behavior.
  */
 const selectWarrantedHostAction = ({
   host,
   state,
   activeProcessCount,
+  hostTechniqueIds,
 }: {
   host: CurrentRunHost;
   state: CurrentRunState;
   activeProcessCount: number;
+  hostTechniqueIds: readonly string[];
 }): HostDecision => {
-  const isolateTechnique = findConfirmedTechnique(state, ISOLATE_TECHNIQUES);
+  const isolateTechnique = findConfirmedAmong(hostTechniqueIds, ISOLATE_TECHNIQUES, state);
   if (isolateTechnique) {
     return {
       rule: 'lateral_or_c2_technique',
       isolate: true,
-      why: `Rule: lateral movement, C2, or exfiltration technique; ${isolateTechnique} was confirmed in this finding`,
+      why: `Rule: lateral movement, C2, or exfiltration technique; ${isolateTechnique} was confirmed on this host`,
     };
   }
 
@@ -236,11 +242,11 @@ const selectWarrantedHostAction = ({
     };
   }
 
-  if (state.severity === 'critical') {
+  if (state.severity === 'critical' && activeProcessCount >= 1) {
     return {
       rule: 'critical_severity',
       isolate: true,
-      why: `Rule: critical severity; the finding's severity is critical`,
+      why: `Rule: critical severity; the finding's severity is critical and this host has suspicious process activity`,
     };
   }
 
@@ -250,7 +256,9 @@ const selectWarrantedHostAction = ({
     why: 'Rule: isolate not warranted',
     heldBack: `Isolate host ${host.name} was not proposed: ${activeProcessCount} suspicious ${
       activeProcessCount === 1 ? 'process' : 'processes'
-    }, no lateral movement, C2, or exfiltration technique confirmed, severity ${state.severity}`,
+    }, no lateral movement, C2, or exfiltration technique confirmed on this host, severity ${
+      state.severity
+    }`,
   };
 };
 
@@ -263,6 +271,7 @@ export const selectHostActions = (args: {
   host: CurrentRunHost;
   state: CurrentRunState;
   activeProcessCount: number;
+  hostTechniqueIds: readonly string[];
 }): HostDecision => {
   const decision = selectWarrantedHostAction(args);
   if (!decision.isolate || args.host.capabilities.includes(ISOLATION_CAPABILITY)) {

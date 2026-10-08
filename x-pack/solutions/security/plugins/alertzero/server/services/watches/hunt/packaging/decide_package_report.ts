@@ -20,6 +20,7 @@ import {
   describeProcess,
 } from './proposal_copy';
 import {
+  attributedTechniqueIds,
   DEFEND_ACTION_KINDS,
   isStale,
   selectHostActions,
@@ -543,10 +544,12 @@ export const decidePackageReport = ({
       );
 
       let activeProcessCount = 0;
+      const hostTechniqueIds: string[] = [];
       for (const processSelector of hostProcessSelectors) {
         const decision = selectProcessActions({ selector: processSelector, host, state });
         if (!isStale(processSelector, state)) {
           activeProcessCount += 1;
+          hostTechniqueIds.push(...attributedTechniqueIds(processSelector));
         }
         if (!hasProcessKinds) {
           continue;
@@ -578,7 +581,12 @@ export const decidePackageReport = ({
       }
 
       if (isolate) {
-        const hostDecision = selectHostActions({ host, state, activeProcessCount });
+        const hostDecision = selectHostActions({
+          host,
+          state,
+          activeProcessCount,
+          hostTechniqueIds,
+        });
         if (hostDecision.isolate) {
           mint({
             entry: isolate,

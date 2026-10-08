@@ -887,7 +887,7 @@ describe('decidePackageReport', () => {
         conversationId,
         state: baseHitState({
           hosts: [withMemdump],
-          processSelectors: [ps1],
+          processSelectors: [ps1Attributed('T1486')],
           evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
         }),
         catalog: {
@@ -951,7 +951,23 @@ describe('decidePackageReport', () => {
       expect(recommendation?.comment).toContain('see Held back');
     });
 
+    const ps1Attributed = (id: string) => selector({ ...ps1, techniqueId: id, techniqueIds: [id] });
+
     it('mints kill (not suspend/dump) on a confirmed destructive technique', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1Attributed('T1486')],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID]);
+    });
+
+    it('does not kill an unattributed process on a run that confirmed a destructive technique', () => {
       const result = decidePackageReport({
         conversationId,
         state: baseHitState({
@@ -961,8 +977,9 @@ describe('decidePackageReport', () => {
         }),
         catalog: { ok: true, actions: defendCatalog },
       });
-      const executable = result.proposals.filter((p) => p.actionWorkflowId);
-      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID]);
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID
+      );
     });
 
     it('does not count stale protected processes toward the isolate threshold', () => {
@@ -1049,7 +1066,7 @@ describe('decidePackageReport', () => {
       const result = decidePackageReport({
         conversationId,
         state: baseHitState({
-          processSelectors: [ps1],
+          processSelectors: [ps1Attributed('T1021.002')],
           evidence: {
             tier1HitCount: 1,
             tier2Confirmed: [{ techniqueId: 'T1021.002', rowCount: 1 }],
@@ -1060,6 +1077,22 @@ describe('decidePackageReport', () => {
       expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).toContain(
         ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
       );
+    });
+
+    it('isolates only the host the technique is attributed to, not every enrolled host', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
+          processSelectors: [ps1Attributed('T1071')],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1071', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const isolates = result.proposals.filter(
+        (p) => p.actionWorkflowId === ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+      expect(isolates.map((p) => p.hostName)).toEqual(['host-a']);
     });
 
     it('still mints suspend when memory dump is not installed', () => {
