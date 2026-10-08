@@ -220,22 +220,11 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   },
   '10': {
     /*
-     * Adds and indexes `metadata.template.id`, the id of the rule template a
-     * rule was created from. Optional, so existing rules need no backfill.
-     * Nothing filters on it yet, so this stays rollback-compatible.
+     * Adds `metadata.template.id`, the id of the rule template a rule was
+     * created from. Optional, so existing rules need no backfill. Not indexed
+     * until something needs to search or filter on it.
      */
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          metadata: {
-            properties: {
-              template: { properties: { id: { type: 'keyword', ignore_above: 256 } } },
-            },
-          },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV8,

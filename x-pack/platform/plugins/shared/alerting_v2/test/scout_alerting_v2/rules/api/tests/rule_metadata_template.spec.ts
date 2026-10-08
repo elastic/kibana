@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
+  type AlertingApiServicesFixture,
   apiTest,
   buildCreateRuleData,
   getRuleUrl,
@@ -26,12 +27,22 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-  });
+  const createdRuleIds: string[] = [];
 
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
+  const createRule = async (
+    apiServices: AlertingApiServicesFixture,
+    name: string
+  ): Promise<{ id: string }> => {
+    const created = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({ metadata: { name } })
+    );
+    createdRuleIds.push(created.id);
+    return created;
+  };
+
+  apiTest.afterEach(async ({ apiServices }) => {
+    await Promise.all(createdRuleIds.map((id) => apiServices.alertingV2.rules.delete(id)));
+    createdRuleIds.length = 0;
   });
 
   apiTest('create: rejects metadata.template in the body', async ({ apiClient }) => {
@@ -45,9 +56,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
   });
 
   apiTest('update: rejects metadata.template in the body', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'update-rejects-template' } })
-    );
+    const created = await createRule(apiServices, 'update-rejects-template');
     const response = await apiClient.patch(getRuleUrl(created.id), {
       headers: writerHeaders,
       body: { metadata: { template: TEMPLATE } },
@@ -72,9 +81,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
   apiTest(
     'get and find: return metadata.template when present',
     async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'from-template' } })
-      );
+      const created = await createRule(apiServices, 'from-template');
       await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
 
       const getResponse = await apiClient.get(getRuleUrl(created.id), { headers: writerHeaders });
@@ -85,15 +92,13 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
         headers: writerHeaders,
       });
       expect(findResponse).toHaveStatusCode(200);
-      expect(findResponse.body.items).toHaveLength(1);
-      expect(findResponse.body.items[0].metadata.template).toStrictEqual(TEMPLATE);
+      const found = findResponse.body.items.find((item: { id: string }) => item.id === created.id);
+      expect(found?.metadata.template).toStrictEqual(TEMPLATE);
     }
   );
 
   apiTest('update: keeps metadata.template', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'update-keeps-template' } })
-    );
+    const created = await createRule(apiServices, 'update-keeps-template');
     await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
 
     const response = await apiClient.patch(getRuleUrl(created.id), {
@@ -110,9 +115,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
   apiTest(
     'upsert: keeps metadata.template on an existing rule',
     async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'upsert-keeps-template' } })
-      );
+      const created = await createRule(apiServices, 'upsert-keeps-template');
       await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
 
       const response = await apiClient.put(getRuleUrl(created.id), {
