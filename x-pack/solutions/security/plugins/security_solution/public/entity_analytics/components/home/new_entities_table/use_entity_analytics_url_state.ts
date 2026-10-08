@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
@@ -168,48 +168,13 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
 
 // ── hook ──────────────────────────────────────────────────────────────────────
 
+/**
+ * The page state in the URL. A param that is missing or invalid reads as its default, and
+ * the URL only carries what the user changed.
+ */
 export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const { search } = useLocation();
   const history = useHistory();
-
-  // Normalise all params in a single replace so the URL is always consistent.
-  useEffect(() => {
-    const params = new URLSearchParams(history.location.search);
-    let dirty = false;
-
-    const ensure = (key: string, isValid: (v: string | null) => boolean, fallback: unknown) => {
-      if (!isValid(params.get(key))) {
-        params.set(key, String(fallback));
-        dirty = true;
-      }
-    };
-
-    ensure(PARAM.TIME_RANGE, isTimeRange, DEFAULTS.timeRange);
-    ensure(PARAM.ROWS_MODE, isRowsMode, DEFAULTS.rowsMode);
-    ensure(PARAM.SORT_DIR, isSortDir, DEFAULTS.sortDirection);
-    ensure(PARAM.PAGE_SIZE, isPageSize, DEFAULTS.pageSize);
-    const rowsModeParam = params.get(PARAM.ROWS_MODE);
-    const normalizedRowsMode = isRowsMode(rowsModeParam) ? rowsModeParam : DEFAULTS.rowsMode;
-    if (!isValidSortField(params.get(PARAM.SORT_FIELD), normalizedRowsMode)) {
-      params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
-      params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
-      dirty = true;
-    }
-    // eaPage is omitted when 0 (cleaner URLs); only reject a present invalid value.
-    const rawPage = params.get(PARAM.PAGE);
-    if (rawPage !== null && !isNonNegativeInt(rawPage)) {
-      params.delete(PARAM.PAGE);
-      dirty = true;
-    }
-    // eaActiveTile is omitted when none; strip a present invalid value.
-    const rawActiveTile = params.get(PARAM.ACTIVE_TILE);
-    if (rawActiveTile !== null && !isSignalCardId(rawActiveTile)) {
-      params.delete(PARAM.ACTIVE_TILE);
-      dirty = true;
-    }
-
-    if (dirty) history.replace({ ...history.location, search: params.toString() });
-  }, [history, search]);
 
   // ── read ──────────────────────────────────────────────────────────────────
 
@@ -227,7 +192,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [rawRowsMode]
   );
 
-  // An invalid sort field reads as the default until the effect above fixes the URL.
+  // An invalid sort field reads as the default sort, direction included.
   const rawSortField = p.get(PARAM.SORT_FIELD);
   const isSortFieldValid = isValidSortField(rawSortField, rowsMode);
   const sortField = isSortFieldValid ? rawSortField : DEFAULTS.sortField;
