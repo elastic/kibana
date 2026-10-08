@@ -42,9 +42,9 @@ test.describe(
       expect(requests.updated[0].policyId).toBe('policy-1');
       expect(requests.updated[0].body.vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
       expect(requests.updated[0].body.vars.secret_access_key).toStrictEqual(SECRET_KEY_REF);
-      expect(Object.keys(requests.updated[0].body.inputs)).toStrictEqual(
-        expect.arrayContaining(['elb-aws-s3', 'guardduty-aws-s3'])
-      );
+      // Both services are enabled in the one policy; a disabled stub would not be a deployed service.
+      expect(requests.updated[0].body.inputs['elb-aws-s3'].enabled).toBe(true);
+      expect(requests.updated[0].body.inputs['guardduty-aws-s3'].enabled).toBe(true);
     });
 
     test('a failed update marks the deployment failed and Retry updates the same policy', async ({

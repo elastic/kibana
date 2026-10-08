@@ -155,9 +155,9 @@ test.describe(
       expect(created).toHaveLength(0);
       expect(updated[0].vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
       expect(updated[0].vars.secret_access_key).toStrictEqual(SECRET_KEY_REF);
-      expect(Object.keys(updated[0].inputs)).toStrictEqual(
-        expect.arrayContaining(['elb-aws-s3', 'guardduty-aws-s3'])
-      );
+      // Both services are enabled in the one policy; a disabled stub would not be a deployed service.
+      expect(updated[0].inputs['elb-aws-s3'].enabled).toBe(true);
+      expect(updated[0].inputs['guardduty-aws-s3'].enabled).toBe(true);
       // The agent policy the package policy runs on is kept.
       expect(updated[0].policy_ids).toStrictEqual([AGENT_POLICY_ID]);
     });

@@ -415,6 +415,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 isDeploying: false,
                 failedInstances: allActiveIds,
                 deployErrors: Object.fromEntries(allActiveIds.map((id) => [id, errorMsg])),
+                // Added instances whose policy was written before another one failed stay tracked.
+                policyIdsByInstance: Object.fromEntries(
+                  Object.entries(addedByPolicy)
+                    .filter(([policyId]) => updatedPolicyIdsThisRun.has(policyId))
+                    .flatMap(([policyId, ids]) => ids.map((id) => [id, policyId]))
+                ),
               });
               return { failed: true };
             }

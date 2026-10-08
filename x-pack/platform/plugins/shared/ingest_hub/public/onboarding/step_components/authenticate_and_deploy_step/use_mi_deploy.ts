@@ -337,6 +337,15 @@ export function useMiDeploy({
           ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
           : {};
 
+      // Added instances whose policy was written this run. A failure in a later policy returns
+      // early; these mappings are kept so the successful additions are not forgotten.
+      const writtenAdditions = (): Record<string, string> =>
+        Object.fromEntries(
+          Object.entries(addedByPolicy)
+            .filter(([policyId]) => updatedPolicyIdsThisRun.has(policyId))
+            .flatMap(([policyId, ids]) => ids.map((id) => [id, policyId]))
+        );
+
       // Updates all already-deployed MI policies with the current session config.
       // Returns whether any policy update failed and the full set of IDs to mark failed.
       // additionalFailedIds: undeployed targets that should also surface as failed on error
@@ -378,6 +387,8 @@ export function useMiDeploy({
         const { results, sharedRefs: storedRefs } = await runWithSharedSecrets({
           items,
           hasTypedSecrets,
+          // A cleanup on Retry may have stored the typed keys already: use that secret.
+          initialRefs: storedSharedRefs,
           // An update can delete the secret it replaced: finish one before starting the next.
           sequential: true,
           run: ([policyId, instanceIdsForPolicy], sharedRefs) =>
@@ -463,6 +474,7 @@ export function useMiDeploy({
             updateDetectAndReviewStep({
               isDeploying: false,
               failedInstances: allFailedIds,
+              policyIdsByInstance: writtenAdditions(),
             });
             return { cleanupFailed: true };
           }
@@ -673,6 +685,7 @@ export function useMiDeploy({
             updateDetectAndReviewStep({
               isDeploying: false,
               failedInstances: allFailedIds,
+              policyIdsByInstance: writtenAdditions(),
               // Re-include cleanup result in case this write races with the combined write above;
               // also prevents a batched call from losing the pendingCleanupPolicyIds update.
               ...(retryRemainingPending !== undefined

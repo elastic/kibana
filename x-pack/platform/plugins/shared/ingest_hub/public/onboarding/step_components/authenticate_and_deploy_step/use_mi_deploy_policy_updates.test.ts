@@ -289,4 +289,64 @@ describe('useMiDeploy — updating an existing package policy', () => {
       STORED_REFS
     );
   });
+
+  it('keeps the services added to a policy that was written when a later policy update fails', async () => {
+    mockUpdate.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('boom'));
+    const other = {
+      ...makeBundle(['rds', 'rds2'], { groupId: 'other' }),
+      members: [member('rds'), member('rds2')],
+    };
+    const updateDetectAndReviewStep = jest.fn();
+    await runDeploy(
+      makeParams({
+        deployGroups: [makeBundle(['elb', 's3']), other],
+        selectedServiceIds: ['elb', 's3', 'rds', 'rds2'],
+        serviceStatuses: { elb: 'receiving', rds: 'receiving' },
+        policyIdsByInstance: { elb: 'policy-A', rds: 'policy-B' },
+        isDirty: true,
+        updateDetectAndReviewStep,
+      })
+    );
+
+    // policy-A took s3 before policy-B failed: s3 stays mapped, rds2 does not.
+    expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        policyIdsByInstance: { s3: 'policy-A' },
+        failedInstances: expect.arrayContaining(['rds2']),
+      })
+    );
+  });
+
+  it('on Retry, updates policies with the secret a cleanup stored instead of typing the keys again', async () => {
+    const other = { ...makeBundle(['rds'], { groupId: 'other' }), members: [member('rds')] };
+    mockCleanup.mockResolvedValue({
+      toDelete: [],
+      toUpdate: [{ policyId: 'policy-B', survivingInstanceIds: ['rds'] }],
+      sharedRefs: STORED_REFS,
+    });
+    const params = makeParams({
+      deployGroups: [makeBundle(['elb']), other],
+      selectedServiceIds: ['elb', 'rds'],
+      serviceStatuses: { elb: 'receiving', rds: 'receiving' },
+      policyIdsByInstance: { elb: 'policy-A', rds: 'policy-B', gone: 'policy-B' },
+      pendingCleanupPolicyIds: { gone: 'policy-B' },
+      failedInstances: ['elb'],
+      isDirty: true,
+      authenticateAndDeployStep: {
+        authMethod: 'static_keys',
+        staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+      },
+    });
+    const { result } = renderHook(() => useMiDeploy(params));
+    await act(async () => {
+      await result.current(['elb']);
+    });
+
+    // policy-B was written by the cleanup; policy-A's update uses the secret it stored.
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate.mock.calls[0][0]).toBe('policy-A');
+    const step = mockUpdate.mock.calls[0][2].authenticateAndDeployStep;
+    expect(step.existingSecretRefs).toBe(STORED_REFS);
+    expect(step.staticKeys).toEqual({ access_key_id: '', secret_access_key: '' });
+  });
 });

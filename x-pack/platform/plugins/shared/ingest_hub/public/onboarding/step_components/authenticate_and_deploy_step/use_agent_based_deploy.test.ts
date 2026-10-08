@@ -808,6 +808,35 @@ describe('useAgentBasedDeploy — updating an existing package policy', () => {
     expect(mockDeployToExistingAgentPolicies).not.toHaveBeenCalled();
   });
 
+  it('keeps the services added to a policy that was written when a later policy update fails', async () => {
+    mockUpdateAgentBasedPolicy
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('boom'));
+    const groupC = {
+      groupId: 'other',
+      instanceIds: ['serviceC', 'serviceD'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    const { updateDetectAndReviewStep } = makeFlowMock({
+      policyIdsByInstance: { serviceA: 'pkg-policy-A', serviceC: 'pkg-policy-C' },
+      isDirty: true,
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([bundledGroup, groupC]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        policyIdsByInstance: { serviceB: 'pkg-policy-A' },
+        failedInstances: expect.arrayContaining(['serviceD']),
+      })
+    );
+  });
+
   it('still creates a policy for a package that has none yet', async () => {
     makeFlowMock({ policyIdsByInstance: { serviceA: 'pkg-policy-A' } });
     mockBuildAgentBasedTargets.mockReturnValue([groupA, groupB]);
