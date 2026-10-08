@@ -107,9 +107,7 @@ describe('use_automations', () => {
 
     act(() => result.current.mutate(body));
 
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation "Triage" created' })
-    );
+    await waitFor(() => expect(addSuccess).toHaveBeenCalledWith({ title: "Saved 'Triage'" }));
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/automations', {
       params: { body },
       signal: null,
@@ -122,7 +120,9 @@ describe('use_automations', () => {
     const toggle = renderWithClient(() => useToggleAutomation());
     const remove = renderWithClient(() => useDeleteAutomation());
 
-    act(() => toggle.result.current.mutate({ id: 'automation-1', isEnabled: false }));
+    act(() =>
+      toggle.result.current.mutate({ id: 'automation-1', name: 'Triage', isEnabled: false })
+    );
     act(() => remove.result.current.mutate('automation-1'));
 
     await waitFor(() => expect(investigationsFetch).toHaveBeenCalledTimes(2));

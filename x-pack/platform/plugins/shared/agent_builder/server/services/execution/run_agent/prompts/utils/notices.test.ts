@@ -13,6 +13,7 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
+  formatAwaitingPromptNotice,
   formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
@@ -246,5 +247,19 @@ describe('formatInterruptionNotice', () => {
     expect(notice).toContain('<cause code="c">');
     expect(notice).toContain('root');
     expect(notice).toContain('…');
+  });
+});
+
+describe('formatAwaitingPromptNotice', () => {
+  it('says the round waits on the user and lists the unanswered questions, escaped', () => {
+    const notice = formatAwaitingPromptNotice(['Which index?', 'Use <prod>?']);
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('the user has not answered');
+    expect(notice).toContain('<question>Which index?</question>');
+    expect(notice).toContain('Use &lt;prod&gt;?');
+  });
+
+  it('omits the questions block when nothing was asked', () => {
+    expect(formatAwaitingPromptNotice([])).not.toContain('<unanswered_questions>');
   });
 });
