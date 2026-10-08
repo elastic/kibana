@@ -14,21 +14,22 @@ import { AppStatus } from '@kbn/core-application-browser';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
-  Url.format({
-    protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
-    pathname,
-    search,
-  });
-
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
+
+  const getKibanaUrl = (pathname?: string, search?: string) =>
+    Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+      pathname,
+      search,
+    });
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
     return browser.executeAsync(async (status, cb) => {

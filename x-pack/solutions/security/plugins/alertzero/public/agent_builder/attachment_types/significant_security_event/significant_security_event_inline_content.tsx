@@ -33,12 +33,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import {
-  buildAlertDetailsUrl,
-  buildDiscoverEsqlUrl,
-  buildEventLookupEsql,
-  buildThreatReportLookupEsql,
-} from '../navigation';
+import { buildAlertDetailsUrl, buildDiscoverEsqlUrl, buildEventLookupEsql } from '../navigation';
 import { EntityChip } from '../entity_chip';
 import { IocBadge, OPEN_ALERT_DETAILS_LABEL, discoverAction } from '../shared/ioc_badge';
 import {
@@ -632,7 +627,7 @@ interface Tier2TableRow {
   technique_id: string;
   tactic_ids: string[];
   confidence: number;
-  rule_name: string;
+  title: string;
   execution?: HuntResultBehaviorExecution;
 }
 
@@ -762,13 +757,13 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       ),
     },
     {
-      field: 'rule_name',
-      name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultRule', {
-        defaultMessage: 'Rule',
+      field: 'title',
+      name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultFinding', {
+        defaultMessage: 'Finding',
       }),
-      render: (ruleName: string) => (
+      render: (title: string) => (
         <EuiText size="xs" css={cellStyles}>
-          {ruleName}
+          {title}
         </EuiText>
       ),
     },
@@ -826,7 +821,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       technique_id: behavior.technique_id,
       tactic_ids: behavior.tactic_ids,
       confidence: behavior.confidence,
-      rule_name: behavior.rule_name,
+      title: behavior.title,
       ...(behavior.execution ? { execution: behavior.execution } : {}),
     })) ?? [];
 
@@ -1374,17 +1369,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
                     { defaultMessage: 'Source report' }
                   )}
                 >
+                  {/* No Discover action: a raw ES|QL lookup against the hidden
+                      `.kibana-threat-reports*` index is unreachable for a non-superuser.
+                      See elastic/security-team#19733. */}
                   <IocBadge
                     value={parsed.report_id}
-                    action={discoverAction(
-                      buildDiscoverEsqlUrl({
-                        share: navigation.share,
-                        esql: buildThreatReportLookupEsql({
-                          reportId: parsed.report_id,
-                          spaceId: navigation.spaceId,
-                        }),
-                      })
-                    )}
                     testSubj="alertzeroSignificantSecurityEventReportLink"
                   />
                 </MetaCard>

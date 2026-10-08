@@ -22,6 +22,8 @@ export { createDownloadProgressBar, formatBytes } from './download_progress';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
 export * from './docker';
+export { publishLoopbackPort } from './publish_loopback_port';
+export { hasIpv6Loopback } from './has_ipv6_loopback';
 export * from './serverless_file_realm';
 export * from './read_roles_from_resource';
 export * from './extract_and_archive_logs';

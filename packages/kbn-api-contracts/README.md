@@ -31,8 +31,9 @@ By default the check is a soft gate: a BC detected in stable/tech_preview fails 
 3. **`src/report/`** - Error formatting and user guidance
 
    - `format_failure.ts` - Generates the tier-grouped CI-log summary (gating tiers first, then an informational experimental section)
+   - `release_note.json` - Release note wording shared by the CI log and the PR comment
    - `write_impact_report.ts` - Writes the JSON impact report consumed by the PR notifier
-   - `links.ts` - Documentation and support links
+   - `links.ts` - Documentation links
 
 4. **`src/allowlist/`** - Escape hatch for approved breaking changes
 
@@ -63,16 +64,43 @@ oasdiff detects these as breaking:
 
 ⚠️ oasdiff classifies these as warnings, but they are treated as breaking here because clients depend on these fields: removing a request field, request parameter, or optional response property breaks any consumer that sends or reads it.
 
+### Rule policy
+
+oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. The reasons for blocking rules are in the table below.
+
+Dispositions:
+
+- **`blocking`** — a warning-level oasdiff rule treated as a breaking change. These are the ⚠️ rows above.
+- **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. A warning listed here is kept instead of dropped. An error listed here does not gate.
+- **`ignore`** — dropped entirely, whatever level oasdiff assigned. It does not gate and does not appear in the report or the PR comment. Use it for a rule that is never a change worth a reviewer's attention. No rule uses it today; prefer `report_only` unless the change should not be visible at all.
+
+Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
+
+| oasdiff ID                           | Disposition   | Why                                                                                                                               |
+| ------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `request-property-removed`           | `blocking`    | Removing a request property breaks any client that sends it                                                                       |
+| `request-parameter-removed`          | `blocking`    | Removing a request parameter breaks any client that sends it                                                                      |
+| `response-optional-property-removed` | `blocking`    | Removing an optional response property breaks any client that reads it                                                            |
+| `response-property-one-of-added`     | `report_only` | Adding a variant to a response `oneOf` is additive; clients keep receiving what they handle                                       |
+| `response-body-one-of-added`         | `report_only` | Same, for the response body `oneOf`                                                                                               |
+| `response-property-enum-value-added` | `report_only` | Adding a response enum value is additive. oasdiff 1.15.1 warns; later versions error. Either way it is reported and does not gate |
+
+The request side stays strict. A new variant a client may have to send is not the same as a new variant it may receive, so request-side rules are not demoted.
+
+Whether generated clients tolerate a new response variant is a consumer concern. Reporting a change here does not make a client that validates response unions strictly accept it, and that follow-up sits with the consumer, not this table.
+
+Report-only changes still reach the PR comment in a non-blocking section, so the owning team can decide whether a release note is warranted. Suppressing a change entirely is the [allowlist](#allowlist)'s job, not this table's: the allowlist is per change, this table is per rule.
+
 ## Allowlist
 
 For approved breaking changes, add entries to `allowlist.json`. **Always prefer the granular form below** — it scopes suppression to one specific breaking change instead of muting everything on the endpoint.
 
 ### Granular form (recommended)
 
-Use `oasdiffId` together with `source` to suppress exactly one breaking change. These fields are AND'd with `path` and `method`: the entry only matches changes for which all four fields agree.
+Use `oasdiffId` to suppress only the changes for one rule, plus `source` for `kbn:` rules. These fields are AND'd with `path` and `method`: the entry only matches changes for which all of them agree.
 
 - `oasdiffId` — matches the oasdiff rule ID (e.g. `request-property-removed`, `kbn:request-additional-properties-tightened`). See the [Breaking Change Rules](#breaking-change-rules) table for known IDs.
-- `source` — matches the JSON pointer / source location reported by oasdiff (e.g. `/components/schemas/Output/properties/name`).
+- `source` — `kbn:` rules only. Matches the JSON pointer the rule reports (e.g. `/components/schemas/Data_views_create_data_view_request_object`). For its own rules, oasdiff reports the path of the spec file it read, which differs per CI run, so the check ignores it and rejects allowlist entries that set it.
 
 ```json
 {
@@ -80,12 +108,11 @@ Use `oasdiffId` together with `source` to suppress exactly one breaking change. 
   "method": "post",
   "reason": "Approved removal of deprecated 'name' field from request body",
   "approvedBy": "@elastic/fleet",
-  "oasdiffId": "request-property-removed",
-  "source": "/components/schemas/Output/properties/name"
+  "oasdiffId": "request-property-removed"
 }
 ```
 
-Example targeting the new request-body tightening rule:
+Example targeting the request-body tightening rule, scoped to one schema:
 
 ```json
 {
@@ -98,7 +125,7 @@ Example targeting the new request-body tightening rule:
 }
 ```
 
-**Required fields:** `path`, `method`, `reason`, `approvedBy`, `oasdiffId`, `source` (the last two only required for granular suppression).
+**Required fields:** `path`, `method`, `reason`, `approvedBy`, and `oasdiffId` for granular suppression. `source` is optional and only valid with a `kbn:` rule.
 **Optional fields:** `prUrl`, `expiresAt`.
 
 ### Coarse form (⚠️ avoid unless absolutely necessary — this masks all future breaking changes on the endpoint)
@@ -127,9 +154,21 @@ The tier of a breaking change is resolved from the affected operation's `x-state
 - **stable** / **tech_preview** — gate the check. A breaking change here fails the check.
 - **experimental** — reported for visibility only. Experimental APIs are allowed to introduce breaking changes, so these never fail the check.
 
+Tier and rule policy are independent. A stable-tier change still doesn't gate when its oasdiff rule is `report_only` (see [Rule policy](#rule-policy)).
+
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted or only experimental changes were found). The comment groups changes by stability tier, with experimental changes in a clearly labeled **non-blocking** section. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Allowlisted stable and Technical Preview changes, experimental changes, and report-only rules each appear in their own non-blocking section. Allowlisted experimental and report-only changes are left out. When there is nothing to report, no new comment is posted. If an earlier comment exists, it's updated to say the latest run found nothing to report. If either check was skipped or didn't finish, the earlier comment is left as it was.
+
+When the change list would make the comment too long for GitHub, the comment still carries what the author has to act on: release note guidance when a breaking change ships, and the note that nothing blocks merge when it does not. Rows that do not fit are left out, with a count of how many. The full list stays in the CI log.
+
+### Release note suggestions
+
+Gating changes (stable and Technical Preview) get release note guidance in the PR comment and the CI log. The "If intentional" step of "What to do" asks the author to add an allowlist entry, the `release_note:breaking` label (in place of any other `release_note:*` label), and release note text in the PR description. The "Release note" section after it asks for a `## Release note` section in the PR description. Per the [release notes guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes), the release notes script publishes that text as the change's entry in the Breaking changes section, so it should tell API users what changed, how it affects them, and what they need to do. This check doesn't write release notes itself.
+
+Allowlisting a stable or Technical Preview change stops it from failing the check, but it still ships as a breaking change. So once its allowlist entry is added, the change moves to an "Approved" section and the label and release note guidance stay, even when nothing else gates.
+
+When nothing gates and nothing is allowlisted (only report-only or experimental changes), "What to do" ends with "Optional: release note describing the change in the PR description", because a release note is the author's call. There is no label guidance.
 
 ## Usage
 
@@ -176,7 +215,12 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
 
 1. **Review the report** - identifies which endpoints, what changed, and their stability tier
 2. **If unintentional:** fix the code to maintain compatibility.
-3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
+3. **If intentional:**
+   - add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
+   - add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label).
+   - add a `## Release note` section to the PR description. See [Release note suggestions](#release-note-suggestions).
+
+Once the allowlist entry is added, the check passes, but the comment stays. It lists the change as approved and keeps the label and release note steps.
 
 **Important:** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes committee. Every stable and Technical Preview API has to follow the formal breaking change process for approval.
 

@@ -24,6 +24,9 @@ const stepExecutionsFor = (fixture: WorkflowRunFixture, stepId: string) =>
     (se) => se.stepId === stepId
   );
 
+const stepOutput = <T>(fixture: WorkflowRunFixture, stepId: string): T =>
+  stepExecutionsFor(fixture, stepId)[0]?.output as T;
+
 /**
  * Re-ticks a parked parallel workflow until it leaves WAITING (or the guard trips).
  * Parallel branches with timers/waits park in WAITING and resume across ticks, so
@@ -35,6 +38,31 @@ const driveToTerminal = async (fixture: WorkflowRunFixture, maxGuard = 10): Prom
     await fixture.resumeWorkflow();
     guard += 1;
   }
+};
+
+/** A poll step that never completes on its own; only `branch-timeout` ends it. */
+const neverCompletingPoll = createPollServerStepDefinition({
+  id: 'integration.parallelNeverPoll',
+  category: StepCategory.Kibana,
+  label: 'Never-completing poll branch (integration)',
+  description: 'Always asks to poll again',
+  inputSchema: z.object({}),
+  outputSchema: z.object({}),
+  poll: async ({ state }) => {
+    const count = (state as { count?: number } | undefined)?.count ?? 0;
+    return { state: { count: count + 1 } };
+  },
+  policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  ceilings: { maxAttempts: 100, maxWaitMs: 600_000 },
+});
+
+const registerNeverCompletingPoll = (fixture: WorkflowRunFixture): void => {
+  (fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => (id === 'integration.parallelNeverPoll' ? neverCompletingPoll : undefined)
+  );
+  (fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => id === 'integration.parallelNeverPoll'
+  );
 };
 
 describe('workflow with parallel (dynamic fan-out) step', () => {
@@ -616,32 +644,9 @@ steps:
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];
 
-    // A poll step that never completes on its own; only `branch-timeout` ends it.
-    const neverCompletingPoll = createPollServerStepDefinition({
-      id: 'integration.parallelNeverPoll',
-      category: StepCategory.Kibana,
-      label: 'Never-completing poll branch (integration)',
-      description: 'Always asks to poll again',
-      inputSchema: z.object({}),
-      outputSchema: z.object({}),
-      poll: async ({ state }) => {
-        const count = (state as { count?: number } | undefined)?.count ?? 0;
-        return { state: { count: count + 1 } };
-      },
-      policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-      ceilings: { maxAttempts: 100, maxWaitMs: 600_000 },
-    });
-
     beforeAll(async () => {
       workflowRunFixture = new WorkflowRunFixture();
-      (
-        workflowRunFixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock
-      ).mockImplementation((id: string) =>
-        id === 'integration.parallelNeverPoll' ? neverCompletingPoll : undefined
-      );
-      (
-        workflowRunFixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock
-      ).mockImplementation((id: string) => id === 'integration.parallelNeverPoll');
+      registerNeverCompletingPoll(workflowRunFixture);
 
       const yaml = `
 consts:
@@ -1217,6 +1222,166 @@ steps:
         expect(output.status).toBe('failed');
         expect(output.results.every((r) => r.status === 'failed')).toBe(true);
       });
+    });
+  });
+
+  // A settled parallel must survive one bad branch in a fan-out where the branches are
+  // the writers of a before-agent hook (nightshift's `sandbox_materialize_workspace`):
+  // every sibling still reaches a terminal state, the step after the parallel still runs
+  // and reads the survivors' outputs, and the execution COMPLETES rather than failing —
+  // `runBeforeAgentWorkflows` turns a failed pre-execution workflow into a thrown error
+  // that aborts the agent round.
+  const settledWriterWorkflow = (memoryStep: string, branchTimeout = '') => `
+steps:
+  - name: materialize_workspaces
+    type: parallel
+    mode: settled${branchTimeout}
+    branches:
+      - name: cortex
+        steps:
+          - name: hydrate_cortex
+            type: data.set
+            with:
+              notification: 'cortex-fragment'
+      - name: memory
+        steps:
+          - name: hydrate_memory
+${memoryStep}
+      - name: decision_trees
+        steps:
+          - name: hydrate_decision_trees
+            type: data.set
+            with:
+              notification: 'trees-fragment'
+  - name: compose_prompt
+    type: data.set
+    with:
+      cortex: '{{ steps.hydrate_cortex.output.notification }}'
+      memory: '{{ steps.hydrate_memory.output.notification }}'
+      decisionTrees: '{{ steps.hydrate_decision_trees.output.notification }}'
+`;
+
+  interface SettledComposeOutput {
+    cortex?: string;
+    memory?: string;
+    decisionTrees?: string;
+  }
+
+  interface SettledAggregateOutput {
+    total: number;
+    succeeded: number;
+    failed: number;
+    status: string;
+    branches?: Record<string, { status: string; output?: unknown; error?: unknown }>;
+  }
+
+  describe('one branch failing under mode: settled', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: settledWriterWorkflow(`            type: slack
+            connector-id: ${FakeConnectors.constantlyFailing.name}
+            with:
+              message: 'materialize memory'`),
+      });
+    });
+
+    it('completes the workflow (a before-agent hook must not fail)', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('completes the parallel step while reporting the failed branch', () => {
+      const [parallel] = stepExecutionsFor(workflowRunFixture, 'materialize_workspaces');
+      expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+      expect(parallel.output as unknown as SettledAggregateOutput).toMatchObject({
+        total: 3,
+        succeeded: 2,
+        failed: 1,
+        status: 'failed',
+      });
+    });
+
+    it('runs every branch to a terminal state (no sibling starved)', () => {
+      for (const stepId of ['hydrate_cortex', 'hydrate_memory', 'hydrate_decision_trees']) {
+        expect(stepExecutionsFor(workflowRunFixture, stepId)).toHaveLength(1);
+      }
+    });
+
+    it('projects the failed branch as failed and the others as completed', () => {
+      const aggregate = stepOutput<SettledAggregateOutput>(
+        workflowRunFixture,
+        'materialize_workspaces'
+      );
+      expect(aggregate.branches?.memory.status).toBe('failed');
+      expect(aggregate.branches?.memory.error).toBeDefined();
+      expect(aggregate.branches?.cortex.status).toBe('completed');
+      expect(aggregate.branches?.decision_trees.status).toBe('completed');
+    });
+
+    it('runs the step after the parallel and reads the successful branches only', () => {
+      const compose = stepOutput<SettledComposeOutput>(workflowRunFixture, 'compose_prompt');
+      expect(compose.cortex).toBe('cortex-fragment');
+      expect(compose.decisionTrees).toBe('trees-fragment');
+      expect(compose.memory).toBeFalsy();
+    });
+  });
+
+  describe('one branch killed by branch-timeout under mode: settled', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      registerNeverCompletingPoll(workflowRunFixture);
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: settledWriterWorkflow(
+          `            type: integration.parallelNeverPoll
+            with: {}`,
+          "\n    branch-timeout: '100ms'"
+        ),
+      });
+      // The poll branch parks the execution in WAITING with a resume scheduled a
+      // full poll interval out. Advancing the clock to that deadline also carries it
+      // past the branch's `branch-timeout`, which is what ends the branch.
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
+      await driveToTerminal(workflowRunFixture, 20);
+    });
+
+    it('completes the workflow (a timed-out branch must not fail it either)', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('completes the parallel step while reporting the timed-out branch', () => {
+      const [parallel] = stepExecutionsFor(workflowRunFixture, 'materialize_workspaces');
+      expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+      expect(parallel.output as unknown as SettledAggregateOutput).toMatchObject({
+        total: 3,
+        succeeded: 2,
+        failed: 1,
+        status: 'failed',
+      });
+      const aggregate = parallel.output as unknown as SettledAggregateOutput;
+      expect(aggregate.branches?.memory.status).toBe('timed_out');
+      expect(aggregate.branches?.cortex.status).toBe('completed');
+      expect(aggregate.branches?.decision_trees.status).toBe('completed');
+    });
+
+    it('records the timed-out branch step as TIMED_OUT, not left RUNNING/WAITING', () => {
+      const branchExecutions = stepExecutionsFor(workflowRunFixture, 'hydrate_memory');
+      expect(branchExecutions.length).toBeGreaterThan(0);
+      expect(branchExecutions.every((se) => se.status === ExecutionStatus.TIMED_OUT)).toBe(true);
+    });
+
+    it('runs the step after the parallel with the timed-out branch reading empty', () => {
+      // The timed-out branch never wrote an output at all, so the downstream read is
+      // empty — the case a compose step has to cover for itself.
+      const compose = stepOutput<SettledComposeOutput>(workflowRunFixture, 'compose_prompt');
+      expect(compose.cortex).toBe('cortex-fragment');
+      expect(compose.decisionTrees).toBe('trees-fragment');
+      expect(compose.memory).toBeFalsy();
     });
   });
 });

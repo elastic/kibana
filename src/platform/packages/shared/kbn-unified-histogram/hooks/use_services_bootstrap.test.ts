@@ -15,6 +15,8 @@ import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
+import * as fetchParamsUtils from '../utils/process_fetch_params';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -40,6 +42,10 @@ describe('useServicesBootstrap', () => {
         timeInterval: 'auto',
       },
     } as ReturnType<typeof useStateProps>);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should initialize', async () => {
@@ -72,7 +78,7 @@ describe('useServicesBootstrap', () => {
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'test-session',
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       requestAdapter: new RequestAdapter(),
@@ -88,7 +94,7 @@ describe('useServicesBootstrap', () => {
     expect(hook.result.current.fetchParams).toEqual(
       expect.objectContaining({
         searchSessionId: 'test-session',
-        dataView: dataViewWithTimefieldMock,
+        dataSource: fetchParamsExternal.dataSource,
         query,
       })
     );
@@ -98,6 +104,51 @@ describe('useServicesBootstrap', () => {
     expect(subscriber).toHaveBeenCalledWith({
       fetchParams: hook.result.current.fetchParams,
       lensVisServiceState: hook.result.current.lensVisServiceState,
+    });
+  });
+
+  it('ignores an older fetch that resolves after a newer one', async () => {
+    const createFetchParams = (searchSessionId: string): UnifiedHistogramFetchParamsExternal => ({
+      searchSessionId,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
+      query,
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      requestAdapter: new RequestAdapter(),
+    });
+    let releaseOlderFetch = () => {};
+    const olderFetchReleased = new Promise<void>((resolve) => {
+      releaseOlderFetch = () => resolve();
+    });
+    const { processFetchParams } = fetchParamsUtils;
+
+    jest.spyOn(fetchParamsUtils, 'processFetchParams').mockImplementationOnce(async (args) => {
+      await olderFetchReleased;
+      return processFetchParams(args);
+    });
+
+    const onVisContextChanged = jest.fn();
+    const { result } = renderHook(() =>
+      useServicesBootstrap(
+        { services: unifiedHistogramServicesMock, onVisContextChanged },
+        { enableLensVisService: true }
+      )
+    );
+    const subscriber = jest.fn();
+    result.current.fetch$.subscribe(subscriber);
+
+    const olderFetch = result.current.api.fetch(createFetchParams('older'));
+    await act(() => result.current.api.fetch(createFetchParams('latest')));
+    await act(async () => {
+      releaseOlderFetch();
+      await olderFetch;
+    });
+
+    expect(result.current.fetchParams?.searchSessionId).toBe('latest');
+    expect(onVisContextChanged).toHaveBeenCalledTimes(1);
+    expect(subscriber).toHaveBeenCalledTimes(1);
+    expect(subscriber).toHaveBeenCalledWith({
+      fetchParams: result.current.fetchParams,
+      lensVisServiceState: result.current.lensVisServiceState,
     });
   });
 });

@@ -123,6 +123,11 @@ export class Plugin {
         // default. See "Task priority" below.
         priority: TaskPriority.Deferrable,
 
+        // Optional, allows `runSoon({ priority })` and a run result's `priority` to change the
+        // stored priority of an existing instance of this type. Defaults to false.
+        // See "Changing an existing task's priority" below.
+        allowPriorityOverride: false,
+
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
         // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
         // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
@@ -200,6 +205,23 @@ task type that sets the field at all is counted by the `task_priority_check` int
 will fail until its snapshot is updated. That failure is deliberate: it exists so ResponseOps
 reviews the change.
 
+#### Changing an existing task's priority
+
+A task's priority is normally fixed when it is scheduled. `ensureScheduled` does not change the
+priority of a task that already exists. A task type that needs to raise or lower the priority of an
+existing instance, for example to promote a background task while a user waits on it and demote it
+afterwards, must opt in with `allowPriorityOverride: true` on its definition. It can then:
+
+- Pass `runSoon(id, { priority })`. The new priority is written in the same version-checked update
+  as `runAt`, so a concurrent change is reported as a conflict instead of being overwritten. If
+  `priority` is omitted, the stored priority is kept.
+- Return `priority` from a successful run (see [Task result](#task-result)) to set the priority of
+  its next run.
+
+For task types that have not opted in, `runSoon(id, { priority })` throws, and a `priority` returned
+from a run is ignored with a warning. Elevated priority is not reset automatically, so a task type
+that promotes an instance is responsible for demoting it once nothing is waiting on it.
+
 #### Deprecated priority names
 
 The members used to be named after their position in the claim ordering. The old names remain as
@@ -243,6 +265,7 @@ The task runner's `run` method is expected to return a promise that resolves to 
 | schedule | Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule. | { interval: string }    |
 | error    | Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.                   | Error                   |
 | state    | Optional, this will be passed into the next run of the task, if this is a recurring task.                                                     | Record<string, unknown> |
+| priority | Optional. The priority of the task's next run. Applied only when the task type sets `allowPriorityOverride`; otherwise ignored with a warning. | TaskPriority            |
 
 ### Examples
 
@@ -436,7 +459,7 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: ScheduleOptions) => {
     // ...
   },
-  runSoon: (taskId: string, force?: boolean) =>  {
+  runSoon: (taskId: string, forceOrOptions?: boolean | RunSoonOptions) =>  {
     // ...
   },
   bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
@@ -556,6 +579,12 @@ The only exception to this is if you use `ensureScheduled` to schedule a task wi
 
 Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
+Pass `runSoon(id, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle on background task nodes, instead of waiting for the next poll. `runSoon` refreshes the task update but does not wait for the request to be delivered; if delivery fails, regular polling claims the task. Requests are throttled to one admitted nudge per 500ms per node, and ignored while Task Manager is backing off from Elasticsearch errors. `xpack.task_manager.claim_nudge.enabled: false` turns this off.
+
+The extra cycle may claim any eligible task, not just this one, so a task that needs a delay before running must encode it in its own eligibility or rescheduling logic. The `kibana.task_manager.claim_nudge.count` metric counts successful opted-in `runSoon` calls.
+
+Pass `runSoon(id, { priority })` to also change the task's stored priority. This requires `allowPriorityOverride: true` on the task type and throws otherwise. See [Changing an existing task's priority](#changing-an-existing-tasks-priority). The legacy boolean form `runSoon(id, true)` is equivalent to `runSoon(id, { force: true })`.
+
 ```js
 export class Plugin {
   constructor() {}
@@ -630,13 +659,16 @@ export class Plugin {
 
 #### bulkUpdateSchedules
 
-Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status
-(for the tasks which have `running` status, `schedule` and `runAt` will be recalculated after task run finishes).
+Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status.
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
 newRunAt = scheduledAt + newInterval
 ```
+
+By default tasks in `running` or `claiming` status are skipped. Pass `includeRunningTasks: true` in the options to
+update them as well: only `schedule` (and API keys, if requested) is written in place, `runAt` is left untouched and
+the next `runAt` is computed from the new schedule when the current run finishes.
 
 Example:
 
@@ -942,6 +974,8 @@ When a task with an API key is deleted, we mark the API key for invalidation. Be
 re-used between tasks (as in the case of one task queuing up another task), we do not immediately delete the associated API key. Instead, we use the saved object type `api_key_to_invalidate` to store the API key IDs that are marked for invalidation.
 
 We schedule a recurring background task that queries for the existence of any `api_key_to_invalidate` saved objects and then queries to see whether those API key IDs are used by any other tasks. If no other tasks are referencing the API key, we invalidate it. We use a removal delay in the query to avoid race conditions that may happen if a task is scheduled with a re-used API key while the invalidation task is running.
+
+When `regenerateApiKey` replaces the API key of a task that is currently running, that run keeps using the old key. The old key's `api_key_to_invalidate` object records the task id and the run's `startedAt`, and the key is not invalidated while that same run is still in progress (the task is `running` with the same `startedAt` and its `retryAt` hasn't passed).
 
 The default schedule for this task is every `5m`. To change this schedule, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.interval`.
 

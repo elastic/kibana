@@ -8,11 +8,14 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
-import { DEFAULT_PROPOSAL_TITLE, type ListProposalsQuery } from '@kbn/proposals-common';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  type ListProposalsQuery,
+} from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -32,6 +35,8 @@ const analyst = (username: string, profileUid = `${username}-uid`) => ({
 });
 
 const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocument => ({
+  rootProposalId: 'proposal-1',
+  revision: 1,
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
   title: 'Tune the noisy rule',
@@ -127,13 +132,16 @@ const createService = (
     update: jest.fn(),
     delete: jest.fn(),
     list: jest.fn(),
+    bulkCreate: jest.fn(),
   };
+  const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
   return {
+    getAttachmentsClient,
     service: new ProposalsService({
       storage,
       logger,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
-      getAttachmentsClient: async () => attachmentsClient,
+      getAttachmentsClient,
     }),
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
     attachmentsClient,
@@ -819,7 +827,7 @@ describe('ProposalsService', () => {
     it('should reject a proposal the workflow already settled without a decision', async () => {
       // Attempt exhaustion and a failure before anyone decided both settle the
       // record as `expired` with no decision on it, and can do so long before
-      // the deadline — so the date check alone would still read it as live.
+      // the deadline passes.
       const storage = createStorage(
         baseDocument({
           status: 'expired',
@@ -831,15 +839,6 @@ describe('ProposalsService', () => {
 
       await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-    });
-
-    it('should reject a proposal past its decision deadline', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
     });
 
@@ -1233,6 +1232,63 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe.each(['clone', 'revise'] as const)('%s attachments', (operation) => {
+    const original = () =>
+      baseDocument(operation === 'clone' ? { decision: 'approved', status: 'failed' } : {});
+
+    it('attaches the successor with its proposal title after linking it', async () => {
+      const storage = createStorage(original());
+      const { service, attachmentsClient, getAttachmentsClient } = createService(storage);
+      attachmentsClient.create.mockImplementation(async () => {
+        expect(storage.index).toHaveBeenCalledTimes(2);
+        return { id: 'attachment-2' };
+      });
+
+      const result = await service[operation]({ id: 'proposal-1' }, SPACE_ID, request);
+      const proposalId = typeof result === 'string' ? result : result.proposalId;
+      expect(getAttachmentsClient).toHaveBeenCalledWith(request);
+      expect(attachmentsClient.create).toHaveBeenCalledTimes(1);
+      expect(attachmentsClient.create).toHaveBeenCalledWith({
+        conversationId: 'conv-1',
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        origin: proposalId,
+        data: { proposalId, title: 'Tune the noisy rule' },
+        render_inline: true,
+      });
+    });
+
+    it('keeps the successor when attachment creation fails', async () => {
+      const { service, attachmentsClient, logger } = createService(createStorage(original()));
+      attachmentsClient.create.mockRejectedValue(new Error('attachment unavailable'));
+      await expect(
+        service[operation]({ id: 'proposal-1' }, SPACE_ID, request)
+      ).resolves.toBeDefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to attach proposal')
+      );
+    });
+
+    it('does not attach an invalid successor', async () => {
+      const { service, attachmentsClient } = createService(
+        createStorage(baseDocument({ decision: 'dismissed', status: 'no_action' }))
+      );
+      await expect(
+        service[operation]({ id: 'proposal-1' }, SPACE_ID, request)
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it.each([409, 503])('does not attach after a failed link write (%s)', async (statusCode) => {
+      const storage = createStorage(original());
+      const { service, attachmentsClient } = createService(storage);
+      storage.index
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(Object.assign(new Error('link failed'), { statusCode }));
+      await expect(service[operation]({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toThrow();
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('clone', () => {
     it('inherits the origin, so a retry stays in the queue that raised it', async () => {
       const storage = createStorage(
@@ -1240,7 +1296,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document.origin).toBe('nightshift');
@@ -1250,7 +1306,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1', executionError: 'rule API rejected it' }, SPACE_ID);
+      await service.clone(
+        { id: 'proposal-1', executionError: 'rule API rejected it' },
+        SPACE_ID,
+        request
+      );
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document).toMatchObject({
@@ -1272,7 +1332,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const cloneId = await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      const cloneId = await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.id).toBe(cloneId);
@@ -1298,7 +1358,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document).toMatchObject({
@@ -1328,7 +1388,8 @@ describe('ProposalsService', () => {
 
       const cloneId = await service.clone(
         { id: 'proposal-1', executionError: 'action exploded' },
-        SPACE_ID
+        SPACE_ID,
+        request
       );
 
       const [, [supersedeArgs]] = storage.index.mock.calls;
@@ -1350,7 +1411,7 @@ describe('ProposalsService', () => {
 
       // Overwriting the pointer would orphan the first clone: it would stay
       // live and undecided with nothing referring to it.
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1363,7 +1424,7 @@ describe('ProposalsService', () => {
         .mockResolvedValueOnce({ _id: 'clone' })
         .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
 
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
 
@@ -1378,7 +1439,7 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
-      await expect(service.clone({ id: 'missing' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'missing' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalNotFoundError
       );
     });
@@ -1399,7 +1460,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument(overrides));
       const { service } = createService(storage);
 
-      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1552,22 +1613,6 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('treats an undefined revision on the original as revision 1 (pre-existing records)', async () => {
-      const storage = createStorage(
-        baseDocument({ revision: undefined, rootProposalId: undefined })
-      );
-      const { service } = createService(storage);
-
-      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
-
-      expect(result.revision).toBe(2);
-      expect(storage.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ rootProposalId: 'proposal-1', revision: 2 }),
-        })
-      );
-    });
-
     it('rejects revising a proposal that is already superseded', async () => {
       const storage = createStorage(
         baseDocument({ status: 'superseded', supersededBy: 'proposal-2' })
@@ -1586,16 +1631,6 @@ describe('ProposalsService', () => {
 
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-      expect(storage.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1752,6 +1787,96 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('findByWorkflowExecutionId', () => {
+    it('returns the original proposal its gate execution created, within the space', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID);
+
+      expect(proposal).toMatchObject({ id: 'proposal-1', workflowExecutionId: EXECUTION_ID });
+      expect(proposal).not.toHaveProperty('ranks');
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                { term: { workflowExecutionId: EXECUTION_ID } },
+                { term: { spaceId: SPACE_ID } },
+              ],
+            },
+          },
+          sort: [{ createdAt: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('returns undefined before the create step ran, or for a blank id', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID)).resolves.toBe(
+        undefined
+      );
+      await expect(service.findByWorkflowExecutionId('', SPACE_ID)).resolves.toBe(undefined);
+      expect(storage.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('countPendingByConversationIds', () => {
+    it('counts pending, unexpired proposals per conversation in one aggregation', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          by_conversation: {
+            buckets: [
+              { key: 'conv-1', doc_count: 2 },
+              { key: 'conv-2', doc_count: 1 },
+            ],
+          },
+        },
+      });
+      const { service } = createService(storage);
+
+      const counts = await service.countPendingByConversationIds(
+        ['conv-1', 'conv-2', 'conv-1', ''],
+        SPACE_ID
+      );
+
+      expect([...counts.entries()]).toEqual([
+        ['conv-1', 2],
+        ['conv-2', 1],
+      ]);
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest).toMatchObject({
+        size: 0,
+        aggs: { by_conversation: { terms: { field: 'conversationId', size: 2 } } },
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { status: 'pending' } },
+          { terms: { conversationId: ['conv-1', 'conv-2'] } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([{ range: { expiresAt: { gt: 'now' } } }]),
+            }),
+          }),
+        ])
+      );
+    });
+
+    it('does not search without conversation ids', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.countPendingByConversationIds([], SPACE_ID)).resolves.toEqual(new Map());
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
@@ -1820,6 +1945,7 @@ describe('ProposalsService', () => {
         decision: undefined,
         actionInput: { name: 'Revised PowerShell' },
       });
+      expect(storage.search).toHaveBeenCalledTimes(2);
       expect(storage.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
@@ -1854,63 +1980,6 @@ describe('ProposalsService', () => {
         decision: undefined,
         actionInput: { name: 'Suspicious PowerShell' },
       });
-    });
-
-    it('follows supersededBy pointers for a chain written before rootProposalId existed', async () => {
-      // No `rootProposalId` on either row: the term query cannot find this
-      // chain, so the pointer walk is the only way to the live head.
-      const legacyRoot = baseDocument({ supersededBy: 'proposal-2' });
-      const live = baseDocument({
-        supersedes: 'proposal-1',
-        revision: 2,
-        status: 'pending',
-        actionInput: { name: 'Revised PowerShell' },
-      });
-      const storage = createStorage(legacyRoot);
-      // Dispatch on the query, not call order. A legacy row carries no
-      // `rootProposalId`, so the chain query answers empty and the pointer walk is
-      // forced; answering it elsewhere would pass without the walk ever running.
-      interface QueryClause {
-        term?: Record<string, unknown>;
-        ids?: { values: string[] };
-      }
-      const queryFilter = (searchRequest: { query?: unknown }): QueryClause[] =>
-        (searchRequest.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ??
-        [];
-      storage.search.mockImplementation(async (searchRequest) => {
-        const filter = queryFilter(searchRequest);
-        if (filter.some((clause) => clause.term?.rootProposalId !== undefined)) {
-          return { hits: { hits: [], total: { value: 0 } } };
-        }
-        const requestedId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
-        return requestedId === 'proposal-2'
-          ? { hits: { hits: [searchHit(live, 'proposal-2')], total: { value: 1 } } }
-          : { hits: { hits: [searchHit(legacyRoot, 'proposal-1')], total: { value: 1 } } };
-      });
-      const { service } = createService(storage);
-
-      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
-
-      // Answering with the stale member would hand a parked gate an id whose
-      // decision write `update()` then refuses.
-      expect(result).toEqual({
-        proposalId: 'proposal-2',
-        revision: 2,
-        status: 'pending',
-        decision: undefined,
-        actionInput: { name: 'Revised PowerShell' },
-      });
-      // The successor is reached by following its pointer, not by the root
-      // term — a chain query for this row would be an empty answer.
-      expect(storage.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [{ ids: { values: ['proposal-2'] } }, { term: { spaceId: SPACE_ID } }],
-            },
-          },
-        })
-      );
     });
   });
 
@@ -2271,6 +2340,45 @@ describe('ProposalsService', () => {
 
       // Normalised: a category carries no key until its first event.
       expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 1, 0, 0]);
+    });
+
+    it('should report what is open now, not what was open at any point, in the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain)).toEqual([1, 1, 1, 1, 0]);
+    });
+
+    it('should not count a proposal that opened and closed within the current bucket', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        opens: byIdxAndCategory('opens', [[4, 'contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets.map((b) => b.counts.contain ?? 0)).toEqual([0, 0, 0, 0, 0]);
+    });
+
+    it('should keep a category in the current bucket once it has closed down to zero', async () => {
+      const storage = createStorage();
+      mockEsql(storage, {
+        anchor: byCategory('anchor', [['contain', 1]]),
+        closes: byIdxAndCategory('closes', [[4, 'contain', 1]]),
+      });
+      const { service } = createService(storage);
+
+      const { buckets } = await service.chartsSummary(chartsQuery, SPACE_ID);
+
+      expect(buckets[4].counts).toEqual({ contain: 0 });
     });
 
     it('should report currentOpen from the scalar query', async () => {

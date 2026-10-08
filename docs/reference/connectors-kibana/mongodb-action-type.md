@@ -9,7 +9,14 @@ applies_to:
 
 # MongoDB connector [mongodb-action-type]
 
-The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
+The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. AI agents use it to query documents, run aggregation pipelines, and discover collection structure through the read-only actions (find, aggregate, count, listCollections). The write actions (insertOne, updateOne, deleteOne) are never exposed to agents and are not yet available. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
+
+:::{include} _snippets/native-driver-memory-note.md
+:::
 
 ## Create connectors in {{kib}} [define-mongodb-ui]
 
@@ -66,24 +73,24 @@ Count
 Follow the discovery pattern before querying: *List collections* → *Find* with a small limit to inspect document shape → *Count* to understand data volume → *Aggregate* to group or transform data.
 ::::
 
-The following actions are workflow-only — they are never exposed to AI agents:
+The following actions are never exposed to AI agents. They become usable when workflow support is added:
 
-Insert one
-:   Insert a single document into a MongoDB collection. Use this to create a new record from a workflow, such as logging an event or saving a processed result. Returns the inserted document ID and whether the write was acknowledged.
+Insert one _(not yet available)_
+:   Insert a single document into a MongoDB collection. Use this to create a new record, such as logging an event or saving a processed result. Returns the inserted document ID and whether the write was acknowledged.
     - `collection` (required): Name of the collection to insert into.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
     - `document` (required): Document to insert. Don't include `_id` unless you want to set it explicitly. Example: `{"name": "Alice", "status": "active"}`.
 
-Update one
-:   Update the first document matching a filter in a MongoDB collection. Use this to modify an existing record from a workflow, such as changing a status field or applying a partial update. Returns matched and modified counts, the upserted document ID (if any), and whether the write was acknowledged.
+Update one _(not yet available)_
+:   Update the first document matching a filter in a MongoDB collection. Use this to modify an existing record, such as changing a status field or applying a partial update. Returns matched and modified counts, the upserted document ID (if any), and whether the write was acknowledged.
     - `collection` (required): Name of the collection to update.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
     - `filter` (required): Filter to match the document to update. Example: `{"_id": "abc"}`.
     - `update` (required): Update operators or replacement document. Example: `{"$set": {"status": "inactive"}}`.
     - `upsert` (optional): If `true`, insert a new document when no document matches the filter.
 
-Delete one
-:   Delete the first document matching a filter from a MongoDB collection. Use this to remove a single record from a workflow, such as cleaning up a processed item. Returns the number of documents deleted and whether the write was acknowledged.
+Delete one _(not yet available)_
+:   Delete the first document matching a filter from a MongoDB collection. Use this to remove a single record, such as cleaning up a processed item. Returns the number of documents deleted and whether the write was acknowledged.
     - `collection` (required): Name of the collection to delete from.
     - `database` (optional): Database to write to. Defaults to the database in the connection URI path if omitted.
     - `filter` (required): Filter to match the document to delete. Example: `{"_id": "abc"}`.
@@ -100,10 +107,10 @@ The MongoDB connector authenticates with a separate connection URI (host, port, 
 
 1. Get the connection URI for your deployment from your MongoDB provider or admin. It uses either the `mongodb://` scheme (host and port, or a comma-separated host list for a replica set or sharded cluster) or the `mongodb+srv://` scheme (a single DNS seed name, for providers that publish SRV records — for example [MongoDB Atlas](https://cloud.mongodb.com/)'s **Database → Connect → Drivers** page).
 2. If the connection string includes `<username>:<password>@`, remove it — credentials go in the separate Username and Password fields, not the URI.
-3. In {{kib}}, create a MongoDB connector, and enter the connection URI, username, and password of a database user with the access your workflows and agents need.
+3. In {{kib}}, create a MongoDB connector, and enter the connection URI, username, and password of a database user with the access your agents need.
 
 ::::{note}
-The username and password are stored as encrypted secrets and never exposed in Kibana UI or logs. Agent-facing tool actions (find, aggregate, count, listCollections) are read-only; insertOne, updateOne, and deleteOne are workflow-only and are never exposed to agents.
+The username and password are stored as encrypted secrets and never exposed in Kibana UI or logs. Agent-facing tool actions (find, aggregate, count, listCollections) are read-only; insertOne, updateOne, and deleteOne are never exposed to agents.
 
 If you are using this connector primarily with agents, use a MongoDB database user with read-only permissions (for example, the built-in `read` role in MongoDB). This limits the blast radius if an agent issues unexpected queries.
 ::::

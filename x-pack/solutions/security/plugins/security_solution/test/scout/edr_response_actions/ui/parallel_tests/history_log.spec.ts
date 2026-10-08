@@ -28,15 +28,15 @@ const requireSeededHistory = (
 spaceTest.describe(
   'Response actions history page',
   {
-    // Stateful only. The Cypress spec was `@brokenInServerless` for this role.
+    // Stateful only.
     tag: tags.stateful.classic,
   },
   () => {
     let seeded: SeededResponseActionsHistory | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
-      // Endpoint host indexing installs Fleet and waits on metadata transforms.
-      spaceTest.setTimeout(600_000);
+      // Two host seeds, plus a wait for the other worker's metadata-transform lock.
+      spaceTest.setTimeout(1_800_000);
       await scoutSpace.setSolutionView('security');
       seeded = await seedResponseActionsHistory({
         esClient,
@@ -57,6 +57,8 @@ spaceTest.describe(
     spaceTest(
       'filters response actions by trigger type and opens the linked rule',
       async ({ page, pageObjects }) => {
+        // The history list's first fetch, plus the filter steps, can exceed the default 60s.
+        spaceTest.setTimeout(180_000);
         const history = requireSeededHistory(seeded);
 
         const { responseActionsHistory } = pageObjects;

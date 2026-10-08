@@ -15,8 +15,6 @@ import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools'
 import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
 
-const MAX_TRANSCRIPT_CHARS = 20_000;
-
 /**
  * A confirmed hypothesis in the investigator's structured output is what makes a path causal, and
  * therefore what separates reinforcing a branch from merely extending the tree.
@@ -33,20 +31,21 @@ export const deriveCausalConfirmed = (response: string): boolean =>
 export const deriveTurnKind = (trees: DecisionTreeSummary[]): DecisionTreeTurnKind =>
   trees.some((tree) => tree.version > 1) ? 'feedback_reinforcement' : 'initial_investigation';
 
-/** Assembles the message handed to the reinforcement agent for one round. */
+/**
+ * Assembles the closing message handed to the reinforcement agent for one round. The
+ * investigation itself is not in it: it reaches the agent as conversation history.
+ */
 export const buildReinforcementPrompt = ({
   trees,
   learnings,
   connectorNames,
-  prompt,
   response,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
-  prompt: string;
   response: string;
-}): string => {
+}): { message: string; turnKind: DecisionTreeTurnKind } => {
   const turnKind = deriveTurnKind(trees);
   const script = selectTurnScript({
     turnKind,
@@ -65,7 +64,7 @@ export const buildReinforcementPrompt = ({
     return trees.some((tree) => learningSlug === tree.symptom);
   });
 
-  const turnPrompt = buildTurnPrompt({
+  const message = buildTurnPrompt({
     editableTreePaths: trees.map(
       (tree) => `${tree.tree_id} — ${workspacePathForTree(tree.tree_id)}`
     ),
@@ -82,15 +81,5 @@ export const buildReinforcementPrompt = ({
     script,
   });
 
-  return [
-    '## Investigation transcript',
-    '',
-    '### User',
-    prompt.slice(0, MAX_TRANSCRIPT_CHARS),
-    '',
-    '### Investigator',
-    response.slice(0, MAX_TRANSCRIPT_CHARS),
-    '',
-    turnPrompt,
-  ].join('\n');
+  return { message, turnKind };
 };

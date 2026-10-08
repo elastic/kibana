@@ -38,6 +38,7 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
+  embedding: 'Embedding',
   rerank: 'Rerank',
 };
 
@@ -253,6 +254,7 @@ export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  selectedRegionOptions?: string[];
   showOutsideRegionPreferences?: boolean;
   showEndOfLifeModels?: boolean;
   showPreviewModels?: boolean;
@@ -264,6 +266,7 @@ export const filterGroupedModels = (
     searchQuery,
     selectedTaskTypes,
     selectedProviders,
+    selectedRegionOptions = [],
     showOutsideRegionPreferences = false,
     showEndOfLifeModels = false,
     showPreviewModels = false,
@@ -284,6 +287,12 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (
+        selectedRegionOptions.length > 0 &&
+        !selectedRegionOptions.some((key) => modelMatchesRegionOption(m, key))
+      ) {
         return false;
       }
       if (!showOutsideRegionPreferences) {
@@ -321,6 +330,11 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
   const eolDate = getModelEOLDate(metadata);
   if (!eolDate) return false;
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function isModelNearingEndOfLife(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!isModelDeprecated(metadata)) return false;
+  return !isModelEndOfLifeReached(metadata);
 }
 
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
@@ -523,3 +537,6 @@ export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOptio
     return true;
   });
 };
+
+export const modelMatchesRegionOption = (model: GroupedModel, key: string): boolean =>
+  getRegionOptions(model.endpoints).some((option) => option.key === key);
