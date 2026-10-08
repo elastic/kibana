@@ -24,6 +24,8 @@ export interface ContractCall {
   readonly request: string;
   /** The matched operation's `operationId`, or `METHOD /path` when it has none. */
   readonly operation?: string;
+  /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
+  readonly token?: true;
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
@@ -138,6 +140,7 @@ export const createContractMockFetch = ({
       calls.push({
         request: description,
         operation: 'OAuth token',
+        token: true,
         status: response.statusCode,
         requestViolations: [],
         responseViolations: [],

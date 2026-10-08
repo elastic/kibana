@@ -101,4 +101,38 @@ describe('token endpoints', () => {
 
     expect(status).toBe(200);
   });
+
+  describe('JWT bearer assertions', () => {
+    const assertion = (claims: Record<string, unknown>) =>
+      `e30.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.signature`;
+    const exchange = (jwt: string) =>
+      requestToken('https://auth.example.com/oauth/token', {
+        body: new URLSearchParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          assertion: jwt,
+        }).toString(),
+      });
+
+    it('issues an access token for a scope', async () => {
+      expect(await exchange(assertion({ scope: 'read' }))).toEqual({
+        status: 200,
+        body: {
+          access_token: 'contract-mock-access-token',
+          token_type: 'Bearer',
+          expires_in: 3600,
+        },
+      });
+    });
+
+    it('issues an ID token for a target audience', async () => {
+      expect(await exchange(assertion({ target_audience: 'https://fn.example.com' }))).toEqual({
+        status: 200,
+        body: { id_token: 'contract-mock-id-token', expires_in: 3600 },
+      });
+    });
+
+    it('rejects an assertion that is not a JWT', async () => {
+      expect((await exchange('not-a-jwt')).body.error).toBe('invalid_grant');
+    });
+  });
 });
