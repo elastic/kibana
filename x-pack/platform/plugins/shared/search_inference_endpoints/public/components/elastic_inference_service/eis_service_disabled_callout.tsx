@@ -27,7 +27,7 @@ export const EisServiceDisabledCallout = ({
       'xpack.searchInferenceEndpoints.eisModelsPage.serviceDisabled.description',
       {
         defaultMessage:
-          'The Elastic Inference Service is currently disabled via the Cloud Connect settings. Models provided through the service will not return a response.',
+          'Elastic Inference Service is disabled in the Cloud Connect settings. Models provided through the service are unavailable.',
       }
     )}
     actionProps={{
