@@ -61,15 +61,11 @@ describe('full-text match marks on columns', () => {
       });
     });
 
-    it('marks every text column for a condition that names no field', async () => {
-      expect(await getMarkedColumns('FROM books | WHERE QSTR("Return")')).toEqual({
-        title: 'all',
-        author: 'all',
-      });
-      expect(await getMarkedColumns('FROM books | WHERE KQL("title: x")')).toEqual({
-        title: 'all',
-        author: 'all',
-      });
+    it('marks every column for a condition that names no field', async () => {
+      const allColumns = { title: 'all', author: 'all', year: 'all', _id: 'all' };
+
+      expect(await getMarkedColumns('FROM books | WHERE QSTR("Return")')).toEqual(allColumns);
+      expect(await getMarkedColumns('FROM books | WHERE KQL("title: x")')).toEqual(allColumns);
     });
 
     it('does not mark a negated condition, or one mixed with other filters', async () => {
@@ -161,6 +157,14 @@ describe('full-text match marks on columns', () => {
           'FROM books | WHERE QSTR("x") | EVAL label = TO_STRING(year) | HIGHLIGHT'
         )
       ).toContain('highlight_label');
+    });
+
+    it('reaches new text columns even after every earlier text column is removed', async () => {
+      expect(
+        await getHighlightColumns(
+          'FROM books | WHERE QSTR("x") | KEEP year | EVAL label = TO_STRING(year) | HIGHLIGHT'
+        )
+      ).toEqual(['highlight_label']);
     });
 
     it('combines the fields of several WHERE commands', async () => {

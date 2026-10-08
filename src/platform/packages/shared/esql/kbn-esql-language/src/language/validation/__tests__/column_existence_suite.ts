@@ -27,6 +27,14 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       );
     });
 
+    it('knows the HIGHLIGHT columns of a QSTR WHERE after its text columns are removed', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | WHERE QSTR("x") | KEEP integerField | EVAL label = TO_STRING(integerField) | HIGHLIGHT | KEEP highlight_label',
+        []
+      );
+    });
+
     it('reports a HIGHLIGHT column whose WHERE has no full-text condition to reuse', async () => {
       const { expectErrors } = await setup();
       await expectErrors(

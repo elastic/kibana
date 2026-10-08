@@ -25,15 +25,14 @@ export const columnsAfter = (
   }
 
   return previousColumns.map((column) => {
-    if (!isTextColumn(column)) {
-      return column;
-    }
-
+    // A condition that names no field applies to whichever text columns exist later, so every
+    // column carries it: it then survives as long as any column does, even if the text columns
+    // of this point are removed and new ones created.
     if (all) {
       return { ...column, fullTextMatch: 'all' };
     }
 
-    return fields.has(column.name) && column.fullTextMatch !== 'all'
+    return isTextColumn(column) && fields.has(column.name) && column.fullTextMatch !== 'all'
       ? { ...column, fullTextMatch: 'field' }
       : column;
   });
