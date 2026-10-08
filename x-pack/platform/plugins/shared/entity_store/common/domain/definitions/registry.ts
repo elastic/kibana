@@ -83,7 +83,7 @@ export function getEntityDefinition(
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions
 ): GatedEntityDefinition<ManagedEntityDefinition> {
-  const definition = getEntityDefinitionWithoutId(type, extractionMode, options);
+  const definition = getBuiltInEntityDefinition(type, extractionMode, options);
 
   return {
     ...definition,
@@ -102,7 +102,7 @@ export function getEntityDefinition(
  * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
  * gates come from that one declaration, so they cannot drift out of being complements.
  */
-export function getEntityDefinitionWithoutId(
+export function getBuiltInEntityDefinition(
   type: EntityType,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions

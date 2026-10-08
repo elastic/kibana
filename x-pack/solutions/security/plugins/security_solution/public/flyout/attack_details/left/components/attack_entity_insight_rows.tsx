@@ -99,7 +99,7 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     const dataAsNestedObject = sampleSource as unknown as Ecs;
 
     const hostEntityId = euidApi?.euid.getEuidFromObject(
-      euidApi.getEntityDefinitionWithoutId('host'),
+      euidApi.getBuiltInEntityDefinition('host'),
       dataAsNestedObject
     );
     const hostEntityFromStore = useEntityFromStore({
@@ -187,7 +187,7 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     const dataAsNestedObject = sampleSource as unknown as Ecs;
 
     const userEntityId = euidApi?.euid.getEuidFromObject(
-      euidApi.getEntityDefinitionWithoutId('user'),
+      euidApi.getBuiltInEntityDefinition('user'),
       dataAsNestedObject
     );
     const userEntityFromStore = useEntityFromStore({

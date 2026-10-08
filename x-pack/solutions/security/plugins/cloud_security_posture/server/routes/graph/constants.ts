@@ -11,15 +11,15 @@ import {
 } from '@kbn/cloud-security-posture-common/constants';
 
 export { type EuidSourceFields } from '@kbn/cloud-security-posture-common/constants';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = getGraphActorEuidSourceFields({
   euid,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 });
 export const GRAPH_TARGET_EUID_SOURCE_FIELDS = getGraphTargetEuidSourceFields({
   euid,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 });
 
 /**

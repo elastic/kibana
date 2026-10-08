@@ -227,7 +227,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     }
 
     const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
-      euidApi.getEntityDefinitionWithoutId(EntityType.user),
+      euidApi.getBuiltInEntityDefinition(EntityType.user),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;

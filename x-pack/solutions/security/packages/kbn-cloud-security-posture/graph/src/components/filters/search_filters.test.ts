@@ -26,7 +26,7 @@ import {
   getEuidNamespaceSourcePrefix,
   getEntityIdentifiersFromDocument,
 } from '@kbn/entity-store/common/domain/euid';
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   getEntityFilterSpec,
   type EuidFilterApi,
@@ -55,7 +55,7 @@ const euidApi: EuidFilterApi = {
     getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
     getEntityIdentifiersFromDocument,
   },
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 };
 
 const buildFilterMock = (key: string, value: string, controlledBy?: string) => ({
@@ -702,7 +702,7 @@ describe('search_filters', () => {
     // entities. Using it rather than a stub means these tests fail if the definition's
     // namespace sources or their `splitBy` change.
     const getUserNamespacePrefix = (field: string, observedValue: string) =>
-      getEuidNamespaceSourcePrefix(getEntityDefinitionWithoutId('user'), field, observedValue);
+      getEuidNamespaceSourcePrefix(getBuiltInEntityDefinition('user'), field, observedValue);
 
     // The shape the Entity Store's `getEuidDslFilterBasedOnDocument` really returns for a GCP
     // user resolved at ranking position 1 (user.id, no user.email). The `prefix` clause is part
@@ -1195,7 +1195,7 @@ describe('search_filters', () => {
     // different definition than the `user` cases above. Driving the real builder rather than a
     // hand-written DSL fixture means these fail if `host.ts` changes.
     const getHostNamespacePrefix = (field: string, observedValue: string) =>
-      getEuidNamespaceSourcePrefix(getEntityDefinitionWithoutId('host'), field, observedValue);
+      getEuidNamespaceSourcePrefix(getBuiltInEntityDefinition('host'), field, observedValue);
 
     const buildHostFilter = (
       sourceFields: Record<string, string | string[]>,

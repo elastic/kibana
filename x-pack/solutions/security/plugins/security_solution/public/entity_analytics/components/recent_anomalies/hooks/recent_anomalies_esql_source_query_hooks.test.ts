@@ -35,7 +35,7 @@ describe('recent anomalies ES|QL sources', () => {
             `${target} = CONCAT("${type}:", ${type}.name)`,
         },
       },
-      getEntityDefinitionWithoutId: (type: string) => ({ type }),
+      getBuiltInEntityDefinition: (type: string) => ({ type }),
     });
   });
 

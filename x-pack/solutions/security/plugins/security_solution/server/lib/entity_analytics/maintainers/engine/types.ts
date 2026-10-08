@@ -80,7 +80,7 @@ export interface CustomActorBinding {
    * Used by `kind: 'standard'` and `kind: 'bucketed'` configs. Override
    * configs compute the actor EUID inside their override fn — set `fields`
    * here for Step 1 narrowing parity, but `evalOverride` is unused for them.
-   * Defaults to `euid.esql.getEuidEvaluation(getEntityDefinitionWithoutId('user'),
+   * Defaults to `euid.esql.getEuidEvaluation(getBuiltInEntityDefinition('user'),
    * ENGINE_COLUMNS.actor, { withTypeId: true })`.
    *
    * Identifiers must follow the quoting convention described at the top of
@@ -225,7 +225,7 @@ interface StandardBuilderFields {
   esqlWhereClause: string;
   /**
    * Optional ESQL expression for the target entity ID.
-   * Defaults to euid.esql.getEuidEvaluation(getEntityDefinitionWithoutId(targetEntityType),
+   * Defaults to euid.esql.getEuidEvaluation(getBuiltInEntityDefinition(targetEntityType),
    * 'targetEntityId', { withTypeId: true }).
    * Required for integrations with non-standard target fields (e.g. okta,
    * aws_cloudtrail communicates_with).
@@ -338,7 +338,7 @@ export type RelationshipIntegrationConfig =
  * Output record from the relationship-maintainer postprocessor.
  *
  * `entityType` is currently fixed to `'user'` because every shipped config
- * computes its actor EUID via `getEuidEvaluation(getEntityDefinitionWithoutId('user'), …)` and
+ * computes its actor EUID via `getEuidEvaluation(getBuiltInEntityDefinition('user'), …)` and
  * the engine hardcodes `'user'` at every producer/builder site. Broadening to
  * `'user' | 'host' | 'service'` is tracked under the actorEntityType
  * follow-up (#266748). Agents/engineers implementing #266748 should change
@@ -350,7 +350,7 @@ export type RelationshipIntegrationConfig =
  *   2. `engine/build_actor_discovery_query.ts` — Step 1 user-EUID existence
  *      filter is parameterized on entity type.
  *   3. `engine/build_targets_per_actor_query.ts` — Step 2 actor EVAL uses
- *      `getEuidEvaluation(getEntityDefinitionWithoutId('user'), …)`; thread the configured
+ *      `getEuidEvaluation(getBuiltInEntityDefinition('user'), …)`; thread the configured
  *      type through.
  *   4. `engine/parse_targets_per_actor_rows.ts` — drop the `'user' as const`
  *      on the produced records.

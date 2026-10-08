@@ -38,10 +38,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid, getEntityDefinitionWithoutId } = jest.requireActual(
+  const { euid, getBuiltInEntityDefinition } = jest.requireActual(
     '@kbn/entity-store/common/euid_helpers'
   );
-  const euidApi = { euid, getEntityDefinitionWithoutId };
+  const euidApi = { euid, getBuiltInEntityDefinition };
   return {
     ...actual,
     useEntityStoreEuidApi: jest.fn(() => euidApi),

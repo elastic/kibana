@@ -9,7 +9,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../../common/domain/euid';
-import { getEntityDefinitionWithoutId } from '../../../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 import type { Entity, HostEntity } from '../../../../../common/domain/definitions/entity.gen';
 import {
   PUBLIC_HEADERS,
@@ -69,7 +69,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.body).toStrictEqual({ ok: true });
 
     expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
-    const euid = getEuidFromObject(getEntityDefinitionWithoutId('generic'), entityObj) as string;
+    const euid = getEuidFromObject(getBuiltInEntityDefinition('generic'), entityObj) as string;
     const check = await esClient.get({ index: LATEST_ALIAS, id: hashEuid(euid) });
     expect(check.found).toBe(true);
   });
@@ -508,7 +508,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(resp.hits.hits).toHaveLength(1);
     expect(resp.hits.hits[0]._id).toBeDefined();
 
-    const euid = getEuidFromObject(getEntityDefinitionWithoutId('generic'), entityObj) as string;
+    const euid = getEuidFromObject(getBuiltInEntityDefinition('generic'), entityObj) as string;
 
     const expectedHashedEntityId = hashEuid(euid);
     const hashedEntityId = resp.hits.hits[0]._id as string;

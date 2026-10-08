@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 
 import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
@@ -27,16 +27,14 @@ export const buildLookbackFilter = (
 
 // TODO(#266748): actorEntityType is hardcoded to 'user' — add actorEntityType to
 // RelationshipIntegrationConfig to support host→host, host→service, and service→* relationships.
-const USER_IDENTITY_FIELDS = getEuidSourceFields(
-  getEntityDefinitionWithoutId('user')
-).requiresOneOf;
+const USER_IDENTITY_FIELDS = getEuidSourceFields(getBuiltInEntityDefinition('user')).requiresOneOf;
 
 /**
  * "At least one of these fields exists and is non-empty" DSL.
  *
  * Used as the base actor-presence filter when the config supplies its own
  * `customActor.fields`. The default path (no `customActor`) keeps using
- * `euid.dsl.getEuidDocumentsContainsIdFilter(getEntityDefinitionWithoutId('user'))`, which
+ * `euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))`, which
  * carries the full ECS user-EUID semantics (including the `event.outcome != "failure"`
  * baseline) — that behaviour is unchanged here. This helper exists only so
  * configs whose actor identity lives outside ECS `user.*` (e.g. Azure
@@ -67,7 +65,7 @@ export const buildActorDiscoveryQuery = (
   // see those actors. Match the gate to the actor-fields the config declares.
   const actorPresenceFilter: QueryDslQueryContainer = config.customActor
     ? buildAnyActorFieldNonEmptyDsl(config.customActor.fields)
-    : euid.dsl.getEuidDocumentsContainsIdFilter(getEntityDefinitionWithoutId('user'));
+    : euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'));
 
   // The @timestamp lookback is a log-index assumption. Entity-index configs
   // (e.g. administers) opt out via `disableLookbackWindow` and gate freshness
@@ -79,9 +77,7 @@ export const buildActorDiscoveryQuery = (
 
   if (config.requireTargetEntityIdExists) {
     baseFilters.push(
-      euid.dsl.getEuidDocumentsContainsIdFilter(
-        getEntityDefinitionWithoutId(config.targetEntityType)
-      )
+      euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(config.targetEntityType))
     );
   }
 

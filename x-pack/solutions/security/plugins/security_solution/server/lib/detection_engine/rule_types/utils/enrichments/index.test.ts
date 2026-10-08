@@ -32,8 +32,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     getEuidFromObjectForSearch: jest.fn(),
   },
-  getEntityDefinitionWithoutId: jest.requireActual('@kbn/entity-store/common/euid_helpers')
-    .getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
 

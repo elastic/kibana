@@ -171,7 +171,7 @@ export function useEntityFromStore(
     () =>
       euidApi?.euid
         ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-            euidApi.getEntityDefinitionWithoutId(entityType as EntityType),
+            euidApi.getBuiltInEntityDefinition(entityType as EntityType),
             identityDocument,
             {
               excludeHigherRankedFields: false,

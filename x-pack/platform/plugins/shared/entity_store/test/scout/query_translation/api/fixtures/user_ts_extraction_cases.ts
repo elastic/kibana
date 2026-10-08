@@ -32,7 +32,7 @@ export interface UserTsExtractionCase {
   readonly query: object;
   /**
    * Document shape passed to
-   * `getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), doc)`
+   * `getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), doc)`
    * (subset of `_source` sufficient to build the same filter as the archived doc).
    */
   readonly dslFilterSource: Record<string, unknown>;
@@ -636,7 +636,7 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 
 /**
  * Expected number of user documents in `es_archives/updates` that pass
- * `getEuidDslDocumentsContainsIdFilter(getEntityDefinitionWithoutId('user'))`, which is built from
+ * `getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))`, which is built from
  * `documentsFilter` only (see `common/domain/euid/dsl.ts`). Documents that pass `documentsFilter`
  * but fail `postAggFilter` are
  * still counted here, so this number is independent of the `postAggFilter` gates. Ingested-only

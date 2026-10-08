@@ -13,13 +13,13 @@
  *
  * Every helper outside `experimental` takes an entity definition as its first argument, so it works
  * for any definition, including those other plugins register in the entity definition registry. Use
- * {@link getEntityDefinitionWithoutId} to resolve one of the Entity Store's built-in definitions
+ * {@link getBuiltInEntityDefinition} to resolve one of the Entity Store's built-in definitions
  * (`user`, `host`, `service`, `generic`) by type name.
  *
  * @example
- * import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+ * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
  * // One of the four built-ins, by name:
- * euid.getEuidFromObject(getEntityDefinitionWithoutId('host'), doc);
+ * euid.getEuidFromObject(getBuiltInEntityDefinition('host'), doc);
  * // Any definition, for example one read from the registry on the server:
  * const definition = await entityStore.getEntityDefinitionsClientForSpace(space).get('k8s.pod');
  * euid.getEuidFromObject(definition, doc);
@@ -27,10 +27,10 @@
  */
 
 import * as euidModule from './domain/euid';
-import { getEntityDefinitionWithoutId } from './domain/definitions/registry';
+import { getBuiltInEntityDefinition } from './domain/definitions/registry';
 import type { EntityDefinitionWithoutId, EntityType } from './domain/definitions/entity_schema';
 
-export { getEntityDefinitionWithoutId };
+export { getBuiltInEntityDefinition };
 
 export const euid = {
   /**
@@ -196,9 +196,9 @@ export type EntityStoreEuid = typeof euid;
 
 /**
  * EUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.
- * Aligns with the {@link euid} object and {@link getEntityDefinitionWithoutId} from this module.
+ * Aligns with the {@link euid} object and {@link getBuiltInEntityDefinition} from this module.
  */
 export interface EntityStoreEuidApi {
   euid: EntityStoreEuid;
-  getEntityDefinitionWithoutId: (type: EntityType) => EntityDefinitionWithoutId;
+  getBuiltInEntityDefinition: (type: EntityType) => EntityDefinitionWithoutId;
 }

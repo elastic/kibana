@@ -175,7 +175,7 @@ export const AlertsDetailsTable = memo(
         return undefined;
       }
       return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(entityTypeResolved),
+        euidApi.getBuiltInEntityDefinition(entityTypeResolved),
         entityRecord
       );
     }, [euidApi, entityTypeResolved, entityRecord]);

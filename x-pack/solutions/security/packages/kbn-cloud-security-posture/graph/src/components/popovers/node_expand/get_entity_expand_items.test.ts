@@ -11,7 +11,7 @@ import {
   getEuidNamespaceSourcePrefix,
   getEntityIdentifiersFromDocument,
 } from '@kbn/entity-store/common/domain/euid';
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   getSourceFieldsFromNode,
   getEntityTypeFromNodeId,
@@ -33,7 +33,7 @@ const euidApi: EuidFilterApi = {
     getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
     getEntityIdentifiersFromDocument,
   },
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 };
 
 describe('getSourceFieldsFromNode', () => {
@@ -357,7 +357,7 @@ describe('getEntityFilterSpec', () => {
     // source switches to/from `firstChunkOfField`, `prefixMatchFields` changes and the values we
     // carry must follow automatically.
     const { prefixMatchFields, exactMatchFields } = getEuidNamespaceSourceFields(
-      getEntityDefinitionWithoutId('user')
+      getBuiltInEntityDefinition('user')
     );
     expect(prefixMatchFields.length).toBeGreaterThan(0);
 

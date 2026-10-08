@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { CRUDClient } from './crud_client';
 import { EntityStoreNotInstalledError } from '../errors';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
-import { getEntityDefinitionWithoutId } from '../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
   ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID,
   ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID,
@@ -493,7 +493,7 @@ describe('CRUDClient', () => {
 
       it('does not emit for entities that failed in the bulk operation', async () => {
         const doc = { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } };
-        const failedId = hashEuid(getEuidFromObject(getEntityDefinitionWithoutId('generic'), doc)!);
+        const failedId = hashEuid(getEuidFromObject(getBuiltInEntityDefinition('generic'), doc)!);
 
         esClient.bulk.mockResolvedValue({
           errors: true,
@@ -524,7 +524,7 @@ describe('CRUDClient', () => {
         const failDoc = { entity: { id: 'host-fail' }, asset: { criticality: 'high_impact' } };
         const successDoc = { entity: { id: 'host-ok' }, asset: { criticality: 'low_impact' } };
         const failedId = hashEuid(
-          getEuidFromObject(getEntityDefinitionWithoutId('generic'), failDoc)!
+          getEuidFromObject(getBuiltInEntityDefinition('generic'), failDoc)!
         );
 
         esClient.bulk.mockResolvedValue({
@@ -540,7 +540,7 @@ describe('CRUDClient', () => {
             {
               update: {
                 _id: hashEuid(
-                  getEuidFromObject(getEntityDefinitionWithoutId('generic'), successDoc)!
+                  getEuidFromObject(getBuiltInEntityDefinition('generic'), successDoc)!
                 ),
                 status: 200,
               },
@@ -744,7 +744,7 @@ describe('CRUDClient', () => {
 
       it('does not emit for entities that failed in the bulk operation', async () => {
         const doc = { entity: { id: 'host-1', risk: { calculated_score_norm: 70 } } };
-        const failedId = hashEuid(getEuidFromObject(getEntityDefinitionWithoutId('generic'), doc)!);
+        const failedId = hashEuid(getEuidFromObject(getBuiltInEntityDefinition('generic'), doc)!);
 
         esClient.bulk.mockResolvedValue({
           errors: true,

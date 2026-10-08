@@ -18,7 +18,7 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  * anomalies → entity-latest on the typed EUID (entity.id).
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
-  { euid, getEntityDefinitionWithoutId }: EntityStoreEuidApi,
+  { euid, getBuiltInEntityDefinition }: EntityStoreEuidApi,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
@@ -36,13 +36,13 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   );
 
   for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(getEntityDefinitionWithoutId(entityType));
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
     parts.push(
       `| EVAL ${euid.esql.getEuidEvaluation(
-        getEntityDefinitionWithoutId(entityType),
+        getBuiltInEntityDefinition(entityType),
         `${entityType}_euid`
       )}`
     );

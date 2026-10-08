@@ -52,7 +52,7 @@ function extractEntityEntriesFromBuckets(
     const source = hit?._source;
     if (source && typeof source === 'object' && !Array.isArray(source)) {
       const identityFields = euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId(entityType),
+        euidApi.getBuiltInEntityDefinition(entityType),
         source
       );
       if (identityFields != null) {
@@ -93,10 +93,10 @@ export const useAttackEntitiesLists = (
       size: 0,
       runtime_mappings: {
         [USER_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping(
-          euidApi.getEntityDefinitionWithoutId('user')
+          euidApi.getBuiltInEntityDefinition('user')
         ),
         [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping(
-          euidApi.getEntityDefinitionWithoutId('host')
+          euidApi.getBuiltInEntityDefinition('host')
         ),
       },
       aggs: {

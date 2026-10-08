@@ -102,7 +102,7 @@ export const AlertCountByRuleByStatus = React.memo(
           : null;
       } else {
         kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getEntityDefinitionWithoutId(entityType as EntityType),
+          euidApi.getBuiltInEntityDefinition(entityType as EntityType),
           entityRecord
         );
       }

@@ -15,7 +15,7 @@ const mockEuidApi = {
       getEuidEvaluation: (_definition: unknown, varName: string) => `${varName} = "mock_euid"`,
     },
   },
-  getEntityDefinitionWithoutId: (type: string) => ({ type }),
+  getBuiltInEntityDefinition: (type: string) => ({ type }),
 } as unknown as EntityStoreEuidApi;
 
 describe('buildAlertBasedTilesQuery', () => {

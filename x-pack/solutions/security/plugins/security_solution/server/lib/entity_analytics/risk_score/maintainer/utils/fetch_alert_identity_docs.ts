@@ -8,7 +8,7 @@
 import { chunk } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEntityTypeCreatableFromSingleDocument } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { ScopedLogger } from './with_log_context';
@@ -64,7 +64,7 @@ export const fetchAlertIdentityDocs = async ({
   // legitimately computes its requested EUID.
   // TODO: Reconsider this coupling after elastic/security-team#18624 is resolved.
   const runtimeMapping = euid.painless.getEuidRuntimeMapping(
-    getEntityDefinitionWithoutId(entityType)
+    getBuiltInEntityDefinition(entityType)
   );
 
   for (const euidsChunk of chunk(euids, ALERT_IDENTITY_DOCS_CHUNK_SIZE)) {

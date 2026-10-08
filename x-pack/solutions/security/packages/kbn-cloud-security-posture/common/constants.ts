@@ -190,16 +190,16 @@ const ENTITY_NAMESPACE_SOURCE_FIELDS = [
  */
 export const getGraphActorEuidSourceFields = ({
   euid,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 }: EntityStoreEuidApi) => {
   return {
-    user: [...euid.getEuidSourceFields(getEntityDefinitionWithoutId('user')).identitySourceFields],
-    host: [...euid.getEuidSourceFields(getEntityDefinitionWithoutId('host')).identitySourceFields],
+    user: [...euid.getEuidSourceFields(getBuiltInEntityDefinition('user')).identitySourceFields],
+    host: [...euid.getEuidSourceFields(getBuiltInEntityDefinition('host')).identitySourceFields],
     service: [
-      ...euid.getEuidSourceFields(getEntityDefinitionWithoutId('service')).identitySourceFields,
+      ...euid.getEuidSourceFields(getBuiltInEntityDefinition('service')).identitySourceFields,
     ],
     generic: [
-      ...euid.getEuidSourceFields(getEntityDefinitionWithoutId('generic')).identitySourceFields,
+      ...euid.getEuidSourceFields(getBuiltInEntityDefinition('generic')).identitySourceFields,
     ],
     all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
@@ -215,27 +215,27 @@ function toTargetField(field: string): string {
  */
 export const getGraphTargetEuidSourceFields = ({
   euid,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 }: EntityStoreEuidApi) => {
   return {
     user: [
       ...euid
-        .getEuidSourceFields(getEntityDefinitionWithoutId('user'))
+        .getEuidSourceFields(getBuiltInEntityDefinition('user'))
         .identitySourceFields.map(toTargetField),
     ],
     host: [
       ...euid
-        .getEuidSourceFields(getEntityDefinitionWithoutId('host'))
+        .getEuidSourceFields(getBuiltInEntityDefinition('host'))
         .identitySourceFields.map(toTargetField),
     ],
     service: [
       ...euid
-        .getEuidSourceFields(getEntityDefinitionWithoutId('service'))
+        .getEuidSourceFields(getBuiltInEntityDefinition('service'))
         .identitySourceFields.map(toTargetField),
     ],
     generic: [
       ...euid
-        .getEuidSourceFields(getEntityDefinitionWithoutId('generic'))
+        .getEuidSourceFields(getBuiltInEntityDefinition('generic'))
         .identitySourceFields.map(toTargetField),
     ],
     // Namespace sources describe the event, not the actor/target side, so they are not

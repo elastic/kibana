@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import type { RelationshipIntegrationConfig } from './types';
 
 const HOST_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter(
-  getEntityDefinitionWithoutId('host')
+  getBuiltInEntityDefinition('host')
 );
 const USER_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter(
-  getEntityDefinitionWithoutId('user')
+  getBuiltInEntityDefinition('user')
 );
 
 const accessesConfig: RelationshipIntegrationConfig = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -50,7 +50,7 @@ describe('useEntitiesOverview', () => {
         getEntityIdentifiersFromDocument: mockGetEntityIdentifiersFromDocument,
         getEuidFromObject: mockGetEuidFromObject,
       },
-      getEntityDefinitionWithoutId,
+      getBuiltInEntityDefinition,
     });
     mockGetEntityIdentifiersFromDocument.mockReturnValue(undefined);
     mockGetEuidFromObject.mockReturnValue(undefined);
@@ -168,19 +168,19 @@ describe('useEntitiesOverview', () => {
     renderHook(() => useEntitiesOverview({ hit }));
 
     expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
-      getEntityDefinitionWithoutId('host'),
+      getBuiltInEntityDefinition('host'),
       hit.flattened
     );
     expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
-      getEntityDefinitionWithoutId('user'),
+      getBuiltInEntityDefinition('user'),
       hit.flattened
     );
     expect(mockGetEuidFromObject).toHaveBeenCalledWith(
-      getEntityDefinitionWithoutId('host'),
+      getBuiltInEntityDefinition('host'),
       hit.flattened
     );
     expect(mockGetEuidFromObject).toHaveBeenCalledWith(
-      getEntityDefinitionWithoutId('user'),
+      getBuiltInEntityDefinition('user'),
       hit.flattened
     );
   });

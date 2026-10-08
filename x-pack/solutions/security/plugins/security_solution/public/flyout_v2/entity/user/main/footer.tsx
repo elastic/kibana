@@ -46,7 +46,7 @@ export const Footer = ({ userName, identityFields, entity }: FooterProps) => {
       return undefined;
     }
     return euidApi.euid.kql.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId('user'),
+      euidApi.getBuiltInEntityDefinition('user'),
       entity
     );
   }, [euidApi, entity]);

@@ -149,7 +149,7 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
     () =>
       hit.flattened
         ? euidApi?.euid.getEntityIdentifiersFromDocument(
-            euidApi.getEntityDefinitionWithoutId('host'),
+            euidApi.getBuiltInEntityDefinition('host'),
             hit.flattened
           )
         : null,
@@ -159,7 +159,7 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
     () =>
       hit.flattened
         ? euidApi?.euid.getEntityIdentifiersFromDocument(
-            euidApi.getEntityDefinitionWithoutId('user'),
+            euidApi.getBuiltInEntityDefinition('user'),
             hit.flattened
           )
         : null,

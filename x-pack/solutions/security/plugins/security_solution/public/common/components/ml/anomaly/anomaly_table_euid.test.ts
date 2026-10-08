@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { Anomaly } from '../types';
@@ -43,7 +43,7 @@ describe('anomaly_table_euid', () => {
       } as unknown as EntityStoreEuid;
 
       expect(
-        buildBroadMlIdentityFieldsExistFilter({ euid, getEntityDefinitionWithoutId }, 'user')
+        buildBroadMlIdentityFieldsExistFilter({ euid, getBuiltInEntityDefinition }, 'user')
       ).toEqual({
         bool: {
           should: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.name' } }],
@@ -77,7 +77,7 @@ describe('anomaly_table_euid', () => {
       } as unknown as EntityStoreEuid;
 
       const q = buildAnomaliesTableInfluencersFilterQuery({
-        euidApi: { euid, getEntityDefinitionWithoutId },
+        euidApi: { euid, getBuiltInEntityDefinition },
         entityType: 'user',
         isScopedToEntity: true,
         identityFields: { 'user.email': 'a@b.c' },
@@ -99,13 +99,13 @@ describe('anomaly_table_euid', () => {
       const entityRecord = { 'user.name': 'alice' } as unknown as EntityStoreRecord;
 
       const q = buildAnomaliesTableInfluencersFilterQuery({
-        euidApi: { euid, getEntityDefinitionWithoutId },
+        euidApi: { euid, getBuiltInEntityDefinition },
         entityType: 'user',
         entityRecord,
         isScopedToEntity: true,
       });
       expect(getEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         entityRecord
       );
       expect(q).toEqual(scopedDsl);
@@ -123,7 +123,7 @@ describe('anomaly_table_euid', () => {
 
       expect(
         getCriteriaFieldsForAnomaliesTable({
-          euidApi: { euid, getEntityDefinitionWithoutId },
+          euidApi: { euid, getBuiltInEntityDefinition },
           entityType: 'user',
           isScopedToEntity: true,
           identityFields: { 'user.name': 'bob' },
@@ -144,7 +144,7 @@ describe('anomaly_table_euid', () => {
 
       expect(
         getCriteriaFieldsForAnomaliesTable({
-          euidApi: { euid, getEntityDefinitionWithoutId },
+          euidApi: { euid, getBuiltInEntityDefinition },
           entityType: 'user',
           isScopedToEntity: true,
           fallbackDisplayName: 'bob',
@@ -165,18 +165,18 @@ describe('anomaly_table_euid', () => {
       const entityRecord = { 'user.name': 'carol' } as unknown as EntityStoreRecord;
 
       const result = getCriteriaFieldsForAnomaliesTable({
-        euidApi: { euid, getEntityDefinitionWithoutId },
+        euidApi: { euid, getBuiltInEntityDefinition },
         entityType: 'user',
         entityRecord,
         isScopedToEntity: true,
         fallbackDisplayName: 'carol',
       });
       expect(getEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         entityRecord
       );
       expect(getEntityIdentifiersFromDocument).toHaveBeenCalledWith(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         entityRecord
       );
       expect(result).toEqual([{ fieldName: 'user.name', fieldValue: 'carol' }]);

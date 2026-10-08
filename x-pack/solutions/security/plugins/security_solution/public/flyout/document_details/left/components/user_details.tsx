@@ -277,7 +277,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const identityFields = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('user'),
+        euidApi.getBuiltInEntityDefinition('user'),
         entityFromStoreResult.entityRecord ?? entityFromStoreResult.entity ?? {}
       ),
     [euidApi, entityFromStoreResult.entityRecord, entityFromStoreResult.entity]

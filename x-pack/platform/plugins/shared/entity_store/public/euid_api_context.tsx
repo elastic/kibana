@@ -22,7 +22,7 @@ export function EntityStoreEuidApiProvider({ children }: Readonly<{ children: Re
       if (!cancelled) {
         setApi({
           euid: mod.euid,
-          getEntityDefinitionWithoutId: mod.getEntityDefinitionWithoutId,
+          getBuiltInEntityDefinition: mod.getBuiltInEntityDefinition,
         });
       }
     });

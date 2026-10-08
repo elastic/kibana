@@ -132,7 +132,7 @@ export const AlertsByStatus = ({
         : null;
     } else {
       kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(entityType as EntityType),
+        euidApi.getBuiltInEntityDefinition(entityType as EntityType),
         entityRecord
       );
     }

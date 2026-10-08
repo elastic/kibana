@@ -32,13 +32,13 @@ export const convertAnomaliesToHosts = (
   const identifiers =
     euidApi && isScoped
       ? euidApi.euid.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('host'),
+          euidApi.getBuiltInEntityDefinition('host'),
           doc
         )
       : undefined;
   const identifiersUsable = identifiers != null && Object.keys(identifiers).length > 0;
   const identitySourceFields =
-    euidApi?.euid.getEuidSourceFields(euidApi.getEntityDefinitionWithoutId('host'))
+    euidApi?.euid.getEuidSourceFields(euidApi.getBuiltInEntityDefinition('host'))
       .identitySourceFields ?? [];
 
   return anomalies.anomalies.reduce<AnomaliesByHost[]>((accum, item) => {

@@ -7,7 +7,7 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEmpty } from 'lodash';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
@@ -30,7 +30,7 @@ export const buildHostDetailsQuery = ({
 
   const filter = [
     ...(entityStoreV2
-      ? [euid.dsl.getEuidDocumentsContainsIdFilter(getEntityDefinitionWithoutId('host'))]
+      ? [euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))]
       : []),
     ...(hostNameFilter ? [hostNameFilter] : []),
     ...createQueryFilterClauses(filterQuery),

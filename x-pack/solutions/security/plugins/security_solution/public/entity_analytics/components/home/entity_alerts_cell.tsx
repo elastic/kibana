@@ -94,7 +94,7 @@ export const EntityAlertsCell: React.FC<{
   const entityFilters = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(entityType),
+        euidApi.getBuiltInEntityDefinition(entityType),
         entityRecord
       );
       if (filter != null) {
@@ -107,7 +107,7 @@ export const EntityAlertsCell: React.FC<{
   const euidKqlEntityFilter = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
       return euidApi.euid.kql.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(entityType),
+        euidApi.getBuiltInEntityDefinition(entityType),
         entityRecord
       );
     }

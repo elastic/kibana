@@ -48,7 +48,7 @@ export const Footer = ({ hostName, identityFields, entity }: FooterProps) => {
       return undefined;
     }
     return euidApi.euid.kql.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId('host'),
+      euidApi.getBuiltInEntityDefinition('host'),
       entity
     );
   }, [euidApi, entity]);

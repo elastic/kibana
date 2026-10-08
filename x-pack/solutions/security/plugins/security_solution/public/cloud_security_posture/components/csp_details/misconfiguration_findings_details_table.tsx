@@ -216,7 +216,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         return undefined;
       }
       return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(entityType as EntityType),
+        euidApi.getBuiltInEntityDefinition(entityType as EntityType),
         entityRecord
       );
     }, [euidApi, entityType, entityRecord]);

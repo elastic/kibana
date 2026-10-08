@@ -227,7 +227,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
       return legacyFilters;
     }
     const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
-      euidApi.getEntityDefinitionWithoutId(EntityType.host),
+      euidApi.getBuiltInEntityDefinition(EntityType.host),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;

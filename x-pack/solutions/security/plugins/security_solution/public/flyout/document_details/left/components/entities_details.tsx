@@ -58,11 +58,11 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
 
   const euidApi = useEntityStoreEuidApi();
   const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    euidApi.getEntityDefinitionWithoutId('user'),
+    euidApi.getBuiltInEntityDefinition('user'),
     dataAsNestedObject
   ) as IdentityFields;
   const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    euidApi.getEntityDefinitionWithoutId('host'),
+    euidApi.getBuiltInEntityDefinition('host'),
     dataAsNestedObject
   ) as IdentityFields;
 
@@ -78,7 +78,7 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
       : undefined;
 
   const userEntityId = euidApi?.euid.getEuidFromObject(
-    euidApi.getEntityDefinitionWithoutId('user'),
+    euidApi.getBuiltInEntityDefinition('user'),
     dataAsNestedObject
   );
   const userEntityFromStore = useEntityFromStore({
@@ -104,7 +104,7 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
       : undefined;
 
   const hostEntityId = euidApi?.euid.getEuidFromObject(
-    euidApi.getEntityDefinitionWithoutId('host'),
+    euidApi.getBuiltInEntityDefinition('host'),
     dataAsNestedObject
   );
   const hostEntityFromStore = useEntityFromStore({

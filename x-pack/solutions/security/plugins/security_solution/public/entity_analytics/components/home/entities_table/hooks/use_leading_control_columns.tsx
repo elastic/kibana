@@ -62,7 +62,7 @@ const InvestigateInTimelineRowControl = ({
     }
 
     const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId(entityType),
+      euidApi.getBuiltInEntityDefinition(entityType),
       record.raw
     );
     if (kqlFilter) {

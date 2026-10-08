@@ -113,7 +113,7 @@ export const buildEuidCspPreviewOptions = (
 
   if (euidApi?.euid) {
     const euidEntityFilter = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId(entityType),
+      euidApi.getBuiltInEntityDefinition(entityType),
       identityDocument
     );
     if (euidEntityFilter != null) {

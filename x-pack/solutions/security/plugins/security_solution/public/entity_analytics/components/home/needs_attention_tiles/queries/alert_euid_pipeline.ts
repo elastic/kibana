@@ -34,18 +34,18 @@ const indentBranch = (esql: string): string =>
  */
 export const buildAlertEuidPipeline = ({
   euid,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 }: EntityStoreEuidApi): string[] => {
   const derivedSteps: string[] = ['WHERE `kibana.alert.entity.id` IS NULL'];
 
   for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(getEntityDefinitionWithoutId(entityType));
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       derivedSteps.push(`| EVAL ${fieldEvals}`);
     }
     derivedSteps.push(
       `| EVAL ${euid.esql.getEuidEvaluation(
-        getEntityDefinitionWithoutId(entityType),
+        getBuiltInEntityDefinition(entityType),
         `${entityType}_euid`
       )}`
     );

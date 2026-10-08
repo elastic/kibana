@@ -109,7 +109,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
     if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
       // Use the entity record to generate a DSL query fragment
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
-        euidApi.getEntityDefinitionWithoutId(storeEntityType ?? 'generic'),
+        euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'),
         entityRecord ?? entityRecordInput
       );
       return filter != null ? [filter] : [];

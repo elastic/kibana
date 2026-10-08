@@ -183,7 +183,7 @@ export const TableTab = memo(
     const hostDocumentIdentityFields = useMemo(
       () =>
         euidApi?.euid.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('host'),
+          euidApi.getBuiltInEntityDefinition('host'),
           hit.flattened
         ) ?? null,
       [euidApi, hit.flattened]
@@ -191,7 +191,7 @@ export const TableTab = memo(
     const userDocumentIdentityFields = useMemo(
       () =>
         euidApi?.euid.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('user'),
+          euidApi.getBuiltInEntityDefinition('user'),
           hit.flattened
         ) ?? null,
       [euidApi, hit.flattened]
@@ -199,18 +199,12 @@ export const TableTab = memo(
     const isHostEntity = hostDocumentIdentityFields != null;
     const hostEuidFromDocument = useMemo(
       () =>
-        euidApi?.euid.getEuidFromObject(
-          euidApi.getEntityDefinitionWithoutId('host'),
-          hit.flattened
-        ),
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
       [euidApi, hit.flattened]
     );
     const userEuidFromDocument = useMemo(
       () =>
-        euidApi?.euid.getEuidFromObject(
-          euidApi.getEntityDefinitionWithoutId('user'),
-          hit.flattened
-        ),
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
       [euidApi, hit.flattened]
     );
     const hostEntityFromStore = useEntityFromStore({

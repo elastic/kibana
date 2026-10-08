@@ -21,7 +21,7 @@ import {
   teardownQueryTranslationTestDataStream,
 } from '../../../common/fixtures/helpers';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../../common/domain/euid/esql';
-import { getEntityDefinitionWithoutId } from '../../../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
   USER_TS_EXTRACTION_CASES,
@@ -71,7 +71,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { entity: { id: 'generic-id' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('generic'),
+        getBuiltInEntityDefinition('generic'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -94,7 +94,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { host: { name: 'server-01', domain: 'example.com' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('host'),
+        getBuiltInEntityDefinition('host'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -120,7 +120,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { host: { name: 'desktop-02' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('host'),
+        getBuiltInEntityDefinition('host'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -146,7 +146,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
       for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
         expect(
-          getEuidEsqlFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), example.doc)
+          getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), example.doc)
         ).toBeUndefined();
       }
     }
@@ -160,7 +160,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         event: { kind: 'asset', module: 'entityanalytics_ad' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -189,7 +189,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         event: { kind: 'asset', module: 'okta' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -216,7 +216,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         data_stream: { dataset: 'aws.cloudtrail' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -239,7 +239,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { user: { name: 'no.module.user' }, event: { kind: 'asset' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
+        getBuiltInEntityDefinition('user'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -271,7 +271,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       async ({ esClient }) => {
         await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
         const filter = getEuidEsqlFilterBasedOnDocument(
-          getEntityDefinitionWithoutId('user'),
+          getBuiltInEntityDefinition('user'),
           scenario.dslFilterSource
         );
         expect(filter).toBeDefined();
@@ -305,7 +305,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { service: { name: 'mailchimp' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('service'),
+        getBuiltInEntityDefinition('service'),
         docSource
       );
       expect(filter).toBeDefined();
@@ -328,7 +328,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = { service: { name: 'service-name' } };
       const filter = getEuidEsqlFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('service'),
+        getBuiltInEntityDefinition('service'),
         docSource
       );
       expect(filter).toBeDefined();

@@ -14,7 +14,7 @@ import {
 } from './commons';
 import type { Condition } from '@kbn/streamlang';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import { applyFieldEvaluations } from './field_evaluations';
@@ -398,7 +398,7 @@ describe('applyWhenConditionTrueSetFields', () => {
 });
 
 describe('user containsId filter condition (documentsFilter AND postAggFilter)', () => {
-  const def = getEntityDefinitionWithoutId('user');
+  const def = getBuiltInEntityDefinition('user');
   const { identityField } = def;
   if (isSingleFieldIdentity(identityField)) {
     throw new Error('User has calculated identity');

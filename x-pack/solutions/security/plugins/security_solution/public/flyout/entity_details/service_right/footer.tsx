@@ -58,7 +58,7 @@ export const ServicePanelFooter = ({
       return undefined;
     }
     return euidApi.euid.kql.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId('service'),
+      euidApi.getBuiltInEntityDefinition('service'),
       entity
     );
   }, [euidApi, entity]);

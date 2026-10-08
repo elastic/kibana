@@ -11,7 +11,7 @@ import {
   getEuidFromObject,
   getEntityIdentifiersFromDocument,
 } from '../euid/memory';
-import { getEntityDefinitionWithoutId } from './registry';
+import { getBuiltInEntityDefinition } from './registry';
 import type { EntityType, CreationRejectionReason } from './entity_schema';
 
 export type EntityCreationRejectionReason =
@@ -37,7 +37,7 @@ export type EntityCreationCandidate = EntityCreationAccepted | EntityCreationRej
 
 /** Returns whether the entity type supports creation from a single document. */
 export function isEntityTypeCreatableFromSingleDocument(entityType: EntityType): boolean {
-  return getEntityDefinitionWithoutId(entityType).creatableFromSingleDocument !== undefined;
+  return getBuiltInEntityDefinition(entityType).creatableFromSingleDocument !== undefined;
 }
 
 /** Applies an entity type's single-document creation policy. */
@@ -50,7 +50,7 @@ export function getEntityCreationCandidate(
   }
 
   const doc = getDocument(sourceDoc);
-  const definition = getEntityDefinitionWithoutId(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
   const { creatableFromSingleDocument: rule } = definition;
   if (!rule) {
     return { accepted: false, reason: 'entity_type_not_creatable' };

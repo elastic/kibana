@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -139,7 +139,7 @@ export const getEntityAnomalyOverview = async ({
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
   const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-    getEntityDefinitionWithoutId(entityType),
+    getBuiltInEntityDefinition(entityType),
     entityRecord
   );
   if (!entityFilter) {

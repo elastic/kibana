@@ -120,7 +120,7 @@ export const User: FC<UserProps> = memo(function User({
     () =>
       hit
         ? euidApi?.euid?.getEuidFromObject(
-            euidApi.getEntityDefinitionWithoutId('user'),
+            euidApi.getBuiltInEntityDefinition('user'),
             hit.flattened
           )
         : entityIdProp,
@@ -150,7 +150,7 @@ export const User: FC<UserProps> = memo(function User({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('user'),
+          euidApi.getBuiltInEntityDefinition('user'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);

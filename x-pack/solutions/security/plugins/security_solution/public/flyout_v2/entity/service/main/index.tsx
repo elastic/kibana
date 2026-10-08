@@ -98,7 +98,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     return (
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('service'),
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {}
     );

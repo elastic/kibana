@@ -146,7 +146,7 @@ const FormattedFieldValueComponent: React.FC<{
     const entityId =
       data && euidApi?.euid
         ? euidApi.euid.getEuidFromTimelineNonEcsData(
-            euidApi.getEntityDefinitionWithoutId('host'),
+            euidApi.getBuiltInEntityDefinition('host'),
             data
           )
         : undefined;
@@ -165,7 +165,7 @@ const FormattedFieldValueComponent: React.FC<{
     const entityId =
       data && euidApi?.euid
         ? euidApi.euid.getEuidFromTimelineNonEcsData(
-            euidApi.getEntityDefinitionWithoutId('user'),
+            euidApi.getBuiltInEntityDefinition('user'),
             data
           )
         : undefined;
@@ -184,7 +184,7 @@ const FormattedFieldValueComponent: React.FC<{
     const entityId =
       data && euidApi?.euid
         ? euidApi.euid.getEuidFromTimelineNonEcsData(
-            euidApi.getEntityDefinitionWithoutId('service'),
+            euidApi.getBuiltInEntityDefinition('service'),
             data
           )
         : undefined;

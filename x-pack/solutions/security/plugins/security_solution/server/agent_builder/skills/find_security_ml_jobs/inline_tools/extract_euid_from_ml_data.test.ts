@@ -11,8 +11,8 @@ import { extractEuidFromMlDataTool } from './extract_euid_from_ml_data';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: { getEuidFromObject: jest.fn() },
-  getEntityDefinitionWithoutId: jest.requireActual('@kbn/entity-store/common/euid_helpers')
-    .getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;

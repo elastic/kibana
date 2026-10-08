@@ -6,7 +6,7 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityNodeViewModel } from '../types';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
 
@@ -22,7 +22,7 @@ const createNode = (
 });
 
 const getFilterDsl = (node: EntityNodeViewModel) => {
-  const filter = getEntityTimelineFilter(node, 'data-view', { euid, getEntityDefinitionWithoutId });
+  const filter = getEntityTimelineFilter(node, 'data-view', { euid, getBuiltInEntityDefinition });
   expect(filter).toBeDefined();
   return buildEsQuery(undefined, [], filter ? [filter] : []);
 };
@@ -57,7 +57,7 @@ describe('getEntityTimelineFilter', () => {
       'event.module': 'system',
       'event.kind': 'event',
     };
-    const id = euid.getEuidFromObjectForSearch(getEntityDefinitionWithoutId('user'), sourceFields);
+    const id = euid.getEuidFromObjectForSearch(getBuiltInEntityDefinition('user'), sourceFields);
     expect(id).toBeDefined();
     const serialized = JSON.stringify(getFilterDsl(createNode(id ?? '', sourceFields)));
     expect(serialized).toContain('user.name');
@@ -88,7 +88,7 @@ describe('getEntityTimelineFilter', () => {
     expect(
       getEntityTimelineFilter(createNode('host:missing'), 'data-view', {
         euid,
-        getEntityDefinitionWithoutId,
+        getBuiltInEntityDefinition,
       })
     ).toBeUndefined();
   });

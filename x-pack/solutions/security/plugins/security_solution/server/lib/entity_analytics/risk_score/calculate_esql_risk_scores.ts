@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../common/field_maps/field_names';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
@@ -492,7 +492,7 @@ export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
 ): { type: 'keyword'; script: { source: string } } => {
   // Store membership is enforced separately, by `inStoreScores` in the maintainer's score_base_entities step.
   const evalScript = euid.painless.getEuidEvaluationForSearch(
-    getEntityDefinitionWithoutId(entityType)
+    getBuiltInEntityDefinition(entityType)
   );
   const typePrefix = `${entityType}:`;
 
@@ -567,7 +567,7 @@ export const getBaseScoreESQL = (
   pageSize: number,
   index: string
 ): string => {
-  const definition = getEntityDefinitionWithoutId(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
   const fieldEvals = euid.esql.getFieldEvaluations(definition);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
@@ -682,7 +682,7 @@ export const getResolutionScoreESQLByIds = (
   alertsIndex: string,
   lookupIndex: string
 ): string => {
-  const definition = getEntityDefinitionWithoutId(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
   const fieldEvals = euid.esql.getFieldEvaluations(definition);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';

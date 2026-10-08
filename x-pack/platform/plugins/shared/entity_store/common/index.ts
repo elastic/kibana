@@ -14,7 +14,7 @@
  * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  *
  * @example
- * import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+ * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
  */
 
 import { z } from '@kbn/zod/v4';

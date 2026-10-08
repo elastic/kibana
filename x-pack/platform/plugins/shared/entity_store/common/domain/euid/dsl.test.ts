@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslFilterBasedOnEntityRecord,
@@ -22,19 +22,17 @@ const fieldMissingOrEmpty = (field: string) => ({
 describe('getEuidDslFilterBasedOnDocument', () => {
   it('returns undefined when doc is falsy', () => {
     expect(
-      getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), null)
+      getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), null)
     ).toBeUndefined();
     expect(
-      getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), undefined)
+      getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), undefined)
     ).toBeUndefined();
-    expect(
-      getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {})
-    ).toBeUndefined();
+    expect(getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {})).toBeUndefined();
   });
 
   describe('generic', () => {
     it('returns bool filter with term on entity.id when present', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), {
         entity: { id: 'e-123' },
       });
 
@@ -46,7 +44,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('generic'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), {
         _source: { entity: { id: 'e-123' } },
       });
 
@@ -60,7 +58,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
   describe('host', () => {
     it('returns filter with term on host.id when present', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
         host: { name: 'to-be-ignored', id: 'host-id-1' },
       });
 
@@ -72,7 +70,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on host.id when present (with flattened source)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
         _source: {
           'host.name': 'to-be-ignored',
           'host.id': 'host-id-1',
@@ -87,7 +85,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on host.name when host.id is missing', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
         host: { name: 'server1' },
       });
 
@@ -100,7 +98,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on host.hostname when host.id and host.name are missing', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
         host: { hostname: 'node-1' },
       });
 
@@ -113,7 +111,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('precedence: uses host.id when both host.id and host.name are present', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
         host: { id: 'e1', name: 'myserver' },
       });
 
@@ -127,7 +125,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
   describe('user', () => {
     it('returns filter with term on user.email and source clause (event.module whenClause expands to sourceMatchesAny)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -153,7 +151,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on user.email and unknown source clause when no event.module or data_stream.dataset', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'alice@example.com' },
         event: { kind: 'asset' },
       });
@@ -192,7 +190,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on user.name and source clause and must on higher-ranked fields missing-or-empty', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'azure' },
       });
@@ -224,7 +222,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
     it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
-        getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+        getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { id: 'user-id-42' },
           event: { module: 'o365' },
         })
@@ -233,7 +231,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
     it('builds a filter for the same doc when it is a detection alert', () => {
       // The waiver lives in the shared gate, so it reaches the DSL builder too.
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { id: 'user-id-42' },
         event: { module: 'o365' },
         'kibana.alert.rule.uuid': 'rule-1',
@@ -246,12 +244,12 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
     it('returns undefined when no user id fields are present', () => {
       expect(
-        getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {})
+        getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {})
       ).toBeUndefined();
     });
 
     it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'alice@example.com', id: 'user-42' },
         event: { kind: 'asset', module: 'entityanalytics_okta' },
       });
@@ -277,7 +275,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter for user.name and user.domain with source clause and must on higher-ranked fields missing-or-empty', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'jane', domain: 'corp.com' },
         event: { kind: 'asset', module: 'entityanalytics_ad' },
       });
@@ -303,7 +301,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must so the query can match stored documents', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'bob@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -318,7 +316,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter for user.name and host.id when fieldEvaluations set entity.namespace to local (non-IDP)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         host: { id: 'host-1' },
         event: { kind: 'event', category: 'authentication' },
@@ -340,7 +338,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
     it('evaluates correctly for real non-IDP document', () => {
       expect(
-        getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+        getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           '@timestamp': '2026-04-22T12:55:59.638Z',
           data_stream: {
             dataset: ['endpoint.events.file', 'endpoint.events.process'],
@@ -392,14 +390,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
         cloud: { provider: 'gcp' },
       };
 
-      const awsFilter = getEuidDslFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
-        awsDoc
-      );
-      const gcpFilter = getEuidDslFilterBasedOnDocument(
-        getEntityDefinitionWithoutId('user'),
-        gcpDoc
-      );
+      const awsFilter = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), awsDoc);
+      const gcpFilter = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), gcpDoc);
 
       expect(awsFilter).toBeDefined();
       expect(gcpFilter).toBeDefined();
@@ -422,7 +414,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
     it('does not include cloud.provider filter when event.module is not asset_discovery', () => {
       // Other integrations sending event.kind=asset must NOT be routed via cloud.provider.
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'other_integration' },
         cloud: { provider: 'aws' },
@@ -436,7 +428,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
   describe('service', () => {
     it('returns undefined when service.name is missing (single-field identity)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
         service: { entity: { id: 'svc-entity-1' } },
       });
 
@@ -444,7 +436,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('returns filter with term on service.name (single-field identity)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
         service: { name: 'api-gateway' },
       });
 
@@ -456,7 +448,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
     });
 
     it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
-      const result = getEuidDslFilterBasedOnDocument(getEntityDefinitionWithoutId('service'), {
+      const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
         service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
       });
 
@@ -472,19 +464,19 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 describe('getEuidDslFilterBasedOnEntityRecord', () => {
   it('returns undefined when the record is falsy', () => {
     expect(
-      getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), null)
+      getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), null)
     ).toBeUndefined();
     expect(
-      getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('host'), undefined)
+      getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('host'), undefined)
     ).toBeUndefined();
     expect(
-      getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {})
+      getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {})
     ).toBeUndefined();
   });
 
   describe('host / service / generic (delegates to document-based builder)', () => {
     it('host: filters on host.id when present', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('host'), {
         entity: { namespace: 'ignored' },
         host: { id: 'host-id-1', name: 'to-be-ignored' },
       });
@@ -497,7 +489,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('host: filters on host.name with host.id missing guard', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('host'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('host'), {
         host: { name: 'server1' },
       });
 
@@ -510,7 +502,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('service: filters on service.name (single-field identity)', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('service'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('service'), {
         service: { name: 'api-gateway' },
       });
 
@@ -524,7 +516,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
 
   describe('user (trusts resolved entity.namespace, reverse-maps source clause)', () => {
     it('okta: filters on user.email and okta source values, without re-deriving namespace', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'okta' },
         user: { email: 'alice@example.com' },
       });
@@ -550,7 +542,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('microsoft_365: filters on user.id with higher-ranked user.email missing guard', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'microsoft_365' },
         user: { id: 'user-42' },
       });
@@ -577,7 +569,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('active_directory: filters on user.name + user.domain with email/id missing guards', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'active_directory' },
         user: { name: 'jane', domain: 'corp.com' },
       });
@@ -603,7 +595,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('entra_id: OR-s the IdP source values and the asset_discovery cloud.provider path', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'entra_id' },
         user: { email: 'bob@example.com' },
       });
@@ -656,7 +648,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('local: filters on user.name + host.id with the local namespace gate condition', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'local', id: 'user:jdoe@host-1@local' },
         user: { name: 'jdoe' },
         host: { id: 'host-1' },
@@ -677,11 +669,11 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace', () => {
-      const awsFilter = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const awsFilter = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'aws' },
         user: { name: 'alice' },
       });
-      const gcpFilter = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const gcpFilter = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'gcp' },
         user: { name: 'alice' },
       });
@@ -697,7 +689,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
     });
 
     it('never emits a term on the evaluated entity.namespace destination', () => {
-      const result = getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { namespace: 'okta' },
         user: { email: 'carol@example.com' },
       });
@@ -707,7 +699,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
 
     it('returns undefined when no identity fields are present on the record', () => {
       expect(
-        getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), {
+        getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
           entity: { namespace: 'okta' },
         })
       ).toBeUndefined();
@@ -785,7 +777,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
         ];
 
         const [expected, ...rest] = variations.map((record) =>
-          getEuidDslFilterBasedOnEntityRecord(getEntityDefinitionWithoutId('user'), record)
+          getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), record)
         );
         expect(expected).toBeDefined();
         for (const filter of rest) {
@@ -804,13 +796,13 @@ const isNotEmptyClause = (field: string) => ({
 
 describe('getEuidDslDocumentsContainsIdFilter', () => {
   it('user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only)', () => {
-    const result = getEuidDslDocumentsContainsIdFilter(getEntityDefinitionWithoutId('user'));
+    const result = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'));
 
     expect(result).toMatchSnapshot();
   });
 
   it('host: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {
-    const result = getEuidDslDocumentsContainsIdFilter(getEntityDefinitionWithoutId('host'));
+    const result = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'));
 
     expect(result).toEqual({
       bool: {
@@ -824,7 +816,7 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
   });
 
   it('service: returns documentsFilter DSL (service.name not empty)', () => {
-    const result = getEuidDslDocumentsContainsIdFilter(getEntityDefinitionWithoutId('service'));
+    const result = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('service'));
 
     expect(result).toEqual({
       bool: {
@@ -837,7 +829,7 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
   });
 
   it('generic: returns documentsFilter DSL (entity.id not empty)', () => {
-    const result = getEuidDslDocumentsContainsIdFilter(getEntityDefinitionWithoutId('generic'));
+    const result = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('generic'));
 
     expect(result).toEqual({
       bool: {
@@ -857,15 +849,15 @@ describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false 
   ) => getEuidDslFilterBasedOnDocument(definition, doc, { excludeHigherRankedFields: false });
 
   it('returns undefined when doc is falsy', () => {
-    expect(partialIdentityFilter(getEntityDefinitionWithoutId('host'), null)).toBeUndefined();
-    expect(partialIdentityFilter(getEntityDefinitionWithoutId('host'), {})).toBeUndefined();
+    expect(partialIdentityFilter(getBuiltInEntityDefinition('host'), null)).toBeUndefined();
+    expect(partialIdentityFilter(getBuiltInEntityDefinition('host'), {})).toBeUndefined();
   });
 
   describe('host', () => {
     it('returns term-only filter on host.name with NO must clause (root cause regression guard)', () => {
       // This is the exact scenario from #278276: page passes only host.name, lookup should not
       // require host.id to be absent.
-      const result = partialIdentityFilter(getEntityDefinitionWithoutId('host'), {
+      const result = partialIdentityFilter(getBuiltInEntityDefinition('host'), {
         host: { name: 'server1' },
       });
 
@@ -879,7 +871,7 @@ describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false 
     });
 
     it('returns term-only filter on host.hostname with NO must clause', () => {
-      const result = partialIdentityFilter(getEntityDefinitionWithoutId('host'), {
+      const result = partialIdentityFilter(getBuiltInEntityDefinition('host'), {
         host: { hostname: 'node-1' },
       });
 
@@ -892,7 +884,7 @@ describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false 
     });
 
     it('returns filter on host.id unchanged (rank 0 — no higher-ranked fields)', () => {
-      const result = partialIdentityFilter(getEntityDefinitionWithoutId('host'), {
+      const result = partialIdentityFilter(getBuiltInEntityDefinition('host'), {
         host: { name: 'ignored', id: 'host-id-1' },
       });
 
@@ -908,7 +900,7 @@ describe('getEuidDslFilterBasedOnDocument with excludeHigherRankedFields: false 
     it('returns filter on user.name with source clause but NO must on higher-ranked absent fields', () => {
       // Default partition semantics would add must:[fieldMissingOrEmpty('user.email'),
       // fieldMissingOrEmpty('user.id'),fieldMissingOrEmpty('user.domain')]. Lookup must NOT add those.
-      const result = partialIdentityFilter(getEntityDefinitionWithoutId('user'), {
+      const result = partialIdentityFilter(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'azure' },
       });

@@ -102,7 +102,7 @@ export const HostIdRenderer = ({
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
       const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('host'),
+        euidApi.getBuiltInEntityDefinition('host'),
         ecsSliceToFlattenedDocument('host', host)
       ) as IdentityFields | undefined;
       if (built && Object.keys(built).length > 0) {
@@ -165,7 +165,7 @@ export const HostNameRenderer = ({
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
       const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('host'),
+        euidApi.getBuiltInEntityDefinition('host'),
         ecsSliceToFlattenedDocument('host', host)
       ) as IdentityFields | undefined;
       if (built && Object.keys(built).length > 0) {

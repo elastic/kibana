@@ -22,17 +22,17 @@ export const hostToCriteria = (opts: HostToCriteriaOptions): CriteriaFields[] =>
     return [];
   }
   if (euidApi) {
-    const { euid, getEntityDefinitionWithoutId } = euidApi;
+    const { euid, getBuiltInEntityDefinition } = euidApi;
     const inputDoc = entityRecord ? entityRecord : hostItem;
     const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument(
-      getEntityDefinitionWithoutId('host'),
+      getBuiltInEntityDefinition('host'),
       inputDoc
     );
     if (scopedDsl != null) {
       return [];
     }
     const identifiers = euid.getEntityIdentifiersFromDocument(
-      getEntityDefinitionWithoutId('host'),
+      getBuiltInEntityDefinition('host'),
       inputDoc
     );
     if (identifiers != null && Object.keys(identifiers).length > 0) {

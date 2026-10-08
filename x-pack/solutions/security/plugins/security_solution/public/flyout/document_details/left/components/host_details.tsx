@@ -236,7 +236,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const hostIdentityFieldsForStore = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('host'),
+        euidApi.getBuiltInEntityDefinition('host'),
         hostEntityFromStoreResult?.entityRecord ?? hostEntityFromStoreResult?.entity
       ),
     [euidApi, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]

@@ -14,13 +14,13 @@ import {
   getFieldEvaluations,
   getIdentityFieldEvaluations,
 } from './field_evaluations';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 
 const USER = 'user' as const;
 
 function deriveUserMeta(doc: Record<string, unknown>) {
   const d = cloneDeep(getDocument({ _source: doc }));
-  const def = getEntityDefinitionWithoutId(USER);
+  const def = getBuiltInEntityDefinition(USER);
   const sharedEvaluations = getFieldEvaluations(def);
   if (sharedEvaluations.length > 0) {
     Object.assign(d, applyFieldEvaluations(d, sharedEvaluations));
@@ -45,7 +45,7 @@ function deriveUserMeta(doc: Record<string, unknown>) {
 describe('USER_TS_EXTRACTION_CASES vs getEuidFromObject (user.ts)', () => {
   it.each(USER_TS_EXTRACTION_CASES.map((c) => [c.id, c] as const))('%s', (_id, scenario) => {
     const doc = scenario.ingestSource ?? scenario.dslFilterSource;
-    const euid = getEuidFromObject(getEntityDefinitionWithoutId(USER), doc);
+    const euid = getEuidFromObject(getBuiltInEntityDefinition(USER), doc);
     expect(euid).toBe(scenario.expectedEuid);
 
     if (scenario.expectedEuid === undefined) {

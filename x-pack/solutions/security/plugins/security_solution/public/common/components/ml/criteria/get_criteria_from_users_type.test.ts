@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { UsersType } from '../../../../explore/users/store/model';
@@ -52,7 +52,7 @@ describe('get_criteria_from_user_type', () => {
       type: UsersType.details,
       userName: 'admin',
       identityFields: { 'user.id': 'uid-1', 'user.name': 'from-identity' },
-      euidApi: { euid, getEntityDefinitionWithoutId },
+      euidApi: { euid, getBuiltInEntityDefinition },
     });
     expect(criteria).toEqual([
       { fieldName: 'user.id', fieldValue: 'uid-1' },
@@ -81,11 +81,11 @@ describe('get_criteria_from_user_type', () => {
       userName: 'admin',
       identityFields: { 'user.name': 'admin' },
       entityRecord,
-      euidApi: { euid, getEntityDefinitionWithoutId },
+      euidApi: { euid, getBuiltInEntityDefinition },
     });
 
     expect(euid.dsl.getEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-      getEntityDefinitionWithoutId('user'),
+      getBuiltInEntityDefinition('user'),
       entityRecord
     );
     expect(criteria).toEqual([

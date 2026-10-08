@@ -11,7 +11,7 @@ import { getEuidSourceFields } from '../../../common/domain/euid';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
   getEntityDefinition,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
 import type {
@@ -110,7 +110,7 @@ function getFieldDescriptions(
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
   const identitySourceFields = getEuidSourceFields(
-    getEntityDefinitionWithoutId(description.type)
+    getBuiltInEntityDefinition(description.type)
   ).identitySourceFields;
   for (const [key, value] of Object.entries(flatProps)) {
     if (key === ENTITY_ID_FIELD || identitySourceFields.includes(key)) {

@@ -97,7 +97,7 @@ export const useEntitiesOverview = ({
   const hostEntityIdentifiers = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('host'),
+        euidApi.getBuiltInEntityDefinition('host'),
         flattened
       ),
     [euidApi, flattened]
@@ -105,7 +105,7 @@ export const useEntitiesOverview = ({
   const userEntityIdentifiers = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('user'),
+        euidApi.getBuiltInEntityDefinition('user'),
         flattened
       ),
     [euidApi, flattened]
@@ -117,11 +117,11 @@ export const useEntitiesOverview = ({
   const hostIdentityFields = hostEntityIdentifiers ?? legacyHostIdentityForStore;
 
   const hostEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject(euidApi.getEntityDefinitionWithoutId('host'), flattened),
+    () => euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), flattened),
     [euidApi, flattened]
   );
   const userEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject(euidApi.getEntityDefinitionWithoutId('user'), flattened),
+    () => euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), flattened),
     [euidApi, flattened]
   );
 

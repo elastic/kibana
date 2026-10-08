@@ -10,7 +10,7 @@ import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
 import {
   getEntityDefinition,
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
 } from '../../../common/domain/definitions/registry';
 import type {
   EntityField,
@@ -68,7 +68,7 @@ describe('buildExtractionSourceClause', () => {
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(
-      getEuidEsqlDocumentsContainsIdFilter(getEntityDefinitionWithoutId('host'))
+      getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))
     );
 
     const withoutCursor = buildExtractionSourceClause({ ...baseParams });

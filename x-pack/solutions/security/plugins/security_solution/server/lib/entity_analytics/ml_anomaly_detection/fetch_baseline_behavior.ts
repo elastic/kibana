@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyHit, EnrichedAnomalyHit } from './types';
 import type { JobConfig } from './get_job_config';
@@ -306,7 +306,7 @@ export const fetchBaselineBehavior = async ({
     }
 
     const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-      getEntityDefinitionWithoutId(entityType),
+      getBuiltInEntityDefinition(entityType),
       entityRecord
     );
     if (!entityFilter) {

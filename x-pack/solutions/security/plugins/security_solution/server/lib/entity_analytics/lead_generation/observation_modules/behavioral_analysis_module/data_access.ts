@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { LeadEntity } from '../../types';
 import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../../utils/elasticsearch_terms_limits';
 import { parseAlertBuckets } from '../types';
@@ -88,7 +88,7 @@ export const fetchAlertSummariesForEntities = async (
     for (const [type, euids] of euidsByType) {
       const fieldName = runtimeFieldName(type);
       const runtimeMappings = {
-        [fieldName]: euid.painless.getEuidRuntimeMapping(getEntityDefinitionWithoutId(type)),
+        [fieldName]: euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition(type)),
       };
 
       for (let offset = 0; offset < euids.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {

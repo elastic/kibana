@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import { getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import { getCriteriaFromHostType } from './get_criteria_from_host_type';
 import { HostsType } from '../../../../explore/hosts/store/model';
@@ -53,7 +53,7 @@ describe('get_criteria_from_host_type', () => {
         'host.id': 'hid-1',
         'host.name': 'zeek-iowa',
       },
-      { euid, getEntityDefinitionWithoutId }
+      { euid, getBuiltInEntityDefinition }
     );
     expect(criteria).toEqual([
       { fieldName: 'host.id', fieldValue: 'hid-1' },

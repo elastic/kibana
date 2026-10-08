@@ -113,7 +113,7 @@ export interface EuidFilterApi {
       doc: unknown
     ) => Record<string, string> | undefined;
   };
-  getEntityDefinitionWithoutId: (entityType: EntityType) => EntityDefinitionOfAnyType;
+  getBuiltInEntityDefinition: (entityType: EntityType) => EntityDefinitionOfAnyType;
 }
 
 /**
@@ -218,7 +218,7 @@ export const getEntityFilterSpec = (
     const prefixFields = euidApi
       ? new Set(
           euidApi.euid.getEuidNamespaceSourceFields(
-            euidApi.getEntityDefinitionWithoutId(entityType)
+            euidApi.getBuiltInEntityDefinition(entityType)
           ).prefixMatchFields
         )
       : new Set<string>();
@@ -230,7 +230,7 @@ export const getEntityFilterSpec = (
     const getNamespaceSourcePrefix: NamespaceSourcePrefixResolver | undefined = euidApi
       ? (field, observedValue) =>
           euidApi.euid.getNamespaceSourcePrefix(
-            euidApi.getEntityDefinitionWithoutId(entityType),
+            euidApi.getBuiltInEntityDefinition(entityType),
             field,
             observedValue
           )
@@ -245,7 +245,7 @@ export const getEntityFilterSpec = (
   let rawIdentifiers: Record<string, string> | undefined;
   try {
     rawIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-      euidApi.getEntityDefinitionWithoutId(entityType),
+      euidApi.getBuiltInEntityDefinition(entityType),
       doc
     );
   } catch {
@@ -286,7 +286,7 @@ const hasNamespaceSourceField = (
   let namespaceSourceFields: string[];
   try {
     const { exactMatchFields, prefixMatchFields } = euidApi.euid.getEuidNamespaceSourceFields(
-      euidApi.getEntityDefinitionWithoutId(entityType)
+      euidApi.getBuiltInEntityDefinition(entityType)
     );
     namespaceSourceFields = [...exactMatchFields, ...prefixMatchFields];
   } catch {
@@ -318,7 +318,7 @@ const buildEntityDsl = (
   let dsl: object | undefined;
   try {
     dsl = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-      euidApi.getEntityDefinitionWithoutId(entityType),
+      euidApi.getBuiltInEntityDefinition(entityType),
       doc
     );
   } catch {

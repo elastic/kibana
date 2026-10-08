@@ -6,7 +6,7 @@
  */
 
 import type { FieldEvaluation } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   applyFieldEvaluations,
@@ -68,7 +68,7 @@ describe('getFieldValue', () => {
 describe('applyFieldEvaluations', () => {
   // User entity uses calculated identity with fieldEvaluations (entity.namespace from event.module)
   const userEvaluations = (
-    getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
+    getBuiltInEntityDefinition('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
   ).fieldEvaluations!;
 
   it('should set entity.namespace to fallbackValue when both event.module and data_stream.dataset are missing', () => {
@@ -323,7 +323,7 @@ describe('applyFieldEvaluations', () => {
 });
 
 describe('shared entity.source field evaluation', () => {
-  const hostSourceEvaluation = getEntityDefinitionWithoutId('host').fieldEvaluations ?? [];
+  const hostSourceEvaluation = getBuiltInEntityDefinition('host').fieldEvaluations ?? [];
 
   it('should prefer event.module over event.dataset and data_stream.dataset', () => {
     expect(
@@ -371,13 +371,13 @@ describe('shared entity.source field evaluation', () => {
 
 describe('getFieldEvaluations', () => {
   it('should include shared field evaluations for single-field identities', () => {
-    const serviceDefinition = getEntityDefinitionWithoutId('service');
+    const serviceDefinition = getBuiltInEntityDefinition('service');
 
     expect(getFieldEvaluations(serviceDefinition)).toEqual(serviceDefinition.fieldEvaluations);
   });
 
   it('should return only shared field evaluations for calculated identities (identity evals are separate)', () => {
-    const userDefinition = getEntityDefinitionWithoutId('user');
+    const userDefinition = getBuiltInEntityDefinition('user');
 
     expect(getFieldEvaluations(userDefinition)).toHaveLength(
       userDefinition.fieldEvaluations?.length ?? 0
@@ -388,13 +388,13 @@ describe('getFieldEvaluations', () => {
 
 describe('getIdentityFieldEvaluations', () => {
   it('returns empty array for single-field identities (service)', () => {
-    const serviceDefinition = getEntityDefinitionWithoutId('service');
+    const serviceDefinition = getBuiltInEntityDefinition('service');
 
     expect(getIdentityFieldEvaluations(serviceDefinition)).toEqual([]);
   });
 
   it('returns identity-specific evaluations for calculated identities (user)', () => {
-    const userDefinition = getEntityDefinitionWithoutId('user');
+    const userDefinition = getBuiltInEntityDefinition('user');
     const identityEvals = getIdentityFieldEvaluations(userDefinition);
 
     expect(identityEvals.length).toBeGreaterThan(0);
@@ -404,7 +404,7 @@ describe('getIdentityFieldEvaluations', () => {
 
 describe('getSourceMatchSpec', () => {
   const userEvaluations = (
-    getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
+    getBuiltInEntityDefinition('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
   ).fieldEvaluations!;
   const userEval = userEvaluations[0];
 

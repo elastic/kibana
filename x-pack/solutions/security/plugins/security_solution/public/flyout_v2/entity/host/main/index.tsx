@@ -120,7 +120,7 @@ export const Host: FC<HostProps> = memo(function Host({
     () =>
       hit
         ? euidApi?.euid?.getEuidFromObject(
-            euidApi.getEntityDefinitionWithoutId('host'),
+            euidApi.getBuiltInEntityDefinition('host'),
             hit.flattened
           )
         : entityIdProp,
@@ -150,7 +150,7 @@ export const Host: FC<HostProps> = memo(function Host({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('host'),
+          euidApi.getBuiltInEntityDefinition('host'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);

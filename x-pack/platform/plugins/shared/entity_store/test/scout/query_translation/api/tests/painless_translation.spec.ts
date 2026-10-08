@@ -27,7 +27,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import { getEuidPainlessRuntimeMapping } from '../../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../../common/domain/euid/memory';
-import { getEntityDefinitionWithoutId } from '../../../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 import {
   EntityType,
   isSingleFieldIdentity,
@@ -37,7 +37,7 @@ const USER_ENTITY_TYPE = 'user' as const;
 
 const userRuntimeSearchBody = {
   runtime_mappings: {
-    entity_id: getEuidPainlessRuntimeMapping(getEntityDefinitionWithoutId(USER_ENTITY_TYPE)),
+    entity_id: getEuidPainlessRuntimeMapping(getBuiltInEntityDefinition(USER_ENTITY_TYPE)),
   },
   fields: ['entity_id'] as const,
 };
@@ -59,7 +59,7 @@ function assertUserRuntimeMatchesMemory(hit: {
   _source?: unknown;
   fields?: Record<string, unknown>;
 }) {
-  const expected = getEuidFromObject(getEntityDefinitionWithoutId(USER_ENTITY_TYPE), hit);
+  const expected = getEuidFromObject(getBuiltInEntityDefinition(USER_ENTITY_TYPE), hit);
   const actual = (hit.fields?.entity_id as string[] | undefined)?.[0];
   expect(actual).toBe(expected);
 }
@@ -88,7 +88,7 @@ function assertRuntimeEuidMatchesEntityTypeFormat(
   if (euid === undefined) {
     return;
   }
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = getBuiltInEntityDefinition(entityType);
   if (isSingleFieldIdentity(identityField) && identityField.skipTypePrepend) {
     expect(euid).not.toMatch(/^(user|host|service|generic):/);
     expect(euid.length).toBeGreaterThan(0);
@@ -144,7 +144,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
           body: {
             query: { match_all: {} },
             runtime_mappings: {
-              entity_id: getEuidPainlessRuntimeMapping(getEntityDefinitionWithoutId(entityType)),
+              entity_id: getEuidPainlessRuntimeMapping(getBuiltInEntityDefinition(entityType)),
             },
             size: 1000,
             fields: ['entity_id'],
@@ -155,7 +155,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         expect(hits.length).toBeGreaterThan(0);
 
         for (const hit of hits) {
-          const expectedEuid = getEuidFromObject(getEntityDefinitionWithoutId(entityType), hit);
+          const expectedEuid = getEuidFromObject(getBuiltInEntityDefinition(entityType), hit);
           const actualEuid = (hit.fields?.entity_id as string[] | undefined)?.[0];
 
           expect(actualEuid).toBe(expectedEuid);
@@ -173,7 +173,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       async ({ esClient }) => {
         const hit = await ingestAndRunUserTsPainlessScenario(esClient, scenario);
         expect(
-          getEuidFromObject(getEntityDefinitionWithoutId(USER_ENTITY_TYPE), hit)
+          getEuidFromObject(getBuiltInEntityDefinition(USER_ENTITY_TYPE), hit)
         ).toBeUndefined();
         expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBeUndefined();
       }
@@ -189,7 +189,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         const hit = await ingestAndRunUserTsPainlessScenario(esClient, scenario);
         const expectedEuid = scenario.expectedEuid;
 
-        expect(getEuidFromObject(getEntityDefinitionWithoutId(USER_ENTITY_TYPE), hit)).toBe(
+        expect(getEuidFromObject(getBuiltInEntityDefinition(USER_ENTITY_TYPE), hit)).toBe(
           expectedEuid
         );
         expect((hit.fields?.entity_id as string[] | undefined)?.[0]).toBe(expectedEuid);
@@ -232,7 +232,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       expect(hits).toHaveLength(1);
       assertUserRuntimeMatchesMemory(hits[0]);
       expect(
-        getEuidFromObject(getEntityDefinitionWithoutId(USER_ENTITY_TYPE), hits[0])
+        getEuidFromObject(getBuiltInEntityDefinition(USER_ENTITY_TYPE), hits[0])
       ).toBeUndefined();
       expect((hits[0].fields?.entity_id as string[] | undefined)?.[0]).toBeUndefined();
     }

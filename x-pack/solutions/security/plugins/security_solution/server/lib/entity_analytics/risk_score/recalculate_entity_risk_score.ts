@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import Boom from '@hapi/boom';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../common/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getConfiguration } from '../risk_engine/utils/saved_object_configuration';
@@ -193,7 +193,7 @@ async function buildScoringContext({
 
   const entityDoc = entities[0];
   const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
-    getEntityDefinitionWithoutId(identifierType as EntityType),
+    getBuiltInEntityDefinition(identifierType as EntityType),
     entityDoc
   );
 

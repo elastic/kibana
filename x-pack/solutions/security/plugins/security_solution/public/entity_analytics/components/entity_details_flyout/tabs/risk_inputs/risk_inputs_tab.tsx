@@ -488,7 +488,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       const sourceEntityId =
         alert.input.entity_id ??
         euidApi.euid.getEuidFromObject(
-          euidApi.getEntityDefinitionWithoutId(entityType),
+          euidApi.getBuiltInEntityDefinition(entityType),
           alert.rawSource
         );
       if (sourceEntityId) {

@@ -139,7 +139,7 @@ export const UserPanel = memo(function UserPanel({
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('user'),
+        euidApi.getBuiltInEntityDefinition('user'),
         entityFromStoreResult.entityRecord
       ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);

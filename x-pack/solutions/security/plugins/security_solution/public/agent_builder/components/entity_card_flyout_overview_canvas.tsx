@@ -266,7 +266,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
       hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
     const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('host'),
+        euidApi.getBuiltInEntityDefinition('host'),
         entityFromStoreResult.entityRecord
       ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
@@ -580,7 +580,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('user'),
+        euidApi.getBuiltInEntityDefinition('user'),
         entityFromStoreResult.entityRecord
       ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
@@ -882,7 +882,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
         : ({} as IdentityFields);
     const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('service'),
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);

@@ -32,13 +32,13 @@ export const convertAnomaliesToUsers = (
   const identifiers =
     euidApi && isScoped
       ? euidApi.euid.getEntityIdentifiersFromDocument(
-          euidApi.getEntityDefinitionWithoutId('user'),
+          euidApi.getBuiltInEntityDefinition('user'),
           doc
         )
       : undefined;
   const identifiersUsable = identifiers != null && Object.keys(identifiers).length > 0;
   const identitySourceFields =
-    euidApi?.euid.getEuidSourceFields(euidApi.getEntityDefinitionWithoutId('user'))
+    euidApi?.euid.getEuidSourceFields(euidApi.getBuiltInEntityDefinition('user'))
       .identitySourceFields ?? [];
 
   return anomalies.anomalies.reduce<AnomaliesByUser[]>((accum, item) => {

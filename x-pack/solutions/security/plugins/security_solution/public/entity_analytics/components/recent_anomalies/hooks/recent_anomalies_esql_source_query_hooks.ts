@@ -53,17 +53,17 @@ const ENTITY_NAME_FIELD: Record<(typeof ANOMALY_ENTITY_TYPES)[number], string> =
  * - entity_type: "user" | "host" | "service" (based on which EUID matched)
  * - entity_name: the display name from the winning entity type's name field
  */
-const getEuidEvaluationBlock = ({ euid, getEntityDefinitionWithoutId }: EntityStoreEuidApi) => {
+const getEuidEvaluationBlock = ({ euid, getBuiltInEntityDefinition }: EntityStoreEuidApi) => {
   const parts: string[] = [];
 
   for (const entityType of ANOMALY_ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(getEntityDefinitionWithoutId(entityType));
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
     parts.push(
       `| EVAL ${euid.esql.getEuidEvaluation(
-        getEntityDefinitionWithoutId(entityType),
+        getBuiltInEntityDefinition(entityType),
         `${entityType}_euid`
       )}`
     );

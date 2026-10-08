@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { EntityType } from '@kbn/entity-store/common';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { LeadEntity } from '../../types';
 import { errorMessage, groupEntitiesByType } from '../utils';
 import { getSecurityMlJobIds } from '../../../ml_anomaly_detection/get_security_ml_job_ids';
@@ -124,7 +124,7 @@ const searchAnomalyBucketsForType = async ({
       size: 0,
       track_total_hits: false,
       runtime_mappings: {
-        entity_id: euid.painless.getEuidRuntimeMapping(getEntityDefinitionWithoutId(entityType)),
+        entity_id: euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition(entityType)),
       },
       query: {
         bool: {

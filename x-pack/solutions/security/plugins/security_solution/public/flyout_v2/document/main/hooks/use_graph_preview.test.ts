@@ -55,7 +55,7 @@ const mockEuid = {
     identitySourceFields: IDENTITY_FIELDS_BY_TYPE[type] ?? [],
   }),
 };
-const mockGetEntityDefinitionWithoutId = (type: string) => ({ type });
+const mockGetBuiltInEntityDefinition = (type: string) => ({ type });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -82,7 +82,7 @@ describe('useGraphPreview', () => {
     mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: mockEuid,
-      getEntityDefinitionWithoutId: mockGetEntityDefinitionWithoutId,
+      getBuiltInEntityDefinition: mockGetBuiltInEntityDefinition,
     });
   });
 
@@ -185,7 +185,7 @@ describe('useGraphPreview', () => {
         ...mockEuid,
         getEntityIdentifiersFromDocument: jest.fn(() => undefined),
       },
-      getEntityDefinitionWithoutId: mockGetEntityDefinitionWithoutId,
+      getBuiltInEntityDefinition: mockGetBuiltInEntityDefinition,
     });
 
     const { result } = renderHook(() =>

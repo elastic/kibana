@@ -101,7 +101,7 @@ export const useHostDetails = ({
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
     const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
-      euidApi.getEntityDefinitionWithoutId('host'),
+      euidApi.getBuiltInEntityDefinition('host'),
       entityRecord
     );
     if (recordFilter) {

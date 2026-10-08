@@ -15,7 +15,7 @@ const mockEuidApi = {
       getEuidEvaluation: (_definition: unknown, varName: string) => `${varName} = "mock_euid"`,
     },
   },
-  getEntityDefinitionWithoutId: (type: string) => ({ type }),
+  getBuiltInEntityDefinition: (type: string) => ({ type }),
 } as unknown as EntityStoreEuidApi;
 
 const pipelineText = (euidApi: EntityStoreEuidApi = mockEuidApi): string =>
@@ -61,7 +61,7 @@ describe('buildAlertEuidPipeline', () => {
           getEuidEvaluation: (_definition: unknown, varName: string) => `${varName} = "mock_euid"`,
         },
       },
-      getEntityDefinitionWithoutId: (type: string) => ({ type }),
+      getBuiltInEntityDefinition: (type: string) => ({ type }),
     } as unknown as EntityStoreEuidApi;
 
     expect(pipelineText(euidApiWithFieldEvals)).toContain('| EVAL user.namespace = user.domain');

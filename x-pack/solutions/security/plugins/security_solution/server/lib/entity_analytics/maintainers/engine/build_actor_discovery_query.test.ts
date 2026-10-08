@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import {
   buildActorDiscoveryQuery,
@@ -18,10 +18,10 @@ import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from '../accesses/configs';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
 
 const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter(
-  getEntityDefinitionWithoutId('host')
+  getBuiltInEntityDefinition('host')
 );
 const USER_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter(
-  getEntityDefinitionWithoutId('user')
+  getBuiltInEntityDefinition('user')
 );
 
 const accessesConfig: RelationshipIntegrationConfig = {

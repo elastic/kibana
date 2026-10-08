@@ -6,7 +6,7 @@
  */
 
 import { chunk, cloneDeep } from 'lodash';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
@@ -105,7 +105,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
       const computedEuid = euid.getEuidFromObjectForSearch(
-        getEntityDefinitionWithoutId(entityType),
+        getBuiltInEntityDefinition(entityType),
         event._source
       );
       if (computedEuid) {

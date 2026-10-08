@@ -10,15 +10,15 @@ import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     getEuidFromObjectForSearch: jest.fn(),
   },
-  getEntityDefinitionWithoutId: jest.requireActual('@kbn/entity-store/common/euid_helpers')
-    .getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
@@ -367,7 +367,7 @@ describe('createEntityStoreEnrichment', () => {
       await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);
 
       expect(mockGetEuidForSearch).toHaveBeenCalledWith(
-        getEntityDefinitionWithoutId('host'),
+        getBuiltInEntityDefinition('host'),
         expect.any(Object)
       );
     });

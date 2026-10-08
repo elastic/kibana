@@ -93,7 +93,7 @@ export const ServicePanel = memo(function ServicePanel({
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     return (
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        euidApi.getEntityDefinitionWithoutId('service'),
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {}
     );

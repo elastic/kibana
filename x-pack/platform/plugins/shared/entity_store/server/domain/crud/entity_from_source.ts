@@ -17,7 +17,7 @@ import {
   applyFieldEvaluations,
   getFieldEvaluations,
 } from '../../../common/domain/euid/field_evaluations';
-import { getEntityDefinitionWithoutId } from '../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
   isSingleFieldIdentity,
   type EntityDefinitionWithoutId,
@@ -49,7 +49,7 @@ export function buildEntityFromSource({
   fields,
 }: BuildEntityFromSourceParams): Entity {
   const doc = getDocument(source);
-  const definition = getEntityDefinitionWithoutId(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
   const built: Record<string, unknown> = {};
 
   set(built, 'entity.id', candidate.euid);

@@ -6,7 +6,7 @@
  */
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
-import { euid, getEntityDefinitionWithoutId } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import { ENGINE_COLUMNS } from '../engine/columns';
@@ -223,7 +223,7 @@ function buildWorkdaySupervisesEsqlQuery(
   // it reproduces the full user EUID ranking and emits the entity.namespace
   // evaluation it depends on.
   const targetEuidEval = euid.esql.getEuidEvaluation(
-    getEntityDefinitionWithoutId('user'),
+    getBuiltInEntityDefinition('user'),
     'targetEntityId',
     {
       withTypeId: true,

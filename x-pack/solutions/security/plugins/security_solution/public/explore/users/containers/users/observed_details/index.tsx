@@ -99,7 +99,7 @@ export const useObservedUserDetails = ({
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
     const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
-      euidApi.getEntityDefinitionWithoutId('user'),
+      euidApi.getBuiltInEntityDefinition('user'),
       entityRecord
     );
     if (recordFilter) {
