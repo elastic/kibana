@@ -691,6 +691,28 @@ describe('ConversationsPage idle state', () => {
     );
   });
 
+  it('does not render the queue sections when idle', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    ['Investigate', 'Respond', 'Closed'].forEach((name) =>
+      expect(screen.queryByRole('button', { name: new RegExp(`^${name}`) })).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders the queue sections when not idle', () => {
+    mockProposals({ respond: [{ ...proposal, category: 'respond' }] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Closed/ })).toBeInTheDocument();
+  });
+
   it('hides the panel while proposals are open', () => {
     mockProposals({ investigate: [proposal] });
     mockOpenCount(1);
