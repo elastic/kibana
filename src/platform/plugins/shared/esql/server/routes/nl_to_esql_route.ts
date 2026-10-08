@@ -114,6 +114,7 @@ export const registerNLtoESQLRoute = (
         const result = await generateEsql({
           model,
           esClient: client,
+          internalEsClient: core.elasticsearch.client.asInternalUser,
           logger,
           nlQuery: nlInstruction,
           additionalContext,

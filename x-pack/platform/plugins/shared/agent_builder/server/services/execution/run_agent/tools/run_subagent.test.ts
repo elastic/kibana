@@ -1246,4 +1246,83 @@ describe('createSubagentTool', () => {
       expect(result.results[0].data).not.toHaveProperty('destructive_access');
     });
   });
+
+  describe('transient-only mode', () => {
+    const createTransientOnlyTool = () => {
+      const executeSubAgent = jest.fn();
+      const createSubAgent = jest.fn();
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+        },
+        abortSignal: new AbortController().signal,
+        parentConversationId: 'conversation-1',
+        subagentTracker: new SubagentTracker(),
+        transientOnly: true,
+      });
+      return { tool, executeSubAgent, createSubAgent };
+    };
+
+    it('refuses a persistent sub-agent without creating a child conversation', async () => {
+      const { tool, createSubAgent } = createTransientOnlyTool();
+      const { context } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        { description: 'task', prompt: 'Do it', mode: SubagentMode.persistent, name: 'researcher' },
+        context
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(createSubAgent).not.toHaveBeenCalled();
+    });
+
+    it('refuses a background sub-agent', async () => {
+      const { tool, executeSubAgent } = createTransientOnlyTool();
+      const { context } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        { description: 'task', prompt: 'Do it', run_in_background: true },
+        context
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(executeSubAgent).not.toHaveBeenCalled();
+    });
+
+    it('describes only transient foreground sub-agents', () => {
+      const { tool } = createTransientOnlyTool();
+      expect(tool.description).not.toContain('## Persistent sub-agents');
+      expect(tool.description).not.toContain('## Running agents in the background');
+      expect(tool.description).not.toContain('send_message');
+      expect(tool.description).toContain('only transient, foreground sub-agents');
+      expect(tool.description).toContain(
+        'Persistent sub-agents listed in the conversation history cannot be reached from this execution.'
+      );
+    });
+
+    it('keeps the full description by default', () => {
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+      expect(tool.description).toContain('## Persistent sub-agents');
+      expect(tool.description).toContain('## Running agents in the background');
+      expect(tool.description).not.toContain('only transient, foreground sub-agents');
+    });
+  });
 });

@@ -150,6 +150,7 @@ steps:
         type: workflow.executeAsync
         with:
           workflow-id: system-security-hunt-proposal-gate
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ foreach.item.conversationId }}"
             title: "{{ foreach.item.title }}"
