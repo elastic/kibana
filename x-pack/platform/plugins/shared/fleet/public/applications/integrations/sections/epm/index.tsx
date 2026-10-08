@@ -18,6 +18,7 @@ import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/cr
 
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
+import { RootPackagePage } from './screens/root';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
@@ -38,6 +39,9 @@ export const EPMApp: React.FunctionComponent = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_copy}>
         <CopyPackagePolicyPage />
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_root}>
+        <RootPackagePage />
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
         <IntegrationsStateContextProvider>

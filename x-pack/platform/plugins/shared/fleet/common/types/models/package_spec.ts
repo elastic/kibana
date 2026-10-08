@@ -41,7 +41,14 @@ export interface PackageDependency {
 
 export interface PackageRequires {
   content?: PackageDependency[];
+  /** Root packages only (prototype): child integration packages a schema resolves to. */
+  integration?: PackageDependency[];
 }
+
+/** Prototype: root package schema map, e.g. { default: 'otel', ecs: { requires }, otel: { requires } }. */
+export type PackageSchemas = { default: string } & {
+  [schema: string]: { requires?: PackageRequires } | string;
+};
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -86,6 +93,8 @@ export interface PackageSpecManifest {
   provider_permissions?: RegistryProviderPermissions[];
   /** Groups related packages (e.g. nginx, nginx_otel) under a shared technology tile. */
   group?: string;
+  /** Prototype: present only on root packages. A package with `schemas` is a root. */
+  schemas?: PackageSchemas;
 }
 export interface DiscoveryDataset {
   name: string;
