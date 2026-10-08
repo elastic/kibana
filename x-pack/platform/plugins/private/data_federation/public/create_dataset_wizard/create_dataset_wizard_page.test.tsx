@@ -19,6 +19,7 @@ import { CREATE_DATASET_PATH, DATASETS_PATH } from '../app_paths';
 import { useLoadList } from '../use_load_list';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 
 // `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
 // Loading the real module pulls in Monaco language registration which evaluates generated i18n
@@ -97,6 +98,7 @@ describe('CreateDatasetWizardPage', () => {
     const history = createMemoryHistory({ initialEntries: [CREATE_DATASET_PATH] });
     const add = jest.fn().mockResolvedValue(undefined);
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const view = render(
       <EuiProvider>
         <I18nProvider>
@@ -107,6 +109,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -121,7 +124,7 @@ describe('CreateDatasetWizardPage', () => {
         </I18nProvider>
       </EuiProvider>
     );
-    return { ...view, history, add, loadDataSets };
+    return { ...view, history, add, loadDataSets, reportUiCounter };
   };
 
   const renderEditWizard = (initialDataSet: DataSetWithName) => {
@@ -131,6 +134,7 @@ describe('CreateDatasetWizardPage', () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const remove = jest.fn().mockResolvedValue(undefined);
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const view = render(
       <EuiProvider>
         <I18nProvider>
@@ -141,6 +145,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add, delete: remove },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -156,7 +161,7 @@ describe('CreateDatasetWizardPage', () => {
         </I18nProvider>
       </EuiProvider>
     );
-    return { ...view, history, add, remove, loadDataSets };
+    return { ...view, history, add, remove, loadDataSets, reportUiCounter };
   };
 
   it('auto-selects format from resource extension', async () => {
@@ -248,7 +253,8 @@ describe('CreateDatasetWizardPage', () => {
   });
 
   it('creates a dataset through the dataset, mapping, and review steps then saves', async () => {
-    const { getByTestId, getByText, findByTestId, history, add, loadDataSets } = renderWizard();
+    const { getByTestId, getByText, findByTestId, history, add, loadDataSets, reportUiCounter } =
+      renderWizard();
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent(createDatasetWizardStrings.pageTitle);
     expect(getByTestId('appHeaderBack')).toHaveAttribute(
@@ -311,6 +317,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(loadDataSets).toHaveBeenCalledTimes(1);
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetCreate);
   });
 
   it('persists common/advanced accordion show/hide state across wizard navigation', async () => {
@@ -380,7 +388,8 @@ describe('CreateDatasetWizardPage', () => {
       },
     };
 
-    const { getByTestId, history, add, remove, loadDataSets } = renderEditWizard(initialDataSet);
+    const { getByTestId, history, add, remove, loadDataSets, reportUiCounter } =
+      renderEditWizard(initialDataSet);
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent('Edit dataset: logs-dataset');
     expect(getByTestId('createDatasetName')).toHaveValue('logs-dataset');
@@ -424,6 +433,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(loadDataSets).toHaveBeenCalledTimes(1);
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
   });
 
   it('deletes the previous dataset when the name changes in edit mode', async () => {
@@ -435,7 +446,7 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId, add, remove } = renderEditWizard(initialDataSet);
+    const { getByTestId, add, remove, reportUiCounter } = renderEditWizard(initialDataSet);
 
     fireEvent.change(getByTestId('createDatasetName'), {
       target: { value: 'renamed-dataset' },
@@ -454,6 +465,8 @@ describe('CreateDatasetWizardPage', () => {
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
       expect(remove).toHaveBeenCalledWith('logs-dataset');
     });
+    expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
   });
 
   it('shows a delete error distinct from a save error when the previous dataset cannot be deleted', async () => {
@@ -461,6 +474,7 @@ describe('CreateDatasetWizardPage', () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const remove = jest.fn().mockRejectedValue(new Error('security_exception: unauthorized'));
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const reportUiCounter = jest.fn();
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
@@ -479,6 +493,7 @@ describe('CreateDatasetWizardPage', () => {
                   docLinks: docLinksMock,
                   datasetsClient: { add, delete: remove },
                   dataSourcesClient: { add: jest.fn() },
+                  reportUiCounter,
                 }}
               >
                 <CreateDatasetWizardPage
@@ -524,6 +539,7 @@ describe('CreateDatasetWizardPage', () => {
     );
     expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
     expect(loadDataSets).not.toHaveBeenCalled();
+    expect(reportUiCounter).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
   });
 
@@ -612,7 +628,8 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId, findByTestId, history, add } = renderEditWizard(initialDataSet);
+    const { getByTestId, findByTestId, history, add, reportUiCounter } =
+      renderEditWizard(initialDataSet);
     add.mockRejectedValue(new Error('validation_exception: bad resource'));
 
     await clickNext(getByTestId);
@@ -641,6 +658,7 @@ describe('CreateDatasetWizardPage', () => {
       'nextButton',
     ]);
     expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
+    expect(reportUiCounter).not.toHaveBeenCalled();
   });
 
   it('preserves API-only settings not managed by the UI when saving edits', async () => {

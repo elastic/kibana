@@ -77,7 +77,7 @@ export class DataFederationPlugin
       visibleIn: ['globalSearch', 'projectSideNav'],
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
-        const [nextCoreStart, { share }] = await core.getStartServices();
+        const [nextCoreStart, { share, usageCollection }] = await core.getStartServices();
 
         const { docTitle } = nextCoreStart.chrome;
         docTitle.change(PLUGIN_NAME);
@@ -89,6 +89,7 @@ export class DataFederationPlugin
           cloudInfo,
           isCloudEnabled,
           share,
+          usageCollection,
           featureFlags: {
             enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,

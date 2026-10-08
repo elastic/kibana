@@ -14,6 +14,7 @@ import type { DataSetWithName, DataSource } from '../common';
 import { DatasetsTabContent } from './datasets_tab_content';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
+import { UI_COUNTER_EVENTS } from './ui_counters';
 
 type MockDatasetsClient = Pick<DataFederationKibanaServices['datasetsClient'], 'add' | 'delete'>;
 
@@ -36,6 +37,10 @@ jest.mock('./datasets_table', () => ({
         <button
           data-test-subj="mockDeleteSelected"
           onClick={() => (props.onDeleteSelected as any)(selectedItems)}
+        />
+        <button
+          data-test-subj="mockDeleteAll"
+          onClick={() => (props.onDeleteSelected as any)(items)}
         />
       </div>
     );
@@ -97,14 +102,17 @@ const createDataSet = ({
 const createServicesMock = ({
   datasetsClient,
   addDanger = jest.fn(),
+  reportUiCounter,
 }: {
   datasetsClient: MockDatasetsClient;
   addDanger?: jest.Mock;
+  reportUiCounter?: jest.Mock;
 }): DataFederationKibanaServices =>
   ({
     dataSourcesClient: { get: jest.fn() },
     datasetsClient,
     toasts: { addDanger, addSuccess: jest.fn() },
+    reportUiCounter,
     docLinks: {
       links: {
         dataFederation: {
@@ -129,16 +137,20 @@ const renderComponent = async ({
   datasetsClient,
   loadDataSets,
   addDanger,
+  reportUiCounter,
 }: {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   datasetsClient: MockDatasetsClient;
   loadDataSets: () => Promise<void>;
   addDanger?: jest.Mock;
+  reportUiCounter?: jest.Mock;
 }) => {
   return render(
     <EuiProvider>
-      <KibanaContextProvider services={createServicesMock({ datasetsClient, addDanger })}>
+      <KibanaContextProvider
+        services={createServicesMock({ datasetsClient, addDanger, reportUiCounter })}
+      >
         <DatasetsTabContent
           dataSources={dataSources}
           dataSets={dataSets}
@@ -198,5 +210,67 @@ describe('DatasetsTabContent', () => {
     });
     expect(deleteMock).toHaveBeenCalledWith('set1');
     expect(document.querySelector('[data-test-subj="mockDeleteError"]')).toBeNull();
+  });
+
+  describe('ui counters', () => {
+    it('reports dataset_delete after a successful single delete', async () => {
+      const reportUiCounter = jest.fn();
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+        datasetsClient: { add: jest.fn(), delete: jest.fn().mockResolvedValue(undefined) },
+        loadDataSets: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteFirst"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockConfirmDelete"]') as Element);
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetDelete);
+      });
+    });
+
+    it('reports dataset_delete with the number of deleted datasets on bulk delete', async () => {
+      const reportUiCounter = jest.fn();
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [
+          createDataSet({ name: 'set1', dataSource: 'ds1' }),
+          createDataSet({ name: 'set2', dataSource: 'ds1' }),
+        ],
+        datasetsClient: { add: jest.fn(), delete: jest.fn().mockResolvedValue(undefined) },
+        loadDataSets: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteAll"]') as Element);
+      fireEvent.click(
+        document.querySelector('[data-test-subj="mockConfirmDeleteMany"]') as Element
+      );
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetDelete, 2);
+      });
+    });
+
+    it('does not report when the delete fails', async () => {
+      const reportUiCounter = jest.fn();
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+        datasetsClient: { add: jest.fn(), delete: jest.fn().mockRejectedValue(new Error('nope')) },
+        loadDataSets: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteFirst"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockConfirmDelete"]') as Element);
+
+      await waitFor(() => {
+        expect(document.querySelector('[data-test-subj="mockDeleteError"]')).not.toBeNull();
+      });
+      expect(reportUiCounter).not.toHaveBeenCalled();
+    });
   });
 });

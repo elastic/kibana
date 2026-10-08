@@ -25,6 +25,7 @@ import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 import { buildDatasetPayload } from './build_dataset_payload';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
@@ -77,7 +78,7 @@ export function CreateDatasetWizardPage({
 }) {
   const history = useHistory();
   const {
-    services: { datasetsClient, toasts },
+    services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
   const datasetNameToEdit = initialDataSet?.name;
@@ -180,6 +181,10 @@ export function CreateDatasetWizardPage({
       }
     }
 
+    reportUiCounter?.(
+      previousName ? UI_COUNTER_EVENTS.datasetUpdate : UI_COUNTER_EVENTS.datasetCreate
+    );
+
     try {
       await loadDataSets();
     } catch (error) {
@@ -191,7 +196,15 @@ export function CreateDatasetWizardPage({
       setIsSaving(false);
       goToDatasets();
     }
-  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods, toasts]);
+  }, [
+    datasetsClient,
+    goToDatasets,
+    initialDataSet,
+    loadDataSets,
+    methods,
+    reportUiCounter,
+    toasts,
+  ]);
 
   const activeStepId = STEPS[activeStepIndex].id;
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
