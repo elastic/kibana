@@ -239,16 +239,6 @@ export class ScopedProfilesManager {
   }
 
   /**
-   * Retrieves an observable of the resolved root and data source contexts that emits when they change
-   * @returns The resolved contexts as an observable
-   */
-  public getContexts$() {
-    return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
-      map(() => this.getContexts())
-    );
-  }
-
-  /**
    * Tracks the active profiles in the EBT context
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {

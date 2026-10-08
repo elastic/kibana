@@ -25,7 +25,7 @@ match. Solution navigations (`Observability`, `Security`) are unaffected — the
 gates already accepted their own `SolutionType`.
 
 This `Default` acceptance is also gated by an **opt-out setting** — see
-[Opt-out setting and activation badge](#opt-out-setting-and-activation-badge).
+[Opt-out setting](#opt-out-setting).
 
 `SolutionType.Search` exists specifically so that Search navigation does **not**
 inherit `Default` behavior — without `search_root_profile`, Search would fall through
@@ -283,12 +283,11 @@ context (`SolutionType.Default`) and inherit all Classic behavior.
 | Attack Overview | Security document | Security data source + attack-discovery alert |
 | Indicator (IOC) Overview | Security document | Security data source + `event.type` includes `indicator` |
 
-## Opt-out setting and activation badge
+## Opt-out setting
 
-### Setting — `discover:enableSolutionProfilesInClassic`
-
-A single boolean advanced setting (`server/ui_settings.ts`, default `true`,
-`requiresPageReload`, space-scoped) turns **all** solution profiles in Classic on or off. It
+A single boolean advanced setting, `discover:enableSolutionProfilesInClassic`
+(`server/ui_settings.ts`, default `true`, `requiresPageReload`, space-scoped), turns **all**
+solution profiles in Classic on or off. It
 is not added to the Serverless allowlist, so it only appears in stateful (where Classic
 navigation exists).
 
@@ -298,19 +297,6 @@ the shared `areSolutionProfilesAllowed(rootContext)` guard (`profiles/root_profi
 is always true outside Classic and, in Classic, false only when the setting is disabled. Because
 the value is read at root resolution, toggling it takes effect on page reload. The base Classic
 behaviors (e.g. the "All logs" ad hoc data view) are **not** gated by this setting.
-
-### Badge — `SolutionProfileBadge`
-
-When a solution profile is active in the active tab's Classic view, the top nav shows a badge
-(`application/main/components/top_nav/solution_profile_badge.tsx`) naming the solution
-("Observability view" / "Security view"). "Active" means the tab's `solutionType` is `Default`
-**and** the resolved data source profile is a solution profile — `getActiveSolutionProfile`
-keys off the profile id, so common profiles that reuse a solution category (e.g.
-`deprecation-logs`) do not trigger it. The badge popover links to the setting via
-`/app/management/kibana/settings?query=…` when the user has `advancedSettings.save`, and
-otherwise shows a "contact your administrator" message. While the badge is shown it **suppresses
-the `SolutionsViewBadge` promo** (`get_top_nav_badges.tsx`), since the context-aware experience
-is already being delivered.
 
 ## Guardrails
 

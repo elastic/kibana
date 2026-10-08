@@ -13,8 +13,6 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
-import { SolutionProfileBadge, getSolutionProfileBadgeText } from './solution_profile_badge';
-import type { ActiveSolution } from './get_active_solution_profile';
 
 /**
  * Helper function to build the top nav badges
@@ -23,12 +21,10 @@ export const getTopNavBadges = ({
   isMobile,
   isManaged,
   services,
-  activeSolution,
 }: {
   isMobile: boolean;
   isManaged: boolean;
   services: DiscoverServices;
-  activeSolution?: ActiveSolution;
 }): ChromeBreadcrumbsBadge[] => {
   const entries: ChromeBreadcrumbsBadge[] = [];
 
@@ -43,16 +39,7 @@ export const getTopNavBadges = ({
     );
   }
 
-  if (activeSolution) {
-    // A solution profile is active in Classic: announce it and suppress the "switch to a solution
-    // view" promo, since the context-aware experience is already being delivered.
-    entries.push({
-      badgeText: getSolutionProfileBadgeText(activeSolution),
-      renderCustomBadge: () => (
-        <SolutionProfileBadge services={services} activeSolution={activeSolution} />
-      ),
-    });
-  } else if (services.spaces && !isMobile) {
+  if (services.spaces && !isMobile) {
     entries.push({
       badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
         defaultMessage: 'Check out context-aware Discover',
