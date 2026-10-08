@@ -362,10 +362,11 @@ async function bulkIndex(
 
   for (let i = 0; i < docs.length; i += chunkSize) {
     const chunk = docs.slice(i, i + chunkSize);
-    const body = chunk.flatMap(({ index, document }) => [{ index: { _index: index } }, document]);
+    // Data streams only accept create (not index) write ops.
+    const body = chunk.flatMap(({ index, document }) => [{ create: { _index: index } }, document]);
     const response = await esClient.bulk({ refresh: false, body });
     if (response.errors) {
-      const errorItem = response.items.find((item) => item.index?.error)?.index?.error;
+      const errorItem = response.items.find((item) => item.create?.error)?.create?.error;
       if (errorItem && !firstError) {
         firstError = { type: errorItem.type, reason: errorItem.reason };
       }
@@ -376,13 +377,10 @@ async function bulkIndex(
       );
     }
     indexed += response.items.filter((item) => {
-      const status = item.index?.status;
+      const status = item.create?.status;
       return (
-        !item.index?.error &&
-        (item.index?.result === 'created' ||
-          item.index?.result === 'updated' ||
-          status === 200 ||
-          status === 201)
+        !item.create?.error &&
+        (item.create?.result === 'created' || status === 200 || status === 201)
       );
     }).length;
   }
@@ -395,6 +393,62 @@ async function bulkIndex(
   return { indexed, firstError };
 }
 
+async function ensureTemplates(esClient: ElasticsearchClient, logger: Logger): Promise<void> {
+  try {
+    await Promise.all([
+      ensureTsdsTemplate(
+        esClient,
+        `metrics-${KUBELETSTATS_DATASET}`,
+        [`metrics-${KUBELETSTATS_DATASET}-*`],
+        {
+          'k8s.pod.cpu_limit_utilization': gaugeDouble(),
+          'k8s.pod.cpu.node.utilization': gaugeDouble(),
+          'k8s.pod.cpu.usage': gaugeDouble(),
+          'k8s.pod.memory_limit_utilization': gaugeDouble(),
+          'k8s.pod.memory.node.utilization': gaugeDouble(),
+          'k8s.pod.memory.working_set': gaugeDouble(),
+          'k8s.pod.memory.usage': gaugeDouble(),
+          'k8s.pod.network.io': gaugeDouble(),
+          'metrics.k8s.pod.cpu_limit_utilization': gaugeDouble(),
+          'metrics.k8s.pod.cpu.node.utilization': gaugeDouble(),
+          'metrics.k8s.pod.cpu.usage': gaugeDouble(),
+          'metrics.k8s.pod.memory_limit_utilization': gaugeDouble(),
+          'metrics.k8s.pod.memory.node.utilization': gaugeDouble(),
+          'metrics.k8s.pod.memory.working_set': gaugeDouble(),
+          'metrics.k8s.pod.memory.usage': gaugeDouble(),
+          'metrics.k8s.pod.network.io': gaugeDouble(),
+        }
+      ),
+      ensureTsdsTemplate(esClient, `metrics-${CLUSTER_DATASET}`, [`metrics-${CLUSTER_DATASET}-*`], {
+        'k8s.node.condition_ready': gaugeLong(),
+        'k8s.node.cpu.usage': gaugeDouble(),
+        'k8s.node.allocatable_cpu': gaugeDouble(),
+        'k8s.node.memory.working_set': gaugeDouble(),
+        'k8s.node.allocatable_memory': gaugeDouble(),
+        'k8s.node.filesystem.usage': gaugeDouble(),
+        'k8s.node.filesystem.capacity': gaugeDouble(),
+        'k8s.deployment.available': gaugeLong(),
+        'k8s.deployment.desired': gaugeLong(),
+        'k8s.pod.phase': gaugeLong(),
+        'k8s.container.restarts': gaugeLong(),
+      }),
+      ensureTsdsTemplate(
+        esClient,
+        `metrics-${HOSTMETRICS_DATASET}`,
+        [`metrics-${HOSTMETRICS_DATASET}-*`],
+        {
+          'system.cpu.utilization': gaugeDouble(),
+          'metrics.system.cpu.utilization': gaugeDouble(),
+        }
+      ),
+    ]);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    // Fall back to built-in metrics-otel@template (TSDS) when the user cannot manage templates.
+    logger.warn(`Kubernetes seed could not install custom TSDS templates: ${message}`);
+  }
+}
+
 /** Seeds OTel Kubernetes metrics shaped for kubernetes_otel managed dashboards. */
 export async function seedKubernetesData(
   esClient: ElasticsearchClient,
@@ -402,73 +456,16 @@ export async function seedKubernetesData(
 ): Promise<SeedKubernetesResult> {
   // Drop prior lab streams so a previous non-TSDS seed cannot block `TS` ES|QL panels.
   await Promise.all(DATA_STREAMS.map((stream) => resetDataStream(esClient, stream, logger)));
+  await ensureTemplates(esClient, logger);
 
-  await Promise.all([
-    ensureTsdsTemplate(esClient, `metrics-${KUBELETSTATS_DATASET}`, [
-      `metrics-${KUBELETSTATS_DATASET}-*`,
-    ], {
-      'k8s.pod.cpu_limit_utilization': gaugeDouble(),
-      'k8s.pod.cpu.node.utilization': gaugeDouble(),
-      'k8s.pod.cpu.usage': gaugeDouble(),
-      'k8s.pod.memory_limit_utilization': gaugeDouble(),
-      'k8s.pod.memory.node.utilization': gaugeDouble(),
-      'k8s.pod.memory.working_set': gaugeDouble(),
-      'k8s.pod.memory.usage': gaugeDouble(),
-      'k8s.pod.network.io': gaugeDouble(),
-      'metrics.k8s.pod.cpu_limit_utilization': gaugeDouble(),
-      'metrics.k8s.pod.cpu.node.utilization': gaugeDouble(),
-      'metrics.k8s.pod.cpu.usage': gaugeDouble(),
-      'metrics.k8s.pod.memory_limit_utilization': gaugeDouble(),
-      'metrics.k8s.pod.memory.node.utilization': gaugeDouble(),
-      'metrics.k8s.pod.memory.working_set': gaugeDouble(),
-      'metrics.k8s.pod.memory.usage': gaugeDouble(),
-      'metrics.k8s.pod.network.io': gaugeDouble(),
-    }),
-    ensureTsdsTemplate(esClient, `metrics-${CLUSTER_DATASET}`, [`metrics-${CLUSTER_DATASET}-*`], {
-      'k8s.node.condition_ready': gaugeLong(),
-      'k8s.node.cpu.usage': gaugeDouble(),
-      'k8s.node.allocatable_cpu': gaugeDouble(),
-      'k8s.node.memory.working_set': gaugeDouble(),
-      'k8s.node.allocatable_memory': gaugeDouble(),
-      'k8s.node.filesystem.usage': gaugeDouble(),
-      'k8s.node.filesystem.capacity': gaugeDouble(),
-      'k8s.deployment.available': gaugeLong(),
-      'k8s.deployment.desired': gaugeLong(),
-      'k8s.pod.phase': gaugeLong(),
-      'k8s.container.restarts': gaugeLong(),
-    }),
-    ensureTsdsTemplate(
-      esClient,
-      `metrics-${HOSTMETRICS_DATASET}`,
-      [`metrics-${HOSTMETRICS_DATASET}-*`],
-      {
-        'system.cpu.utilization': gaugeDouble(),
-        'metrics.system.cpu.utilization': gaugeDouble(),
-      }
-    ),
-  ]);
-
-  for (const stream of DATA_STREAMS) {
-    try {
-      await esClient.indices.createDataStream({ name: stream });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (
-        !message.includes('resource_already_exists_exception') &&
-        !message.includes('already exists')
-      ) {
-        throw error;
-      }
-    }
-  }
-
+  // Let the first bulk `create` auto-create data streams (avoids kibana_system createDataStream 403).
   const docs = buildDocuments(Date.now());
   const { indexed: documentsIndexed, firstError } = await bulkIndex(esClient, docs, logger);
 
   if (documentsIndexed === 0) {
     const detail = firstError
       ? `${firstError.type ?? 'error'}: ${firstError.reason ?? 'unknown'}`
-      : 'No bulk errors reported — check index privileges and TSDS templates.';
+      : 'No bulk errors reported — check that your user can write to metrics-* data streams.';
     throw new Error(
       `Kubernetes seed indexed 0 documents into ${DATA_STREAMS.join(', ')}. ${detail}`
     );

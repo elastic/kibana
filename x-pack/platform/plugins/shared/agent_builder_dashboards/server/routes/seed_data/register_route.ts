@@ -17,6 +17,20 @@ import { seedKubernetesData } from './seed_kubernetes';
 
 const KUBERNETES_OTEL_PACKAGE = 'kubernetes_otel';
 
+function formatSeedError(error: unknown): string {
+  if (error && typeof error === 'object' && 'meta' in error) {
+    const esError = (
+      error as {
+        meta?: { body?: { error?: { type?: string; reason?: string } } };
+      }
+    ).meta?.body?.error;
+    if (esError?.reason) {
+      return `${esError.type ?? 'error'}: ${esError.reason}`;
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 async function ensureKubernetesOtelPackage({
   coreSetup,
   request,
@@ -81,9 +95,8 @@ export function registerSeedDataRoute({
           logger,
         });
 
-        // Use the internal user so prototype seeding works on deployed clusters
-        // where the signed-in user may lack index/template privileges.
-        const result = await seedKubernetesData(core.elasticsearch.client.asInternalUser, logger);
+        // Must use the signed-in user: kibana_system cannot create metrics-* data streams.
+        const result = await seedKubernetesData(core.elasticsearch.client.asCurrentUser, logger);
 
         return response.ok({
           body: {
@@ -93,7 +106,7 @@ export function registerSeedDataRoute({
           },
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = formatSeedError(error);
         logger.error(`Kubernetes seed failed: ${message}`);
         return response.customError({
           statusCode: 500,
