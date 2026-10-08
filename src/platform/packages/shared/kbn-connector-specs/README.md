@@ -598,7 +598,7 @@ node scripts/connector_vendor_api --connector datadog --check
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination` and `x-ms-pageable` are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination` and `x-ms-pageable` are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
