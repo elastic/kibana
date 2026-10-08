@@ -189,25 +189,27 @@ export const SEEDED_ENTITIES: MitreEntity[] = [
   ...SEEDED_ATLAS_ENTITIES,
 ];
 
+const buildSeededDocId = (entity: MitreEntity): string =>
+  `${MITRE_ATTACK_ENTITY_SO_TYPE}:${buildSoId({
+    framework: entity.framework,
+    frameworkVersion: entity.framework_version,
+    id: entity.id,
+  })}`;
+
+/** Elasticsearch document `_id`s of exactly the seeded entities; used by setup and teardown. */
+export const getSeededSoIds = (): string[] => SEEDED_ENTITIES.map(buildSeededDocId);
+
 /**
  * Builds the Elasticsearch bulk operations array for indexing the synthetic
  * MITRE entities. Each entity becomes two entries in the array: an index
  * action header and the document body.
  */
 export const buildSeedBulkOperations = (): Array<Record<string, unknown>> =>
-  SEEDED_ENTITIES.flatMap((entity) => {
-    const soId = buildSoId({
-      framework: entity.framework,
-      frameworkVersion: entity.framework_version,
-      id: entity.id,
-    });
-    const docId = `${MITRE_ATTACK_ENTITY_SO_TYPE}:${soId}`;
-    return [
-      { index: { _index: SEEDED_MITRE_INDEX, _id: docId } },
-      {
-        type: MITRE_ATTACK_ENTITY_SO_TYPE,
-        [MITRE_ATTACK_ENTITY_SO_TYPE]: entity,
-        ...SO_BASE_FIELDS,
-      },
-    ];
-  });
+  SEEDED_ENTITIES.flatMap((entity) => [
+    { index: { _index: SEEDED_MITRE_INDEX, _id: buildSeededDocId(entity) } },
+    {
+      type: MITRE_ATTACK_ENTITY_SO_TYPE,
+      [MITRE_ATTACK_ENTITY_SO_TYPE]: entity,
+      ...SO_BASE_FIELDS,
+    },
+  ]);
