@@ -350,7 +350,7 @@ steps:
           Glob patterns for matches/does_not_match: * matches any sequence, ? matches one char.
 
         query  — The query is too broad and FPs share a pattern not worth
-          excepting individually. Only valid for rule type "{{ steps.fetch_rule.output.type }}".
+          excepting individually. The rule stays a "{{ steps.fetch_rule.output.type }}" rule.
           Populate proposed_query with the full narrowed query in this rule's language,
           "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
           and a * inside quotes is a literal asterisk, so every substring match must
@@ -604,12 +604,15 @@ steps:
     on-failure:
       continue: true
 
-  # The preview bodies below carry the rule's own data view, timestamp override and
-  # alert suppression, so those settings no longer exclude a rule. The type check
-  # alone excludes saved-query rules, which carry no inline query. The exception arm
-  # additionally requires its filter to have been built: falling back to the rule's
-  # own filters would backtest the unchanged rule and present it as the exception's
-  # result. Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
+  # The preview bodies below carry the rule's own data view, timestamp override,
+  # alert suppression and type-specific fields, so the preview covers query, EQL,
+  # ES|QL, new terms, indicator match and threshold rules. Saved-query rules carry
+  # no inline query and machine learning rules no query at all, so neither is
+  # previewed; an exception cannot be previewed on an ES|QL rule, which has no
+  # filters. The exception arm additionally requires its filter to have been built:
+  # falling back to the rule's own filters would backtest the unchanged rule and
+  # present it as the exception's result. Gated on fetch_rule so a skipped
+  # diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
     if: >-
@@ -623,10 +626,28 @@ steps:
               and steps.build_exception_filter.output.filters != null)
             or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
             or steps.diagnose_rule.output.structured_output.change_type == 'schedule')
-          and (steps.fetch_rule.output.type == 'query'
-            or (steps.fetch_rule.output.type == 'threshold'
-              and (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
-                or steps.diagnose_rule.output.structured_output.change_type == 'schedule'))) }}
+          and (
+            (steps.diagnose_rule.output.structured_output.change_type == 'query'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'esql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'))
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))
+            or (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+              and steps.fetch_rule.output.type == 'threshold')
+            or (steps.diagnose_rule.output.structured_output.change_type == 'schedule'
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'esql'
+                or steps.fetch_rule.output.type == 'new_terms'
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))) }}
 
   # The diagnosis reports the proposed threshold as three fields; the preview body
   # and the apply action take one object. Skipped for every other arm, so the
@@ -685,6 +706,21 @@ steps:
           timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
           timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
           alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
+          # Type-specific fields (EQL, new terms, indicator match); undefined and dropped
+          # for rule types that lack them.
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threat_index: "${{ steps.fetch_rule.output.threat_index }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          concurrent_searches: "${{ steps.fetch_rule.output.concurrent_searches }}"
+          items_per_search: "${{ steps.fetch_rule.output.items_per_search }}"
           filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
@@ -719,6 +755,21 @@ steps:
           timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
           timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
           alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
+          # Type-specific fields (EQL, new terms, indicator match); undefined and dropped
+          # for rule types that lack them.
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threat_index: "${{ steps.fetch_rule.output.threat_index }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          concurrent_searches: "${{ steps.fetch_rule.output.concurrent_searches }}"
+          items_per_search: "${{ steps.fetch_rule.output.items_per_search }}"
           # build_exception_filter's output (the rule's filters plus the negated exception
           # clause) takes precedence when it ran; otherwise this previews unchanged, same
           # as the query arm.
@@ -948,8 +999,8 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest is available. The preview supports only query rules and threshold rules.
-        It does not support a saved query.
+        No backtest is available. The preview does not support saved query rules or machine learning rules,
+        and it cannot preview an exception on an ES|QL rule.
         Or the agent could not convert the proposed exception into a preview filter.
         Approving still applies the proposed change.
         Judge it on the change and on the false positives above, not on a simulated alert count.
