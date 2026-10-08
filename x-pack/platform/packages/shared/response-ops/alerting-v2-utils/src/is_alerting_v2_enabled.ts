@@ -61,11 +61,11 @@ export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
 
 const OBSERVABILITY_SOLUTION_NAV_ID = 'oblt';
 
-/** Returns whether the active solution nav id is Observability, the only solution where v2 rules are reachable. */
+/** Returns whether the active solution nav id is Observability or none (a classic space); other solution views return `false`. */
 export const isAlertingV2AvailableInSolution = (
   solutionNavId: string | null | undefined
 ): boolean => {
-  return solutionNavId === OBSERVABILITY_SOLUTION_NAV_ID;
+  return !solutionNavId || solutionNavId === OBSERVABILITY_SOLUTION_NAV_ID;
 };
 
 /**

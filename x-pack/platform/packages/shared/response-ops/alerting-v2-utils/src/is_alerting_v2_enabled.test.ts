@@ -17,16 +17,13 @@ import {
 } from './is_alerting_v2_enabled';
 
 describe('isAlertingV2AvailableInSolution', () => {
-  it('returns true for the Observability solution', () => {
-    expect(isAlertingV2AvailableInSolution('oblt')).toBe(true);
+  it.each([['oblt'], [null], [undefined]])('returns true for %s', (solutionNavId) => {
+    expect(isAlertingV2AvailableInSolution(solutionNavId)).toBe(true);
   });
 
-  it.each([['security'], ['es'], ['workplaceai'], [null], [undefined]])(
-    'returns false for %s',
-    (solutionNavId) => {
-      expect(isAlertingV2AvailableInSolution(solutionNavId)).toBe(false);
-    }
-  );
+  it.each([['security'], ['es'], ['workplaceai']])('returns false for %s', (solutionNavId) => {
+    expect(isAlertingV2AvailableInSolution(solutionNavId)).toBe(false);
+  });
 });
 
 describe('isAlertingV2Enabled', () => {

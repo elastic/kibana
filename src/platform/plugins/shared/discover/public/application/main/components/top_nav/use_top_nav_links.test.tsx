@@ -582,11 +582,18 @@ describe('useTopNavLinks', () => {
       expect(alertsItem?.items?.length).toBeGreaterThan(0);
     });
 
+    it('should use the v2 selector flyout in a classic space', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true, null);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem?.run).toBeDefined();
+      expect(alertsItem?.items).toBeUndefined();
+    });
+
     it.each<[string, SolutionId | null]>([
       ['security', 'security'],
       ['search', 'es'],
       ['workplace ai', 'workplaceai'],
-      ['classic (no solution)', null],
     ])('should fall back to v1 popover items in %s', async (_name, solutionNavId) => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true, solutionNavId);
 
