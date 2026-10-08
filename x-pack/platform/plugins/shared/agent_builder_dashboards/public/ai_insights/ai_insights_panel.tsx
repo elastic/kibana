@@ -326,7 +326,7 @@ const StaleInlineNotice: React.FC<{ onUpdate: () => void }> = ({ onUpdate }) => 
       <EuiIcon type="warning" color="warning" aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem grow={true}>
-      <EuiText size="s" color="subdued">
+      <EuiText size="s" color="warning">
         <span>
           {i18n.translate('xpack.agentBuilderDashboards.aiInsights.stale.body', {
             defaultMessage:

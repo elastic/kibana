@@ -52,7 +52,7 @@ export const SEED_DATA_CARDS: SeedCard[] = [
     }),
     description: i18n.translate('xpack.agentBuilderDashboards.seedData.kubernetes.description', {
       defaultMessage:
-        'Installs the kubernetes_otel Fleet package (managed dashboards) and seeds ~15 minutes of recent OTel Kubernetes metrics (TSDS-safe).',
+        'Installs the kubernetes_otel Fleet package (managed dashboards) and seeds ~24 hours of OTel Kubernetes metrics + events for every panel.',
     }),
     dashboardHint: '[Kubernetes OTel] Overview',
   },
