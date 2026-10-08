@@ -6,8 +6,11 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { testTimeoutMs } from './src/budget';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  timeout: 120 * 60_000,
+  // Sized from FP_TP_COHORT / FP_TP_MAX_EXAMPLES_PER_CORPUS / EVAL_REPETITIONS /
+  // EVAL_CONCURRENCY so the full scored cohort fits; never below the original 120 min.
+  timeout: testTimeoutMs(process.env),
 });

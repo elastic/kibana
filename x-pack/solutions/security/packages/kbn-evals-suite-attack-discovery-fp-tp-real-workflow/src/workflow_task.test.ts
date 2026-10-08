@@ -12,6 +12,7 @@ import {
   buildAttackDiscoveryFromPayload,
   deriveInvestigationId,
   normalizeVerdictLabel,
+  readAgentConnectorId,
   readAgentVerdict,
   readWorkflowOutput,
   runAttackDiscoveryWorkflow,
@@ -313,6 +314,53 @@ describe('readAgentVerdict', () => {
   it('passes through a bare-string structured verdict (real runtime shape)', () => {
     const steps = [agentStep({ output: { structured_output: { verdict: 'true_positive' } } })];
     expect(readAgentVerdict(steps)).toBe('true_positive');
+  });
+});
+
+describe('readAgentConnectorId', () => {
+  it('reads metadata.usage.connectorId from the ai.agent step output', () => {
+    const steps = [
+      agentStep({ output: null }),
+      agentStep({ output: { metadata: { usage: { connectorId: 'http.conn.model-x' } } } }),
+    ];
+    expect(readAgentConnectorId(steps)).toBe('http.conn.model-x');
+  });
+
+  it('scans every agent-step record and skips empty/absent usage', () => {
+    const steps = [
+      agentStep({ output: { metadata: { usage: { connectorId: '' } } } }),
+      agentStep({ output: {} }),
+      agentStep({ output: { metadata: { usage: { connectorId: 'http.conn.model-y' } } } }),
+    ];
+    expect(readAgentConnectorId(steps)).toBe('http.conn.model-y');
+  });
+
+  it('returns undefined when no agent step reported usage', () => {
+    expect(readAgentConnectorId([agentStep({ output: null })])).toBeUndefined();
+  });
+
+  it('is surfaced on the task output for per-row routing verification', async () => {
+    const fetch = bridgeFetch({
+      execution: {
+        status: 'completed',
+        output: { verdict: 'true_positive' },
+        stepExecutions: [
+          agentStep({
+            output: {
+              structured_output: { verdict: 'true_positive' },
+              metadata: { usage: { connectorId: 'http.conn.model-x' } },
+            },
+          }),
+        ],
+      },
+    });
+    const result = await runAttackDiscoveryWorkflow({
+      fetch: fetch as never,
+      log: mockLog(),
+      payload: GUIDE_PAYLOAD,
+      caseId: 'guide-sanity-40',
+    });
+    expect(result.agentConnectorId).toBe('http.conn.model-x');
   });
 });
 

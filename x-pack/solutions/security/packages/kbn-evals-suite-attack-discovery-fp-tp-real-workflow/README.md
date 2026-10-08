@@ -71,6 +71,23 @@ A scored/gating run uses `FP_TP_COHORT=scored`. An unknown value throws rather
 than falling back to `all`. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15; `0` or
 non-numeric means no cap) applies per corpus on top of the cohort.
 
+## Subject-model routing and Playwright budget
+
+The workflow's `ai.agent` step resolves its connector from the
+`alertzero_reasoning` inference feature, so `beforeAll` routes that feature to
+the Playwright project's connector (`src/subject_model_routing.ts`, reusing the
+sibling suite's `overrideInferenceFeature`) and `afterAll` restores the previous
+settings. Without it, every model column would grade the space default
+connector. Each row's task output carries `agentConnectorId`
+(`metadata.usage.connectorId` from the `ai.agent` step) so per-row routing is
+verifiable in results.
+
+The Playwright test timeout is derived (`src/budget.ts`) from
+`FP_TP_COHORT`, `FP_TP_MAX_EXAMPLES_PER_CORPUS`, `EVAL_REPETITIONS`, and
+`EVAL_CONCURRENCY` (default 5) — 60s/case of wall clock, never below the
+original 120 min. The full scored cohort (267 cases) × 3 reps at default
+concurrency yields ceil(267·3/5) = 161 waves ≈ 161 min.
+
 `UnsafeClose` scores 0 for any case where the verdict is `false_positive` and the
 gold label is anything else. It is the `UnsafeClose` evaluator from
 `@kbn/evals-suite-attack-discovery-fp-tp`, adapted to this suite's output shape.

@@ -29,6 +29,7 @@ import {
   type EvaluationDataset,
   type Example,
   type DefaultEvaluators,
+  type EvalConnector,
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import type { CorpusName } from '../src/constants';
@@ -40,6 +41,7 @@ import {
   verdictAccuracy,
   VERDICT_QUALITY_CRITERIA,
 } from '../src/evaluators';
+import { routeSubjectModel } from '../src/subject_model_routing';
 import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
 interface AttackDiscoveryExample extends Example {
@@ -75,6 +77,23 @@ evaluate.describe(
   'Attack Discovery — FP/TP verdict accuracy',
   { tag: tags.stateful.classic },
   () => {
+    let restoreInferenceSettings: (() => Promise<void>) | undefined;
+
+    // The workflow's ai.agent step resolves its model from the `alertzero_reasoning`
+    // inference feature, so route it to this project's connector or every model column
+    // would grade the space default.
+    evaluate.beforeAll(
+      async ({ fetch, connector }: { fetch: HttpHandler; connector: EvalConnector }) => {
+        restoreInferenceSettings = await routeSubjectModel({ fetch, connector });
+      }
+    );
+
+    evaluate.afterAll(async ({ log }: { fetch: HttpHandler; log: ToolingLog }) => {
+      await restoreInferenceSettings?.().catch((error: Error) =>
+        log.warning(`Could not restore inference settings: ${error.message}`)
+      );
+    });
+
     evaluate(
       'runs the attack-discovery review workflow per corpus case and grades the verdict',
       async ({

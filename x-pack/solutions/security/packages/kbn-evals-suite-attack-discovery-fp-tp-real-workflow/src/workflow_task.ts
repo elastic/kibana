@@ -107,6 +107,11 @@ export interface AttackDiscoveryTaskOutput {
   executionId: string;
   executionStatus: ExecutionStatus;
   traceId?: string;
+  /**
+   * Connector the `ai.agent` step actually ran on (`metadata.usage.connectorId`), so the
+   * eval side can verify per row that the subject model was routed.
+   */
+  agentConnectorId?: string;
   /** Set when seeding (AD doc or investigation) failed; the case grades as no-verdict. */
   seedingError?: string;
 }
@@ -148,6 +153,27 @@ export const readAgentVerdict = (
     const verdict = structured?.verdict ?? structured?.verdicts?.[0];
     if (verdict) {
       return verdict;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Reads the connector the `ai.agent` step ran on from its `metadata.usage.connectorId`.
+ * Enter records and errored steps may carry no usage, so every agent-step record is
+ * scanned; `undefined` means no step reported one.
+ */
+export const readAgentConnectorId = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): string | undefined => {
+  for (const step of stepExecutions.filter(isAgentStep)) {
+    const output = step.output as
+      | { metadata?: { usage?: { connectorId?: unknown } } }
+      | null
+      | undefined;
+    const connectorId = output?.metadata?.usage?.connectorId;
+    if (typeof connectorId === 'string' && connectorId !== '') {
+      return connectorId;
     }
   }
   return undefined;
@@ -847,5 +873,6 @@ export const runAttackDiscoveryWorkflow = async ({
     executionId: workflowExecutionId,
     executionStatus: execution.status,
     traceId: execution.traceId,
+    agentConnectorId: readAgentConnectorId(execution.stepExecutions),
   };
 };
