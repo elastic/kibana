@@ -28,9 +28,13 @@ export class SmlTestTypesPlugin implements Plugin<void, void, SetupDependencies>
     /**
      * `ai.conversation.updated` is opt-in and no solution plugin enables it on the Agent Builder
      * Scout deployment, so `conversation_updated_trigger_api.spec.ts` would never see the trigger
-     * fire without this.
+     * fire without this. Both templates are needed: the spec asserts that escalation writes are
+     * emitted too, just not matched by its workflow.
      */
-    agentBuilder.conversations.enableUpdatedTrigger(async () => true);
+    agentBuilder.conversations.enableUpdatedTrigger({
+      templateIds: ['investigation', 'escalation'],
+      isEnabled: async () => true,
+    });
 
     /**
      * Grants `ai_index:sml_test_gated/read` and nothing else, so a role can be built that differs

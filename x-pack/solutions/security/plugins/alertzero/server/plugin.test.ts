@@ -7,7 +7,11 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  TEMPLATE_ID_ESCALATION,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
@@ -385,8 +389,14 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         return enableUpdatedTrigger;
       };
 
-      it('opts in to the trigger when Agent Builder is available at setup', () => {
-        expect(setupWithAgentBuilder(coreMock.createSetup())).toHaveBeenCalledTimes(1);
+      it('opts in to the trigger for investigation and escalation conversations', () => {
+        const enableUpdatedTrigger = setupWithAgentBuilder(coreMock.createSetup());
+
+        expect(enableUpdatedTrigger).toHaveBeenCalledTimes(1);
+        expect(enableUpdatedTrigger).toHaveBeenCalledWith({
+          templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
+          isEnabled: expect.any(Function),
+        });
       });
 
       it('resolves the opt-in from the AlertZero setting of the requesting space', async () => {
@@ -397,7 +407,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         (uiSettingsClient.get as jest.Mock).mockResolvedValue(true);
         const request = httpServerMock.createKibanaRequest();
 
-        const [isEnabled] = enableUpdatedTrigger.mock.calls[0];
+        const [{ isEnabled }] = enableUpdatedTrigger.mock.calls[0];
 
         await expect(isEnabled(request)).resolves.toBe(true);
         expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);

@@ -173,6 +173,7 @@ export type {
   PluginsStart,
   RuntimeStart,
   ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,

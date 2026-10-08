@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   ConversationMetadataUpdatedTriggerId,
@@ -15,19 +16,13 @@ import type { ConversationEventBus } from './conversation_event_bus';
 import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
 /**
- * Opt-in check registered by a solution through `conversations.enableUpdatedTrigger`, resolving
- * whether `ai.conversation.updated` should be emitted for the request that performed the write.
- */
-export type ConversationUpdatedCheck = (request: KibanaRequest) => Promise<boolean>;
-
-/**
  * Registers bridge listeners that forward conversation domain events to workflows_extensions.
  */
 export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
   logger: Logger,
-  conversationUpdatedChecks: readonly ConversationUpdatedCheck[]
+  conversationUpdatedOptIns: readonly ConversationUpdatedOptIn[]
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -75,10 +70,13 @@ export function registerConversationWorkflowEventBridge(
     );
   });
 
-  // Opt-in: without a solution enabling the trigger, the emit is skipped before the subscriber
-  // lookup, so deployments that have nothing subscribed don't pay for the write.
-  const isConversationUpdatedEnabled = async (request: KibanaRequest): Promise<boolean> => {
-    for (const isEnabled of conversationUpdatedChecks) {
+  // Opt-in: without a solution enabling the trigger for the conversation's template, the emit is
+  // skipped before the subscriber lookup, so writes nothing listens to don't pay for it.
+  const isConversationUpdatedEnabled = async (
+    request: KibanaRequest,
+    optIns: readonly ConversationUpdatedOptIn[]
+  ): Promise<boolean> => {
+    for (const { isEnabled } of optIns) {
       try {
         if (await isEnabled(request)) {
           return true;
@@ -93,8 +91,18 @@ export function registerConversationWorkflowEventBridge(
   };
 
   conversationEventBus.onConversationUpdated((request, payload) => {
+    const { templateId } = payload;
+    if (!templateId) {
+      return;
+    }
+    const optIns = conversationUpdatedOptIns.filter(({ templateIds }) =>
+      templateIds.includes(templateId)
+    );
+    if (optIns.length === 0) {
+      return;
+    }
     void (async () => {
-      if (await isConversationUpdatedEnabled(request)) {
+      if (await isConversationUpdatedEnabled(request, optIns)) {
         await forward(ConversationUpdatedTriggerId, payload, request);
       }
     })();

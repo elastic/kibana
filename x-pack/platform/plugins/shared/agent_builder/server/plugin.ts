@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -49,7 +50,6 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
-import type { ConversationUpdatedCheck } from './workflows/triggers/event_bridge';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -78,7 +78,7 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
-  private readonly conversationUpdatedChecks: ConversationUpdatedCheck[] = [];
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -322,8 +322,8 @@ export class AgentBuilderPlugin
         ),
       },
       conversations: {
-        enableUpdatedTrigger: (isEnabled) => {
-          this.conversationUpdatedChecks.push(isEnabled);
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
         },
       },
       topSnippets: this.config.topSnippets,
@@ -389,7 +389,7 @@ export class AgentBuilderPlugin
       this.conversationEventBus,
       startDeps.workflowsExtensions,
       this.logger,
-      this.conversationUpdatedChecks
+      this.conversationUpdatedOptIns
     );
 
     const {

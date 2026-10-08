@@ -22,8 +22,8 @@ import {
   ConversationAttachmentDeletedTriggerId,
   ConversationUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import { createConversationEventBus } from './conversation_event_bus';
-import type { ConversationUpdatedCheck } from './event_bridge';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
 
 const flushMicrotasks = async () => {
@@ -80,7 +80,7 @@ describe('registerConversationWorkflowEventBridge', () => {
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     // `ai.conversation.updated` is opt-in; the gate itself is covered in its own describe below.
     registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger, [
-      async () => true,
+      { templateIds: ['investigation'], isEnabled: async () => true },
     ]);
   });
 
@@ -263,41 +263,54 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
 
     describe('opt-in gate', () => {
-      /** Emits on a bus gated by `checks` and resolves once the forward had a chance to run. */
-      const emitWithChecks = async (checks: ConversationUpdatedCheck[]) => {
-        const gatedBus = createConversationEventBus();
-        registerConversationWorkflowEventBridge(gatedBus, workflowsExtensions, logger, checks);
+      const investigationOptIn = (
+        isEnabled: ConversationUpdatedOptIn['isEnabled']
+      ): ConversationUpdatedOptIn => ({ templateIds: ['investigation'], isEnabled });
 
-        gatedBus.emitConversationUpdated(request, payload);
+      /** Emits on a bus gated by `optIns` and resolves once the forward had a chance to run. */
+      const emitWithOptIns = async (
+        optIns: ConversationUpdatedOptIn[],
+        event: ConversationUpdatedTriggerEvent = payload
+      ) => {
+        const gatedBus = createConversationEventBus();
+        registerConversationWorkflowEventBridge(gatedBus, workflowsExtensions, logger, optIns);
+
+        gatedBus.emitConversationUpdated(request, event);
         await flushMicrotasks();
       };
 
-      it('should not emit when no check is registered', async () => {
-        await emitWithChecks([]);
+      it('should not emit when no opt-in is registered', async () => {
+        await emitWithOptIns([]);
 
         expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
         expect(mockClient.emitEvent).not.toHaveBeenCalled();
       });
 
-      it('should not emit when every check resolves false', async () => {
-        await emitWithChecks([async () => false, async () => false]);
+      it('should not emit when every matching opt-in resolves false', async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => false),
+          investigationOptIn(async () => false),
+        ]);
 
         expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
         expect(mockClient.emitEvent).not.toHaveBeenCalled();
       });
 
-      it('should emit when any check resolves true', async () => {
-        await emitWithChecks([async () => false, async () => true]);
+      it('should emit when any matching opt-in resolves true', async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => false),
+          investigationOptIn(async () => true),
+        ]);
 
         expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
       });
 
       it('should warn and keep evaluating when a check throws', async () => {
-        await emitWithChecks([
-          async () => {
+        await emitWithOptIns([
+          investigationOptIn(async () => {
             throw new Error('settings unavailable');
-          },
-          async () => true,
+          }),
+          investigationOptIn(async () => true),
         ]);
 
         expect(logger.warn).toHaveBeenCalledWith(
@@ -308,14 +321,35 @@ describe('registerConversationWorkflowEventBridge', () => {
         expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
       });
 
-      it('should pass the emitting request to each check', async () => {
+      it('should pass the emitting request to each matching check', async () => {
         const firstCheck = jest.fn().mockResolvedValue(false);
         const secondCheck = jest.fn().mockResolvedValue(false);
 
-        await emitWithChecks([firstCheck, secondCheck]);
+        await emitWithOptIns([investigationOptIn(firstCheck), investigationOptIn(secondCheck)]);
 
         expect(firstCheck).toHaveBeenCalledWith(request);
         expect(secondCheck).toHaveBeenCalledWith(request);
+      });
+
+      it('should not run checks or emit when the conversation has no template', async () => {
+        const isEnabled = jest.fn().mockResolvedValue(true);
+
+        await emitWithOptIns([investigationOptIn(isEnabled)], {
+          ...payload,
+          templateId: undefined,
+        });
+
+        expect(isEnabled).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not run checks registered for other templates', async () => {
+        const escalationCheck = jest.fn().mockResolvedValue(true);
+
+        await emitWithOptIns([{ templateIds: ['escalation'], isEnabled: escalationCheck }]);
+
+        expect(escalationCheck).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
       });
     });
   });
