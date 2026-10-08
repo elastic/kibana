@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Scalar } from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import type { ExtendedAutocompleteContext } from './context/autocomplete.types';
+import { buildAutocompleteContext as buildContext } from './context/build_autocomplete_context';
 import {
   getCompletionItemProvider,
   WORKFLOW_COMPLETION_PROVIDER_ID,
@@ -19,6 +22,7 @@ import {
 import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
 
 import { isDeprecatedStepType } from '../../../../../common/schema';
+import { createStepInfo } from '../../../../shared/test_utils/step_info_factory';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -73,6 +77,50 @@ describe('getCompletionItemProvider', () => {
 
   afterEach(() => {
     clearAllYamlProviders();
+  });
+
+  it.each([false, true])('never suggests identity values (managed=%s)', async (managed) => {
+    for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
+      const field = 'run-as-mode';
+      jest.mocked(buildContext).mockReturnValueOnce({
+        path: ['steps', 0, 'with', field],
+        focusedStepInfo: createStepInfo({ stepType }),
+        focusedYamlPair: {
+          path: ['with', field],
+          keyNode: new Scalar(field),
+          valueNode: new Scalar(''),
+        },
+        isCurrentWorkflowManaged: managed,
+      } as ExtendedAutocompleteContext);
+      const yamlProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'inherit',
+              insertText: 'inherit',
+              kind: monaco.languages.CompletionItemKind.EnumMember,
+              range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+            },
+          ],
+        }),
+      };
+      clearAllYamlProviders();
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+      const provider = getCompletionItemProvider(
+        emptyRegistry,
+        getState,
+        undefined,
+        undefined,
+        undefined
+      );
+      const result = await provider.provideCompletionItems?.(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+      expect(result?.suggestions.map(({ label }) => label)).toEqual([]);
+    }
   });
 
   describe('provider structure', () => {
