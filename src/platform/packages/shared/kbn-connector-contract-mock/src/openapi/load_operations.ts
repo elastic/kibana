@@ -13,11 +13,13 @@ import { isRecord } from './schema_walk';
 import type {
   ContractOperation,
   ContractSpec,
+  Credential,
   MediaTypeContent,
   OpenApiDocument,
   OperationParameter,
   OperationServer,
   ParameterLocation,
+  SecurityRequirement,
   SpecSchema,
 } from './types';
 
@@ -99,6 +101,22 @@ const toServers = (servers: unknown): OperationServer[] | undefined => {
   }));
 };
 
+const toCredential = (scheme: Record<string, unknown>): Credential | undefined => {
+  const { type, in: location, name } = scheme;
+  if (type === 'apiKey' && typeof name === 'string') {
+    return location === 'header' || location === 'query' || location === 'cookie'
+      ? { in: location, name }
+      : undefined;
+  }
+  if (type === 'http' && typeof scheme.scheme === 'string') {
+    return { in: 'authorization', scheme: scheme.scheme.toLowerCase() };
+  }
+  if (type === 'oauth2' || type === 'openIdConnect') {
+    return { in: 'authorization', scheme: 'bearer' };
+  }
+  return undefined;
+};
+
 const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
   const version = typeof openapi === 'string' ? openapi : '';
   if (version.startsWith('3.0.')) {
@@ -124,6 +142,21 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
   const { document } = spec;
   const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
   const rootServers = toServers(document.servers) ?? [];
+  const { securitySchemes } = isRecord(document.components) ? document.components : {};
+  const schemes = new Map(
+    entriesOf(securitySchemes).map(([name, scheme]) => {
+      const pointer = appendPointer('/components/securitySchemes', name);
+      return [name, isRecord(scheme) ? toCredential(resolve(scheme, pointer).value) : undefined];
+    })
+  );
+  // Operation `security` replaces the document's, and `[]` removes it.
+  const toSecurity = (requirements: unknown): SecurityRequirement[] =>
+    (Array.isArray(requirements) ? requirements : [])
+      .filter(isRecord)
+      .map((requirement) =>
+        Object.keys(requirement).map((name) => ({ name, credential: schemes.get(name) }))
+      );
+  const rootSecurity = toSecurity(document.security);
 
   const toParameters = (parameters: unknown, pointer: string): OperationParameter[] =>
     (Array.isArray(parameters) ? parameters : []).flatMap((node, index) => {
@@ -226,6 +259,9 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
               }),
             };
           }),
+          security: Array.isArray(operation.security)
+            ? toSecurity(operation.security)
+            : rootSecurity,
           spec,
         },
       ];

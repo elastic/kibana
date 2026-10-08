@@ -95,6 +95,21 @@ export interface OperationServer {
   readonly variables: Readonly<Record<string, ServerVariable>>;
 }
 
+/** Where a security scheme expects its credential. */
+export type Credential =
+  | { readonly in: 'header' | 'query' | 'cookie'; readonly name: string }
+  /** An `Authorization` header with this scheme, such as `basic` or `bearer` (lowercase). */
+  | { readonly in: 'authorization'; readonly scheme: string };
+
+export interface SecurityScheme {
+  readonly name: string;
+  /** Undefined for schemes that can't be checked on a request, such as `mutualTLS`. */
+  readonly credential?: Credential;
+}
+
+/** Schemes that must all be satisfied; an empty list allows anonymous requests. */
+export type SecurityRequirement = readonly SecurityScheme[];
+
 export interface ContractOperation {
   /** The `operationId`, or `METHOD /path` when the spec declares none. */
   readonly id: string;
@@ -105,5 +120,7 @@ export interface ContractOperation {
   readonly parameters: readonly OperationParameter[];
   readonly requestBody?: OperationRequestBody;
   readonly responses: readonly OperationResponse[];
+  /** Alternative requirements, one of which a request must satisfy; empty when there are none. */
+  readonly security: readonly SecurityRequirement[];
   readonly spec: ContractSpec;
 }

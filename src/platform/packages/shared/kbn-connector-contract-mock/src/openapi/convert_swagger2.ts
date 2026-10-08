@@ -156,10 +156,42 @@ const toResponse = (response: Node, produces: readonly string[]): Node => ({
     : {}),
 });
 
+const OAUTH2_FLOWS: Readonly<Record<string, string>> = {
+  implicit: 'implicit',
+  password: 'password',
+  application: 'clientCredentials',
+  accessCode: 'authorizationCode',
+};
+
+const toSecuritySchemes = (definitions: unknown): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(isRecord(definitions) ? definitions : {}).flatMap(([name, definition]) => {
+      if (!isRecord(definition)) {
+        return [];
+      }
+      const { type, flow, authorizationUrl, tokenUrl, scopes, description } = definition;
+      const described = typeof description === 'string' ? { description } : {};
+      if (type === 'basic') {
+        return [[name, { type: 'http', scheme: 'basic', ...described }]];
+      }
+      if (type === 'oauth2' && typeof flow === 'string' && flow in OAUTH2_FLOWS) {
+        const urls = { authorizationUrl, tokenUrl };
+        const flowUrls = Object.fromEntries(
+          Object.entries(urls).filter(([, url]) => typeof url === 'string')
+        );
+        const flows = {
+          [OAUTH2_FLOWS[flow]]: { ...flowUrls, scopes: isRecord(scopes) ? scopes : {} },
+        };
+        return [[name, { type, flows, ...described }]];
+      }
+      return [[name, definition]];
+    })
+  );
+
 /**
  * Converts a Swagger 2.0 document to OpenAPI 3.0, so it can be loaded like any other spec.
  * Parameter and response refs are inlined; schema refs keep pointing at the converted
- * `components.schemas`.
+ * `components.schemas`, and security definitions become `components.securitySchemes`.
  */
 export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
   const document = structuredClone(source);
@@ -232,7 +264,11 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
     info: document.info,
     servers,
     paths,
-    components: { schemas: isRecord(document.definitions) ? document.definitions : {} },
+    components: {
+      schemas: isRecord(document.definitions) ? document.definitions : {},
+      securitySchemes: toSecuritySchemes(document.securityDefinitions),
+    },
+    ...(Array.isArray(document.security) ? { security: document.security } : {}),
   };
   convertSchemas(converted);
   return converted;

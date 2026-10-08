@@ -38,6 +38,8 @@ export type Responder = (
 /** The steps the mock runs for every request, implemented once per spec format. */
 export interface ContractAdapter {
   route(request: ContractRequest): RouteResult;
+  /** Violations when the request lacks the credentials the operation requires. */
+  authenticate(match: OperationMatch, request: ContractRequest): Violation[];
   validateRequest(match: OperationMatch, request: ContractRequest): Violation[];
   respond: Responder;
   validateResponse(operation: ContractOperation, response: ContractResponse): Violation[];
