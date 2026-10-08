@@ -47,6 +47,10 @@ interface YamlStep {
   name: string;
   type?: string;
   with?: {
+    result_tier2_targets?: string;
+    result_actionable_indices?: string;
+    result_behaviors?: string;
+    tier2_targets?: string;
     'workflow-id'?: string;
     inputs?: Record<string, unknown>;
     path?: string;
@@ -60,6 +64,7 @@ interface YamlStep {
 
 interface YamlWorkflow {
   tags?: string[];
+  outputs?: { properties?: Record<string, { type?: string }> };
   triggers?: Array<{ type: string; inputs?: TriggerInputSchema }>;
   steps: YamlStep[];
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
@@ -249,6 +254,77 @@ describe('Hunt Watch worker chain', () => {
         "${{ steps.check_index_scope.output.status != 'ok' and steps.check_index_scope.output.status != 'degraded' }}"
       );
       expect(stepIn(workerSteps, 'count_index_scope_statuses')).toBeUndefined();
+    });
+  });
+
+  // A clean run attaches no SSE, so the coordinator's Tier 2 targets and executed behaviors
+  // reach packaging only as inputs threaded hunt -> Worker -> packaging child -> step. The
+  // Worker leg is not wired here: its YAML is a `yamlTemplate` whose fingerprint guard needs a
+  // `version` bump, which is left to the owner. Until then these inputs arrive absent, which
+  // the step treats as "no dataset hint / no query".
+  describe('the coordinator result handed to packaging', () => {
+    const resultVariables = () =>
+      huntSteps.find((step) => step.with?.result_tier2_targets !== undefined)?.with ?? {};
+    const decideInputs = () => stepIn(packageReportSteps, 'decide_and_package')?.with ?? {};
+
+    it('declares the three results as hunt outputs', () => {
+      expect(Object.keys(hunt.outputs?.properties ?? {})).toEqual(
+        expect.arrayContaining(['tier2_targets', 'actionable_indices', 'behaviors'])
+      );
+    });
+
+    it('declares behaviors as an array', () => {
+      expect(hunt.outputs?.properties?.behaviors?.type).toBe('array');
+    });
+
+    it.each([
+      ['tier2_targets', ['logs-aws.cloudtrail-*'], ['logs-aws.cloudtrail-*']],
+      ['tier2_targets', undefined, []],
+    ])(
+      'reads %s as an array (%p) even when the coordinator did not run',
+      (_name, value, expected) => {
+        expect(
+          evaluateExpression(resultVariables().result_tier2_targets as string, {
+            steps: {
+              run_hunt_coordinator: { output: value ? { tier2_targets: value } : undefined },
+            },
+          })
+        ).toEqual(expected);
+      }
+    );
+
+    it('reads behaviors as an empty array when Tier 2 never ran', () => {
+      expect(
+        evaluateExpression(resultVariables().result_behaviors as string, {
+          steps: { run_hunt_coordinator: { output: { tier2_targets: [] } } },
+        })
+      ).toEqual([]);
+    });
+
+    it('reads behaviors from the coordinator Tier 2 result', () => {
+      expect(
+        evaluateExpression(resultVariables().result_behaviors as string, {
+          steps: {
+            run_hunt_coordinator: { output: { tier2: { behaviors: [{ technique_id: 'T1110' }] } } },
+          },
+        })
+      ).toEqual([{ technique_id: 'T1110' }]);
+    });
+
+    it('declares the three inputs on the packaging child without requiring them', () => {
+      const inputs = packageReport.triggers?.[0]?.inputs;
+
+      expect(
+        ['tier2Targets', 'actionableIndices', 'behaviors'].map(
+          (key) => key in (inputs?.properties ?? {}) && !(inputs?.required ?? []).includes(key)
+        )
+      ).toEqual([true, true, true]);
+    });
+
+    it('forwards the three inputs from the packaging child into the step', () => {
+      expect(
+        ['tier2Targets', 'actionableIndices', 'behaviors'].map((key) => key in decideInputs())
+      ).toEqual([true, true, true]);
     });
   });
 
