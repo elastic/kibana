@@ -23,8 +23,14 @@ import { toMessage } from './to_message';
 
 export type ManagementApi = WorkflowsServerPluginSetup['management'];
 
-export const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string =>
+/** Identity of a workflow or rule target: the same id can exist in several spaces. */
+export const targetKey = ({ id, spaceId }: { id: string; spaceId: SpaceId }): string =>
   `${id}@${spaceId}`;
+
+/** Unions workflow or rule targets by id and space; a later list wins on a shared key. */
+export const mergeTargets = <T extends { id: string; spaceId: SpaceId }>(...lists: T[][]): T[] => [
+  ...new Map(lists.flat().map((target) => [targetKey(target), target])).values(),
+];
 
 const disableWorkflow = async (
   mgmt: ManagementApi,
@@ -42,13 +48,14 @@ const disableWorkflow = async (
     if (result.enabled !== false) {
       failures.push({
         target,
+        spaceId,
         error: result.validationErrors.join('; ') || 'workflow was not disabled',
       });
       return false;
     }
     return true;
   } catch (error) {
-    failures.push({ target, error: toMessage(error) });
+    failures.push({ target, spaceId, error: toMessage(error) });
     return false;
   }
 };
@@ -69,7 +76,11 @@ const cancelTargetExecutions = async (
     if (error instanceof WorkflowNotFoundError) {
       return;
     }
-    failures.push({ target: `execution:${id}@${spaceId}`, error: toMessage(error) });
+    failures.push({
+      target: `execution:${id}@${spaceId}`,
+      spaceId,
+      error: toMessage(error),
+    });
   }
 };
 
@@ -114,21 +125,28 @@ export const sweepWorkflows = async ({
  * - `already` / `gone`: no longer needs resume (already on, or deleted)
  * - `failed`: keep in the disabled snapshot for retry
  */
-export const reEnableWorkflow = async (
-  mgmt: ManagementApi,
-  { id, spaceId }: MaintenanceWorkflowTarget,
-  request: KibanaRequest,
-  failures: SignificantEventsMaintenanceFailure[],
-  reportMissing = true
-): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
+export const reEnableWorkflow = async ({
+  mgmt,
+  workflow: { id, spaceId },
+  request,
+  failures,
+  reportMissing = true,
+}: {
+  mgmt: ManagementApi;
+  workflow: MaintenanceWorkflowTarget;
+  request: KibanaRequest;
+  failures: SignificantEventsMaintenanceFailure[];
+  /** Reset passes `false`: a workflow that is gone needs no restore and is not a failure. */
+  reportMissing?: boolean;
+}): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
   const target = `workflow:${id}@${spaceId}`;
   try {
     const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
     if (!workflow) {
       if (reportMissing) {
-        // Gone — surface it, but don't keep the deployment paused on a workflow
+        // Gone — surface it, but don't keep the space paused on a workflow
         // that no longer exists.
-        failures.push({ target, error: 'workflow not found' });
+        failures.push({ target, spaceId, error: 'workflow not found' });
       }
       return 'gone';
     }
@@ -137,20 +155,21 @@ export const reEnableWorkflow = async (
     }
     if (!workflow.definition) {
       // Transient (installer hasn't finished); keep recorded so resume retries.
-      failures.push({ target, error: 'workflow is not fully installed yet' });
+      failures.push({ target, spaceId, error: 'workflow is not fully installed yet' });
       return 'failed';
     }
     const result = await mgmt.updateWorkflow(id, { enabled: true }, spaceId, request);
     if (result.enabled !== true) {
       failures.push({
         target,
+        spaceId,
         error: result.validationErrors.join('; ') || 'workflow was not enabled',
       });
       return 'failed';
     }
     return 'toggled';
   } catch (error) {
-    failures.push({ target, error: toMessage(error) });
+    failures.push({ target, spaceId, error: toMessage(error) });
     return 'failed';
   }
 };
@@ -183,7 +202,10 @@ export const restoreWorkflowsAfterReset = async ({
   }
   const remaining: MaintenanceWorkflowTarget[] = [];
   for (const workflow of eligible) {
-    if ((await reEnableWorkflow(mgmt, workflow, request, failures, false)) === 'failed') {
+    if (
+      (await reEnableWorkflow({ mgmt, workflow, request, failures, reportMissing: false })) ===
+      'failed'
+    ) {
       remaining.push(workflow);
     }
   }

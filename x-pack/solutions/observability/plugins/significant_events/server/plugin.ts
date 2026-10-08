@@ -798,7 +798,7 @@ export class SignificantEventsPlugin
       return;
     }
     // Propagate failures: swallowing them lets install succeed while newly
-    // installed workflows stay enabled during a paused deployment.
+    // installed workflows stay enabled in a paused space.
     await this.maintenanceService.reassertPause();
   }
 

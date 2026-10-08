@@ -6,13 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
-import { requestForSpace } from './feature_settings';
 import {
   makeManagementApi,
   makeService,
   makeV2RulesClient,
-  REQUEST,
+  requestInSpace,
 } from './maintenance_service.test_helpers';
 
 function setupSpaces() {
@@ -46,22 +44,40 @@ function setupSpaces() {
   return { ...fixture, rules };
 }
 
-const requestA = requestForSpace(REQUEST, brandSpaceId('a'));
-const requestB = requestForSpace(REQUEST, brandSpaceId('b'));
+const requestA = requestInSpace('a');
+const requestB = requestInSpace('b');
 
 describe('maintenance across spaces', () => {
-  it('pauses every space and resumes the recorded rules from another space', async () => {
-    const { service, rules } = setupSpaces();
+  it('pauses only the space it runs in', async () => {
+    const { service, rules, soClient } = setupSpaces();
+
     const paused = await service.pause({ request: requestA });
-    expect(paused.rulesDisabled).toBe(2);
+
+    expect(paused.state).toBe('paused');
+    expect(paused.rulesDisabled).toBe(1);
     expect(paused.partialFailures).toEqual([]);
     expect(rules.a.bulkDisableRules).toHaveBeenCalledWith({ ids: ['same-id'] });
-    expect(rules.b.bulkDisableRules).toHaveBeenCalledWith({ ids: ['same-id'] });
+    expect(rules.b.bulkDisableRules).not.toHaveBeenCalled();
+    await expect(service.getState({ request: requestA })).resolves.toBe('paused');
+    await expect(service.getState({ request: requestB })).resolves.toBe('enabled');
+    // Space B never got a document of its own.
+    expect(soClient.readDocument('a')).toEqual(expect.objectContaining({ state: 'paused' }));
+    expect(soClient.readDocument('b')).toBeUndefined();
+  });
+
+  it('resumes only the space it runs in', async () => {
+    const { service, rules } = setupSpaces();
+    await service.pause({ request: requestA });
+    await service.pause({ request: requestB });
 
     const resumed = await service.resume({ request: requestB });
+
+    expect(resumed.state).toBe('enabled');
     expect(resumed.partialFailures).toEqual([]);
-    expect(rules.a.bulkEnableRules).toHaveBeenCalledWith({ ids: ['same-id'] });
     expect(rules.b.bulkEnableRules).toHaveBeenCalledWith({ ids: ['same-id'] });
+    expect(rules.a.bulkEnableRules).not.toHaveBeenCalled();
+    await expect(service.getState({ request: requestA })).resolves.toBe('paused');
+    await expect(service.getState({ request: requestB })).resolves.toBe('enabled');
   });
 
   it('deletes owned rules in every space before resetting shared data', async () => {

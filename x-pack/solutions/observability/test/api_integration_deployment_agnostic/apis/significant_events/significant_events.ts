@@ -346,7 +346,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Maintenance pause/resume', () => {
-      // Pause is deployment-wide, so always leave the deployment resumed for
+      // Pause is stored per space, so always leave this space resumed for
       // whatever runs next, even if an assertion above fails.
       afterEach(async () => {
         await resumeMaintenance(apiClient);

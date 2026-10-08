@@ -12,11 +12,11 @@ import {
 } from '@kbn/management-settings-ids';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   REQUEST,
+  cleanupDocumentId,
   continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
@@ -135,7 +135,7 @@ describe('SignificantEventsMaintenanceService', () => {
         reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
       ).toBe(false);
       // Non-settings-backed workflows still come back.
-      expect(reEnabledIds).toContain(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID);
+      expect(reEnabledIds).toContain(cleanupDocumentId('default'));
 
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
         expect.objectContaining({
@@ -249,9 +249,7 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('flips to enabled with warnings when a workflow cannot be re-enabled', async () => {
-      const { api } = makeManagementApi({
-        failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      });
+      const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
       const { service, soClient } = makeService({ management: api });
 
       await service.pause({ request: REQUEST });
@@ -268,7 +266,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite.state).toBe('enabled');
       expect(lastWrite.disabledRules).toEqual([]);
       expect(lastWrite.disabledWorkflows).toEqual([
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        expect.objectContaining({ id: cleanupDocumentId('default') }),
       ]);
       await expect(service.getStatus({ request: REQUEST })).resolves.toEqual(
         expect.objectContaining({ state: 'enabled' })
@@ -307,9 +305,7 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('reports partialFailures and keeps failed inventory when resume has warnings', async () => {
-      const { api } = makeManagementApi({
-        failEnableFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      });
+      const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
       const { service } = makeService({
         management: api,
         ruleBackedRuleIds: ['rule-1'],
@@ -328,9 +324,7 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('retries leftover inventory on a second resume while already enabled', async () => {
-      const failEnableFor = {
-        id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID as string | undefined,
-      };
+      const failEnableFor = { id: cleanupDocumentId('default') as string | undefined };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
       const { service, soClient } = makeService({ management: api });
 
@@ -348,8 +342,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(secondResume.partialFailures).toEqual([]);
       expect(
         updateWorkflow.mock.calls.some(
-          (call) =>
-            call[0] === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID && call[1]?.enabled === true
+          (call) => call[0] === cleanupDocumentId('default') && call[1]?.enabled === true
         )
       ).toBe(true);
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {

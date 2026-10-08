@@ -6,14 +6,7 @@
  */
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import {
-  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-} from '@kbn/management-settings-ids';
-import {
-  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
@@ -23,7 +16,12 @@ import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
 } from './saved_object';
 import {
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
+import {
   REQUEST,
+  cleanupDocumentId,
   continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
@@ -125,16 +123,14 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
       );
-      expect(soClient.create).toHaveBeenLastCalledWith(
+      // The space was never paused, so the document reset created to block it is removed
+      // again once there is nothing left to restore.
+      expect(soClient.delete).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({
-          state: 'enabled',
-          updatedBy: 'marco',
-          disabledWorkflows: [],
-          disabledRules: [],
-        }),
-        { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
+      expect(soClient.readDocument('default')).toBeUndefined();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
     });
 
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
@@ -283,7 +279,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('enabled');
       expect(summary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -387,7 +383,7 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
-      const failEnableFor: { id?: string } = { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID };
+      const failEnableFor: { id?: string } = { id: cleanupDocumentId('default') };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
       const { service, soClient } = makeService({ management: api });
 
@@ -395,9 +391,17 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(resetSummary.state).toBe('enabled');
       expect(resetSummary.workflowsDisabled).toBe(1);
       expect(resetSummary.partialFailures).toContainEqual({
-        target: expect.stringContaining(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID),
+        spaceId: 'default',
+        target: expect.stringContaining(cleanupDocumentId('default')),
         error: expect.stringContaining('enable failed'),
       });
+      // What could not be restored stays on the space's document, even though reset created it.
+      expect(soClient.readDocument('default')).toEqual(
+        expect.objectContaining({
+          state: 'enabled',
+          disabledWorkflows: [{ id: cleanupDocumentId('default'), spaceId: 'default' }],
+        })
+      );
 
       failEnableFor.id = undefined;
       updateWorkflow.mockClear();
@@ -405,7 +409,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(resumeSummary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -443,6 +447,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.deleted?.rules).toBe(1);
       expect(summary.partialFailures).toContainEqual({
+        spaceId: 'default',
         target: 'rule:failed-rule',
         error: 'delete failed',
       });
@@ -540,7 +545,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(inventoryWrite.state).toBe('paused');
       expect(inventoryWrite.disabledWorkflows.map(({ id }) => id)).toContain(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID
+        cleanupDocumentId('default')
       );
       expect(soClient.create.mock.invocationCallOrder[1]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
@@ -561,13 +566,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
       // The sweep is rolled back so the unrecorded workflows are not stranded.
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: false },
         expect.any(String),
         REQUEST
       );
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -576,7 +581,8 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
-      const { api } = makeManagementApi();
+      // A workflow that cannot be restored stays on the document, so the final write is needed.
+      const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
       const { service, soClient, esClient } = makeService({
         management: api,
         dataStreams: {
@@ -589,7 +595,9 @@ describe('SignificantEventsMaintenanceService', () => {
         .mockResolvedValueOnce({} as never) // swept inventory
         .mockRejectedValueOnce(new Error('reset state write failed'));
 
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'Significant Events reset persist failed in space: "default" (reset state write failed). The data was already deleted and these spaces stay paused; run Reset again to return them to enabled'
+      );
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
         {
           name: DETECTIONS_DATA_STREAM,

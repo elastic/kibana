@@ -45,6 +45,13 @@ export interface StillOnFeatureSettings extends PausedFeatureSettings {
   continuousOnboardingSpaceIds: SpaceId[];
 }
 
+/** No toggle on. A fresh object per call: callers push space ids into the arrays. */
+export const emptyStillOn = (): StillOnFeatureSettings => ({
+  continuousOnboardingWasEnabled: false,
+  continuousOnboardingSpaceIds: [],
+  scheduledDiscoveryEnabledSpaceIds: [],
+});
+
 /** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET_PREFIX = 'settings:continuous-onboarding@';
 const SCHEDULED_SETTING_TARGET_PREFIX = 'settings:scheduled-discovery@';
@@ -58,7 +65,9 @@ export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
   workflowId.startsWith(`${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-`);
 
 /** The per-space continuous onboarding document of a space. */
-const continuousOnboardingWorkflowTarget = (spaceId: SpaceId): MaintenanceWorkflowTarget => ({
+export const continuousOnboardingWorkflowTarget = (
+  spaceId: SpaceId
+): MaintenanceWorkflowTarget => ({
   id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`,
   spaceId,
 });
@@ -192,6 +201,7 @@ export const createFeatureSettingsController = ({
         } catch (error) {
           failures.push({
             target: continuousSettingTarget(spaceId),
+            spaceId,
             error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
           });
           // Uncertain read: prefer restore on resume for this space, same as
@@ -208,6 +218,7 @@ export const createFeatureSettingsController = ({
         } catch (error) {
           failures.push({
             target: scheduledSettingTarget(spaceId),
+            spaceId,
             error: `Failed to read scheduled discovery setting: ${toMessage(error)}`,
           });
           // Uncertain read: prefer restore on resume for this space.
@@ -227,6 +238,7 @@ export const createFeatureSettingsController = ({
           } catch (error) {
             failures.push({
               target: scheduledSettingTarget(spaceId),
+              spaceId,
               error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
             });
           }
@@ -234,6 +246,7 @@ export const createFeatureSettingsController = ({
       } catch (error) {
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to pause scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -276,6 +289,7 @@ export const createFeatureSettingsController = ({
         remaining.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to resume scheduled discovery setting: ${toMessage(error)}`,
         });
       }
@@ -305,6 +319,7 @@ export const createFeatureSettingsController = ({
     } catch (error) {
       failures.push({
         target: continuousSettingTarget(spaceId),
+        spaceId,
         error: `Failed to resume continuous onboarding setting: ${toMessage(error)}`,
       });
       return false;
@@ -359,11 +374,7 @@ export const createFeatureSettingsController = ({
     spaceIds: SpaceId[];
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<StillOnFeatureSettings> => {
-    const stillOn: StillOnFeatureSettings = {
-      continuousOnboardingWasEnabled: false,
-      continuousOnboardingSpaceIds: [],
-      scheduledDiscoveryEnabledSpaceIds: [],
-    };
+    const stillOn = emptyStillOn();
     // Re-assert runs without a user request (e.g. after a feature-flag flip).
     const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
     for (const spaceId of spaceIds) {
@@ -382,6 +393,7 @@ export const createFeatureSettingsController = ({
           }
           failures.push({
             target: continuousSettingTarget(spaceId),
+            spaceId,
             error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
           });
         }
@@ -401,11 +413,106 @@ export const createFeatureSettingsController = ({
         }
         failures.push({
           target: scheduledSettingTarget(spaceId),
+          spaceId,
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
         });
       }
     }
     return stillOn;
+  };
+
+  /**
+   * The toggles that currently read on in each space, read before Reset turns them off so an
+   * aborted Reset can turn them back on. A toggle that cannot be read counts as off.
+   */
+  const readTogglesOn = async ({
+    request,
+    spaceIds,
+  }: {
+    request: KibanaRequest;
+    spaceIds: SpaceId[];
+  }): Promise<StillOnFeatureSettings> => {
+    const on = emptyStillOn();
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    for (const spaceId of spaceIds) {
+      try {
+        const spaceClient = await uiSettingsClients.space(spaceId);
+        if (await readsOn(spaceClient, OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)) {
+          on.continuousOnboardingSpaceIds.push(spaceId);
+        }
+        if (
+          await readsOn(
+            spaceClient,
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          )
+        ) {
+          on.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
+      } catch {
+        // No settings client for this space: nothing to restore there.
+      }
+    }
+    return on;
+  };
+
+  /**
+   * Turns the given toggles back on. Returns the ones that could not be written, in the same
+   * shape, so the caller can keep them recorded for a later Resume.
+   */
+  const restoreTogglesOn = async ({
+    request,
+    toggles,
+    failures,
+  }: {
+    request: KibanaRequest;
+    toggles: StillOnFeatureSettings;
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<StillOnFeatureSettings> => {
+    const notRestored = emptyStillOn();
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    /** Turns one toggle on; returns whether the write succeeded. */
+    const restore = async ({
+      spaceId,
+      key,
+      target,
+    }: {
+      spaceId: SpaceId;
+      key: string;
+      target: string;
+    }): Promise<boolean> => {
+      try {
+        await (await uiSettingsClients.space(spaceId)).set(key, true);
+        return true;
+      } catch (error) {
+        failures.push({
+          target,
+          spaceId,
+          error: `Failed to restore the setting after reset aborted: ${toMessage(error)}`,
+        });
+        return false;
+      }
+    };
+    for (const spaceId of toggles.continuousOnboardingSpaceIds) {
+      const restored = await restore({
+        spaceId,
+        key: OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        target: continuousSettingTarget(spaceId),
+      });
+      if (!restored) {
+        notRestored.continuousOnboardingSpaceIds.push(spaceId);
+      }
+    }
+    for (const spaceId of toggles.scheduledDiscoveryEnabledSpaceIds) {
+      const restored = await restore({
+        spaceId,
+        key: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        target: scheduledSettingTarget(spaceId),
+      });
+      if (!restored) {
+        notRestored.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+      }
+    }
+    return notRestored;
   };
 
   return {
@@ -414,6 +521,8 @@ export const createFeatureSettingsController = ({
     restoreContinuousOnboarding,
     readFeatureSettingsStatus,
     reassertFeatureSettingsOff,
+    readTogglesOn,
+    restoreTogglesOn,
   };
 };
 

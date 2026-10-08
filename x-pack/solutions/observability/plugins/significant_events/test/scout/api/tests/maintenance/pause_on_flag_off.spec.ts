@@ -17,8 +17,12 @@ import { NIGHTSHIFT_FLAG_SETTLE_MS } from '../../../../../server/lib/maintenance
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
-// A managed workflow installed as soon as Significant Events is available.
-const WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-discovery';
+// A shared managed workflow, installed as soon as Significant Events is available. Every space
+// uses it, so the pause leaves it enabled.
+const SHARED_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-discovery';
+// A per-space workflow, created on demand. The pause turns it off in the space.
+const BOOTSTRAP_CLEANUP_ENDPOINT = 'internal/significant_events/maintenance/cleanup/_bootstrap';
+const SPACE_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-cleanup-default';
 // Serverless disables the public global settings API.
 const ALERTING_V2_ENABLED_SETTING_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
   ALERTING_V2_ENABLED_SETTING_ID
@@ -45,7 +49,18 @@ const unsetAlertingV2 = async (kbnClient: KbnClient) => {
   });
 };
 
-const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, string>) => {
+const isSpaceList = (value: unknown): value is Array<{ id: string }> =>
+  Array.isArray(value) &&
+  value.every((space) => typeof space === 'object' && space !== null && 'id' in space);
+
+const toSpaceIds = (value: unknown): string[] =>
+  isSpaceList(value) ? value.map(({ id }) => id) : [];
+
+const createClient = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  engineAdminCookieHeader: Record<string, string>
+) => {
   const internalHeaders = { ...COMMON_API_HEADERS, ...cookieHeader };
   const publicHeaders = { ...PUBLIC_API_HEADERS, ...cookieHeader };
 
@@ -65,12 +80,20 @@ const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, 
       });
       return response.body.available;
     },
-    async isWorkflowEnabled() {
-      const response = await apiClient.get(WORKFLOW_ENDPOINT, {
+    async isWorkflowEnabled(endpoint: string) {
+      const response = await apiClient.get(endpoint, {
         headers: publicHeaders,
         responseType: 'json',
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
+    },
+    async bootstrapSpaceWorkflow() {
+      // Bootstrapping needs Manage engines, which the streams admin role does not include.
+      const response = await apiClient.post(BOOTSTRAP_CLEANUP_ENDPOINT, {
+        headers: { ...COMMON_API_HEADERS, ...engineAdminCookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
     },
     async isRuleEnabled(ruleId: string) {
       const response = await apiClient.get(`api/alerting/v2/rules/${ruleId}`, {
@@ -86,12 +109,12 @@ const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, 
         body: {
           title: 'Nightshift flag-off rule',
           esql: { query: QUERY_ESQL },
-          target_name: QUERY_STREAM,
+          source_id: QUERY_STREAM,
         },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      return computeRuleId(QUERY_STREAM, queryId, QUERY_ESQL);
+      return computeRuleId('default', QUERY_STREAM, queryId, QUERY_ESQL);
     },
     /** Deletes the query together with its backing rule. */
     async deleteQuery(queryId: string) {
@@ -111,10 +134,12 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
+    let engineAdminCookieHeader: Record<string, string>;
     let queryId: string | undefined;
 
     apiTest.beforeAll(async ({ samlAuth, apiServices, kbnClient }) => {
       ({ cookieHeader } = await samlAuth.asStreamsAdmin());
+      ({ cookieHeader: engineAdminCookieHeader } = await samlAuth.asNightshiftEngineAdmin());
       await enableAlertingV2(kbnClient);
       // An earlier flag flip in this run may have left the deployment paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
@@ -123,8 +148,15 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiServices, apiClient, kbnClient }) => {
       await apiServices.significantEventsTest.enableSignificantEvents();
       await apiServices.significantEventsTest.resumeSignificantEvents();
+      // Flag-off pauses every space, and resume only reaches the space it is called in.
+      const spaceIds = toSpaceIds(await kbnClient.spaces.list());
+      await Promise.all(
+        spaceIds
+          .filter((id) => id !== 'default')
+          .map((id) => apiServices.significantEventsTest.resumeSignificantEvents({ spaceId: id }))
+      );
       if (queryId !== undefined) {
-        await createClient(apiClient, cookieHeader).deleteQuery(queryId);
+        await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteQuery(queryId);
       }
       await unsetAlertingV2(kbnClient);
     });
@@ -134,15 +166,22 @@ apiTest.describe(
       async ({ apiClient, apiServices }) => {
         // Waits for workflow installation plus the flag settle window, beyond the 60s default.
         apiTest.setTimeout(120_000);
-        const client = createClient(apiClient, cookieHeader);
+        const client = createClient(apiClient, cookieHeader, engineAdminCookieHeader);
         const nightshift = apiServices.significantEventsTest;
 
         const ruleId = await apiTest.step(
-          'starts running, with a workflow and a rule enabled',
+          'starts running, with workflows and a rule enabled',
           async () => {
             expect((await client.getMaintenance()).state).toBe('enabled');
-            // Installation is asynchronous, so wait until the workflow is installed and running.
-            await expect.poll(client.isWorkflowEnabled, POLL_OPTIONS).toBe(true);
+            // Installation is asynchronous, so wait until the shared workflow is installed and running.
+            await expect
+              .poll(() => client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .toBe(true);
+            // The per-space workflow only exists once something asks for it.
+            await client.bootstrapSpaceWorkflow();
+            await expect
+              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .toBe(true);
             queryId = `flag-off-${uuidv4()}`;
             const id = await client.createRuleBackedQuery(queryId);
             expect(await client.isRuleEnabled(id)).toBe(true);
@@ -150,17 +189,24 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step('turning the flag off pauses, disabling both', async () => {
-          // A flip only counts once the previous value has held for the settle window, and
-          // global setup turned the flag on moments ago.
-          await delay(NIGHTSHIFT_FLAG_SETTLE_MS + 1_000);
-          await nightshift.disableSignificantEvents();
-          // The status route stays reachable while the flag is off.
-          await expect.poll(client.getMaintenance, POLL_OPTIONS).toStrictEqual(PAUSED_BY_FLAG);
-          // The state reads `paused` as soon as the pause is claimed, before the sweep ends.
-          await expect.poll(client.isWorkflowEnabled, POLL_OPTIONS).toBe(false);
-          await expect.poll(() => client.isRuleEnabled(ruleId), POLL_OPTIONS).toBe(false);
-        });
+        await apiTest.step(
+          'turning the flag off pauses, disabling the space and its rule',
+          async () => {
+            // A flip only counts once the previous value has held for the settle window, and
+            // global setup turned the flag on moments ago.
+            await delay(NIGHTSHIFT_FLAG_SETTLE_MS + 1_000);
+            await nightshift.disableSignificantEvents();
+            // The status route stays reachable while the flag is off.
+            await expect.poll(client.getMaintenance, POLL_OPTIONS).toStrictEqual(PAUSED_BY_FLAG);
+            // The state reads `paused` as soon as the pause is claimed, before the sweep ends.
+            await expect
+              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .toBe(false);
+            await expect.poll(() => client.isRuleEnabled(ruleId), POLL_OPTIONS).toBe(false);
+            // The shared workflows belong to every space, so the pause does not turn them off.
+            expect(await client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT)).toBe(true);
+          }
+        );
 
         await apiTest.step('turning the flag back on keeps it paused', async () => {
           await nightshift.enableSignificantEvents();

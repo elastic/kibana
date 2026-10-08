@@ -84,8 +84,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // The maintenance state is a single deployment-wide document, so always leave
-    // it enabled; a leaked `paused` state would block the other suites' rule work.
+    // The maintenance state is one document per space, so always leave this space
+    // enabled; a leaked `paused` state would block the other suites' rule work.
     afterEach(async () => {
       await resumeMaintenance(apiClient);
     });

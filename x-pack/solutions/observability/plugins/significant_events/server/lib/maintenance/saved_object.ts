@@ -7,22 +7,27 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
-
-export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 /**
- * A single, deployment-wide document recording the maintenance state of
- * Significant Events background activity (`enabled` / `paused`). It is a
- * global (not per-space) control, so a fixed id + `agnostic` namespace is used.
+ * One document per space recording the maintenance state of Significant Events
+ * background activity in that space (`enabled` / `paused`). A space without a
+ * document is enabled. The type is space-isolated (`single`), so the same fixed
+ * id exists independently in every space and pausing one space leaves the others
+ * untouched.
  *
  * `state` is stored as a free-form string (keyword) rather than a closed enum
  * so a newer node can persist a state an older node does not yet know about;
  * readers normalise unknown values back to the default. The document also
- * stores the exact set of workflows and rules that were disabled, so resume
- * can re-enable precisely what was turned off (and nothing that was already
- * off). No data other than these enablement flags is affected.
- *
- * The id intentionally matches the type name: there is only ever one document.
+ * stores the exact set of workflows and rules of its own space that were
+ * disabled, so resume can re-enable precisely what was turned off (and nothing
+ * that was already off). No data other than these enablement flags is affected.
+ */
+export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
+
+/**
+ * The id intentionally matches the type name: there is only ever one document per space, so
+ * the id is fixed and a space's document is found without a lookup.
  */
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID = 'significant-events-maintenance-state';
 
@@ -62,6 +67,7 @@ const maintenanceSummarySchemaV2 = maintenanceSummarySchemaV1.extends({
 
 const disabledWorkflowSchemaV1 = schema.object({
   id: schema.string(),
+  // Kept so the model-version 3 schema stays unchanged. Reads ignore it: a document is per space.
   spaceId: schema.string(),
 });
 
@@ -97,6 +103,7 @@ const maintenanceStateAttributesV3 = schema.object({
   disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
+  // Rules are recorded with the same `{ id, spaceId }` shape as workflows.
   disabledRules: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
@@ -109,9 +116,9 @@ export type SignificantEventsMaintenanceStateAttributes = TypeOf<
 >;
 
 /**
- * Rules recorded before version 3 had no space, and the stored ids can't recover it. The old
- * sweep used the triggering request's space, so default is a best guess: a pause started from
- * another space resumes against the wrong space and leaves those rules disabled.
+ * Rules recorded before version 3 had no space, and the stored ids can't recover it, so they
+ * are attributed to the default space. Reads no longer trust the stored `spaceId` anyway: a
+ * document records only its own space's inventory, so the document's space wins.
  */
 export const backfillDisabledRules = (
   attributes: Partial<TypeOf<typeof maintenanceStateAttributesV1>> &
@@ -120,14 +127,14 @@ export const backfillDisabledRules = (
   attributes: {
     disabledRules:
       attributes.disabledRules ??
-      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: 'default' })),
+      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: DEFAULT_SPACE_ID })),
   },
 });
 
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
   name: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
   hidden: true,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {

@@ -16,6 +16,11 @@ export interface SignificantEventsMaintenanceFailure {
    */
   target: string;
   error: string;
+  /**
+   * The space the failure belongs to. Absent for failures that are not tied to one
+   * space (data streams, snapshots, a missing plugin), which every space reports.
+   */
+  spaceId?: string;
 }
 
 export interface SignificantEventsMaintenanceDeletedCounts {
