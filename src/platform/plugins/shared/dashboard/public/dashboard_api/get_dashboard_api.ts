@@ -148,7 +148,7 @@ export function getDashboardApi({
 
   const approximationManager = initializeApproximationManager(initialState);
 
-  async function setState(state: DashboardState) {
+  async function setState(state: DashboardState, save?: boolean = false) {
     await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
@@ -158,6 +158,12 @@ export function getDashboardApi({
     // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
     if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
       forcePublishOnReset$.next();
+    }
+
+    if (save) {
+      onSave$.next({
+        dashboardState: state,
+      });
     }
   }
 
@@ -377,7 +383,6 @@ export function getDashboardApi({
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
     isAccessControlEnabled: Boolean(isAccessControlEnabled),
-    onSave$,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

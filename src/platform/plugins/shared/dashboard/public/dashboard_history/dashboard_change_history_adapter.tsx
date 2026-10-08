@@ -12,10 +12,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { DashboardApi } from '../dashboard_api/types';
-import { dashboardClient } from '../dashboard_client';
-import { coreServices } from '../services/kibana_services';
-import { DashboardUpdateResponseBody } from '@kbn/dashboard-plugin/server';
-import { DASHBOARD_APP_API_VERSION } from '@kbn/dashboard-plugin/common/constants';
+import { RestoreChangeResponse } from '@kbn/dashboard-plugin/server/change_history/register_restore_route';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
@@ -62,40 +59,14 @@ export const createDashboardChangeHistoryAdapter = (
     ? async ({ objectId, changeId, signal }) => {
         console.log('RESTORE!!!!!!!!!!!!!!!!!!!!');
         try {
-          const response = await http.get<ChangeDetailsResponse>(
+          const response = await http.get<RestoreChangeResponse>(
             `${BASE_HISTORY_PATH}/${objectId}/restore/${changeId}`,
             {
               signal,
             }
           );
-          console.log({ response });
-          // const response = await http.get<ChangeDetailsResponse>(
-          //   `${BASE_HISTORY_PATH}/${objectId}/${changeId}`,
-          //   {
-          //     signal,
-          //   }
-          // );
-          // // console.log({ response });
-          // // dashboardApi.setState(response.snapshot);
-          // const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-          //   buildDashboardAppPath(objectId),
-          //   {
-          //     version: DASHBOARD_APP_API_VERSION,
-          //     body: JSON.stringify(response.snapshot),
-          //   }
-          // );
-
-          // dashboardApi.runQuickSave();
-          // const result = await dashboardClient.update(objectId, response.snapshot);
-          // dashboardApi.onSave$.next({
-          //   objectId,
-          //   dashboardId: result?.id ?? objectId,
-          //   dashboardState: response.snapshot,
-          // });
-
-          // console.log({ result });
+          dashboardApi.setState(response, true);
         } catch (e) {
-          console.log({ e });
           throw mapChangeHistoryHttpError(e);
         }
       }

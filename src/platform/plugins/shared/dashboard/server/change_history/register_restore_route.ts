@@ -17,18 +17,7 @@ import { getChangeHistoryClient } from './change_history_service';
 import { spacesService } from '../kibana_services';
 import { update } from '../api/update/update';
 
-const detailsResponseSchema = z.object({
-  id: z.string(),
-  timestamp: z.string(),
-  actor: z.object({
-    name: z.string(),
-    profileId: z.string().optional(),
-  }),
-  action: z.string(),
-  snapshot: getDashboardStateSchema(true),
-  isCurrent: z.boolean(),
-});
-export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
+export type RestoreChangeResponse = DashboardState;
 
 export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext>) => {
   router.get(
@@ -42,6 +31,12 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
               changeId: z.string(),
             })
             .strict(),
+        },
+        response: {
+          200: {
+            body: () => getDashboardStateSchema(true, true),
+            description: 'success',
+          },
         },
       },
       security: {
@@ -97,7 +92,7 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         item.object.sequence
       );
       console.log({ result });
-      return res.ok();
+      return res.ok({ body: result.body.data });
     }
   );
 };
