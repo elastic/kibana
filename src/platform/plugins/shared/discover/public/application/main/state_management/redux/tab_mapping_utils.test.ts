@@ -883,7 +883,8 @@ describe('tab mapping utils', () => {
     ): NonNullable<DiscoverSessionTab['tabTypeState']> => ({
       type: DiscoverTabType.Metrics,
       ...METRICS_GRID_SETTINGS_DEFAULTS,
-      ...METRICS_GRID_SORT_DEFAULTS,
+      gridSortField: METRICS_GRID_SORT_DEFAULTS.sortField,
+      gridSortDirection: METRICS_GRID_SORT_DEFAULTS.sortDirection,
       dimensions,
     });
 
