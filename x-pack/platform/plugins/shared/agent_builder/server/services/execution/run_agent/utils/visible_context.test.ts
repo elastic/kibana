@@ -405,6 +405,7 @@ describe('attachment events', () => {
         conversation: {
           ...conversation([...asProcessed(pausedRoundTimeline('r', ['c1'])), inputEvent]),
           describeAttachmentType,
+          resumedRoundId: 'r',
         },
         // the resume is seeded with c1; the paused round's tool event arrives through the channel
         run: {
@@ -453,7 +454,7 @@ describe('attachment events', () => {
     ] as ProcessedTimelineEvent[];
     const messages = await renderVisibleContext(
       {
-        conversation: { ...conversation(timeline), describeAttachmentType },
+        conversation: { ...conversation(timeline), describeAttachmentType, resumedRoundId: 'r' },
         run: {
           ...run([call('c1')], { renderState: renderStateOf(['c1']) }),
           attachmentEvents: inheritedAttachmentEvents(timeline, 'r'),
@@ -968,6 +969,7 @@ describe('prompt-cache stability through persistence and reload', () => {
       context,
       resumeAnchors,
     });
+    processed.resumedRoundId = pendingTurn.id;
     const runAttachmentEvents = new RunAttachmentEvents({
       attachmentStateManager: context.attachmentStateManager,
       roundId: pendingTurn.id,

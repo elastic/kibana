@@ -400,6 +400,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 
@@ -521,6 +522,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 

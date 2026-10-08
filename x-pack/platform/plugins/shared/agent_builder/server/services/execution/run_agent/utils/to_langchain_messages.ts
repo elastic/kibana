@@ -7,19 +7,29 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import type { AIMessage } from '@langchain/core/messages';
-import type { AssistantResponse, ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type {
+  AssistantResponse,
+  ConversationRoundAuthor,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import {
   getConversationRoundAuthorDisplayName,
+  isAskUserQuestionStep,
   isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
+import {
+  formatAwaitingPromptNotice,
+  formatInterruptionNotice,
+  formatSubagentRosterNotice,
+} from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
+  isAwaitingPrompt,
   isTimelineStandaloneEvent,
   isTimelineRound,
   roundInterruption,
@@ -111,7 +121,7 @@ export const prepareMessages = async ({
   const messages: BaseMessage[] = [];
   const notices = attachmentNotices ?? noticeRendererFor(conversation);
 
-  // a round awaiting a prompt is left to the graph, which resumes it
+  // the round this run resumes is left to the graph
   const { entries, input, inputTimestamp } = historyView(conversation, conversationTimestamp);
 
   if (compactionSummary) {
@@ -236,13 +246,26 @@ export const roundOutcomeNotice = (
   return notice ? [createUserMessage(notice)] : [];
 };
 
-/** The round's assistant response, or the notice standing in for it on an interrupted round. */
+/**
+ * The round's assistant response, or the notice standing in for it on an interrupted or paused
+ * round.
+ */
 export const roundOutcomeMessage = (round: TimelineRound<ProcessedTimelineEvent>): BaseMessage => {
+  if (isAwaitingPrompt(round)) {
+    return createUserMessage(formatAwaitingPromptNotice(unansweredQuestions(round.steps)));
+  }
   const interruption = roundInterruption(round);
   return interruption
     ? createUserMessage(formatInterruptionNotice(interruption))
     : formatAssistantResponse({ response: roundResponse(round) });
 };
+
+const unansweredQuestions = (steps: ConversationRoundStep[]): string[] =>
+  steps.flatMap((step) =>
+    isAskUserQuestionStep(step) && step.answers === undefined
+      ? step.questions.map(({ question }) => question)
+      : []
+  );
 
 /**
  * The message a standalone event contributes to the history: a user-role message carrying the

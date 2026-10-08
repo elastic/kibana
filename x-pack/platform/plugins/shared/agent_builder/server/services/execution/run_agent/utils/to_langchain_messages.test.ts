@@ -47,6 +47,7 @@ import {
   eventsNativeConversation,
   failedExec0Timeline,
   pausedAndResumedRoundTimeline,
+  pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
   roundsOfTimeline,
@@ -304,6 +305,7 @@ describe('prepareMessages', () => {
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('hook rewrite on resume'),
+        resumedRoundId: 'round-1',
       }),
     });
 
@@ -1795,6 +1797,38 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(texts[5].content).toContain('attempt to answer the previous message failed');
       expect(texts[5].content).toContain('code="internalError"');
       expect(texts[6].content).toContain('bye');
+    });
+
+    it('renders a paused round the run does not resume as history, closed by a notice', async () => {
+      const timeline = processedTimeline(pausedRoundTimeline('r1', ['tc1']));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // user message, tool call, interrupted tool result, notice, next input
+      expect(messages.map((message) => message.getType())).toEqual([
+        'human',
+        'ai',
+        'tool',
+        'human',
+        'human',
+      ]);
+      expect((messages[1] as AIMessage).tool_calls?.[0].id).toBe('tc1');
+      expect(String(messages[2].content)).toContain('"interrupted":true');
+      expect(String(messages[3].content)).toContain('<system_notice>');
+      expect(String(messages[3].content)).toContain('the user has not answered');
+      expect(String(messages[4].content)).toContain('bye');
+    });
+
+    it('lists the unanswered questions of a paused round the run does not resume', async () => {
+      // the first four events: the round paused on its ask_user_question, before the answer
+      const timeline = processedTimeline(pausedAndResumedRoundTimeline().slice(0, 4));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // user message, notice, next input; the unanswered ask step renders nothing
+      expect(messages.map((message) => message.getType())).toEqual(['human', 'human', 'human']);
+      expect(String(messages[1].content)).toContain('<question>q</question>');
+      expect(String(messages[2].content)).toContain('bye');
     });
 
     it('renders an aborted round with the aborted notice', async () => {

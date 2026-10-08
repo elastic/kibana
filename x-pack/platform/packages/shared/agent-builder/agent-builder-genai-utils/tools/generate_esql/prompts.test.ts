@@ -9,7 +9,11 @@ import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type { Action } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
-import { createGenerateEsqlPrompt } from './prompts';
+import {
+  createGenerateEsqlPrompt,
+  createRequestDocumentationPrompt,
+  createRequestDocumentationPromptNoResource,
+} from './prompts';
 
 const TS_DOC_CONTENT = 'ts queries documentation';
 const PROMQL_DOC_CONTENT = 'promql queries documentation';
@@ -67,5 +71,28 @@ describe('createGenerateEsqlPrompt', () => {
 
     expect(systemPrompt).not.toContain(TS_DOC_CONTENT);
     expect(systemPrompt).not.toContain(PROMQL_DOC_CONTENT);
+  });
+});
+
+describe('request documentation prompts', () => {
+  const getUserPrompt = (messages: unknown): string =>
+    (messages as Array<[string, string]>).find(([role]) => role === 'user')?.[1] ?? '';
+
+  it.each([
+    ['with resource', createRequestDocumentationPrompt],
+    ['without resource', createRequestDocumentationPromptNoResource],
+  ])('includes the additional context (%s)', (_, createPrompt) => {
+    const userPrompt = getUserPrompt(
+      createPrompt({
+        nlQuery: 'cpu utilization',
+        resource,
+        documentation,
+        additionalContext: 'You MUST use the PROMQL command',
+      })
+    );
+
+    expect(userPrompt).toContain(
+      '<additional-context>\nYou MUST use the PROMQL command\n</additional-context>'
+    );
   });
 });

@@ -144,15 +144,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
     renderers,
     conversationClient,
+    conversationAccess,
   } = context;
+  const storesConversation = conversationAccess === 'readWrite';
 
   // The context is built from the normalized event timeline (legacy conversations serialized
   // through roundsToEvents) so preflight and message building read one source.
   const timeline = conversation ? eventsForContext(conversation) : [];
 
-  ensureValidInput({ input: nextInput, timeline });
+  ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
-  const pendingTurn = conversation ? getPendingTurn(conversation) : undefined;
+  const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
@@ -174,10 +176,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
     subAgentExecutor: context.subAgentExecutor,
-    initialState: conversation?.state?.background_executions,
+    initialState: storesConversation ? conversation?.state?.background_executions : undefined,
   });
 
-  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
+  const subagentTracker = new SubagentTracker(
+    storesConversation ? conversation?.state?.subagents : undefined
+  );
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
@@ -230,6 +234,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     templateId: conversation?.template_id,
     resumeAnchors,
   });
+  processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
   const runAttachmentEvents = new RunAttachmentEvents({
     attachmentStateManager: context.attachmentStateManager,
@@ -255,6 +260,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
+    conversationAccess,
     // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
     // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
     roundExecutionIndex: pendingTurn
@@ -327,7 +333,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const conversationId = conversation?.id;
   const updateConversationMetadata =
-    conversationId && conversation?.template_id
+    storesConversation && conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
           conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
       : undefined;
@@ -413,6 +419,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     renderers: renderers?.getRegisteredRenderers() ?? [],
     imageResolver,
     conversationTemplates: context.conversationTemplates,
+    conversationMetadataWritable: updateConversationMetadata !== undefined,
   });
 
   const agentGraph = createAgentGraph({
@@ -589,6 +596,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      conversationAccess,
       connectorId: model.connector.connectorId,
       agentConfiguration,
     });
