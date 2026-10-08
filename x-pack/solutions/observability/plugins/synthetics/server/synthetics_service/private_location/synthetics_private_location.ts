@@ -382,11 +382,25 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  /**
+   * Bumps the agent policies collected via `deferredBumps` passed to
+   * {@link editMonitors}; the caller must call this once done, also on failure.
+   */
+  async scheduleRevisionBumps(deferredBumps: Set<string>) {
+    await this.packagePolicyService.scheduleRevisionBumps(deferredBumps);
+  }
+
+  /**
+   * When `deferredBumps` is passed, agent policy revision bumps are collected
+   * there instead of done per call, so a caller editing many batches in sequence
+   * can bump each agent policy once, not once per batch.
+   */
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
-    maintenanceWindows: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[],
+    deferredBumps?: Set<string>
   ) {
     if (configs.length === 0) {
       return {
@@ -469,6 +483,7 @@ export class SyntheticsPrivateLocation {
     const createResponse = await this.packagePolicyService.bulkCreate({
       newPolicies: policiesToCreate,
       spaceId,
+      deferredBumps,
     });
 
     if (createResponse.failed.length > 0) {
@@ -488,10 +503,12 @@ export class SyntheticsPrivateLocation {
       this.packagePolicyService.bulkUpdate({
         policiesToUpdate,
         spaceId,
+        deferredBumps,
       }),
       this.packagePolicyService.bulkDelete({
         policyIdsToDelete: uniqueToDelete,
         spaceId,
+        deferredBumps,
       }),
     ]);
 
