@@ -31,42 +31,42 @@ steps:
   - name: evaluate_each
     type: foreach
     foreach: \\"{{ steps.sample_traces.output.values }}\\"
+    iteration-on-failure:
+      continue: true
     steps:
       - name: evaluate
-        type: kibana.request
+        type: ai.evals.evaluateTrace
         with:
-          method: POST
-          path: /s/{{ workflow.spaceId }}/internal/evals/_evaluate
-          headers:
-            kbn-xsrf: \\"true\\"
-            elastic-api-version: \\"1\\"
-            x-elastic-internal-origin: kibana
-          body:
-            subject:
-              mode: single-turn
-              traces:
-                - trace_id: \\"{{ foreach.item[1] }}\\"
-            evaluators:
-              - name: correctness
-                version: v1
-                connector_id: \\"{{ consts.connector_id }}\\"
-              - name: trace_readiness
-                connector_id: \\"{{ consts.connector_id }}\\"
+          trace_id: \\"{{ foreach.item[1] }}\\"
+          evaluators:
+            - name: correctness
+              version: v1
+              connector_id: \\"{{ consts.connector_id }}\\"
+            - name: trace_readiness
+              connector_id: \\"{{ consts.connector_id }}\\"
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+            max-delay: 1m
+            jitter: true
       - name: persist
-        type: kibana.request
+        type: ai.evals.persistOnlineScores
         with:
-          method: POST
-          path: /s/{{ workflow.spaceId }}/internal/evals/online_scores
-          headers:
-            kbn-xsrf: \\"true\\"
-            elastic-api-version: \\"1\\"
-            x-elastic-internal-origin: kibana
-          body:
-            monitor:
-              id: \\"{{ workflow.id }}\\"
-              name: \\"{{ workflow.name }}\\"
-            trace_id: \\"{{ foreach.item[1] }}\\"
-            connector_id: \\"{{ consts.connector_id }}\\"
-            results: \${{ steps.evaluate.output.results }}
+          monitor:
+            id: \\"{{ workflow.id }}\\"
+            name: \\"{{ workflow.name }}\\"
+          trace_id: \\"{{ foreach.item[1] }}\\"
+          connector_id: \\"{{ consts.connector_id }}\\"
+          results: \${{ steps.evaluate.output.results }}
+          errors: \${{ steps.evaluate.output.errors }}
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+            max-delay: 1m
+            jitter: true
 "
 `;

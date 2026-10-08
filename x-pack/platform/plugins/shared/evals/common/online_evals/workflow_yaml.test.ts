@@ -6,10 +6,10 @@
  */
 
 import { WorkflowSchema } from '@kbn/workflows/spec/schema';
-import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
+import { parseWorkflowYamlToJSON, parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import { EvaluateTraceStepId, PersistOnlineScoresStepId } from '../workflows/steps';
 import {
   buildOnlineEvalWorkflowYaml,
-  isLegacyOnlineEvalWorkflowYaml,
   parseOnlineEvalWorkflowYaml,
   type OnlineEvalWorkflowConfig,
 } from './workflow_yaml';
@@ -73,30 +73,47 @@ describe('online eval workflow yaml', () => {
     expect(yaml).not.toContain('attributes.evaluator.name IS NULL');
   });
 
-  it('targets the workflow space for the evaluate and persist steps', () => {
+  it('uses the typed evals steps instead of raw kibana.request calls', () => {
     const yaml = buildOnlineEvalWorkflowYaml(getConfig());
 
-    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/_evaluate');
-    expect(yaml).toContain('path: /s/{{ workflow.spaceId }}/internal/evals/online_scores');
+    expect(yaml).toContain(`type: ${EvaluateTraceStepId}`);
+    expect(yaml).toContain(`type: ${PersistOnlineScoresStepId}`);
+    expect(yaml).not.toContain('kibana.request');
+    expect(yaml).not.toContain('kbn-xsrf');
+    expect(yaml).not.toContain('elastic-api-version');
+    expect(yaml).not.toContain('x-elastic-internal-origin');
+    expect(yaml).not.toMatch(/[&*]a\d/);
   });
 
-  it('parses legacy workflows whose step paths have no space prefix', () => {
-    const config = getConfig();
-    const yaml = buildOnlineEvalWorkflowYaml(config).replaceAll('/s/{{ workflow.spaceId }}', '');
+  it('retries both steps with backoff and skips a trace whose retries are exhausted', () => {
+    // The static `WorkflowSchema` doesn't know the evals step types, so inspect the raw YAML.
+    const parsed = parseYamlToJSONWithoutValidation(buildOnlineEvalWorkflowYaml(getConfig()));
+    if (!parsed.success) {
+      throw new Error('Expected the generated workflow to be valid YAML');
+    }
 
-    expect(yaml).toContain('path: /internal/evals/_evaluate');
-    expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+    const [, evaluateEach] = (parsed.json as { steps: Array<Record<string, unknown>> }).steps;
+    expect(evaluateEach['iteration-on-failure']).toEqual({ continue: true });
+
+    const expectedRetry = {
+      'max-attempts': 3,
+      delay: '5s',
+      strategy: 'exponential',
+      'max-delay': '1m',
+      jitter: true,
+    };
+    for (const step of evaluateEach.steps as Array<Record<string, unknown>>) {
+      expect(step['on-failure']).toEqual({ retry: expectedRetry });
+    }
   });
 
-  it('flags only online eval workflows whose step paths have no space prefix as legacy', () => {
-    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
-    const legacyYaml = yaml.replaceAll('/s/{{ workflow.spaceId }}', '');
-
-    expect(isLegacyOnlineEvalWorkflowYaml(yaml)).toBe(false);
-    expect(isLegacyOnlineEvalWorkflowYaml(legacyYaml)).toBe(true);
-    expect(isLegacyOnlineEvalWorkflowYaml(legacyYaml.replace('evals-online', 'not-online'))).toBe(
-      false
+  it('does not parse workflows that still use raw kibana.request steps', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig()).replace(
+      `type: ${PersistOnlineScoresStepId}`,
+      'type: kibana.request'
     );
+
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toBeUndefined();
   });
 
   it('returns undefined for non-online-evals workflows', () => {

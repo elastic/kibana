@@ -20,21 +20,31 @@ const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
-// `kibana.request` paths are sent as Kibana-root paths, so the workflow space must be
-// explicit for the evals routes to resolve evaluators and stamp scores in that space.
-const SPACE_PATH_PREFIX_TEMPLATE = '/s/{{ workflow.spaceId }}';
-const EVALUATE_PATH = '/internal/evals/_evaluate';
-const PERSIST_PATH = '/internal/evals/online_scores';
-// Keep module-level values plain literals: computed values make the bundler keep this module
-// in the plugin's page-load bundle through the `common` barrel.
-const SPACE_EVALUATE_PATH = '/s/{{ workflow.spaceId }}/internal/evals/_evaluate';
-const SPACE_PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
-// stringifies plain `{{ }}` interpolations, which would turn this array into a
-// string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
-// No `.body` segment: a `kibana.request` step's `output` is the parsed HTTP
-// response body directly (`{ results: [...] }`), not `{ body: { results: [...] } }`.
+// stringifies plain `{{ }}` interpolations, which would turn these arrays into strings
+// and fail the persist step's input validation.
 const EVALUATE_RESULTS_TEMPLATE = '${{ steps.evaluate.output.results }}';
+const EVALUATE_ERRORS_TEMPLATE = '${{ steps.evaluate.output.errors }}';
+
+// Keep module-level values plain literals, and don't import the step definitions for these
+// ids: either makes the bundler keep this module (and zod) in the plugin's page-load bundle
+// through the `common` barrel.
+const EVALUATE_TRACE_STEP_TYPE = 'ai.evals.evaluateTrace';
+const PERSIST_ONLINE_SCORES_STEP_TYPE = 'ai.evals.persistOnlineScores';
+
+// A fresh object per step: a shared reference would be serialized as a YAML anchor and alias.
+const buildStepOnFailure = () => ({
+  retry: {
+    'max-attempts': 3,
+    delay: '5s',
+    strategy: 'exponential',
+    'max-delay': '1m',
+    jitter: true,
+  },
+});
+
+// A trace whose retries are exhausted is skipped rather than failing the whole run.
+const ITERATION_ON_FAILURE = { continue: true };
 
 const WINDOW_AND_LAG_REGEX =
   /\|\s*WHERE\s+@timestamp\s*>=\s*NOW\(\)\s*-\s*(\d+)m\s+AND\s+@timestamp\s*<\s*NOW\(\)\s*-\s*(\d+)m/i;
@@ -202,9 +212,8 @@ const getNamedStep = (steps: unknown, expectedName: string): WorkflowStep | null
   return toWorkflowStep(maybeStep);
 };
 
-// Workflows created by older builds use the unprefixed path, which targets the default space.
-const isStepPath = (path: unknown, routePath: string): boolean =>
-  path === `${SPACE_PATH_PREFIX_TEMPLATE}${routePath}` || path === routePath;
+const getStepWith = (step: WorkflowStep): Record<string, unknown> | null =>
+  step.with && typeof step.with === 'object' ? (step.with as Record<string, unknown>) : null;
 
 export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): string => {
   const {
@@ -247,52 +256,35 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
         name: EVALUATE_EACH_STEP_NAME,
         type: 'foreach',
         foreach: SAMPLE_TRACES_OUTPUT_VALUES_TEMPLATE,
+        'iteration-on-failure': ITERATION_ON_FAILURE,
         steps: [
           {
             name: EVALUATE_STEP_NAME,
-            type: 'kibana.request',
+            type: EVALUATE_TRACE_STEP_TYPE,
             with: {
-              method: 'POST',
-              path: SPACE_EVALUATE_PATH,
-              headers: {
-                'kbn-xsrf': 'true',
-                'elastic-api-version': '1',
-                'x-elastic-internal-origin': 'kibana',
-              },
-              body: {
-                subject: {
-                  mode: 'single-turn',
-                  traces: [{ trace_id: TRACE_ID_TEMPLATE }],
-                },
-                evaluators: evaluators.map((evaluator) => ({
-                  name: evaluator.name,
-                  ...(evaluator.version ? { version: evaluator.version } : {}),
-                  connector_id: CONNECTOR_ID_TEMPLATE,
-                })),
-              },
+              trace_id: TRACE_ID_TEMPLATE,
+              evaluators: evaluators.map((evaluator) => ({
+                name: evaluator.name,
+                ...(evaluator.version ? { version: evaluator.version } : {}),
+                connector_id: CONNECTOR_ID_TEMPLATE,
+              })),
             },
+            'on-failure': buildStepOnFailure(),
           },
           {
             name: PERSIST_STEP_NAME,
-            type: 'kibana.request',
+            type: PERSIST_ONLINE_SCORES_STEP_TYPE,
             with: {
-              method: 'POST',
-              path: SPACE_PERSIST_PATH,
-              headers: {
-                'kbn-xsrf': 'true',
-                'elastic-api-version': '1',
-                'x-elastic-internal-origin': 'kibana',
+              monitor: {
+                id: WORKFLOW_ID_TEMPLATE,
+                name: WORKFLOW_NAME_TEMPLATE,
               },
-              body: {
-                monitor: {
-                  id: WORKFLOW_ID_TEMPLATE,
-                  name: WORKFLOW_NAME_TEMPLATE,
-                },
-                trace_id: TRACE_ID_TEMPLATE,
-                connector_id: CONNECTOR_ID_TEMPLATE,
-                results: EVALUATE_RESULTS_TEMPLATE,
-              },
+              trace_id: TRACE_ID_TEMPLATE,
+              connector_id: CONNECTOR_ID_TEMPLATE,
+              results: EVALUATE_RESULTS_TEMPLATE,
+              errors: EVALUATE_ERRORS_TEMPLATE,
             },
+            'on-failure': buildStepOnFailure(),
           },
         ],
       },
@@ -370,27 +362,16 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   }
 
   const evaluateStep = getNamedStep(evaluateEachStep.steps, EVALUATE_STEP_NAME);
-  if (!evaluateStep || evaluateStep.type !== 'kibana.request') {
+  if (!evaluateStep || evaluateStep.type !== EVALUATE_TRACE_STEP_TYPE) {
     return undefined;
   }
 
-  const evaluateStepWith =
-    evaluateStep.with && typeof evaluateStep.with === 'object'
-      ? (evaluateStep.with as Record<string, unknown>)
-      : null;
-  if (
-    !evaluateStepWith ||
-    evaluateStepWith.method !== 'POST' ||
-    !isStepPath(evaluateStepWith.path, EVALUATE_PATH)
-  ) {
+  const evaluateStepWith = getStepWith(evaluateStep);
+  if (!evaluateStepWith || evaluateStepWith.trace_id !== TRACE_ID_TEMPLATE) {
     return undefined;
   }
 
-  const evaluateStepBody =
-    evaluateStepWith.body && typeof evaluateStepWith.body === 'object'
-      ? (evaluateStepWith.body as Record<string, unknown>)
-      : null;
-  const evaluateStepEvaluators = evaluateStepBody?.evaluators;
+  const evaluateStepEvaluators = evaluateStepWith.evaluators;
   if (!Array.isArray(evaluateStepEvaluators) || evaluateStepEvaluators.length === 0) {
     return undefined;
   }
@@ -426,40 +407,24 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   }
 
   const persistStep = getNamedStep(evaluateEachStep.steps, PERSIST_STEP_NAME);
-  if (!persistStep || persistStep.type !== 'kibana.request') {
+  if (!persistStep || persistStep.type !== PERSIST_ONLINE_SCORES_STEP_TYPE) {
     return undefined;
   }
 
-  const persistStepWith =
-    persistStep.with && typeof persistStep.with === 'object'
-      ? (persistStep.with as Record<string, unknown>)
+  const persistStepWith = getStepWith(persistStep);
+  const persistStepMonitor =
+    persistStepWith?.monitor && typeof persistStepWith.monitor === 'object'
+      ? (persistStepWith.monitor as Record<string, unknown>)
       : null;
-
   if (
     !persistStepWith ||
-    persistStepWith.method !== 'POST' ||
-    !isStepPath(persistStepWith.path, PERSIST_PATH)
-  ) {
-    return undefined;
-  }
-
-  const persistStepBody =
-    persistStepWith.body && typeof persistStepWith.body === 'object'
-      ? (persistStepWith.body as Record<string, unknown>)
-      : null;
-
-  const persistStepMonitor =
-    persistStepBody?.monitor && typeof persistStepBody.monitor === 'object'
-      ? (persistStepBody.monitor as Record<string, unknown>)
-      : null;
-  if (
-    !persistStepBody ||
     !persistStepMonitor ||
     persistStepMonitor.id !== WORKFLOW_ID_TEMPLATE ||
     persistStepMonitor.name !== WORKFLOW_NAME_TEMPLATE ||
-    persistStepBody.trace_id !== TRACE_ID_TEMPLATE ||
-    persistStepBody.connector_id !== CONNECTOR_ID_TEMPLATE ||
-    persistStepBody.results !== EVALUATE_RESULTS_TEMPLATE
+    persistStepWith.trace_id !== TRACE_ID_TEMPLATE ||
+    persistStepWith.connector_id !== CONNECTOR_ID_TEMPLATE ||
+    persistStepWith.results !== EVALUATE_RESULTS_TEMPLATE ||
+    persistStepWith.errors !== EVALUATE_ERRORS_TEMPLATE
   ) {
     return undefined;
   }
@@ -475,26 +440,4 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
     evaluators: parsedEvaluators,
     connectorId,
   };
-};
-
-const getStepPath = (step: WorkflowStep | null): unknown =>
-  step?.with && typeof step.with === 'object' ? (step.with as { path?: unknown }).path : undefined;
-
-/** Whether an online eval workflow still calls the evals routes without the workflow space prefix. */
-export const isLegacyOnlineEvalWorkflowYaml = (yaml: string): boolean => {
-  if (!parseOnlineEvalWorkflowYaml(yaml)) {
-    return false;
-  }
-
-  const parsed = parseYamlToJSONWithoutValidation(yaml);
-  if (!parsed.success) {
-    return false;
-  }
-
-  const { steps } = parsed.json as Record<string, unknown>;
-  const evaluateEachStep = getNamedStep(steps, EVALUATE_EACH_STEP_NAME);
-  return (
-    getStepPath(getNamedStep(evaluateEachStep?.steps, EVALUATE_STEP_NAME)) === EVALUATE_PATH ||
-    getStepPath(getNamedStep(evaluateEachStep?.steps, PERSIST_STEP_NAME)) === PERSIST_PATH
-  );
 };

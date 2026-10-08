@@ -150,16 +150,17 @@ steps:
 
 The full set of `ai.evals.*` steps:
 
-| Step                          | Purpose                                                        |
-| ----------------------------- | -------------------------------------------------------------- |
-| `ai.evals.startExperiment`    | Create the experiment/execution ids that group a run's scores. |
-| `ai.evals.resolveDataset`     | Load datasets and their examples.                              |
-| `ai.evals.executeTask`        | Run the thing being evaluated against one example.             |
-| `ai.evals.evaluateTrace`      | Grade one trace with one or more evaluators.                   |
-| `ai.evals.ingestScores`       | Persist evaluator scores for one example.                      |
-| `ai.evals.evaluateExample`    | Execute, evaluate, and ingest scores for a single example.     |
-| `ai.evals.evaluateDataset`    | Resolve datasets and evaluate every example (the main step).   |
-| `ai.evals.compareExperiments` | Statistically compare two or more experiments.                 |
+| Step                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `ai.evals.startExperiment`     | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset`      | Load datasets and their examples.                              |
+| `ai.evals.executeTask`         | Run the thing being evaluated against one example.             |
+| `ai.evals.evaluateTrace`       | Grade one trace with one or more evaluators.                   |
+| `ai.evals.ingestScores`        | Persist evaluator scores for one example.                      |
+| `ai.evals.persistOnlineScores` | Persist an online evaluation's scores for one trace.           |
+| `ai.evals.evaluateExample`     | Execute, evaluate, and ingest scores for a single example.     |
+| `ai.evals.evaluateDataset`     | Resolve datasets and evaluate every example (the main step).   |
+| `ai.evals.compareExperiments`  | Statistically compare two or more experiments.                 |
 
 The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
 
