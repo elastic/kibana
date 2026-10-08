@@ -285,6 +285,41 @@ describe('VegaLibraryEditor', () => {
       expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeDisabled();
     });
 
+    it('follows query and filter changes right away', async () => {
+      const { getSearchBarProps } = renderEditor();
+      await screen.findByText('changeSpec');
+
+      await act(async () => {
+        getSearchBarProps().onQuerySubmit?.({
+          query: { query: 'status:active', language: 'kuery' },
+          dateRange: { from: 'now-15m', to: 'now' },
+        });
+      });
+
+      expect(lastPreviewState()).toEqual({
+        spec: { format: 'hjson', value: '{ mark: point }' },
+        query: { expression: 'status:active', language: 'kql' },
+      });
+      // Only spec changes need Run preview.
+      expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeDisabled();
+    });
+
+    it('keeps the previewed spec while applying query changes', async () => {
+      const { getSearchBarProps } = renderEditor();
+      await userEvent.click(await screen.findByText('changeSpec'));
+
+      await act(async () => {
+        getSearchBarProps().onQuerySubmit?.({
+          query: { query: 'status:active', language: 'kuery' },
+          dateRange: { from: 'now-15m', to: 'now' },
+        });
+      });
+
+      expect(lastPreviewState().spec.value).toBe('{ mark: point }');
+      expect(lastPreviewState().query).toEqual({ expression: 'status:active', language: 'kql' });
+      expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeEnabled();
+    });
+
     it('reopens with the run preview button after it is closed', async () => {
       renderEditor();
       await screen.findByTestId('mockPreview');

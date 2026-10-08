@@ -102,7 +102,11 @@ export const VegaLibraryEditor = ({
     [item]
   );
   const [draft, setDraft] = useState(initialDraft);
-  const [previewedDraft, setPreviewedDraft] = useState(initialDraft);
+  // Only the spec waits for Run preview; the preview follows query and filter changes right away.
+  const [previewedSpec, setPreviewedSpec] = useState<Pick<VegaDraft, 'spec' | 'format'>>({
+    spec: initialDraft.spec,
+    format: initialDraft.format,
+  });
   // The preview can only be closed while it is stacked over the editor on narrow screens.
   const [isPreviewOpen, setIsPreviewOpen] = useState(true);
   const [specDataViews, setSpecDataViews] = useState<DataView[]>([]);
@@ -111,19 +115,19 @@ export const VegaLibraryEditor = ({
 
   const isExisting = item !== undefined;
   const isDirty = !isSameDraft(draft, initialDraft);
-  const canPreview = !isSameDraft(draft, previewedDraft);
+  const canPreview = draft.spec !== previewedSpec.spec;
   const dataViews = specDataViews.length ? specDataViews : defaultDataView ? [defaultDataView] : [];
 
   // The data views follow the previewed spec, so they don't resolve on every keystroke.
   useEffect(() => {
     let isCurrent = true;
-    getSpecDataViews(previewedDraft.spec).then((resolved) => {
+    getSpecDataViews(previewedSpec.spec).then((resolved) => {
       if (isCurrent) setSpecDataViews(resolved);
     });
     return () => {
       isCurrent = false;
     };
-  }, [previewedDraft.spec]);
+  }, [previewedSpec.spec]);
 
   // The library has no dashboard to take a time range from, so the preview has its own.
   const timeRange$ = useMemo(
@@ -133,7 +137,10 @@ export const VegaLibraryEditor = ({
   const [timeRange, setTimeRange] = useState(timeRange$.getValue());
   const getPreviewParentApi = useCallback(() => ({ timeRange$ }), [timeRange$]);
 
-  const previewState = useMemo(() => fromDraft(previewedDraft), [previewedDraft]);
+  const previewState = useMemo(
+    () => fromDraft({ ...previewedSpec, query: draft.query, filters: draft.filters }),
+    [previewedSpec, draft.query, draft.filters]
+  );
 
   const reportSaveError = (error: Error) =>
     core.notifications.toasts.addError(error, {
@@ -247,7 +254,7 @@ export const VegaLibraryEditor = ({
         cancelButtonDataTestSubj="vegaLibraryEditorCancelButton"
         previewAction={{
           onPreview: () => {
-            setPreviewedDraft(draft);
+            setPreviewedSpec({ spec: draft.spec, format: draft.format });
             setIsPreviewOpen(true);
           },
           // Also reopens a closed preview.
