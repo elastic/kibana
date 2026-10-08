@@ -16,6 +16,7 @@ import {
   getCustomElementAttribute,
   renderAttachmentElement,
   splitCustomElements,
+  type RenderAttachmentElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
   IsomerComposition,
@@ -27,11 +28,13 @@ import type { AttachmentServiceStart } from '../attachments';
 
 const { tagName, attributes } = renderAttachmentElement;
 
-/** A `<render_attachment>` tag of the response message. `version` is absent when the tag has none. */
-interface AttachmentNode {
+/**
+ * A `<render_attachment>` tag of the response message, with its attributes as written. Its
+ * version is validated when it's resolved, by `resolveAttachmentVersion`.
+ */
+interface AttachmentNode extends RenderAttachmentElementAttributes {
   type: 'attachment';
   attachmentId: string;
-  version?: number;
 }
 
 /** The response message split into its markdown and its attachment tags, in order. */
@@ -43,12 +46,10 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
     return;
   }
 
-  const version = Number(getCustomElementAttribute(tag, attributes.version));
-
   return {
     type: 'attachment',
     attachmentId,
-    ...(Number.isInteger(version) && version > 0 ? { version } : {}),
+    version: getCustomElementAttribute(tag, attributes.version),
   };
 };
 
