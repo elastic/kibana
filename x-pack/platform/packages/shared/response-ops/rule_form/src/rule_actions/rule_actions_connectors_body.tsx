@@ -27,8 +27,6 @@ import {
   useEuiTheme,
   EuiSelectable,
   useCurrentEuiBreakpoint,
-  EuiBetaBadge,
-  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
@@ -427,6 +425,23 @@ export const RuleActionsConnectorsBody = ({
               isDisabled={isDisabled}
               titleSize="xs"
               layout="horizontal"
+              betaBadgeProps={
+                actionType.isDeprecated
+                  ? {
+                      color: 'warning',
+                      label: DEPRECATED_LABEL,
+                      size: 's',
+                      tooltipContent: isLLMConnectorTypeId(actionType.id) ? (
+                        <>
+                          <p>{DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}</p>
+                          <p>{DEPRECATED_LLM_CONNECTOR_INFO}</p>
+                        </>
+                      ) : (
+                        DEPRECATED_CONNECTOR_TOOLTIP_CONTENT
+                      ),
+                    }
+                  : undefined
+              }
               icon={
                 <div style={{ marginInlineEnd: `16px` }}>
                   <Suspense fallback={<EuiLoadingSpinner />}>
@@ -440,26 +455,6 @@ export const RuleActionsConnectorsBody = ({
                   <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
                   <EuiSpacer size="s" />
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                    {actionType.isDeprecated && (
-                      <EuiFlexItem grow={false} style={{ height: `1.5rem` }}>
-                        <EuiBetaBadge
-                          color="warning"
-                          label={DEPRECATED_LABEL}
-                          size="s"
-                          title={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
-                        />
-                      </EuiFlexItem>
-                    )}
-                    {actionType.isDeprecated && isLLMConnectorTypeId(actionType.id) && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="info"
-                          color="subdued"
-                          content={DEPRECATED_LLM_CONNECTOR_INFO}
-                          data-test-subj={`deprecatedLLMConnectorInfo-${actionType.id}`}
-                        />
-                      </EuiFlexItem>
-                    )}
                     <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
                       <strong>{actionType?.name}</strong>
                     </EuiText>
