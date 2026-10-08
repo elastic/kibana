@@ -15,7 +15,6 @@ import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_NAME_LENGTH,
   MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
-  MAX_SAVED_OBJECT_AGGS_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECT_TYPES_PER_QUERY,
@@ -172,12 +171,6 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
               meta: { description: 'A KQL filter to apply to the search.' },
             })
           ),
-          aggs: schema.maybe(
-            schema.string({
-              maxLength: MAX_SAVED_OBJECT_AGGS_LENGTH,
-              meta: { description: 'Aggregations as a JSON string.' },
-            })
-          ),
           namespaces: schema.maybe(
             schema.oneOf(
               [
@@ -211,19 +204,10 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsFind({ request, types }).catch(() => {});
 
-      // manually validate to avoid using JSON.parse twice
-      let aggs;
-      if (query.aggs) {
-        try {
-          aggs = JSON.parse(query.aggs);
-        } catch (e) {
-          return response.badRequest({
-            body: {
-              message: 'invalid aggs value',
-            },
-          });
-        }
-      }
+      // NOTE: aggregations are intentionally not exposed on this HTTP route. The
+      // Saved Objects client still supports `aggs` for internal server-side callers,
+      // but accepting arbitrary aggregations from HTTP callers is not a supported
+      // feature of this (deprecated) endpoint.
       const { savedObjects } = await context.core;
 
       // check if registered type(s)are exposed to the global SO Http API's.
@@ -253,7 +237,6 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
         hasNoReferenceOperator: query.has_no_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
-        aggs,
         namespaces,
         migrationVersionCompatibility: 'compatible',
       });
