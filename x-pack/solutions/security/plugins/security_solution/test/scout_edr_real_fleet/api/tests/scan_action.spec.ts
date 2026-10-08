@@ -66,8 +66,22 @@ const actionDetailsPath = (actionId: string): string =>
 
 const shellQuote = (value: string): string => `'${value.replaceAll("'", `'\\''`)}'`;
 
+/**
+ * Build the guest command for `getHostVmClient().exec`.
+ * execa 5 splits on spaces and does not honor quotes. Multipass passes that
+ * argv through, so `bash -lc` must receive the script as one argument.
+ * Vagrant joins the argv and runs it in the guest shell, where JSON quotes work.
+ * `getHostVmClient` uses this same `CI` check to pick the client.
+ */
+const guestShellCommand = (script: string): string => {
+  if (process.env.CI) {
+    return `bash -lc ${JSON.stringify(script)}`;
+  }
+  return `bash -lc ${script.replaceAll(' ', '\\ ')}`;
+};
+
 const runOnHost = async (hostname: string, script: string): Promise<string> => {
-  const result = await getHostVmClient(hostname).exec(`bash -lc ${JSON.stringify(script)}`);
+  const result = await getHostVmClient(hostname).exec(guestShellCommand(script));
   return result.stdout.trim();
 };
 
