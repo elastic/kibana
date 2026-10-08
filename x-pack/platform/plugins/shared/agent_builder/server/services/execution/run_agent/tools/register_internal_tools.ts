@@ -110,6 +110,7 @@ export const registerInternalTools = async ({
     todoStateManager,
     selfClient,
     parentExecutionId,
+    conversationAccess,
   } = context;
 
   // Sub-agent spawning is reserved for top-level, non-standalone runs
@@ -153,6 +154,9 @@ export const registerInternalTools = async ({
 
     if (allowedSubagents.length > 0) {
       const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const inferenceFeatureIdBySubagent = new Map(
+        allowedSubagents.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+      );
       const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       tools.push(
@@ -167,20 +171,25 @@ export const registerInternalTools = async ({
           parentConversationId,
           subagentTracker,
           conversationExists,
+          transientOnly: conversationAccess !== 'readWrite',
         })
       );
-      tools.push(
-        createSendMessageTool({
-          agentId: ownerAgentId,
-          executionId: executionId ?? '',
-          subAgentExecutor,
-          abortSignal,
-          backgroundExecutionService,
-          subagentTracker,
-          allowedIds,
-        })
-      );
-      tools.push(createSleepTool());
+      // send_message and sleep only serve persistent and background sub-agents.
+      if (conversationAccess === 'readWrite') {
+        tools.push(
+          createSendMessageTool({
+            agentId: ownerAgentId,
+            executionId: executionId ?? '',
+            subAgentExecutor,
+            abortSignal,
+            backgroundExecutionService,
+            subagentTracker,
+            allowedIds,
+            inferenceFeatureIdBySubagent,
+          })
+        );
+        tools.push(createSleepTool());
+      }
     }
   }
 

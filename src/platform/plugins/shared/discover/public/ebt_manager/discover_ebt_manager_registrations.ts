@@ -36,6 +36,7 @@ export const QUERY_PERFORMANCE_PHRASE_QUERY_COUNT = 'phraseQueryCount';
 export const QUERY_PERFORMANCE_MULTI_MATCH_TYPES = 'multiMatchTypes';
 export const QUERY_PERFORMANCE_FETCH_TYPE = 'fetchType';
 export const QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND = 'querySourceCommand';
+export const QUERY_PERFORMANCE_APPROXIMATION = 'approximation';
 
 /**
  * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
@@ -188,6 +189,13 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
+          optional: true,
+        },
+      },
+      [QUERY_PERFORMANCE_APPROXIMATION]: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the response contains approximate results',
           optional: true,
         },
       },

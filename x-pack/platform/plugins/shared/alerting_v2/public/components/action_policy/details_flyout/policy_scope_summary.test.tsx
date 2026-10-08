@@ -54,7 +54,7 @@ describe('PolicyScopeSummary', () => {
 
     expect(
       screen.getByText(
-        'This policy matches all alerts from rules with one of the following tags AND the matching query.'
+        'This policy matches all alerts from rules with one of the following routing tags AND the matching query.'
       )
     ).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
@@ -66,7 +66,9 @@ describe('PolicyScopeSummary', () => {
     renderSummary({ tags: ['prod'] });
 
     expect(
-      screen.getByText('This policy matches all alerts from rules with one of the following tags.')
+      screen.getByText(
+        'This policy matches all alerts from rules with one of the following routing tags.'
+      )
     ).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.queryByText(/Advanced matching query/)).not.toBeInTheDocument();
@@ -79,14 +81,14 @@ describe('PolicyScopeSummary', () => {
       screen.getByText('This policy matches all alerts matching this query.')
     ).toBeInTheDocument();
     expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
-    expect(screen.queryByText('Rule tags:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Routing tags:')).not.toBeInTheDocument();
   });
 
   it('renders the catch-all summary when the matcher is null', () => {
     renderSummary(null);
 
     expect(screen.getByText('This policy matches all alerts.')).toBeInTheDocument();
-    expect(screen.queryByText('Rule tags:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Routing tags:')).not.toBeInTheDocument();
     expect(screen.queryByText(/Advanced matching query/)).not.toBeInTheDocument();
   });
 });

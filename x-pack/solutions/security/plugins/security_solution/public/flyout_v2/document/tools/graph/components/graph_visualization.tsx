@@ -176,6 +176,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             entity: doc.entity,
             id: doc.id,
             icon: node.icon,
+            risk: doc.entity.riskScore,
           }));
         onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {

@@ -11,6 +11,7 @@ import type { AutoApprovedApi } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
+import { NON_INTERACTIVE_DECLINED_REASON } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
 import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
@@ -81,6 +82,7 @@ describe('createExecuteApiTool', () => {
           method: 'PUT',
           path: '/my-index',
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index', body: { settings: { number_of_shards: 1 } } }
       )
@@ -116,6 +118,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/status',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/api/status', querystring: { v8format: true } }
       )
@@ -151,6 +154,7 @@ describe('createExecuteApiTool', () => {
           method: 'POST',
           path: '/internal/foo',
           destructive: false,
+          readOnly: false,
         },
         { method: 'POST', path: '/internal/foo', body: { a: 1 } }
       )
@@ -181,6 +185,7 @@ describe('createExecuteApiTool', () => {
           required: ['viewId'],
         },
         destructive: false,
+        readOnly: true,
       },
       { method: 'GET', path: '/api/data_views/data_view/logs' }
     );
@@ -210,6 +215,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path,
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: builtPath }
       );
@@ -346,6 +352,7 @@ describe('createExecuteApiTool', () => {
             required: ['index'],
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/42' }
       )
@@ -384,6 +391,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health' }
       )
@@ -415,6 +423,7 @@ describe('createExecuteApiTool', () => {
             properties: { index: { $ref: '../../../etc/passwd.json#/$defs/x' } },
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index' }
       )
@@ -455,6 +464,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cat/indices/{index}', querystring: { format: 'json' } }
       )
@@ -486,6 +496,7 @@ describe('createExecuteApiTool', () => {
           method: 'DELETE',
           path: '/{index}',
           destructive: true,
+          readOnly: false,
         },
         { method: 'DELETE', path: '/{index}' }
       )
@@ -519,6 +530,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/logs/_doc/1', body: { document: { field: 1 } } }
       )
@@ -555,6 +567,7 @@ describe('createExecuteApiTool', () => {
             properties: { body: { 'x-found-in': 'body', 'x-body-root': true } },
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'POST', path: '/api/cases', body: { body: { title: 'Investigation' } } }
       )
@@ -594,6 +607,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: false,
         },
         {
           method: 'POST',
@@ -643,6 +657,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: true,
         },
         {
           method: 'POST',
@@ -683,6 +698,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/_cluster/health',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health' }
       )
@@ -713,6 +729,7 @@ describe('createExecuteApiTool', () => {
           method: 'PUT',
           path: '/my-index',
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index' }
       )
@@ -751,6 +768,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/status',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/api/status' }
       )
@@ -796,6 +814,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/_cluster/health',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health', querystring }
       )
@@ -824,6 +843,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/saved_objects/_find',
           destructive: false,
+          readOnly: true,
         },
         {
           method: 'GET',
@@ -858,6 +878,7 @@ describe('createExecuteApiTool', () => {
           method: 'DELETE',
           path: '/{index}',
           destructive: true,
+          readOnly: false,
         },
         { method: 'DELETE', path: '/my-index' }
       );
@@ -948,6 +969,14 @@ describe('createExecuteApiTool', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).toContain('non-interactive');
+      // Tagged as an auto-declined prompt, keeping the API details for the caller.
+      expect(data.metadata).toEqual(
+        expect.objectContaining({
+          declined_reason: NON_INTERACTIVE_DECLINED_REASON,
+          target: 'elasticsearch',
+          api: 'indices.delete',
+        })
+      );
     });
 
     it('records that the user confirmed the call', async () => {
@@ -978,6 +1007,7 @@ describe('createExecuteApiTool', () => {
             method: 'GET',
             path: '/_cluster/health',
             destructive: false,
+            readOnly: true,
           },
           { method: 'GET', path: '/_cluster/health' }
         )
@@ -1087,6 +1117,9 @@ describe('createExecuteApiTool', () => {
           const data = result.results[0].data as ErrorResultData;
           expect(data.message).toContain('pre-approve');
           expect(data.message).toContain('indices.delete');
+          expect(data.metadata).toEqual(
+            expect.objectContaining({ declined_reason: NON_INTERACTIVE_DECLINED_REASON })
+          );
         }
       );
 

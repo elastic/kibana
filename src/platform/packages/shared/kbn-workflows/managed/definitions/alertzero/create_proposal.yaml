@@ -135,6 +135,7 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-create-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
         title: "${{ inputs.title }}"

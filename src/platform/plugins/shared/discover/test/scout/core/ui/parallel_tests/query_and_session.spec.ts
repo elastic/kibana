@@ -21,7 +21,7 @@ const EMPTY_RANGE = {
   to: 'Jun 12, 1999 @ 11:21:04.000',
 };
 
-const EXPECTED_CHART_TIMESPAN = `${testData.DEFAULT_TIME_RANGE_DISPLAY.from} - ${testData.DEFAULT_TIME_RANGE_DISPLAY.to} (interval: Auto - 3 hours)`;
+const EXPECTED_CHART_TIMESPAN = `${testData.DEFAULT_TIME_RANGE_DISPLAY.from} - ${testData.DEFAULT_TIME_RANGE_DISPLAY.to} (interval: Auto - hour)`;
 
 spaceTest.describe('query and session', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -73,20 +73,32 @@ spaceTest.describe('query and session', { tag: tags.deploymentAgnostic }, () => 
     }
   );
 
-  spaceTest('updates the time range when a histogram bar is clicked', async ({ pageObjects }) => {
-    const { datePicker, discover } = pageObjects;
+  spaceTest(
+    'updates the time range when a histogram bar is clicked',
+    async ({ page, pageObjects, scoutSpace }) => {
+      const { datePicker, discover } = pageObjects;
 
-    await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-    await discover.waitUntilTabIsLoaded();
-    await discover.clickHistogramBar();
-    await discover.waitUntilTabIsLoaded();
+      // The center-canvas click is aimed at the 09:00–12:00 bar. A target of 100
+      // uses 1-hour buckets, so keep 50 for this gesture.
+      await scoutSpace.uiSettings.set({ 'histogram:barTarget': 50 });
+      try {
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
+        await discover.waitUntilTabIsLoaded();
+        await discover.clickHistogramBar();
+        await discover.waitUntilTabIsLoaded();
 
-    expect(await datePicker.getTimeConfig()).toStrictEqual({
-      start: '2015-09-21T09:00:00.000Z',
-      end: '2015-09-21T12:00:00.000Z',
-    });
-    expect(await discover.getDocTableIndex(1)).toContain('Sep 21, 2015 @ 11:59:22.316');
-  });
+        expect(await datePicker.getTimeConfig()).toStrictEqual({
+          start: '2015-09-21T09:00:00.000Z',
+          end: '2015-09-21T12:00:00.000Z',
+        });
+        expect(await discover.getDocTableIndex(1)).toContain('Sep 21, 2015 @ 11:59:22.316');
+      } finally {
+        await scoutSpace.uiSettings.unset('histogram:barTarget');
+      }
+    }
+  );
 
   spaceTest(
     'shows Auto chart interval and results for the default range',

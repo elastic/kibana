@@ -7,6 +7,8 @@ enabled: false
 tags:
   - watch
   - watch-detection
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   # This worker owns the per-space tuning cadence; the sweep it dispatches stays
   # manual-only so there is one scheduler authority and no cross-space collision.
@@ -33,6 +35,7 @@ steps:
     type: workflow.executeAsync
     with:
       workflow-id: system-security-rule-tuning-worker
+      run-as-mode: inherit
       inputs:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
         analysis_window_days: "${{ consts.worker_settings.extras.analysisWindowDays }}"
