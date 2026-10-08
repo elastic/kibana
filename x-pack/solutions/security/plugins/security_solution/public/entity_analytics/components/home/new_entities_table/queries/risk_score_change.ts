@@ -13,7 +13,6 @@ import {
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
 } from '../common';
-import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import {
   buildKeepClause,
   buildLookupJoinClause,
@@ -29,7 +28,7 @@ import {
   buildEmptyRowsQuery,
   buildValueCursorClause,
   buildValueSortSuffix,
-  fetchSplitSortPage,
+  buildSplitSortSpec,
 } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
@@ -191,10 +190,6 @@ const riskScoreChangeEnricher: PageEnricher = {
 // ── query spec ────────────────────────────────────────────────────────────────
 
 export const riskScoreChangeQuerySpec = {
-  sort: {
-    buildSortQuery: buildRiskScoreChangeSortQuery,
-    buildCountQuery: buildEntitiesInViewCountQuery,
-    fetchSortPage: (args, ctx) => fetchSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
-  },
+  sort: buildSplitSortSpec(riskScoreChangeSplitSortPlan),
   enricher: riskScoreChangeEnricher,
 } satisfies ColumnQuerySpec;

@@ -23,14 +23,10 @@ import {
   LAST_SEEN_ALERT_FIELD,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
-import {
-  buildEntitiesInViewConditions,
-  buildEntitiesInViewCountQuery,
-  IN_VIEW_FIELD,
-} from './entities_in_view';
+import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import { buildForeignSortPageSteps } from './foreign_sort';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
-import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
+import { buildEntityListSortPlan, buildSplitSortSpec } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
@@ -222,22 +218,11 @@ const alertsEnricher: PageEnricher = {
 // ── query specs ───────────────────────────────────────────────────────────────
 
 export const alertCountQuerySpec = {
-  sort: {
-    // Entities without alerts count 0, so they sort first in ascending order.
-    buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
-    buildCountQuery: buildEntitiesInViewCountQuery,
-    fetchSortPage: (args, ctx) =>
-      fetchSplitSortPage(getAlertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
-  },
+  sort: buildSplitSortSpec(getAlertSplitSortPlan(ALERT_COUNT_FIELD)),
   enricher: alertsEnricher,
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {
-  sort: {
-    buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
-    buildCountQuery: buildEntitiesInViewCountQuery,
-    fetchSortPage: (args, ctx) =>
-      fetchSplitSortPage(getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
-  },
+  sort: buildSplitSortSpec(getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD)),
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;

@@ -6,9 +6,16 @@
  */
 
 import { ENTITY_ID_FIELD, getEntityId } from '../common';
-import { buildEntitiesInViewSteps } from './entities_in_view';
+import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
 import { buildKeepClause, esc, toList } from './esql';
-import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '../common';
+import type {
+  EsqlRunner,
+  PageCursor,
+  QueryArgs,
+  Row,
+  SortPageContext,
+  SortQuerySpec,
+} from '../common';
 
 /*
  * Split sort: a foreign sort that reads its two kinds of rows separately.
@@ -234,3 +241,10 @@ export const fetchSplitSortPage = async (
   const empty = await emptyRows(null, limit - values.length);
   return empty == null ? general() : [...values, ...empty];
 };
+
+/** Sort spec of a column with a split sort plan: the plan's general query or its split pages. */
+export const buildSplitSortSpec = (plan: SplitSortPlan): SortQuerySpec => ({
+  buildSortQuery: plan.buildSortQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(plan, args, ctx),
+});
