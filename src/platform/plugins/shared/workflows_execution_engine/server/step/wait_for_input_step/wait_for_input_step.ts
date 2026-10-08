@@ -163,6 +163,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         channels,
         stepMessage: message,
         formUrl,
+        kibanaUrl,
         renderTemplate: (template) =>
           String(ctx.renderValueAccordingToContext(template, hitlTemplateContext)),
         connectorExecutor: this.connectorExecutor,

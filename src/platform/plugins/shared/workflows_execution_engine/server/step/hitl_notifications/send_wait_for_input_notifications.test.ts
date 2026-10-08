@@ -46,6 +46,7 @@ describe('sendWaitForInputNotifications', () => {
       stepMessage: 'Please provide input',
       formUrl:
         'https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate,
       connectorExecutor: { execute } as never,
       abortController: new AbortController(),
@@ -67,6 +68,33 @@ describe('sendWaitForInputNotifications', () => {
       },
       abortController: expect.any(AbortController),
     });
+  });
+
+  it('sends a rendered email subject and custom message', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: {
+          'connector-id': 'email-1',
+          to: ['analyst@example.com'],
+          subject: 'Ticket for {{inputs.hostname}}',
+          message: 'Open {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replaceAll('{{inputs.hostname}}', 'web-01')
+          .replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subject).toBe('Ticket for web-01');
+    expect(execute.mock.calls[0][0].input.message).toBe('Open https://kibana.example/form');
   });
 
   it('sends slack2 sendMessage with default Open form mrkdwn and optional message override', async () => {

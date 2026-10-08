@@ -119,6 +119,7 @@ export async function sendWaitForInputNotifications({
   channels,
   stepMessage,
   formUrl,
+  kibanaUrl,
   renderTemplate,
   connectorExecutor,
   abortController,
@@ -126,6 +127,7 @@ export async function sendWaitForInputNotifications({
   channels: WaitForInputChannels;
   stepMessage: string;
   formUrl: string;
+  kibanaUrl: string;
   renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
@@ -205,7 +207,7 @@ export async function sendWaitForInputNotifications({
           'input'
         ),
         message,
-        footerLinkPath: absoluteUrlToKibanaFooterPath(formUrl),
+        footerLinkPath: absoluteUrlToKibanaFooterPath(formUrl, kibanaUrl),
       }),
       abortController,
     });

@@ -21,7 +21,17 @@ describe('build_hitl_email_notification', () => {
     it('returns pathname and search from an absolute URL', () => {
       expect(
         absoluteUrlToKibanaFooterPath(
-          'https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc'
+          'https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+          'https://kibana.example'
+        )
+      ).toBe('/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc');
+    });
+
+    it('strips the server base path that publicBaseUrl already includes', () => {
+      expect(
+        absoluteUrlToKibanaFooterPath(
+          'https://kibana.example/kibana/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+          'https://kibana.example/kibana'
         )
       ).toBe('/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc');
     });

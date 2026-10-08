@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DEFAULT_HITL_APPROVAL_EMAIL_SUBJECT,
-  DEFAULT_HITL_EMAIL_FOOTER_LINK_TEXT,
-  DEFAULT_HITL_INPUT_EMAIL_SUBJECT,
-  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
-} from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_HITL_INPUT_OPEN_FORM_LABEL } from '@kbn/workflows';
 
 export interface HitlEmailChannelConfig {
   'connector-id': string;
@@ -22,10 +18,35 @@ export interface HitlEmailChannelConfig {
   subject?: string;
 }
 
-/** Converts an absolute Kibana URL into `kibanaFooterLink.path` (pathname + search). */
-export function absoluteUrlToKibanaFooterPath(absoluteUrl: string): string {
-  const url = new URL(absoluteUrl);
-  return `${url.pathname}${url.search}`;
+/** `kibanaFooterLink.path` relative to `publicBaseUrl` (pathname + search). */
+export function absoluteUrlToKibanaFooterPath(absoluteUrl: string, kibanaUrl: string): string {
+  const target = new URL(absoluteUrl);
+  const basePath = new URL(kibanaUrl).pathname.replace(/\/$/, '');
+  const pathname =
+    basePath.length > 0 &&
+    (target.pathname === basePath || target.pathname.startsWith(`${basePath}/`))
+      ? target.pathname.slice(basePath.length) || '/'
+      : target.pathname;
+
+  return `${pathname}${target.search}`;
+}
+
+function hitlInputEmailSubject(): string {
+  return i18n.translate('workflowsExecutionEngine.hitlNotifications.inputRequiredTitle', {
+    defaultMessage: 'Input required',
+  });
+}
+
+function hitlApprovalEmailSubject(): string {
+  return i18n.translate('workflowsExecutionEngine.hitlNotifications.approvalRequiredTitle', {
+    defaultMessage: 'Approval required',
+  });
+}
+
+function hitlEmailFooterLinkText(): string {
+  return i18n.translate('workflowsExecutionEngine.hitlNotifications.viewInKibanaLinkText', {
+    defaultMessage: 'View in Kibana',
+  });
 }
 
 /** Safe execution UI path for approval email footers (must not mutate via approve/reject). */
@@ -87,7 +108,7 @@ export function buildHitlEmailConnectorInput({
     message,
     kibanaFooterLink: {
       path: footerLinkPath,
-      text: DEFAULT_HITL_EMAIL_FOOTER_LINK_TEXT,
+      text: hitlEmailFooterLinkText(),
     },
   };
 }
@@ -100,5 +121,5 @@ export function resolveHitlEmailSubject(
     return configuredSubject;
   }
 
-  return kind === 'input' ? DEFAULT_HITL_INPUT_EMAIL_SUBJECT : DEFAULT_HITL_APPROVAL_EMAIL_SUBJECT;
+  return kind === 'input' ? hitlInputEmailSubject() : hitlApprovalEmailSubject();
 }
