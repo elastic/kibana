@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 
 /**
  * Props passed to the `renderAssignees` render prop.
@@ -105,7 +105,7 @@ export type RenderLinkedInvestigations = (
  */
 export interface OverviewSlotRenderProps {
   conversation: Conversation;
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   proposedActionsContent?: React.ReactNode;
   /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
   proposedActionsCount?: React.ReactNode;

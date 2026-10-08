@@ -14,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-browser';
 import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import { ConversationTitle } from './conversation_title';
 import type {
   RenderAssignees,
@@ -57,6 +58,7 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Solution-owned conversation template id. Agent Builder throws if it is already registered. */
   templateId: string;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
@@ -132,6 +134,7 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
 export const registerAgenticInvestigationTemplateUI = ({
   conversationTemplates,
   templateId,
+  groupedAttachments,
   name,
   icon,
   renderEscalationModal,
@@ -149,14 +152,14 @@ export const registerAgenticInvestigationTemplateUI = ({
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
-  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
+  conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
             conversation={conversation}
-            attachmentsService={attachmentsService}
+            groupedAttachments={groupedAttachments}
             renderProposedActions={renderProposedActions}
             renderOverview={renderOverview}
             renderProposedActionsCount={renderProposedActionsCount}

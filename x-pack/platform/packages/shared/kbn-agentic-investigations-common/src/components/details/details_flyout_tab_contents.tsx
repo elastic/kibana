@@ -13,20 +13,26 @@ import {
   EuiMarkdownFormat,
   EuiText,
 } from '@elastic/eui';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { AttachmentSummarySection } from '../attachment_summary';
+import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
+import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
 const SUMMARY_LIMIT = 120;
 
+const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
+  FlyoutGroupedAttachments.ALERTS,
+  FlyoutGroupedAttachments.ATTACKS,
+  FlyoutGroupedAttachments.RULES,
+];
+
 export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
    * package cannot fetch a conversation's proposals itself, so a host that can (see
@@ -58,7 +64,7 @@ export const OverviewTab = memo<OverviewTabProps>(
   ({
     investigation,
     attachments,
-    attachmentsService,
+    groupedAttachments,
     proposedActionsContent,
     proposedActionsCount,
     sections = {},
@@ -70,6 +76,14 @@ export const OverviewTab = memo<OverviewTabProps>(
     const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
     const displayedSummary =
       isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
+
+    const attachmentsSection = (
+      <GroupedAttachmentsSection
+        attachments={attachments}
+        registry={groupedAttachments}
+        order={GROUPED_ATTACHMENTS_ORDER}
+      />
+    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -98,16 +112,12 @@ export const OverviewTab = memo<OverviewTabProps>(
                   </EuiButtonEmpty>
                 </div>
               )}
+              {attachmentsSection}
             </DetailsBlock>
           </EuiFlexItem>
         )}
 
-        {/* Not wrapped in an EuiFlexItem: the section renders nothing when the investigation has
-            no listable attachment, and an empty item would still take a gutter. */}
-        <AttachmentSummarySection
-          attachments={attachments}
-          attachmentsService={attachmentsService}
-        />
+        {!summary && attachmentsSection}
 
         {impact && (
           <EuiFlexItem data-test-subj="investigationOverviewImpact">
