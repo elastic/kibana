@@ -17,6 +17,7 @@ import {
 import {
   buildAfterIdClause,
   buildKeepClause,
+  buildSortSuffix,
   buildLookupJoinClause,
   buildLookback,
   getRiskScoreIndex,
@@ -25,12 +26,7 @@ import {
 import { buildMergedForeignRows, buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, ColumnQuerySpec } from '../common';
 import type { MergedForeignRowsOptions } from './foreign_sort';
-import {
-  buildEmptyRowsQuery,
-  buildValueCursorClause,
-  buildValueSortSuffix,
-  fetchSplitSortPage,
-} from './split_sort';
+import { buildEmptyRowsQuery, buildValueCursorClause, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 /** Width of the reference window before the time range, as in the risk movers tile. */
@@ -107,11 +103,11 @@ const riskScoreChangeSplitSortPlan: SplitSortPlan = {
       ...buildScoredEntityRows(args),
       `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NOT NULL`,
       ...buildValueCursorClause(args.cursor),
-      ...buildValueSortSuffix(args, RISK_SCORE_CHANGE_FIELD, limit),
+      ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
       buildLookupJoinClause(args.concreteEntityIndexName),
       buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
       // LOOKUP JOIN may not keep the input order.
-      ...buildValueSortSuffix(args, RISK_SCORE_CHANGE_FIELD, limit),
+      ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
     ].join('\n'),
   buildSortQuery: buildRiskScoreChangeSortQuery,
   // Empty rows: unscored entities, plus scored entities without a reference score.

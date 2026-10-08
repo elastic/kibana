@@ -12,6 +12,7 @@ import {
   buildAfterValuePredicate,
   buildKeepClause,
   buildLookupJoinClause,
+  buildSortSuffix,
   toList,
 } from './esql';
 import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '../common';
@@ -77,16 +78,6 @@ export const buildValueCursorClause = (cursor: PageCursor | null): string[] =>
   cursor?.sortValue != null
     ? [`| WHERE ${buildAfterValuePredicate(cursor, cursor.sortValue)}`]
     : [];
-
-/** Sort and limit of a page of value rows. */
-export const buildValueSortSuffix = (
-  args: QueryArgs,
-  sortField: string,
-  limit: number
-): string[] => [
-  `| SORT ${sortField} ${args.sort.direction.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
-  `| LIMIT ${limit}`,
-];
 
 interface EmptyRowsOptions {
   /** Entities to leave out: the entities with a value. */
@@ -176,7 +167,7 @@ export const buildEntityListSortPlan = ({
       [
         ...buildEntitiesWithValues(args, `| STATS ${aggregations.join(', ')} BY \`entity.id\``),
         ...buildValueCursorClause(args.cursor),
-        ...buildValueSortSuffix(args, sortField, limit),
+        ...buildSortSuffix(sortField, args.sort.direction, limit),
         buildKeepClause(args, ...columns),
       ].join('\n'),
     buildSortQuery,

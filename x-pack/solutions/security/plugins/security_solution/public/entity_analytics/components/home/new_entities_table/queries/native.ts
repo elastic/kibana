@@ -6,8 +6,7 @@
  */
 
 import { buildEntitiesInViewSteps } from './entities_in_view';
-import { buildKeepClause, buildCursorClause } from './esql';
-import { ENTITY_ID_FIELD } from '../common';
+import { buildKeepClause, buildCursorClause, buildSortSuffix } from './esql';
 import type { ColumnQuerySpec, QueryArgs } from '../common';
 
 const buildNativeEntitySortQuery = (args: QueryArgs): string => {
@@ -20,8 +19,7 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
     ...buildEntitiesInViewSteps(args),
     buildKeepClause(args),
     ...buildCursorClause(cursor),
-    `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
-    `| LIMIT ${pageSize + 1}`,
+    ...buildSortSuffix(field, dir, pageSize + 1),
   ].join('\n');
 };
 

@@ -148,11 +148,11 @@ export const buildAfterValuePredicate = (
 export const buildAfterIdClause = (afterId: string | null): string[] =>
   afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : [];
 
-export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): string =>
-  [
-    `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
-    `| LIMIT ${pageSize + 1}`,
-  ].join('\n');
+/** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
+export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [
+  `| SORT ${field} ${direction.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
+  `| LIMIT ${limit}`,
+];
 
 /**
  * Page rows after a STATS that produced one row per entity with the sort value: sort and
@@ -165,11 +165,11 @@ export const buildJoinedPageSteps = (
   extraFields: readonly string[] = []
 ): string[] => [
   ...buildCursorClause(args.cursor),
-  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+  ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
   buildLookupJoinClause(args.concreteEntityIndexName),
   buildKeepClause(args, sortField, ...extraFields),
   // LOOKUP JOIN may not keep the input order.
-  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+  ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
 ];
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
