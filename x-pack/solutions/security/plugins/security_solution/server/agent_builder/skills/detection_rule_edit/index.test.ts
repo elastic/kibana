@@ -23,6 +23,7 @@ describe('detection-rule-edit', () => {
         'takes precedence over every creation, editing, and attachment-persistence instruction'
       );
       expect(skill.content).toContain('Make no further tool calls: not `product_documentation`');
+      expect(skill.content).toContain('FIRST and on its own, in a turn with no other tool calls');
       expect(skill.content).toContain('[GenAI Settings](<metadata.settingsUrl>)');
       expect(skill.content).toContain(
         'do not substitute attachments, prior knowledge, or another research source'

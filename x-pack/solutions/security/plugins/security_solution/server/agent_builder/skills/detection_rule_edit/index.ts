@@ -104,8 +104,8 @@ Find the attachment id by looking at your most recent \`<render_attachment id=".
 ### Step 2: Research Before Creating or Editing
 
 Before creating or editing a rule, use the available research tools to ensure accuracy:
-- Use \`security_labs_search\` to find relevant threat intelligence, detection strategies, and rule examples from Elastic Security Labs.
-- Use \`product_documentation\` to look up correct field formats, query syntax, or rule type requirements.
+- Call \`security_labs_search\` FIRST and on its own, in a turn with no other tool calls, to find relevant threat intelligence, detection strategies, and rule examples from Elastic Security Labs. Read its result before making any other research call, because an unavailable result means you must stop.
+- Only after \`security_labs_search\` returns usable results, use \`product_documentation\` to look up correct field formats, query syntax, or rule type requirements.
 
 This is especially important when:
 - Creating a new rule from scratch (search for similar detections or threat context).
