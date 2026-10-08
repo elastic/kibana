@@ -1,0 +1,29 @@
+{
+  "accessControl": {
+    "accessMode": "write_restricted",
+    "owner": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0"
+  },
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"autoApplyFilters\":true,\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"syncCursor\":true}",
+    "panelsJSON": "[{\"type\":\"vis\",\"embeddableConfig\":{\"attributes\":{\"visualizationType\":\"lnsXY\",\"version\":2,\"title\":\"\",\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"line_0\":{\"index\":\"million-integers-f507bd655def546c8421ffc241ef2034e4d262bdb32a4f99cb053fd3ace9c3d0\",\"query\":{\"esql\":\"FROM million-integers | MV_EXPAND values | EVAL @timestamp = TO_DATETIME(values * 1000 + 1791493960000) | LIMIT 200000\"},\"columns\":[{\"columnId\":\"line_0_x\",\"fieldName\":\"@timestamp\",\"meta\":{\"type\":\"date\"}},{\"columnId\":\"line_0_y_0\",\"fieldName\":\"values\",\"meta\":{\"type\":\"number\"}}],\"ignoreGlobalFilters\":false}}}},\"internalReferences\":[{\"type\":\"index-pattern\",\"id\":\"million-integers-f507bd655def546c8421ffc241ef2034e4d262bdb32a4f99cb053fd3ace9c3d0\",\"name\":\"indexpattern-datasource-layer-line_0\"}],\"visualization\":{\"preferredSeriesType\":\"line\",\"legend\":{\"isVisible\":false,\"position\":\"right\",\"maxLines\":1},\"yLeftScale\":\"linear\",\"axisTitlesVisibilitySettings\":{\"x\":false,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"xExtent\":{\"mode\":\"dataBounds\",\"niceValues\":false},\"yLeftExtent\":{\"mode\":\"full\",\"niceValues\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"hideEndzones\":true,\"showCurrentTimeMarker\":false,\"pointVisibility\":\"auto\",\"curveType\":\"LINEAR\",\"layers\":[{\"layerId\":\"line_0\",\"accessors\":[\"line_0_y_0\"],\"layerType\":\"data\",\"seriesType\":\"line\",\"xAccessor\":\"line_0_x\",\"yConfig\":[{\"axisMode\":\"left\",\"forAccessor\":\"line_0_y_0\"}]}]},\"adHocDataViews\":{\"million-integers-f507bd655def546c8421ffc241ef2034e4d262bdb32a4f99cb053fd3ace9c3d0\":{\"id\":\"million-integers-f507bd655def546c8421ffc241ef2034e4d262bdb32a4f99cb053fd3ace9c3d0\",\"title\":\"million-integers\",\"name\":\"million-integers\",\"sourceFilters\":[],\"allowNoIndex\":false,\"type\":\"esql\"}},\"filters\":[],\"query\":{\"esql\":\"FROM million-integers | MV_EXPAND values | EVAL @timestamp = TO_DATETIME(values * 1000 + 1791493960000) | LIMIT 200000\"}},\"references\":[]},\"title\":\"Requests over time\",\"drilldowns\":[]},\"panelIndex\":\"9534866f-d880-4f57-9788-58f8102291ad\",\"gridData\":{\"y\":0,\"x\":0,\"w\":25,\"h\":11,\"i\":\"9534866f-d880-4f57-9788-58f8102291ad\"}}]",
+    "timeFrom": "2026-10-06T11:52:52.311Z",
+    "timeRestore": true,
+    "timeTo": "2026-10-15T13:54:06.509Z",
+    "title": "Many points"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-10-08T21:21:45.364Z",
+  "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "id": "9b664ead-85e1-4a1d-8edc-7c589fb68088",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-10-08T21:46:02.343Z",
+  "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "version": "WzQyLDFd"
+}
