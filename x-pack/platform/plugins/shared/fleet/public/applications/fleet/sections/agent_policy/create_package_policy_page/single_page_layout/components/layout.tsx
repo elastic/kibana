@@ -31,6 +31,7 @@ import type {
 import { PackageIcon } from '../../../../../components';
 import { useRootPackage } from '../../../../../../../hooks/use_root_package';
 import { ROOT_QUERYPARAM } from '../../../../../../../../common/services';
+import { RootSchemaToggle } from '../../../../../../integrations/sections/epm/screens/root/schema_toggle';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
@@ -278,6 +279,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>{pageTitle}</EuiFlexItem>
+        {root && (
+          <EuiFlexItem>
+            <RootSchemaToggle rootName={root.name} currentPackageName={packageInfo?.name} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {pageDescription}

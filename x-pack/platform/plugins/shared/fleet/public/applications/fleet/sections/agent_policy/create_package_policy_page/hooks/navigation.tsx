@@ -57,10 +57,9 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     // External apps (Integrations catalog, Security, Observability Onboarding) append
     // returnPath/returnAppId as query params so Cancel returns to the originating page.
     const searchParams = new URLSearchParams(search);
-    // PROTOTYPE: coming from a root package schema picker, return there.
-    const rootName = searchParams.get('root');
-    if (rootName) {
-      return getHref('integration_root', { rootName });
+    // PROTOTYPE: coming from a root package, return to browse (the root page just redirects here).
+    if (searchParams.get('root')) {
+      return getHref('integrations_all');
     }
     const returnPath = searchParams.get('returnPath');
     const returnAppId = searchParams.get('returnAppId');
