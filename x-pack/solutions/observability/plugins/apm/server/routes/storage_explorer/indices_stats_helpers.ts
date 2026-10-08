@@ -21,24 +21,41 @@ export async function getTotalIndicesStats({
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
 }) {
-  const existingIndices = await getExistingApmIndices({ context, apmEventClient });
-  if (!existingIndices.length) {
+  const esClient = (await context.core).elasticsearch.client;
+  const responses = await Promise.all(
+    getApmIndexPatterns(apmEventClient).map(async (index) => {
+      try {
+        return await esClient.asCurrentUser.indices.stats({
+          index,
+          expand_wildcards: 'all',
+        });
+      } catch (error) {
+        if (isIndexNotFoundError(error)) {
+          return null;
+        }
+        throw error;
+      }
+    })
+  );
+
+  const indices = Object.assign(
+    {},
+    ...responses.filter((response) => response !== null).map((response) => response?.indices ?? {})
+  );
+
+  if (!Object.keys(indices).length) {
     return EMPTY_INDICES_STATS;
   }
 
-  const esClient = (await context.core).elasticsearch.client;
-  try {
-    return await esClient.asCurrentUser.indices.stats({
-      index: existingIndices.join(),
-      expand_wildcards: 'all',
-    });
-  } catch (error) {
-    // An index can disappear between resolution and the stats request.
-    if (isIndexNotFoundError(error)) {
-      return EMPTY_INDICES_STATS;
-    }
-    throw error;
-  }
+  const totalSize = sumBy(
+    values(indices),
+    (indexStats) => indexStats?.total?.store?.size_in_bytes ?? 0
+  );
+
+  return {
+    _all: { total: { store: { size_in_bytes: totalSize } } },
+    indices,
+  };
 }
 
 export function getEstimatedSizeForDocumentsInIndex({
@@ -83,27 +100,27 @@ export async function getIndicesLifecycleStatus({
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
 }) {
-  const existingIndices = await getExistingApmIndices({ context, apmEventClient });
-  if (!existingIndices.length) {
-    return {};
-  }
-
   const esClient = (await context.core).elasticsearch.client;
-  try {
-    const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
-      index: existingIndices.join(),
-      filter_path: 'indices.*.phase',
-    });
+  const responses = await Promise.all(
+    getApmIndexPatterns(apmEventClient).map(async (index) => {
+      try {
+        return await esClient.asCurrentUser.ilm.explainLifecycle({
+          index,
+          filter_path: 'indices.*.phase',
+        });
+      } catch (error) {
+        if (isIndexNotFoundError(error)) {
+          return null;
+        }
+        throw error;
+      }
+    })
+  );
 
-    return indices || {};
-  } catch (error) {
-    // ILM explain does not accept ignore_unavailable, and an index can
-    // disappear between resolution and this request.
-    if (isIndexNotFoundError(error)) {
-      return {};
-    }
-    throw error;
-  }
+  return Object.assign(
+    {},
+    ...responses.filter((response) => response !== null).map((response) => response?.indices ?? {})
+  );
 }
 
 export async function getIndicesInfo({
@@ -130,22 +147,16 @@ export async function getIndicesInfo({
   return indicesInfo;
 }
 
-async function getExistingApmIndices({
-  context,
-  apmEventClient,
-}: {
-  context: ApmPluginRequestHandlerContext;
-  apmEventClient: APMEventClient;
-}) {
-  return Object.keys(await getIndicesInfo({ context, apmEventClient }));
-}
-
-export function getApmIndicesCombined(apmEventClient: APMEventClient) {
+function getApmIndexPatterns(apmEventClient: APMEventClient) {
   const {
     indices: { transaction, span, metric, error },
   } = apmEventClient;
 
-  return uniq([transaction, span, metric, error]).join();
+  return uniq([transaction, span, metric, error]);
+}
+
+export function getApmIndicesCombined(apmEventClient: APMEventClient) {
+  return getApmIndexPatterns(apmEventClient).join();
 }
 
 export function isIndexNotFoundError(error: unknown): boolean {
