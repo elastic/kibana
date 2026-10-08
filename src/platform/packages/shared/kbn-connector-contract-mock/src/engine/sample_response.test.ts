@@ -108,6 +108,45 @@ describe('sampleResponse', () => {
     expect(await response.text()).toBe('');
   });
 
+  it('answers operations without a success response with a status they declare', async () => {
+    const { fetch: statusFetch, calls: statusCalls } = createContractMockFetch({
+      specs: [
+        {
+          ...spec,
+          paths: {
+            '/tarball': {
+              get: {
+                responses: {
+                  '404': { description: 'missing' },
+                  '302': {
+                    description: 'redirect',
+                    headers: { Location: { required: true, schema: { type: 'string' } } },
+                  },
+                },
+              },
+            },
+            '/legacy': { get: { responses: { '410': { description: 'gone' } } } },
+            '/errors': {
+              get: { responses: { '5XX': { description: 'x' }, '4XX': { description: 'x' } } },
+            },
+            '/moved': {
+              get: { responses: { '3XX': { description: 'x' }, '301': { description: 'x' } } },
+            },
+          },
+        },
+      ],
+    });
+
+    const statuses = [];
+    for (const path of ['/tarball', '/legacy', '/errors', '/moved']) {
+      const response = await statusFetch(`https://api.example.com${path}`);
+      statuses.push(response.status);
+    }
+
+    expect(statuses).toEqual([302, 410, 400, 301]);
+    expect(statusCalls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+  });
+
   it('serves the first media type example that matches the schema, following refs', async () => {
     const { fetch: exampleFetch } = createContractMockFetch({
       specs: [
