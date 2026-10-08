@@ -153,7 +153,7 @@ interface RowActionsCellProps {
   onOpenEntityGraph: () => void;
 }
 
-const RowActionsCell: React.FC<RowActionsCellProps> = ({
+export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   onInvestigateInTimeline,
   onOpenEntityGraph,
 }) => {
@@ -214,8 +214,6 @@ const RowActionsCell: React.FC<RowActionsCellProps> = ({
     </EuiFlexGroup>
   );
 };
-
-export { RowActionsCell };
 
 export interface RowActions {
   onInvestigateInTimeline: (row: Row) => void;
@@ -433,16 +431,15 @@ const AnomalyCountCell = memo(
     onAnomalyCountClick?: (row: Row) => void;
   }) => {
     if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
-    const anomalyCount = value;
     return onAnomalyCountClick ? (
       <EuiLink
         onClick={() => onAnomalyCountClick(row)}
         onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
       >
-        {anomalyCount}
+        {value}
       </EuiLink>
     ) : (
-      <>{String(anomalyCount)}</>
+      <>{String(value)}</>
     );
   }
 );

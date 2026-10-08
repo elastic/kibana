@@ -115,7 +115,7 @@ export interface RunContext {
   signal?: AbortSignal;
 }
 
-/** Fields an enricher fetched, per entity id; `null` when its query failed. */
+/** Fields an enricher fetched, per entity id. */
 type EnrichedFields = ReadonlyMap<string, Row>;
 
 /** Reads computed fields of the page rows after the sort query. It rejects when it fails. */
@@ -173,6 +173,10 @@ export const getEntityId = (row: Row): string | undefined => getString(row, ENTI
 export const getEntityIds = (rows: readonly Row[]): string[] =>
   rows.flatMap((row) => getEntityId(row) ?? []);
 
+/** `entity.id ASC` order. */
+export const compareEntityIds = (a: Row, b: Row): number =>
+  (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;
+
 /** Narrows a sort column value for a cursor. */
 export const toSortValue = (value: unknown): SortValue =>
   typeof value === 'string' || typeof value === 'number' ? value : null;
@@ -203,7 +207,7 @@ export const createEsqlRunner = (
 };
 
 /**
- * Resolves to `null` when an enrich request fails, so one enricher cannot fail the page.
+ * Resolves to `null` when the request fails, so the caller can fall back instead of failing.
  * An abort still rejects: the query key changed and the caller drops the result.
  */
 export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>

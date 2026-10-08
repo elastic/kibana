@@ -6,6 +6,7 @@
  */
 
 import {
+  compareEntityIds,
   getEntityIds,
   getEntityId,
   getNumber,
@@ -14,9 +15,9 @@ import {
   RISK_SCORE_NORM_FIELD,
 } from '../common';
 import {
+  buildAfterIdClause,
   buildKeepClause,
   buildLookupJoinClause,
-  esc,
   buildLookback,
   getRiskScoreIndex,
   toList,
@@ -132,7 +133,7 @@ const riskScoreChangeSplitSortPlan: SplitSortPlan = {
         [
           ...buildScoredEntityRows(args),
           `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NULL`,
-          ...(afterId != null ? [`| WHERE \`entity.id\` > ${esc(afterId)}`] : []),
+          ...buildAfterIdClause(afterId),
           '| SORT `entity.id` ASC',
           `| LIMIT ${limit}`,
           buildLookupJoinClause(args.concreteEntityIndexName),
@@ -140,9 +141,7 @@ const riskScoreChangeSplitSortPlan: SplitSortPlan = {
         ].join('\n')
       ),
     ]);
-    return [...unscored, ...unreferenced]
-      .sort((a, b) => ((getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1))
-      .slice(0, limit);
+    return [...unscored, ...unreferenced].sort(compareEntityIds).slice(0, limit);
   },
 };
 

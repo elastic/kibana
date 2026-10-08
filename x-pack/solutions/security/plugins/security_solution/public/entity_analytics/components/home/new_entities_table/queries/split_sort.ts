@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { ENTITY_ID_FIELD, getEntityId } from '../common';
+import { ENTITY_ID_FIELD, getEntityIds } from '../common';
 import {
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
   buildEntitiesInViewSteps,
 } from './entities_in_view';
-import { buildKeepClause, buildLookupJoinClause, esc, toList } from './esql';
+import {
+  buildAfterIdClause,
+  buildAfterValuePredicate,
+  buildKeepClause,
+  buildLookupJoinClause,
+  toList,
+} from './esql';
 import type {
   EsqlRunner,
   PageCursor,
@@ -81,17 +87,10 @@ export const isLargeView = (args: QueryArgs, viewSize: number): boolean =>
  * Keeps the value rows after the cursor in `SORT field <dir>, entity.id ASC` order. Unlike
  * `buildCursorClause` it leaves out empty rows: the empty block is read separately.
  */
-export const buildValueCursorClause = (cursor: PageCursor | null): string[] => {
-  if (cursor == null || cursor.sortValue == null) return [];
-  const { sortField, sortValue, sortDirection, entityId } = cursor;
-  const op = sortDirection === 'desc' ? '<' : '>';
-  const val = typeof sortValue === 'string' ? esc(sortValue) : String(sortValue);
-  return [
-    `| WHERE (${sortField} ${op} ${val}) OR (${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${esc(
-      entityId
-    )})`,
-  ];
-};
+export const buildValueCursorClause = (cursor: PageCursor | null): string[] =>
+  cursor?.sortValue != null
+    ? [`| WHERE ${buildAfterValuePredicate(cursor, cursor.sortValue)}`]
+    : [];
 
 /** Sort and limit of a page of value rows. */
 export const buildValueSortSuffix = (
@@ -125,7 +124,7 @@ export const buildEmptyRowsQuery = (
     ...buildEntitiesInViewSteps(args),
     ...conditions.map((condition) => `| WHERE ${condition}`),
     ...(excludeIds.length ? [`| WHERE NOT ${ENTITY_ID_FIELD} IN (${toList(excludeIds)})`] : []),
-    ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : []),
+    ...buildAfterIdClause(afterId),
     `| SORT ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${limit}`,
     `| EVAL ${emptyColumns}`,
@@ -146,9 +145,7 @@ const fetchEmptyRowsExcludingValueIds = async (
   limit: number
 ): Promise<Row[] | null> => {
   const valueIdsQuery = [...valueEntities, '| KEEP `entity.id`', `| LIMIT ${MAX_VALUE_ROWS + 1}`];
-  const ids = (await runQuery(valueIdsQuery.join('\n')))
-    .map(getEntityId)
-    .filter((id): id is string => id != null);
+  const ids = getEntityIds(await runQuery(valueIdsQuery.join('\n')));
   if (ids.length > MAX_VALUE_ROWS) return null;
   return runQuery(buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit));
 };

@@ -6,6 +6,7 @@
  */
 
 import {
+  compareEntityIds,
   getEntityIds,
   getEntityId,
   getNumber,
@@ -176,7 +177,7 @@ const compareGroups =
   (a: Row, b: Row): number => {
     const bySize = getGroupSize(a) - getGroupSize(b);
     if (bySize !== 0) return direction === 'desc' ? -bySize : bySize;
-    return (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;
+    return compareEntityIds(a, b);
   };
 
 const isAfterCursor =

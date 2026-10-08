@@ -4912,7 +4912,7 @@ FROM entities-latest-default
 | WHERE _in_view == 1
 | EVAL risk_score_change = current_score - reference_score
 | WHERE risk_score_change IS NULL
-| WHERE \`entity.id\` > \\"host:h-1\\"
+| WHERE entity.id > \\"host:h-1\\"
 | SORT \`entity.id\` ASC
 | LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`

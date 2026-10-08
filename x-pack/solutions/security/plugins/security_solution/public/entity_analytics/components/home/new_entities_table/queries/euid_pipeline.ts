@@ -80,20 +80,20 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
 
   const unstampedEvals = [...buildPerTypeEuidEvals(), evalGuardedTypedEuids('_ea_entity_id')];
 
-  let unstampedWhere: string;
-  if (idsList != null && unstampedIdentityClause == null) {
-    unstampedWhere = 'WHERE false';
-  } else if (unstampedIdentityClause != null) {
-    const conjuncts = [
-      ...guard,
-      '`kibana.alert.entity.id` IS NULL',
-      ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
-      `(${unstampedIdentityClause})`,
-    ];
-    unstampedWhere = `WHERE ${conjuncts.join(' AND ')}`;
-  } else {
-    unstampedWhere = `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`;
-  }
+  const unstampedConjuncts = [
+    ...guard,
+    '`kibana.alert.entity.id` IS NULL',
+    ...(unstampedIdentityClause != null
+      ? [
+          ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
+          `(${unstampedIdentityClause})`,
+        ]
+      : []),
+  ];
+  const unstampedWhere =
+    idsList != null && unstampedIdentityClause == null
+      ? 'WHERE false'
+      : `WHERE ${unstampedConjuncts.join(' AND ')}`;
 
   const unstampedSteps = [unstampedWhere, ...unstampedEvals, `| KEEP ${keepCols}`];
 

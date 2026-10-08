@@ -135,15 +135,28 @@ export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE
  */
 export const buildCursorClause = (cursor: PageCursor | null): string[] => {
   if (cursor == null) return [];
-  const { sortField, sortValue, sortDirection, entityId } = cursor;
+  const { sortField, sortValue, entityId } = cursor;
   if (sortValue == null) {
     return [`| WHERE ${sortField} IS NULL AND ${ENTITY_ID_FIELD} > ${esc(entityId)}`];
   }
+  return [`| WHERE ${buildAfterValuePredicate(cursor, sortValue)} OR ${sortField} IS NULL`];
+};
+
+/** Rows after a cursor with a non-null sort value, in `SORT field <dir>, entity.id ASC` order. */
+export const buildAfterValuePredicate = (
+  { sortField, sortDirection, entityId }: PageCursor,
+  sortValue: string | number
+): string => {
   const op = sortDirection === 'desc' ? '<' : '>';
   const val = typeof sortValue === 'string' ? esc(sortValue) : String(sortValue);
-  const tieBreaker = `${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${esc(entityId)}`;
-  return [`| WHERE (${sortField} ${op} ${val}) OR (${tieBreaker}) OR ${sortField} IS NULL`];
+  return `(${sortField} ${op} ${val}) OR (${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${esc(
+    entityId
+  )})`;
 };
+
+/** Keeps the entities after `afterId`, for pages sorted by `entity.id` alone. */
+export const buildAfterIdClause = (afterId: string | null): string[] =>
+  afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : [];
 
 export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): string =>
   [
