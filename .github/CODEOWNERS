@@ -1560,7 +1560,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search @elastic/kibana-discover
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search-session @elastic/kibana-discover
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/security-rule @elastic/security-detection-engineering
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/stream-prompts @elastic/streams-ui @elastic/nightshift-sre-agent-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/task @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/uiam_api_keys_provisioning_status @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/watchlist-entity-source @elastic/security-entity-analytics
@@ -1604,37 +1603,20 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-discover @elastic/kibana-dashboards
 /x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-discover
 /x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-discover
-/x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts @elastic/kibana-discover
-/src/platform/test/accessibility/apps/discover.ts @elastic/kibana-discover
 /src/platform/test/api_integration/apis/data_views @elastic/kibana-discover
 /src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-discover
 /src/platform/test/api_integration/apis/kql_telemetry @elastic/kibana-discover
 /src/platform/test/api_integration/apis/scripts @elastic/kibana-discover
 /src/platform/test/api_integration/apis/search @elastic/kibana-discover
-/src/platform/test/examples/data_view_field_editor_example @elastic/kibana-discover
-/src/platform/test/examples/discover_customization_examples @elastic/kibana-discover
-/src/platform/test/examples/field_formats @elastic/kibana-discover
-/src/platform/test/examples/partial_results @elastic/kibana-discover
-/src/platform/test/examples/search @elastic/kibana-discover
-/src/platform/test/examples/unified_field_list_examples @elastic/kibana-discover
-/src/platform/test/examples/unified_tabs_examples @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
-/src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-discover
-/x-pack/platform/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-discover
-/x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-discover
-/x-pack/platform/test/functional/apps/discover @elastic/kibana-discover
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-discover
-/x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover @elastic/kibana-discover
-/x-pack/platform/test/search_sessions_integration @elastic/kibana-discover
 /x-pack/platform/test/upgrade/apps/discover @elastic/kibana-discover
 /x-pack/platform/test/serverless/api_integration/test_suites/data_views @elastic/kibana-discover
 /x-pack/platform/test/serverless/api_integration/test_suites/data_view_field_editor @elastic/kibana-discover
 /x-pack/platform/test/serverless/api_integration/test_suites/kql_telemetry @elastic/kibana-discover
 /x-pack/platform/test/serverless/api_integration/test_suites/scripts_tests @elastic/kibana-discover
 /x-pack/platform/test/serverless/api_integration/test_suites/search_oss @elastic/kibana-discover
-/x-pack/platform/test/serverless/functional/test_suites/discover @elastic/kibana-discover
-/x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover @elastic/kibana-discover
 /src/platform/plugins/shared/data/**/esaggs* @elastic/kibana-discover @elastic/kibana-dashboards
 
 # Discover session metrics tab schema
@@ -2034,10 +2016,7 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/obs-signals-logs-team
-/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-signals-logs-team
-/x-pack/solutions/observability/test/functional/services/uptime @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-signals-logs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
@@ -2790,9 +2769,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/api_integration/apis/console/*.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-management
-/src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/index_management/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/painless_lab/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/console/ @elastic/kibana-management
@@ -2968,7 +2945,6 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
-/x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
@@ -3918,7 +3894,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/pipeline-resource-definitions/kibana-report-flaky-tests.yml @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/pipelines/report_flaky_tests.yml @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scripts/steps/report_flaky_tests.sh @elastic/appex-qa @elastic/kibana-operations
-/.buildkite/scripts/steps/check_flaky_test_issues.sh @elastic/appex-qa @elastic/kibana-operations
 
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
