@@ -759,6 +759,13 @@ describe('"now" anchoring', () => {
     expect(range.startDate?.toISOString()).toBe('2025-07-15T11:45:00.000Z');
     expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
   });
+
+  it('does not truncate absolute bounds', () => {
+    const range = textToTimeRange('2025-07-15T11:00:00.123Z to 2025-07-15T11:30:00.456Z');
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:00:00.123Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T11:30:00.456Z');
+  });
 });
 
 describe('matchPreset', () => {
