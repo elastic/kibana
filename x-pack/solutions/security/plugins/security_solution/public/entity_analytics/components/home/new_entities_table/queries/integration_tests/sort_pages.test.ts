@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
-import { createTestEsCluster } from '@kbn/test';
-import type { EsTestCluster } from '@kbn/test';
+import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
 import { findSortPageFetcher } from '../../grid_columns';
+import { toEsql } from '../../active_filters';
+import type { ActiveFilters } from '../../active_filters';
+import { EMPTY_ENTITY_FILTERS } from '../../hooks/use_entity_analytics_url_state';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
-import { BASE_ARGS, createRunQuery, getIds, loadFixture } from './fixture';
+import { BASE_ARGS, getIds, startFixtureCluster } from './fixture';
+import type { FixtureCluster } from './fixture';
 
 /** The general queries run below the threshold; the split plans at or above it. */
 const VIEW_SIZES = { 'a small view': 10, 'a large view': SPLIT_SORT_MIN_VIEW_SIZE };
@@ -92,29 +93,91 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
   ],
 ];
 
+const NO_FILTERS: ActiveFilters = {
+  search: {},
+  entityFilters: EMPTY_ENTITY_FILTERS,
+  tileEntityIds: null,
+  rowsMode: 'resolved',
+};
+
+/** Rows a filter keeps, in each sort's order, compiled by the grid's own `toEsql`. */
+const FILTER_CASES: ReadonlyArray<[string, Partial<ActiveFilters>, string, SortDir, string[]]> = [
+  [
+    'a search',
+    { search: { esql: 'KQL("""entity.name: web*""")' } },
+    'alert_count',
+    'desc',
+    ['host:h1', 'host:h2', 'host:h3'],
+  ],
+  [
+    'a search',
+    { search: { esql: 'KQL("""entity.name: web*""")' } },
+    'group_size',
+    'desc',
+    ['host:h1', 'host:h2', 'host:h3'],
+  ],
+  [
+    'an entity type filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, entityTypes: [EntityType.user] } },
+    'group_size',
+    'desc',
+    ['user:bob@okta', 'user:alice@okta'],
+  ],
+  [
+    'a criticality filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] } },
+    'alert_count',
+    'desc',
+    ['host:h1'],
+  ],
+  [
+    'a watchlist filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, watchlists: ['wl-1'] } },
+    'entity.risk.calculated_score_norm',
+    'desc',
+    ['host:h2'],
+  ],
+  [
+    'a tile',
+    { tileEntityIds: ['host:h2', 'user:alice@okta'] },
+    'anomaly_count',
+    'desc',
+    ['user:alice@okta', 'host:h2'],
+  ],
+  [
+    'individual rows',
+    { rowsMode: 'individual' },
+    'entity.risk.calculated_score_norm',
+    'desc',
+    [
+      'host:h1',
+      'user:alice@okta',
+      'host:h2',
+      'service:payments',
+      'host:h3',
+      'host:h4',
+      'host:h5',
+      'user:bob@okta',
+      'user:carol@okta',
+    ],
+  ],
+];
+
 describe('entities grid sort pages on Elasticsearch', () => {
-  let esServer: EsTestCluster;
-  let client: Client;
-  let runQuery: EsqlRunner;
+  let cluster: FixtureCluster;
 
   beforeAll(async () => {
-    esServer = createTestEsCluster({
-      log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
-    });
-    await esServer.start();
-    client = esServer.getClient();
-    runQuery = createRunQuery(client);
-    await loadFixture(client);
+    cluster = await startFixtureCluster();
   }, 300_000);
 
   afterAll(async () => {
-    await esServer?.stop();
+    await cluster?.stop();
   });
 
   describe.each(Object.entries(VIEW_SIZES))('on %s', (_view, viewSize) => {
     it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
       const rows = await fetchPage(
-        runQuery,
+        cluster.runQuery,
         { ...BASE_ARGS, sort: { field, direction } },
         viewSize
       );
@@ -126,8 +189,27 @@ describe('entities grid sort pages on Elasticsearch', () => {
       'reads the same %s %s order two rows at a time',
       async (field, direction, expected) => {
         const rows = await fetchAllPages(
-          runQuery,
+          cluster.runQuery,
           { ...BASE_ARGS, sort: { field, direction }, pageSize: 2 },
+          viewSize
+        );
+
+        expect(getIds(rows)).toEqual(expected);
+      }
+    );
+
+    it.each(FILTER_CASES)(
+      'keeps the rows of %s, sorted by %s %s',
+      async (_name, filters, field, direction, expected) => {
+        const activeFilters = { ...NO_FILTERS, ...filters };
+        const rows = await fetchPage(
+          cluster.runQuery,
+          {
+            ...BASE_ARGS,
+            ...toEsql(activeFilters),
+            rowsMode: activeFilters.rowsMode,
+            sort: { field, direction },
+          },
           viewSize
         );
 
