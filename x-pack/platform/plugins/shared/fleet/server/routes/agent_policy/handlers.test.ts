@@ -238,6 +238,22 @@ describe('Agent policy API handlers', () => {
       expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
       expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
     });
+
+    it('should abort without applying any change when the policy is not found in the request space', async () => {
+      agentPolicyServiceMock.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('fleet-agent-policies', 'policy')
+      );
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: { name: 'Policy', namespace: 'default', space_ids: ['space-b'] },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /not found/i
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('GetListAgentPolicyOutputsHandler', () => {
