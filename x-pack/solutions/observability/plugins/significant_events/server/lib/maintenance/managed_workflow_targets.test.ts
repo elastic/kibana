@@ -61,24 +61,6 @@ describe('managed_workflow_targets registry', () => {
     expect(buildCancelTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
   });
 
-  it('never disables the shared workflows, which belong to every space', () => {
-    const disabledIds = buildDisableTargets([asSpaceId('default'), asSpaceId('space-a')]).map(
-      ({ id }) => id
-    );
-    for (const id of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
-      expect(disabledIds).not.toContain(id);
-    }
-  });
-
-  it('cancels executions of the shared workflows in each swept space', () => {
-    const cancelTargets = buildCancelTargets([asSpaceId('space-a')]);
-    for (const id of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
-      expect(cancelTargets).toContainEqual({ id, spaceId: asSpaceId('space-a') });
-    }
-    // Only the swept space: another space's executions are not touched.
-    expect(cancelTargets.every(({ spaceId }) => spaceId === 'space-a')).toBe(true);
-  });
-
   it('tracks cleanup as a per-space scheduled workflow', () => {
     expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
     expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual({

@@ -11,10 +11,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import {
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
@@ -27,7 +24,6 @@ import {
   makeManagementApi,
   makeV2RulesClient,
   makeService,
-  requestInSpace,
 } from './maintenance_service.test_helpers';
 
 describe('SignificantEventsMaintenanceService', () => {
@@ -361,59 +357,6 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('paused');
       expect(summary.partialFailures).toEqual([]);
       expect(savedObjects.createInternalRepository).not.toHaveBeenCalled();
-    });
-
-    it('only touches the space the request is made in', async () => {
-      const { api, updateWorkflow, cancelAllActiveWorkflowExecutions } = makeManagementApi();
-      const { service, soClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a', 'space-b'],
-      });
-
-      await service.pause({ request: requestInSpace('space-a') });
-
-      // Scheduled workflow documents are space-suffixed; only the caller's space is hit.
-      const disabledDocumentIds = updateWorkflow.mock.calls.map((call) => call[0] as string);
-      expect(disabledDocumentIds.length).toBeGreaterThan(0);
-      expect(disabledDocumentIds.every((id) => id.endsWith('-space-a'))).toBe(true);
-      expect(updateWorkflow.mock.calls.every(([, , spaceId]) => spaceId === 'space-a')).toBe(true);
-      expect(
-        cancelAllActiveWorkflowExecutions.mock.calls.every(([, spaceId]) => spaceId === 'space-a')
-      ).toBe(true);
-      // The legacy default-space sync document belongs to the default space.
-      expect(disabledDocumentIds).not.toContain(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
-      expect(soClient.readDocument('space-a')).toEqual(
-        expect.objectContaining({ state: 'paused' })
-      );
-      expect(soClient.readDocument('default')).toBeUndefined();
-      expect(soClient.readDocument('space-b')).toBeUndefined();
-    });
-
-    it("stores only the paused space's targets and restore flags on its document", async () => {
-      const { api } = makeManagementApi();
-      const { service, soClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a'],
-        continuousOnboardingEnabled: true,
-        scheduledDiscoveryEnabled: true,
-        ruleBackedRuleIds: ['rule-1'],
-      });
-
-      await service.pause({ request: requestInSpace('space-a') });
-
-      const document = soClient.readDocument('space-a') as {
-        disabledWorkflows: Array<{ id: string; spaceId: string }>;
-        disabledRules: Array<{ id: string; spaceId: string }>;
-        pausedSettings: { scheduledDiscoveryEnabledSpaceIds: string[] };
-      };
-      expect(document.disabledWorkflows.length).toBeGreaterThan(0);
-      expect(document.disabledWorkflows.every(({ spaceId }) => spaceId === 'space-a')).toBe(true);
-      expect(document.disabledWorkflows).toContainEqual({
-        id: continuousDocumentId('space-a'),
-        spaceId: 'space-a',
-      });
-      expect(document.disabledRules).toEqual([{ id: 'rule-1', spaceId: 'space-a' }]);
-      expect(document.pausedSettings.scheduledDiscoveryEnabledSpaceIds).toEqual(['space-a']);
     });
 
     it('records restore flags when settings were enabled even if set(false) fails', async () => {

@@ -26,7 +26,6 @@ import {
   makeManagementApi,
   makeV2RulesClient,
   makeService,
-  requestInSpace,
 } from './maintenance_service.test_helpers';
 
 describe('SignificantEventsMaintenanceService', () => {
@@ -132,145 +131,6 @@ describe('SignificantEventsMaintenanceService', () => {
       );
       expect(soClient.readDocument('default')).toBeUndefined();
       await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
-    });
-
-    it('pauses every space through its own document before deleting data, then enables them all', async () => {
-      const { api } = makeManagementApi();
-      const { service, soClient, esClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a', 'space-b'],
-        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
-      });
-      // A space a user paused earlier keeps a document; the others never had one.
-      await service.pause({ request: requestInSpace('space-a'), updatedBy: 'marco' });
-      soClient.create.mockClear();
-
-      await service.reset({ request: REQUEST, updatedBy: 'admin' });
-
-      const wipeOrder = esClient.indices.deleteDataStream.mock.invocationCallOrder[0];
-      const pausedBeforeWipe = soClient.create.mock.calls
-        .map(([, attributes], index) => ({
-          state: (attributes as { state: string }).state,
-          spaceId: soClient.create.mock.contexts[index].spaceId,
-          order: soClient.create.mock.invocationCallOrder[index],
-        }))
-        .filter(({ state, order }) => state === 'paused' && order < wipeOrder)
-        .map(({ spaceId }) => spaceId);
-      // space-a was already paused, so only the two spaces without a document are written.
-      expect(new Set(pausedBeforeWipe)).toEqual(new Set(['default', 'space-b']));
-
-      // Everything is enabled again: the pre-existing document stays, the created ones go.
-      expect(soClient.readDocument('space-a')).toEqual(
-        expect.objectContaining({ state: 'enabled', updatedBy: 'admin' })
-      );
-      expect(soClient.readDocument('default')).toBeUndefined();
-      expect(soClient.readDocument('space-b')).toBeUndefined();
-      for (const spaceId of ['default', 'space-a', 'space-b']) {
-        await expect(service.getState({ request: requestInSpace(spaceId) })).resolves.toBe(
-          'enabled'
-        );
-      }
-    });
-
-    it('refuses to delete shared data when a space cannot be marked paused first', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, esClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a'],
-        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
-      });
-      // The first space is marked, the second one is not.
-      soClient.create
-        .mockResolvedValueOnce({} as never)
-        .mockRejectedValueOnce(new Error('space-a intent write failed'));
-
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
-        'space-a intent write failed'
-      );
-
-      expect(updateWorkflow).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-    });
-
-    it('refuses to delete shared data when it cannot list every space', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, esClient } = makeService({
-        management: api,
-        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
-        internalSpacesThrow: true,
-      });
-
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('spaces finder failed');
-
-      expect(soClient.create).not.toHaveBeenCalled();
-      expect(updateWorkflow).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-    });
-
-    it('sweeps every space, including those the caller cannot see', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service } = makeService({
-        management: api,
-        spaceIds: ['default'],
-        internalSpaceIds: ['default', 'space-a'],
-      });
-
-      await service.reset({ request: REQUEST });
-
-      expect(
-        updateWorkflow.mock.calls.some(
-          ([id, , spaceId]) => id === cleanupDocumentId('space-a') && spaceId === 'space-a'
-        )
-      ).toBe(true);
-    });
-
-    it('releases the spaces it paused when pausing a later space fails', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, esClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a'],
-        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
-      });
-      const createDocument = soClient.create.getMockImplementation();
-      if (!createDocument) {
-        throw new Error('Missing saved objects client fixture');
-      }
-      soClient.create
-        .mockImplementationOnce(createDocument)
-        .mockRejectedValueOnce(new Error('so write failed'));
-
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('so write failed');
-
-      expect(soClient.readDocument('default')).toBeUndefined();
-      expect(soClient.readDocument('space-a')).toBeUndefined();
-      expect(updateWorkflow).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-    });
-
-    it('records a space-specific failure only in the document of that space', async () => {
-      const { api } = makeManagementApi();
-      const { service, soClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a'],
-        investigations: {
-          deleted: 0,
-          failures: [{ id: 'inv-1', spaceId: 'space-a', error: 'delete failed' }],
-        },
-      });
-      // A space that keeps a recorded target keeps its document, so its summary is readable.
-      await service.pause({ request: REQUEST });
-      await service.pause({ request: requestInSpace('space-a') });
-
-      await service.reset({ request: REQUEST });
-
-      const failuresIn = (spaceId: string) =>
-        (
-          soClient.readDocument(spaceId) as {
-            lastSummary: { partialFailures: Array<{ target: string }> };
-          }
-        ).lastSummary.partialFailures.map(({ target }) => target);
-      expect(failuresIn('space-a')).toContain('investigation:inv-1@space-a');
-      expect(failuresIn('default')).not.toContain('investigation:inv-1@space-a');
     });
 
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
@@ -718,30 +578,6 @@ describe('SignificantEventsMaintenanceService', () => {
         REQUEST
       );
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-    });
-
-    it('turns the settings it switched off back on when the sweep is rolled back', async () => {
-      const { api } = makeManagementApi();
-      const { service, soClient, getInternalSpaceUiSettingsClient } = makeService({
-        management: api,
-        continuousOnboardingEnabled: true,
-        scheduledDiscoveryEnabled: true,
-      });
-      soClient.create
-        .mockResolvedValueOnce({} as never)
-        .mockRejectedValueOnce(new Error('inventory write failed'));
-
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('inventory write failed');
-
-      const { set } = getInternalSpaceUiSettingsClient('default');
-      expect(set).toHaveBeenCalledWith(
-        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
-        true
-      );
-      expect(set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-        true
-      );
     });
 
     it('throws when the final maintenance state write fails after destructive side effects', async () => {

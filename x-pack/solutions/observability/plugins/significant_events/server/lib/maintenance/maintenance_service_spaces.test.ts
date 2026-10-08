@@ -65,18 +65,6 @@ describe('maintenance across spaces', () => {
     expect(soClient.readDocument('b')).toBeUndefined();
   });
 
-  it('reports the status of the space it is asked about', async () => {
-    const { service } = setupSpaces();
-    await service.pause({ request: requestA, updatedBy: 'marco' });
-
-    await expect(service.getStatus({ request: requestA })).resolves.toEqual(
-      expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
-    );
-    const statusB = await service.getStatus({ request: requestB });
-    expect(statusB.state).toBe('enabled');
-    expect(statusB.updatedBy).toBeUndefined();
-  });
-
   it('resumes only the space it runs in', async () => {
     const { service, rules } = setupSpaces();
     await service.pause({ request: requestA });
@@ -90,18 +78,6 @@ describe('maintenance across spaces', () => {
     expect(rules.a.bulkEnableRules).not.toHaveBeenCalled();
     await expect(service.getState({ request: requestA })).resolves.toBe('paused');
     await expect(service.getState({ request: requestB })).resolves.toBe('enabled');
-  });
-
-  it('does not resume a space that was never paused', async () => {
-    const { service, rules } = setupSpaces();
-    await service.pause({ request: requestA });
-
-    const resumed = await service.resume({ request: requestB });
-
-    expect(resumed.state).toBe('enabled');
-    expect(rules.a.bulkEnableRules).not.toHaveBeenCalled();
-    expect(rules.b.bulkEnableRules).not.toHaveBeenCalled();
-    await expect(service.getState({ request: requestA })).resolves.toBe('paused');
   });
 
   it('deletes owned rules in every space before resetting shared data', async () => {

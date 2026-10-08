@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import {
-  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
-  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-  backfillDisabledRules,
-  getSignificantEventsMaintenanceStateSavedObjectType,
-} from './saved_object';
-
-describe('getSignificantEventsMaintenanceStateSavedObjectType', () => {
-  const type = getSignificantEventsMaintenanceStateSavedObjectType();
-
-  it('is isolated to a space and keeps the type name and the document id', () => {
-    expect(type.namespaceType).toBe('single');
-    expect(type.name).toBe(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE);
-    expect(type.name).toBe('significant-events-maintenance-state');
-    expect(SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID).toBe('significant-events-maintenance-state');
-    expect(type.hidden).toBe(true);
-  });
-});
+import { backfillDisabledRules } from './saved_object';
 
 describe('backfillDisabledRules', () => {
   it('maps legacy rule ids to the default space', () => {

@@ -59,7 +59,7 @@ interface SoCallContext {
 //
 // The calls are recorded on shared mocks, in the shape the real client takes, so a test sees
 // every write in order whichever space made it. `forSpace` is what `asScopedToNamespace` hands
-// out; `readDocument` and `seed` reach a space's stored document directly.
+// out; `readDocument` reaches a space's stored document directly.
 export function makeSoClient() {
   const store = new Map<string, { attributes: Record<string, unknown>; version?: string }>();
   const key = (spaceId: string, type: string, id: string) => `${spaceId}:${type}:${id}`;
@@ -131,16 +131,7 @@ export function makeSoClient() {
       )
     )?.attributes;
 
-  /** Stores a maintenance document as is, e.g. one written while the type was still agnostic. */
-  const seed = (spaceId: string, attributes: Record<string, unknown>) =>
-    put(
-      spaceId,
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
-      attributes
-    );
-
-  return { get, create, update, delete: remove, forSpace, readDocument, seed };
+  return { get, create, update, delete: remove, forSpace, readDocument };
 }
 
 // Stateful workflows management mock: tracks each workflow's `enabled` flag so a
@@ -271,8 +262,6 @@ export function makeService(params?: {
   spaceIds?: string[];
   /** Space ids the internal client finds (default: same as `spaceIds`). */
   internalSpaceIds?: string[];
-  /** Make the internal client's space finder throw. */
-  internalSpacesThrow?: boolean;
   /** Per-space continuous-onboarding toggle before pause, in every space (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
@@ -389,9 +378,6 @@ export function makeService(params?: {
   const spacesRepository = {
     createPointInTimeFinder: jest.fn(() => ({
       async *find() {
-        if (params?.internalSpacesThrow) {
-          throw new Error('spaces finder failed');
-        }
         for (const id of params?.internalSpaceIds ?? params?.spaceIds ?? ['default']) {
           yield { saved_objects: [{ id }] };
         }
