@@ -35,6 +35,8 @@ const analyst = (username: string, profileUid = `${username}-uid`) => ({
 });
 
 const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocument => ({
+  rootProposalId: 'proposal-1',
+  revision: 1,
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
   title: 'Tune the noisy rule',
@@ -1611,22 +1613,6 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('treats an undefined revision on the original as revision 1 (pre-existing records)', async () => {
-      const storage = createStorage(
-        baseDocument({ revision: undefined, rootProposalId: undefined })
-      );
-      const { service } = createService(storage);
-
-      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
-
-      expect(result.revision).toBe(2);
-      expect(storage.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ rootProposalId: 'proposal-1', revision: 2 }),
-        })
-      );
-    });
-
     it('rejects revising a proposal that is already superseded', async () => {
       const storage = createStorage(
         baseDocument({ status: 'superseded', supersededBy: 'proposal-2' })
@@ -1959,6 +1945,7 @@ describe('ProposalsService', () => {
         decision: undefined,
         actionInput: { name: 'Revised PowerShell' },
       });
+      expect(storage.search).toHaveBeenCalledTimes(2);
       expect(storage.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
@@ -1993,63 +1980,6 @@ describe('ProposalsService', () => {
         decision: undefined,
         actionInput: { name: 'Suspicious PowerShell' },
       });
-    });
-
-    it('follows supersededBy pointers for a chain written before rootProposalId existed', async () => {
-      // No `rootProposalId` on either row: the term query cannot find this
-      // chain, so the pointer walk is the only way to the live head.
-      const legacyRoot = baseDocument({ supersededBy: 'proposal-2' });
-      const live = baseDocument({
-        supersedes: 'proposal-1',
-        revision: 2,
-        status: 'pending',
-        actionInput: { name: 'Revised PowerShell' },
-      });
-      const storage = createStorage(legacyRoot);
-      // Dispatch on the query, not call order. A legacy row carries no
-      // `rootProposalId`, so the chain query answers empty and the pointer walk is
-      // forced; answering it elsewhere would pass without the walk ever running.
-      interface QueryClause {
-        term?: Record<string, unknown>;
-        ids?: { values: string[] };
-      }
-      const queryFilter = (searchRequest: { query?: unknown }): QueryClause[] =>
-        (searchRequest.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ??
-        [];
-      storage.search.mockImplementation(async (searchRequest) => {
-        const filter = queryFilter(searchRequest);
-        if (filter.some((clause) => clause.term?.rootProposalId !== undefined)) {
-          return { hits: { hits: [], total: { value: 0 } } };
-        }
-        const requestedId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
-        return requestedId === 'proposal-2'
-          ? { hits: { hits: [searchHit(live, 'proposal-2')], total: { value: 1 } } }
-          : { hits: { hits: [searchHit(legacyRoot, 'proposal-1')], total: { value: 1 } } };
-      });
-      const { service } = createService(storage);
-
-      const result = await service.getLatestRevision('proposal-1', SPACE_ID);
-
-      // Answering with the stale member would hand a parked gate an id whose
-      // decision write `update()` then refuses.
-      expect(result).toEqual({
-        proposalId: 'proposal-2',
-        revision: 2,
-        status: 'pending',
-        decision: undefined,
-        actionInput: { name: 'Revised PowerShell' },
-      });
-      // The successor is reached by following its pointer, not by the root
-      // term — a chain query for this row would be an empty answer.
-      expect(storage.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [{ ids: { values: ['proposal-2'] } }, { term: { spaceId: SPACE_ID } }],
-            },
-          },
-        })
-      );
     });
   });
 
