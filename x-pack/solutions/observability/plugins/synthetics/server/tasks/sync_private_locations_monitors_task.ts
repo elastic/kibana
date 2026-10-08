@@ -73,7 +73,7 @@ export class SyncPrivateLocationMonitorsTask {
         description:
           'This task syncs private location monitor package policies, handling maintenance window changes.',
         timeout: '10m',
-        maxAttempts: 1,
+        maxAttempts: 2,
         createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
@@ -121,9 +121,10 @@ export class SyncPrivateLocationMonitorsTask {
       const { privateLocationId, previousAgentPolicyId } = taskInstance.state;
       if (privateLocationId) {
         // This instance is one-shot, so never return a schedule: task manager
-        // would turn a failed run into a recurring task. A failed recreate is
-        // re-attempted by the next daily clean up, which finds it missing again.
-        const state = {
+        // would turn a failed run into a recurring task. A failed run keeps the
+        // location in state so the retry re-runs this branch instead of the MW sync.
+        const retryState = taskInstance.state as SyncTaskState;
+        const doneState = {
           ...taskInstance.state,
           privateLocationId: undefined,
           previousAgentPolicyId: undefined,
@@ -143,13 +144,13 @@ export class SyncPrivateLocationMonitorsTask {
             logger.error(
               `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
             );
-            return { error, state };
+            return { error, state: retryState };
           }
         } catch (error) {
           logger.error(
             `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
           );
-          return { error, state };
+          return { error, state: retryState };
         } finally {
           // Policies written with a sharding condition skip Fleet's own bump, which
           // would leave agents on the old policy still running the moved monitors.
@@ -162,7 +163,7 @@ export class SyncPrivateLocationMonitorsTask {
           }
         }
 
-        return { state };
+        return { state: doneState };
       }
 
       const defaultState = {
@@ -230,6 +231,10 @@ export class SyncPrivateLocationMonitorsTask {
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
+      if (taskInstance.state.privateLocationId) {
+        // One-shot: no schedule (it would make the task recurring), and keep the location for the retry.
+        return { error, state: taskInstance.state as SyncTaskState };
+      }
       return { error, state: taskState, schedule: { interval } };
     }
 

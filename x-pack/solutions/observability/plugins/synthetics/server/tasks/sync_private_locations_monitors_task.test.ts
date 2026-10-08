@@ -116,7 +116,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           description:
             'This task syncs private location monitor package policies, handling maintenance window changes.',
           timeout: '10m',
-          maxAttempts: 1,
+          maxAttempts: 2,
           createTaskRunner: expect.any(Function),
         }),
       });
@@ -412,8 +412,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(scheduleOf(result)).toBeUndefined();
     });
 
-    it('should not return a schedule when a per-location sync fails', async () => {
-      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+    it('keeps the location in state when a per-location sync fails so a retry re-runs it', async () => {
+      const taskInstance = getMockTaskInstance({
+        privateLocationId: 'pl-1',
+        previousAgentPolicyId: 'policy-old',
+      });
       (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
         .fn()
         .mockReturnValue(mockSoClient as any);
@@ -435,7 +438,43 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeDefined();
       // a schedule here would convert this one-shot task into a recurring one
       expect(scheduleOf(result)).toBeUndefined();
-      expect(result.state.privateLocationId).toBeUndefined();
+      // a retry with the location cleared would run the maintenance-window sync instead
+      expect(result.state.privateLocationId).toBe('pl-1');
+      expect(result.state.previousAgentPolicyId).toBe('policy-old');
+    });
+
+    it('keeps the location in state and returns no schedule when loading locations fails', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('so down'));
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeDefined();
+      // a schedule here would convert this one-shot task into a recurring one
+      expect(scheduleOf(result)).toBeUndefined();
+      expect(result.state.privateLocationId).toBe('pl-1');
+    });
+
+    it('keeps the location in state when the sync reports failed creates', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([
+          { id: 'pl-1', label: 'L', isServiceManaged: false, agentPolicyId: 'policy-1' },
+        ]);
+      jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+        failedCreatesBySpace: [{ spaceId: 'default', count: 1 }],
+      });
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeDefined();
+      expect(result.state.privateLocationId).toBe('pl-1');
     });
 
     describe('previous agent policy', () => {
