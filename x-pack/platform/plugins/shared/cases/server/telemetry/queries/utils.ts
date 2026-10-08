@@ -416,6 +416,7 @@ export const getSolutionValues = ({
       totalWithAtLeastOne:
         caseAggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
+    totalRestrictedCases: caseAggregations?.[owner].restrictedCases?.doc_count ?? 0,
   };
 };
 

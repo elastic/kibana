@@ -40,6 +40,7 @@ import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { SUPERUSER_ROLE_NAME } from '../common/constants';
+import { RESTRICTED_CASE_ACCESS_DENIED_COUNTER } from './usage_counters';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -188,7 +189,7 @@ export class CasesClientFactory {
 
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
     const userInfo = await this.getUserInfo(request);
-    const auth = await this.createAuthorization(request, userInfo.profile_uid);
+    const auth = await this.createAuthorization(request, userInfo.profile_uid, clientSource);
     const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
       request,
       savedObjectsService
@@ -247,10 +248,12 @@ export class CasesClientFactory {
 
   private async createAuthorization(
     request: KibanaRequest,
-    profileUid?: string
+    profileUid?: string,
+    clientSource?: CasesClientSource
   ): Promise<Authorization> {
     this.validateInitialization();
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
+    const { usageCounter } = this.options;
     return Authorization.create({
       request,
       securityAuth: this.options.securityPluginStart?.authz,
@@ -261,6 +264,11 @@ export class CasesClientFactory {
       profileUid,
       isSuperuser: this.isSuperuser(request),
       restrictedCasesEnabled: this.options.config.restrictedCases.enabled,
+      onRestrictedCaseDenied: () =>
+        usageCounter?.incrementCounter({
+          counterName: RESTRICTED_CASE_ACCESS_DENIED_COUNTER,
+          counterType: `cases_client.${clientSource ?? 'rest_api'}`,
+        }),
     });
   }
 

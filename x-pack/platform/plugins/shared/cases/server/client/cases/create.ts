@@ -57,6 +57,7 @@ import {
 import {
   CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  CREATE_RESTRICTED_CASE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
 
@@ -516,6 +517,10 @@ export const create = async (
       clientArgs,
       persistedTemplateId ? CREATE_CASE_WITH_TEMPLATE_COUNTER : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
     );
+
+    if (isCaseRestricted(newCase.attributes)) {
+      incrementCasesClientCounter(clientArgs, CREATE_RESTRICTED_CASE_COUNTER);
+    }
 
     if (persistedTemplateId) {
       try {

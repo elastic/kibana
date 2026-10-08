@@ -139,6 +139,7 @@ export const getCasesTelemetryData = async ({
           totalWithAtLeastOne:
             casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
         },
+        totalRestrictedCases: casesRes.aggregations?.restrictedCases?.doc_count ?? 0,
         ...allAttachmentFrameworkStats,
       },
       sec: getSolutionValues({
@@ -186,6 +187,7 @@ const getCasesSavedObjectTelemetry = async (
           ...getAssigneesAggregations(),
           ...getObservablesAggregations(),
           ...getStatusAggregation(),
+          ...getRestrictedCasesAggregation(),
         },
       },
     }),
@@ -203,6 +205,7 @@ const getCasesSavedObjectTelemetry = async (
       ...getAssigneesAggregations(),
       ...getStatusAggregation(),
       ...getObservablesAggregations(),
+      ...getRestrictedCasesAggregation(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
@@ -262,6 +265,16 @@ const getStatusAggregation = () => ({
   status: {
     terms: {
       field: `${CASE_SAVED_OBJECT}.attributes.status`,
+    },
+  },
+});
+
+const getRestrictedCasesAggregation = () => ({
+  restrictedCases: {
+    filter: {
+      term: {
+        [`${CASE_SAVED_OBJECT}.attributes.access.mode`]: 'restricted',
+      },
     },
   },
 });

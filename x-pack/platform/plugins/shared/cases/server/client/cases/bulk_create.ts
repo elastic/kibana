@@ -62,6 +62,7 @@ import {
 import {
   CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  CREATE_RESTRICTED_CASE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
 
@@ -407,6 +408,12 @@ export const bulkCreate = async (
       clientArgs,
       CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
       casesSOs.length - casesCreatedWithTemplate
+    );
+
+    incrementCasesClientCounter(
+      clientArgs,
+      CREATE_RESTRICTED_CASE_COUNTER,
+      casesSOs.filter((c) => isCaseRestricted(c.attributes)).length
     );
 
     const casesPerTemplateId = countCasesPerTemplateId(casesSOs);

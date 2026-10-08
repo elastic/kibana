@@ -106,7 +106,10 @@ import {
 } from '../../common/utils/pair_field_representations';
 import {
   APPLY_TEMPLATE_COUNTER,
+  CASE_RESTRICTED_COUNTER,
+  CASE_UNRESTRICTED_COUNTER,
   CLEAR_TEMPLATE_COUNTER,
+  RESTRICT_ALERT_UPDATE_FAILED_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
 /**
@@ -1093,7 +1096,18 @@ export const bulkUpdate = async (
       }
     }
 
-    await syncAlertCaseIdsForAccessChanges({ casesToUpdate, caseService, alertsService });
+    try {
+      await syncAlertCaseIdsForAccessChanges({ casesToUpdate, caseService, alertsService });
+    } catch (error) {
+      if (
+        casesToUpdate.some(
+          ({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED
+        )
+      ) {
+        incrementCasesClientCounter(clientArgs, RESTRICT_ALERT_UPDATE_FAILED_COUNTER);
+      }
+      throw error;
+    }
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
@@ -1210,6 +1224,23 @@ export const bulkUpdate = async (
 
     incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
     incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    const persistedCaseIds = new Set(updatedCasesResponse.map(({ id }) => id));
+    const countPersistedAccessChanges = (mode: CaseAccessMode) =>
+      casesToUpdate.filter(
+        ({ updateReq }) => persistedCaseIds.has(updateReq.id) && updateReq.access?.mode === mode
+      ).length;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      CASE_RESTRICTED_COUNTER,
+      countPersistedAccessChanges(CaseAccessMode.RESTRICTED)
+    );
+    incrementCasesClientCounter(
+      clientArgs,
+      CASE_UNRESTRICTED_COUNTER,
+      countPersistedAccessChanges(CaseAccessMode.DEFAULT)
+    );
 
     await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
 

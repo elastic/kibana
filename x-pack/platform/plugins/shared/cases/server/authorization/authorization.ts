@@ -52,6 +52,7 @@ export class Authorization {
   private readonly profileUid?: string;
   private readonly isSuperuser: boolean;
   private readonly restrictedCasesEnabled: boolean;
+  private readonly onRestrictedCaseDenied?: () => void;
 
   private constructor({
     request,
@@ -61,6 +62,7 @@ export class Authorization {
     profileUid,
     isSuperuser,
     restrictedCasesEnabled,
+    onRestrictedCaseDenied,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
@@ -69,6 +71,7 @@ export class Authorization {
     profileUid?: string;
     isSuperuser: boolean;
     restrictedCasesEnabled: boolean;
+    onRestrictedCaseDenied?: () => void;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
@@ -77,6 +80,7 @@ export class Authorization {
     this.profileUid = profileUid;
     this.isSuperuser = isSuperuser;
     this.restrictedCasesEnabled = restrictedCasesEnabled;
+    this.onRestrictedCaseDenied = onRestrictedCaseDenied;
   }
 
   /**
@@ -92,6 +96,7 @@ export class Authorization {
     profileUid,
     isSuperuser = false,
     restrictedCasesEnabled = false,
+    onRestrictedCaseDenied,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
@@ -102,6 +107,8 @@ export class Authorization {
     profileUid?: string;
     isSuperuser?: boolean;
     restrictedCasesEnabled?: boolean;
+    /** Telemetry hook invoked when a restricted case is refused to a non-assignee. */
+    onRestrictedCaseDenied?: () => void;
   }): Promise<Authorization> {
     const getSpace = async (): Promise<Space | undefined> => {
       return spaces?.spacesService.getActiveSpace(request);
@@ -137,6 +144,7 @@ export class Authorization {
       profileUid,
       isSuperuser,
       restrictedCasesEnabled,
+      onRestrictedCaseDenied,
     });
   }
 
@@ -217,6 +225,7 @@ export class Authorization {
         operation: operations,
         error: new RestrictedCaseAccessError(),
       });
+      this.onRestrictedCaseDenied?.();
       throw createRestrictedCaseNotFoundError(invisibleEntity.id);
     }
 
