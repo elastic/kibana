@@ -31,6 +31,11 @@ describe('sampleSchema', () => {
     [{ type: 'number', maximum: -2 }, -2],
     [{ type: 'boolean' }, true],
     [{ type: ['null', 'string'] }, 'string'],
+    [{ type: 'integer', minimum: 5, multipleOf: 4 }, 8],
+    [{ type: 'number', multipleOf: 0.25, minimum: 0.1 }, 0.25],
+    [{ type: 'string', pattern: '^[0-9a-fA-F]{24}$' }, 'a'.repeat(24)],
+    [{ type: 'string', pattern: '^[A-Z]{2}-\\d+$', minLength: 6 }, 'AA-000'],
+    [{ type: 'array', items: { type: 'string' }, maxItems: 0 }, []],
   ])('builds a placeholder for %j', (schema, expected) => {
     expect(sample(schema)).toEqual(expected);
   });
