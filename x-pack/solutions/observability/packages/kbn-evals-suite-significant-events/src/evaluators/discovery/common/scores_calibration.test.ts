@@ -17,11 +17,10 @@ type CalibrationCriteriaFn = Parameters<typeof createSeverityCalibrationEvaluato
 
 const buildEvent = (status: SignificantEvent['status']): SignificantEvent => ({
   '@timestamp': '2026-09-27T00:00:00.000Z',
-  event_uuid: `event-${status}`,
   event_id: `event-${status}`,
   title: `Event ${status}`,
   summary: `Event is ${status}`,
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.5,
   stream_names: ['logs-test'],
   status,
@@ -70,25 +69,26 @@ describe.each(evaluatorFactories)('%s', (_name, createEvaluator) => {
     await expect(result).resolves.toEqual({
       score: null,
       label: 'unavailable',
-      explanation: 'No open significant events to evaluate',
+      explanation: 'No active significant events to evaluate',
     });
     expect(criteriaFn).not.toHaveBeenCalled();
     expect(judgeEvaluate).not.toHaveBeenCalled();
   });
 
-  it('skips when all significant events are closed or dismissed', async () => {
-    const { result, criteriaFn, judgeEvaluate } = runEvaluation([
-      buildEvent('closed'),
-      buildEvent('dismissed'),
-    ]);
+  it('skips when all significant events are inactive', async () => {
+    const { result, criteriaFn, judgeEvaluate } = runEvaluation([buildEvent('inactive')]);
 
-    expect((await result).score).toBeNull();
+    await expect(result).resolves.toEqual({
+      score: null,
+      label: 'unavailable',
+      explanation: 'No active significant events to evaluate',
+    });
     expect(criteriaFn).not.toHaveBeenCalled();
     expect(judgeEvaluate).not.toHaveBeenCalled();
   });
 
-  it('invokes the criteria evaluator when at least one significant event is open', async () => {
-    const significantEvents = [buildEvent('closed'), buildEvent('open')];
+  it('invokes the criteria evaluator when at least one significant event is active', async () => {
+    const significantEvents = [buildEvent('inactive'), buildEvent('active')];
     const { result, criteriaFn, judgeEvaluate } = runEvaluation(significantEvents);
 
     await expect(result).resolves.toMatchObject({ score: 0.75, explanation: 'judged' });

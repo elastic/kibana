@@ -20,10 +20,10 @@ type CalibrationCriteriaFn = CreateScenarioCriteriaLlmEvaluatorOptions<
   DiscoveryAgentOutput
 >['criteriaFn'];
 
-const skipWhenNoOpenEvents = (output: DiscoveryAgentOutput): string | undefined =>
-  output.significantEvents.some(({ status }) => status === 'open')
+const skipWhenNoActiveEvents = (output: DiscoveryAgentOutput): string | undefined =>
+  output.significantEvents.some(({ status }) => status === 'active')
     ? undefined
-    : 'No open significant events to evaluate';
+    : 'No active significant events to evaluate';
 
 const createCalibrationEvaluator = (
   name: string,
@@ -34,7 +34,7 @@ const createCalibrationEvaluator = (
     name,
     criteria,
     criteriaFn,
-    skipWhen: skipWhenNoOpenEvents,
+    skipWhen: skipWhenNoActiveEvents,
   });
 
 const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
