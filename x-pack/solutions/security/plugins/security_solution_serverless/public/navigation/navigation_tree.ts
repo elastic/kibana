@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
@@ -25,35 +26,37 @@ export const createNavigationTree = async (
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
+  const agentBuilderNavAtTop = await firstValueFrom(
+    services.featureFlags.getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
   );
   const agentBuilderLink = {
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 
   return {
     body: [
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      contextEngineLink,
+      // Context Engine follows Agent Builder wherever it renders; it no longer has a
+      // fixed top position.
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [contextEngineLink] : []),
+      ...(!showAgentBuilder ? [contextEngineLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // PND body (nodes omitted when xpack.pnd.enabled is false)
-      ...defaultNavigationTree.pnd(),
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
+      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.pndSecondary(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -68,6 +71,7 @@ export const createNavigationTree = async (
       ...getWorkflowsNavPanel(services),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
@@ -79,9 +83,7 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -151,7 +153,7 @@ export const createNavigationTree = async (
         title: i18nStrings.devTools,
         icon: 'code',
       },
-      createManagementFooterItemsTree(services, chatExperience),
+      createManagementFooterItemsTree(chatExperience),
     ],
   };
 };

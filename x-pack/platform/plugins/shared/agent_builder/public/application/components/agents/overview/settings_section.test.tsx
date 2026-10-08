@@ -39,6 +39,7 @@ const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
           currentInstructions=""
           showWorkflowSection
           workflowIds={[]}
+          postExecutionWorkflowIds={[]}
           canEditAgent
           onOpenEditFlyout={jest.fn()}
           agentId={AGENT_ID}

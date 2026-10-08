@@ -17,8 +17,8 @@ import type {
 import {
   DEFAULT_MITRE_FRAMEWORK,
   DEFAULT_MITRE_ENTITY_STATUS,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
 } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../../saved_objects';
 import { buildKqlFilter, getEmptyMitreEntityCollection } from '../../utils';
 import { resolveLatestVersion } from '../resolve_latest_version';
 import { validateMitreEntity } from '../../mitre_entity_validation';
@@ -47,12 +47,12 @@ export const list = async ({
   }
 
   // Fetch all entities in a single page. Each MITRE enterprise dataset has less than 1000 entities
-  // (873 for ATT&CK enterprise 19.1). 10,000 is a generous ceiling for future versions and frameworks.
+  // (873 for ATT&CK enterprise 19.2). 10,000 is a generous ceiling for future versions and frameworks.
   const findResponse = await savedObjectsRepository.find<MitreEntity>({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],
     perPage: 10000,
-    sortField: 'id',
+    sortField: 'name',
     sortOrder: 'asc',
     filter: buildKqlFilter({ framework, frameworkVersion, types, status }),
   });
@@ -75,6 +75,10 @@ export const list = async ({
         break;
     }
   }
+
+  // Tactic order follows matrix-position definition, techniques and subtechniques stay sorted by name as
+  // they are also defined that way within MITRE
+  tactics.sort((a, b) => a.position - b.position);
 
   return { framework, frameworkVersion, tactics, techniques, subtechniques };
 };

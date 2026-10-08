@@ -42,8 +42,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('bootstraps prebuilt rules by installing required packages from EPR', async () => {
-      await retryService.tryWithRetries(
-        'initializeSecuritySolution',
+      await retryService.tryForTime(
+        60000 * 10,
         async () => {
           await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
@@ -71,11 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           });
         },
-        {
-          retryCount: 10,
-          retryDelay: 5000,
-          timeout: 60000 * 10, // total timeout applied to all attempts altogether, 10 mins
-        }
+        { description: 'initializeSecuritySolution', retryDelay: 5000 }
       );
     });
 

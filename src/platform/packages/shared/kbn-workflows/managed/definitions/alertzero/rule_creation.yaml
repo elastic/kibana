@@ -1,0 +1,315 @@
+version: "1"
+name: Detection Rule Creation Worker
+description: >
+  Drafts an ES|QL detection rule for a reported gap, previews it, and records the
+  draft as a proposal on the caller's investigation. The rule is created disabled only
+  once an analyst approves, under the approver's identity.
+enabled: true
+tags:
+  - security
+  - detection-rule-creation
+settings:
+  # This run parks in WAITING_FOR_CHILD while the proposal gate holds the decision,
+  # and the engine's default 6h workflow timeout would cancel the draft under the
+  # analyst. So this must stay above the gate's own ceiling of `168h` (a 72h
+  # decision window, a second 72h for a proposal re-parked just before its
+  # deadline, plus margin). A test pins the relationship.
+  timeout: "176h"
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        technique:
+          type: string
+          maxLength: 64
+          description: MITRE ATT&CK technique id the new rule should cover.
+        gap_description:
+          type: string
+          maxLength: 2000
+          description: Detection gap the new rule should cover.
+        evidence:
+          type: string
+          maxLength: 4000
+          description: Hunt findings or event examples supporting the gap.
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence in the detection gap from 0 to 1.
+        preview_invocation_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+          description: Rule executions the preview simulates.
+        investigation_id:
+          type: string
+          maxLength: 512
+          description: >-
+            Investigation the proposal is recorded on. The caller opened it for the gap,
+            so the analyst sees a single record whichever route the gap takes.
+      required: [investigation_id]
+      additionalProperties: false
+outputs:
+  - name: created
+    type: boolean
+  - name: reviewed
+    type: boolean
+  - name: decision
+    type: string
+  - name: rule_name
+    type: string
+  - name: skip_reason
+    type: string
+steps:
+  - name: draft_creation
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_reasoning
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_creation
+    aggregate-by: alertzero_parent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        # detection-rule-edit calls security.find_rules, an inline tool of
+        # find-security-rules, when it looks up an existing rule.
+        skill_ids:
+          - detection-rule-edit
+          - find-security-rules
+      message: |-
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
+        security.create_detection_rule to create a new ES|QL rule draft now. The
+        supplied context is sufficient; do not ask a follow-up question.
+
+        ATT&CK technique: {{ inputs.technique }}
+        Detection gap: {{ inputs.gap_description }}
+        Evidence: {{ inputs.evidence }}
+        Confidence: {{ inputs.confidence }}
+
+        Echo the tool's returned rule fields under "rule" and the attachment
+        metadata alongside it. Never return id or rule_id. If the tool did not
+        return a rule, for example because the data source does not exist, do
+        not invent one: return empty strings for name, description, query and
+        attachment_id, give every other rule field the plainest value its type
+        allows (language and type "esql", severity "low", risk_score 0, empty
+        strings for interval, from and to, empty lists for threat and tags),
+        and give the reason in one sentence under "reason". Leave "reason"
+        empty when the tool returned a rule.
+
+        Write the name, the description and the reason in ASD-STE100 Simplified
+        Technical English.
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          rule:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              query:
+                type: string
+              language:
+                type: string
+                enum: [esql]
+              type:
+                type: string
+                enum: [esql]
+              interval:
+                type: string
+              from:
+                type: string
+              to:
+                type: string
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+              risk_score:
+                # Integer, as the detection engine's own `RiskScore` is; the create
+                # action rejects a fractional score before it reaches an analyst.
+                type: integer
+                minimum: 0
+                maximum: 100
+              threat:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              tags:
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+              - description
+              - query
+              - language
+              - type
+              - interval
+              - from
+              - to
+              - severity
+              - risk_score
+              - threat
+              - tags
+          attachment_id:
+            type: string
+          attachment_version:
+            type: number
+          reason:
+            type: string
+            description: >-
+              Why the tool returned no rule, in one sentence. Empty when it returned one.
+        required:
+          - rule
+          - attachment_id
+
+  # A draft missing its query, name, description or attachment is not reviewable, so
+  # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
+  # open. When the tool built nothing the prompt asks for exactly those four empty,
+  # and plain values everywhere else so the structured output still validates. The
+  # create action requires a name and a description, so such a draft can never be
+  # created: proposing it fails the run instead of asking the analyst anything
+  # answerable. Step `if` cannot group with parentheses, so the compound test lives
+  # here as a flag.
+  - name: draft_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_creation.output.structured_output.rule.query != null
+          and steps.draft_creation.output.structured_output.rule.query != ''
+          and steps.draft_creation.output.structured_output.rule.name != null
+          and steps.draft_creation.output.structured_output.rule.name != ''
+          and steps.draft_creation.output.structured_output.rule.description != null
+          and steps.draft_creation.output.structured_output.rule.description != ''
+          and steps.draft_creation.output.structured_output.attachment_id != null
+          and steps.draft_creation.output.structured_output.attachment_id != '' }}
+
+  - name: preview_creation
+    type: workflow.execute
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      workflow-id: system-security-rule-preview
+      run-as-mode: inherit
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+          description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
+          query: "{{ steps.draft_creation.output.structured_output.rule.query }}"
+          language: esql
+          type: esql
+          interval: "{{ steps.draft_creation.output.structured_output.rule.interval }}"
+          from: "{{ steps.draft_creation.output.structured_output.rule.from }}"
+          to: "{{ steps.draft_creation.output.structured_output.rule.to }}"
+          severity: "{{ steps.draft_creation.output.structured_output.rule.severity }}"
+          risk_score: "${{ steps.draft_creation.output.structured_output.rule.risk_score }}"
+          threat: "${{ steps.draft_creation.output.structured_output.rule.threat }}"
+          tags: "${{ steps.draft_creation.output.structured_output.rule.tags }}"
+          invocationCount: "${{ inputs.preview_invocation_count }}"
+          timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  # The draft lives as an attachment in the agent's own conversation, which stays
+  # opaque to the analyst. Copy it by value onto the investigation so the rule the
+  # proposal asks about is right next to the decision.
+  - name: attach_draft
+    type: ai.attachment.add
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      id: "rule-draft"
+      type: security.rule
+      data:
+        text: "{{ steps.draft_creation.output.structured_output.rule | json }}"
+        attachmentLabel: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      description: "Drafted rule for the detection gap: {{ steps.draft_creation.output.structured_output.rule.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Only a draft the analyst can inspect on the investigation is proposed. The
+  # proposal comment shows a few fields, but the action creates the whole body,
+  # schedule, tags and threat included. When the copy fails nothing is proposed and
+  # `reviewed` stays false, so the caller keeps the gap open.
+  - name: proposal_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_ready.output.ok == true
+          and steps.attach_draft.error == null }}
+
+  # The proposal gate records the draft on the investigation, parks on the
+  # analyst's decision for up to 72h, and on approval runs the create action as
+  # the approver with the drafted rule as its input. When nobody answers the gate
+  # settles the proposal as `expired` and completes without a decision, so the
+  # caller keeps the gap open. No on-failure: a gate that fails outright fails
+  # this run, and the caller sees no decision either. The caller owns the
+  # investigation, so it also decides when it closes.
+  - name: propose_creation
+    type: workflow.execute
+    if: "${{ steps.proposal_ready.output.ok == true }}"
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "{{ inputs.investigation_id }}"
+        comment: |-
+          **Create a new ES|QL detection rule for this gap**
+
+          **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
+          {{ steps.draft_creation.output.structured_output.rule.description }}
+
+          ```esql
+          {{ steps.draft_creation.output.structured_output.rule.query }}
+          ```
+
+          **Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+
+          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
+          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
+
+          **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
+
+          **On approval**
+          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
+        actionWorkflowId: system-alertzero-action-create-rule
+        actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
+        impact: low
+        confidence: medium
+        # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
+        autoApprove: false
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      # `succeeded` means the create action completed inside the gate. A create that
+      # fails fails the action, and the gate re-parks a fresh proposal rather than
+      # reporting success, so the status is the mutation evidence here. Re-finding the
+      # rule by name would only add a read that can fail and make the caller propose a
+      # duplicate.
+      created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
+      # A decision either way. An expired gate is neither, and a draft that never
+      # reached the gate was reviewed by nobody; both leave the caller's gap open.
+      reviewed: >-
+        ${{ steps.propose_creation.output.decision == 'approved'
+          or steps.propose_creation.output.decision == 'dismissed' }}
+      decision: "{{ steps.propose_creation.output.decision }}"
+      rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      # Why nothing was proposed, so a gap that keeps coming back can be explained
+      # without opening the agent conversation. Empty when the draft reached the gate.
+      skip_reason: >-
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

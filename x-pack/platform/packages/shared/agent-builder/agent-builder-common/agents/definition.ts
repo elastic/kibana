@@ -128,6 +128,11 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
+   */
+  post_execution_workflow_ids?: string[];
+
+  /**
    * Optional list of plugin IDs assigned to this agent.
    * Skills contributed by these plugins will be available to the agent during execution.
    */
@@ -147,14 +152,30 @@ export interface AgentConfiguration {
    * the accuracy and token efficiency.
    * */
   ai_indices?: string[];
+
+  /**
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
+   */
+  subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
 }
+
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<AgentConfiguration, 'inference_feature_id'>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<AgentConfigurationInput>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.

@@ -1,5 +1,5 @@
 {
-  "sha1": "a726bd68c7f730f948d793e2236076891fdc68b2",
+  "sha1": "b8181541e1a1f9b1e2c6c196c31108aed016c72e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_ui/ui/tests/enrollment_token.spec.ts",
-        "line": 34,
+        "line": 37,
         "column": 42
       }
     }

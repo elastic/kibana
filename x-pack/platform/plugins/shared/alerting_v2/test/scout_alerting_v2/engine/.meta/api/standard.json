@@ -1,9 +1,121 @@
 {
-  "sha1": "cf457e7bc8fdebe63e8debbecbf568722e224d76",
+  "sha1": "1ab3799aae20cc537987ab0f886afa4c670902d8",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "af81b6bb218cc8d-c5e946cce3fe120",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: installs the managed ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-4000966590f5848",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: index template sets index.final_pipeline at the current version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 55,
+        "column": 40
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-a89788bb7207aef",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: stamps timestamp on writes that omit it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 61,
+        "column": 33
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-f808b0e5811f97a",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: every backing index has index.final_pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 74,
+        "column": 17
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-e3aa73ad9514120",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: installs the managed ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-acfd1b25206c18e",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: index template sets index.final_pipeline at the current version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 55,
+        "column": 40
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-97fdad4fbe64d37",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: stamps timestamp on writes that omit it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 61,
+        "column": 33
+      }
+    },
+    {
+      "id": "af81b6bb218cc8d-e34b13e4105d8eb",
+      "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: every backing index has index.final_pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "line": 74,
+        "column": 17
+      }
+    },
     {
       "id": "80022d138baddea-0f1c065c42b9c1b",
       "title": "End-to-end (executor -> director -> dispatcher) a breaching rule produces a fire action via the full end-to-end",
@@ -28,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/end_to_end.spec.ts",
-        "line": 113,
+        "line": 110,
         "column": 27
       }
     },
@@ -84,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 369,
+        "line": 371,
         "column": 27
       }
     },
@@ -322,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 64,
-        "column": 30
+        "line": 70,
+        "column": 5
       }
     },
     {
@@ -336,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 99,
-        "column": 14
+        "line": 106,
+        "column": 19
       }
     },
     {
@@ -350,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 169,
-        "column": 14
+        "line": 174,
+        "column": 19
       }
     },
     {
@@ -364,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 201,
-        "column": 9
+        "line": 209,
+        "column": 14
       }
     },
     {
@@ -378,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 267,
+        "line": 273,
         "column": 14
       }
     },
@@ -392,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 324,
-        "column": 17
+        "line": 330,
+        "column": 9
       }
     },
     {
@@ -406,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 397,
-        "column": 14
+        "line": 401,
+        "column": 80
       }
     },
     {
@@ -420,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 455,
-        "column": 24
+        "line": 461,
+        "column": 18
       }
     },
     {
@@ -434,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 266,
+        "line": 264,
         "column": 6
       }
     },
@@ -448,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 285,
+        "line": 283,
         "column": 16
       }
     },
@@ -462,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 300,
+        "line": 298,
         "column": 16
       }
     },
@@ -476,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 311,
+        "line": 309,
         "column": 1
       }
     },
@@ -490,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 326,
+        "line": 324,
         "column": 16
       }
     },
@@ -504,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 336,
+        "line": 334,
         "column": 10
       }
     },
@@ -518,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/telemetry.spec.ts",
-        "line": 171,
-        "column": 20
+        "line": 168,
+        "column": 12
       }
     }
   ]

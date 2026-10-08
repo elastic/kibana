@@ -10,7 +10,7 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -22,16 +22,24 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
+export interface EvalsSuiteSpecModelGroup {
+  files: string[];
+  models?: string[];
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  specModelGroups?: EvalsSuiteSpecModelGroup[];
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -149,11 +157,10 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
- * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
- * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
- * stops merging segments. These steps spell out their own agent block, so the repo-wide default
- * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
- * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
+ * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
+ * inherit the repo-wide agent defaults. `undefined` uses the agent image default; set a number
+ * (here or in `DEFAULT_AGENT_IMAGE_CONFIG`) to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml` in sync.
  */
 const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
 
@@ -206,6 +213,14 @@ function buildEvalsYaml({
       const evalServerConfigSetEnv = suite.serverConfigSet
         ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
+      const evalScoutTargetEnv = [
+        ...(suite.scoutArch
+          ? [`          EVAL_SCOUT_ARCH: ${toBuildkiteYamlString(suite.scoutArch)}`]
+          : []),
+        ...(suite.scoutDomain
+          ? [`          EVAL_SCOUT_DOMAIN: ${toBuildkiteYamlString(suite.scoutDomain)}`]
+          : []),
+      ];
       return [
         `      - label: ${toBuildkiteYamlString(label)}`,
         `        key: ${key}`,
@@ -219,13 +234,14 @@ function buildEvalsYaml({
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         ...(evalServerConfigSetEnv ? [evalServerConfigSetEnv] : []),
+        ...evalScoutTargetEnv,
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
+        ...(EVAL_AGENT_DISK_SIZE_GB ? [`          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`] : []),
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,

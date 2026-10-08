@@ -27,6 +27,13 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
+ * When true, all `kibana.*` steps use Core `http.selfClient`.
+ * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
+ */
+export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
+  'workflows.kibanaRequest.coreSelfClientEnabled';
+
+/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
@@ -38,7 +45,7 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 
 /**
  * Global Advanced Setting gating the global Workflow Executions view
- * (`/app/workflows/executions`).
+ * (`/app/workflows/executions`) and the execution flyout on workflow detail.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
  * readable from any browser plugin that consumes the workflows UI without
@@ -48,11 +55,24 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
   'workflowsManagement:globalExecutionsView:enabled';
 
 /**
+ * Gates the failed-step error panel "Diagnose with AI Agent" handoff.
+ * Package assembly and CTA wiring ship regardless; default off until rollout.
+ */
+export const WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID =
+  'workflows:executionFlyout:aiDiagnose:enabled';
+
+/**
  * Max length for YAML `connector-id` (triggers, steps, HITL channels) and reported
  * connector ids. Covers Actions saved-object ids, user-friendly aliases, and HITL
  * connector names.
  */
 export const CONNECTOR_ID_MAX_LENGTH = 512;
+
+/**
+ * Explicit trigger binding for every connector instance of the same connector event type.
+ * Must be quoted in YAML (`"*"`); unquoted `*` is YAML alias syntax.
+ */
+export const ALL_CONNECTOR_IDS = '*';
 
 /**
  * Upper bound on a KQL condition (step `if` and trigger `on.condition`).
@@ -75,6 +95,17 @@ export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-sys
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+
+/**
+ * Why the workflow editor cannot apply changes. The editor sends it on the
+ * `workflow.yaml` attachment so the agent does not offer edits the user cannot save.
+ */
+export const WORKFLOW_EDITOR_READ_ONLY_REASONS = [
+  'executions_tab',
+  'managed',
+  'no_permission',
+] as const;
+export type WorkflowEditorReadOnlyReason = (typeof WORKFLOW_EDITOR_READ_ONLY_REASONS)[number];
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML

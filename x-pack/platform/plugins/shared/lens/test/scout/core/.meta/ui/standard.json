@@ -1,5 +1,5 @@
 {
-  "sha1": "22d544cc064d8c4e85369f4af0d8e8103d8d5f24",
+  "sha1": "50ecc047cafbcd64c839c0c76b8babd9e2612947",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -39,7 +39,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 52,
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-e4cbd64875404d1",
+      "title": "Lens Convert to ES|QL converts eligible data layers and preserves annotation and reference layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 112,
+        "column": 13
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-271977c54caef04",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button when any data layer is unsupported",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 160,
         "column": 5
       }
     },
@@ -52,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 81,
+        "line": 168,
         "column": 16
       }
     },
@@ -65,8 +91,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 95,
-        "column": 11
+        "line": 180,
+        "column": 18
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-eb851498a13608d",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button when the chart has query-based annotations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 186,
+        "column": 23
       }
     },
     {

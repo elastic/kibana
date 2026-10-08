@@ -8,7 +8,25 @@
  */
 
 import type { RestEndpointMethodTypes } from '@octokit/rest';
-import { areChangesSkippable, doAnyChangesMatch } from './github';
+import {
+  areChangesSkippable,
+  doAnyChangesMatch,
+  getGithubClient,
+  KIBANA_COMMENT_SIGIL,
+  upsertComment,
+} from './github.ts';
+
+jest.mock('@octokit/rest', () => ({
+  Octokit: jest.fn(() => ({
+    paginate: jest.fn(),
+    issues: {
+      listComments: jest.fn(),
+      createComment: jest.fn(),
+      updateComment: jest.fn(),
+      deleteComment: jest.fn(),
+    },
+  })),
+}));
 
 describe('github', () => {
   const getMockChangedFile = (filename: string, previousFilename = '') => {
@@ -127,6 +145,50 @@ describe('github', () => {
 
         expect(execute).toEqual(true);
       });
+    });
+  });
+
+  describe('upsertComment', () => {
+    const client = getGithubClient();
+    const paginate = jest.mocked(client.paginate);
+    const { createComment, updateComment, deleteComment } = jest.mocked(client.issues);
+    const marker = `<!-- ${KIBANA_COMMENT_SIGIL}:ctx -->`;
+    const upsert = (opts: { clearPrevious: boolean; createIfMissing?: boolean }) =>
+      upsertComment({ commentBody: 'new', commentContext: 'ctx', ...opts }, 'elastic', 'kibana', 1);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('posts a comment when there is none', async () => {
+      paginate.mockResolvedValue([]);
+
+      await upsert({ clearPrevious: false });
+
+      expect(createComment).toHaveBeenCalledWith(
+        expect.objectContaining({ issue_number: 1, body: `${marker}\nnew` })
+      );
+    });
+
+    it('posts nothing when there is no comment and createIfMissing is false', async () => {
+      paginate.mockResolvedValue([]);
+
+      await upsert({ clearPrevious: false, createIfMissing: false });
+
+      expect(createComment).not.toHaveBeenCalled();
+      expect(updateComment).not.toHaveBeenCalled();
+    });
+
+    it('updates an existing comment in place when createIfMissing is false', async () => {
+      paginate.mockResolvedValue([{ id: 7, body: `${marker}\nold` }]);
+
+      await upsert({ clearPrevious: false, createIfMissing: false });
+
+      expect(updateComment).toHaveBeenCalledWith(
+        expect.objectContaining({ comment_id: 7, body: `${marker}\nnew` })
+      );
+      expect(deleteComment).not.toHaveBeenCalled();
+      expect(createComment).not.toHaveBeenCalled();
     });
   });
 });

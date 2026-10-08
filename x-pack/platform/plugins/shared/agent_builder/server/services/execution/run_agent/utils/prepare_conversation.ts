@@ -6,22 +6,16 @@
  */
 
 import type {
-  CompactionSummary,
-  ConversationAction,
+  ConversationEvent,
   ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
   MetadataFieldValue,
-  TimelineEvent,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
-import { createBadRequestError, TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, isTimelineEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  getLatestVersion,
-  getContentKey,
-  hashContent,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
   AttachmentResolveContext,
@@ -30,29 +24,34 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
+import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
+  ContextTimelineEvent,
+  ProcessedCustomEvent,
   ProcessedTimelineEvent,
   ProcessedUserMessageEvent,
-  TimelineRound,
 } from './context_timeline';
-import { groupTimelineRounds } from './context_timeline';
+import {
+  groupTimelineRounds,
+  groupTimelineEntries,
+  isTimelineCustomEvent,
+  isTimelineRound,
+} from './context_timeline';
 
 export interface ProcessedConversation {
   /**
    * The agent-context timeline: the previous rounds' events in order, with each `user_message`
-   * payload processed. Compaction drops the events of summarized rounds.
+   * payload processed. Never trimmed: what a compaction summary covers is hidden at render time.
    */
   timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachmentStateManager: AttachmentStateManager;
-  /** Compaction summary covering older rounds that were replaced by this summary */
-  compactionSummary?: CompactionSummary;
   /** Persistent sub-agent roster */
-  subagentRosterFallback?: Record<string, string>;
+  subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
    * Deserialized metadata from the active conversation template.
    * Populated from `conversation.metadata` at prepare time so prompt factories
@@ -61,125 +60,26 @@ export interface ProcessedConversation {
   metadata?: Record<string, MetadataFieldValue>;
   /** ID of the template applied to this conversation, used to look up field definitions. */
   template_id?: string;
+  /**
+   * Id of the paused round this run resumes. Only that round is left out of the history; a paused
+   * round the run does not resume is rendered as history.
+   */
+  resumedRoundId?: string;
 }
-
-/**
- * Promote legacy per-round attachments into conversation-level versioned attachments.
- **/
-const mergeInputAttachmentsIntoAttachmentState = async (
-  attachmentStateManager: AttachmentStateManager,
-  attachmentContentByKey: Map<string, string>,
-  inputs: AttachmentInput[],
-  options: {
-    updateOriginSnapshot?: boolean;
-    resolveContext: AttachmentResolveContext;
-    validateContext?: AttachmentValidateContext;
-  }
-): Promise<void> => {
-  if (inputs.length === 0) return;
-
-  for (const input of inputs) {
-    // Prefer stable IDs (if provided)
-    if (input.id) {
-      const existing = attachmentStateManager.getAttachmentRecord(input.id);
-      if (existing) {
-        // Skip validate() when content is unchanged
-        const dataUnchanged =
-          input.data !== undefined &&
-          getLatestVersion(existing)?.content_hash === hashContent(input.data);
-
-        await attachmentStateManager.update(
-          input.id,
-          {
-            ...(dataUnchanged ? {} : { data: input.data }),
-            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-          },
-          ATTACHMENT_REF_ACTOR.user,
-          options.validateContext
-        );
-        if (options?.updateOriginSnapshot && existing.origin !== undefined) {
-          await attachmentStateManager.updateOrigin(
-            input.id,
-            existing.origin,
-            ATTACHMENT_REF_ACTOR.user
-          );
-        }
-        continue;
-      }
-    }
-
-    const contentKey = getContentKey(input, 'unknown');
-    if (attachmentContentByKey.has(contentKey)) {
-      // already present (same content), nothing to do
-      continue;
-    }
-
-    const created = await attachmentStateManager.add(
-      {
-        ...(input.id ? { id: input.id } : {}),
-        type: input.type,
-        data: input.data,
-        ...(input.origin !== undefined ? { origin: input.origin } : {}),
-        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-        ...(input.description !== undefined ? { description: input.description } : {}),
-        ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
-      },
-      ATTACHMENT_REF_ACTOR.user,
-      options.resolveContext,
-      options.validateContext
-    );
-
-    const latest = getLatestVersion(created);
-    if (latest) {
-      attachmentContentByKey.set(`${created.type}:${latest.content_hash}`, created.id);
-    }
-  }
-};
-
-/**
- * Prepare the rounds and input based on the action.
- * - 'regenerate': Strip the last round and use its input for re-execution
- * - Default: Use rounds and input as provided
- */
-const prepareForAction = ({
-  action,
-  rounds,
-  nextInput,
-}: {
-  action?: ConversationAction;
-  rounds: TimelineRound[];
-  nextInput: ConverseInput;
-}): { effectiveRounds: TimelineRound[]; effectiveNextInput: ConverseInput } => {
-  if (action === 'regenerate') {
-    if (rounds.length === 0) {
-      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
-    }
-    const lastRound = rounds[rounds.length - 1];
-    // Faithfully replay the original request by copying the full stored input shape
-    return {
-      effectiveRounds: rounds.slice(0, -1),
-      effectiveNextInput: { ...lastRound.userMessage.data },
-    };
-  }
-
-  return { effectiveRounds: rounds, effectiveNextInput: nextInput };
-};
 
 export const prepareConversation = async ({
   timeline,
   nextInput,
   nextInputAuthor,
   context,
-  action,
   metadata,
   templateId,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
-  timeline: TimelineEvent[];
+  timeline: ContextTimelineEvent[];
   nextInput: ConverseInput;
   nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
-  action?: ConversationAction;
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
 }): Promise<ProcessedConversation> => {
@@ -193,37 +93,33 @@ export const prepareConversation = async ({
     request: context.request,
   };
 
-  // Pre-populate content keys from already-known attachments to detect duplicates.
-  const attachmentContentByKey = new Map<string, string>();
-  for (const existing of attachmentStateManager.getAll()) {
-    const latest = getLatestVersion(existing);
-    if (latest) {
-      attachmentContentByKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
-    }
-  }
+  const effectiveRounds = groupTimelineRounds(timeline);
+  const effectiveNextInput = nextInput;
 
-  // Handle regenerate action: use last round's input and strip it from the timeline
-  const { effectiveRounds, effectiveNextInput } = prepareForAction({
-    action,
-    rounds: groupTimelineRounds(timeline),
-    nextInput,
-  });
-
-  // Rounds are processed in order: migrating a round's legacy attachments into the state manager
-  // determines which refs later rounds (and the next input) resolve to. Events outside a round
-  // (e.g. a run that never terminated) carry no context and are dropped.
+  // Process complete executions, independent messages and custom events in order so attachment
+  // versions resolve consistently. Incomplete execution inputs remain outside the model history.
   const processedInputs: ProcessedRoundInput[] = [];
   const processedTimeline: ProcessedTimelineEvent[] = [];
-  for (const round of effectiveRounds) {
+  const includedRounds = new Set(effectiveRounds.map((round) => round.id));
+  for (const round of groupTimelineEntries(timeline)) {
+    if (isTimelineCustomEvent(round)) {
+      const processedEvent = await processCustomEvent({ event: round.event, context });
+      if (processedEvent) {
+        processedTimeline.push(processedEvent);
+      }
+      continue;
+    }
+    if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
     attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
     if (input.attachments && input.attachments.length > 0) {
-      await mergeInputAttachmentsIntoAttachmentState(
-        attachmentStateManager,
-        attachmentContentByKey,
-        input.attachments,
-        { resolveContext, validateContext }
-      );
+      await mergeAttachmentInputs({
+        stateManager: attachmentStateManager,
+        inputs: input.attachments,
+        actor: ATTACHMENT_REF_ACTOR.user,
+        resolveContext,
+        validateContext,
+      });
     }
     const attachmentRefs = mergeAttachmentRefs(
       input.attachment_refs,
@@ -240,23 +136,31 @@ export const prepareConversation = async ({
       ...round.userMessage,
       data: processedInput,
     };
-    for (const event of round.events) {
-      if (event === round.userMessage) {
+    // A round carries its user message and its run; a standalone message only itself.
+    const events = isTimelineRound(round) ? round.events : [round.userMessage];
+
+    for (const event of events) {
+      if (event.id === round.userMessage.id) {
         processedTimeline.push(processedUserMessage);
-      } else if (event.type !== TimelineEventType.userMessage) {
+      } else if (isTimelineEvent(event) && event.type !== TimelineEventType.userMessage) {
         processedTimeline.push(event);
       }
     }
   }
 
   attachmentStateManager.clearAccessTracking();
+  // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
+  // only the next input's attachments surface as chat_input attachment events.
+  attachmentStateManager.clearChanges();
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
-  await mergeInputAttachmentsIntoAttachmentState(
-    attachmentStateManager,
-    attachmentContentByKey,
-    nextInputAttachments,
-    { updateOriginSnapshot: true, resolveContext, validateContext }
-  );
+  await mergeAttachmentInputs({
+    stateManager: attachmentStateManager,
+    inputs: nextInputAttachments,
+    actor: ATTACHMENT_REF_ACTOR.user,
+    resolveContext,
+    validateContext,
+    updateOriginSnapshot: true,
+  });
   const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();
   const mergedNextInputRefs = mergeAttachmentRefs(
     effectiveNextInput.attachment_refs,
@@ -305,6 +209,44 @@ export const prepareConversation = async ({
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
+};
+
+/**
+ * Resolves a custom event's LLM representation through its registered type definition. Events
+ * whose type is unknown (logged) or defines no `format` (by design) are left out of the agent
+ * context; a `format` that throws is logged and skipped, so third-party code cannot sink the round.
+ */
+const processCustomEvent = async ({
+  event,
+  context,
+}: {
+  event: ConversationEvent;
+  context: AgentHandlerContext;
+}): Promise<ProcessedCustomEvent | undefined> => {
+  const definition = context.conversationEvents?.getDefinition(event.type);
+  if (!definition) {
+    context.logger.debug(
+      `Skipping conversation event "${event.id}": type "${event.type}" is not registered`
+    );
+    return undefined;
+  }
+  // A type without `format` opts out of the agent context by design: nothing to report.
+  if (!definition.format) {
+    return undefined;
+  }
+  try {
+    // The payload was validated against `definition.payloadSchema` when the event was added.
+    const representation = await definition.format(event, {
+      request: context.request,
+      spaceId: context.spaceId,
+    });
+    return { ...event, representation };
+  } catch (error) {
+    context.logger.warn(
+      `Failed to format conversation event "${event.id}" (type "${event.type}"): ${error}`
+    );
+    return undefined;
+  }
 };
 
 const prepareRoundInput = ({

@@ -23,7 +23,6 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -33,7 +32,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
 import { getRuleDetailMenu } from './get_rule_detail_menu';
@@ -63,10 +62,6 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
     },
   ];
 
-  for (const tag of rule.metadata.tags ?? []) {
-    badges.push({ label: tag, color: 'hollow' });
-  }
-
   return badges;
 };
 
@@ -74,6 +69,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const chrome = useService(CoreStart('chrome'));
@@ -85,7 +82,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
-  const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
@@ -109,7 +105,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       { id: rule.id, name: rule.metadata.name },
       {
         onSuccess: () => {
-          history.push('/');
+          rulesLocators.navigateSync({});
         },
       }
     );
@@ -223,7 +219,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       <AppHeader
         title={rule.metadata.name}
         back={{
-          href: paths.ruleList,
+          href: rulesListHref,
           label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
             defaultMessage: 'Rules',
           }),
@@ -260,7 +256,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             }
           `}
         >
-          <EuiSplitPanel.Inner grow paddingSize="none" data-test-subj="ruleDetailOverviewColumn">
+          <EuiSplitPanel.Inner
+            grow
+            paddingSize="none"
+            data-test-subj="ruleDetailOverviewColumn"
+            css={css`
+              min-inline-size: 0;
+            `}
+          >
             <EuiPanel
               hasBorder={false}
               hasShadow={false}
@@ -285,18 +288,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             data-test-subj="ruleDetailSidebarColumn"
             css={css`
               min-height: 0;
-              ${logicalCSS('padding-top', euiTheme.size.l)}
+              padding: ${euiTheme.size.l};
 
               ${largeMediaQuery} {
-                ${logicalCSS('padding-top', '0')}
                 flex-shrink: 0;
                 flex-basis: 400px;
                 min-width: 40px;
                 max-width: 500px;
                 height: 100%;
                 overflow-y: auto;
-                padding: ${euiTheme.size.l};
-                ${logicalCSS('padding-right', '0')}
                 border-left: ${euiTheme.border.thin};
               }
             `}

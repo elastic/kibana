@@ -101,7 +101,7 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
   logStreamPageState, // <-- this could be any state of the page state machine
 }) => {
   if (logStreamPageState.matches('uninitialized') || logStreamPageState.matches('loadingLogView')) {
-    return <SourceLoadingPage />;
+    return <LoadingPage />;
   } else if (logStreamPageState.matches('loadingLogViewFailed')) {
     return <ConnectedLogViewErrorPage />;
   } else if (logStreamPageState.matches('missingLogViewIndices')) {

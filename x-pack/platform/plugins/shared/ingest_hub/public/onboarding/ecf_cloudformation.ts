@@ -16,7 +16,6 @@
  * Three template families are supported, each producing its own Launch button:
  *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
  *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams
- *                                                                   (uses `S3SourceBuckets` instead of `S3Buckets`)
  *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
  *
  * Reference templates:
@@ -32,7 +31,7 @@ import type {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
 
 // ── Template filenames ────────────────────────────────────────────────────────
 
@@ -109,22 +108,28 @@ export const getEcfServiceConfigs = (
 
     // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    // Both vars are multi-value; split the comma-joined draft string into individual ARNs
-    // so each can be normalised independently (e.g. log-group `:*` suffix per ARN).
-    const splitArns = (raw: string | undefined): string[] =>
-      raw
+    // Both vars are multi-value; split the comma-joined draft string (or already-typed array
+    // after SO resume) into individual ARNs for per-ARN normalisation.
+    const splitArns = (raw: string | string[] | undefined): string[] => {
+      if (Array.isArray(raw)) return raw.map((s) => s.trim()).filter(Boolean);
+      return raw
         ? raw
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean)
         : [];
+    };
 
-    const bucketArns = enabledInputs.includes('aws-s3')
-      ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
-      : [];
-    const logGroupArns = enabledInputs.includes('aws-cloudwatch')
-      ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
-      : [];
+    // Inputs outside `ecfInputs` (e.g. WAF CloudWatch) are agent-based only: never launch them via ECF.
+    const ecfCanRoute = (input: string) => !entry.ecfInputs || entry.ecfInputs.includes(input);
+    const bucketArns =
+      enabledInputs.includes('aws-s3') && ecfCanRoute('aws-s3')
+        ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
+        : [];
+    const logGroupArns =
+      enabledInputs.includes('aws-cloudwatch') && ecfCanRoute('aws-cloudwatch')
+        ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+        : [];
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {
@@ -152,6 +157,32 @@ export const getEcfServiceConfigs = (
 const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
 
 /**
+ * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no
+ * explicit port is present. Required by the OTel ECF CloudFormation exporter configuration.
+ */
+export const ensureOtlpPort = (endpoint: string): string => {
+  try {
+    const parsed = new URL(endpoint);
+    // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
+    // Handles bracketed IPv6 ([::1]) and case-insensitive schemes (HTTPS://).
+    if (/^https?:\/\/(?:\[[^\]]+\]|[^/:[]+):\d+/i.test(endpoint)) return endpoint;
+    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    if (!port) return endpoint;
+    // URL.hostname is lowercased; use the original authority string to preserve casing.
+    // Stop at /, ?, or # so a bare query (e.g. ?token=abc) is not included in the authority.
+    const schemeEnd = endpoint.indexOf('://') + 3;
+    const afterScheme = endpoint.slice(schemeEnd);
+    const authorityEnd = afterScheme.search(/[/?#]/);
+    const originalAuthority =
+      authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
+    const rest = authorityEnd === -1 ? '' : afterScheme.slice(authorityEnd);
+    return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
+  } catch {
+    return endpoint;
+  }
+};
+
+/**
  * Builds a CloudFormation Quick Create URL for the unified multi-signal ECF template.
  *
  * The URL pre-fills:
@@ -163,7 +194,7 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  * `ElasticAPIKey` is intentionally NOT pre-filled: it is a sensitive credential that should
  * not appear in browser history or URL logs.  The user fills it in the AWS console.
  *
- * TODO: generate a dedicated Elastic API key server-side and pre-fill it (follow-up issue).
+ * TODO: generate a dedicated Elastic API key server-side and pre-fill it (ingest-dev#9519).
  *
  * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
  * @param region        AWS region for the CloudFormation stack (the global region from Step 2).
@@ -261,9 +292,8 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
 /**
  * Builds a CloudFormation Quick Create URL for the OTel multi-signal ECF template.
  *
- * The OTel template uses `S3SourceBuckets` instead of `S3Buckets` (unlike the ECS unified
- * template). All other parameters — `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share
- * the same names and semantics.
+ * Parameters — `S3Buckets`, `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share the same
+ * names and semantics as the unified template.
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled for the same security reasons as the unified
  * template: it must not appear in browser history or URL logs.
@@ -302,11 +332,10 @@ export const buildEcfOtelCloudFormationUrl = ({
   hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
-    hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+    hashParams.set('param_OTLPEndpoint', ensureOtlpPort(otlpEndpoint));
   }
-  // OTel template uses S3SourceBuckets, not S3Buckets
   if (s3BucketArns.length > 0) {
-    hashParams.set('param_S3SourceBuckets', s3BucketArns.join(','));
+    hashParams.set('param_S3Buckets', s3BucketArns.join(','));
   }
   if (logGroupArns.length > 0) {
     hashParams.set('param_CloudWatchLogGroups', logGroupArns.join(','));

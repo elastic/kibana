@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
 import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
 import type {
@@ -21,6 +21,7 @@ import {
   FlyoutHeaderCollapseProvider,
   FlyoutTabsProvider,
   FlyoutTemplateConfigProvider,
+  useFlyoutTemplateManaged,
 } from './context';
 import type { FlyoutTabDescriptor, FlyoutTabsState } from './context/tabs_context';
 import { useHeaderCollapse } from './use_header_collapse';
@@ -57,34 +58,21 @@ const resolveDefaultSelectedTabId = (
   return tabs[0]?.id;
 };
 
-/** Root component that renders Header, Body, Footer zones in template order. */
-const FlyoutTemplateRoot = ({
+/** Renders Header, Body, Footer zones in template order from fully resolved root props. */
+const FlyoutTemplateResolved = ({
   children,
-  onClose,
   size = 'm',
-  minWidth,
-  type,
-  maxWidth,
-  paddingSize,
-  ownFocus,
-  resizable,
-  onResize,
   session = 'start',
-  historyKey,
-  onActive,
   flyoutMenuProps,
-  id,
-  hasChildBackground,
-  outsideClickCloses,
-  focusTrapProps,
-  closeButtonProps,
   tabs: tabsProp,
+  tabBarProps,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
   onTabChange,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
+  ...euiFlyoutProps
 }: FlyoutTemplateProps) => {
   const htmlIdSuffix = useId().replace(/[^A-Za-z0-9_-]/g, '');
   const flyoutTitleId = useGeneratedHtmlId({ prefix: `flyoutTemplateTitle${htmlIdSuffix}` });
@@ -110,12 +98,14 @@ const FlyoutTemplateRoot = ({
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
   const bodyAttrs = bodyItem?.attributes as FlyoutBodyProps | undefined;
   const menuTitle = headerAttrs?.title;
-  const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
+  const menuTitleString =
+    headerAttrs?.titleText ?? (typeof menuTitle === 'string' ? menuTitle : undefined);
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
 
-  // Feed string titles to EUI's flyout menu for history/navigation.
+  // Feed the title text to EUI's flyout menu for history/navigation. Without it EUI falls back to a
+  // placeholder title, so a header whose title is a node needs `titleText` to be named there.
   const mergedMenuProps = {
     ...(menuTitleString !== undefined ? { title: menuTitleString } : {}),
     ...flyoutMenuProps,
@@ -184,38 +174,25 @@ const FlyoutTemplateRoot = ({
   );
 
   const tabsContextValue = useMemo<FlyoutTabsState>(
-    () => ({ tabs, selectedTabId, selectTab }),
-    [tabs, selectedTabId, selectTab]
+    () => ({ tabs, tabBarProps, selectedTabId, selectTab }),
+    [tabs, tabBarProps, selectedTabId, selectTab]
   );
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
 
   return (
     <EuiFlyout
-      onClose={onClose}
+      {...euiFlyoutProps}
       size={size}
-      minWidth={minWidth}
-      type={type}
-      maxWidth={maxWidth}
-      paddingSize={paddingSize}
-      ownFocus={ownFocus}
-      resizable={resizable}
-      onResize={onResize}
       session={session}
-      historyKey={historyKey}
-      onActive={onActive}
+      paddingSize="m"
+      data-test-subj={dataTestSubj}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
-      id={id}
-      hasChildBackground={hasChildBackground}
-      outsideClickCloses={outsideClickCloses}
-      focusTrapProps={focusTrapProps}
-      closeButtonProps={closeButtonProps}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
-      data-test-subj={dataTestSubj}
     >
-      <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
+      <FlyoutTemplateConfigProvider value={{ dataTestSubj }}>
         <FlyoutTabsProvider value={tabsContextValue}>
           <FlyoutHeaderCollapseProvider value={collapseState}>
             {headerItem && (
@@ -227,6 +204,65 @@ const FlyoutTemplateRoot = ({
         </FlyoutTabsProvider>
       </FlyoutTemplateConfigProvider>
     </EuiFlyout>
+  );
+};
+
+/**
+ * Root component. Under a managing opener the resolved props win outright, so the `id` and
+ * `session` its bookkeeping matches on cannot be contradicted here. `onClose` stays the
+ * element's own, so the declarative contract can keep requiring it, with teardown composed
+ * in behind it.
+ */
+const FlyoutTemplateRoot = (props: FlyoutTemplateProps) => {
+  const managed = useFlyoutTemplateManaged();
+  const { onClose } = props;
+  const ignoredPropNames = managed
+    ? Object.keys(props).filter(
+        (name) =>
+          name !== 'children' &&
+          name !== 'onClose' &&
+          props[name as keyof FlyoutTemplateProps] !== undefined
+      )
+    : [];
+  const ignoredPropList = ignoredPropNames.join(', ');
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' || !ignoredPropList) return;
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[FlyoutTemplate] A managed flyout ignores root props on <FlyoutTemplate>; move ${ignoredPropList} to the options passed to the opener.`
+    );
+  }, [ignoredPropList]);
+
+  // EUI routes the close button, history navigation, and cascade closes through `onClose`, and
+  // has already dropped the flyout from its manager by the time any of them arrive. Content
+  // that wraps or swallows the handler must not be able to strand the flyout, so teardown runs
+  // regardless of what it does.
+  const hasClosedRef = useRef(false);
+  const closeManaged = managed?.close;
+  const handleManagedClose = useCallback<NonNullable<FlyoutTemplateProps['onClose']>>(
+    (event) => {
+      // EUI's history-navigation detector invokes `onClose` before clearing the flag its own
+      // unmount cleanup reads, so the synchronous teardown below re-enters this handler.
+      if (hasClosedRef.current) {
+        return;
+      }
+      hasClosedRef.current = true;
+      try {
+        onClose?.(event);
+      } finally {
+        closeManaged?.();
+      }
+    },
+    [onClose, closeManaged]
+  );
+
+  return (
+    <FlyoutTemplateResolved
+      {...(managed ? { ...managed.props, onClose: handleManagedClose } : props)}
+    >
+      {props.children}
+    </FlyoutTemplateResolved>
   );
 };
 

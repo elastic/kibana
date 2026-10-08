@@ -38,4 +38,8 @@ export const profilingApiEndpoints = {
   topNFunctions: 'internal/profiling/topn/functions',
   flamechart: 'internal/profiling/flamechart',
   setupInstructions: 'internal/profiling/setup/instructions',
+  status: 'internal/profiling/status',
 } as const;
+
+// Full-resolution events data stream of the OTel profiling schema.
+export const OTEL_PROFILING_EVENTS_DATA_STREAM = 'profiling-events-all.otel-default';

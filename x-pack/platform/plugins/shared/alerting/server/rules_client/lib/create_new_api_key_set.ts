@@ -17,21 +17,30 @@ export async function createNewAPIKeySet(
     id,
     ruleName,
     username,
+    profileUid,
     shouldUpdateApiKey,
     errorMessage,
     apiKeyOwnership,
+    refresh,
   }: {
     id: string;
     ruleName: string;
     username: string | null;
+    profileUid: string | null;
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
     apiKeyOwnership?: RuleApiKeyOwnership;
+    refresh?: boolean | 'wait_for';
   }
 ): Promise<
   Pick<
     RawRule,
-    'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+    | 'apiKey'
+    | 'apiKeyOwner'
+    | 'apiKeyOwnerProfileUid'
+    | 'apiKeyCreatedByUser'
+    | 'uiamApiKey'
+    | 'uiamApiKeyExternal'
   >
 > {
   let createdAPIKey = null;
@@ -40,6 +49,7 @@ export async function createNewAPIKeySet(
     const name = generateAPIKeyName(id, ruleName);
     const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, {
       apiKeyOwnership,
+      refresh,
     });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
@@ -48,5 +58,5 @@ export async function createNewAPIKeySet(
     throw Boom.badRequest(`${message} - ${error.message}`);
   }
 
-  return apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
+  return apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey, profileUid);
 }

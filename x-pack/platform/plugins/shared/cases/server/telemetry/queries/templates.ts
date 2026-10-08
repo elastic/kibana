@@ -318,27 +318,13 @@ const buildSolutionTelemetry = ({
 };
 
 /**
- * The zeroed subject area, for the caller's flag-off path. Built from the same assembly
- * the populated path uses, so it cannot drift from the payload contract when a key is
- * added.
- */
-export const getEmptyTemplatesTelemetry = (): Omit<TemplatesTelemetry, 'featureEnabled'> => {
-  const emptyScope = () => buildSolutionTelemetry({ total: 0, totalSoftDeleted: 0 });
-
-  return { all: emptyScope(), sec: emptyScope(), obs: emptyScope(), main: emptyScope() };
-};
-
-/**
  * Snapshot of the template inventory, its field-type usage, and template adoption across
  * cases. Aggregations only — no template name, tag, author, or definition text is read.
- *
- * Reports no feature-flag state: the caller owns the flag, and only calls this when the
- * flag is on. See `collect_telemetry_data.ts`.
  */
 export const getTemplatesTelemetryData = async ({
   savedObjectsClient,
   logger,
-}: CollectTelemetryDataParams): Promise<Omit<TemplatesTelemetry, 'featureEnabled'>> => {
+}: CollectTelemetryDataParams): Promise<TemplatesTelemetry> => {
   try {
     const [inventoryRes, softDeletedRes, adoptionRes] = await Promise.all([
       getInventoryTelemetry(savedObjectsClient),

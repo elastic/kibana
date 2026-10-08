@@ -28,8 +28,13 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
-import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
-import { coreServices, shareService, dataService } from '../../services/kibana_services';
+import type { DashboardRedirect } from '../types';
+import {
+  coreServices,
+  shareService,
+  dataService,
+  searchSessionsManagementService,
+} from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -37,11 +42,11 @@ import { useShareOptions } from './share/use_share_options';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 
 export const useDashboardMenuItems = ({
-  maybeRedirect,
+  redirectTo,
   showResetChange,
   shareAction,
 }: {
-  maybeRedirect: (result?: SaveDashboardReturn) => void;
+  redirectTo: DashboardRedirect;
   showResetChange?: boolean;
   /** Used to build the menu Share item from the same action passed to App Header. */
   shareAction?: AppHeaderShareAction;
@@ -135,12 +140,8 @@ export const useDashboardMenuItems = ({
    * initiate interactive dashboard copy action
    */
   const dashboardInteractiveSave = useCallback(async () => {
-    const result = await dashboardApi.runInteractiveSave();
-    maybeRedirect(result);
-    if (result && !result.error) {
-      return result;
-    }
-  }, [maybeRedirect, dashboardApi]);
+    await dashboardApi.runInteractiveSave(redirectTo);
+  }, [redirectTo, dashboardApi]);
 
   /**
    * Save the dashboard without any UI or popups.
@@ -306,7 +307,7 @@ export const useDashboardMenuItems = ({
         iconType: 'backgroundTask',
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
-          dataService.search.showSearchSessionsFlyout({
+          searchSessionsManagementService?.openFlyout({
             appId: appId!,
             trackingProps: { openedFrom: 'background search button' },
           }),
@@ -448,7 +449,11 @@ export const useDashboardMenuItems = ({
       items.push(resetChangesMenuItem);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 
@@ -495,7 +500,11 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.export);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 

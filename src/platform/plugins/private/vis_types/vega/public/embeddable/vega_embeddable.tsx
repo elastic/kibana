@@ -10,7 +10,10 @@
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
@@ -18,8 +21,24 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import {
+  BehaviorSubject,
+  combineLatest,
+  EMPTY,
+  firstValueFrom,
+  map,
+  merge,
+  skip,
+  switchMap,
+  tap,
+} from 'rxjs';
+import {
+  FilterStateStore,
+  isOfQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -28,9 +47,11 @@ import {
   areTriggersDisabled,
   fetch$,
   getInheritedViewMode,
+  initializeStateManager,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
+  type CanCancelRequests,
   type HasEditCapabilities,
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
@@ -38,8 +59,8 @@ import {
   type PublishesDataViews,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
-  type PublishesESQLQuery,
-  type PublishesEsqlUsage,
+  type PublishesEsql,
+  type PublishesWritableUnifiedSearch,
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
@@ -48,7 +69,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -60,10 +80,15 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
-import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
+import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
+// Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
+// wait on `vega_editor_flyout` before the flyout can render.
+import { VegaEditorFlyout } from './vega_editor_flyout';
+import { openVegaEditor } from './open_vega_editor';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -86,6 +111,7 @@ interface VegaRenderInput {
  * participates in public dashboards-as-code validation and OpenAPI generation.
  */
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+  CanCancelRequests &
   HasDrilldowns &
   HasEditCapabilities &
   HasInspectorAdapters &
@@ -95,14 +121,28 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesDataLoading &
   PublishesWritableDescription &
   PublishesWritableTitle &
-  PublishesESQLQuery &
-  PublishesEsqlUsage &
+  PublishesEsql &
+  PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
-  PublishesRendered;
+  PublishesRendered & {
+    /** Returns the editor panel content for an already-open flyout. */
+    getEditPanel?: (options: {
+      ariaLabelledBy: string;
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    }) => Promise<JSX.Element | undefined>;
+  };
+
+// `toStoredFilters` drops `$state`, and the filter editor ignores edits to filters without one.
+const toPanelFilters = (filters: VegaByValueState['filters']): Filter[] | undefined =>
+  (toStoredFilters(filters) as Filter[] | undefined)?.map((filter) =>
+    filter.$state?.store ? filter : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
+  );
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
+  SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
 }
 
@@ -122,9 +162,25 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
-    const usesEsql$ = new BehaviorSubject(false);
+    const panelSearchStateManager = initializeStateManager<{
+      query?: Query | AggregateQuery;
+      filters?: Filter[];
+    }>(
+      {
+        query: toStoredQuery(initialState.query),
+        filters: toPanelFilters(initialState.filters),
+      },
+      {
+        query: undefined,
+        filters: undefined,
+      },
+      {
+        query: 'deepEquality',
+        filters: 'deepEquality',
+      }
+    );
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
-    const query$ = new BehaviorSubject<AggregateQuery | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
@@ -141,8 +197,7 @@ export const vegaEmbeddableFactory = (
           }
         }),
         tap((spec) => {
-          usesEsql$.next(spec ? specUsesEsql(spec) : false);
-          query$.next(getPublishedEsqlQuery(spec));
+          esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
         switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
@@ -159,12 +214,18 @@ export const vegaEmbeddableFactory = (
     const stateApi = initializeStateApi<VegaByValueState>({
       uuid,
       parentApi,
-      serializeState: () => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-        spec: spec$.getValue(),
-      }),
+      serializeState: () => {
+        const panelQuery = panelSearchStateManager.api.query$.getValue();
+
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
+          filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
+          spec: spec$.getValue(),
+        };
+      },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -172,75 +233,102 @@ export const vegaEmbeddableFactory = (
         spec$.pipe(
           skip(1),
           map((): void => undefined)
-        )
+        ),
+        panelSearchStateManager.anyStateChange$
       ),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
+        query: 'deepEquality',
+        filters: 'deepEquality',
         spec: 'deepEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
+        panelSearchStateManager.reinitializeState({
+          query: toStoredQuery(nextState.query),
+          filters: toPanelFilters(nextState.filters),
+        });
         spec$.next(nextState.spec);
       },
     });
+
+    const getEditPanel = async ({
+      ariaLabelledBy,
+      closeFlyout = () => {},
+      isNewPanel = false,
+    }: {
+      ariaLabelledBy: string;
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    }) => {
+      const initialSpec = spec$.getValue();
+      const initialSearch = panelSearchStateManager.getLatestState();
+      // A missing default data view shouldn't block editing.
+      const defaultDataView =
+        (await getDataViews()
+          .getDefault()
+          .catch((): null => null)) ?? undefined;
+      return (
+        <VegaEditorFlyout
+          api={api}
+          ariaLabelledBy={ariaLabelledBy}
+          SearchBar={deps.SearchBar}
+          closeFlyout={closeFlyout}
+          defaultDataView={defaultDataView}
+          initialSpec={initialSpec}
+          isNewPanel={isNewPanel}
+          onPreview={(spec) => spec$.next(spec)}
+          onSave={(spec) => spec$.next(spec)}
+          onRevert={() => {
+            if (isNewPanel && apiIsPresentationContainer(parentApi)) {
+              parentApi.removePanel(api.uuid);
+            } else {
+              spec$.next(initialSpec);
+              panelSearchStateManager.reinitializeState(initialSearch);
+            }
+          }}
+        />
+      );
+    };
 
     const api = finalizeApi({
       ...titleManager.api,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
+      ...panelSearchStateManager.api,
       ...stateApi,
       blockingError$,
       dataLoading$,
       rendered$,
-      usesEsql$,
+      esql$,
       approximationApplied$,
-      query$,
       projectRoutingOverrides$,
       dataViews$,
+      cancelRequests: (reason) => abortController.abort(reason),
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
+      getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const initialSpec = spec$.getValue();
-        openLazyFlyout({
+        openVegaEditor({
           core,
           parentApi,
           returnFocus,
-          flyoutProps: {
-            size: 'm',
-            type: 'push',
-            focusedPanelId: uuid,
-          },
-          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { VegaEditorFlyout } = await import('./vega_editor_flyout');
-            return (
-              <VegaEditorFlyout
-                ariaLabelledBy={ariaLabelledBy}
-                closeFlyout={closeFlyout}
-                initialSpec={initialSpec}
-                isNewPanel={isNewPanel}
-                onPreview={(spec) => spec$.next(spec)}
-                onSave={(spec) => spec$.next(spec)}
-                onRevert={() => {
-                  if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-                    parentApi.removePanel(api.uuid);
-                  } else {
-                    spec$.next(initialSpec);
-                  }
-                }}
-              />
-            );
-          },
+          focusedPanelId: uuid,
+          isNewPanel,
+          loadApi: async () => api,
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
       // exported JSON can be round-tripped through the REST API.
-      supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+      supportsJsonExport: await firstValueFrom(
+        core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+      ),
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
@@ -271,12 +359,22 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api)])
+    const fetchSubscription = combineLatest([
+      spec$,
+      fetch$(api),
+      panelSearchStateManager.api.query$,
+      panelSearchStateManager.api.filters$,
+    ])
       .pipe(
-        switchMap(async ([spec, data]) => {
+        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
+          // A cancelled request can still resolve with partial results, but once a newer fetch
+          // starts, that fetch owns the loading state.
+          const isCurrentFetch = () =>
+            abortController.signal === signal &&
+            (!signal.aborted || signal.reason === AbortReason.CANCELED);
 
           rendered$.next(false);
           dataLoading$.next(true);
@@ -293,14 +391,19 @@ export const vegaEmbeddableFactory = (
 
           try {
             const { createVegaRequestHandler } = await import('../async_services');
+            if (signal.aborted) {
+              if (isCurrentFetch()) rendered$.next(true);
+              return;
+            }
             const requestHandler = createVegaRequestHandler(deps.visualizationDependencies, {
               abortSignal: signal,
               inspectorAdapters,
             });
             const visData = await requestHandler({
               timeRange,
-              query: data.query as Query,
-              filters: data.filters,
+              // buildEsQuery ANDs these and ignores empty and ES|QL queries.
+              query: [data.query, panelQuery].filter(isOfQueryType),
+              filters: [...(data.filters ?? []), ...(panelFilters ?? [])],
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },
@@ -314,7 +417,7 @@ export const vegaEmbeddableFactory = (
               esqlVariables: data.esqlVariables,
             });
 
-            if (signal.aborted) {
+            if (!isCurrentFetch()) {
               return;
             }
             approximationApplied$.next(visData.approximationApplied);
@@ -325,6 +428,8 @@ export const vegaEmbeddableFactory = (
             });
           } catch (error) {
             if (signal.aborted) {
+              // A cancel is not an error; keep whatever the panel already shows.
+              if (isCurrentFetch()) rendered$.next(true);
               return;
             }
             renderInput$.next(undefined);
@@ -333,7 +438,7 @@ export const vegaEmbeddableFactory = (
             // render that never happens.
             rendered$.next(true);
           } finally {
-            if (!signal.aborted) {
+            if (isCurrentFetch()) {
               dataLoading$.next(false);
             }
           }

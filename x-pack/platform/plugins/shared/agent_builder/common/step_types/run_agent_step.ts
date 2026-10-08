@@ -188,7 +188,7 @@ export const OutputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
+      'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
     ),
   metadata: z
     .object({
@@ -217,6 +217,13 @@ export const OutputSchema = z.object({
  */
 export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
   '`aggregate-by` can only be set when `plugin-id` is also set.';
+
+/**
+ * Validation message shown when `ephemeral` is combined with `create-conversation`: a run that
+ * stores nothing cannot create a conversation.
+ */
+export const EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE =
+  '`ephemeral` cannot be combined with `create-conversation`.';
 
 /**
  * Config schema for the run agent step.
@@ -278,6 +285,16 @@ export const ConfigSchema = z
         'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
       ),
     /**
+     * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
+     * is loaded as context but not modified.
+     */
+    ephemeral: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
+      ),
+    /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
      * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
      * attribution is used.
@@ -288,6 +305,20 @@ export const ConfigSchema = z
       .optional()
       .describe(
         "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+      ),
+    'product-solution': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+      ),
+    'product-feature': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
       ),
     /**
      * Parent feature id used to roll up this step's LLM token usage under a parent feature
@@ -310,6 +341,15 @@ export const ConfigSchema = z
       .max(32)
       .optional()
       .describe('Maximum response size for this workflow step.'),
+    /**
+     * Reasoning level the model should use.
+     */
+    'reasoning-level': z
+      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+      .optional()
+      .describe(
+        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
@@ -334,6 +374,13 @@ export const ConfigSchema = z
         code: z.ZodIssueCode.custom,
         message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
         path: ['aggregate-by'],
+      });
+    }
+    if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
+        path: ['ephemeral'],
       });
     }
   });
@@ -397,7 +444,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "significant-events.investigation"
+  agent-id: "nightshift.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
@@ -433,6 +480,23 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 
 Public conversations are visible to other users who can use the underlying agent.
 This setting only applies when the step creates a new conversation.`,
+
+      `## Summarize an existing conversation without modifying it
+\`\`\`yaml
+- name: summarize
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-summarizer"
+  ephemeral: true
+  with:
+    conversation_id: "{{ event.conversationId }}"
+    message: "Summarize this conversation in five bullet points."
+\`\`\`
+
+With \`ephemeral: true\`, the agent sees the conversation's history, attachments and workspace files,
+but nothing from the run is written back: no message, round, metadata or workspace change. The step
+output carries the agent's answer and no \`conversation_id\`. Runs can overlap with each other and with
+regular executions of the same conversation. \`ephemeral\` cannot be combined with
+\`create-conversation\`.`,
 
       `## Get structured output using a JSON schema
 \`\`\`yaml

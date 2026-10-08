@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -16,7 +16,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { HeaderPage } from '../../common/components/header_page';
+import { SecurityAppHeader } from '../../common/components/app_header';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
@@ -26,7 +26,6 @@ import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
@@ -60,13 +59,19 @@ const DetectionResponseComponent = () => {
     <>
       {indicesExist ? (
         <>
-          {isDataViewReady && (
-            <FiltersGlobal>
-              <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-            </FiltersGlobal>
-          )}
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />
+            <SecurityAppHeader title={i18n.DETECTION_RESPONSE_TITLE} spacing="largeBleed" />
+            {isDataViewReady && (
+              <>
+                <EuiSpacer size="m" />
+                <SiemSearchBar
+                  dataView={dataView}
+                  displayStyle="inPage"
+                  id={InputsModelId.global}
+                />
+              </>
+            )}
+            <EuiSpacer size="m" />
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="detectionResponseLoader" />
             ) : (

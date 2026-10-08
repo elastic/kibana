@@ -55,6 +55,8 @@ Use this tool when:
 — The user asks to run, trigger or execute a workflow.
 — You need to run a workflow you just generated (e.g. via \`generate_workflow\`).
 
+**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing.
+
 ## Source — exactly one must be provided
 
 - \`workflowId\`: a persisted workflow id (the workflow must be saved and enabled).
@@ -137,24 +139,19 @@ If set to false, or if the workflow does not complete within the timeout, the to
       const workflowParams = inputs ?? {};
       const wait = waitForCompletion ?? true;
 
-      // Executing an existing persisted workflow by id runs under the caller's
-      // identity, so require the same Workflows privileges the direct run API
-      // enforces. Inline YAML runs the caller's own definition and is not gated.
-      if (!resolvedYaml) {
-        const canExecute = await hasWorkflowExecutePrivilege({
-          security: getSecurity(),
-          request,
-          spaceId,
-        });
-        if (!canExecute) {
-          return {
-            results: [
-              errorResult(
-                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute privilege is required.`
-              ),
-            ],
-          };
-        }
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: getSecurity(),
+        request,
+        spaceId,
+      });
+      if (!canExecute) {
+        return {
+          results: [
+            errorResult(
+              "Unauthorized to execute workflow. The 'workflowsManagement' execute privilege is required."
+            ),
+          ],
+        };
       }
 
       const result = resolvedYaml

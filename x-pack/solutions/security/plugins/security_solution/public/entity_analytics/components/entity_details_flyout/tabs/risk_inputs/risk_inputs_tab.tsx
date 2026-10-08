@@ -38,6 +38,10 @@ import { getWatchlistName } from '../../../../../../common/entity_analytics/watc
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -79,6 +83,23 @@ export interface RiskInputsTabProps<T extends EntityType> {
    *  the v2 tool flyout which has no expandable-flyout state. */
   subTab?: RiskScoreLeftPanelSubTab;
 }
+
+const RISK_INPUTS_ALERTS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_alerts'
+);
+const RISK_INPUTS_WATCHLISTS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_watchlists'
+);
+const RISK_INPUTS_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_entity_from_store'
+);
+const RISK_INPUTS_HISTORY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'risk_inputs_history'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -147,7 +168,9 @@ export const RiskInputsTab = <T extends EntityType>({
     [openLeftPanel, panels.left]
   );
 
-  const { data: watchlists } = useGetWatchlists();
+  const { data: watchlists } = useGetWatchlists({
+    executionContext: RISK_INPUTS_WATCHLISTS_CONTEXT,
+  });
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   // A risk score stores the criticality that was set when the score was written, so it can be
@@ -155,7 +178,12 @@ export const RiskInputsTab = <T extends EntityType>({
   // EntitySummaryGrid does. Saving criticality patches this query's cache, so the row is right
   // straight away rather than after the recalculation round trip, and stays right if that
   // recalculation fails.
-  const { entityRecord } = useEntityFromStore({ entityId, entityType, skip: !entityId });
+  const { entityRecord } = useEntityFromStore({
+    entityId,
+    entityType,
+    skip: !entityId,
+    executionContext: RISK_INPUTS_ENTITY_FROM_STORE_CONTEXT,
+  });
 
   // The record has loaded. No `asset.criticality` on it means the level was removed, not that
   // we failed to read it.
@@ -385,6 +413,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     scoreType: historyScoreType,
     includeContributions: true,
     skip: !pitSelectionActive,
+    executionContext: RISK_INPUTS_HISTORY_CONTEXT,
   });
 
   const pitEntry = pitSelectionActive ? pitHistoryData?.entries[0] : undefined;
@@ -433,7 +462,11 @@ const RiskInputsTabContent = <T extends EntityType>({
     setQuery,
   });
 
-  const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+  const alerts = useRiskContributingAlerts<T>({
+    riskScore: activeRiskScore,
+    entityType,
+    executionContext: RISK_INPUTS_ALERTS_CONTEXT,
+  });
   const { hasAlertsRead } = alerts;
 
   const entityNameByEuid = useMemo(() => {
@@ -605,7 +638,6 @@ const RiskInputsTabContent = <T extends EntityType>({
       {hasResolutionScore && (
         <>
           <EuiButtonGroup
-            color="primary"
             isFullWidth
             legend={i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.riskInputs.scoreViewLegend',
@@ -1055,7 +1087,7 @@ const ExtraAlertsMessage = <T extends EntityType>({
           }}
         />
       }
-      iconType="annotation"
+      iconType="flag"
     />
   );
 };

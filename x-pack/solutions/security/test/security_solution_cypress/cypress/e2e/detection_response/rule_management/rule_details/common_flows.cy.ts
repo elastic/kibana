@@ -14,6 +14,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getDetails } from '../../../../tasks/rule_details';
+import { shouldHaveTagsText } from '../../../../helpers/tags';
 import { ruleFields } from '../../../../data/detection_engine';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
 
@@ -136,18 +137,7 @@ describe(
           expect(removeExternalLinkText(details.text())).equal(ruleFields.referenceUrls.join(''));
         });
         getDetails(FALSE_POSITIVES_DETAILS).should('have.text', ruleFields.falsePositives.join(''));
-        // On MKI, rules created with an ES API key and no UIAM key get a "Missing Elastic Cloud API
-        // Key" tag appended by the alerting framework (see
-        // https://github.com/elastic/kibana/pull/289195). It is not present locally/ESS, so strip it
-        // from the rendered tags to keep the assertion stable in both environments.
-        getDetails(TAGS_DETAILS)
-          .invoke('text')
-          .then((text) => {
-            cy.wrap(text.replace('Missing Elastic Cloud API Key', '')).should(
-              'equal',
-              ruleFields.ruleTags.join('')
-            );
-          });
+        shouldHaveTagsText(getDetails(TAGS_DETAILS), ruleFields.ruleTags.join(''));
       });
       cy.get(THREAT_TACTIC).should(
         'contain',

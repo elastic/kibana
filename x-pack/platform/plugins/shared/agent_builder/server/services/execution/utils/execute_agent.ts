@@ -12,15 +12,17 @@ import type {
   Conversation,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
   ConversationRoundAuthor,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
@@ -37,14 +39,15 @@ export const executeAgent$ = ({
   defaultConnectorId,
   telemetryMetadata,
   maxContentLength,
+  reasoningLevel,
   browserApiTools,
   configurationOverrides,
-  action,
   executionMode,
   interactivity,
   parentExecutionId,
   projectRouting,
   roundId,
+  conversationAccess,
 }: {
   agentId: string;
   executionId: string;
@@ -60,14 +63,15 @@ export const executeAgent$ = ({
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
+  reasoningLevel?: ChatCompletionReasoningEffort;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
-  action?: ConversationAction;
   executionMode?: AgentExecutionMode;
   interactivity?: InteractivityConfigInput;
   parentExecutionId?: string;
   projectRouting?: string;
   roundId?: string;
+  conversationAccess?: ExecutionConversationAccess;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -78,10 +82,12 @@ export const executeAgent$ = ({
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
       executionMode,
       interactive: interactivity,
       parentExecutionId,
       projectRouting,
+      conversationAccess,
       agentParams: {
         nextInput,
         conversation,
@@ -91,7 +97,6 @@ export const executeAgent$ = ({
         configurationOverrides,
         structuredOutput,
         outputSchema,
-        action,
         executionId,
         roundId,
       },
