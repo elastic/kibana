@@ -9,7 +9,10 @@ import { z } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
-import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import {
+  contextEngineAiIndexTools,
+  contextEngineMemoryTools,
+} from '@kbn/agent-builder-common/tools';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import { createMockedExecutableTool, createToolProviderMock } from '../../../../test_utils';
 import {
@@ -168,14 +171,17 @@ describe('selectTools', () => {
   });
 
   describe('AI-index tools', () => {
-    const aiIndexToolIds = Object.values(contextEngineAiIndexTools);
+    const aiIndexReadToolIds = Object.values(contextEngineAiIndexTools);
+    const aiIndexToolIds = [...aiIndexReadToolIds, ...Object.values(contextEngineMemoryTools)];
 
     const selectStaticToolIds = async ({
       aiIndicesEnabled,
       aiIndices,
+      aiIndexCatalog,
     }: {
       aiIndicesEnabled: boolean;
       aiIndices?: string[];
+      aiIndexCatalog?: Array<{ id: string; esqlTarget?: string; memoryEnabled?: boolean }>;
     }) => {
       const attachmentStateManager = createAttachmentStateManagerMock();
       attachmentStateManager.getActive.mockReturnValue([]);
@@ -200,6 +206,7 @@ describe('selectTools', () => {
         request: httpServerMock.createKibanaRequest(),
         toolProvider,
         agentConfiguration,
+        aiIndexCatalog,
         aiIndicesEnabled,
         attachmentsService: createAttachmentsService(),
         spaceId: 'default',
@@ -208,9 +215,66 @@ describe('selectTools', () => {
       return result.staticTools.map((tool) => tool.id).filter((id) => id !== 'attachments.read');
     };
 
-    it('adds the three tools when the feature is on and the agent has AI Indices', async () => {
+    it('adds all tools when the feature is on and a resolved assigned index enables memory', async () => {
       await expect(
-        selectStaticToolIds({ aiIndicesEnabled: true, aiIndices: ['elastic'] })
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
+      ).resolves.toEqual(aiIndexToolIds);
+    });
+
+    it('omits memory tools when every resolved assigned index disables memory', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['disabled-index'],
+          aiIndexCatalog: [
+            {
+              id: 'disabled-index',
+              esqlTarget: 'ai-index-idx-disabled',
+              memoryEnabled: false,
+            },
+          ],
+        })
+      ).resolves.toEqual(aiIndexReadToolIds);
+    });
+
+    it('omits memory tools when assigned indices cannot be resolved or read', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['missing-index'],
+          aiIndexCatalog: [{ id: 'missing-index' }],
+        })
+      ).resolves.toEqual(aiIndexReadToolIds);
+    });
+
+    it('adds memory tools when any resolved assigned index enables memory', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['disabled-index', 'memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'disabled-index',
+              esqlTarget: 'ai-index-idx-disabled',
+              memoryEnabled: false,
+            },
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
       ).resolves.toEqual(aiIndexToolIds);
     });
 
@@ -223,7 +287,17 @@ describe('selectTools', () => {
 
     it('adds nothing when the feature is off', async () => {
       await expect(
-        selectStaticToolIds({ aiIndicesEnabled: false, aiIndices: ['elastic'] })
+        selectStaticToolIds({
+          aiIndicesEnabled: false,
+          aiIndices: ['memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
       ).resolves.toEqual([]);
     });
   });

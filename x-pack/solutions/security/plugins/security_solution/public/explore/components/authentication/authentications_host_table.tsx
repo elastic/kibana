@@ -24,6 +24,10 @@ import {
   rowItems,
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
 import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
@@ -34,6 +38,11 @@ import { AuthStackByField } from '../../../../common/search_strategy';
 const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 
 const tableType = hostsModel.HostsTableType.authentications;
+
+const HOSTS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'authentications'
+);
 
 const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
   endDate,
@@ -116,6 +125,7 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
     stackByField: AuthStackByField.userName,
     activePage,
     limit,
+    executionContext: HOSTS_AUTHENTICATIONS_CONTEXT,
   });
 
   const columns =

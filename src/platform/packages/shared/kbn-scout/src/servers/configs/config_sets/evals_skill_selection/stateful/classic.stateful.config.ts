@@ -19,10 +19,10 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * - aiAssistant:preferredChatExperience=agent — ensures agent mode is active
  * - securitySolution.enableExperimental — enables elastic-defend-configuration-troubleshooting
  *   (automaticTroubleshootingSkill) and find-security-rules (dexAiSkillFindRules)
- * - streams.significantEventsAvailable — enables significant-events-* skill registration
+ * - nightshift.enabled — enables significant-events-* skill registration
  *
  * Skills NOT included (intentionally excluded from benchmark scope):
- * - workflow-authoring, rule-management, pci-compliance, observability.rca
+ * - workflow-authoring, rule-management, pci-compliance
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_skill_selection
@@ -34,7 +34,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
-      '--feature_flags.overrides.streams.significantEventsAvailable=true',
+      '--feature_flags.overrides.nightshift.enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([

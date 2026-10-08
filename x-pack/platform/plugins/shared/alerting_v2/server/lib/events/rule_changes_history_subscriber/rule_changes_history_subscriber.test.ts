@@ -41,8 +41,7 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createRuleResponse({ id: 'rule-1', metadata: { version: 3 } });
-const { version: _occVersion, ...ruleSnapshot } = rule;
+const rule = createRuleResponse({ id: 'rule-1', version: 3 });
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -114,14 +113,14 @@ describe('RuleChangesHistorySubscriber', () => {
       async ({ eventType, action, ecsEventType }) => {
         subscriber.start();
 
-        await handlerFor(eventType)(eventOf(eventType), { request });
+        await handlerFor(eventType)(eventOf(eventType), { request, origin: 'user' });
 
         expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
         expect(changeHistory.logRuleChanges).toHaveBeenCalledTimes(1);
         expect(changeHistory.logRuleChanges).toHaveBeenCalledWith({
           spaceId: 'my-space',
           author,
-          entries: [{ id: 'rule-1', snapshot: ruleSnapshot, sequence: 3 }],
+          entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
           correlationId: 'corr-1',
@@ -133,7 +132,10 @@ describe('RuleChangesHistorySubscriber', () => {
       userProfile.getCurrent.mockResolvedValue(null);
       subscriber.start();
 
-      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request });
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+        request,
+        origin: 'user',
+      });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
         expect.objectContaining({ author: { uid: null, username: null } })
@@ -149,25 +151,7 @@ describe('RuleChangesHistorySubscriber', () => {
           spaceId: 'my-space',
           correlationId: 'corr-1',
         }),
-        { request }
-      );
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
-    it('skips events whose rule has no version sequence', async () => {
-      subscriber.start();
-      // The API always populates `metadata.version`; drop it to exercise the
-      // subscriber's defensive guard against a malformed runtime event.
-      const { version: _version, ...metadataWithoutVersion } = rule.metadata;
-      const ruleWithoutSequence = {
-        ...rule,
-        metadata: metadataWithoutVersion,
-      } as typeof rule;
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
-        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
-        { request }
+        { request, origin: 'user' }
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
@@ -176,7 +160,10 @@ describe('RuleChangesHistorySubscriber', () => {
     it('omits timestamp so logRuleChanges defaults to now', async () => {
       subscriber.start();
 
-      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request });
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+        request,
+        origin: 'user',
+      });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
         expect.not.objectContaining({ timestamp: expect.anything() })
@@ -188,7 +175,10 @@ describe('RuleChangesHistorySubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request })
+        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

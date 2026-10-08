@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { describeCodecParity } from '../test_helpers/parity';
+import { describeCodecCases } from '../test_helpers/codec_cases';
+import { BandwidthLimitKey, LocationStatus } from './locations';
 import {
-  BandwidthLimitKey,
-  LocationStatus,
   LocationGeoCodec,
   LocationStatusCodec,
   ManifestLocationCodec,
@@ -18,8 +17,7 @@ import {
   ServiceLocationErrors,
   ServiceLocationsApiResponseCodec,
   ThrottlingOptionsCodec,
-} from './locations';
-import * as zodLocations from '../zod/locations';
+} from '../schemas/locations';
 
 const geo = { lat: 41.25, lon: -95.86 };
 
@@ -41,26 +39,23 @@ const privateLocation = {
   status: LocationStatus.BETA,
 };
 
-describeCodecParity({
+describeCodecCases({
   label: 'LocationStatusCodec',
-  ioTs: LocationStatusCodec,
-  zod: zodLocations.LocationStatusCodec,
+  codec: LocationStatusCodec,
   valid: Object.values(LocationStatus),
   invalid: ['GA', '', null],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'LocationGeoCodec',
-  ioTs: LocationGeoCodec,
-  zod: zodLocations.LocationGeoCodec,
+  codec: LocationGeoCodec,
   valid: [geo, { lat: '41.25', lon: '-95.86' }, { lat: null, lon: null }],
   invalid: [{ lat: true, lon: 1 }, { lat: 1 }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ManifestLocationCodec',
-  ioTs: ManifestLocationCodec,
-  zod: zodLocations.ManifestLocationCodec,
+  codec: ManifestLocationCodec,
   valid: [
     {
       url: 'https://us-central.synthetics.elastic.dev',
@@ -74,10 +69,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ServiceLocationCodec',
-  ioTs: ServiceLocationCodec,
-  zod: zodLocations.ServiceLocationCodec,
+  codec: ServiceLocationCodec,
   valid: [serviceLocation, { id: 'x', label: 'X', isServiceManaged: false }],
   invalid: [
     { label: 'X', isServiceManaged: true },
@@ -85,18 +79,16 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'PublicLocationCodec',
-  ioTs: PublicLocationCodec,
-  zod: zodLocations.PublicLocationCodec,
+  codec: PublicLocationCodec,
   valid: [serviceLocation],
   invalid: [{ id: 'x', label: 'X', isServiceManaged: true }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'MonitorServiceLocationCodec',
-  ioTs: MonitorServiceLocationCodec,
-  zod: zodLocations.MonitorServiceLocationCodec,
+  codec: MonitorServiceLocationCodec,
   valid: [
     { id: 'us_central', label: 'US Central' },
     { ...privateLocation, url: 'https://private', isServiceManaged: false, status: 'ga' },
@@ -104,10 +96,9 @@ describeCodecParity({
   invalid: [{ id: 'us_central' }, { id: 1, label: 'X' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ServiceLocationErrors',
-  ioTs: ServiceLocationErrors,
-  zod: zodLocations.ServiceLocationErrors,
+  codec: ServiceLocationErrors,
   valid: [
     [],
     [
@@ -125,18 +116,16 @@ describeCodecParity({
   invalid: [[{ locationId: 'x', error: { reason: 'x' } }]],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ThrottlingOptionsCodec',
-  ioTs: ThrottlingOptionsCodec,
-  zod: zodLocations.ThrottlingOptionsCodec,
+  codec: ThrottlingOptionsCodec,
   valid: [{ [BandwidthLimitKey.DOWNLOAD]: 100, [BandwidthLimitKey.UPLOAD]: 30 }],
   invalid: [{ [BandwidthLimitKey.DOWNLOAD]: 100 }, { download: '100', upload: 30 }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ServiceLocationsApiResponseCodec',
-  ioTs: ServiceLocationsApiResponseCodec,
-  zod: zodLocations.ServiceLocationsApiResponseCodec,
+  codec: ServiceLocationsApiResponseCodec,
   valid: [
     { locations: [] },
     { throttling: undefined, locations: [] },

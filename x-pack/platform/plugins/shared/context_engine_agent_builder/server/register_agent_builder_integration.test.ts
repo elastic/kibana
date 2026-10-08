@@ -9,6 +9,16 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  KI_RETRIEVAL_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
+} from '../common/agent_builder_skills';
+import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -62,8 +72,11 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     >;
 
     let resolver: AiIndexResolver | undefined;
+    const register = jest.fn();
     const agentBuilder = {
       agents: {
+        register,
+        registerType: jest.fn(),
         registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
           resolver = registered;
         }),
@@ -81,6 +94,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     }
     return {
       resolver,
+      register,
       list,
       getAiIndexDataReadService,
       asScoped,
@@ -117,22 +131,34 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           id: 'my-custom',
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
+          memory_enabled: true,
         },
       ],
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([
-      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      {
+        id: 'my-custom',
+        esqlTarget: 'ai-index-idx-custom',
+        description: 'Support tickets.',
+        memoryEnabled: true,
+      },
     ]);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
-      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
+      aiIndices: [
+        {
+          id: 'wanted',
+          dest: { type: 'index', value: 'idx-wanted' },
+          memory_enabled: false,
+        },
+      ],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted' },
+      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: false },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
@@ -167,5 +193,51 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     await expect(resolver({ ids: ['my-custom'], request })).rejects.toThrow('cluster unreachable');
     expect(list).not.toHaveBeenCalled();
+  });
+
+  it('registers the Context Engine Setup agent as a built-in during setup', () => {
+    const { register } = setup({ aiIndices: [] });
+
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: CONTEXT_ENGINE_SETUP_AGENT_ID,
+        type: chatAgentTypeId,
+        availability: expect.objectContaining({
+          cacheMode: 'space',
+          handler: expect.any(Function),
+        }),
+        configuration: expect.objectContaining({
+          enable_elastic_capabilities: false,
+          subagent_ids: [SELF_AGENT_ID],
+          skill_ids: expect.arrayContaining([
+            ANALYZE_AND_IMPROVE_SKILL_ID,
+            AI_INDEX_AUTOMATIONS_SKILL_ID,
+            AI_INDEX_SOURCES_SKILL_ID,
+            KI_RETRIEVAL_SKILL_ID,
+            CONTEXT_ENGINE_SIGNALS_SKILL_ID,
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('hides the agent in spaces where Context Engine is disabled', async () => {
+    const { register } = setup({ aiIndices: [] });
+    const { availability } = register.mock.calls[0][0];
+
+    const unavailable = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(false) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(unavailable.status).toBe('unavailable');
+
+    const available = await availability.handler({
+      uiSettings: { get: jest.fn().mockResolvedValue(true) } as any,
+      request: {} as any,
+      spaceId: 'my-space',
+    });
+    expect(available.status).toBe('available');
   });
 });

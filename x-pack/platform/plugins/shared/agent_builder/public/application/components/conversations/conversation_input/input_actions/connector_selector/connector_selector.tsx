@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
@@ -27,12 +28,14 @@ import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useAgentId } from '../../../../../hooks/use_conversation';
+import { useAgentModel } from '../../../../../hooks/agents/use_agent_model';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
   useSelectorListStyles,
 } from '../input_actions.styles';
-import { InputPopoverButton } from '../input_popover_button';
+import { InputPopoverButton, type ToolTipAnchorProps } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
 import { isNearingEndOfLife, ModelRetirementIcon } from './model_badges';
@@ -89,22 +92,40 @@ const defaultConnectorButtonLabel = i18n.translate(
   { defaultMessage: 'LLM' }
 );
 
-const ConnectorPopoverButton: React.FC<{
+const modelSetByAgentTooltip = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.modelSetByAgentTooltip',
+  { defaultMessage: 'This agent uses a preconfigured model, so it cannot be changed here.' }
+);
+
+export interface ConnectorPopoverButtonProps extends ToolTipAnchorProps {
   isPopoverOpen: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   disabled: boolean;
+  hasAriaDisabled?: boolean;
   selectedConnectorName?: string;
   isRetiring?: boolean;
-}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isRetiring }) => {
+}
+
+const ConnectorPopoverButton: React.FC<ConnectorPopoverButtonProps> = ({
+  isPopoverOpen,
+  onClick,
+  disabled,
+  hasAriaDisabled,
+  selectedConnectorName,
+  isRetiring,
+  ...toolTipAnchorProps
+}) => {
   const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
+      hasAriaDisabled={hasAriaDisabled}
       iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
       aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
+      {...toolTipAnchorProps}
       ebtProps={getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
         action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_CONNECTOR_SELECTOR,
@@ -192,7 +213,7 @@ const ConnectorListFooter: React.FC = () => {
 
 type ConnectorOptionData = EuiSelectableOption<{}>;
 
-export const ConnectorSelector: React.FC<{}> = () => {
+const SelectableConnectorSelector: React.FC<{}> = () => {
   const {
     services: { http, settings },
   } = useKibana();
@@ -296,13 +317,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
   const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
-  // Track the previously-observed default so we can detect admin-initiated changes.
-  // Seeded with the current value on first render and updated on every effect run
-  // (including early returns) so the ref stays aligned with the observable even
-  // while connectors are still loading. That way, once we proceed past the early
-  // return, `previousDefault` reflects the last observed value — not a mount-time
-  // baseline — and the first real emission is not mistaken for a change.
-  const previousDefaultRef = useRef(defaultConnectorId);
+  const previousDefaultRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const previousDefault = previousDefaultRef.current;
@@ -330,9 +345,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
       return;
     }
 
-    // Admin-initiated change of the default-model setting to a valid connector.
+    // Admin-initiated change: only fire once we've seen a previous real value so the
+    // initial settings resolution isn't mistaken for a change.
     if (
       defaultConnectorId &&
+      previousDefault !== undefined &&
       defaultConnectorId !== previousDefault &&
       defaultConnectorId !== selectedConnectorId &&
       connectors.some((c) => c.id === defaultConnectorId)
@@ -417,4 +434,26 @@ export const ConnectorSelector: React.FC<{}> = () => {
       </EuiSelectable>
     </EuiPopover>
   );
+};
+
+export const ConnectorSelector = () => {
+  const agentId = useAgentId();
+  const { isLoading, isLocked, connectorName } = useAgentModel(agentId);
+
+  if (isLoading) {
+    return <ConnectorPopoverButton isPopoverOpen={false} disabled />;
+  }
+  if (isLocked) {
+    return (
+      <EuiToolTip content={modelSetByAgentTooltip}>
+        <ConnectorPopoverButton
+          isPopoverOpen={false}
+          disabled
+          hasAriaDisabled
+          selectedConnectorName={connectorName}
+        />
+      </EuiToolTip>
+    );
+  }
+  return <SelectableConnectorSelector />;
 };

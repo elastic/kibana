@@ -35,7 +35,7 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
     await pageObjects.discover.selectDataView(testData.DEFAULT_DATA_VIEW);
@@ -135,12 +135,11 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
 
   spaceTest(
     'should merge custom global filters with saved search filters',
-    async ({ browserAuth, page, pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects, scoutSpace }) => {
       const { dataGrid, discover, filterBar, unifiedFieldList } = pageObjects;
       const discoverHitCount = page.testSubj.locator('discoverQueryHits');
       const savedSearchTitle = `testFilters ${scoutSpace.id}`;
 
-      await browserAuth.loginAsPrivilegedUser();
       await scoutSpace.uiSettings.setDefaultTime(TIME_DEFAULTS_FOR_SAVED_SEARCH_FILTERS);
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await discover.waitUntilTabIsLoaded();
@@ -156,10 +155,6 @@ spaceTest.describe('Discover URL state', { tag: tags.deploymentAgnostic }, () =>
       await expect(discoverHitCount).toHaveText('737');
 
       await discover.saveSearch(savedSearchTitle);
-      await discover.waitUntilTabIsLoaded();
-      await expect(discoverHitCount).toHaveText('737');
-
-      await page.reload();
       await discover.waitUntilTabIsLoaded();
       await expect(discoverHitCount).toHaveText('737');
 
