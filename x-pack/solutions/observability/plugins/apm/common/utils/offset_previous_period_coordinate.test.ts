@@ -11,6 +11,13 @@ const currentPeriodTimeseries: Coordinate[] = [
   { x: new Date('2021-01-28T14:45:00.000Z').valueOf(), y: 0 },
 ];
 
+const previousPeriodTimeseries: Coordinate[] = [
+  { x: new Date('2021-01-27T14:45:00.000Z').valueOf(), y: 1 },
+  { x: new Date('2021-01-27T15:00:00.000Z').valueOf(), y: 2 },
+  { x: new Date('2021-01-27T15:15:00.000Z').valueOf(), y: 2 },
+  { x: new Date('2021-01-27T15:30:00.000Z').valueOf(), y: 3 },
+];
+
 describe('mergePeriodsTimeseries', () => {
   describe('returns empty array', () => {
     it('when previous timeseries is not defined', () => {
@@ -30,29 +37,27 @@ describe('mergePeriodsTimeseries', () => {
         })
       ).toEqual([]);
     });
-  });
 
-  it('does not throw when current period timeseries is empty', () => {
-    const previousPeriodTimeseries: Coordinate[] = [
-      { x: new Date('2021-01-27T14:45:00.000Z').valueOf(), y: 1 },
-    ];
+    it('when current timeseries is not defined', () => {
+      expect(
+        offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: undefined,
+          previousPeriodTimeseries,
+        })
+      ).toEqual([]);
+    });
 
-    expect(() =>
-      offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: [],
-        previousPeriodTimeseries,
-      })
-    ).not.toThrow();
+    it('when current timeseries is empty', () => {
+      expect(
+        offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: [],
+          previousPeriodTimeseries,
+        })
+      ).toEqual([]);
+    });
   });
 
   it('offsets previous period timeseries', () => {
-    const previousPeriodTimeseries: Coordinate[] = [
-      { x: new Date('2021-01-27T14:45:00.000Z').valueOf(), y: 1 },
-      { x: new Date('2021-01-27T15:00:00.000Z').valueOf(), y: 2 },
-      { x: new Date('2021-01-27T15:15:00.000Z').valueOf(), y: 2 },
-      { x: new Date('2021-01-27T15:30:00.000Z').valueOf(), y: 3 },
-    ];
-
     expect(
       offsetPreviousPeriodCoordinates({
         currentPeriodTimeseries,
