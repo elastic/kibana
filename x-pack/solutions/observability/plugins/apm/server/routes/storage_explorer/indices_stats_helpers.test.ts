@@ -108,4 +108,68 @@ describe('storage explorer with no APM indices', () => {
 
     await expect(getIndicesLifecycleStatus({ context, apmEventClient })).resolves.toEqual(phases);
   });
+
+  it('preserves statistics for existing APM indices when only some configured indices are missing', async () => {
+    const partialApmEventClient = {
+      indices: {
+        transaction: 'traces-apm-existing',
+        span: 'traces-apm-missing',
+        metric: 'metrics-apm-existing',
+        error: 'logs-apm-missing',
+      },
+    } as unknown as APMEventClient;
+
+    const survivingStats = {
+      _all: { total: { store: { size_in_bytes: 42 } } },
+      indices: {
+        'traces-apm-existing': {
+          total: { store: { size_in_bytes: 40 } },
+        },
+        'metrics-apm-existing': {
+          total: { store: { size_in_bytes: 2 } },
+        },
+      },
+    };
+
+    const stats = jest.fn(async ({ index }: { index: string }) => {
+      if (index.includes('missing')) {
+        throw missingIndex;
+      }
+      return survivingStats;
+    });
+    const context = contextFor({ indices: { stats } });
+
+    await expect(
+      getTotalIndicesStats({ context, apmEventClient: partialApmEventClient })
+    ).resolves.toBe(survivingStats);
+  });
+
+  it('preserves lifecycle phases for existing APM indices when only some configured indices are missing', async () => {
+    const partialApmEventClient = {
+      indices: {
+        transaction: 'traces-apm-existing',
+        span: 'traces-apm-missing',
+        metric: 'metrics-apm-existing',
+        error: 'logs-apm-missing',
+      },
+    } as unknown as APMEventClient;
+
+    const phases = {
+      'traces-apm-existing': { phase: 'hot' },
+      'metrics-apm-existing': { phase: 'warm' },
+    };
+
+    const explainLifecycle = jest.fn(async ({ index }: { index: string }) => {
+      if (index.includes('missing')) {
+        throw missingIndex;
+      }
+      return { indices: phases };
+    });
+    const context = contextFor({ ilm: { explainLifecycle } });
+
+    await expect(
+      getIndicesLifecycleStatus({ context, apmEventClient: partialApmEventClient })
+    ).resolves.toEqual(phases);
+  });
+
 });
