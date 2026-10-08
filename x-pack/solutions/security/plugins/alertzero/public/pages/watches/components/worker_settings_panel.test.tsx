@@ -247,11 +247,7 @@ describe('WorkerSettingsPanel enable gating', () => {
   it.each(['alertAnalysisRuntimeDisabled', 'alertAnalysisWorkflowDisabled'] as const)(
     'disables the switch of an off Worker when the server reports %s',
     (enableBlockedReason) => {
-      renderPanel(WORKFLOW_ID, false, {
-        enabled: false,
-        enableBlockedReason,
-        serviceAccountId: 'kibana/az-worker-1',
-      });
+      renderPanel(WORKFLOW_ID, false, { enabled: false, enableBlockedReason });
 
       expect(screen.getByTestId(switchId)).toBeDisabled();
     }
@@ -270,7 +266,7 @@ describe('WorkerSettingsPanel enable gating', () => {
   });
 
   it('leaves the switch usable when no reason is reported', () => {
-    renderPanel(WORKFLOW_ID, false, { enabled: false, serviceAccountId: 'kibana/az-worker-1' });
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
 
     expect(screen.getByTestId(switchId)).not.toBeDisabled();
   });
