@@ -8,7 +8,7 @@
  */
 
 import { Children, useEffect, useRef, useState } from 'react';
-import type { MouseEvent, ReactNode, RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import { getFocusableElements } from '../utils/get_focusable_elements';
 
@@ -19,12 +19,12 @@ const SHOW_MORE_STEP = 10;
 interface ShowMore {
   hasMore: boolean;
   listRef: RefObject<HTMLUListElement>;
-  showMore: (e: MouseEvent<HTMLButtonElement>) => void;
+  showMore: () => void;
   visibleItems: ReactNode[];
 }
 
 /**
- * Pages `children` behind "Show more" when `isEnabled`, moving keyboard focus to the first revealed item.
+ * Pages `children` behind "Show more" when `isEnabled`, moving focus to the first revealed item.
  */
 export const useShowMore = (children: ReactNode, isEnabled: boolean): ShowMore => {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
@@ -34,7 +34,8 @@ export const useShowMore = (children: ReactNode, isEnabled: boolean): ShowMore =
   const items = Children.toArray(children);
   const hasMore = isEnabled && items.length > visibleCount;
 
-  // "Show more" can unmount itself, so keyboard focus moves to the first revealed item.
+  // "Show more" can unmount itself, so focus moves to the first revealed item. Not limited to keyboard
+  // clicks (`detail === 0`): screen readers activate with a regular click. Mouse users get no focus ring.
   useEffect(() => {
     const focusIndex = focusIndexRef.current;
     if (focusIndex === null) return;
@@ -43,9 +44,8 @@ export const useShowMore = (children: ReactNode, isEnabled: boolean): ShowMore =
     if (firstRevealed instanceof HTMLElement) getFocusableElements(firstRevealed)[0]?.focus();
   }, [visibleCount]);
 
-  const showMore = (e: MouseEvent<HTMLButtonElement>) => {
-    // Keyboard-activated clicks have `detail === 0`; mouse users keep focus where it is.
-    if (e.detail === 0) focusIndexRef.current = visibleCount;
+  const showMore = () => {
+    focusIndexRef.current = visibleCount;
     setVisibleCount((count) => count + SHOW_MORE_STEP);
   };
 
