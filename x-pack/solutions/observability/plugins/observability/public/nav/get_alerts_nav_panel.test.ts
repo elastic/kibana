@@ -30,6 +30,7 @@ const FULL_V2_CAPABILITIES = {
 
 const enableV2 = (core: CoreStart) => {
   core.settings.globalClient.get = <T>(_key: string) => true as T;
+  core.settings.globalClient.isDeclared = () => true;
   core.settings.client.get = <T>(_key: string) => false as T;
 };
 

@@ -240,6 +240,9 @@ describe('rulesPage', () => {
   describe('when alerting v2 is enabled', () => {
     beforeEach(() => {
       (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
+      (useKibanaMock().services.settings.globalClient.isDeclared as jest.Mock).mockReturnValue(
+        true
+      );
     });
 
     describe('and the user can read v2 rules', () => {

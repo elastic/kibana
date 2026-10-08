@@ -28,7 +28,7 @@ interface ScoutSpaceUiSettings {
 
 /**
  * Toggles the `alerting:v2:enabled` global advanced setting at runtime.
- * The default Scout server leaves this setting unpinned, unlike `scout_alerting_v2`.
+ * The default Scout server does not pin this setting (it defaults to on), unlike `scout_alerting_v2`.
  */
 export const setAlertingV2EnabledSetting = async (
   kbnClient: KbnClient,
@@ -40,7 +40,7 @@ export const setAlertingV2EnabledSetting = async (
   await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
-/** DELETE is a no-op when no user value is set. */
+/** Deleting the user value restores the registered default, which is on. DELETE is a no-op when no user value is set. */
 export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({
     description: `unset ${ALERTING_V2_ENABLED_SETTING_ID}`,

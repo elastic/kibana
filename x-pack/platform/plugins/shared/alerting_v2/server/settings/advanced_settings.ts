@@ -34,13 +34,12 @@ export const alertingGlobalAdvancedSettings = {
       defaultMessage: 'Alerting V2',
     }),
     type: 'boolean',
-    value: false,
+    value: true,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
       defaultMessage: 'Enables the alerting V2 APIs and UI.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
@@ -61,7 +60,6 @@ export const alertingSpaceAdvancedSettings = {
     ),
     schema: schema.boolean(),
     requiresPageReload: true,
-    experimental: true,
   },
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],

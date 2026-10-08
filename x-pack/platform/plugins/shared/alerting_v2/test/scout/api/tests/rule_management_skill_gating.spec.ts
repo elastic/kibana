@@ -36,8 +36,8 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
  * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
  * asserting either skill is listed.
  *
- * This is the canonical gating suite because the generic Scout config leaves
- * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
+ * This is the canonical gating suite because the generic Scout config does not
+ * pin `alerting:v2:enabled` (it defaults to on), so it can be flipped at runtime.
  * The dedicated `scout_alerting_v2` config forces the feature on and therefore
  * cannot cover the disabled cases.
  */
@@ -101,19 +101,24 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
     }
   );
 
-  // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
+  // Toggling `alerting:v2:enabled` requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
   // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
-    'does not list the alerting V2 skills when only alerting:v2:enabled is on',
+    'does not list the alerting V2 skills when alerting:v2:enabled is off',
     { tag: '@local-stateful-classic' },
-    async ({ apiClient, requestAuth }) => {
+    async ({ apiClient, kbnClient, requestAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+      });
+
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
 
       const setResponse = await apiClient.post(
         `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
-        { headers, body: { value: true }, responseType: 'json' }
+        { headers, body: { value: false }, responseType: 'json' }
       );
       expect(setResponse).toHaveStatusCode(200);
 

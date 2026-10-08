@@ -32,7 +32,7 @@ const POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
 
 const PAUSED_BY_FLAG = { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR };
 
-// The default Scout server leaves alerting v2 off, and its routes answer 503 until it is on.
+// Alerting v2 defaults to on; the explicit write keeps its routes reachable if the default changes.
 const enableAlertingV2 = async (kbnClient: KbnClient) => {
   await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
 };
