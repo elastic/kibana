@@ -703,7 +703,7 @@ export class LensVisService {
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
-      textBasedColumns: columns,
+      textBasedColumns: columns as DatatableColumn[] | undefined,
       query,
     };
 

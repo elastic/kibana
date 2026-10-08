@@ -77,19 +77,29 @@ describe('processFetchParams', () => {
     ).toBe(false);
   });
 
-  it('assigns columnsMap from columns', async () => {
-    const params: UnifiedHistogramFetchParamsExternal = {
+  it('derives columns and columnsMap from the result columns of an ES|QL source', async () => {
+    const columns = [
+      { id: 'a', name: 'colA', meta: { type: 'string' } },
+      { id: 'b', name: 'colB', meta: { type: 'number' } },
+    ] as DatatableColumn[];
+    EsqlSource.clearCache();
+    const result = await processParams({
       ...commonParams,
-      columns: [
-        { id: 'a', name: 'colA' },
-        { id: 'b', name: 'colB' },
-      ] as any,
-    };
-    const result = await processParams(params);
-    expect(result.columnsMap).toEqual({
-      a: { id: 'a', name: 'colA' },
-      b: { id: 'b', name: 'colB' },
+      dataSource: await EsqlSource.create({
+        query: 'from logs',
+        timeFieldName: '@timestamp',
+        resultColumns: columns,
+      }),
+      query: { esql: 'from logs' },
     });
+    expect(result.columns).toEqual(columns);
+    expect(result.columnsMap).toEqual({ a: columns[0], b: columns[1] });
+  });
+
+  it('has no columns for a data view source', async () => {
+    const result = await processParams(commonParams);
+    expect(result.columns).toBeUndefined();
+    expect(result.columnsMap).toBeUndefined();
   });
 
   it('assigns breakdown using initialBreakdownField if not in params', async () => {
@@ -135,7 +145,6 @@ describe('processFetchParams', () => {
     const result = await processParams({
       ...commonParams,
       dataSource: esqlSource,
-      columns,
       query: { esql: 'from logs' },
       breakdownField: 'foo',
     });
@@ -153,7 +162,6 @@ describe('processFetchParams', () => {
     const result = await processParams({
       ...commonParams,
       dataSource: esqlSource,
-      columns,
       query: { esql: 'from logs | stats count(*)' },
       breakdownField: 'foo',
     });

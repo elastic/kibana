@@ -222,7 +222,6 @@ export const EpisodesHistogram = ({
       dataSource: esqlSource,
       query: esqlQuery,
       table,
-      columns: table.columns,
       breakdownField,
       timeInterval: bucketInterval,
       timeRange,

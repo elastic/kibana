@@ -25,7 +25,6 @@ import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isSameDataset, type EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
@@ -55,7 +54,6 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
-const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
@@ -281,7 +279,7 @@ export const useDiscoverHistogram = (
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const dataSourceForColumns =
         currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
-      const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
+      const table = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         currentDataSource: dataSourceForColumns,
       });
@@ -289,7 +287,6 @@ export const useDiscoverHistogram = (
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        columns: dataSourceForColumns ? esqlQueryColumns : undefined,
         table: dataSourceForColumns && !latestFetchDetails ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
@@ -501,29 +498,23 @@ function getUnifiedHistogramTableForEsql({
   currentDataSource: EsqlSource | undefined;
 }) {
   if (!currentDataSource) {
-    return {
-      table: undefined,
-      esqlQueryColumns: EMPTY_ESQL_COLUMNS,
-    };
+    return undefined;
   }
-
-  // EsqlSource has columns from its eager LIMIT 0 query — no need to wait for documents.
-  const esqlQueryColumns = [...currentDataSource.resultColumns];
 
   // Provide a pre-fetched data table only when documents are already available,
   // so Lens can reuse the rows for suggestion enrichment without an extra request.
+  // The columns of the chart itself come from the EsqlSource (its eager LIMIT 0 query), so the
+  // chart doesn't wait for the documents.
   const isDocumentsComplete =
     documentsValue?.result &&
     [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus);
 
-  const table = isDocumentsComplete
+  return isDocumentsComplete
     ? {
         type: 'datatable' as const,
         rows: documentsValue!.result!.map((r) => r.raw),
-        columns: esqlQueryColumns,
+        columns: [...currentDataSource.resultColumns],
         meta: { type: ESQL_TABLE_TYPE },
       }
     : undefined;
-
-  return { table, esqlQueryColumns };
 }

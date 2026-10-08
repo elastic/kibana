@@ -39,7 +39,7 @@ export const buildFetchParams = ({
     params.relativeTimeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
   const { dataSource } = params;
 
-  const columns = params.columns;
+  const columns = dataSource.kind === 'esql' ? dataSource.resultColumns : undefined;
   const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
@@ -53,7 +53,8 @@ export const buildFetchParams = ({
     // additional
     lastReloadRequestTime: Date.now(),
     isTimeBased,
-    columnsMap: params.columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
+    columns,
+    columnsMap: columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
       acc[column.id] = column;
       return acc;
     }, {}),
@@ -100,7 +101,7 @@ function getProcessedBreakdownField({
   isTimeBased: boolean;
   dataSource: UnifiedHistogramFetchParamsExternal['dataSource'];
   query: UnifiedHistogramFetchParams['query'];
-  columns: UnifiedHistogramFetchParamsExternal['columns'];
+  columns: UnifiedHistogramFetchParams['columns'];
   breakdownField: string | undefined;
 }) {
   if (!isTimeBased) {

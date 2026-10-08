@@ -223,10 +223,6 @@ export interface UnifiedHistogramFetchParamsExternal {
    */
   controlsState?: ControlPanelsState<OptionsListESQLControlState>;
   /**
-   * The current columns
-   */
-  columns?: DatatableColumn[];
-  /**
    * Preloaded data table sometimes used for rendering the chart in ES|QL mode
    */
   table?: Datatable;
@@ -263,6 +259,8 @@ export type UnifiedHistogramFetchParams = Omit<
   // additional
   lastReloadRequestTime: number;
   isTimeBased: boolean;
+  /** The columns of the ES|QL data source, derived from `dataSource`. */
+  columns: readonly DatatableColumn[] | undefined;
   columnsMap: Record<string, DatatableColumn> | undefined;
   breakdown:
     | {
