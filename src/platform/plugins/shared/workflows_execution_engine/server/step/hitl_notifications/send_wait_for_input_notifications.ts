@@ -17,7 +17,10 @@ import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
+  fitHitlRenderedTextPreservingLink,
+  fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -34,8 +37,11 @@ function buildDefaultInputTeamsMessage({
   stepMessage: string;
   formUrl: string;
 }): string {
-  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
-  return `${prompt}Open form: ${formUrl}`;
+  return fitHitlTextPreservingSuffix(
+    stepMessage,
+    `Open form: ${formUrl}`,
+    TEAMS_CONTENT_MAX_LENGTH
+  );
 }
 
 function buildDefaultInputSlackMessage({
@@ -221,12 +227,16 @@ export async function sendWaitForInputNotifications({
   if (teamsConnectorId && teamId && channelId) {
     const content =
       teamsConfig.message != null
-        ? resolveWaitForInputChannelMessage({
-            channelMessageTemplate: teamsConfig.message,
-            stepMessage,
+        ? fitHitlRenderedTextPreservingLink(
+            resolveWaitForInputChannelMessage({
+              channelMessageTemplate: teamsConfig.message,
+              stepMessage,
+              formUrl,
+              renderTemplate,
+            }),
             formUrl,
-            renderTemplate,
-          })
+            TEAMS_CONTENT_MAX_LENGTH
+          )
         : buildDefaultInputTeamsMessage({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({
