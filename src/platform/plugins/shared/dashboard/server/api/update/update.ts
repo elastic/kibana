@@ -143,7 +143,8 @@ export async function update(
         version: existing.version,
       }
     );
-    addToHistory({
+    console.log({ savedObject });
+    await addToHistory({
       ctx: requestCtx,
       dashboardId: id,
       snapshot: updateBody,

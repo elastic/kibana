@@ -47,7 +47,6 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
       },
     },
     async (ctx, req, res) => {
-      console.log('HERE!!!!!!!!!!!!!!!!');
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({

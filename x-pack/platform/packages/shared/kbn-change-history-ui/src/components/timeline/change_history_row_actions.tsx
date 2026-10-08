@@ -21,7 +21,7 @@ const ChangeHistoryRowActions = ({
   onRestoreVersion,
 }: ChangeHistoryRowActionsProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
-  console.log({ onRestoreVersion });
+
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const items = [
       ...(onCompareToVersion

@@ -43,7 +43,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
   const modalTitleId = useGeneratedHtmlId();
-  console.log({ supports });
+
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
   const [compareOverride, setCompareOverride] = useState<
     ChangeHistoryCompareRowOverride | undefined
@@ -66,6 +66,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
     objectId,
     enabled: isOpen,
   });
+
+  useEffect(() => {
+    console.log({ items });
+  }, [items]);
 
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {

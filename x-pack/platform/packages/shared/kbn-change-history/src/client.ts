@@ -255,6 +255,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         },
         () => client.create({ ...request })
       );
+      console.log('!!!!!!!!!!!!!!!!!!!!!!!!! LOG');
     } catch (err) {
       this.logger.error(`Error saving change history: ${err}`);
       throw err;

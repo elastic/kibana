@@ -90,7 +90,7 @@ export const useChangeHistoryCompare = ({
       target: targetChange,
     };
   }, [baselineChange, endpoints, targetChange]);
-  console.log({ compareSpec });
+
   return {
     compareSpec,
     isLoadingCompareContext:

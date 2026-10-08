@@ -60,12 +60,15 @@ export const addToHistory = async ({
     ...(sequence.previous !== sequence.current ? { sequence: sequence.current } : {}),
     snapshot, // post-change state
   };
+
   await client.log(change, {
     action: 'dashboard_update',
     username: user.username,
     userProfileId: user.profile_uid,
     spaceId,
     ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
+    refresh: 'wait_for', // wait for ES to update so that we fetch the updated list
   });
+
   // return res.ok();
 };

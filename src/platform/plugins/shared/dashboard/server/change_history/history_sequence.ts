@@ -29,7 +29,7 @@ export const getNextHistorySequence = (
   const hasChanged =
     !equal(existingAttributes, omit(next.attributes, 'historySequence')) ||
     !equal(existing.references, next.references);
-  console.log({ hasChanged });
+
   if (existingSequence == null) return INITIAL_HISTORY_SEQUENCE;
   return hasChanged ? existingSequence + 1 : existingSequence;
 };

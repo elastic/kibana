@@ -121,7 +121,6 @@ export const registerHistoryListRoute = (
                     jsondiffpatch.diff(item.object.snapshot, items[index + 1].object.snapshot)
                   )
                 : undefined;
-            console.log({ changes, sequence: item.object.sequence });
             return {
               id: item.event.id,
               action: item.event.action,

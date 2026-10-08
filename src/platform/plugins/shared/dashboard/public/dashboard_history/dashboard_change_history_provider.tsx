@@ -47,9 +47,10 @@ export const DashboardChangeHistoryProvider = ({
     []
   );
 
-  const adapter = useMemo(() => {
-    return createDashboardChangeHistoryAdapter(coreServices.http, dashboardApi);
-  }, [dashboardApi]);
+  const adapter = useMemo(
+    () => createDashboardChangeHistoryAdapter(coreServices.http, dashboardApi),
+    [dashboardApi]
+  );
 
   return (
     <ChangeHistoryProvider

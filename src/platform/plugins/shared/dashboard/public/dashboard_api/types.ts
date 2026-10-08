@@ -275,5 +275,6 @@ export type DashboardInternalApi = ReturnType<
 
 export interface DashboardUser {
   uid: string;
+  name?: string;
   hasGlobalAccessControlPrivilege: boolean;
 }

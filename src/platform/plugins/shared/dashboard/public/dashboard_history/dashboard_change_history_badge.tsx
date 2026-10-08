@@ -21,7 +21,7 @@ const DashboardChangeHistoryBadge = ({
   item: ChangeHistoryListItem;
 }): JSX.Element | null => {
   const { euiTheme } = useEuiTheme();
-  console.log({ item });
+
   if (item.metadata?.unsavedChanges) {
     return (
       <EuiBadge color={euiTheme.colors.backgroundLightWarning}>

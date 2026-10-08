@@ -11,8 +11,8 @@ import { mapChangeHistoryHttpError, type ChangeHistoryAdapter } from '@kbn/chang
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
+import type { RestoreChangeResponse } from '../../server/change_history/register_restore_route';
 import type { DashboardApi } from '../dashboard_api/types';
-import { RestoreChangeResponse } from '@kbn/dashboard-plugin/server/change_history/register_restore_route';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
@@ -26,7 +26,6 @@ export const createDashboardChangeHistoryAdapter = (
         query: { page: page.index + 1, per_page: page.size },
         signal,
       });
-      console.log({ response });
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
@@ -49,7 +48,7 @@ export const createDashboardChangeHistoryAdapter = (
     if (!dashboardApi || !dashboardApi!.hasUnsavedChanges$.getValue()) return;
     return {
       id: dashboardApi!.uuid,
-      actor: { name: '' },
+      actor: { name: dashboardApi.user?.name ?? '' },
       action: 'dashboard_unsaved_changes',
       timestamp: new Date(Date.now()).toISOString(),
       snapshot: dashboardApi!.getSerializedState().attributes,
@@ -58,7 +57,6 @@ export const createDashboardChangeHistoryAdapter = (
   },
   restoreChange: dashboardApi
     ? async ({ objectId, changeId, signal }) => {
-        console.log('RESTORE!!!!!!!!!!!!!!!!!!!!');
         try {
           const response = await http.get<RestoreChangeResponse>(
             `${BASE_HISTORY_PATH}/${objectId}/restore/${changeId}`,
