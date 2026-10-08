@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractRequest, ContractResponse, Responder, Violation } from '../contract/types';
+import type {
+  ContractProtocol,
+  ContractRequest,
+  ContractResponse,
+  NamedOperationRef,
+  Responder,
+  Violation,
+} from '../contract/types';
 import type {
   OperationRef,
   Recording,
@@ -18,6 +25,8 @@ import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
 import { sampleResponse } from '../engine/sample_response';
+import type { GraphQLSpec } from '../graphql/graphql_protocol';
+import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
@@ -29,8 +38,13 @@ export interface ContractCall {
   readonly request: string;
   /** The matched operation's `operationId`, or `METHOD /path` when it has none. */
   readonly operation?: string;
-  /** The matched operation's method (lowercase), path template and, for named specs, spec name. */
-  readonly matched?: OperationRef;
+  /**
+   * The matched operation: its method (lowercase) and path template, or its name for protocols
+   * such as GraphQL; and, for named specs, the spec's name.
+   */
+  readonly matched?: OperationRef | NamedOperationRef;
+  /** Set for named operations: whether the operation only reads, e.g. a GraphQL query. */
+  readonly readOnly?: boolean;
   /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
   readonly token?: true;
   readonly status: number;
@@ -38,12 +52,15 @@ export interface ContractCall {
   readonly responseViolations: readonly Violation[];
 }
 
+/** An OpenAPI document, or a spec of a protocol with its own endpoints, such as GraphQL. */
+export type ContractMockSpec = OpenApiDocument | GraphQLSpec;
+
 export interface ContractMockOptions extends PaginationOptions {
   /**
    * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
    * as `{ v1, v2 }`) let `calls`, fixtures, recordings and pagination tell their operations apart.
    */
-  readonly specs: readonly OpenApiDocument[] | Readonly<Record<string, OpenApiDocument>>;
+  readonly specs: readonly ContractMockSpec[] | Readonly<Record<string, ContractMockSpec>>;
   /** Hand-written responses, served in preference to everything else. */
   readonly fixtures?: readonly ResponseFixture[];
   /** Responses captured from the vendor, served when they still conform to the spec. */
@@ -99,8 +116,13 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   };
 };
 
-const isDocumentList = (specs: ContractMockOptions['specs']): specs is readonly OpenApiDocument[] =>
+const isSpecList = (specs: ContractMockOptions['specs']): specs is readonly ContractMockSpec[] =>
   Array.isArray(specs);
+
+const toNamedSpecs = (
+  specs: ContractMockOptions['specs']
+): Array<readonly [string | undefined, ContractMockSpec]> =>
+  isSpecList(specs) ? specs.map((spec) => [undefined, spec] as const) : Object.entries(specs);
 
 // Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
 // as Microsoft Graph, so mocks created from the same document share its operations.
@@ -115,9 +137,20 @@ const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation
 };
 
 const loadSpecs = (specs: ContractMockOptions['specs']): ContractOperation[] =>
-  isDocumentList(specs)
-    ? specs.flatMap((document) => loadSpec(document))
-    : Object.entries(specs).flatMap(([source, document]) => loadSpec(document, source));
+  toNamedSpecs(specs).flatMap(([source, spec]) =>
+    isGraphQLSpec(spec) ? [] : loadSpec(spec, source)
+  );
+
+const loadProtocols = (specs: ContractMockOptions['specs']): Map<string, ContractProtocol> => {
+  const protocols = new Map<string, ContractProtocol>();
+  for (const [source, spec] of toNamedSpecs(specs)) {
+    if (isGraphQLSpec(spec)) {
+      const protocol = createGraphQLProtocol(spec, source);
+      protocol.endpoints.forEach((endpoint) => protocols.set(endpoint, protocol));
+    }
+  }
+  return protocols;
+};
 
 const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
   method,
@@ -142,7 +175,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
  * get 404, requests without the credentials the operation requires get 401, and requests that
  * break the spec get 422 listing the violations; every request is recorded in `calls`. The
- * token URLs of the specs' OAuth 2 flows issue stub tokens. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * token URLs of the specs' OAuth 2 flows issue stub tokens, and GraphQL specs answer at their
+ * endpoints. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createContractMockFetch = ({
   specs,
@@ -153,6 +187,7 @@ export const createContractMockFetch = ({
   respond = sampleResponse,
 }: ContractMockOptions): ContractMock => {
   const operations = loadSpecs(specs);
+  const protocols = loadProtocols(specs);
   const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
@@ -169,6 +204,19 @@ export const createContractMockFetch = ({
     const description = `${request.method.toUpperCase()} ${request.url.origin}${
       request.url.pathname
     }`;
+    const protocol = protocols.get(toEndpoint(request.url));
+    if (protocol) {
+      const { response, operations: called, requestViolations } = await protocol.handle(request);
+      const base = { request: description, status: response.statusCode, requestViolations };
+      if (called.length === 0) {
+        calls.push({ ...base, responseViolations: [] });
+      }
+      for (const { name, source, readOnly } of called) {
+        const matched = { name, ...(source === undefined ? {} : { source }) };
+        calls.push({ ...base, operation: name, matched, readOnly, responseViolations: [] });
+      }
+      return response;
+    }
     const routed = contract.route(request);
     const grants = tokenEndpoints.get(`${request.url.origin}${request.url.pathname}`);
     if (!('operation' in routed) && grants) {

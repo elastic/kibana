@@ -46,6 +46,23 @@ Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendo
 
 Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
 
+## GraphQL
+
+GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
+
+```ts
+const { fetch, calls } = createContractMockFetch({
+  specs: {
+    v2: mondayOpenApi,
+    graphql: { format: 'graphql', sdl: mondaySchema, endpoints: ['https://api.monday.com/v2'] },
+  },
+});
+```
+
+Requests to an endpoint (`GET` with `query`, `operationName` and `variables` in the query string, or `POST` with them in a JSON body) are parsed and validated against the schema, and their variables and arguments coerced to their declared types. A request that breaks the schema gets **400** with GraphQL `errors`, and a mutation sent with `GET` is rejected. Valid requests execute against the schema with sampled values, so a response has exactly the fields the document selects: scalars are sampled as in OpenAPI responses (custom scalars by their names, such as `ISO8601DateTime`), enums answer their first value, lists hold one item, abstract types resolve to their first possible type, and `Boolean`s are `false`, so flags such as a connection's `hasNextPage` end paging after one page. Documents that use `@defer` or `@stream` get **501**.
+
+Each root field a request selects is recorded in `calls` as its own operation, named by the operation type and field, such as `query items`. Its `matched` has that `name` instead of a method and path, and `readOnly` is `true` for queries.
+
 ## Credentials
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
