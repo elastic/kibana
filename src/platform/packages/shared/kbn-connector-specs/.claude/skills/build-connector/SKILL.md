@@ -67,10 +67,13 @@ added line belongs to that connector.
 
 Mark task 1 as `in_progress`.
 
-Before generating code, research the vendor's real API docs for the actions you plan to implement —
-specifically update semantics (partial vs. full-replace), array query-param encoding, per-action auth
-scopes, and regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code"
-in `create-connector/reference/custom-connector-setup.md`. Bugs that trace back to skipping this (wrong
+Before generating code, find the vendor's machine-readable spec and describe the operations the
+planned actions call with `node scripts/connector_vendor_api --inspect` (see "Start from the vendor's
+spec" in `create-connector/reference/custom-connector-setup.md`): methods, parameter locations, array
+encoding, bounds and scopes come from it. Then research the vendor's real API docs for what the spec
+doesn't settle — specifically update semantics (partial vs. full-replace), per-action auth scopes, and
+regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code" in the same
+file. Bugs that trace back to skipping this (wrong
 auth scope, 400s on partial updates, 404s on regional domains) are far cheaper to avoid up front than to
 find during Task 7's live chat test or after the PR is open.
 

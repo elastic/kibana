@@ -593,6 +593,9 @@ Each connector can have a `vendor_api/` folder next to its spec, recording the v
 The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
 
 ```sh
+# Before writing the connector: list what a vendor spec offers, then describe the operations to call
+node scripts/connector_vendor_api --inspect --source v1=https://… --grep monitor
+node scripts/connector_vendor_api --inspect --source v1=https://… --operation 'GET /api/v1/monitor'
 # First run: name each vendor spec; YAML or JSON, external $refs are bundled
 node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
 # After changing the connector: record offline against the committed snapshots
@@ -604,6 +607,8 @@ node scripts/connector_vendor_api --connector datadog --check
 # Specs of tens of megabytes, such as Microsoft Graph's, need a larger heap to fetch
 NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
+
+`--inspect` writes nothing and needs no connector, so it can run before any code exists. It loads specs the way recording does (converted to OpenAPI 3, `$ref`s bundled, and with `--connector`, the connector's manifest sources and overlay), then either lists operations (`METHOD path operationId summary`, up to 200 per source; narrow with `--grep`) or, for each `--operation` (`METHOD /path` or an `operationId`), prints as YAML what an action needs to call it: servers, security schemes and required scopes, every parameter with its location and effective `style`/`explode`, the request body and success response schemas with `$ref`s inlined `--depth` levels deep (default 4), and the `pagination` descriptor recording would propose. Examples and `x-` extensions are left out and descriptions shortened, so even a large spec gives a short answer.
 
 The folder holds:
 

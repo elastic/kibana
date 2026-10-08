@@ -10,15 +10,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
-import {
-  applyOverlay,
-  convertDiscovery,
-  convertSwagger2,
-  isDiscoveryDocument,
-} from '@kbn/connector-contract-mock';
+import { applyOverlay } from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
-import { bundleSpec } from './bundle_spec';
 import { forEachRef, isJsonObject } from './json_pointer';
+import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
 import type {
@@ -71,7 +66,8 @@ const FIXTURES = 'fixtures.json';
 const OVERLAY = 'overlay.yaml';
 const snapshotFile = (source: string) => path.join('snapshots', `${source}.openapi.json`);
 
-const readOptional = async (file: string): Promise<string | undefined> => {
+/** Reads a file that may not exist yet. */
+export const readOptional = async (file: string): Promise<string | undefined> => {
   try {
     return await fs.readFile(file, 'utf8');
   } catch (error) {
@@ -81,9 +77,6 @@ const readOptional = async (file: string): Promise<string | undefined> => {
     throw error;
   }
 };
-
-const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
-  document.swagger === '2.0' ? 'swagger' : 'openapi';
 
 const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
   const version = isJsonObject(info) ? info.version : undefined;
@@ -185,14 +178,9 @@ export const updateVendorApi = async ({
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
       log.info(`Fetching ${name} from ${url}`);
-      const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
-      // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
-      const discovery = isDiscoveryDocument(parsed);
-      const document = discovery ? convertDiscovery(parsed) : parsed;
-      const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
-      const bundled = await bundleSpec(document, { url, load });
-      formats[name] = discovery ? 'discovery' : formatOf(bundled);
-      raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
+      const { format, document } = await loadVendorSpec(url, fetchText);
+      formats[name] = format;
+      raw[name] = document;
     } else {
       raw[name] = JSON.parse(snapshot);
       formats[name] = previous?.sources[name]?.format ?? 'openapi';

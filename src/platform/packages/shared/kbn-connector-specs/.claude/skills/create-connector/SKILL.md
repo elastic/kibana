@@ -27,8 +27,17 @@ Follow only the steps for the chosen path. Do not mix them.
 
 ### Research the vendor API before writing schemas or handlers
 
-For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
-vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace, including
+For a custom (non-MCP) connector, do this before Step 2. Start from the vendor's own machine-readable
+spec: find its URL, then list and describe the operations your actions will call with
+`node scripts/connector_vendor_api --inspect --source v1=<url> [--grep <text> | --operation '<METHOD> <path>']`,
+and write each action's method, parameter locations and zod bounds from that description. See "Start
+from the vendor's spec" in
+[reference/custom-connector-setup.md](reference/custom-connector-setup.md). The connector is recorded
+and checked against the same spec in Step 4, so code written from it avoids most of what recording
+would report.
+
+Then, for each action, find the vendor's real API docs and verify what the spec doesn't settle — don't
+assume: update semantics (partial vs. full-replace, including
 nested objects sent whole), the HTTP method and body shape of that exact route, how array query params
 are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH` actions belong
 in the query string or the JSON body, the auth scope or cloud role (and the level it is granted at) each
@@ -219,7 +228,7 @@ the contract test fails otherwise. The folder records the vendor operations each
 snapshot of the vendor's spec, so the connector is checked offline against it on every CI run. See
 "Vendor API artifacts" in the package README for the file formats.
 
-1. **Record.** Using the spec URLs from the vendor API research, run:
+1. **Record.** With the same spec URLs you inspected in Step 1, run:
 
    ```bash
    node scripts/connector_vendor_api --connector {connector_name} --source v1=https://…/openapi.json

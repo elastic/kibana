@@ -13,6 +13,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findConnector } from '../src/test/vendor_api/find_connector';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
 import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
 
 const parseSource = (flag: string): [string, string] => {
@@ -33,12 +34,33 @@ const fetchText = async (url: string): Promise<string> => {
 
 run(
   async ({ log, flagsReader }) => {
-    const id = flagsReader.requiredString('connector');
     const check = flagsReader.boolean('check');
     const sources = Object.fromEntries(
       (flagsReader.arrayOfStrings('source') ?? []).map(parseSource)
     );
 
+    if (flagsReader.boolean('inspect')) {
+      if (check || flagsReader.boolean('refresh')) {
+        throw createFlagError('--inspect writes nothing; leave out --check and --refresh');
+      }
+      const inspectedId = flagsReader.string('connector');
+      const { output, problems } = await inspectVendorApi({
+        sources,
+        directory: inspectedId ? (await findConnector(inspectedId)).directory : undefined,
+        operations: flagsReader.arrayOfStrings('operation') ?? [],
+        grep: flagsReader.string('grep'),
+        depth: flagsReader.number('depth'),
+        fetchText,
+        log,
+      });
+      log.write(output);
+      if (problems.length > 0) {
+        throw createFailError(problems.join('\n'));
+      }
+      return;
+    }
+
+    const id = flagsReader.requiredString('connector');
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -79,15 +101,22 @@ run(
   {
     description: `Records which vendor API operations a connector calls and writes its vendor_api artifacts.
 
-      Without --source or --refresh, records offline against the committed snapshots.`,
+      Without --source or --refresh, records offline against the committed snapshots.
+      With --inspect, shows what the vendor specs offer instead, before or while writing the connector.`,
     flags: {
-      string: ['connector', 'source'],
-      boolean: ['refresh', 'check'],
+      string: ['connector', 'source', 'operation', 'grep', 'depth'],
+      boolean: ['refresh', 'check', 'inspect'],
       help: `
-        --connector  Connector metadata.id, for example datadog or .datadog (required)
+        --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect)
         --source     name=url of a vendor spec to add or move; repeatable. Fetches every source.
         --refresh    Fetch every source URL in manifest.json again
         --check      Write nothing; fail if artifacts would change or problems are found
+        --inspect    Write nothing; list the operations of the --source specs, or of the connector's
+                     manifest sources, with its overlay applied
+        --operation  With --inspect, describe this operation instead: "METHOD /path" or an
+                     operationId; repeatable
+        --grep       With --inspect, list only operations matching this case-insensitive pattern
+        --depth      With --inspect, how many $refs deep to inline schemas (default 4)
       `,
     },
   }
