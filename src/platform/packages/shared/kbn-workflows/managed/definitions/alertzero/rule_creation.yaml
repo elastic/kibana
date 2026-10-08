@@ -102,6 +102,9 @@ steps:
         strings for interval, from and to, empty lists for threat and tags),
         and give the reason in one sentence under "reason". Leave "reason"
         empty when the tool returned a rule.
+
+        Write the name, the description and the reason in ASD-STE100 Simplified
+        Technical English.
       schema:
         type: object
         additionalProperties: false
@@ -279,7 +282,7 @@ steps:
           **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
 
           **On approval**
-          The rule is created disabled under your identity; review and enable it from the rules page. Dismissing discards the draft.
+          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low
