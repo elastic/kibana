@@ -1430,6 +1430,7 @@ x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunt
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elastic/security-generative-ai
@@ -1442,10 +1443,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/se
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
-x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis @elastic/security-detection-platform
-
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
-
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
