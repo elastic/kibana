@@ -137,12 +137,22 @@ describe('HIGHLIGHT > columnsAfter', () => {
       expect(getGeneratedColumns('FROM a | HIGHLIGHT QSTR("fox")')).toHaveLength(3);
     });
 
-    it('assumes every text and keyword column when both the query and ON are omitted', () => {
-      expect(getGeneratedColumns('FROM a | WHERE MATCH(title, "fox") | HIGHLIGHT')).toEqual([
-        'highlight_title',
-        'highlight_author',
-        'highlight_body',
-      ]);
+    it('generates the columns an earlier WHERE marked when both the query and ON are omitted', () => {
+      const markedColumns = previousColumns.map((column) =>
+        column.name === 'title' ? { ...column, fullTextMatch: 'field' as const } : column
+      );
+      const { root } = Parser.parse('FROM a | HIGHLIGHT');
+      const command = root.commands.find(({ name }) => name === 'highlight') as ESQLCommand;
+
+      expect(
+        columnsAfter(command, markedColumns)
+          .map(({ name }) => name)
+          .filter((name) => name.startsWith('highlight_'))
+      ).toEqual(['highlight_title']);
+    });
+
+    it('generates nothing when both the query and ON are omitted and nothing is marked', () => {
+      expect(getGeneratedColumns('FROM a | HIGHLIGHT')).toEqual([]);
     });
 
     it('uses the prefix for the derived columns', () => {

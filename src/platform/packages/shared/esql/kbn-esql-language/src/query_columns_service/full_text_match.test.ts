@@ -171,16 +171,38 @@ describe('full-text match marks on columns', () => {
       ).toEqual(['highlight_title', 'highlight_author']);
     });
 
-    it('assumes every text column when nothing can be reused', async () => {
+    it('generates nothing when the WHERE has no reusable full-text condition', async () => {
       expect(
         await getHighlightColumns('FROM books | WHERE NOT MATCH(title, "x") | HIGHLIGHT')
-      ).toEqual(['highlight_title', 'highlight_author']);
+      ).toEqual([]);
+      expect(await getHighlightColumns('FROM books | WHERE author == "x" | HIGHLIGHT')).toEqual([]);
+      expect(
+        await getHighlightColumns('FROM books | WHERE author IS NOT NULL | HIGHLIGHT')
+      ).toEqual([]);
     });
 
-    it('does not generate a column for a dropped field', async () => {
+    it('generates nothing after a command that does not preserve documents', async () => {
+      expect(
+        await getHighlightColumns(
+          'FROM books | WHERE MATCH(title, "x") | STATS c = COUNT(*) BY title | HIGHLIGHT'
+        )
+      ).toEqual([]);
+    });
+
+    it('generates nothing for a dropped field', async () => {
       expect(
         await getHighlightColumns('FROM books | WHERE MATCH(title, "x") | DROP title | HIGHLIGHT')
-      ).toEqual(['highlight_author']);
+      ).toEqual([]);
+    });
+
+    it('generates every text column when the WHERE targets a parameter', async () => {
+      expect(
+        await getHighlightColumns('FROM books | WHERE MATCH(?field, "x") | HIGHLIGHT')
+      ).toEqual(['highlight_title', 'highlight_author']);
+      expect(await getHighlightColumns('FROM books | WHERE ??field : "x" | HIGHLIGHT')).toEqual([
+        'highlight_title',
+        'highlight_author',
+      ]);
     });
 
     it('does not use the marks when ON is given', async () => {

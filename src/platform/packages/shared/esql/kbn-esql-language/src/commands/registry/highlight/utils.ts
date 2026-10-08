@@ -273,21 +273,15 @@ const getHighlightableColumnNames = (columns: ESQLColumnData[]): string[] =>
 
 /**
  * The columns an earlier WHERE targets with its positive full-text conditions: the ones it
- * marked, or every text column when a condition names no field. When nothing is marked the
- * query cannot be reused, which Elasticsearch rejects, so any text column is assumed to avoid
- * reporting a valid column as unknown.
+ * marked, or every text column when a condition names no field. With nothing marked there is no
+ * query to reuse, which Elasticsearch rejects, so no column is generated.
  */
 const getReusedWhereColumnNames = (columns: ESQLColumnData[]): string[] => {
   const markedColumns = columns.filter(({ fullTextMatch }) => fullTextMatch !== undefined);
 
-  if (
-    markedColumns.length === 0 ||
-    markedColumns.some(({ fullTextMatch }) => fullTextMatch === 'all')
-  ) {
-    return getHighlightableColumnNames(columns);
-  }
-
-  return markedColumns.map(({ name }) => name);
+  return markedColumns.some(({ fullTextMatch }) => fullTextMatch === 'all')
+    ? getHighlightableColumnNames(columns)
+    : markedColumns.map(({ name }) => name);
 };
 
 /**

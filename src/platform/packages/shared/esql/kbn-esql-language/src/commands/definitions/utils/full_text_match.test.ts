@@ -30,6 +30,8 @@ describe('getFullTextTargets', () => {
     ['MATCH(a, "x") AND MATCH(b, "y")', { fields: ['a', 'b'], all: false }],
     ['MATCH(a, "x") OR MATCH(b, "y")', { fields: ['a', 'b'], all: false }],
     ['(MATCH(a, "x") OR QSTR("y")) AND n > 1', { fields: ['a'], all: true }],
+    ['MATCH(?field, "x")', { fields: [], all: true }],
+    ['??field : "x"', { fields: [], all: true }],
   ])('%s', (condition, expected) => {
     expect(getTargets(condition)).toEqual(expected);
   });

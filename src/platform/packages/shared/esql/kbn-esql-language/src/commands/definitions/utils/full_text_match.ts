@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isColumn, isFunctionExpression } from '@elastic/esql';
+import { isColumn, isFunctionExpression, isParamLiteral } from '@elastic/esql';
 import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../registry/types';
 import { METADATA_FIELDS } from '../../registry/options/metadata';
@@ -66,8 +66,11 @@ const collectTargets = (expression: ESQLAstItem, targets: FullTextTargets): void
   } else if (FIELD_TARGETING_FUNCTIONS.includes(name)) {
     const [field] = expression.args;
 
-    if (!Array.isArray(field) && isColumn(field)) {
+    // A field that cannot be resolved here, such as a parameter, could be any text column.
+    if (!Array.isArray(field) && isColumn(field) && !field.args.some(isParamLiteral)) {
       targets.fields.add(field.name);
+    } else {
+      targets.all = true;
     }
   } else {
     expression.args.forEach((arg) => collectTargets(arg, targets));
