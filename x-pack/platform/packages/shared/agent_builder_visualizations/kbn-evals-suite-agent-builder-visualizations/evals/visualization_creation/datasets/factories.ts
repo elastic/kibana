@@ -86,8 +86,11 @@ const statsList = (metrics: GoldMetric[]): string =>
  * Kibana applies the time range to `@timestamp` on its own, so only other date fields
  * need an explicit time-picker `WHERE`.
  */
-const timeWindow = (timeField: string): string =>
-  timeField === '@timestamp' ? '' : `\n| WHERE ${timeField} >= ?_tstart AND ${timeField} < ?_tend`;
+const timeWindow = (timeField: string): string[] =>
+  timeField === '@timestamp' ? [] : [`| WHERE ${timeField} >= ?_tstart AND ${timeField} < ?_tend`];
+
+/** Join query commands, one per line; an empty group (e.g. no time window) adds no line. */
+const pipeline = (...commands: Array<string | string[]>): string => commands.flat().join('\n');
 
 /** Top-N by category in the agent's idiom: time window, STATS ... BY, SORT first metric, LIMIT. */
 export const categoricalQuery = ({
@@ -97,10 +100,13 @@ export const categoricalQuery = ({
   timeField = '@timestamp',
   limit = 10,
 }: QuerySource & { groupBy: string; limit?: number }): string =>
-  `FROM ${index}${timeWindow(timeField)}
-| STATS ${statsList(metrics)} BY ${groupBy}
-| SORT \`${metrics[0].alias}\` DESC
-| LIMIT ${limit}`;
+  pipeline(
+    `FROM ${index}`,
+    timeWindow(timeField),
+    `| STATS ${statsList(metrics)} BY ${groupBy}`,
+    `| SORT \`${metrics[0].alias}\` DESC`,
+    `| LIMIT ${limit}`
+  );
 
 /**
  * `@timestamp` time series use `TBUCKET(100, ?_tstart, ?_tend)`. The bounds size the
@@ -126,8 +132,7 @@ export const timeSeriesQuery = ({
 
 /** Single-row totals for metric and gauge charts. */
 export const totalsQuery = ({ index, metrics, timeField = '@timestamp' }: QuerySource): string =>
-  `FROM ${index}${timeWindow(timeField)}
-| STATS ${statsList(metrics)}`;
+  pipeline(`FROM ${index}`, timeWindow(timeField), `| STATS ${statsList(metrics)}`);
 
 export const TIME_BUCKET_COLUMN = 'Time Bucket';
 
