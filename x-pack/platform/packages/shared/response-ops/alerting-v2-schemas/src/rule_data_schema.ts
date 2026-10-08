@@ -6,46 +6,74 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
-import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
-import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
-import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
+  validateEsqlQuery,
+  validateEsqlQuerySegment,
+  validateMinDuration,
+  composeEsqlQuery,
+  validateComposedEsqlQuery,
+} from './validation';
+import {
+  actorSchema,
+  durationSchema,
+  entityIdSchema,
+  ENTITY_ID_NOTE,
+  ESTIMATED_COUNT_NOTE,
+  queryIntSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
+import {
+  ID_MAX_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
   MAX_GROUPING_FIELDS,
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
-  ID_MAX_LENGTH,
-  VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_ARTIFACT_DATA_LENGTH,
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
 } from './constants';
+import { bulkErrorSchema } from './bulk_operation_schema';
 
 /** Primitives */
 
+// `abort` makes the length cap final so the parser never runs on oversized input.
 export const esqlQuerySchema = z
   .string()
   .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH)
+  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
   .superRefine((value, ctx) => {
     const error = validateEsqlQuery(value);
     if (error) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+      ctx.addIssue({ code: 'custom', message: error });
     }
   });
 
 /** Kind */
 
 export const ruleKindSchema = z
-  .enum(['alert', 'signal'])
-  .describe(
-    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-  );
+  .union([
+    z
+      .literal('alert')
+      .describe(
+        'Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.'
+      ),
+    z
+      .literal('signal')
+      .describe(
+        'Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.'
+      ),
+  ])
+  .describe('Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -63,21 +91,29 @@ export const metadataSchema = z
       .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .describe('Human-readable description of the rule.'),
-    owner: z.string().max(256).optional().describe('Owner of the rule.'),
     tags: tagsSchema
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
-    builder_type: z
-      .string()
-      .max(64)
+    routing_tags: tagsSchema
+      .min(1)
+      .optional()
+      .describe(
+        'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".'
+      ),
+    builder: z
+      .object({
+        type: z.string().max(64).describe('Rule builder type.'),
+      })
+      .strict()
       .optional()
       .describe(
         'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
       ),
   })
   .strict()
-  .describe('Rule metadata.');
+  .describe('Rule metadata.')
+  .meta({ id: 'alerting_rule_metadata' });
 
 /** Schedule (required) */
 
@@ -85,7 +121,7 @@ export const metadataSchema = z
 export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+    ctx.addIssue({ code: 'custom', message: error });
   }
 });
 
@@ -97,97 +133,67 @@ export const scheduleSchema = z
       .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
   })
   .strict()
-  .describe('Execution schedule configuration.');
+  .describe('Execution schedule configuration.')
+  .meta({ id: 'alerting_rule_schedule' });
 
 /** Query (required) */
-
-export const queryFormatSchema = z.enum(['composed', 'standalone']);
-export const queryFormat = queryFormatSchema.enum;
-export type QueryFormat = z.infer<typeof queryFormatSchema>;
-
-/** Recovery strategy. */
-export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
-export const recoveryStrategy = recoveryStrategySchema.enum;
-export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
-
-/**
- * No-data strategy.
- *
- * Note: `'emit'` is a valid stored/engine value but is temporarily rejected as
- * write-API input (create/update).
- */
-export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
-export const noDataStrategy = noDataStrategySchema.enum;
-export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
  * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
  * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
- * splicing the segment onto `base`. We only enforce structural bounds here
- * (length, non-empty). Full parser validation only runs when the segment is
- * composed with its `base` via `composeEsqlQuery`.
+ * splicing the segment onto `base`. Parsed on its own rather than only as part
+ * of the composed query, because the parser silently drops a command it cannot
+ * read: an unparseable segment composes to bare `base`, which would store a
+ * rule where every row matches.
  */
 export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH)
-  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
+  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
+  .refine((s) => s.trim().length > 0, {
+    message: 'Segment must not be whitespace-only',
+    abort: true,
+  })
+  .superRefine((value, ctx) => {
+    const error = validateEsqlQuerySegment(value);
+    if (error) {
+      ctx.addIssue({ code: 'custom', message: error });
+    }
+  });
 
-/** Composed wrappers (segment-based, appended to `base`). */
-
-const composedBreachSchema = z
+const breachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection (required).'
+      "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause."
     ),
   })
-  .strict();
-
-const composedRecoverySchema = z
-  .object({
-    segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
-  })
   .strict()
-  .describe('Recovery query segment. Present only when recovery_strategy is "query".');
+  .describe(
+    'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.'
+  )
+  .meta({ id: 'alerting_rule_breach' });
 
-/** Standalone wrappers (full queries). */
+/**
+ * Composing re-parses both parts, so it repeats the error of whichever part is
+ * already invalid. The composition checks stand down once one has reported.
+ */
+const hasIssueOn = (
+  issues: ReadonlyArray<{ path?: PropertyKey[] }>,
+  ...fields: string[]
+): boolean => issues.some((issue) => fields.some((field) => issue.path?.[0] === field));
 
-const standaloneBreachSchema = z
+export const querySchema = z
   .object({
-    query: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
-  })
-  .strict();
-
-const standaloneRecoverySchema = z
-  .object({
-    query: esqlQuerySchema.describe('Full ES|QL query for recovery detection.'),
-  })
-  .strict()
-  .describe('Recovery query. Present only when recovery_strategy is "query".');
-
-const standaloneNoDataSchema = z
-  .object({
-    query: esqlQuerySchema.describe('Full ES|QL query that detects presence of data.'),
-  })
-  .strict()
-  .describe('No-data detection query. Present only when no_data_strategy is not "none".');
-
-export const composedQuerySchema = z
-  .object({
-    format: z.literal(queryFormat.composed),
     base: esqlQuerySchema.describe(
-      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+      'ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.'
     ),
-    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
-    recovery: composedRecoverySchema
-      .optional()
-      .describe('Recovery query segment. Required when recovery_strategy is "query".'),
+    breach: breachSchema.optional(),
   })
   .strict()
   .check((ctx) => {
-    const breachError = validateEsqlQuery(
-      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-    );
+    if (!ctx.value.breach || hasIssueOn(ctx.issues, 'base', 'breach')) return;
+
+    const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
     if (breachError) {
       ctx.issues.push({
         code: 'custom',
@@ -196,131 +202,276 @@ export const composedQuerySchema = z
         input: ctx.value.breach.segment,
       });
     }
-    if (ctx.value.recovery) {
-      const recoveryError = validateEsqlQuery(
-        composeEsqlQuery(ctx.value.base, ctx.value.recovery.segment)
-      );
-      if (recoveryError) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['recovery', 'segment'],
-          message: recoveryError,
-          input: ctx.value.recovery.segment,
-        });
-      }
-    }
   })
-  .describe('Composed query: a shared base with appendable breach and recovery segments.');
-
-export const standaloneQuerySchema = z
-  .object({
-    format: z.literal(queryFormat.standalone),
-    breach: standaloneBreachSchema.describe('Breach detection configuration (required).'),
-    recovery: standaloneRecoverySchema
-      .optional()
-      .describe('Recovery query. Required when recovery_strategy is "query".'),
-    no_data: standaloneNoDataSchema
-      .optional()
-      .describe('No-data detection query. Required when no_data_strategy is not "none".'),
-  })
-  .strict()
-  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
-
-export const querySchema = z
-  .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
-  .describe('Detection query configuration.');
+  .describe(
+    'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+  )
+  .meta({ id: 'alerting_rule_query' });
 
 export type Query = z.infer<typeof querySchema>;
 
+/** Recovery (alert rules only) */
+
+export const recoveryStrategySchema = z.enum(['no_breach', 'condition', 'query', 'manual']);
+export const recoveryStrategy = recoveryStrategySchema.enum;
+export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
+
+export const recoverySchema = z
+  .discriminatedUnion('strategy', [
+    z
+      .object({ strategy: z.literal(recoveryStrategy.no_breach) })
+      .strict()
+      .describe('Recovers the alert when its group no longer appears in the breach results.')
+      .meta({ id: 'alerting_rule_recovery_no_breach' }),
+    z
+      .object({
+        strategy: z.literal(recoveryStrategy.condition),
+        segment: esqlQuerySegmentSchema.describe(
+          "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause."
+        ),
+      })
+      .strict()
+      .describe(
+        'Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.'
+      )
+      .meta({ id: 'alerting_rule_recovery_condition' }),
+    z
+      .object({
+        strategy: z.literal(recoveryStrategy.query),
+        query: esqlQuerySchema.describe(
+          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.'
+        ),
+      })
+      .strict()
+      .describe('Recovers the alert when this separate query returns the group.')
+      .meta({ id: 'alerting_rule_recovery_query' }),
+    z
+      .object({ strategy: z.literal(recoveryStrategy.manual) })
+      .strict()
+      .describe(
+        'Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.'
+      )
+      .meta({ id: 'alerting_rule_recovery_manual' }),
+  ])
+  .describe(
+    'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
+  )
+  .meta({ id: 'alerting_rule_recovery' });
+
+export type Recovery = z.infer<typeof recoverySchema>;
+
+/** No data (alert rules only) */
+
+/**
+ * No-data strategy. `alert` is a valid stored and engine value, but the create
+ * and update APIs reject it (see {@link isNoDataStrategyWritable}).
+ */
+export const noDataStrategySchema = z.enum(['ignore', 'keep_last', 'resolve', 'alert']);
+export const noDataStrategy = noDataStrategySchema.enum;
+export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
+
+const NO_DATA_PRESENCE_QUERY_DESCRIPTION =
+  'Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.';
+
+/**
+ * A no-data mode that classifies absence, and therefore may carry a presence
+ * query. `ignore` is the one mode that cannot, since the query would never run.
+ */
+const classifyingNoDataSchema = (
+  strategy: Exclude<NoDataStrategy, 'ignore'>,
+  description: string
+) =>
+  z
+    .object({
+      strategy: z.literal(strategy),
+      query: esqlQuerySchema.optional().describe(NO_DATA_PRESENCE_QUERY_DESCRIPTION),
+    })
+    .strict()
+    .describe(description)
+    .meta({ id: `alerting_rule_no_data_${strategy}` });
+
+export const noDataSchema = z
+  .discriminatedUnion('strategy', [
+    z
+      .object({ strategy: z.literal(noDataStrategy.ignore) })
+      .strict()
+      .describe(
+        'Does not check whether a group still has data. Missing groups do not produce `no_data` events.'
+      )
+      .meta({ id: 'alerting_rule_no_data_ignore' }),
+    classifyingNoDataSchema(
+      noDataStrategy.keep_last,
+      "Holds the alert's current status when the rule finds no data."
+    ),
+    classifyingNoDataSchema(
+      noDataStrategy.resolve,
+      'Closes the alert the first time the rule finds no data for a group.'
+    ),
+    classifyingNoDataSchema(
+      noDataStrategy.alert,
+      'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
+    ),
+  ])
+  .describe(
+    'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.'
+  )
+  .meta({ id: 'alerting_rule_no_data' });
+
+export type NoData = z.infer<typeof noDataSchema>;
+
+/**
+ * True when `breach` carries a segment worth composing. Stored rules migrated
+ * from the pre-collapse shape keep their legacy `breach`, which holds either a
+ * blank `segment` or a full `query`; both mean "every row of `base` breaches".
+ * Simplifies to a `breach != null` check once model version 7 drops the legacy
+ * keys.
+ */
+export const hasBreachCondition = (
+  breach?: { segment?: string } | null
+): breach is { segment: string } => Boolean(breach?.segment?.trim());
+
+/**
+ * A `query` as the ES|QL readers accept it: either the public {@link Query} or a
+ * stored one still carrying the pre-collapse keys, whose `breach.segment` is
+ * optional and may be blank.
+ */
+export interface ReadableQuery {
+  base: string;
+  breach?: { segment?: string } | null;
+}
+
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
- * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`; for standalone it's `breach.query` verbatim.
+ * to detect breaches. `base` on its own when there is no breach segment to
+ * append, otherwise `base` composed with `breach.segment`.
  */
-export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
+export const getBreachEsqlQuery = (query: ReadableQuery): string =>
+  hasBreachCondition(query.breach)
     ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.breach.query;
+    : query.base;
 
 /**
- * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,
- * otherwise `undefined`. For composed queries this is `base` +
- * `recovery.segment`; for standalone it's `recovery.query` verbatim.
+ * Returns the recovery ES|QL query for the strategies that run one, otherwise
+ * `undefined`. `no_breach` classifies absence from the breach set and `manual`
+ * never recovers, so neither has a query.
  */
 export const getRecoverEsqlQuery = (
-  query: Query,
-  strategy?: RecoveryStrategy
+  query: ReadableQuery,
+  recovery?: Recovery
 ): string | undefined => {
-  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
-  if (query.format === 'composed') {
-    return composeEsqlQuery(query.base, query.recovery.segment);
+  if (recovery?.strategy === recoveryStrategy.condition) {
+    return composeEsqlQuery(query.base, recovery.segment);
   }
-  return query.recovery.query;
-};
 
-/**
- * Returns the has-data ES|QL query when `noDataStrategy` is not `'none'`,
- * otherwise `undefined`.
- *
- * - Standalone: returns the explicit `no_data.query` block, if configured.
- * - Composed: returns the `base` query.
- */
-export const getNoDataEsqlQuery = (query: Query, strategy?: NoDataStrategy): string | undefined => {
-  if (strategy == null || strategy === noDataStrategy.none) return undefined;
-  if (query.format === 'composed') {
-    return query.base;
+  if (recovery?.strategy === recoveryStrategy.query) {
+    return recovery.query;
   }
-  if (query.no_data) {
-    return query.no_data.query;
-  }
+
   return undefined;
 };
 
 /**
- * Returns the "root" ES|QL query — the one containing the `FROM` clause and
- * therefore usable for index-pattern extraction. `base` for composed,
- * `breach.query` for standalone.
+ * Returns the presence ES|QL query, or `undefined` when the rule does not
+ * classify absence. Without an explicit `no_data.query`, `base` is the
+ * presence query.
  */
-export const getRootEsqlQuery = (query: Query): string =>
-  query.format === 'composed' ? query.base : query.breach.query;
+export const getNoDataEsqlQuery = (query: ReadableQuery, noData?: NoData): string | undefined => {
+  if (noData == null || noData.strategy === noDataStrategy.ignore) return undefined;
+  return noData.query ?? query.base;
+};
+
+/**
+ * Returns the "root" ES|QL query — the one containing the `FROM` clause and
+ * therefore usable for index-pattern extraction.
+ */
+export const getRootEsqlQuery = (query: ReadableQuery): string => query.base;
 
 /** State transition (optional, alert-only) */
 
-export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['and', 'or']);
+export type StateTransitionOperator = z.infer<typeof stateTransitionOperatorSchema>;
+
+const stateTransitionPhaseSchema = ({
+  countDescription,
+  timeframeDescription,
+  metaId,
+}: {
+  countDescription: string;
+  timeframeDescription: string;
+  metaId: string;
+}) =>
+  z
+    .object({
+      count: z
+        .number()
+        .int()
+        .min(0)
+        .max(MAX_CONSECUTIVE_BREACHES)
+        .optional()
+        .describe(countDescription),
+      timeframe: durationSchema.optional().describe(timeframeDescription),
+      operator: stateTransitionOperatorSchema
+        .optional()
+        .describe(
+          'When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.'
+        ),
+    })
+    .strict()
+    .check((ctx) => {
+      const { count, timeframe, operator } = ctx.value;
+
+      // A phase exists to hold a threshold; an empty one reads as configured
+      // but gates nothing, and the stored shape has no way to express it.
+      if (count == null && timeframe == null) {
+        ctx.issues.push({
+          code: 'custom',
+          message: 'A state transition phase must set count or timeframe.',
+          input: ctx.value,
+        });
+        return;
+      }
+
+      if (operator != null && (count == null || timeframe == null)) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['operator'],
+          message: 'operator is only allowed when both count and timeframe are set.',
+          input: operator,
+        });
+      }
+    })
+    .meta({ id: metaId });
 
 export const stateTransitionSchema = z
   .object({
-    pending_operator: stateTransitionOperatorSchema
+    pending: stateTransitionPhaseSchema({
+      countDescription:
+        'Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
+      timeframeDescription:
+        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
+      metaId: 'alerting_rule_state_transition_pending',
+    })
       .optional()
-      .describe('How to combine count and timeframe for pending.'),
-    pending_count: z
-      .number()
-      .int()
-      .min(0)
-      .max(MAX_CONSECUTIVE_BREACHES)
+      .describe('Delay before a match opens an alert.'),
+    recovering: stateTransitionPhaseSchema({
+      countDescription:
+        'Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
+      timeframeDescription:
+        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
+      metaId: 'alerting_rule_state_transition_recovering',
+    })
       .optional()
-      .describe('Consecutive breaches before transitioning to active.'),
-    pending_timeframe: durationSchema
-      .optional()
-      .describe('Time window for pending evaluation, e.g. 5m, 15m.'),
-    recovering_operator: stateTransitionOperatorSchema
-      .optional()
-      .describe('How to combine count and timeframe for recovering.'),
-    recovering_count: z
-      .number()
-      .int()
-      .min(0)
-      .max(MAX_CONSECUTIVE_BREACHES)
-      .optional()
-      .describe('Consecutive recoveries before transitioning to inactive.'),
-    recovering_timeframe: durationSchema
-      .optional()
-      .describe('Time window for recovering evaluation, e.g. 5m, 15m.'),
+      .describe(
+        'Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.'
+      ),
   })
   .strict()
-  .describe('Episode state transition thresholds (alert-only).')
-  .optional()
-  .nullable();
+  .describe(
+    'Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
+  )
+  .meta({ id: 'alerting_rule_state_transition' });
+
+export type StateTransition = z.infer<typeof stateTransitionSchema>;
 
 /** Grouping (optional) */
 
@@ -334,13 +485,14 @@ export const groupingSchema = z
       ),
   })
   .strict()
-  .describe('Grouping configuration.');
+  .describe('Grouping configuration.')
+  .meta({ id: 'alerting_rule_grouping' });
 
 /** Artifacts (optional) */
 
 const artifactSchema = z
   .object({
-    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
     data: z
       .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
@@ -348,9 +500,13 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
-    const fields = Object.entries(ctx.value.data);
-
-    if (fields.length > MAX_ARTIFACT_DATA_FIELDS) {
+    // Only type-agnostic structures belong here. How large a `data` value may be
+    // depends on the artifact type, which this schema deliberately does not know:
+    // registered types are bounded by their own `dataSchema` (applied server-side,
+    // where the artifact-type registry is available). Unregistered types pass
+    // through with a limit of MAX_ARTIFACT_DATA_LENGTH so a disabled or rolled-back
+    // plugin cannot fail writes.
+    if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
         path: ['data'],
@@ -359,64 +515,44 @@ const artifactSchema = z
       });
     }
 
-    const typeSchema = ARTIFACT_DATA_SCHEMAS[ctx.value.type];
-    const declared = typeSchema ? new Set(Object.keys(typeSchema.shape)) : undefined;
-    const typeResult = typeSchema?.safeParse(ctx.value.data);
-
-    if (typeResult && !typeResult.success) {
-      for (const issue of typeResult.error.issues) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', ...issue.path],
-          message: issue.message,
-          input: issue.input,
-        });
-      }
+    if (JSON.stringify(ctx.value.data).length > MAX_ARTIFACT_DATA_LENGTH) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['data'],
+        message: `Artifact data must not exceed ${MAX_ARTIFACT_DATA_LENGTH} characters when serialized.`,
+        input: ctx.value.data,
+      });
     }
-
-    // Fields declared by the type schema use that schema's own limits (e.g.
-    // runbook content at 50k). Everything else gets the generic default so
-    // unregistered types stay bounded without a framework change.
-    for (const [field, value] of fields) {
-      if (declared?.has(field)) {
-        continue;
-      }
-
-      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-
-      if (typeof value === 'string') {
-        if (value.length > limit) {
-          ctx.issues.push({
-            code: 'custom',
-            path: ['data', field],
-            message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
-            input: value,
-          });
-        }
-        continue;
-      }
-
-      // Structured values are measured serialized, so nesting a payload in an
-      // object or an array cannot buy more room than a plain string field gets.
-      if ((JSON.stringify(value) ?? '').length > limit) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', field],
-          message: `Artifact data field "${field}" must serialize to at most ${limit} characters for type "${ctx.value.type}".`,
-          input: value,
-        });
-      }
-    }
-  });
+  })
+  .meta({ id: 'alerting_rule_artifact' });
 
 const artifactsSchema = z
   .array(artifactSchema)
   .max(100)
+  .check((ctx) => {
+    const seen = new Set<string>();
+    for (let index = 0; index < ctx.value.length; index++) {
+      const id = ctx.value[index].id;
+      if (seen.has(id)) {
+        ctx.issues.push({
+          code: 'custom',
+          path: [index, 'id'],
+          message: `Artifact id "${id}" must be unique within the rule.`,
+          input: id,
+        });
+      }
+      seen.add(id);
+    }
+  })
   .describe(
-    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+    'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.'
   );
 
 /** Create rule API schema */
+
+const TIME_FIELD_DESCRIPTION =
+  'Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.';
+const TIME_FIELD_UPDATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} If omitted, the existing value is kept.`;
 
 /**
  * Base schema without refinements - used for extending in response schema and
@@ -430,22 +566,14 @@ export const createRuleDataBaseSchema = z
     time_field: z
       .string()
       .min(1)
-      .max(128)
+      .max(MAX_FIELD_NAME_LENGTH)
       .default(DEFAULT_TIME_FIELD)
-      .describe('Time field used for the lookback window range filter.'),
+      .describe(TIME_FIELD_DESCRIPTION),
     schedule: scheduleSchema,
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema
-      .optional()
-      .describe(
-        'How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.'
-      ),
-    no_data_strategy: noDataStrategySchema
-      .optional()
-      .describe(
-        'How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
-      ),
-    state_transition: stateTransitionSchema,
+    recovery: recoverySchema.optional(),
+    no_data: noDataSchema.optional(),
+    state_transition: stateTransitionSchema.optional().nullable(),
     grouping: groupingSchema.optional(),
     artifacts: artifactsSchema.optional(),
   })
@@ -453,110 +581,182 @@ export const createRuleDataBaseSchema = z
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
+/**
+ * The shape the predicates below read. Deliberately structural rather than
+ * `CreateRuleData`, so the stored attributes and the merged-update attributes
+ * can be checked with the same functions.
+ */
+interface RuleLifecycleShape {
+  kind?: string;
+  query?: { breach?: { segment?: string } | null };
+  recovery?: { strategy?: string } | null;
+  no_data?: { strategy?: string; query?: string } | null;
+  state_transition?: { recovering?: unknown } | null;
+}
+
 export const isStateTransitionAllowed = (data: {
   kind?: string;
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
-export const isSignalUsingStandaloneFormat = (data: {
+/** Signal rules never create alerts, so no action policy can be routed to them. */
+export const isRoutingTagsAllowedForKind = (data: {
   kind?: string;
-  query?: { format?: string };
-}): boolean => data.kind !== 'signal' || data.query?.format === queryFormat.standalone;
+  metadata?: { routing_tags?: unknown } | null;
+}): boolean => data.kind !== 'signal' || data.metadata?.routing_tags == null;
 
-/** Signal rules only run a breach query — no recovery or no-data behaviour. */
-export const isSignalQueryBreachOnly = (data: {
-  kind?: string;
-  recovery_strategy?: RecoveryStrategy | null;
-  no_data_strategy?: NoDataStrategy | null;
-}): boolean => {
-  if (data.kind !== 'signal') return true;
-  const recoveryOk = data.recovery_strategy == null || data.recovery_strategy === 'none';
-  const noDataOk = data.no_data_strategy == null || data.no_data_strategy === 'none';
-  return recoveryOk && noDataOk;
-};
+export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
+  'metadata.routing_tags is only allowed when kind is "alert".';
 
-/** query.recovery is only meaningful when recovery_strategy is "query". */
-export const isRecoveryQueryConsistentWithStrategy = (data: {
-  recovery_strategy?: RecoveryStrategy | null;
-  query?: { recovery?: unknown };
-}): boolean => {
-  if (data.query?.recovery == null) return true;
-  return data.recovery_strategy === recoveryStrategy.query;
-};
+/** The two objects that describe an alert rule's episode lifecycle. */
+const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
 
-/** recovery_strategy "query" requires a recovery query block. */
-export const isRecoveryQueryProvidedForStrategy = (data: {
-  recovery_strategy?: RecoveryStrategy | null;
-  query?: { recovery?: unknown };
-}): boolean => data.recovery_strategy !== recoveryStrategy.query || data.query?.recovery != null;
+/** Signal rules have no episodes, so there is nothing for recovery or no-data to transition. */
+export const isLifecycleConfigAllowedForKind = (data: RuleLifecycleShape): boolean =>
+  data.kind !== 'signal' || (data.recovery == null && data.no_data == null);
 
-/** query.no_data is only meaningful when no_data_strategy is not "none". */
-type QueryWithOptionalNoData = Record<string, unknown>;
+/**
+ * Alert rules spell out their whole lifecycle. The server never fills either
+ * object in, so absence is a rejected write rather than a default, and no
+ * reader has to interpret a missing `recovery` or `no_data`.
+ */
+export const isLifecycleConfigPresentForKind = (data: RuleLifecycleShape): boolean =>
+  data.kind !== 'alert' || (data.recovery != null && data.no_data != null);
 
-export const isNoDataQueryConsistentWithStrategy = (data: {
-  no_data_strategy?: NoDataStrategy | null;
-  query?: QueryWithOptionalNoData;
-}): boolean => {
-  if (data.query?.no_data == null) return true;
-  return data.no_data_strategy != null && data.no_data_strategy !== noDataStrategy.none;
+/**
+ * Without a breach segment every row of `base` breaches, so a `base + segment`
+ * recovery condition can only return groups that are already breaching, and
+ * breach wins. Such a rule could never auto-recover, so reject it rather than
+ * store `manual` in disguise.
+ */
+export const isRecoveryConditionUsableWithBreach = (data: RuleLifecycleShape): boolean =>
+  data.recovery?.strategy !== recoveryStrategy.condition || hasBreachCondition(data.query?.breach);
+
+/**
+ * Without a breach segment, `base` is both the breach query and the fallback
+ * presence query, so a group that stops breaching disappears from both and is
+ * read as "no data" rather than "recovered" — under `keep_last` the episode
+ * would never close. Only the author knows which `base` means, so make them say
+ * it: split the condition into `breach`, or state the presence query.
+ */
+export const isAbsenceDistinguishableFromBreach = (data: RuleLifecycleShape): boolean => {
+  const strategy = data.no_data?.strategy;
+  if (strategy == null || strategy === noDataStrategy.ignore) return true;
+
+  return data.no_data?.query != null || hasBreachCondition(data.query?.breach);
 };
 
 /**
- * Standalone rules with `no_data_strategy != 'none'` must provide a
- * `query.no_data` block. Composed rules use their `base` query as the
- * data-presence query, so they don't need a separate block.
+ * `alert` is stored and executed, but the write APIs do not accept it yet: the
+ * engine only classifies groups that already have an episode, so the strategy
+ * cannot open one for a group that never breached.
  */
-export const isNoDataQueryProvidedForStrategy = (data: {
-  no_data_strategy?: NoDataStrategy | null;
-  query?: QueryWithOptionalNoData;
-}): boolean => {
-  if (data.no_data_strategy == null || data.no_data_strategy === noDataStrategy.none) {
-    return true;
-  }
-  if (data.query?.format !== queryFormat.standalone) return true;
-  return data.query?.no_data != null;
+export const isNoDataStrategyWritable = (data: RuleLifecycleShape): boolean =>
+  data.no_data?.strategy !== noDataStrategy.alert;
+
+const rejectAlertNoDataStrategy = {
+  message: 'no_data.strategy "alert" is not currently supported.',
+  path: ['no_data', 'strategy'],
 };
 
-/** `no_data_strategy: 'emit'` is temporarily not accepted (see `noDataStrategySchema`). */
-export const isNoDataStrategyNotEmit = (data: {
-  no_data_strategy?: NoDataStrategy | null;
-}): boolean => data.no_data_strategy !== noDataStrategy.emit;
-const rejectEmitNoDataStrategy = {
-  message: 'no_data_strategy "emit" is not currently supported.',
-  path: ['no_data_strategy'],
+export const REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE =
+  'A no_data strategy other than "ignore" requires query.breach or no_data.query.';
+
+const requireDistinguishableAbsence = {
+  message: REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  path: ['no_data', 'query'],
 };
 
-export const createRuleDataSchema = createRuleDataBaseSchema
-  .refine(isStateTransitionAllowed, {
-    message: 'state_transition is only allowed when kind is "alert".',
-    path: ['state_transition'],
-  })
-  .refine(isSignalUsingStandaloneFormat, {
-    message: 'kind "signal" requires query.format "standalone".',
-    path: ['query', 'format'],
-  })
-  .refine(isSignalQueryBreachOnly, {
-    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-    path: ['recovery_strategy'],
-  })
-  .refine(isRecoveryQueryConsistentWithStrategy, {
-    message: 'query.recovery is only allowed when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
-  .refine(isRecoveryQueryProvidedForStrategy, {
-    message: 'query.recovery is required when recovery_strategy is "query".',
-    path: ['query', 'recovery'],
-  })
-  .refine(isNoDataQueryConsistentWithStrategy, {
-    message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataQueryProvidedForStrategy, {
-    message:
-      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-    path: ['query', 'no_data'],
-  })
-  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
+/**
+ * Recovery transition thresholds are inert under `recovery.strategy: manual`,
+ * so we reject any `state_transition.recovering` block. `count: 0` is not a
+ * delay — the episode recovers immediately — so it must not be configured
+ * while recovery never happens.
+ */
+export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleShape): boolean =>
+  data.recovery?.strategy !== recoveryStrategy.manual || data.state_transition?.recovering == null;
+
+/** The create-rule fields the refinements below read. */
+type CreateRuleRefinementFields = Pick<
+  z.infer<typeof createRuleDataBaseSchema>,
+  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+>;
+
+/**
+ * Shared create-rule cross-field refinements. Applied to both the single-create
+ * body and each bulk-create item so the two write paths cannot drift.
+ *
+ * The remaining invariants are object-local and enforced by the discriminated
+ * unions themselves; only the ones that read two different objects live here.
+ */
+const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFields>>(
+  schema: T
+): T =>
+  schema
+    .refine(isStateTransitionAllowed, {
+      message: 'state_transition is only allowed when kind is "alert".',
+      path: ['state_transition'],
+    })
+    .refine(isRoutingTagsAllowedForKind, {
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+      path: ['metadata', 'routing_tags'],
+    })
+    .check((ctx) => {
+      const allowed = isLifecycleConfigAllowedForKind(ctx.value);
+      const present = isLifecycleConfigPresentForKind(ctx.value);
+      if (allowed && present) return;
+
+      // One issue per offending field, so an alert rule that only forgot
+      // `no_data` is not told to look at `recovery`.
+      for (const field of LIFECYCLE_FIELDS) {
+        const set = ctx.value[field] != null;
+        if (!allowed && set) {
+          ctx.issues.push({
+            code: 'custom',
+            path: [field],
+            message: 'Signal rules cannot set recovery or no_data.',
+            input: ctx.value[field],
+          });
+        }
+        if (!present && !set) {
+          ctx.issues.push({
+            code: 'custom',
+            path: [field],
+            message: 'Alert rules must set both recovery and no_data.',
+            input: ctx.value[field],
+          });
+        }
+      }
+    })
+    .refine(isRecoveryConditionUsableWithBreach, {
+      message: 'recovery.strategy "condition" requires query.breach.',
+      path: ['recovery', 'segment'],
+    })
+    .refine(isAbsenceDistinguishableFromBreach, requireDistinguishableAbsence)
+    .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
+    .refine(isRecoveryTransitionConsistentWithStrategy, {
+      message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
+      path: ['state_transition', 'recovering'],
+    })
+    .check((ctx) => {
+      const { query, recovery } = ctx.value;
+      if (query == null || recovery?.strategy !== recoveryStrategy.condition) return;
+      if (hasIssueOn(ctx.issues, 'query', 'recovery')) return;
+
+      const error = validateComposedEsqlQuery(query.base, recovery.segment);
+      if (error) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['recovery', 'segment'],
+          message: error,
+          input: recovery.segment,
+        });
+      }
+    });
+
+export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  id: 'alerting_new_rule',
+});
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
@@ -587,50 +787,48 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder: z
+          .object({ type: z.string().max(64).describe('Rule builder type.') })
+          .strict()
+          .optional()
+          .nullable(),
+        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
+        // omitting `tags` preserves the existing ones on a partial update).
+        tags: tagsSchema.min(1).nullable().optional(),
+        routing_tags: tagsSchema.min(1).nullable().optional(),
+      })
       .optional(),
-    time_field: z.string().min(1).max(128).optional(),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    time_field: z
+      .string()
+      .min(1)
+      .max(MAX_FIELD_NAME_LENGTH)
+      .optional()
+      .describe(TIME_FIELD_UPDATE_DESCRIPTION),
+    schedule: scheduleSchema.partial().optional(),
     query: querySchema.optional(),
-    recovery_strategy: recoveryStrategySchema.optional().nullable(),
-    no_data_strategy: noDataStrategySchema.optional().nullable(),
-    state_transition: stateTransitionSchema.nullable(),
+    recovery: recoverySchema.optional(),
+    no_data: noDataSchema.optional(),
+    state_transition: stateTransitionSchema.optional().nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: artifactsSchema.optional().nullable(),
   })
   .strict()
-  .check((ctx) => {
-    if (ctx.value.no_data_strategy === noDataStrategy.emit) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['no_data_strategy'],
-        message: rejectEmitNoDataStrategy.message,
-        input: ctx.value.no_data_strategy,
-      });
-    }
-  });
+  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
+  .meta({ id: 'alerting_update_rule' });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
-
-/** Update rule API body schema — adds OCC version on top of update data. */
-export const updateRuleBodySchema = updateRuleDataSchema.extend({
-  version: z
-    .string()
-    .min(1)
-    .max(VERSION_MAX_LENGTH)
-    .optional()
-    .describe('The current version of the rule, used for optimistic concurrency control.'),
-});
-
-export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
 /**
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
  */
-export const ruleResponseSchema = createRuleDataBaseSchema.extend({
-  id: z.string().describe('Unique rule identifier.'),
-  metadata: metadataSchema.extend({
+export const ruleResponseSchema = createRuleDataBaseSchema
+  .extend({
+    // `null` clears the field on write; the server stores that as absent, so a
+    // response never carries it.
+    state_transition: stateTransitionSchema.optional(),
+    id: z.string().describe('Unique rule identifier.'),
     version: z
       .number()
       .int()
@@ -638,19 +836,13 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       .describe(
         'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
       ),
-  }),
-  enabled: z.boolean().describe('Whether the rule is enabled.'),
-  createdBy: z.string().nullable().describe('User who created the rule.'),
-  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
-  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
-  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
-  version: z
-    .string()
-    .optional()
-    .describe(
-      'The saved object version token of the rule, used for optimistic concurrency control.'
-    ),
-});
+    enabled: z.boolean().describe('Whether the rule is enabled.'),
+    created_by: actorSchema.nullable().describe('Actor who created the rule.'),
+    created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
+    updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
+    updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
+  })
+  .meta({ id: 'alerting_rule_response' });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
@@ -659,25 +851,32 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
-  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe('A text string to search across rule fields.'),
-});
+export const findRulesRequestSchema = z
+  .object({
+    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+      .optional()
+      .describe(
+        `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
+      ),
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
+      .optional()
+      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
+    filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
+    sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('A text string to search across rule fields.'),
+  })
+  .strict()
+  .refine(
+    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+  );
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
@@ -685,11 +884,12 @@ export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 export const findRulesResponseSchema = z
   .object({
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
-    total: z.number().describe('The total number of rules matching the query.'),
+    total: z.number().describe(`The number of rules matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of rules per page.'),
+    per_page: z.number().describe('The number of rules per page.'),
   })
-  .describe('Paginated list of rules.');
+  .describe('Paginated list of rules.')
+  .meta({ id: 'alerting_rule_list_response' });
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
@@ -708,39 +908,113 @@ export const ruleTagsParamsSchema = z
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
 /** Rule tags response schema. */
-export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
+export const ruleTagsResponseSchema = tagsResponseSchema
+  .describe('All unique tags across rules.')
+  .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
-export const ruleIdSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(ID_MAX_LENGTH)
-  .describe('A rule identifier.');
-
-/**
- * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
- */
-export const bulkGetRulesParamsSchema = z
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
   .object({
-    ids: z
-      .array(ruleIdSchema)
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Rule identifiers to retrieve. The response preserved this order.'),
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
   })
   .strict();
 
-export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
+
+export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
  */
-export const bulkGetRulesResponseSchema = z.object({
-  rules: z
-    .array(ruleResponseSchema)
-    .describe('The requested rules, in the same order as the requested ids.'),
-});
+export const bulkGetRulesResponseSchema = z
+  .object({
+    items: z
+      .array(ruleResponseSchema)
+      .describe('The requested rules, in the same order as the requested ids.'),
+  })
+  .meta({ id: 'alerting_bulk_get_rules_response' });
 
 export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
+
+/**
+ * A single item in a bulk-create request: the create-rule body plus optional
+ * client-supplied `id` and `enabled` (default true). Disabled rules are saved
+ * and do not run until enabled.
+ */
+export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    id: ruleIdSchema
+      .optional()
+      .describe(
+        'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
+      ),
+    enabled: z
+      .boolean()
+      .default(true)
+      .describe(
+        'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
+      ),
+  })
+).meta({ id: 'alerting_bulk_create_rule_item' });
+
+export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
+
+/**
+ * Request body schema for `POST /api/alerting/v2/rules/_bulk_create`.
+ */
+export const bulkCreateRulesRequestSchema = z
+  .object({
+    items: z
+      .array(bulkCreateRuleItemSchema)
+      .min(1)
+      .max(MAX_BULK_ITEMS)
+      .describe(`The rules to create. Must contain between 1 and ${MAX_BULK_ITEMS} rules.`),
+  })
+  .strict()
+  .refine(
+    (data) => {
+      const ids = data.items
+        .map((rule) => rule.id)
+        .filter((id): id is string => id != null && id.length > 0);
+      return new Set(ids).size === ids.length;
+    },
+    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
+  )
+  .meta({ id: 'alerting_bulk_create_rules_request' });
+
+export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>;
+
+/**
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
+ * Successfully created rules are returned in `items`; per-item failures land
+ * in `errors`. HTTP 200 even when some items fail (partial success).
+ */
+export const bulkCreateRulesResponseSchema = z
+  .object({
+    items: z
+      .array(ruleResponseSchema)
+      .describe('Rules that were created. Rules listed in `errors` are not included.'),
+    errors: z
+      .array(bulkErrorSchema)
+      .describe(
+        'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
+      ),
+  })
+  .meta({ id: 'alerting_bulk_create_rules_response' });
+
+export type BulkCreateRulesResponse = z.infer<typeof bulkCreateRulesResponseSchema>;

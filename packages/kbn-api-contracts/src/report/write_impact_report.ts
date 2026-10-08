@@ -14,7 +14,11 @@ import type { StabilityTier } from '../stability';
 /**
  * A single breaking change, tier-classified. Every reported change carries its
  * tier: stable and tech_preview gate the build, experimental is reported for
- * visibility only. The notifier and CI log key their sections off this field.
+ * visibility only. A change can also be report-only regardless of tier, when the
+ * declared rule policy says Kibana treats that oasdiff rule as non-breaking. An
+ * allowlisted entry is a stable or tech_preview change that matched an approved
+ * allowlist entry: it no longer gates, but still ships as a breaking change. The
+ * notifier and CI log key their sections off these fields.
  */
 export interface ImpactReportEntry {
   path: string;
@@ -24,9 +28,17 @@ export interface ImpactReportEntry {
   source?: string;
   tier: StabilityTier;
   since?: string;
+  reportOnly?: boolean;
+  policyReason?: string;
+  allowlisted?: boolean;
 }
 
+/** The published spec a report was produced from. One report covers one distribution. */
+export type ReportDistribution = 'stack' | 'serverless';
+
 export interface ImpactReport {
+  // Optional so a report written by an older revision still parses.
+  distribution?: ReportDistribution;
   entries: ImpactReportEntry[];
 }
 

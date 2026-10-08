@@ -15,7 +15,18 @@ source .buildkite/scripts/common/util.sh
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
   export BUILDKITE_TOKEN
 
-  GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-chromium-linux-build | \
+    kibana-console-definitions-sync | \
+    kibana-es-ql-grammar-sync | \
+    kibana-opentelemetry-semantic-conventions-sync | \
+    kibana-scout-update-metadata)
+      GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
+      ;;
+    *)
+      GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+      ;;
+  esac
   export GITHUB_TOKEN
 
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
@@ -132,7 +143,7 @@ EOF
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
     echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
-    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
     # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
     #don't fetch the validator; eval steps run on a full checkout.
     kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
@@ -143,7 +154,7 @@ EOF
     # Eval suites require this for the LLM-as-a-judge connector selection
     export EVAL_CONNECTOR_ID="${EVAL_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # Export the vault config so eval-owned scripts can extract OpenRouter / connector
     # settings without needing vault access themselves.
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
@@ -173,9 +184,6 @@ EOF
 
 # Set up GCS Service Account for CDN
 {
-  GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
-  export GCS_SA_CDN_KEY
-
   GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
   export GCS_SA_CDN_EMAIL
 
@@ -184,6 +192,9 @@ EOF
 
   GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
   export GCS_SA_CDN_URL
+
+  GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
+  export GCS_SA_CDN_AUDIENCE
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials
@@ -211,9 +222,9 @@ EOF
 
 # Setup GCS Service Account Proxy for CI
 {
-  KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
-  export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
-  vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
+  KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
+  export KIBANA_WIF_CREDENTIALS_DIR
+  export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
 # Acquire credentials for legacy vault if needed

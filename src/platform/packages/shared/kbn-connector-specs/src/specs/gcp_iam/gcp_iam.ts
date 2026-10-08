@@ -269,6 +269,7 @@ Gotchas:
   actions: {
     listServiceAccounts: {
       isTool: true,
+      scope: 'read',
       description:
         'List the service accounts in a Google Cloud project, with email, uniqueId, display name, and whether each is disabled. ' +
         'The orientation tool: use it to find the target of a containment action when you have a project but not an exact account email. ' +
@@ -296,6 +297,7 @@ Gotchas:
 
     getServiceAccount: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one service account by email: name, uniqueId, display name, description, project, OAuth client id, etag, and whether it is disabled. ' +
         'Use it to enrich an identity alert or to check whether a containment step already landed. ' +
@@ -316,6 +318,7 @@ Gotchas:
     disableServiceAccount: {
       // Locks a workload identity out entirely; a wrong target can break production.
       isTool: false,
+      scope: 'destroy',
       description:
         'Disable a service account so it can no longer authenticate. The primary containment move for a compromised cloud identity, and fully reversible with enableServiceAccount. ' +
         'Every workload using this identity stops working immediately, so confirm the target with getServiceAccount first. Returns an empty body on success.',
@@ -335,6 +338,7 @@ Gotchas:
 
     enableServiceAccount: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-enable a previously disabled service account so it can authenticate again. The rollback for disableServiceAccount, used once an investigation clears the identity.',
       input: ServiceAccountActionInputSchema,
@@ -353,6 +357,7 @@ Gotchas:
 
     listServiceAccountKeys: {
       isTool: true,
+      scope: 'read',
       description:
         'List the keys on a service account, with key id, algorithm, origin, type, validity window, and whether each is disabled. ' +
         'Use it during triage to find leaked or stale credentials before cutting one. ' +
@@ -375,6 +380,7 @@ Gotchas:
 
     disableServiceAccountKey: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Disable one service account key. Cuts off a leaked credential while the account itself keeps working, so it contains the leak without taking down every workload. ' +
         'Reversible with enableServiceAccountKey. Prefer this over deleteServiceAccountKey while an investigation is still open.',
@@ -397,6 +403,7 @@ Gotchas:
 
     enableServiceAccountKey: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-enable a previously disabled service account key. The rollback for disableServiceAccountKey, for when a key turns out to have been disabled in error.',
       input: ServiceAccountKeyActionInputSchema,
@@ -419,6 +426,7 @@ Gotchas:
     deleteServiceAccountKey: {
       // Irreversible: a deleted key cannot be restored.
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a service account key. The terminal containment for a leaked credential and NOT reversible, unlike disableServiceAccountKey. ' +
         'Anything still authenticating with this key breaks immediately. Prefer disabling first unless the key is known-compromised.',
@@ -440,6 +448,7 @@ Gotchas:
 
     createServiceAccountKey: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new key on a service account: the create half of a rotate-then-revoke key rotation. ' +
         'For safety this returns only the new key metadata (id, algorithm, validity), NEVER the private key material, so the secret cannot leak into a workflow log or an agent transcript. ' +
@@ -461,6 +470,7 @@ Gotchas:
 
     getIamPolicy: {
       isTool: true,
+      scope: 'read',
       description:
         'Read an IAM allow policy: every role binding with its members, any IAM conditions, and the etag. ' +
         'Targets a project, folder, or organization to see who holds which roles there, or a single service account to see who may impersonate it. ' +
@@ -479,6 +489,7 @@ Gotchas:
 
     addIamPolicyBinding: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Grant one role to one member, leaving every other binding untouched. ' +
         'Targets a project, folder, or organization, or a single service account to let a member impersonate it. ' +
@@ -537,6 +548,7 @@ Gotchas:
 
     removeIamPolicyBinding: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Revoke one role from one member, leaving every other binding untouched. The core access-revocation response. ' +
         'Targets a project, folder, or organization, or a single service account to cut off an impersonator, which is the narrowest containment move available here. ' +
@@ -596,6 +608,7 @@ Gotchas:
     setIamPolicy: {
       // Replaces the whole policy: the highest-blast-radius action in the connector.
       isTool: false,
+      scope: 'destroy',
       description:
         'Replace an entire IAM allow policy in one call. For bulk remediation only. ' +
         'This REPLACES every binding, so any binding missing from the input is revoked. Always build the bindings from a getIamPolicy response and pass back its etag. ' +
@@ -620,6 +633,7 @@ Gotchas:
 
     testIamPermissions: {
       isTool: true,
+      scope: 'read',
       description:
         'Check which of the given permissions the caller holds on a project, folder, organization, or service account. Only the held subset is returned, so an empty list means none. ' +
         'Use it to confirm a revocation took effect, to verify least privilege, or to check the connector itself can perform an action before attempting it.',
@@ -646,6 +660,7 @@ Gotchas:
 
     getRole: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a role definition, including every permission it includes and its launch stage. ' +
         'Use it before changing a binding to understand what the role actually grants, so a remediation does not over- or under-grant. ' +
@@ -683,6 +698,7 @@ Gotchas:
 
     queryGrantableRoles: {
       isTool: true,
+      scope: 'read',
       description:
         'List the roles that can be granted on a project, folder, or organization. ' +
         'Use it to build a valid binding: a role that is not grantable on the target resource will be rejected by addIamPolicyBinding. ' +
@@ -716,6 +732,7 @@ Gotchas:
 
     createServiceAccount: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a service account in a project, for automated onboarding or a scoped break-glass identity. ' +
         'The new account starts with no roles at all, so pair it with addIamPolicyBinding to grant the least privilege it needs. ' +
@@ -743,6 +760,7 @@ Gotchas:
     deleteServiceAccount: {
       // Restorable for 30 days, and only by uniqueId, so treat as effectively terminal.
       isTool: false,
+      scope: 'destroy',
       description:
         'Delete a service account: terminal cleanup after decommissioning. ' +
         'Everything authenticating as this identity breaks immediately. It can be restored with undeleteServiceAccount for 30 days, but only by uniqueId, so read that with getServiceAccount BEFORE deleting. ' +
@@ -760,6 +778,7 @@ Gotchas:
 
     undeleteServiceAccount: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore a recently deleted service account: the safety net for a delete made in error. ' +
         'Takes the numeric uniqueId, not the email, because the email is not resolvable once deleted. Only works within 30 days of deletion.',

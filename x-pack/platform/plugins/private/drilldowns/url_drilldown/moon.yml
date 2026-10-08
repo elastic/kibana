@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/url-drilldown-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/url-drilldown-plugin'
   description: Moon project for @kbn/url-drilldown-plugin
   channel: ''
-  owner: '@elastic/appex-sharedux'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/private/drilldowns/url_drilldown
 dependsOn:
   - '@kbn/core'
@@ -25,7 +25,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
-  - '@kbn/monaco'
+  - '@kbn/code-editor'
   - '@kbn/std'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/presentation-publishing'

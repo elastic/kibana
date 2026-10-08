@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
 import {
@@ -28,6 +30,13 @@ const blastRadiusDependencySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this dependency entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   source: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -59,6 +68,13 @@ const blastRadiusInfrastructureSchema = z.object({
     .describe(
       'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
     ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   title: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -83,6 +99,13 @@ const blastRadiusEntitySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
   stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
 });
@@ -95,12 +118,36 @@ export const blastRadiusEntrySchema = z.discriminatedUnion('type', [
 
 export type BlastRadiusEntry = z.infer<typeof blastRadiusEntrySchema>;
 
+/**
+ * A causal entity, carrying the classification of the Knowledge Indicator it references.
+ *
+ * `type` here is **not** the same field as `blast_radius[].type`. This one is the referenced
+ * indicator's own type, drawn from `INFERRED_FEATURE_TYPES` (`entity`, `infrastructure`,
+ * `technology`, `dependency`, `schema`). On a blast radius row, `type` is the discriminated-union
+ * tag that selects between the three row shapes (`entity`, `infrastructure`, `dependency`) and says
+ * nothing about the indicator. The two vocabularies overlap, so a value alone cannot tell you which
+ * field you are holding.
+ */
 export const causalFeatureSchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
       'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+    ),
+  type: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
+    ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
   name: z
     .string()
@@ -117,17 +164,66 @@ export const causalFeatureSchema = z.object({
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
 
 /** Query-based verification attached to a signal when the agent ran an ES|QL check. */
-const signalEvidenceSchema = z.object({
-  esql_query: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .describe('The ES|QL query executed to verify this signal.'),
+export const signalEvidenceSchema = z.object({
+  esql_query: z.string().max(MAX_TEXT_LENGTH).describe('The ES|QL query that verified this signal'),
   result: z
     .enum(['found', 'empty', 'error'])
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
     ),
+  time_range: z
+    .object({
+      from: z.iso.datetime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+      to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+    })
+    .optional()
+    .describe(
+      'Absolute time window the query was executed against. Required to interpret an esql_query that uses ?_tstart/?_tend placeholders.'
+    ),
 });
+
+export const SIGNAL_VERDICTS = [
+  'confirms',
+  'refutes',
+  'off_topic',
+  'inconclusive',
+  'not_checked',
+] as const;
+export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
+
+export const SIGNAL_EFFECTS = ['none', 'degradation', 'outage', 'exposure'] as const;
+export type SignalEffect = (typeof SIGNAL_EFFECTS)[number];
+
+/**
+ * Effect field contract — single source of truth for schema `.describe()` and eval judges.
+ * This contract only governs what the agent classifies from grounding evidence, not what tier that
+ * classification implies. There is no "scope" on a blocked operation: escalates a
+ * single blocked operation to critical on KI `severity_score` or topology fan-out, not on a
+ * judgment about how narrowly the block is confined.
+ */
+export const EFFECT_CONTRACT_RULE = dedent`
+    What this signal's \`evidence\` shows about whether the operation succeeded — never from
+    \`p_value\`, \`change_point_type\`, fire count, or this signal's own \`description\` wording.
+
+    - "none": the operation completed normally, or no confirmed impact is shown.
+    - "degradation": the operation succeeded but impaired — elevated latency, a retry that then
+      succeeded, a fallback response, or a partial result.
+    - "outage": the operation failed to complete — an error status (including a rejected or
+      bad-request reply), an exception, a timeout, or a refused connection. A reply reporting
+      failure is still a failure — whose fault does not change that; attribution belongs in
+      \`symptom_hypothesis\`, not here. Name each distinct failing path in \`outage_paths\` — this
+      describes only the requests this evidence covers, not every caller or region.
+    - "exposure": confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
+
+    An internal dependency's error is not itself the operation failing when the system is known to
+    tolerate it via a fallback, backup path, or degraded mode — judge the operation's own outcome,
+    not the dependency's. When a row genuinely doesn't show that outcome either way, the matched
+    query KI's description may break the tie if this signal's own description cites the specific
+    clause the row supports; otherwise default to "degradation".
+
+    Only \`confirms\`, or \`off_topic\` with a concrete non-benign error, may be anything but
+    "none".
+  `;
 
 const signalBaseSchema = z.object({
   stream_name: z
@@ -139,21 +235,18 @@ const signalBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+      Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
-        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
-        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
+      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
 
-        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
-        ${NO_RAW_SENSITIVE_VALUES_RULE}
-      `
+      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      ${NO_RAW_SENSITIVE_VALUES_RULE}
+    `
     ),
-  confirmed: z
-    .boolean()
-    .optional()
+  verdict: z
+    .enum(SIGNAL_VERDICTS)
     .describe(
-      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation at a newly elevated rate; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion (empty or errored evidence, or matching rows whose pre/post rate shows no new elevation); not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -164,6 +257,14 @@ const signalBaseSchema = z.object({
     .optional()
     .describe(
       'ES|QL query verification for this signal. Present when a query was executed to confirm or refute the signal; null when no verification was run.'
+    ),
+  effect: z.enum(SIGNAL_EFFECTS).optional().describe(EFFECT_CONTRACT_RULE),
+  outage_paths: z
+    .array(z.string().max(MAX_TITLE_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
+    .optional()
+    .describe(
+      'Required when effect is "outage": each distinct verified path the row shows failing to complete, named by what traverses it — the caller operation when the evidence names one ("checkout"), otherwise the failing hop ("orders-api -> postgres"). One entry per distinct path; a URL alone is not a path. Omit when effect is not "outage".'
     ),
 });
 
@@ -179,54 +280,130 @@ const detectionSignalMetadataSchema = detectionSchema
     'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
   );
 
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSignalMetadataSchema,
-});
+const detectionSignalSchema = signalBaseSchema
+  .extend({
+    type: z.literal('detection'),
+    metadata: detectionSignalMetadataSchema,
+  })
+  .superRefine((signal, context) => {
+    const result = signal.evidence?.result;
+    if (signal.verdict === 'confirms' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A confirming verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'off_topic' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'An off-topic verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'refutes' && result !== 'found' && result !== 'empty') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A refuting verdict requires found or empty query evidence.',
+      });
+    }
+    if (signal.verdict === 'inconclusive' && result === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message:
+          'An inconclusive verdict requires query evidence (found rate-flat rows, empty, or error).',
+      });
+    }
+    if (
+      signal.verdict === 'not_checked' &&
+      signal.evidence !== undefined &&
+      signal.evidence !== null
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A not-checked verdict cannot include query evidence.',
+      });
+    }
+    // Deterministic guard: only a verdict that means "this row shows something real" may claim
+    // impact. An off-topic signal here means a concrete non-benign observed error (guarded above:
+    // off_topic requires found evidence) — not merely an unrelated finding.
+    const canClaimImpact = signal.verdict === 'confirms' || signal.verdict === 'off_topic';
+    if (!canClaimImpact && signal.effect !== undefined && signal.effect !== 'none') {
+      context.addIssue({
+        code: 'custom',
+        path: ['effect'],
+        message:
+          'effect can only be "degradation", "outage", or "exposure" on a confirms signal, or an off_topic signal with a concrete observed error. Every other verdict must use effect "none" or omit it.',
+      });
+    }
+    if (signal.effect === 'outage' && (signal.outage_paths ?? []).length === 0) {
+      context.addIssue({
+        code: 'custom',
+        path: ['outage_paths'],
+        message: 'effect "outage" requires at least one entry in outage_paths.',
+      });
+    }
+    if (signal.effect !== 'outage' && (signal.outage_paths ?? []).length > 0) {
+      context.addIssue({
+        code: 'custom',
+        path: ['outage_paths'],
+        message: 'outage_paths is only valid when effect is "outage".',
+      });
+    }
+  });
 
 /** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
-/** Canonical severity values in descending severity order (critical → low). */
-export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'] as const;
+/** Canonical severity values in descending severity order (critical → low). info is not supported yet */
+export const SEVERITY_OPTIONS = [
+  'critical',
+  'high',
+  'medium',
+  'low',
+] as const satisfies readonly AlertEventSeverity[];
 
 /**
  * Severity field contract — single source of truth for schema `.describe()` and eval judges.
  * Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Sortable severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
+    Severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
 
     Decide in order — stop at the first match:
-    1. "80-critical" when ANY of these hold:
+    1. "critical" when ANY of these hold:
       - a site-wide/global outage affecting all or most customers;
       - multiple current rows confirming blocked paths for distinct core operations (for example balance, history, and payment together);
-      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "60-high";
+      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high";
       - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
-    2. "60-high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "80-critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
-    3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
-    4. "20-low" for recovery, noise, false alarm, or non-issue.
+    2. "high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
+    3. "medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
+    4. "low" for recovery, noise, false alarm, or non-issue.
 
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
   `;
-
-/** Canonical sortable severity used by storage, APIs, and tools. */
-export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(SEVERITY_CONTRACT_RULE);
+/** Canonical severity used by storage, APIs, and tools. */
+export const severitySchema = alertEventSeveritySchema
+  .exclude(['info'])
+  .describe(SEVERITY_CONTRACT_RULE);
 
 export type Severity = z.infer<typeof severitySchema>;
 
 const SEVERITY_LABELS: Record<Severity, string> = {
-  '20-low': i18n.translate('xpack.significantEvents.severity.lowLabel', {
+  low: i18n.translate('xpack.significantEvents.severity.lowLabel', {
     defaultMessage: 'Low',
   }),
-  '40-medium': i18n.translate('xpack.significantEvents.severity.mediumLabel', {
+  medium: i18n.translate('xpack.significantEvents.severity.mediumLabel', {
     defaultMessage: 'Medium',
   }),
-  '60-high': i18n.translate('xpack.significantEvents.severity.highLabel', {
+  high: i18n.translate('xpack.significantEvents.severity.highLabel', {
     defaultMessage: 'High',
   }),
-  '80-critical': i18n.translate('xpack.significantEvents.severity.criticalLabel', {
+  critical: i18n.translate('xpack.significantEvents.severity.criticalLabel', {
     defaultMessage: 'Critical',
   }),
 };
@@ -237,6 +414,7 @@ export const getSeverityLabel = (severity: Severity): string => SEVERITY_LABELS[
 export const significantEventBaseSchema = z.object({
   event_id: z
     .string()
+    .min(1)
     .max(MAX_ID_LENGTH)
     .describe(
       'Stable incident key shared across all documents that belong to the same event. Auto-generated when creating a new event. Must be preserved unchanged across all subsequent writes for the same incident.'
@@ -249,7 +427,7 @@ export const significantEventBaseSchema = z.object({
       Stable incident label. Format: "<Affected scope> — <observed condition>".
       Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
-      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, and current-cycle-only details.
+      Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
 
       Examples: "API gateway — upstream connection refused"; "Indexer — database pool exhausted"; "Platform tier — connection refused across worker, scheduler, and API services" (multi-service cascade grouped in one event).
     `

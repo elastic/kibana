@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect, type RouteComponentProps } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import {
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,

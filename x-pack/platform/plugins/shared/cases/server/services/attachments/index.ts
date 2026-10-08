@@ -20,13 +20,12 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import {
   UNIFIED_ALERT_TYPES_ARRAY,
   isAlertAttachmentType,
 } from '../../../common/utils/attachments';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
@@ -39,8 +38,9 @@ import {
   LEGACY_FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import {
+  FILE_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
 import {
   getAttachmentSavedObjectType,
@@ -49,7 +49,7 @@ import {
   resolveAttachmentSavedObjectTypes,
 } from '../../common/attachments';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common/utils';
+import { defaultSortField, getIDsAndIndicesAsArrays } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
@@ -89,7 +89,7 @@ import { isSOError } from '../../common/error';
 import {
   assertLegacyWriteableAttachmentType,
   getTransformerForPatchAttributes,
-  transformAttributesForMode,
+  toUnifiedAttributes,
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
@@ -170,17 +170,35 @@ export class AttachmentService {
    *
    * Used by the case metrics handler to display the alert count to the user.
    */
-  public async countAlertsAttachedToCase(
-    params: AlertsAttachedToCaseArgs
-  ): Promise<number | undefined> {
-    const { caseId, filter: authorizationFilter } = params;
+  public async countAlertsAttachedToCase({
+    caseId,
+    filter: authorizationFilter,
+    owner,
+    originOnly = true,
+  }: AlertsAttachedToCaseArgs): Promise<number | undefined> {
     try {
       this.context.log.debug(`Attempting to count alerts for case id ${caseId}`);
-      return this.aggregateAlertsForCase({
+
+      const documents = await this.getter.getAllDocumentsAttachedToCase({
         caseId,
-        aggType: 'cardinality',
-        extraFilter: authorizationFilter,
+        filter: authorizationFilter,
+        attachmentTypes: [AttachmentType.alert],
+        owner,
       });
+
+      const alertIds = new Set<string>();
+      for (const document of documents) {
+        const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
+
+        ids.forEach((id, index) => {
+          const alertIndex = indices[index];
+          if (!originOnly || alertIndex == null || !isNonLocalIndexName(alertIndex)) {
+            alertIds.add(id);
+          }
+        });
+      }
+
+      return alertIds.size;
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
       throw error;
@@ -198,7 +216,7 @@ export class AttachmentService {
       this.context.log.debug(
         `Attempting to count all alerts (legacy + unified) for case ${caseId}`
       );
-      return this.aggregateAlertsForCase({ caseId, aggType: 'value_count' });
+      return this.aggregateAlertsForCase(caseId);
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case ${caseId}: ${error}`);
       throw error;
@@ -206,21 +224,10 @@ export class AttachmentService {
   }
 
   /**
-   * Shared aggregation across legacy (`cases-comments.attributes.alertId`) and
-   * unified (`cases-attachments.attributes.attachmentId`) alert storage.
-   *
-   * @param aggType `'cardinality'` for unique alert ids, `'value_count'` for occurrences.
-   * @param extraFilter additional KueryNode (e.g. authorization) AND-combined onto the type filter.
+   * Aggregates alert occurrence counts across legacy (`cases-comments.attributes.alertId`)
+   * and unified (`cases-attachments.attributes.attachmentId`) alert storage.
    */
-  private async aggregateAlertsForCase({
-    caseId,
-    aggType,
-    extraFilter,
-  }: {
-    caseId: string;
-    aggType: 'cardinality' | 'value_count';
-    extraFilter?: KueryNode;
-  }): Promise<number> {
+  private async aggregateAlertsForCase(caseId: string): Promise<number> {
     const typeFilters: Array<KueryNode | undefined> = [
       buildFilter({
         filters: [AttachmentType.alert],
@@ -238,15 +245,14 @@ export class AttachmentService {
 
     const aggregations: Record<string, estypes.AggregationsAggregationContainer> = {
       legacyAlerts: {
-        [aggType]: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
+        value_count: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
       },
       unifiedAlerts: {
-        [aggType]: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
+        value_count: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
       },
     };
 
-    const combinedTypeFilter = combineFilters(typeFilters, 'or');
-    const combinedFilter = combineFilters([combinedTypeFilter, extraFilter]);
+    const combinedFilter = combineFilters(typeFilters, 'or');
 
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
@@ -310,9 +316,8 @@ export class AttachmentService {
    * - Legacy: `persistableState` and `externalReference` rows in
    *   `cases-comments`, EXCLUDING `.files` (file attachments are limited
    *   separately).
-   * - Unified (when the flag is on): persistable-state subtypes plus
-   *   `security.endpoint`, EXCLUDING `file` (matched via the `type` field on
-   *   `cases-attachments`).
+   * - Unified: persistable-state subtypes plus every
+   *   {@link UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP} type except `file`.
    *
    * Files are intentionally excluded on both sides; the request-side
    * `PersistableStateAndExternalReferencesLimiter.countOfItemsInRequest`
@@ -354,14 +359,14 @@ export class AttachmentService {
 
       const unifiedTypesToCount = [
         ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
-        SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        // Custom externalReference/persistableState subtypes with no unified
-        // mapping (e.g. FTR `.test` types) are still written to
-        // `cases-attachments` but keep their legacy `type`, so count those too.
+        ...Object.keys(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP).filter(
+          (type) => type !== FILE_ATTACHMENT_TYPE
+        ),
+        // Unmapped custom subtypes (e.g. FTR `.test`) keep the legacy type name.
         AttachmentType.persistableState,
         AttachmentType.externalReference,
       ];
-      // Files are stored with the migrated unified `file` type (not the legacy
+      // Files are stored with the unified `file` type (not the legacy
       // `.files` externalReference subtype), so excluding `file` from the type
       // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
       // isn't mapped on `cases-attachments`, so filtering on it would 400.
@@ -397,10 +402,13 @@ export class AttachmentService {
     }
   }
 
-  public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs) {
+  /**
+   * Deletes the attachments and returns the ids whose saved object was confirmed deleted by this call.
+   */
+  public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs): Promise<string[]> {
     try {
       if (savedObjectIds.length <= 0) {
-        return;
+        return [];
       }
 
       this.context.log.debug(`Attempting to DELETE attachments ${savedObjectIds}`);
@@ -433,8 +441,11 @@ export class AttachmentService {
       // `/reset`). So exclude an id only when a delete failed with a status
       // other than 404.
       const failedIds = new Set<string>();
+      const deletedIds = new Set<string>();
       for (const status of statuses) {
-        if (!status.success && status.error?.statusCode !== 404) {
+        if (status.success) {
+          deletedIds.add(status.id);
+        } else if (status.error?.statusCode !== 404) {
           failedIds.add(status.id);
         }
       }
@@ -442,6 +453,10 @@ export class AttachmentService {
       this.mirrorSafely(() =>
         this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(idsToMirror)
       );
+
+      // Unlike the mirror, callers reporting the deletion need ids this call actually removed: an
+      // id that 404'd in both types was already gone, and a non-404 failure may have survived.
+      return savedObjectIds.filter((id) => deletedIds.has(id) && !failedIds.has(id));
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
@@ -483,8 +498,8 @@ export class AttachmentService {
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
           unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>
         );
-        // v2 union accepts both unified- and legacy-shape attributes (some
-        // unmigrated types still pass through legacy-shaped).
+        // v2 union accepts leftover legacy-shaped attributes (unknown
+        // persistable-state subtype ids that toUnifiedAttributes does not fold).
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
@@ -1071,10 +1086,8 @@ export class AttachmentService {
 
   public async find({
     options,
-    mode,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
-    mode: AttachmentMode;
   }): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
@@ -1091,9 +1104,8 @@ export class AttachmentService {
         const injectedSo = injectAttachmentSOAttributesFromRefs(
           so as unknown as SavedObject<AttachmentPersistedAttributes>
         ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
-        const transformed = transformAttributesForMode({
+        const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
-          mode,
         });
         if (transformed.isUnified) {
           const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(

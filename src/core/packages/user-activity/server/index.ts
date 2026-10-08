@@ -13,6 +13,7 @@ export type {
   UserActivityEventOutcome,
   UserActivityError,
   UserActivityEvent,
+  UserActivityKibanaMetadata,
   TrackUserActionParams,
   UserActivityServiceSetup,
   UserActivityServiceStart,

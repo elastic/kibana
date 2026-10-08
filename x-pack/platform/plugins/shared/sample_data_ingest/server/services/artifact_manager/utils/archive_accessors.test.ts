@@ -44,7 +44,7 @@ describe('loadManifestFile', () => {
   it('throws if the manifest cannot be parsed', async () => {
     const archive = createMockArchive({ 'manifest.json': '{}}}{' });
 
-    await expect(loadManifestFile(archive)).rejects.toThrowError();
+    await expect(loadManifestFile(archive)).rejects.toThrow();
   });
 });
 
@@ -73,6 +73,6 @@ describe('loadMappingFile', () => {
   it('throws if the manifest cannot be parsed', async () => {
     const archive = createMockArchive({ 'mappings.json': '{}}}{' });
 
-    await expect(loadMappingFile(archive)).rejects.toThrowError();
+    await expect(loadMappingFile(archive)).rejects.toThrow();
   });
 });

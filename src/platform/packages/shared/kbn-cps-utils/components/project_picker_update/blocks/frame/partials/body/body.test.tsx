@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import type { ProjectPickerState } from '../../../../state/reducers';
-import { ProjectPickerFrameBody } from './body';
+import { ProjectPickerFrameBody, ProjectPickerFrameBodyHeader } from './body';
 import {
   FilterOperator,
   getFilterExpressionLookupKey,
@@ -43,16 +43,32 @@ const createFilterExpressions = (
     ])
   );
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: [],
-  visibleProjectIds: [],
-  selectedProjects: [],
-  ...overrides,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    controlsState: 'enabled',
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map(),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [],
+    selectedProjectIds: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    ...overrides,
+  };
+};
 
 const renderBody = (stateOverrides: Partial<ProjectPickerState> = {}) => {
   mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
@@ -63,6 +79,17 @@ const renderBody = (stateOverrides: Partial<ProjectPickerState> = {}) => {
       <ProjectPickerFrameBody>
         <div data-test-subj="bodyChild" />
       </ProjectPickerFrameBody>
+    </EuiThemeProvider>
+  );
+};
+
+const renderBodyHeader = (stateOverrides: Partial<ProjectPickerState> = {}) => {
+  mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
+  mockUseProjectPickerActions.mockReturnValue({});
+
+  return render(
+    <EuiThemeProvider>
+      <ProjectPickerFrameBodyHeader />
     </EuiThemeProvider>
   );
 };
@@ -92,7 +119,7 @@ describe('ProjectPickerFrameBody', () => {
     jest.clearAllMocks();
   });
 
-  describe('standard mode', () => {
+  describe('enabled controls state', () => {
     it('shows the add-filter control when filters are applied', () => {
       renderBody({
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
@@ -122,9 +149,9 @@ describe('ProjectPickerFrameBody', () => {
     });
   });
 
-  describe('read-only mode', () => {
+  describe('disabled controls state', () => {
     it('hides the filter box when there are no filter expressions', () => {
-      renderBody({ isReadOnly: true });
+      renderBody({ controlsState: 'disabled' });
 
       expect(screen.queryByTestId('projectPickerFilterDisplayContainer')).not.toBeInTheDocument();
       expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
@@ -133,13 +160,86 @@ describe('ProjectPickerFrameBody', () => {
 
     it('shows filter display but not the add-filter control when filters are applied', () => {
       renderBody({
-        isReadOnly: true,
+        controlsState: 'disabled',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       });
 
       expect(screen.getByTestId('projectPickerFilterDisplayContainer')).toBeInTheDocument();
       expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
       expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
+    });
+  });
+
+  describe('hidden controls state', () => {
+    it('hides the entire header when controls are hidden', () => {
+      renderBody({ controlsState: 'hidden' });
+
+      expect(screen.queryByTestId('projectPickerFrameBodyHeader')).not.toBeInTheDocument();
+      expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
+    });
+  });
+
+  describe('propose-then-commit filter state', () => {
+    it('shows the no-matching-projects warning when committed filters exclude every project', () => {
+      renderBodyHeader({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        visibleProjectIds: [],
+        selectedProjectIds: [],
+      });
+
+      expect(screen.getByTestId('projectPickerFilterDisplayNoMatchCallout')).toBeInTheDocument();
+    });
+
+    it('suppresses the no-matching-projects warning while a filter proposal is pending', () => {
+      renderBodyHeader({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        visibleProjectIds: [],
+        selectedProjectIds: [],
+        proposedFilters: { filterExpressions: new Map(), excludedOverrides: [] },
+        isFilterProposalPending: true,
+      });
+
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the search-error callout when the pending proposal failed, without the no-match warning', () => {
+      renderBodyHeader({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        visibleProjectIds: [],
+        selectedProjectIds: [],
+        proposedFilters: {
+          filterExpressions: createFilterExpressions([[typeSecurityExpression, false]]),
+          excludedOverrides: [],
+        },
+        isFilterProposalPending: true,
+        filterSearchError: new Error('search failed'),
+      });
+
+      expect(screen.getByTestId('projectPickerFilterSearchErrorCallout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders the displayed (proposed) filter chips instead of the committed ones while a proposal is pending', () => {
+      const proposedFilterExpressions = createFilterExpressions([[typeSecurityExpression]]);
+
+      renderBodyHeader({
+        filterExpressions: new Map(),
+        displayedFilterExpressions: proposedFilterExpressions,
+        proposedFilters: { filterExpressions: proposedFilterExpressions, excludedOverrides: [] },
+        isFilterProposalPending: true,
+      });
+
+      expect(screen.getByTestId('projectPickerFilterDisplayContainer')).toBeInTheDocument();
+    });
+
+    it('disables the add-filter control while a proposal is pending', () => {
+      renderBodyHeader({ isFilterProposalPending: true });
+
+      expect(screen.getByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
     });
   });
 });

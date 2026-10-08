@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiCallOut,
   EuiConfirmModal,
   EuiFormFieldset,
   EuiCheckbox,
@@ -16,6 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Agent } from '../../../../types';
 import {
@@ -141,21 +141,18 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       <p>
         {hasFleetServer && isSingleAgent ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
                 defaultMessage: 'This agent is running Fleet Server',
               })}
-              color="warning"
-              iconType="warning"
-            >
-              <p>
+              text={
                 <FormattedMessage
                   id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
                   defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
                 />
-              </p>
-            </EuiCallOut>
+              }
+            />
             <EuiSpacer />
           </>
         ) : null}

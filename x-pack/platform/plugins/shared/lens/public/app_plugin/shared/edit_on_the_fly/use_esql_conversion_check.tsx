@@ -17,19 +17,20 @@ import type {
   LensDatasourceId,
   TypedLensSerializedState,
   LensDocument,
+  Visualization,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
+  getFailureTooltipText,
   isEsqlQuerySuccess,
+  type EsqlConversionFailureReason,
   type ColumnRoles,
-} from '../../../datasources/form_based/generate_esql_query';
-import {
-  esqlConversionFailureReasonMessages,
-  getFailureTooltip,
-} from '../../../datasources/form_based/to_esql_failure_reasons';
+} from '@kbn/lens-common';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -45,11 +46,62 @@ interface EsqlConversionSettings {
 }
 
 const getEsqlConversionDisabledSettings = (
-  tooltip: string = esqlConversionFailureReasonMessages.unknown
+  reason: EsqlConversionFailureReason = 'unknown'
 ): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
-  convertToEsqlButtonTooltip: tooltip,
+  convertToEsqlButtonTooltip: getFailureTooltipText(reason),
   convertibleLayers: [],
+});
+
+const getConvertibleLayerName = (layerId: string): string =>
+  i18n.translate('xpack.lens.config.convertToEsqlLayerName', {
+    defaultMessage: 'Layer {layerId}',
+    values: { layerId: layerId.substring(0, 6) },
+  });
+
+/**
+ * Detects annotation layers that cannot be represented by an ES|QL visualization.
+ * Query annotations rely on data views, while by-reference annotation groups are
+ * rejected by the ES|QL schema even when every event in the group is manual.
+ *
+ * The state is intentionally probed structurally instead of via `XYVisualizationState`
+ * and `isAnnotationsLayer`: this hook is visualization-agnostic (`visualization.state`
+ * is `unknown` in the store and may belong to any vis type), mirroring the
+ * `getTrendlineLayerId` probe for metric state below. Keep this shape in sync with
+ * `XYAnnotationLayerConfig` (`@kbn/lens-common`).
+ */
+export const hasUnsupportedAnnotations = (visualizationState: unknown): boolean => {
+  const layers = (visualizationState as { layers?: unknown })?.layers;
+  if (!Array.isArray(layers)) {
+    return false;
+  }
+  return layers.some(
+    (layer: {
+      layerType?: string;
+      annotations?: EventAnnotationConfig[];
+      annotationGroupId?: string;
+      __lastSaved?: unknown;
+    }) =>
+      layer?.layerType === layerTypes.ANNOTATIONS &&
+      (layer.annotationGroupId !== undefined ||
+        layer.__lastSaved !== undefined ||
+        (Array.isArray(layer.annotations) && layer.annotations.some(isQueryAnnotationConfig)))
+  );
+};
+
+const makeNonConvertibleLayer = (
+  layerId: string,
+  type: ConvertibleLayer['type'],
+  failureReason?: EsqlConversionFailureReason
+): ConvertibleLayer => ({
+  id: layerId,
+  icon: 'layers',
+  name: getConvertibleLayerName(layerId),
+  type,
+  query: '',
+  isConvertibleToEsql: false,
+  conversionData: { esAggsIdMap: {}, partialRows: false },
+  failureReason,
 });
 
 export const useEsqlConversionCheck = (
@@ -65,7 +117,7 @@ export const useEsqlConversionCheck = (
     datasourceId: LensDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
-    activeVisualization: unknown;
+    activeVisualization: Visualization | undefined;
   },
   {
     framePublicAPI,
@@ -92,53 +144,39 @@ export const useEsqlConversionCheck = (
 
     // Guard: charts saved to the library
     if (isSavedToLibrary(persistedDoc)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.saved_to_library_not_supported
-      );
+      return getEsqlConversionDisabledSettings('saved_to_library_not_supported');
+    }
+
+    // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
+    if (hasUnsupportedAnnotations(state)) {
+      return getEsqlConversionDisabledSettings('query_annotations_not_supported');
     }
 
     // Detect trendline layer from metric visualization state
     const trendlineLayerId = getTrendlineLayerId(state);
-
-    // Guard: layer count (trendline layers don't count — they are auto-included)
-    const dataLayerIds = trendlineLayerId
-      ? layerIds.filter((id) => id !== trendlineLayerId)
-      : layerIds;
-    if (dataLayerIds.length > 1) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.multi_layer_not_supported
-      );
-    }
 
     // Guard: datasource state exists and has layers
     if (!isValidDatasourceState(datasourceState)) {
       return getEsqlConversionDisabledSettings();
     }
 
-    // Guard: layer access
-    const layerId = dataLayerIds[0];
     const layers = datasourceState.layers as Record<string, FormBasedLayer>;
-    if (!layerId || !layers[layerId]) {
-      return getEsqlConversionDisabledSettings();
-    }
 
-    const singleLayer = layers[layerId];
-    if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-      return getEsqlConversionDisabledSettings();
+    const hasNonStaticReferenceLine = layerIds.some((layerId) => {
+      const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
+      if (layerType !== layerTypes.REFERENCELINE) {
+        return false;
+      }
+      const referenceLineLayer = layers[layerId];
+      return Boolean(
+        referenceLineLayer?.columnOrder?.some(
+          (columnId) => referenceLineLayer.columns[columnId]?.operationType !== 'static_value'
+        )
+      );
+    });
+    if (hasNonStaticReferenceLine) {
+      return getEsqlConversionDisabledSettings('reference_line_not_supported');
     }
-
-    // Main logic: compute esqlLayer
-    const { columnOrder } = singleLayer;
-    const columns = { ...singleLayer.columns };
-    const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-    const [, esAggEntries] = partition(
-      columnEntries,
-      ([, col]) =>
-        (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-          operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
-        // Keep static_value columns - they'll be converted to EVAL statements
-        col.operationType !== 'static_value'
-    );
 
     // Extract column roles from visualization state for semantic ES|QL column naming
     const columnRoles: ColumnRoles = {};
@@ -147,34 +185,70 @@ export const useEsqlConversionCheck = (
       columnRoles[visState.maxAccessor] = 'max_value';
     }
 
-    let esqlLayer;
-    try {
-      esqlLayer = generateEsqlQuery(
-        esAggEntries,
-        singleLayer,
-        framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
-        coreStart.uiSettings,
-        framePublicAPI.dateRange,
-        startDependencies.data.nowProvider.get(),
-        columnRoles
+    // Iterate over data layers and attempt conversion for each. Non-data layers remain
+    // visible in the conversion modal but stay in their original datasource.
+    const convertibleLayers: ConvertibleLayer[] = [];
+    for (const layerId of layerIds) {
+      // Metric trendlines are converted separately and omitted from the modal.
+      if (layerId === trendlineLayerId) {
+        continue;
+      }
+
+      const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
+
+      // Trendlines are excluded above via trendlineLayerId; this guard only narrows
+      // the type (ConvertibleLayer['type'] excludes 'metricTrendline').
+      if (layerType === layerTypes.METRIC_TRENDLINE) {
+        continue;
+      }
+
+      if (layerType !== layerTypes.DATA) {
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerType));
+        continue;
+      }
+
+      const layer = layers[layerId];
+      if (!layer || !layer.columnOrder || !layer.columns) {
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
+        continue;
+      }
+
+      const { columnOrder } = layer;
+      const columns = { ...layer.columns };
+      const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
+      const [, esAggEntries] = partition(
+        columnEntries,
+        ([, col]) =>
+          (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+            operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
+          col.operationType !== 'static_value'
       );
-    } catch (e) {
-      // Layer remains non-convertible
-      // This prevents conversion errors from breaking the visualization
-      return getEsqlConversionDisabledSettings(esqlConversionFailureReasonMessages.unknown);
-    }
 
-    if (!isEsqlQuerySuccess(esqlLayer)) {
-      const reason = esqlLayer?.reason;
-      const tooltipMessage = getFailureTooltip(reason);
-      return getEsqlConversionDisabledSettings(tooltipMessage);
-    }
+      let esqlLayer;
+      try {
+        esqlLayer = generateEsqlQuery(
+          esAggEntries,
+          layer,
+          framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+          coreStart.uiSettings,
+          framePublicAPI.dateRange,
+          startDependencies.data.nowProvider.get(),
+          columnRoles
+        );
+      } catch (e) {
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
+        continue;
+      }
 
-    const convertibleLayers: ConvertibleLayer[] = [
-      {
+      if (!isEsqlQuerySuccess(esqlLayer)) {
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, esqlLayer.reason));
+        continue;
+      }
+
+      convertibleLayers.push({
         id: layerId,
         icon: 'layers',
-        name: '',
+        name: getConvertibleLayerName(layerId),
         type: layerTypes.DATA,
         query: esqlLayer.esql,
         isConvertibleToEsql: true,
@@ -182,8 +256,8 @@ export const useEsqlConversionCheck = (
           esAggsIdMap: esqlLayer.esAggsIdMap,
           partialRows: esqlLayer.partialRows,
         },
-      },
-    ];
+      });
+    }
 
     // If there is a trendline layer, attempt to convert it alongside the main layer
     const trendlineResult = trendlineLayerId
@@ -200,15 +274,27 @@ export const useEsqlConversionCheck = (
     // If a trendline layer exists but failed to convert, disable the button
     // rather than silently dropping the trendline
     if (trendlineLayerId && trendlineResult && !trendlineResult.success) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.trendline_not_supported
-      );
+      return getEsqlConversionDisabledSettings('trendline_not_supported');
     }
 
-    // Trendline is auto-included in the conversion but not shown in the modal
+    // Guard: converting only a subset of data layers would leave a form-based data
+    // layer alongside text-based ones, which is an invalid mixed state
+    // (buildVisualizationAPI rejects mixed ESQL and non-ESQL data layers).
+    const nonConvertibleDataLayer = convertibleLayers.find(
+      (layer) => layer.type === layerTypes.DATA && !layer.isConvertibleToEsql
+    );
+    if (nonConvertibleDataLayer) {
+      return getEsqlConversionDisabledSettings(nonConvertibleDataLayer.failureReason ?? 'unknown');
+    }
+
+    // Trendline is auto-included in the conversion but not shown in the modal.
+    // Non-data helper layers (reference lines/annotations) remain in their original datasource.
+    const convertibleDataLayers = convertibleLayers.filter(
+      (layer) => layer.type === layerTypes.DATA && layer.isConvertibleToEsql
+    );
     const layersToConvert = trendlineResult?.success
-      ? [...convertibleLayers, trendlineResult.layer]
-      : convertibleLayers;
+      ? [...convertibleDataLayers, trendlineResult.layer]
+      : convertibleDataLayers;
 
     const newAttributes = convertFormBasedToTextBasedLayer({
       layersToConvert,
@@ -273,7 +359,9 @@ function tryConvertTrendlineLayer(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   columnRoles: ColumnRoles
-): { success: true; layer: ConvertibleLayer } | { success: false; reason?: string } {
+):
+  | { success: true; layer: ConvertibleLayer }
+  | { success: false; reason?: EsqlConversionFailureReason } {
   if (!layer?.columnOrder || !layer?.columns) return { success: false };
 
   // Defensive patching of date_histogram columns for trendline conversion.

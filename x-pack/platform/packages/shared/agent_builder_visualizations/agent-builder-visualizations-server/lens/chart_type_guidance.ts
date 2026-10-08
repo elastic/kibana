@@ -7,28 +7,26 @@
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
+import { generalChartRules } from './general_rules';
+
+const toBullets = (rules: readonly string[]): string[] => rules.map((rule) => `- ${rule}`);
 
 export const getChartTypeSelectionPromptContent = () =>
   [
-    'Available chart types:',
+    "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:",
     ...Object.entries(chartTypeRegistry).map(
-      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection.description}`
+      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection}`
     ),
-    '',
-    'Guidelines:',
-    ...Object.entries(chartTypeRegistry).map(([, { prompt }]) => `- ${prompt.selection.guideline}`),
-    "- Consider the user's intent and the nature of the data being visualized",
   ].join('\n');
 
-export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const perChartTypeRules = chartTypeRegistry[chartType].prompt.config?.perChartTypeRules;
-
-  if (!perChartTypeRules?.length) {
-    return '';
-  }
-
-  return [
-    `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...perChartTypeRules.map((rule) => `- ${rule}`),
+/**
+ * Rules for authoring one chart type's Lens config: the general rules followed
+ * by the chart-specific ones. `getColorConfigPromptContent` compiles the color
+ * mechanics separately.
+ */
+export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): string =>
+  [
+    `CHART RULES FOR ${chartType.toUpperCase()}:`,
+    ...toBullets(generalChartRules),
+    ...toBullets(chartTypeRegistry[chartType].prompt.rules ?? []),
   ].join('\n');
-};

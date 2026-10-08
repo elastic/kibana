@@ -29,18 +29,17 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           name: ilmPolicyName,
         });
 
-        expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
-          _meta: {
-            managed: true,
-          },
-          phases: {
-            hot: {
-              min_age: '0ms',
-              actions: {
-                rollover: {
-                  max_age: '30d',
-                  max_primary_shard_size: '50gb',
-                },
+        const commonPolicy = commonIlmPolicy[ilmPolicyName].policy;
+        // `_meta` also carries a `content_hash` stamp used to skip unchanged installs
+        expect(commonPolicy._meta?.managed).to.eql(true);
+        expect(commonPolicy._meta?.content_hash).to.be.a('string');
+        expect(commonPolicy.phases).to.eql({
+          hot: {
+            min_age: '0ms',
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_primary_shard_size: '50gb',
               },
             },
           },

@@ -1,0 +1,72 @@
+{
+  "10.1.0": [
+    {
+      "state": "enabled",
+      "disabledWorkflows": [],
+      "disabledRuleIds": []
+    },
+    {
+      "state": "paused",
+      "updatedAt": "2026-09-01T10:00:00.000Z",
+      "updatedBy": "elastic",
+      "disabledWorkflows": [
+        {
+          "id": "significant-events-discovery",
+          "spaceId": "default"
+        }
+      ],
+      "disabledRuleIds": ["rule-1"],
+      "lastSummary": {
+        "state": "paused",
+        "executionsCancelled": 1,
+        "workflowsDisabled": 1,
+        "rulesDisabled": 1,
+        "partialFailures": [
+          {
+            "target": "workflow:significant-events-cleanup@space-a",
+            "error": "workflow not found"
+          }
+        ]
+      },
+      "pausedSettings": {
+        "continuousOnboardingWasEnabled": true,
+        "scheduledDiscoveryEnabledSpaceIds": ["default", "space-a"]
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "state": "enabled",
+      "disabledWorkflows": [],
+      "disabledRuleIds": []
+    },
+    {
+      "state": "paused",
+      "updatedAt": "2026-09-01T10:00:00.000Z",
+      "updatedBy": "elastic",
+      "disabledWorkflows": [
+        {
+          "id": "significant-events-discovery",
+          "spaceId": "default"
+        }
+      ],
+      "disabledRuleIds": ["rule-1"],
+      "lastSummary": {
+        "state": "paused",
+        "executionsCancelled": 1,
+        "workflowsDisabled": 1,
+        "rulesDisabled": 1,
+        "partialFailures": [
+          {
+            "target": "workflow:significant-events-cleanup@space-a",
+            "error": "workflow not found"
+          }
+        ]
+      },
+      "pausedSettings": {
+        "continuousOnboardingWasEnabled": true,
+        "scheduledDiscoveryEnabledSpaceIds": ["default", "space-a"]
+      }
+    }
+  ]
+}

@@ -42,6 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
+import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
@@ -59,6 +60,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
@@ -76,6 +78,7 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -167,7 +170,7 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
-    this.casesEventBus = new CasesEventBus();
+    this.casesEventBus = new CasesEventBus(this.logger);
 
     registerSavedObjects({
       core,
@@ -222,6 +225,37 @@ export class CasePlugin
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+    const workflowRunService =
+      this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
+        ? new CasesWorkflowRunService({
+            management: plugins.workflowsManagement.management,
+            logger: this.logger,
+            audit: plugins.security.audit,
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
+          })
+        : undefined;
+
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
 
     registerRoutes({
       router,
@@ -231,7 +265,13 @@ export class CasePlugin
           docLinks: core.docLinks,
           config: this.caseConfig,
         }),
-        ...getInternalRoutes(this.userProfileService, this.caseConfig),
+        ...getInternalRoutes(
+          this.userProfileService,
+          this.caseConfig,
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
+        ),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -241,17 +281,18 @@ export class CasePlugin
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
     plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
 
-    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
-      const [coreStart] = await core.getStartServices();
-      return this.getCasesClientWithRequest(coreStart)(request);
+    const getCasesClient = (
+      clientSource: CasesClientSource
+    ): ((request: KibanaRequest, options?: GetCasesClientOptions) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest, options?: GetCasesClientOptions) => {
+        const [coreStart] = await core.getStartServices();
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
+      };
     };
 
-    const getSpaceId = (request?: KibanaRequest) => {
-      if (!request) {
-        return DEFAULT_SPACE_ID;
-      }
-
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
     };
 
     const serverlessProjectType = this.isServerless
@@ -263,7 +304,8 @@ export class CasePlugin
       alerting: plugins.alerting,
       core,
       logger: this.logger,
-      getCasesClient,
+      getCasesClient: getCasesClient('connector'),
+      getActionsClient,
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
@@ -272,7 +314,7 @@ export class CasePlugin
 
     registerCaseWorkflowSteps(
       plugins.workflowsExtensions,
-      getCasesClient,
+      getCasesClient('workflow'),
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
       this.caseConfig.templates?.enabled === true,
@@ -280,24 +322,29 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
-    if (plugins.agentBuilder) {
+    const isCasesAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
-        getCasesClient,
+        getCasesClient('agent_builder'),
         core,
         this.unifiedAttachmentTypeRegistry,
         {
           analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
-        }
+        },
+        this.logger
       );
     }
 
     return {
       attachmentFramework: {
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
       config: this.caseConfig,
@@ -489,8 +536,14 @@ export class CasePlugin
     });
 
     return {
-      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
+      getCasesEventBus: () => {
+        if (!this.casesEventBus) {
+          throw new Error('getCasesEventBus called before casesEventBus was initialized');
+        }
+        return this.casesEventBus;
+      },
       config: this.caseConfig,
     };
   }
@@ -532,6 +585,7 @@ export class CasePlugin
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
+            clientSource: 'rest_api',
           });
         },
       };
@@ -539,14 +593,16 @@ export class CasePlugin
   };
 
   private getCasesClientWithRequest =
-    (core: CoreStart) =>
-    async (request: KibanaRequest): Promise<CasesClient> => {
+    (core: CoreStart, clientSource: CasesClientSource) =>
+    async (request: KibanaRequest, options?: GetCasesClientOptions): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
       return this.clientFactory.create({
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
+        clientSource,
+        actionSource: options?.actionSource,
       });
     };
 }

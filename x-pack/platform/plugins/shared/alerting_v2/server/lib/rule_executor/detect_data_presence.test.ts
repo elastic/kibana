@@ -6,13 +6,14 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
-import { buildGroupHash } from './build_alert_events';
+import { buildGroupHash, UNGROUPED_GROUP_HASH } from './build_alert_events';
 import type { RuleResponse } from '../rules_client';
 import { detectDataPresence } from './detect_data_presence';
 
@@ -21,7 +22,6 @@ const groupingFields = ['host.name'];
 const hostHash = buildGroupHash({
   rowDoc: { 'host.name': HOST },
   groupKeyFields: groupingFields,
-  fallbackSeed: 'unused',
 });
 
 describe('detectDataPresence', () => {
@@ -41,22 +41,21 @@ describe('detectDataPresence', () => {
     return createRuleResponse({
       kind: 'alert',
       grouping: { fields: groupingFields },
-      no_data_strategy: 'emit',
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM metrics-* | WHERE avg_cpu > 90' },
-        no_data: { query: 'FROM metrics-* | STATS COUNT(*) BY host.name' },
+      no_data: {
+        strategy: 'alert',
+        query: 'FROM metrics-* | STATS COUNT(*) BY host.name',
       },
+      query: { base: 'FROM metrics-* | WHERE avg_cpu > 90' },
       ...overrides,
     });
   }
 
-  it("returns an empty set when no_data_strategy is 'none'", async () => {
+  it("returns an empty set when no_data.strategy is 'ignore'", async () => {
     const { queryService, scopedEsClient } = setup();
 
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule({ no_data_strategy: 'none' }),
+      rule: buildRule({ no_data: { strategy: 'ignore' } }),
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -65,17 +64,12 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set());
   });
 
-  it('returns an empty set when a standalone rule omits the query.no_data block', async () => {
+  it('returns an empty set when the rule carries no no_data configuration', async () => {
     const { queryService, scopedEsClient } = setup();
 
     const result = await detectDataPresence({
       queryService,
-      rule: createRuleResponse({
-        kind: 'alert',
-        no_data_strategy: 'emit',
-        grouping: { fields: groupingFields },
-        query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
-      }),
+      rule: buildRule({ no_data: undefined }),
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -127,6 +121,27 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set([hostHash]));
   });
 
+  it('collapses an ungrouped rule to the single UNGROUPED_GROUP_HASH', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    // Several rows, no grouping fields: the presence set is the single series.
+    scopedEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse(
+        [{ name: 'host.name', type: 'keyword' }],
+        [['host-a'], ['host-b'], ['host-c']]
+      )
+    );
+
+    const result = await detectDataPresence({
+      queryService,
+      rule: buildRule({ grouping: undefined }),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    });
+
+    expect(result).toEqual(new Set([UNGROUPED_GROUP_HASH]));
+  });
+
   it('records an empty set when the no-data query returns no rows', async () => {
     const { queryService, scopedEsClient } = setup();
 
@@ -142,7 +157,7 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set());
   });
 
-  it('uses the composed base query as the no-data query', async () => {
+  it('falls back to the base query when no_data carries no presence query', async () => {
     const { queryService, scopedEsClient } = setup();
 
     const baseQuery = 'FROM metrics-* | STATS AVG(cpu) BY host.name';
@@ -150,25 +165,22 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
       rule: createRuleResponse({
         kind: 'alert',
-        no_data_strategy: 'emit',
+        no_data: { strategy: 'alert' },
         grouping: { fields: groupingFields },
-        query: {
-          format: 'composed',
-          base: baseQuery,
-          breach: { segment: 'WHERE AVG(cpu) > 0.9' },
-        },
+        query: { base: baseQuery, breach: { segment: 'WHERE AVG(cpu) > 0.9' } },
       }),
-      input: createRuleExecutionInput(),
+      input,
       logger: loggerService,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: baseQuery }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(result).toEqual(new Set([hostHash]));
   });
@@ -190,6 +202,25 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('surfaces content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

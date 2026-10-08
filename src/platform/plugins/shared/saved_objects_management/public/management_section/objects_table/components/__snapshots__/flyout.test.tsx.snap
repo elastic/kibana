@@ -313,7 +313,7 @@ exports[`Flyout should render import step 1`] = `
           </EuiTitle>
         }
       >
-        <EuiFilePickerClass
+        <EuiFilePicker
           accept=".ndjson"
           fullWidth={true}
           initialPromptText={

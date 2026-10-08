@@ -10,7 +10,7 @@
 import type { IconType } from '@elastic/eui';
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup, AnnotationClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type {
   CellValueContext,
@@ -50,6 +50,11 @@ export interface MultiFilterEvent {
 export interface BrushEvent {
   name: 'brush';
   data: RangeSelectContext['data'];
+}
+
+export interface AnnotationClickEvent {
+  name: 'annotationClick';
+  data: AnnotationClickTriggerEvent['data'];
 }
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

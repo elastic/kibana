@@ -8,9 +8,11 @@
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
+import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
 import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = () => ({
@@ -21,9 +23,16 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  availability: createAlertingV2Availability({
+    getActiveSpace: jest.fn().mockResolvedValue({}),
+  }),
 });
 
 describe('createRuleManagementSkill', () => {
+  it('generates schema docs without throwing', () => {
+    expect(() => createRuleManagementSkill(createDeps())).not.toThrow();
+  });
+
   it('registers the skill under the stable rule-management id and name', () => {
     const skill = createRuleManagementSkill(createDeps());
 
@@ -42,6 +51,16 @@ describe('createRuleManagementSkill', () => {
     const skill = createRuleManagementSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
+  });
+
+  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
+    const skill = createRuleManagementSkill(createDeps());
+    const uiSettings = { get: jest.fn().mockResolvedValue(false) };
+
+    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
+      status: 'unavailable',
+    });
+    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
   });
 
   it('exposes only the manage rule inline tool', async () => {

@@ -21,6 +21,8 @@ export interface FlyoutLensChartConfigDefinition {
 export interface ServiceScope {
   serviceName: string;
   environment: string;
+  /** When set, scopes charts to a single transaction / entry span. */
+  transactionName?: string;
 }
 
 export interface EcsServiceScope extends ServiceScope {

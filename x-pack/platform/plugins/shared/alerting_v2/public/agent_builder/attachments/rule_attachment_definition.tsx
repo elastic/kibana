@@ -14,6 +14,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 
 export { RULE_ATTACHMENT_TYPE };
+import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
 import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
@@ -30,7 +31,8 @@ export const createRuleAttachmentDefinition = ({
   container,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
-  getIcon: () => 'bell',
+  getIcon: () => 'watchesApp',
+  getHeader: ({ attachment }) => ({ icon: RULE_KIND_ICONS[attachment.data.kind] }),
 
   canvasWidth: '40vw',
 

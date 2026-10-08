@@ -29,6 +29,9 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { getGcpIdToken, parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
 
 const CLOUD_RUN_API_BASE = 'https://run.googleapis.com/v2';
+// Cloud Functions (2nd gen) / Cloud Run service names are at most 63 characters.
+const FUNCTION_NAME_MAX_LENGTH = 63;
+const PAGE_TOKEN_MAX_LENGTH = 2048;
 
 interface GcpApiResponse {
   data: unknown;
@@ -163,11 +166,16 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Invoke a GCP Cloud Function or Cloud Run function by name using its HTTP trigger URL. Use this when you need to run a known function with an optional JSON payload and return the function response.',
       input: lazySchema(() =>
         z.object({
-          functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Cloud Function or Cloud Run service name'),
           payload: z.unknown().optional().describe('JSON payload to send to the function'),
         })
       ),
@@ -215,6 +223,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      scope: 'read',
       description:
         'List GCP Cloud Functions and Cloud Run functions in the configured project and region. Use this to discover available function names before invoking or inspecting a function.',
       input: lazySchema(() =>
@@ -226,7 +235,11 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
             .max(500)
             .optional()
             .describe('Maximum number of functions to return (1-500)'),
-          pageToken: z.string().optional().describe('Pagination token from a previous response'),
+          pageToken: z
+            .string()
+            .max(PAGE_TOKEN_MAX_LENGTH)
+            .optional()
+            .describe('Pagination token from a previous response'),
         })
       ),
       handler: async (ctx, input) => {
@@ -283,11 +296,16 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a single GCP Cloud Function or Cloud Run function by name. Use this when you already know the function name and need its endpoint or deployment configuration before deciding what to invoke.',
       input: lazySchema(() =>
         z.object({
-          functionName: z.string().min(1).describe('Cloud Function or Cloud Run service name'),
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Cloud Function or Cloud Run service name'),
         })
       ),
       handler: async (ctx, input) => {

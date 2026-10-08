@@ -10,17 +10,14 @@ import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/cons
 import {
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
-  ENTITY_ANALYTICS_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
-  SECURITY_FEATURE_ID,
 } from '../../common/constants';
-import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS } from '../app/translations';
+import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
-import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
@@ -55,21 +52,6 @@ export const detectionResponseLinks: LinkItem = {
       defaultMessage: 'Detection & Response',
     }),
   ],
-};
-
-export const entityAnalyticsLinks: LinkItem = {
-  id: SecurityPageName.entityAnalytics,
-  title: ENTITY_ANALYTICS,
-  landingImage: entityAnalyticsDashboard,
-  description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsDescription', {
-    defaultMessage:
-      'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
-  }),
-  path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-  isBeta: false,
-  licenseType: 'platinum',
-  globalSearchKeywords: [ENTITY_ANALYTICS],
 };
 
 export const ecsDataQualityDashboardLinks: LinkItem = {

@@ -47,6 +47,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { CredentialAccessor } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -80,6 +81,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
+import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -90,6 +92,7 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -173,6 +176,12 @@ export interface PluginSetupContract {
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 
   registerConnectorLifecycleListener(listener: ConnectorLifecycleListener): void;
+
+  /**
+   * Registers the single consumer that receives connector events from the public inbound hub.
+   * Throws if an emitter is already registered (exactly one emitter is supported).
+   */
+  registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
 }
 
 export interface PluginStartContract {
@@ -199,7 +208,7 @@ export interface PluginStartContract {
    */
   getActionsClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -264,6 +273,7 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -281,6 +291,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private securityStart?: SecurityPluginStart;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -291,6 +302,7 @@ export class ActionsPlugin
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
+  private connectorEventEmitter?: ConnectorEventEmitter;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
@@ -343,6 +355,8 @@ export class ActionsPlugin
           baseUrl: this.actionsConfig.relay.url,
           configurationUtilities: actionsConfigUtils,
           logger: this.logger.get('relay-client'),
+          useSystemIdentity: this.actionsConfig.relay.uiam?.enabled ?? false,
+          getSystemIdentity: () => this.securityStart?.authc.systemIdentity,
         })
       : undefined;
 
@@ -480,14 +494,25 @@ export class ActionsPlugin
     });
 
     // Routes
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
+    const inboundEvents = setupInboundEvents({
+      actionsConfigUtils,
+      http: core.http,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      spaces: this.spaces,
+      inMemoryConnectors: this.inMemoryConnectors,
+      getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
     defineRoutes({
-      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      router,
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
       logger: this.logger,
       core,
       oauthRateLimiter,
+      inboundEvents,
     });
 
     return {
@@ -551,10 +576,24 @@ export class ActionsPlugin
       registerConnectorLifecycleListener: (listener: ConnectorLifecycleListener) => {
         this.connectorLifecycleListeners.push(listener);
       },
+      registerConnectorEventEmitter: (emitter: ConnectorEventEmitter) => {
+        if (this.connectorEventEmitter !== undefined) {
+          throw new Error(
+            'A connector event emitter is already registered; only one emitter is supported.'
+          );
+        }
+        this.connectorEventEmitter = emitter;
+      },
     };
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    this.securityStart = plugins.security;
+    if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
+      this.logger.warn(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
+      );
+    }
     const {
       logger,
       licenseState,
@@ -638,6 +677,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -659,7 +699,7 @@ export class ActionsPlugin
       return await createActionsClient({ request, unsecuredSavedObjectsClient });
     };
 
-    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: SpaceId) => {
       throwIfCannotEncrypt();
 
       const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
@@ -1084,6 +1124,7 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {
@@ -1133,10 +1174,14 @@ export class ActionsPlugin
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      const { isInboundEventsEnabled: requestedEventsEnabled, ...withoutEventsFlag } = connector;
       this.inMemoryConnectors.push({
-        ...connector,
+        ...withoutEventsFlag,
         isDynamic: true,
         isPreconfigured: true,
+        ...(this.actionsConfig.inboundEvents.enabled && requestedEventsEnabled === true
+          ? { isInboundEventsEnabled: true }
+          : {}),
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
       return true;

@@ -80,8 +80,14 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     })
     .addCase(editPrivateLocationAction.fail, (state, action) => {
       state.editLoading = false;
-      state.privateLocationToEdit = undefined;
       state.error = action.payload;
+      // A 5xx can follow a partially committed edit (e.g. the revert after a failed schedule). Close the
+      // editor and reload so a second save is compared against what was persisted.
+      if ((action.payload.body.statusCode ?? 0) >= 500) {
+        state.privateLocationToEdit = undefined;
+        state.data = null;
+        state.isPrivateLocationFlyoutVisible = false;
+      }
     })
     .addCase(deletePrivateLocationAction.get, (state) => {
       state.deleteLoading = true;

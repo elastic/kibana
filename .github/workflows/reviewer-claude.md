@@ -2,7 +2,7 @@
 name: Claude Reviewer
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    types: [synchronize, reopened, labeled]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -40,10 +40,9 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
-# - Draft PR events activate only when the ci:draft-checks label is present.
-# - ready_for_review activates the first review when a draft is marked ready.
-# - Adding the ci:draft-checks label activates a review; other label events are ignored.
+# - reviewer:skip-ai suppresses PR event activations.
+# - Reviewer label events activate, including labels added while creating a PR.
+# - Synchronize/reopened PR events activate when the reviewer label is already present.
 # - Synchronize events for merge commits are ignored; only code pushes activate a new review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
@@ -57,14 +56,11 @@ if: >-
       (
         (
           github.event.action == 'labeled' &&
-          github.event.label.name == 'ci:draft-checks'
+          github.event.label.name == 'reviewer:claude'
         ) ||
         (
           github.event.action != 'labeled' &&
-          (
-            !github.event.pull_request.draft ||
-            contains(github.event.pull_request.labels.*.name, 'ci:draft-checks')
-          )
+          contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
         )
       )
     )
@@ -76,7 +72,7 @@ concurrency:
       github.event.inputs.comment_id ||
       (
         github.event.action == 'labeled' &&
-        github.event.label.name != 'ci:draft-checks' &&
+        github.event.label.name != 'reviewer:claude' &&
         github.event.label.name != 'reviewer:skip-ai' &&
         github.event.label.name
       ) ||
@@ -94,6 +90,7 @@ env:
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
   REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none

@@ -12,6 +12,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
+import { OPTIONAL_LABEL } from '../optional_field_label';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
@@ -40,6 +41,7 @@ export const DescriptionField = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          labelAppend={OPTIONAL_LABEL}
           fullWidth
           isInvalid={!!error}
           error={error?.message}

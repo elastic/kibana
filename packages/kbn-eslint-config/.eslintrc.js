@@ -17,86 +17,6 @@
  * under the License.
  */
 
-const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
-
-/**
- * Compile an exact, kibana-root-relative file path (forward slashes) into an
- * anchored regex. A regex is required because the `module_migration` rule matches
- * each `exclude` with `RegExp.test()` against a path that uses the OS-native
- * separator, so each `/` is matched as `[\/\\]` to also work on Windows.
- */
-const exactFilePathMatcher = (relativePath) =>
-  new RegExp(
-    `^${relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '[\\/\\\\]')}$`
-  );
-
-/**
- * Files that already import js-yaml. New js-yaml imports must not be added here;
- * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Each entry is an exact file path, so adding a new js-yaml import (even in an
- * already-listed directory) is flagged until that file is migrated or added here.
- * The `module_migration` rule evaluates each mapping independently, so this list
- * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
- */
-const JS_YAML_LEGACY_CONSUMERS = [
-  'packages/kbn-rspack-optimizer/src/limits.ts',
-  'src/platform/kbn-ui/_tooling/affected_packages.ts',
-  'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
-  'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
-  'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
-  'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
-].map(exactFilePathMatcher);
-
-const USES_ELASTIC_APM_AGENT = [
-  // Core platform APM integration & agent infrastructure
-  /src[\/\\]core[\/\\]/,
-  /kbn-apm-config-loader[\/\\]/,
-  /kbn-apm-utils[\/\\]/,
-
-  // Test & dev tooling
-  /kbn-test[\/\\]src[\/\\]/,
-  /kbn-journeys[\/\\]/,
-  /kbn-cli-dev-mode[\/\\]/,
-  /kbn-docs-utils[\/\\]/,
-  /src[\/\\]platform[\/\\]test[\/\\]/,
-  /x-pack[\/\\]platform[\/\\]test[\/\\]/,
-
-  // Shared packages with APM tracing
-  /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
-  /kbn-reporting[\/\\]export_types[\/\\]/,
-
-  // Plugins with legacy APM custom spans (pending OTel migration)
-  /workflows_execution_engine[\/\\]server[\/\\]/,
-  /task_manager[\/\\]server[\/\\]/,
-  /fleet[\/\\]server[\/\\]/,
-  /alerting[\/\\]server[\/\\]/,
-  /screenshotting[\/\\]server[\/\\]/,
-  /reporting[\/\\]server[\/\\]/,
-  /intercepts[\/\\]server[\/\\]/,
-  /data_usage[\/\\]server[\/\\]/,
-  /encrypted_saved_objects[\/\\]server[\/\\]/,
-  /plugins[\/\\]shared[\/\\]data[\/\\]server[\/\\]search[\/\\]/,
-  /telemetry[\/\\]server[\/\\]/,
-  /telemetry_collection_manager[\/\\]server[\/\\]/,
-  /security_solution[\/\\]server[\/\\]/,
-  /lists[\/\\]server[\/\\]/,
-  /elastic_assistant[\/\\]server[\/\\]/,
-  /plugins[\/\\]apm[\/\\]/,
-  /synthetics[\/\\]server[\/\\]/,
-  /feature-flags[\/\\]server-internal[\/\\]/,
-  /plugins[\/\\]slo[\/\\]server[\/\\]/,
-];
-
 module.exports = {
   extends: [
     './javascript.js',
@@ -146,133 +66,6 @@ module.exports = {
       {
         endOfLine: 'auto',
       },
-    ],
-
-    '@kbn/eslint/module_migration': [
-      'error',
-      [
-        {
-          from: 'expect.js',
-          to: '@kbn/expect',
-        },
-        {
-          from: 'mkdirp',
-          to: false,
-          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`,
-        },
-        {
-          from: 'numeral',
-          to: '@elastic/numeral',
-        },
-        {
-          from: '@kbn/elastic-idx',
-          to: false,
-          disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`,
-        },
-        {
-          from: 'x-pack',
-          toRelative: 'x-pack',
-        },
-        {
-          from: 'react-router',
-          to: 'react-router-dom',
-        },
-        {
-          from: '@kbn/ui-shared-deps/monaco',
-          to: '@kbn/monaco',
-        },
-        {
-          from: 'monaco-editor',
-          to: false,
-          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`,
-        },
-        {
-          from: 'tinymath',
-          to: '@kbn/tinymath',
-          disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`,
-        },
-        {
-          from: '@kbn/test/types/ftr',
-          to: '@kbn/test',
-          disallowedMessage: `import from the root of @kbn/test instead`,
-        },
-        {
-          from: 'react-intl',
-          to: '@kbn/i18n-react',
-          disallowedMessage: `import from @kbn/i18n-react instead`,
-          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-i18n-react/],
-        },
-        {
-          from: 'zod',
-          to: '@kbn/zod',
-          disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
-        },
-        {
-          from: 'styled-components',
-          to: false,
-          exclude: USES_STYLED_COMPONENTS,
-          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
-        },
-        {
-          from: '@kbn/test/jest',
-          to: '@kbn/test-jest-helpers',
-          disallowedMessage: `import from @kbn/test-jest-helpers instead`,
-        },
-        {
-          from: '@kbn/utility-types/jest',
-          to: '@kbn/utility-types-jest',
-          disallowedMessage: `import from @kbn/utility-types-jest instead`,
-        },
-        {
-          from: '@kbn/inspector-plugin',
-          to: '@kbn/inspector-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@kbn/expressions-plugin',
-          to: '@kbn/expressions-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@kbn/kibana-utils-plugin',
-          to: '@kbn/kibana-utils-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@elastic/safer-lodash-set',
-          to: '@kbn/safer-lodash-set',
-        },
-        {
-          from: '@elastic/apm-synthtrace',
-          to: '@kbn/synthtrace',
-        },
-        {
-          from: 'rison-node',
-          to: '@kbn/rison',
-        },
-        {
-          from: '@tanstack/react-query',
-          to: '@kbn/react-query',
-          exact: true,
-          disallowedMessage:
-            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
-        },
-        {
-          from: 'elastic-apm-node',
-          to: false,
-          exclude: USES_ELASTIC_APM_AGENT,
-          disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
-        },
-        {
-          from: 'js-yaml',
-          to: false,
-          exclude: JS_YAML_LEGACY_CONSUMERS,
-          disallowedMessage:
-            "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). " +
-            'Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.',
-        },
-      ],
     ],
 
     /**
@@ -409,14 +202,6 @@ module.exports = {
 
     '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
-    '@kbn/eslint/no_async_promise_body': 'error',
-    '@kbn/eslint/no_async_foreach': 'error',
-    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
-    '@kbn/eslint/no_trailing_import_slash': 'error',
-    '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
-    '@kbn/eslint/no_this_in_property_initializers': 'error',
-    '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
-    '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
@@ -436,6 +221,7 @@ module.exports = {
      */
     '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
     '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
+    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
 
     /**
      * EUI Team rules
@@ -481,52 +267,4 @@ module.exports = {
     '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
-  overrides: [
-    {
-      files: [
-        'src/platform/plugins/private/event_annotation/**/*',
-        'src/platform/plugins/private/event_annotation_listing/**/*',
-        'src/platform/plugins/private/vis_default_editor/**/*',
-        'src/platform/plugins/private/vis_types/**/*',
-        'src/platform/plugins/shared/chart_expressions/**/*',
-        'src/platform/plugins/shared/charts/**/*',
-        'src/platform/plugins/shared/expressions/**/*',
-        'src/platform/plugins/shared/vis_types/**/*',
-        'src/platform/plugins/shared/visualization_listing/**/*',
-        'src/platform/plugins/shared/visualizations/**/*',
-        'x-pack/platform/plugins/shared/lens/**/*',
-        'x-pack/platform/plugins/private/graph/**/*',
-        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
-        'src/platform/packages/shared/kbn-lens-common/**/*',
-        'src/platform/packages/shared/kbn-lens-common-2/**/*',
-        'src/platform/packages/shared/kbn-coloring/**/*',
-        'src/platform/packages/shared/kbn-chart-icons/**/*',
-        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
-        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
-      ],
-      rules: {
-        '@kbn/eslint/no_viz_naming': 'error',
-      },
-    },
-    {
-      files: [
-        'src/platform/plugins/**/server/index.ts',
-        'x-pack/platform/plugins/**/server/index.ts',
-        'x-pack/solutions/**/plugins/**/server/index.ts',
-        'examples/**/server/index.ts',
-        'packages/kbn-mock-idp-plugin/server/index.ts',
-      ],
-      excludedFiles: ['**/test/**'],
-      rules: {
-        /**
-         * Plugin server entry should not load ./plugin until the plugin is enabled.
-         * @see https://github.com/elastic/kibana/pull/170856
-         * @see https://github.com/elastic/kibana/issues/171080
-         *
-         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
-         */
-        '@kbn/eslint/no_sync_import_from_plugin': 'error',
-      },
-    },
-  ],
 };

@@ -19,8 +19,17 @@ export const resetSLORoute = createSloServerRoute({
     },
   },
   params: resetSLOParamsSchema,
-  handler: async ({ params, logger, request, plugins, corePlugins, getScopedClients }) => {
+  handler: async ({
+    params,
+    logger,
+    request,
+    plugins,
+    corePlugins,
+    getScopedClients,
+    commonResourcesInstalled,
+  }) => {
     await assertPlatinumLicense(plugins);
+    await commonResourcesInstalled;
 
     const { scopedClusterClient, spaceId, repository, transformManager, summaryTransformManager } =
       await getScopedClients({ request, logger });

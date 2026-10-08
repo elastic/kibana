@@ -16,7 +16,7 @@ import {
 } from './action_policy_oas_shared_examples';
 
 export const SNOOZE_ACTION_POLICY_REQUEST: SnoozeActionPolicyBody = {
-  snoozedUntil: '2026-01-16T12:00:00.000Z',
+  snoozed_until: '2026-01-16T12:00:00.000Z',
 };
 
 export const snoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
@@ -28,16 +28,16 @@ export const snoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
     },
     responses: {
       200: actionPolicyResponseExample('snoozeActionPolicyResponse', 'Snoozed action policy', {
-        snoozedUntil: SNOOZE_ACTION_POLICY_REQUEST.snoozedUntil,
+        snoozed_until: SNOOZE_ACTION_POLICY_REQUEST.snoozed_until,
       }),
       400: invalidResponseExample({
         summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-        message: 'snoozedUntil: Invalid input: expected string, received undefined',
+        message: 'snoozed_until: Invalid input: expected string, received undefined',
         details: {
           errors: {
             errors: [],
             properties: {
-              snoozedUntil: { errors: ['Invalid input: expected string, received undefined'] },
+              snoozed_until: { errors: ['Invalid input: expected string, received undefined'] },
             },
           },
         },

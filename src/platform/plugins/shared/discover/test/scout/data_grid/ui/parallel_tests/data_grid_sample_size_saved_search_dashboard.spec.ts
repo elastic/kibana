@@ -12,9 +12,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+
 import { expectSampleSizeFooter } from '../fixtures';
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH = 150;
 const CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL = 10;

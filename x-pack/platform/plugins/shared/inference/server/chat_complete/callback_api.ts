@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
+  createInferenceInternalError,
   createInferenceRequestError,
   InferenceTaskErrorCode,
   getConnectorFamily,
@@ -37,10 +38,10 @@ import {
   resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
+  retryHoldingTokenCountEvents,
   streamToResponse,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
-import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
@@ -64,6 +65,9 @@ interface CreateChatCompleteApiOptions {
   callbackManager?: InferenceCallbackManager;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -119,6 +123,9 @@ export function createChatCompleteCallbackApi({
   callbackManager,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -147,9 +154,12 @@ export function createChatCompleteCallbackApi({
         anonymization,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+        resolveConnectorId,
       })
     ).pipe(
-      retryWithExponentialBackoff({
+      retryHoldingTokenCountEvents({
         maxRetry: maxRetries,
         backoffMultiplier: retryConfiguration.backoffMultiplier,
         initialDelay: retryConfiguration.initialDelay,
@@ -210,10 +220,13 @@ function createChatCompletePipeline({
         metadata,
         modelName,
         temperature,
+        reasoning,
         toolChoice,
         tools,
         timeout,
         maxContentLength,
+        cacheControl,
+        sessionId,
       } = callback(callbackContext);
 
       const messages = sanitizeMessages(givenMessages);
@@ -237,13 +250,14 @@ function createChatCompletePipeline({
         })
       ).pipe(
         switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-          const systemWithAnonymizationInstructions = preparedAnonymization.system
-            ? addAnonymizationInstruction(
-                preparedAnonymization.system,
-                anonymizationRules,
-                effectivePolicy
-              )
-            : system;
+          // Gate on whether anything was actually masked this turn, not on whether a system
+          // prompt happens to exist — a request with no system prompt can still anonymize
+          // entities in its messages, and the model still needs to be told what the
+          // placeholder tokens mean.
+          const baseSystem = preparedAnonymization.system ?? system;
+          const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules, effectivePolicy)
+            : baseSystem;
 
           const spanModel = getSpanModel(modelName);
 
@@ -253,6 +267,9 @@ function createChatCompletePipeline({
               messages: preparedAnonymization.messages,
               tools,
               toolChoice,
+              cacheControl,
+              sessionId,
+              reasoning,
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
             },
@@ -263,6 +280,7 @@ function createChatCompletePipeline({
                 toolChoice,
                 tools,
                 temperature,
+                reasoning,
                 logger,
                 functionCalling,
                 modelName,
@@ -270,10 +288,12 @@ function createChatCompletePipeline({
                 metadata,
                 timeout,
                 maxContentLength,
+                cacheControl,
+                sessionId,
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
         }),
         tokenUsageLogger
           ? handleTokenUsageLogging({
@@ -311,6 +331,9 @@ function resolveAndCreatePipeline({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -327,8 +350,19 @@ function resolveAndCreatePipeline({
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }) {
-  return from(endpointIdCache.has(connectorId)).pipe(
+  return from(
+    throwIfConnectorNotAllowed({
+      connectorId,
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+      resolveConnectorId,
+      logger,
+    }).then(() => endpointIdCache.has(connectorId))
+  ).pipe(
     switchMap((isInferenceEndpoint) => {
       let resolvedAsInferenceEndpoint = isInferenceEndpoint;
 
@@ -359,6 +393,7 @@ function resolveAndCreatePipeline({
                   ...options,
                   executor,
                   endpointModelId: endpointMeta.modelId,
+                  provider: endpointMeta.provider,
                 }),
             };
           }
@@ -400,6 +435,7 @@ function resolveAndCreatePipeline({
                     ...options,
                     executor: endpointExecutor,
                     endpointModelId: endpointMeta.modelId,
+                    provider: endpointMeta.provider,
                   }),
               };
             }
@@ -466,6 +502,52 @@ function resolveAndCreatePipeline({
         })
       );
     })
+  );
+}
+
+async function throwIfConnectorNotAllowed({
+  connectorId,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  logger,
+}: {
+  connectorId: string;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  logger: Logger;
+}): Promise<void> {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
+    return;
+  }
+  let defaultConnectorId: string | undefined;
+  try {
+    if (!(await isDefaultConnectorOnly())) {
+      return;
+    }
+    defaultConnectorId = await getDefaultConnectorId();
+  } catch (error) {
+    // fail closed: block the call when the restriction cannot be verified
+    logger.error(`Failed to verify the default AI connector restriction: ${error.message}`);
+    throw createInferenceInternalError('Failed to verify the default AI connector restriction');
+  }
+  if (connectorId === defaultConnectorId) {
+    return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
+  }
+  throw createInferenceRequestError(
+    `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
+      defaultConnectorId ? ` "${defaultConnectorId}"` : ''
+    }`,
+    400
   );
 }
 

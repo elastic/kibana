@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const REPO_NAME = 'test';
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await retry.waitFor('ILM app', async () => {
         await common.navigateToApp('indexLifecycleManagement');
-        return testSubjects.exists('ilmPageHeader');
+        return testSubjects.exists(APP_HEADER_TEST_SUBJECTS.title);
       });
     });
 
@@ -115,7 +116,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Navigate to create policy page and take snapshot
         await testSubjects.click(createButtonTestSubject);
         await retry.waitFor('ILM create policy form', async () => {
-          return (await testSubjects.getVisibleText('policyTitle')) === 'Create policy';
+          return (
+            (await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)) === 'Create policy'
+          );
         });
 
         // Fill out form after enabling all phases and take snapshot.
@@ -137,7 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor('ILM edit form', async () => {
           return (
-            (await testSubjects.getVisibleText('policyTitle')) === `Edit policy ${POLICY_NAME}`
+            (await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)) ===
+            `Edit policy ${POLICY_NAME}`
           );
         });
         await a11y.testAppSnapshot();

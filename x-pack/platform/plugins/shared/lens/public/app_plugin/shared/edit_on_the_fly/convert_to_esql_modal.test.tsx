@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import userEvent from '@testing-library/user-event';
@@ -62,6 +62,16 @@ const mockLayers: ConvertibleLayer[] = [
     isConvertibleToEsql: false,
     conversionData: mockConversionData,
   },
+  {
+    id: '5',
+    icon: 'layers',
+    name: 'Layer 5',
+    type: layerTypes.DATA,
+    query: '',
+    isConvertibleToEsql: false,
+    conversionData: mockConversionData,
+    failureReason: 'formula_not_supported' as const,
+  },
 ];
 
 const mockOnCancel = jest.fn();
@@ -95,10 +105,10 @@ describe('ConvertToEsqlModal', () => {
       expect(screen.getByText(/FROM datacommerce/)).toBeInTheDocument();
     });
 
-    it('calls onConfirm callback', async () => {
+    it('calls onConfirm callback', () => {
       renderComponent({ layers: [mockLayers[0]] });
 
-      await userEvent.click(screen.getByRole('button', { name: /switch to query mode/i }));
+      fireEvent.click(screen.getByRole('button', { name: /convert to es\|ql/i }));
 
       expect(mockOnConfirm).toHaveBeenCalled();
     });
@@ -114,68 +124,73 @@ describe('ConvertToEsqlModal', () => {
       expect(screen.getByText('Layer 3')).toBeInTheDocument();
     });
 
-    it('disables selection for non-convertible layers', () => {
+    it('shows failure reason tooltip icon for non-convertible data layers', () => {
       renderComponent();
 
-      expect(screen.getByTestId('checkboxSelectRow-3')).toBeDisabled(); // Layer 3 (annotation)
-      expect(screen.getByTestId('checkboxSelectRow-4')).toBeDisabled(); // Layer 4 (reference line)
+      const icon = screen.getByTestId('lnsEsqlConversionFailureReason-5');
+      expect(icon).toBeInTheDocument();
+      // EuiIcon jest mock renders the aria-label as text content
+      expect(icon).toHaveTextContent(/Cannot convert to ES\|QL: Formula operations/);
     });
 
-    it('expands row to show query when expand button is clicked', async () => {
+    it('summarizes which layers are converted and retained', () => {
+      renderComponent({ layers: mockLayers.slice(0, 4) });
+
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+      expect(screen.getAllByText('Will be converted')).toHaveLength(2);
+      expect(screen.getAllByText('Will remain unchanged')).toHaveLength(2);
+    });
+
+    it('expands row to show query when expand button is clicked', () => {
       renderComponent();
 
       const expandButtons = screen.getAllByRole('button', { name: /expand/i });
-      await userEvent.click(expandButtons[0]);
+      fireEvent.click(expandButtons[0]);
 
       expect(screen.getAllByText(/FROM datacommerce/)[0]).toBeInTheDocument();
     });
 
-    it('collapses row when collapse button is clicked', async () => {
+    it('collapses row when collapse button is clicked', () => {
       renderComponent();
 
       const expandButtons = screen.getAllByRole('button', { name: /expand/i });
-      await userEvent.click(expandButtons[0]);
+      fireEvent.click(expandButtons[0]);
 
       const collapseButton = screen.getByRole('button', { name: /collapse/i });
-      await userEvent.click(collapseButton);
+      fireEvent.click(collapseButton);
 
       const codeBlocks = screen.queryAllByText(/FROM datacommerce/, { selector: 'code' });
       expect(codeBlocks).toHaveLength(0);
     });
 
-    it('disables expand button for non-convertible layers', () => {
+    it('shows expand buttons only for layers with an ES|QL query preview', () => {
       renderComponent();
 
-      const expandButtons = screen.getAllByRole('button', { name: /expand/i });
-      expect(expandButtons[2]).toBeDisabled(); // Layer 3 expand button
+      expect(screen.getAllByRole('button', { name: /expand/i })).toHaveLength(2);
     });
 
-    // TODO: Revisit this once we pick up multi-layer conversion support again
-    it.skip('allows selecting multiple convertible layers', async () => {
-      renderComponent();
+    it('converts all data layers without requiring a selection', async () => {
+      renderComponent({ layers: mockLayers.slice(0, 4) });
 
-      await userEvent.click(screen.getByTestId('checkboxSelectRow-1'));
-      await userEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+      const confirmButton = screen.getByRole('button', { name: /convert to es\|ql/i });
+      expect(confirmButton).toBeEnabled();
 
-      await userEvent.click(screen.getByRole('button', { name: /switch to query mode/i }));
-
-      expect(mockOnConfirm).toHaveBeenCalledWith({
-        layersToConvert: [mockLayers[0], mockLayers[1]],
-      });
+      await userEvent.click(confirmButton);
+      expect(mockOnConfirm).toHaveBeenCalledTimes(1);
     });
 
-    it('disables confirm button when no layers are selected', () => {
+    it('disables conversion when any data layer cannot be converted', () => {
       renderComponent();
 
-      const confirmButton = screen.getByRole('button', { name: /switch to query mode/i });
-      expect(confirmButton).toBeDisabled();
+      expect(screen.getByText('Cannot be converted')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /convert to es\|ql/i })).toBeDisabled();
     });
   });
 
-  it('calls onCancel when cancel button is clicked', async () => {
+  it('calls onCancel when cancel button is clicked', () => {
     renderComponent();
 
-    await userEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByText('Cancel'));
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 });
