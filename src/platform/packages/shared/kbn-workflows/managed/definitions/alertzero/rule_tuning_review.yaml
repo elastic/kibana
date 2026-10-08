@@ -297,6 +297,7 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_agentic
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -308,6 +309,13 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids:
+          - investigate-rule
       # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
       # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
