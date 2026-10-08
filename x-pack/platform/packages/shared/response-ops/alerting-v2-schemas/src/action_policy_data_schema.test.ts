@@ -375,8 +375,8 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.matcher).toBeNull();
     });
 
-    it('rejects a matcher that omits both sub-fields', () => {
-      expect(updateActionPolicyDataSchema.safeParse({ matcher: {} }).success).toBe(false);
+    it('accepts a matcher that omits both sub-fields, which names no leaf to change', () => {
+      expect(updateActionPolicyDataSchema.parse({ matcher: {} })).toEqual({ matcher: {} });
     });
 
     it('accepts a matcher that sets one sub-field and leaves the other out', () => {
@@ -564,8 +564,8 @@ describe('action policy optional fields are never empty', () => {
       );
     });
 
-    it('rejects an empty object on patch', () => {
-      expect(updateActionPolicyDataSchema.safeParse({ matcher: {} }).success).toBe(false);
+    it('accepts an empty object on patch, where it names no leaf and clears nothing', () => {
+      expect(updateActionPolicyDataSchema.parse({ matcher: {} })).toEqual({ matcher: {} });
     });
 
     it('accepts a cleared leaf on patch', () => {

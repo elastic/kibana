@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
@@ -380,6 +381,55 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
+    'merge: an empty matcher names no leaf, so it changes nothing',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'empty-matcher-noop-policy',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: {} },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.matcher).toStrictEqual({
+        tags: ['production'],
+        expression: "data.severity == 'critical'",
+      });
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(fetched.matcher).toStrictEqual(response.body.matcher);
+    }
+  );
+
+  apiTest('merge: an empty body names no field, so nothing changes', async ({ apiClient }) => {
+    const created = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({
+        name: 'empty-body-noop-policy',
+        description: 'untouched',
+        matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        group_by: ['service.name'],
+        grouping_mode: 'per_field',
+        throttle: { strategy: 'time_interval', interval: '5m' },
+      }),
+    });
+    expect(created).toHaveStatusCode(201);
+
+    const response = await apiClient.patch(getActionPolicyUrl(created.body.id), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: {},
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(omit(response.body, 'updated_at')).toStrictEqual(omit(created.body, 'updated_at'));
+  });
+
+  apiTest(
     'merge: clears one matcher leaf with null and preserves its sibling',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
@@ -655,11 +705,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       const nulledStrategy = await patch({ throttle: { strategy: null } });
       expect(nulledStrategy).toHaveStatusCode(400);
       expect(nulledStrategy.body.code).toBe('BAD_REQUEST');
-
-      // A matcher that constrains nothing is spelled `matcher: null`, not `{}`.
-      const emptyMatcher = await patch({ matcher: {} });
-      expect(emptyMatcher).toHaveStatusCode(400);
-      expect(emptyMatcher.body.code).toBe('BAD_REQUEST');
     }
   );
 

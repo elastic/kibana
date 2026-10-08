@@ -39,16 +39,13 @@ const MATCHER_LEAD =
 
 export const POLICY_MATCHER_DESCRIPTION = `${MATCHER_LEAD} At least one of \`tags\` and \`expression\` must be set, so an empty \`matcher\` is rejected. Omit \`matcher\` entirely for a catch-all policy that applies to all alerts.`;
 
-export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` for a catch-all policy that applies to all alerts. An empty \`matcher\` is rejected; clearing the last of \`tags\` and \`expression\` clears the matcher itself, which is also a catch-all.`;
+export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` for a catch-all policy that applies to all alerts. An empty \`matcher\` names no leaf and so changes nothing; clearing the last of \`tags\` and \`expression\` clears the matcher itself, which is also a catch-all.`;
 
 const MATCHER_AT_LEAST_ONE_MESSAGE =
-  'matcher must set at least one of `tags`, `expression`; omit `matcher` (create) or send `matcher: null` (PATCH) for a catch-all policy.';
+  'matcher must set at least one of `tags`, `expression`; omit `matcher` for a catch-all policy.';
 
-/** `null` counts as naming a leaf: a PATCH clearing one of the two still says which. */
-const namesAMatcherLeaf = (matcher: {
-  tags?: string[] | null;
-  expression?: string | null;
-}): boolean => matcher.tags !== undefined || matcher.expression !== undefined;
+const namesAMatcherLeaf = (matcher: { tags?: string[]; expression?: string }): boolean =>
+  matcher.tags !== undefined || matcher.expression !== undefined;
 
 const matcherTagsSchema = z
   .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
@@ -75,5 +72,4 @@ export const policyMatcherPatchSchema = z
       .optional()
       .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
   })
-  .strict()
-  .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE });
+  .strict();
