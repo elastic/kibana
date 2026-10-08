@@ -759,12 +759,12 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
-  // Columnar readiness flag (`elasticsearch.columnar.supported`, package-spec 3.7.0). It is a
-  // data-stream-level field only, so it has no counterpart in parseTopLevelElasticsearchEntry.
+  // Columnar readiness for the logsdb_columnar index mode (package-spec 3.7.0). At data stream
+  // level it overrides the package-level value and may additionally be `unsupported`.
   // @ts-expect-error upgrade typescript v5.1.6
-  if (expandedElasticsearch?.columnar) {
+  if (expandedElasticsearch?.logsdb_columnar) {
     // @ts-expect-error upgrade typescript v5.1.6
-    parsedElasticsearchEntry.columnar = expandedElasticsearch.columnar;
+    parsedElasticsearchEntry.logsdb_columnar = expandedElasticsearch.logsdb_columnar;
   }
 
   return parsedElasticsearchEntry;
@@ -818,6 +818,14 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
       // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.settings
     );
+  }
+
+  // Package-level columnar readiness for the logsdb_columnar index mode (package-spec 3.7.0).
+  // It applies to every logs data stream that does not override it in its own manifest.
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.logsdb_columnar) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.logsdb_columnar = expandedElasticsearch.logsdb_columnar;
   }
 
   return parsedElasticsearchEntry;

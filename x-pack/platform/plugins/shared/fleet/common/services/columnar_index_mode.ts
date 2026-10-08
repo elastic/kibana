@@ -5,30 +5,49 @@
  * 2.0.
  */
 
-import type { RegistryDataStream, RegistryElasticsearch } from '../types';
+import type { LogsdbColumnarReadiness, RegistryDataStream } from '../types';
 
 /**
- * Index modes that belong to the columnar family. `columnar` is the base mode; `logsdb_columnar`
- * adds the logs profile on top of it.
+ * The Elasticsearch index mode Fleet writes to `settings.index.mode` when a logs data stream is
+ * switched to columnar storage. It is not a value a package can put in
+ * `elasticsearch.index_mode`; packages declare readiness with `elasticsearch.logsdb_columnar`
+ * instead (package-spec 3.7.0).
  */
-export const COLUMNAR_INDEX_MODES = ['logsdb_columnar', 'columnar'] as const;
+export const LOGSDB_COLUMNAR_INDEX_MODE = 'logsdb_columnar';
 
-export function isColumnarIndexMode(indexMode?: string): boolean {
-  return (COLUMNAR_INDEX_MODES as readonly string[]).includes(indexMode ?? '');
+/** Minimal shape of the package manifest fields this module needs. */
+export interface ColumnarPackageInfo {
+  elasticsearch?: {
+    logsdb_columnar?: Exclude<LogsdbColumnarReadiness, 'unsupported'>;
+  };
 }
 
 /**
- * A data stream may be switched to a columnar index mode only when the package has declared that
- * it is ready for it, either explicitly through the stream-level readiness flag
- * (`elasticsearch.columnar.supported: true`, package-spec 3.7.0) or implicitly by already
- * declaring a columnar `elasticsearch.index_mode`.
+ * Resolves the effective columnar readiness of a data stream: the data stream's own
+ * `elasticsearch.logsdb_columnar` if set, otherwise the package-level one.
+ *
+ * Returns `undefined` when nothing is declared, when the data stream is not of type `logs`
+ * (the setting is ignored for any other type), or when the data stream declares an
+ * `elasticsearch.index_mode` — `index_mode` and `logsdb_columnar` are mutually exclusive and the
+ * spec validator rejects the combination, so `index_mode` wins here defensively.
  */
-export function isColumnarEligible(
-  registryDataStream?: { elasticsearch?: RegistryElasticsearch } | RegistryDataStream
-): boolean {
-  const elasticsearch = registryDataStream?.elasticsearch;
+export function getLogsdbColumnarReadiness(
+  packageInfo: ColumnarPackageInfo | undefined,
+  dataStream: Pick<RegistryDataStream, 'type' | 'elasticsearch'>
+): LogsdbColumnarReadiness | undefined {
+  if (dataStream.type !== 'logs') {
+    return undefined;
+  }
+  if (dataStream.elasticsearch?.index_mode) {
+    return undefined;
+  }
+  return dataStream.elasticsearch?.logsdb_columnar ?? packageInfo?.elasticsearch?.logsdb_columnar;
+}
 
-  return (
-    elasticsearch?.columnar?.supported === true || isColumnarIndexMode(elasticsearch?.index_mode)
-  );
+/**
+ * True when the readiness value means the data stream may be put in the `logsdb_columnar` index
+ * mode (`opt_in` or `default`). `unsupported` and `undefined` are not ready.
+ */
+export function isLogsdbColumnarReady(readiness?: LogsdbColumnarReadiness): boolean {
+  return readiness === 'opt_in' || readiness === 'default';
 }

@@ -171,16 +171,12 @@ const getOtelBaseComponents = (type: string): string[] => {
  * mapping properties out of it.
  *
  * This assumes that all fields with dotted.names have been expanded in a previous step.
- *
- * `isIndexModeColumnar` must be true when the resolved index mode is `columnar` or
- * `logsdb_columnar`; it gates the per-field `columnar` overrides (package-spec 3.7.0).
  */
 export function generateMappings(
   fields: Field[],
-  isIndexModeTimeSeries = false,
-  isIndexModeColumnar = false
+  isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
-  const builder = new MappingsBuilder(isIndexModeTimeSeries, isIndexModeColumnar);
+  const builder = new MappingsBuilder(isIndexModeTimeSeries);
   const { properties } = builder.build(fields);
   return builder.toIndexTemplateMappings(properties);
 }
@@ -457,9 +453,11 @@ const getDataStreams = async (
   }));
 };
 
-// Index modes that Fleet can enable per data stream through experimental features; they are
-// only ever present on a write index because a toggle or the package manifest put them there.
-const TOGGLEABLE_INDEX_MODES: string[] = ['time_series', 'logsdb_columnar', 'columnar'];
+// Index modes Fleet writes explicitly to `settings.index.mode`; they are only ever present on a
+// write index because a toggle or the package manifest put them there, never because of a
+// cluster default. That is what makes it safe to roll over when the template no longer declares
+// a mode: the write index is still on a mode that nothing asks for anymore.
+const TOGGLEABLE_INDEX_MODES: string[] = ['time_series', 'logsdb_columnar'];
 
 const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   'subobjects',

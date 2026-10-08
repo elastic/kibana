@@ -304,8 +304,8 @@ describe('EPM index template install', () => {
       });
     });
 
-    describe('field-level columnar overrides', () => {
-      const columnarDataStream = (elasticsearch: any) =>
+    describe('logsdb_columnar index mode', () => {
+      const logsDataStream = (elasticsearch: any = {}) =>
         ({
           type: 'logs',
           dataset: 'package.dataset',
@@ -317,71 +317,53 @@ describe('EPM index template install', () => {
           elasticsearch,
         } as RegistryDataStream);
 
-      const getProperties = (dataStream: RegistryDataStream, experimental?: any) => {
+      const prepare = (dataStream: RegistryDataStream, indexMode?: string) => {
         mockedLoadFieldsFromYaml.mockReturnValue([
           {
             name: 'event.original',
             type: 'keyword',
             doc_values: false,
-            index: false,
-            columnar: { doc_values: true, index: true },
+            store: true,
           },
         ]);
 
-        const { componentTemplates } = prepareTemplate({
+        const { componentTemplates, indexTemplate } = prepareTemplate({
           packageInstallContext,
           fieldAssetsMap: new Map(),
           dataStream,
-          experimentalDataStreamFeature: experimental,
           ilmMigrationStatusMap: new Map(),
+          indexMode,
         });
 
         const packageTemplate = componentTemplates['logs-package.dataset@package'].template as any;
-        return packageTemplate.mappings.properties.event.properties.original;
+        return {
+          settings: indexTemplate.indexTemplate.template.settings,
+          properties: packageTemplate.mappings.properties.event.properties.original,
+        };
       };
 
-      it('applies the overrides when the package declares a columnar index mode', () => {
-        expect(getProperties(columnarDataStream({ index_mode: 'logsdb_columnar' }))).toEqual({
-          type: 'keyword',
-          doc_values: true,
-          index: true,
-        });
+      it('writes the mode and strips doc_values/store when the target mode is columnar', () => {
+        const { settings, properties } = prepare(logsDataStream(), 'logsdb_columnar');
+
+        expect(settings).toEqual({ index: { mode: 'logsdb_columnar' } });
+        expect(properties).toEqual({ type: 'keyword' });
       });
 
-      it('applies the overrides when columnar is opted in through the experimental feature', () => {
-        expect(
-          getProperties(columnarDataStream({}), {
-            data_stream: 'logs-package.dataset',
-            features: { columnar: true },
-          })
-        ).toEqual({
-          type: 'keyword',
-          doc_values: true,
-          index: true,
-        });
+      it('leaves mappings untouched when no columnar mode is requested', () => {
+        const { settings, properties } = prepare(logsDataStream());
+
+        expect(settings).toEqual({ index: {} });
+        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
       });
 
-      it('ignores the overrides when the data stream is not in a columnar index mode', () => {
-        expect(getProperties(columnarDataStream({}))).toEqual({
-          type: 'keyword',
-          doc_values: false,
-          index: false,
-        });
-      });
+      it('ignores the columnar mode for a time_series data stream', () => {
+        const { settings, properties } = prepare(
+          logsDataStream({ index_mode: 'time_series' }),
+          'logsdb_columnar'
+        );
 
-      it('ignores the overrides when time_series wins over the columnar opt-in', () => {
-        // getTemplate gives time_series precedence over the columnar mode, so the mappings must
-        // not be generated as if the index were columnar.
-        expect(
-          getProperties(columnarDataStream({ index_mode: 'time_series' }), {
-            data_stream: 'logs-package.dataset',
-            features: { columnar: true },
-          })
-        ).toEqual({
-          type: 'keyword',
-          doc_values: false,
-          index: false,
-        });
+        expect(settings).toEqual({ index: { mode: 'time_series' } });
+        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
       });
     });
 
