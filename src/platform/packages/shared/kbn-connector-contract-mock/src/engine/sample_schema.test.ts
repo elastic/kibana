@@ -56,6 +56,7 @@ describe('sampleSchema', () => {
   it.each([
     [{ type: 'string' }, 'string'.padEnd(1024, 'x')],
     [{ type: 'string', maxLength: 8, examples: ['ex'] }, 'stringxx'],
+    [{ type: 'string', maxLength: 10_000_000 }, 'string'.padEnd(65_536, 'x')],
     [{ type: 'string', pattern: '^[A-Z]{2}-\\d+$', maxLength: 6 }, 'AA-000'],
     [{ type: 'string', format: 'uuid' }, '00000000-0000-4000-8000-000000000000'],
     [{ type: 'string', enum: ['a', 'b'] }, 'b'],

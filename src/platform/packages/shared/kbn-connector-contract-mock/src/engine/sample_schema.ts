@@ -33,8 +33,11 @@ const FORMAT_PLACEHOLDERS: Readonly<Record<string, string>> = {
 };
 
 // Boundary samples of unbounded strings and arrays; bounded arrays are capped at
-// BOUNDARY_MAX_ITEMS so that nested `maxItems` don't multiply into huge responses.
+// BOUNDARY_MAX_ITEMS so that nested `maxItems` don't multiply into huge responses, and bounded
+// strings at BOUNDARY_MAX_STRING_LENGTH, since patterns such as base64's overflow the regex
+// stack on megabytes of input.
 const BOUNDARY_STRING_LENGTH = 1024;
+const BOUNDARY_MAX_STRING_LENGTH = 65_536;
 const BOUNDARY_ITEMS = 3;
 const BOUNDARY_MAX_ITEMS = 100;
 
@@ -54,7 +57,10 @@ const fitLength = (
   boundary: boolean
 ): string => {
   const max = numberOrUndefined(maxLength);
-  const target = boundary ? max ?? BOUNDARY_STRING_LENGTH : numberOrUndefined(minLength) ?? 0;
+  const min = numberOrUndefined(minLength) ?? 0;
+  const target = boundary
+    ? Math.max(Math.min(max ?? BOUNDARY_STRING_LENGTH, BOUNDARY_MAX_STRING_LENGTH), min)
+    : min;
   const padded = value.padEnd(target, padding);
   return padded.slice(0, max ?? padded.length);
 };
