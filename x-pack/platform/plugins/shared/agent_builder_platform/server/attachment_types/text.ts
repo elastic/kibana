@@ -33,7 +33,10 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toSpec: ({ content }) => ({ type: 'view', body: [{ type: 'markdown', text: content }] }),
+    toIsomerComposition: ({ content }) => ({
+      type: 'view',
+      body: [{ type: 'markdown', text: content }],
+    }),
     getAgentDescription: () => {
       return `A text attachment contains plain text content.
       Rendering it inline displays the text content as a plain text block in the conversation UI.`;

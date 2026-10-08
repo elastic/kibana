@@ -15,7 +15,7 @@ import {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
-import { IsomerServiceImpl } from './isomer_service';
+import { SurfacesServiceImpl } from './surfaces_service';
 
 jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
@@ -62,22 +62,22 @@ const unmappedAttachmentsService = {
   getTypeDefinition: () => undefined,
 } as unknown as AttachmentServiceStart;
 
-const renderProjection = (
+const renderPayload = (
   event: RoundCompleteEvent,
   attachmentsService: AttachmentServiceStart = unmappedAttachmentsService
 ) =>
-  new IsomerServiceImpl({ attachmentsService, logger: loggerMock.create() }).renderProjection(
+  new SurfacesServiceImpl({ attachmentsService, logger: loggerMock.create() }).renderPayload(
     event,
     {
       originType: ConversationOriginType.Slack,
     }
   );
 
-describe('renderProjection', () => {
-  it('renders the projection of the round origin', () => {
-    const projection = renderProjection(createRoundCompleteEvent('Hello'));
+describe('renderPayload', () => {
+  it('renders the payload of the round surface', () => {
+    const payload = renderPayload(createRoundCompleteEvent('Hello'));
 
-    expect(projection?.slack?.text).toBe('Hello');
+    expect(payload?.text).toBe('Hello');
   });
 
   it('renders mapped attachments in place of their tags', () => {
@@ -87,14 +87,14 @@ describe('renderProjection', () => {
     );
     const attachmentsService = {
       getTypeDefinition: () => ({
-        toSpec: (data: { query: string }) => ({
+        toIsomerComposition: (data: { query: string }) => ({
           type: 'view',
           body: [{ type: 'markdown', text: `\`${data.query}\`` }],
         }),
       }),
     } as unknown as AttachmentServiceStart;
 
-    const slack = JSON.stringify(renderProjection(event, attachmentsService)?.slack);
+    const slack = JSON.stringify(renderPayload(event, attachmentsService));
 
     expect(slack).toContain('FROM logs | LIMIT 10');
     expect(slack).not.toContain('render_attachment');
@@ -103,7 +103,7 @@ describe('renderProjection', () => {
   it('leaves out unmapped attachments', () => {
     const event = createRoundCompleteEvent('Here: <render_attachment id="a1" />', [esqlAttachment]);
 
-    const slack = JSON.stringify(renderProjection(event)?.slack);
+    const slack = JSON.stringify(renderPayload(event));
 
     expect(slack).toContain('Here:');
     expect(slack).not.toContain('Latest logs');
@@ -115,27 +115,27 @@ describe('renderProjection', () => {
       throw new Error('boom');
     });
 
-    expect(renderProjection(createRoundCompleteEvent('Hello'))).toBeUndefined();
+    expect(renderPayload(createRoundCompleteEvent('Hello'))).toBeUndefined();
   });
 
   it('renders nothing when the message is empty', () => {
-    expect(renderProjection(createRoundCompleteEvent(''))).toBeUndefined();
+    expect(renderPayload(createRoundCompleteEvent(''))).toBeUndefined();
   });
 
   it('renders nothing when none of the message can be rendered', () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
-    expect(renderProjection(event)).toBeUndefined();
+    expect(renderPayload(event)).toBeUndefined();
   });
 
   it('renders nothing for rounds without an origin', () => {
-    const isomerService = new IsomerServiceImpl({
+    const surfacesService = new SurfacesServiceImpl({
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
     });
 
     expect(
-      isomerService.renderProjection(createRoundCompleteEvent('Hello'), { originType: undefined })
+      surfacesService.renderPayload(createRoundCompleteEvent('Hello'), { originType: undefined })
     ).toBeUndefined();
   });
 });

@@ -18,7 +18,7 @@ import { TimelineEventType } from './timeline_events';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
-import type { OriginIsomerProjection } from './projection';
+import type { SurfacePayload } from './surface_payload';
 import type {
   CompactionSummary,
   ConversationInternalState,
@@ -368,7 +368,11 @@ export type RoundCompleteEvent = ChatEventBase<
   ChatEventType.roundComplete,
   RoundCompleteEventData
 > & {
-  projection?: OriginIsomerProjection;
+  /**
+   * The response message ready to post on the round's surface, such as Slack. Added at callback
+   * delivery and never stored.
+   */
+  surface_payload?: SurfacePayload;
 };
 
 export const isRoundCompleteEvent = (

@@ -12,12 +12,12 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
-  AttachmentIsomerSpec,
+  AttachmentIsomerComposition,
   IsomerMarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import type { AttachmentNode, Spec, SpecNode } from './pack';
+import type { AttachmentNode, CompositionNode, MessageComposition } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -47,8 +47,8 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
  */
-const toSpecNodes = (message: string): SpecNode[] => {
-  const nodes: SpecNode[] = [];
+const toCompositionNodes = (message: string): CompositionNode[] => {
+  const nodes: CompositionNode[] = [];
   let cursor = 0;
 
   const pushMarkdown = (text: string) => {
@@ -74,7 +74,7 @@ const toSpecNodes = (message: string): SpecNode[] => {
   return nodes;
 };
 
-export interface BuildSpecOptions {
+export interface BuildCompositionOptions {
   /** The response message, with its `<render_attachment>` tags. */
   message: string;
   /** The conversation's attachments, as carried by `round_complete`. */
@@ -98,14 +98,14 @@ const resolveVersion = (
   attachmentRefs.find((ref) => ref.attachment_id === attachmentId)?.version ??
   attachment.versions.at(-1)?.version;
 
-const toHeadingNode = ({ title, subtitle }: AttachmentIsomerSpec): IsomerMarkdownNode[] => {
+const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): IsomerMarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
 };
 
 const resolveAttachmentNode = (
   node: AttachmentNode,
-  { attachments, attachmentRefs, attachmentsService, logger }: BuildSpecOptions
+  { attachments, attachmentRefs, attachmentsService, logger }: BuildCompositionOptions
 ): IsomerMarkdownNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
   if (!attachment) {
@@ -120,34 +120,39 @@ const resolveAttachmentNode = (
     return [];
   }
 
-  const toSpec = attachmentsService.getTypeDefinition(attachment.type)?.toSpec;
-  if (!toSpec) {
+  const toIsomerComposition = attachmentsService.getTypeDefinition(
+    attachment.type
+  )?.toIsomerComposition;
+  if (!toIsomerComposition) {
     logger.debug(
-      `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toSpec`
+      `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toIsomerComposition`
     );
     return [];
   }
 
   try {
-    const spec = toSpec(attachmentVersion.data, {
+    const composition = toIsomerComposition(attachmentVersion.data, {
       attachment,
       version: attachmentVersion.version,
     });
-    return [...toHeadingNode(spec), ...spec.body];
+    return [...toHeadingNode(composition), ...composition.body];
   } catch (error) {
-    logger.warn(`Leaving out attachment "${attachment.id}": its toSpec failed: ${error.message}`);
+    logger.warn(
+      `Leaving out attachment "${attachment.id}": its toIsomerComposition failed: ${error.message}`
+    );
     return [];
   }
 };
 
 /**
- * Builds the spec of a response message: its markdown becomes `markdown` nodes, and each
- * `<render_attachment>` tag is replaced, in place, by what its type's `toSpec` returns.
- * Attachments that are missing, have no `toSpec`, or fail to map are left out.
+ * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
+ * and each `<render_attachment>` tag is replaced, in place, by what its type's
+ * `toIsomerComposition` returns. Attachments that are missing, have no `toIsomerComposition`, or
+ * fail to map are left out.
  */
-export const buildSpec = (options: BuildSpecOptions): Spec => ({
+export const buildComposition = (options: BuildCompositionOptions): MessageComposition => ({
   type: 'view',
-  body: toSpecNodes(options.message).flatMap((node): SpecNode[] =>
+  body: toCompositionNodes(options.message).flatMap((node): CompositionNode[] =>
     node.type === 'attachment' ? resolveAttachmentNode(node, options) : [node]
   ),
 });

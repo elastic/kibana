@@ -17,11 +17,11 @@ export type {
   AttachmentValidateContext,
 } from './type_definition';
 export type {
-  AttachmentIsomerSpec,
-  AttachmentIsomerSpecContext,
-  AttachmentIsomerSpecMapping,
+  AttachmentIsomerComposition,
+  AttachmentIsomerCompositionContext,
+  AttachmentIsomerCompositionMapping,
   IsomerMarkdownNode,
-} from './isomer_spec';
+} from './isomer_composition';
 export type {
   AttachmentBoundedTool,
   BuiltinAttachmentBoundedTool,

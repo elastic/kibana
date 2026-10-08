@@ -6,10 +6,10 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentIsomerSpecMapping } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentIsomerCompositionMapping } from '@kbn/agent-builder-server/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
-import { buildSpec, type BuildSpecOptions } from './spec';
+import { buildComposition, type BuildCompositionOptions } from './composition';
 
 const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'a1',
@@ -24,18 +24,22 @@ const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAt
   ...parts,
 });
 
-const toText: AttachmentIsomerSpecMapping = (data, { version }) => ({
+const toText: AttachmentIsomerCompositionMapping = (data, { version }) => ({
   type: 'view',
   title: `Text v${version}`,
   body: [{ type: 'markdown', text: (data as { content: string }).content }],
 });
 
-const createAttachmentsService = (toSpec: AttachmentIsomerSpecMapping | undefined = toText) =>
+const createAttachmentsService = (
+  toIsomerComposition: AttachmentIsomerCompositionMapping | undefined = toText
+) =>
   ({
-    getTypeDefinition: (type: string) => (type === 'text' ? { toSpec } : undefined),
+    getTypeDefinition: (type: string) => (type === 'text' ? { toIsomerComposition } : undefined),
   } as unknown as AttachmentServiceStart);
 
-const createOptions = (overrides: Partial<BuildSpecOptions> = {}): BuildSpecOptions => ({
+const createOptions = (
+  overrides: Partial<BuildCompositionOptions> = {}
+): BuildCompositionOptions => ({
   message: 'Here it is: <render_attachment id="a1" />',
   attachments: [createAttachment()],
   attachmentsService: createAttachmentsService(),
@@ -45,18 +49,18 @@ const createOptions = (overrides: Partial<BuildSpecOptions> = {}): BuildSpecOpti
 
 const textOnly = [{ type: 'markdown', text: 'Here it is:' }];
 
-describe('buildSpec', () => {
+describe('buildComposition', () => {
   it('converts markdown into a markdown node', () => {
-    expect(buildSpec(createOptions({ message: 'There are **3** open alerts.' }))).toEqual({
+    expect(buildComposition(createOptions({ message: 'There are **3** open alerts.' }))).toEqual({
       type: 'view',
       body: [{ type: 'markdown', text: 'There are **3** open alerts.' }],
     });
   });
 
-  it('replaces tags with their toSpec, in place', () => {
+  it('replaces tags with their toIsomerComposition, in place', () => {
     const message = 'Before <render_attachment id="a1" version="1"/> after';
 
-    expect(buildSpec(createOptions({ message })).body).toEqual([
+    expect(buildComposition(createOptions({ message })).body).toEqual([
       { type: 'markdown', text: 'Before' },
       { type: 'markdown', text: '**Text v1**' },
       { type: 'markdown', text: 'v1' },
@@ -67,18 +71,18 @@ describe('buildSpec', () => {
   it('uses the round ref version of tags without a version', () => {
     const options = createOptions({ attachmentRefs: [{ attachment_id: 'a1', version: 1 }] });
 
-    expect(buildSpec(options).body).toContainEqual({ type: 'markdown', text: 'v1' });
+    expect(buildComposition(options).body).toContainEqual({ type: 'markdown', text: 'v1' });
   });
 
   it('uses the latest version of tags without a version or a ref', () => {
-    expect(buildSpec(createOptions()).body).toContainEqual({ type: 'markdown', text: 'v2' });
+    expect(buildComposition(createOptions()).body).toContainEqual({ type: 'markdown', text: 'v2' });
   });
 
   it('ignores versions that are not positive integers', () => {
     for (const version of ['latest', '0']) {
       const message = `<render_attachment id="a1" version="${version}" />`;
 
-      expect(buildSpec(createOptions({ message })).body).toContainEqual({
+      expect(buildComposition(createOptions({ message })).body).toContainEqual({
         type: 'markdown',
         text: 'v2',
       });
@@ -88,7 +92,7 @@ describe('buildSpec', () => {
   it('does not take the id from a longer attribute name', () => {
     const message = '<render_attachment field-id="x" id="a1" />';
 
-    expect(buildSpec(createOptions({ message })).body).toContainEqual({
+    expect(buildComposition(createOptions({ message })).body).toContainEqual({
       type: 'markdown',
       text: 'v2',
     });
@@ -97,32 +101,35 @@ describe('buildSpec', () => {
   it('drops tags without an id', () => {
     const message = 'Here it is: <render_attachment version="1" />';
 
-    expect(buildSpec(createOptions({ message })).body).toEqual(textOnly);
+    expect(buildComposition(createOptions({ message })).body).toEqual(textOnly);
   });
 
-  it('leaves out types without a toSpec', () => {
+  it('leaves out types without a toIsomerComposition', () => {
     const options = createOptions({ attachments: [createAttachment({ type: 'case' })] });
 
-    expect(buildSpec(options).body).toEqual(textOnly);
+    expect(buildComposition(options).body).toEqual(textOnly);
   });
 
   it('leaves out missing attachments and versions', () => {
-    expect(buildSpec(createOptions({ attachments: [] })).body).toEqual(textOnly);
+    expect(buildComposition(createOptions({ attachments: [] })).body).toEqual(textOnly);
     expect(
-      buildSpec(createOptions({ message: 'Here it is: <render_attachment id="a1" version="9" />' }))
-        .body
+      buildComposition(
+        createOptions({ message: 'Here it is: <render_attachment id="a1" version="9" />' })
+      ).body
     ).toEqual(textOnly);
   });
 
-  it('leaves out attachments whose toSpec fails', () => {
+  it('leaves out attachments whose toIsomerComposition fails', () => {
     const attachmentsService = createAttachmentsService(() => {
       throw new Error('boom');
     });
 
-    expect(buildSpec(createOptions({ attachmentsService })).body).toEqual(textOnly);
+    expect(buildComposition(createOptions({ attachmentsService })).body).toEqual(textOnly);
   });
 
-  it('returns an empty spec for an empty message', () => {
-    expect(buildSpec(createOptions({ message: ' \n<render_attachment />\n ' })).body).toEqual([]);
+  it('returns an empty composition for an empty message', () => {
+    expect(
+      buildComposition(createOptions({ message: ' \n<render_attachment />\n ' })).body
+    ).toEqual([]);
   });
 });

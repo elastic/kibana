@@ -221,10 +221,10 @@ apiTest.describe.skip(
       const roundComplete = getRoundCompleteEvent(callbackRequests);
       expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
 
-      // Slack rounds carry the reply rendered as Block Kit.
-      const slack = roundComplete.projection?.slack;
-      expect(slack?.text).toBe(mockedLlmResponse);
-      expect(slack?.blocks).toStrictEqual([
+      // Slack rounds carry the response message rendered as Block Kit.
+      const surfacePayload = roundComplete.surface_payload;
+      expect(surfacePayload?.text).toBe(mockedLlmResponse);
+      expect(surfacePayload?.blocks).toStrictEqual([
         { type: 'section', text: { type: 'mrkdwn', text: mockedLlmResponse } },
       ]);
 
@@ -233,51 +233,54 @@ apiTest.describe.skip(
       expect(accepted.conversation_id).toBe(conversationId);
     });
 
-    apiTest('renders the Slack projection with attachments in place', async ({ apiClient }) => {
-      const attachmentContent = 'Attached callback note';
-      const mockedLlmResponse =
-        'Here is the note:\n\n<render_attachment id="callback-note" />\n\nAnything else?';
-      await setupAgentDirectAnswer({
-        proxy: llmProxy,
-        title: 'Callback Attachment Title',
-        response: mockedLlmResponse,
-      });
+    apiTest(
+      'renders the Slack surface payload with attachments in place',
+      async ({ apiClient }) => {
+        const attachmentContent = 'Attached callback note';
+        const mockedLlmResponse =
+          'Here is the note:\n\n<render_attachment id="callback-note" />\n\nAnything else?';
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Callback Attachment Title',
+          response: mockedLlmResponse,
+        });
 
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
-        headers: internalHeaders(),
-        body: {
-          input: 'Hello callback attachments',
-          connector_id: connectorId,
-          execution_idempotency_key: 'Ev-callback-attachments',
-          attachments: [
-            { id: 'callback-note', type: 'text', data: { content: attachmentContent } },
-          ],
-          origin: {
-            type: ConversationOriginType.Slack,
-            external_conversation_id: 'team:T123/channel:C123/thread:callback-attachments',
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Hello callback attachments',
+            connector_id: connectorId,
+            execution_idempotency_key: 'Ev-callback-attachments',
+            attachments: [
+              { id: 'callback-note', type: 'text', data: { content: attachmentContent } },
+            ],
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-attachments',
+            },
+            callback: {
+              url: `${callbackServerUrl}/callback?token=attachments`,
+            },
           },
-          callback: {
-            url: `${callbackServerUrl}/callback?token=attachments`,
-          },
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(202);
-      conversationIds.add((response.body as ChatCallbackAcceptedResponse).conversation_id);
+        expect(response).toHaveStatusCode(202);
+        conversationIds.add((response.body as ChatCallbackAcceptedResponse).conversation_id);
 
-      const callbackRequests = await collectCompletedRoundRequests();
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        const callbackRequests = await collectCompletedRoundRequests();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      const roundComplete = getRoundCompleteEvent(callbackRequests);
-      expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
+        const roundComplete = getRoundCompleteEvent(callbackRequests);
+        expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
 
-      const blocks = JSON.stringify(roundComplete.projection?.slack?.blocks);
-      expect(blocks).toContain('Here is the note:');
-      expect(blocks).toContain(attachmentContent);
-      expect(blocks).toContain('Anything else?');
-      expect(blocks).not.toContain('render_attachment');
-    });
+        const blocks = JSON.stringify(roundComplete.surface_payload?.blocks);
+        expect(blocks).toContain('Here is the note:');
+        expect(blocks).toContain(attachmentContent);
+        expect(blocks).toContain('Anything else?');
+        expect(blocks).not.toContain('render_attachment');
+      }
+    );
 
     apiTest(
       'stores callback origin authorship on list and get conversation responses',
@@ -504,8 +507,8 @@ apiTest.describe.skip(
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
           expect(getExecutionId(firstRequests)).toBe(executionId);
-          // Rounds without an origin get no projection.
-          expect(getRoundCompleteEvent(firstRequests).projection).toBeUndefined();
+          // Rounds without an origin get no surface payload.
+          expect(getRoundCompleteEvent(firstRequests).surface_payload).toBeUndefined();
           expect(getConversationId(firstRequests)).toBe(conversationId);
         });
 

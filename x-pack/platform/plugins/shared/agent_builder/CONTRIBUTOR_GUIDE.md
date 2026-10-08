@@ -421,16 +421,16 @@ const myAttachmentType: AttachmentTypeDefinition = {
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
-#### `toSpec` — rendering outside Kibana
+#### `toIsomerComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSpec`, which maps the data of one attachment version to an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toIsomerComposition`, which maps the data of one attachment version to an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes. Without it, the attachment is left out there.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
   id: 'my_type',
   validate: ...,
   format: ...,
-  toSpec: (data) => ({
+  toIsomerComposition: (data) => ({
     type: 'view',
     title: data.name,
     body: [{ type: 'markdown', text: `Status: ${data.status}` }],

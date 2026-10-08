@@ -102,7 +102,7 @@ describe('TaskHandler event streaming and finalization', () => {
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
-  const isomerService = {};
+  const surfacesService = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -130,7 +130,7 @@ describe('TaskHandler event streaming and finalization', () => {
       logger,
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
-      isomerService,
+      surfacesService,
     } as never);
 
   const run = () =>
@@ -183,7 +183,7 @@ describe('TaskHandler event streaming and finalization', () => {
       execution,
       events$: expect.anything(),
       callbackDeliveryService,
-      isomerService,
+      surfacesService,
       logger: expect.anything(),
     });
     expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);

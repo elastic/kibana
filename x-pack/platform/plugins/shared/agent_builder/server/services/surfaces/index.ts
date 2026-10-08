@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IsomerServiceImpl, type IsomerService } from './isomer_service';
+export { SurfacesServiceImpl, type SurfacesService } from './surfaces_service';

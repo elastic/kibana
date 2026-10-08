@@ -25,10 +25,10 @@ export interface AttachmentNode extends PrimitiveNode {
   version?: number;
 }
 
-export type SpecNode = IsomerMarkdownNode | AttachmentNode;
+export type CompositionNode = IsomerMarkdownNode | AttachmentNode;
 
 /** A response message as an Isomer composition. */
-export type Spec = Composition<SpecNode>;
+export type MessageComposition = Composition<CompositionNode>;
 
 const markdown = definePrimitive<IsomerMarkdownNode>({
   type: 'markdown',
@@ -54,7 +54,7 @@ const markdown = definePrimitive<IsomerMarkdownNode>({
 const describeAttachment = ({ attachmentId }: AttachmentNode) => `Attachment ${attachmentId}`;
 
 /**
- * Attachment nodes are resolved by `buildSpec` before rendering, so these renderers only name
+ * Attachment nodes are resolved by `buildComposition` before rendering, so these renderers only name
  * the attachment.
  */
 const attachment = definePrimitive<AttachmentNode>({
@@ -79,13 +79,13 @@ const attachment = definePrimitive<AttachmentNode>({
   },
 });
 
-/** The node types of an Agent Builder spec. */
+/** The node types of an Agent Builder composition. */
 export const agentBuilderPack = definePrimitivePack({
   id: 'agent-builder',
   primitives: [markdown, attachment],
 });
 
-/** Renders specs on any surface. */
-export const specDispatcher = createPrimitiveDispatcher<SpecNode>(
+/** Renders compositions on any surface. */
+export const compositionDispatcher = createPrimitiveDispatcher<CompositionNode>(
   composePacks([agentBuilderPack]).definitions
 );

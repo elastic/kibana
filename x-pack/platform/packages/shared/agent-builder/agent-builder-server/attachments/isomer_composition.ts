@@ -14,16 +14,16 @@ export interface IsomerMarkdownNode extends PrimitiveNode {
   text: string;
 }
 
-/** What an attachment type's `toSpec` returns: the composition shown in place of the attachment. */
-export type AttachmentIsomerSpec = Composition<IsomerMarkdownNode>;
+/** What an attachment type's `toIsomerComposition` returns, shown in place of the attachment. */
+export type AttachmentIsomerComposition = Composition<IsomerMarkdownNode>;
 
-export interface AttachmentIsomerSpecContext {
+export interface AttachmentIsomerCompositionContext {
   attachment: VersionedAttachment;
   version: number;
 }
 
 /** Maps the data of one attachment version to the composition shown in its place. */
-export type AttachmentIsomerSpecMapping<TContent = unknown> = (
+export type AttachmentIsomerCompositionMapping<TContent = unknown> = (
   data: TContent,
-  context: AttachmentIsomerSpecContext
-) => AttachmentIsomerSpec;
+  context: AttachmentIsomerCompositionContext
+) => AttachmentIsomerComposition;

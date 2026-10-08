@@ -19,14 +19,14 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { AttachmentServiceStart } from '../../attachments';
-import { IsomerServiceImpl } from '../../isomer';
+import { SurfacesServiceImpl } from '../../surfaces';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 import { deliverCallbackEvents } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
-const projectionDeps = {
-  isomerService: new IsomerServiceImpl({
+const surfacesDeps = {
+  surfacesService: new SurfacesServiceImpl({
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
   }),
@@ -151,7 +151,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(null),
       events$,
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -166,7 +166,7 @@ describe('deliverCallbackEvents', () => {
       execution: createStandaloneExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -183,7 +183,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -202,7 +202,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -241,7 +241,7 @@ describe('deliverCallbackEvents', () => {
         roundCompleteEvent
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -268,7 +268,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(progressEvent, roundCompleteEvent),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -301,7 +301,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(roundCompleteEvent, laterEvent),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -312,7 +312,7 @@ describe('deliverCallbackEvents', () => {
     expect(deliveredEvents).toEqual([laterEvent, roundCompleteEvent]);
   });
 
-  it('adds the Slack projection to round_complete for Slack rounds', async () => {
+  it('adds the Slack surface payload to round_complete for Slack rounds', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const reasoningEvent = createReasoningEvent('thinking');
     const roundCompleteEvent = createRoundCompleteEvent('There are **3** alerts.');
@@ -321,7 +321,7 @@ describe('deliverCallbackEvents', () => {
       execution: createSlackExecution(),
       events$: of(reasoningEvent, roundCompleteEvent),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -333,15 +333,13 @@ describe('deliverCallbackEvents', () => {
       reasoningEvent,
       {
         ...roundCompleteEvent,
-        projection: {
-          slack: {
-            text: expect.any(String),
-            blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'There are *3* alerts.' } }],
-          },
+        surface_payload: {
+          text: expect.any(String),
+          blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'There are *3* alerts.' } }],
         },
       },
     ]);
-    expect(roundCompleteEvent).not.toHaveProperty('projection');
+    expect(roundCompleteEvent).not.toHaveProperty('surface_payload');
   });
 
   it('renders attachments through their type mapping, and leaves out the others', async () => {
@@ -357,7 +355,7 @@ describe('deliverCallbackEvents', () => {
     getTypeDefinition.mockImplementation((type: string) =>
       type === 'text'
         ? {
-            toSpec: ({ content }: { content: string }) => ({
+            toIsomerComposition: ({ content }: { content: string }) => ({
               type: 'view',
               body: [{ type: 'markdown', text: content }],
             }),
@@ -374,20 +372,18 @@ describe('deliverCallbackEvents', () => {
         )
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
     const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
-    const slack = JSON.stringify(
-      (payload as { event: RoundCompleteEvent }).event.projection?.slack
-    );
+    const slack = JSON.stringify((payload as { event: RoundCompleteEvent }).event.surface_payload);
 
     expect(slack).toContain('Attached note');
     expect(slack).not.toContain('render_attachment');
   });
 
-  it('does not add projections to rounds without an origin', async () => {
+  it('does not add a surface payload to rounds without an origin', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const roundCompleteEvent = createRoundCompleteEvent();
 
@@ -395,7 +391,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(roundCompleteEvent),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -415,7 +411,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('persistence boom'))
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -453,7 +449,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('one'), createReasoningEvent('two')),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -471,7 +467,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -488,7 +484,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -518,7 +514,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -543,7 +539,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => createRequestAbortedError('request aborted'))
       ),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -564,7 +560,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: throwError(() => createRequestAbortedError('request aborted')),
       callbackDeliveryService: service,
-      ...projectionDeps,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -592,7 +588,7 @@ describe('deliverCallbackEvents', () => {
         execution: createConversationExecution(),
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
-        ...projectionDeps,
+        ...surfacesDeps,
         logger: loggerMock.create(),
       })
     ).resolves.toBeUndefined();
