@@ -81,8 +81,9 @@ export const RuleCreateOptionsFlyout = ({
         return;
       }
       /*
-       * Menu close already unregistered this flyout. Remount when the form is open
-       * so it can confirm, then let the parent run that confirm.
+       * Escape already unregistered this flyout. Remount when the form is open
+       * so it can confirm, then let the parent run that confirm. The header
+       * close button calls `onClose` directly and does not come through here.
        */
       if (retain) {
         reregister();
@@ -101,37 +102,36 @@ export const RuleCreateOptionsFlyout = ({
       session={isStacked ? 'start' : undefined}
       historyKey={historyKey}
       flyoutMenuProps={
-        isStacked ? { title: CREATE_RULE_TITLE, titleId: FLYOUT_TITLE_ID } : undefined
+        // Session name for Back/history. EUI hides this title, so the header is what users see.
+        isStacked ? { title: CREATE_RULE_TITLE } : undefined
       }
       ownFocus
-      hideCloseButton={!isStacked}
+      hideCloseButton={true}
       onClose={handleFlyoutClose}
       aria-labelledby={FLYOUT_TITLE_ID}
       data-test-subj="ruleCreateOptionsFlyout"
       data-flyout-key={flyoutKey}
     >
-      {isStacked ? null : (
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-                <h2>{CREATE_RULE_TITLE}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  color="text"
-                  onClick={onClose}
-                  aria-label={CLOSE_LABEL}
-                  data-test-subj="ruleCreateOptionsFlyoutCloseButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-      )}
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+              <h2>{CREATE_RULE_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={CLOSE_LABEL}
+                data-test-subj="ruleCreateOptionsFlyoutCloseButton"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <RuleCreateOptionsPanel
           layout="vertical"

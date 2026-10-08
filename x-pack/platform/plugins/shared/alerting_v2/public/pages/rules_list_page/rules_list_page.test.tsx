@@ -596,7 +596,7 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
@@ -679,7 +679,7 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();

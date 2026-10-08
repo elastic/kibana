@@ -15,7 +15,6 @@ import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
 
 let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
-let latestFlyoutKey: number | undefined;
 
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
@@ -26,7 +25,6 @@ jest.mock('@elastic/eui', () => {
     EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
       (props, ref) => {
         latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
-        latestFlyoutKey = (props as { 'data-flyout-key'?: number })['data-flyout-key'];
         return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
       }
     ),
@@ -69,7 +67,6 @@ const renderFlyout = () =>
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
     latestFlyoutOnClose = undefined;
-    latestFlyoutKey = undefined;
     jest.clearAllMocks();
     mockAreAgentBuilderSkillsAvailable = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
@@ -90,7 +87,7 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 
-  it('remounts a stacked picker and then asks the parent to close when the menu close is clicked', () => {
+  it('shows the Create rule title and closes from the header when stacked', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
@@ -104,10 +101,11 @@ describe('RuleCreateOptionsFlyout', () => {
       </I18nProvider>
     );
 
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(latestFlyoutKey).toBe(1);
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });
 

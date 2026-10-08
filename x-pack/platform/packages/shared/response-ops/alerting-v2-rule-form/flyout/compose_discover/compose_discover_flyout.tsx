@@ -20,6 +20,7 @@ import {
   EuiTitle,
   euiFullHeight,
   EuiToolTip,
+  getFlyoutManagerStore,
 } from '@elastic/eui';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -514,6 +515,11 @@ export function ComposeDiscoverFlyout({
    */
   const pendingHistoryBackRef = useRef(false);
   /*
+   * Set before popping this session on discard. Unmount then reports another
+   * navigation-back; that must not reopen the confirm dialog.
+   */
+  const discardingToPickerRef = useRef(false);
+  /*
    * Set in the same turn as the confirm, before React re-renders. A picker
    * remount can cascade this flyout while `isConfirmCloseVisible` is still
    * false in the closure. The ref is what that cascade has to read.
@@ -559,6 +565,9 @@ export function ComposeDiscoverFlyout({
 
   const handleRequestClose: EuiFlyoutProps['onClose'] = useCallback(
     (_event, meta) => {
+      if (discardingToPickerRef.current) {
+        return;
+      }
       const leaveToPicker = meta?.reason === 'navigation-back';
       const hasUnsavedChanges = readHasUnsavedChanges();
 
@@ -637,17 +646,44 @@ export function ComposeDiscoverFlyout({
     };
   }, [closeRequestRef, requestImperativeClose]);
 
+  /*
+   * Back remounts this flyout on top of the picker so the confirm can show.
+   * Unmounting that managed flyout calls closeAllFlyouts and dismisses the
+   * picker. Pop this session first; the picker's session stays registered.
+   */
+  const releaseAuthoringSession = useCallback(() => {
+    const store = getFlyoutManagerStore();
+    const topSession = () => {
+      const { sessions } = store.getState();
+      return sessions[sessions.length - 1];
+    };
+    const current = topSession();
+    if (current?.historyKey !== historyKey) {
+      return;
+    }
+    discardingToPickerRef.current = true;
+    const authoringMainId = current.mainFlyoutId;
+    // Pop a leftover child (the query sandbox) first, then this form.
+    // The picker shares historyKey but has a different main id, so it stays.
+    store.goBack();
+    const after = topSession();
+    if (after?.historyKey === historyKey && after.mainFlyoutId === authoringMainId) {
+      store.goBack();
+    }
+  }, [historyKey]);
+
   const handleConfirmDiscard = useCallback(() => {
     confirmPendingRef.current = false;
     reopenChildRef.current = false;
     setIsConfirmCloseVisible(false);
     if (pendingHistoryBackRef.current) {
       pendingHistoryBackRef.current = false;
+      releaseAuthoringSession();
       onHistoryBack();
       return;
     }
     onClose();
-  }, [onClose, onHistoryBack]);
+  }, [onClose, onHistoryBack, releaseAuthoringSession]);
 
   const handleCancelDiscard = useCallback(() => {
     confirmPendingRef.current = false;

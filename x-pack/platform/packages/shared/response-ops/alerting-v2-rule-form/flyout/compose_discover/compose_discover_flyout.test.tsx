@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import { getFlyoutManagerStore, type EuiFlyoutProps } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -40,6 +40,7 @@ jest.mock('@elastic/eui', () => {
   const EuiFlyoutActual = actual.EuiFlyout;
   return {
     ...actual,
+    getFlyoutManagerStore: jest.fn(() => actual.getFlyoutManagerStore()),
     EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
       (props, ref) => {
         if (props['data-test-subj'] === 'composeDiscoverFlyout') {
@@ -406,6 +407,9 @@ const clickSplitBaseAndAlert = () => {
 
 describe('ComposeDiscoverFlyout', () => {
   beforeEach(() => {
+    const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+    jest.mocked(getFlyoutManagerStore).mockReset();
+    jest.mocked(getFlyoutManagerStore).mockImplementation(() => actual.getFlyoutManagerStore());
     latestFlyoutOnClose = undefined;
     latestFlyoutKey = undefined;
     sandboxFlyoutProps = undefined;
@@ -822,6 +826,39 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onHistoryBack).toHaveBeenCalledTimes(1);
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('pops the form session before discard returns to the options flyout', () => {
+      const historyKey = Symbol('stackedCreate');
+      const sessions = [
+        { mainFlyoutId: 'options', historyKey, childHistory: [] as unknown[] },
+        { mainFlyoutId: 'form', historyKey, childHistory: [] as unknown[] },
+      ];
+      const goBack = jest.fn(() => {
+        sessions.pop();
+      });
+      jest.mocked(getFlyoutManagerStore).mockReturnValue({
+        getState: () => ({ sessions }),
+        goBack,
+      } as unknown as ReturnType<typeof getFlyoutManagerStore>);
+
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack, historyKey });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(goBack).toHaveBeenCalledTimes(1);
+      expect(goBack.mock.invocationCallOrder[0]).toBeLessThan(
+        onHistoryBack.mock.invocationCallOrder[0]
+      );
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(sessions.map((session) => session.mainFlyoutId)).toEqual(['options']);
     });
 
     it('"Continue editing" on Back keeps the flyout open', () => {
