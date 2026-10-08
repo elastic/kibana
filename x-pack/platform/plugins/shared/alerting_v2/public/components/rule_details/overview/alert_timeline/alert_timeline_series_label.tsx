@@ -27,7 +27,7 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
   const episodeCountLabel = i18n.translate(
     'xpack.alertingV2.alertTimeline.seriesLabel.episodeCount',
     {
-      defaultMessage: '{count, plural, one {# episode} other {# episodes}}',
+      defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
       values: { count: episodeCount },
     }
   );

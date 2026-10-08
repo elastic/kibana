@@ -33,7 +33,7 @@ jest.mock('./use_alert_timeline_url_state', () => ({
   useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, jest.fn()],
 }));
 
-jest.mock('../../../../utils/discover_href_for_episode', () => ({
+jest.mock('../../../../utils/discover_href_for_alert', () => ({
   getDiscoverHrefForRuleQuery: () => '/discover',
 }));
 
