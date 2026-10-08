@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs/promises';
 import path from 'path';
 import { stringify } from 'yaml';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
@@ -14,7 +15,8 @@ import { applyOverlay } from '@kbn/connector-contract-mock';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 import { isJsonObject } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
-import { parseManifest } from './manifest';
+import type { ManifestSource, VendorApiManifest } from './manifest';
+import { parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { readOptional } from './update_vendor_api';
 
@@ -24,7 +26,10 @@ export const LIST_LIMIT = 200;
 export interface InspectVendorApiOptions {
   /** Specs to inspect by source name; without them, the sources in the connector's manifest. */
   readonly sources: Readonly<Record<string, string>>;
-  /** A connector's `vendor_api` folder, whose manifest sources and overlay are used. */
+  /**
+   * A connector's `vendor_api` folder. Its overlay is applied, its manifest sources are used
+   * without `sources`, and `sources` it doesn't have yet are added to its manifest.
+   */
   readonly directory?: string;
   /** `METHOD /path` or `operationId` of operations to describe; lists operations otherwise. */
   readonly operations: readonly string[];
@@ -32,13 +37,20 @@ export interface InspectVendorApiOptions {
   readonly grep?: string;
   readonly depth?: number;
   readonly fetchText: (url: string) => Promise<string>;
+  /** When the document `fetchText` returned for a URL was fetched, if not just now. */
+  readonly fetchedAt?: (url: string) => Date | undefined;
+  readonly now: () => Date;
   readonly log: { readonly info: (message: string) => void };
 }
 
 export interface InspectVendorApiResult {
   readonly output: string;
+  /** Whether sources were added to the connector's manifest. */
+  readonly manifestUpdated: boolean;
   readonly problems: readonly string[];
 }
+
+const MANIFEST = 'manifest.json';
 
 const titleOf = ({ info }: OpenApiDocument): string => {
   const { title, version } = isJsonObject(info) ? info : {};
@@ -48,7 +60,8 @@ const titleOf = ({ info }: OpenApiDocument): string => {
 /**
  * Shows what vendor specs offer before a connector is written against them: the operations
  * they list, or for chosen operations everything an action needs to call one. Specs are
- * loaded the way recording loads them, with the connector's overlay applied.
+ * loaded the way recording loads them, with the connector's overlay applied. New sources are
+ * added to the connector's manifest, so recording later needs no `--source`.
  */
 export const inspectVendorApi = async ({
   sources: sourceFlags,
@@ -57,34 +70,61 @@ export const inspectVendorApi = async ({
   grep,
   depth,
   fetchText,
+  fetchedAt,
+  now,
   log,
 }: InspectVendorApiOptions): Promise<InspectVendorApiResult> => {
-  const manifestText = directory
-    ? await readOptional(path.join(directory, 'manifest.json'))
+  const manifestText = directory ? await readOptional(path.join(directory, MANIFEST)) : undefined;
+  const manifest: VendorApiManifest | undefined = manifestText
+    ? parseManifest(manifestText)
     : undefined;
   const overlayText = directory
     ? await readOptional(path.join(directory, 'overlay.yaml'))
     : undefined;
   const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
   const urls =
-    Object.keys(sourceFlags).length > 0 || manifestText === undefined
+    Object.keys(sourceFlags).length > 0 || manifest === undefined
       ? sourceFlags
-      : Object.fromEntries(
-          Object.entries(parseManifest(manifestText).sources).map(([name, { url }]) => [name, url])
-        );
+      : Object.fromEntries(Object.entries(manifest.sources).map(([name, { url }]) => [name, url]));
   if (Object.keys(urls).length === 0) {
     throw new Error('pass the specs to inspect with --source, or a --connector with a manifest');
   }
 
+  const problems: string[] = [];
   const documents: Record<string, OpenApiDocument> = {};
+  const added: Record<string, ManifestSource> = {};
   for (const [name, url] of Object.entries(urls)) {
-    log.info(`Fetching ${name} from ${url}`);
-    const { document } = await loadVendorSpec(url, fetchText);
+    log.info(`Loading ${name} from ${url}`);
+    const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
     documents[name] = overlay ? applyOverlay(document, overlay).document : document;
+    const known = manifest?.sources[name];
+    if (known && known.url !== url) {
+      problems.push(
+        `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
+      );
+    } else if (directory && !known) {
+      added[name] = {
+        format,
+        url,
+        ...(apiVersion === undefined ? {} : { apiVersion }),
+        fetchedAt: (fetchedAt?.(url) ?? now()).toISOString(),
+      };
+    }
+  }
+  const manifestUpdated = directory !== undefined && Object.keys(added).length > 0;
+  if (directory && manifestUpdated) {
+    await fs.mkdir(directory, { recursive: true });
+    await fs.writeFile(
+      path.join(directory, MANIFEST),
+      serializeManifest({
+        ...manifest,
+        sources: { ...manifest?.sources, ...added },
+        operations: manifest?.operations ?? {},
+      })
+    );
   }
 
   const sections: string[] = [];
-  const problems: string[] = [];
   if (operations.length > 0) {
     for (const query of operations) {
       const found = Object.entries(documents).flatMap(([source, document]) => {
@@ -101,7 +141,7 @@ export const inspectVendorApi = async ({
       }
       sections.push(...found.map((description) => stringify(description, { lineWidth: 0 })));
     }
-    return { output: sections.join('---\n'), problems };
+    return { output: sections.join('---\n'), manifestUpdated, problems };
   }
 
   const pattern = grep === undefined ? undefined : new RegExp(grep, 'i');
@@ -129,5 +169,5 @@ export const inspectVendorApi = async ({
       )
     );
   }
-  return { output: sections.join('\n\n'), problems };
+  return { output: sections.join('\n\n'), manifestUpdated, problems };
 };

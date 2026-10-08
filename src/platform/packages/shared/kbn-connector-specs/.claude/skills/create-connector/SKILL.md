@@ -29,8 +29,9 @@ Follow only the steps for the chosen path. Do not mix them.
 
 For a custom (non-MCP) connector, do this before Step 2. Start from the vendor's own machine-readable
 spec: find its URL, then list and describe the operations your actions will call with
-`node scripts/connector_vendor_api --inspect --source v1=<url> [--grep <text> | --operation '<METHOD> <path>']`,
-and write each action's method, parameter locations and zod bounds from that description. See "Start
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> [--grep <text> | --operation '<METHOD> <path>']`,
+and write each action's method, parameter locations and zod bounds from that description. The first
+inspection adds the source to the connector's `vendor_api/manifest.json`; leave out `--source` after it. See "Start
 from the vendor's spec" in
 [reference/custom-connector-setup.md](reference/custom-connector-setup.md). The connector is recorded
 and checked against the same spec in Step 4, so code written from it avoids most of what recording
@@ -228,13 +229,15 @@ the contract test fails otherwise. The folder records the vendor operations each
 snapshot of the vendor's spec, so the connector is checked offline against it on every CI run. See
 "Vendor API artifacts" in the package README for the file formats.
 
-1. **Record.** With the same spec URLs you inspected in Step 1, run:
+1. **Record.** The sources you inspected in Step 1 are already in `manifest.json`, so run:
 
    ```bash
-   node scripts/connector_vendor_api --connector {connector_name} --source v1=https://…/openapi.json
+   node scripts/connector_vendor_api --connector {connector_name}
    ```
 
-   One `--source name=url` per spec. YAML, JSON, Swagger 2.0 and Google Discovery documents all work.
+   It records against the same documents you inspected, kept since then in `data/connector_vendor_api`.
+   A spec you didn't inspect is added with `--source name=url`, one per spec; YAML, JSON, Swagger 2.0
+   and Google Discovery documents all work.
    The script runs every action against a mock built from the spec, under each auth type, with inputs
    generated from its schema: without and with optional properties, at every upper bound, and with each
    enum value. After changing the connector, rerun it without `--source` to record offline against the

@@ -50,15 +50,19 @@ them from the start avoids most of what recording would otherwise report. If the
 note that too: the connector then needs an exemption with a reason, and the docs are the only source.
 
 Then read the spec through the script, which loads it the way recording does, rather than reading the
-raw file (Microsoft Graph's is 44 MB):
+raw file (Microsoft Graph's is 44 MB). Name the scaffolded connector, so the source is declared once:
 
 ```bash
-# Find the operations behind the actions you plan
-node scripts/connector_vendor_api --inspect --source v1=https://…/openapi.json --grep 'issues'
-# Describe each operation an action will call
-node scripts/connector_vendor_api --inspect --source v1=https://…/openapi.json \
+# Find the operations behind the actions you plan; adds v1 to the connector's vendor_api/manifest.json
+node scripts/connector_vendor_api --inspect --connector <id> --source v1=https://…/openapi.json --grep 'issues'
+# Describe each operation an action will call; the manifest's sources are used from now on
+node scripts/connector_vendor_api --inspect --connector <id> \
   --operation 'POST /repos/{owner}/{repo}/issues' --operation issues/list-for-repo
 ```
+
+The fetched spec is kept in `data/connector_vendor_api` (not committed), so later inspections and
+recording use the same document even if the vendor publishes from a moving branch. Pass `--refresh` to
+fetch it again.
 
 For each operation the description gives the servers (with regional variables), the security schemes
 and scopes it requires, every parameter with its location (`path`, `query`, `header`) and effective

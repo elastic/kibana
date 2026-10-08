@@ -67,8 +67,9 @@ added line belongs to that connector.
 
 Mark task 1 as `in_progress`.
 
-Before generating code, find the vendor's machine-readable spec and describe the operations the
-planned actions call with `node scripts/connector_vendor_api --inspect` (see "Start from the vendor's
+After scaffolding and before writing actions, find the vendor's machine-readable spec and describe the
+operations the planned actions call with `node scripts/connector_vendor_api --inspect --connector <id>`
+(see "Start from the vendor's
 spec" in `create-connector/reference/custom-connector-setup.md`): methods, parameter locations, array
 encoding, bounds and scopes come from it. Then research the vendor's real API docs for what the spec
 doesn't settle — specifically update semantics (partial vs. full-replace), per-action auth scopes, and

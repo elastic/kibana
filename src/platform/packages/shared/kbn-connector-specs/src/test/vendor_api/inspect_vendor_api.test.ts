@@ -68,9 +68,13 @@ const inspect = (options: Partial<InspectVendorApiOptions>) =>
       }
       throw new Error(`unexpected fetch of ${url}`);
     },
+    now: () => new Date('2026-10-08T09:00:00.000Z'),
     log: { info: () => {} },
     ...options,
   });
+
+const readManifest = async (directory: string) =>
+  JSON.parse(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8'));
 
 describe('inspectVendorApi', () => {
   let directory: string;
@@ -160,9 +164,78 @@ actions:
     update: { maximum: 100 }
 `
     );
-    const { output } = await inspect({ sources: {}, directory, operations: ['listItems'] });
+    const { output, manifestUpdated } = await inspect({
+      sources: {},
+      directory,
+      operations: ['listItems'],
+    });
     expect(parse(output)).toMatchObject({
       parameters: [{ name: 'limit', schema: { type: 'integer', maximum: 100 } }],
     });
+    expect(manifestUpdated).toBe(false);
+  });
+
+  it("adds new sources to a connector's manifest, with when they were fetched", async () => {
+    const { manifestUpdated, problems } = await inspect({
+      directory,
+      fetchedAt: () => new Date('2026-10-01T12:00:00.000Z'),
+    });
+    expect(problems).toEqual([]);
+    expect(manifestUpdated).toBe(true);
+    expect(await readManifest(directory)).toEqual({
+      sources: {
+        v1: {
+          format: 'openapi',
+          url: SPEC_URL,
+          apiVersion: '2.1',
+          fetchedAt: '2026-10-01T12:00:00.000Z',
+        },
+      },
+      operations: {},
+    });
+  });
+
+  it('keeps what the manifest records and adds only the new sources', async () => {
+    const recorded = {
+      sources: { v1: { format: 'openapi', url: SPEC_URL, fetchedAt: '2026-09-01T00:00:00.000Z' } },
+      operations: { listItems: [{ source: 'v1', method: 'get', path: '/items' }] },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(recorded));
+
+    await inspect({ sources: { v1: SPEC_URL }, directory });
+    expect(await readManifest(directory)).toEqual(recorded);
+
+    await inspect({ sources: { v1: SPEC_URL, legacy: SWAGGER_URL }, directory });
+    expect(await readManifest(directory)).toEqual({
+      ...recorded,
+      sources: {
+        ...recorded.sources,
+        legacy: {
+          format: 'swagger',
+          url: SWAGGER_URL,
+          apiVersion: '1',
+          fetchedAt: '2026-10-08T09:00:00.000Z',
+        },
+      },
+    });
+  });
+
+  it('does not move a source the manifest has to another URL', async () => {
+    await inspect({ directory });
+    const { manifestUpdated, problems } = await inspect({
+      sources: { v1: SWAGGER_URL },
+      directory,
+    });
+    expect(manifestUpdated).toBe(false);
+    expect(problems).toEqual([
+      `v1 is ${SPEC_URL} in manifest.json; to move it, record with --source v1=${SWAGGER_URL}`,
+    ]);
+    expect((await readManifest(directory)).sources.v1.url).toBe(SPEC_URL);
+  });
+
+  it('writes no manifest without a connector folder', async () => {
+    const { manifestUpdated } = await inspect({});
+    expect(manifestUpdated).toBe(false);
+    await expect(fs.readdir(directory)).resolves.toEqual([]);
   });
 });

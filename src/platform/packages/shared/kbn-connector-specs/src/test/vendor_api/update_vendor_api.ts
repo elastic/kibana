@@ -12,7 +12,7 @@ import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
 import { applyOverlay } from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
-import { forEachRef, isJsonObject } from './json_pointer';
+import { forEachRef } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
@@ -50,6 +50,8 @@ export interface UpdateVendorApiOptions {
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
+  /** When the document `fetchText` returned for a URL was fetched, if not just now. */
+  readonly fetchedAt?: (url: string) => Date | undefined;
   readonly now: () => Date;
   readonly log: VendorApiLog;
 }
@@ -76,11 +78,6 @@ export const readOptional = async (file: string): Promise<string | undefined> =>
     }
     throw error;
   }
-};
-
-const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
-  const version = isJsonObject(info) ? info.version : undefined;
-  return typeof version === 'string' ? version : undefined;
 };
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
@@ -144,6 +141,7 @@ export const updateVendorApi = async ({
   refresh = false,
   check = false,
   fetchText,
+  fetchedAt: fetchedAtOf,
   now,
   log,
 }: UpdateVendorApiOptions): Promise<UpdateVendorApiResult> => {
@@ -174,13 +172,16 @@ export const updateVendorApi = async ({
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
+  // The `info.version` of each source loaded in full, rather than read from its snapshot.
+  const loaded = new Map<string, string | undefined>();
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
-      log.info(`Fetching ${name} from ${url}`);
-      const { format, document } = await loadVendorSpec(url, fetchText);
+      log.info(`Loading ${name} from ${url}`);
+      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
       formats[name] = format;
       raw[name] = document;
+      loaded.set(name, apiVersion);
     } else {
       raw[name] = JSON.parse(snapshot);
       formats[name] = previous?.sources[name]?.format ?? 'openapi';
@@ -288,8 +289,10 @@ export const updateVendorApi = async ({
     const file = snapshotFile(name);
     files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
-    const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
-    const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
+    const fetchedAt = unchanged
+      ? previous?.sources[name]?.fetchedAt
+      : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
     const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],

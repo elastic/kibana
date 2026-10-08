@@ -14,15 +14,23 @@ import {
   isDiscoveryDocument,
 } from '@kbn/connector-contract-mock';
 import { bundleSpec } from './bundle_spec';
+import { isJsonObject } from './json_pointer';
 import type { ManifestSource } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 
 export interface LoadedVendorSpec {
   /** The format the vendor publishes. */
   readonly format: ManifestSource['format'];
+  /** The spec's `info.version`. */
+  readonly apiVersion?: string;
   /** The spec as one OpenAPI 3.x document, with external `$ref`s bundled in. */
   readonly document: OpenApiDocument;
 }
+
+const apiVersionOf = ({ info }: OpenApiDocument): { apiVersion?: string } => {
+  const version = isJsonObject(info) ? info.version : undefined;
+  return typeof version === 'string' ? { apiVersion: version } : {};
+};
 
 /**
  * Fetches a vendor spec and turns it into one OpenAPI 3.x document: Google Discovery and
@@ -39,9 +47,9 @@ export const loadVendorSpec = async (
   const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
   const bundled = await bundleSpec(document, { url, load });
   if (discovery) {
-    return { format: 'discovery', document: bundled };
+    return { format: 'discovery', ...apiVersionOf(bundled), document: bundled };
   }
   return bundled.swagger === '2.0'
-    ? { format: 'swagger', document: convertSwagger2(bundled) }
-    : { format: 'openapi', document: bundled };
+    ? { format: 'swagger', ...apiVersionOf(bundled), document: convertSwagger2(bundled) }
+    : { format: 'openapi', ...apiVersionOf(bundled), document: bundled };
 };
