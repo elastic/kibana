@@ -50,6 +50,7 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
   const appId = useObservable(coreServices.application.currentAppId$);
+
   const { openModal } = useChangeHistoryModal();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);

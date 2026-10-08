@@ -27,13 +27,6 @@ export const createDashboardChangeHistoryAdapter = (
         signal,
       });
       console.log({ response });
-      if (dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
-        // the first item is always the most recent
-        response.items[0] = {
-          ...response.items[0],
-          metadata: { unsavedChanges: true },
-        };
-      }
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
@@ -47,13 +40,21 @@ export const createDashboardChangeHistoryAdapter = (
           signal,
         }
       );
-      if (response.isCurrent && dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
-        response.snapshot = dashboardApi.getSerializedState().attributes;
-      }
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
     }
+  },
+  getPendingChange: () => {
+    if (!dashboardApi || !dashboardApi!.hasUnsavedChanges$.getValue()) return;
+    return {
+      id: dashboardApi!.uuid,
+      actor: { name: '' },
+      action: 'dashboard_unsaved_changes',
+      timestamp: new Date(Date.now()).toISOString(),
+      snapshot: dashboardApi!.getSerializedState().attributes,
+      metadata: { unsavedChanges: true },
+    };
   },
   restoreChange: dashboardApi
     ? async ({ objectId, changeId, signal }) => {
