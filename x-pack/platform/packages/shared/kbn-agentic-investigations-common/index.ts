@@ -88,6 +88,8 @@ export {
   type RenderStatus,
   type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
+  type RenderSyncIndicator,
+  type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
 } from './src/template_ui/types';
 export {
