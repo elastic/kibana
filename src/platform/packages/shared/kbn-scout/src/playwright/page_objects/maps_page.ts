@@ -336,10 +336,7 @@ export class MapsPage {
    * optionally selected `requestName`, closes the inspector, and returns the value.
    */
   async getRequestTimestamp(requestName?: string): Promise<string> {
-    return this.getRequestStat(
-      () => this.inspector.getRequestTimestamp(),
-      requestName
-    );
+    return this.getRequestStat(() => this.inspector.getRequestTimestamp(), requestName);
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */

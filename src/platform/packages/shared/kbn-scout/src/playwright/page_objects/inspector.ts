@@ -47,7 +47,6 @@ export class InspectorPage {
       responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
       codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
     };
-
   }
 
   /**
