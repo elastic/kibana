@@ -123,6 +123,10 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  const settingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings' });
+  const detectionSettingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/detections',
+  });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
@@ -134,13 +138,13 @@ export function SignificantEventsPage() {
                 order: 1,
                 label: settingsLabel,
                 iconType: 'gear',
-                href: router.link('/settings'),
-                testId: 'significantEventsSettingsLink',
+                href: settingsHref,
+                testId: 'nightshiftSettingsLink',
               },
             ],
           }
         : undefined,
-    [canManageAndConfigure, router, settingsLabel]
+    [canManageAndConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -315,7 +319,7 @@ export function SignificantEventsPage() {
                 </p>
                 {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={detectionSettingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -361,7 +365,7 @@ export function SignificantEventsPage() {
                 )}
                 {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={detectionSettingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"

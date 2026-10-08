@@ -128,7 +128,10 @@ describe('createModelProvider', () => {
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
           request: deps.request,
-          bindTo: { connectorId: 'default-connector' },
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
         })
       );
       expect(model.chatModel).toBe(chatModel);
@@ -199,7 +202,12 @@ describe('createModelProvider', () => {
         expect.objectContaining({ connectorId: 'specific-connector' })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
-        expect.objectContaining({ bindTo: { connectorId: 'specific-connector' } })
+        expect.objectContaining({
+          bindTo: {
+            connectorId: 'specific-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
+        })
       );
     });
   });
@@ -291,7 +299,7 @@ describe('createModelProvider', () => {
   });
 
   describe('telemetryMetadata', () => {
-    it('defaults to the Agent Builder telemetry and binds no metadata when none is provided', async () => {
+    it('defaults to the Agent Builder telemetry and binds it on the inference client when none is provided', async () => {
       const deps = setupDeps();
       setupChatAndClient(deps.inference);
 
@@ -305,7 +313,10 @@ describe('createModelProvider', () => {
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
-          bindTo: { connectorId: 'default-connector' },
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
         })
       );
     });

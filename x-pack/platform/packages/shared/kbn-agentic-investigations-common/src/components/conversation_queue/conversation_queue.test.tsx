@@ -17,8 +17,7 @@ const investigation: Investigation = {
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 1,
   assignees: [],
   recommendedAction: 'respond',
@@ -146,6 +145,17 @@ describe('ConversationQueue', () => {
       renderQueue({ count: 100, remaining: 30, onShowMore: jest.fn() });
 
       expect(showMore()).toHaveTextContent('Show more (30)');
+    });
+
+    it('follows the last row as its sibling, so the row keeps its divider', () => {
+      renderQueue({ remaining: 30, onShowMore: jest.fn() });
+
+      let footer: HTMLElement = showMore();
+      while (footer.parentElement && !footer.previousElementSibling) {
+        footer = footer.parentElement;
+      }
+
+      expect(footer.previousElementSibling).toHaveTextContent(investigation.title);
     });
 
     it('is absent with nothing left to load', () => {

@@ -14,7 +14,7 @@
     "test/scout_edr_real_fleet/**/*",
     "test/scout_es_max_response_size/**/*",
     "test/scout_security_attacks_alignment/**/*",
-    "test/scout_threat_intel/**/*",
+    "test/scout_alertzero/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
