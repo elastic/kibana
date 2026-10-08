@@ -784,7 +784,7 @@ export const BULK_DELETE_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate
   'xpack.cases.workflowSteps.bulkDeleteObservables.documentation.details',
   {
     defaultMessage:
-      'This step deletes the specified observables from the case. The step echoes back the case_id and the observable_ids that were requested.',
+      'This step deletes the specified observables from the case. The operation is atomic: if any of the observable IDs is not found on the case, the step fails and no observables are deleted. The step echoes back the case_id and the observable_ids that were requested.',
   }
 );
 
