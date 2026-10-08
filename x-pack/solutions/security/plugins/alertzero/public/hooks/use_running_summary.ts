@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useWatches } from './use_watches_api';
 import { useWorkers } from './use_workers_api';
 
 export interface RunningSummary {
@@ -14,15 +13,19 @@ export interface RunningSummary {
   workerCount: number;
 }
 
-/** Counts what is switched on; the API exposes no in-progress flag, so "running" means enabled. */
+/**
+ * Counts what is switched on; the API exposes no in-progress flag, so "running" means enabled.
+ * A Watch counts when any of its Workers is enabled: the Watches API only returns catalog
+ * placeholders, so the settings an analyst changes live on the Workers.
+ */
 export const useRunningSummary = (): RunningSummary => {
-  const { data: watchesData } = useWatches();
   const { data: workersData } = useWorkers();
   const workers = workersData?.workers ?? [];
+  const enabledWorkers = workers.filter(({ enabled }) => enabled);
 
   return {
-    watchCount: (watchesData?.watches ?? []).filter(({ enabled }) => enabled).length,
-    enabledWorkerCount: workers.filter(({ enabled }) => enabled).length,
+    watchCount: new Set(enabledWorkers.flatMap(({ watchIds }) => watchIds)).size,
+    enabledWorkerCount: enabledWorkers.length,
     workerCount: workers.length,
   };
 };
