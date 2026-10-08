@@ -248,6 +248,15 @@ describe('WorkersService', () => {
     ).toBe(true);
   });
 
+  it('does not check Alert Analysis dependencies while listing Workers', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+
+    const response = await service.list(request, SPACE);
+    expect(response.workers.find(({ id }) => id === TRIAGE)?.enabled).toBe(false);
+    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
+  });
+
   it('rejects enabling a worker that has no service account', async () => {
     const harness = createPersistentHarness();
     const result = await harness.createService().update(TRIAGE, { enabled: true }, SPACE, request);
@@ -705,6 +714,38 @@ describe('WorkersService', () => {
     expect(
       workers.filter(({ id }) => id !== RULE_TUNING).every(({ state }) => state !== 'unavailable')
     ).toBe(true);
+  });
+
+  it('lists a Worker whose stored settings contain an unknown key as unavailable', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(
+      RULE_TUNING,
+      {
+        enabled: true,
+        settings: { serviceAccountId: 'sa-1' },
+        settingsRevision: null,
+      },
+      SPACE,
+      request
+    );
+    const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+    if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+    document.values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { ...RULE_TUNING_DEFAULT_EXTRAS, retiredField: 1 },
+    };
+
+    const { workers } = await service.list(request, SPACE);
+    const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
+
+    expect(ruleTuning).toMatchObject({
+      state: 'unavailable',
+      stateReason: 'Worker settings could not be read from durable storage',
+      settingsRevision: null,
+    });
   });
 
   it('installs on enable and leaves the per-space document in place on disable', async () => {

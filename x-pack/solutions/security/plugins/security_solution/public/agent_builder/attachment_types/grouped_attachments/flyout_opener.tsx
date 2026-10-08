@@ -16,6 +16,7 @@ import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_f
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { getOpenConversationFlyoutWidth } from './conversation_flyout_width';
 
 /** The app shell normally does this; without it the opened flyout spins forever. */
 const DataViewManagerBootstrap = () => {
@@ -43,7 +44,10 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
       return;
     }
     hasOpened.current = true;
-    openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY);
+    // Attack, alert, and rule rows open at the flyout they replace. Other descriptors ignore this and keep their own size.
+    openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY, {
+      originFlyoutSize: getOpenConversationFlyoutWidth() ?? 's',
+    });
   }, [descriptor, api]);
 
   return null;
