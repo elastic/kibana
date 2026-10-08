@@ -48,38 +48,61 @@ async function downloadFile(url: string, filePath: string): Promise<void> {
 }
 
 function extractYamlCodeBlocks(content: string): string {
-  // Match ```yaml ... ``` code blocks and everything after
-  const yamlBlockRegex = /```yaml\n([\s\S]*?)```([\s\S]*)/;
-  const match = content.match(yamlBlockRegex);
+  // Published pages are UTF-8 with a leading BOM.
+  const normalized = content.replace(/^\uFEFF/, '');
 
-  if (!match) {
+  // Older docs pages embed availability metadata in a fenced ```yaml block,
+  // followed by the command markdown.
+  const yamlBlockRegex = /```yaml\n([\s\S]*?)```([\s\S]*)/;
+  const match = normalized.match(yamlBlockRegex);
+
+  if (match) {
+    const yamlContent = match[1]?.trim() || '';
+    const contentAfterYaml = match[2]?.trim() || '';
+
+    // Combine YAML content and everything after the YAML block
+    let combined = '';
+    if (yamlContent && contentAfterYaml) {
+      combined = `${yamlContent}\n\n${contentAfterYaml}`;
+    } else if (yamlContent) {
+      combined = yamlContent;
+    } else if (contentAfterYaml) {
+      combined = contentAfterYaml;
+    }
+
+    // Remove the first 3 lines, which mark GA or Preview
+    if (combined) {
+      const lines = combined.split('\n');
+      if (lines.length > 3) {
+        return lines.slice(3).join('\n');
+      }
+      return '';
+    }
+
     return '';
   }
 
-  const yamlContent = match[1]?.trim() || '';
-  const contentAfterYaml = match[2]?.trim() || '';
+  // Current docs pages (including PROMQL) use YAML frontmatter instead of a fenced block.
+  return extractFrontmatterBody(normalized);
+}
 
-  // Combine YAML content and everything after the YAML block
-  let combined = '';
-  if (yamlContent && contentAfterYaml) {
-    combined = `${yamlContent}\n\n${contentAfterYaml}`;
-  } else if (yamlContent) {
-    combined = yamlContent;
-  } else if (contentAfterYaml) {
-    combined = contentAfterYaml;
+/**
+ * Returns the markdown body of a docs page that starts with `---` frontmatter.
+ * Drops the page title and the leading availability banner so the command
+ * write-up can be reorganized like the older fenced pages.
+ */
+function extractFrontmatterBody(content: string): string {
+  const frontmatterMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?([\s\S]*)$/);
+  const body = frontmatterMatch?.[1]?.trim();
+  if (!body) {
+    return '';
   }
 
-  // Remove the first 3 lines, which mark GA or Preview
-  if (combined) {
-    const lines = combined.split('\n');
-    if (lines.length > 3) {
-      return lines.slice(3).join('\n');
-    } else {
-      return '';
-    }
-  }
-
-  return '';
+  return body
+    .replace(/^# .+\r?\n+/, '')
+    .replace(/^<applies-to>[\s\S]*?<\/applies-to>\s*/, '')
+    .replace(/<\/?(?:note|tip|warning|important)>/gi, '')
+    .trim();
 }
 
 function getCommandName(fileName: string): string {
@@ -159,31 +182,33 @@ function rewriteSyntaxSection(content: string, functionName: string): string {
 }
 
 function stripMarkdownTables(content: string): string {
-  // Strip markdown tables: rows with pipes and separator rows with dashes
-  // Pattern: | col1 | col2 |\n|------|------|\n| val1 | val2 |
+  // Keep table cell text and drop separator rows. Output schemas (for example
+  // PROMQL result columns) are only documented in these tables.
   const lines = content.split('\n');
   const result: string[] = [];
-  let inTable = false;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (const line of lines) {
     const trimmedLine = line.trim();
-
     const isTableRow = trimmedLine.startsWith('|') && trimmedLine.endsWith('|');
-
-    // Check if this is a separator row (contains | and dashes like |---|---|)
     const isSeparatorRow = isTableRow && /^[\|\s\-:]+$/.test(trimmedLine);
 
-    if (isTableRow || isSeparatorRow) {
-      inTable = true;
+    if (isSeparatorRow) {
       continue;
-    } else {
-      if (inTable) {
-        inTable = false;
-      }
-      // Add the line (it's not part of a table)
-      result.push(line);
     }
+
+    if (isTableRow) {
+      const cells = trimmedLine
+        .slice(1, -1)
+        .split('|')
+        .map((cell) => cell.trim())
+        .filter((cell) => cell.length > 0);
+      if (cells.length > 0) {
+        result.push(cells.join(' | '));
+      }
+      continue;
+    }
+
+    result.push(line);
   }
 
   return result.join('\n');
@@ -866,7 +891,7 @@ yargs(process.argv.slice(2))
                 };
                 cacheUpdated = true;
               } else {
-                log.warning(`No YAML code blocks found in ${mdFile}, skipping`);
+                log.warning(`No command documentation found in ${mdFile}, skipping`);
               }
             }
             if (docFiles.length > 0) {

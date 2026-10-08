@@ -134,10 +134,7 @@ export const getTopNavConfig = (
 ): VisualizeAppHeaderActions => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
-  const isOriginatingFromDashboardPanel = Boolean(
-    originatingApp &&
-      !(originatingApp === 'dashboards' && Boolean(originatingPath?.includes('/list/')))
-  );
+  const isOriginatingFromDashboardPanel = Boolean(originatingApp && originatingPath);
 
   /**
    * Called when the user clicks "Save" button.

@@ -90,6 +90,7 @@ const setup = () => {
     {
       getSubjectsService: () => service,
       privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
       logger: loggerMock.create(),
     }
   );
@@ -177,9 +178,13 @@ describe('SubjectsService', () => {
     expect(client.update).toHaveBeenCalled();
   });
 
-  it('does not write when the caller does not own the conversation', async () => {
+  it('does not write when the caller cannot converse with the conversation', async () => {
     const { storage, conversations, upsert } = setup();
-    conversations.get.mockResolvedValue({ permissions: { update_access_control: false } });
+    // `conversations.get` itself enforces `converse` access and fails closed as not-found;
+    // the write path relies on that instead of a separate permission check.
+    conversations.get.mockRejectedValue(
+      createConversationNotFoundError({ conversationId: CONVERSATION_ID })
+    );
 
     await expect(upsert([alertSubject])).rejects.toEqual(
       createConversationNotFoundError({ conversationId: CONVERSATION_ID })

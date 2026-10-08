@@ -104,6 +104,16 @@
     }
   },
   {
+    "id": "alertzero-common-layer",
+    "name": "AlertZero Common Layer",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/alertzero-common-layer"
+    }
+  },
+  {
     "id": "contextual-security",
     "name": "Contextual Security",
     "github": {
@@ -662,21 +672,6 @@
       "Distributed tracing",
       "Service maps",
       "APM data access"
-    ]
-  },
-  {
-    "id": "obs-signals-ai-o11y",
-    "name": "Obs Signals AI O11y",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-signals-ai-o11y",
-      "label": "Team:obs-signals-ai-o11y"
-    },
-    "responsibilities": [
-      "GenAI tab",
-      "AI observability"
     ]
   },
   {

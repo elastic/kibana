@@ -52,9 +52,11 @@ const LOAD_ESQL_DOCS_SCRIPT = resolve(
   'x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js'
 );
 
-/** EIS chat_completion endpoint used to enrich ES|QL docs. The product-docs pipeline sets the same id. */
+/** Inference endpoint used by load_esql_docs to enrich ES|QL docs. */
 const ESQL_DOCS_INFERENCE_ID =
-  process.env.ESQL_DOCS_INFERENCE_ID || '.openai-gpt-5.5-chat_completion';
+  process.env.ESQL_DOCS_INFERENCE_ID ||
+  process.env.ESQL_DOCS_CONNECTOR_ID ||
+  '.openai-gpt-5.5-chat_completion';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
