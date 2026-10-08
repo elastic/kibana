@@ -56,7 +56,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
   it('reads valid params', () => {
     const { result } = renderUrlState(
-      '?eaTimeRange=7d&eaRowsMode=individual&eaSortField=alert_count&eaSortDir=asc&eaPage=3&eaPageSize=25&eaActiveTile=riskMovers&entityTypes=host,user&riskLevels=Critical'
+      '?eaTimeRange=7d&eaRowsMode=individual&eaSortField=alert_count&eaSortDir=asc&eaPage=3&eaPageSize=25&eaActiveTile=riskMovers&eaEntityTypes=host,user&eaRiskLevels=Critical'
     );
 
     expect(result.current).toEqual(
@@ -78,7 +78,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
   it('reads invalid params as defaults without rewriting the URL', () => {
     const search =
-      '?eaTimeRange=1y&eaRowsMode=x&eaSortField=nope&eaSortDir=asc&eaPage=-1&eaPageSize=7&eaActiveTile=nope&entityTypes=host,bogus';
+      '?eaTimeRange=1y&eaRowsMode=x&eaSortField=nope&eaSortDir=asc&eaPage=-1&eaPageSize=7&eaActiveTile=nope&eaEntityTypes=host,bogus';
     const { result, history } = renderUrlState(search);
 
     expect(result.current).toEqual(
@@ -139,7 +139,7 @@ describe('useEntityAnalyticsUrlState', () => {
   });
 
   it('writes entity filters and drops empty ones', () => {
-    const { result, params } = renderUrlState('?watchlists=w1&eaPage=4');
+    const { result, params } = renderUrlState('?eaWatchlists=w1&eaPage=4');
 
     act(() =>
       result.current.setEntityFilters({
@@ -151,12 +151,12 @@ describe('useEntityAnalyticsUrlState', () => {
       })
     );
 
-    expect(params()).toEqual({ entityTypes: 'host', assetCriticality: 'high_impact' });
+    expect(params()).toEqual({ eaEntityTypes: 'host', eaAssetCriticality: 'high_impact' });
   });
 
   it('clears the filters, the tile and the sort on reset', () => {
     const { result, params } = renderUrlState(
-      '?entityTypes=host&eaActiveTile=riskMovers&eaSortField=alert_count&eaSortDir=asc&eaPage=2&eaTimeRange=7d'
+      '?eaEntityTypes=host&eaActiveTile=riskMovers&eaSortField=alert_count&eaSortDir=asc&eaPage=2&eaTimeRange=7d'
     );
 
     act(() => result.current.resetGridQuery());
@@ -183,6 +183,8 @@ describe('useEntityAnalyticsUrlState', () => {
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     act(() => result.current.toggleExpandedId('host:h-1'));
     expect(result.current.expandedIds).toEqual(['user:a,b@corp', 'host:h-1']);
+    // One param per id, encoded once.
+    expect(history.location.search).toBe('?eaExpanded=user%3Aa%2Cb%40corp&eaExpanded=host%3Ah-1');
 
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     expect(result.current.expandedIds).toEqual(['host:h-1']);

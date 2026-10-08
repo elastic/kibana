@@ -52,12 +52,11 @@ const PARAM = {
   PAGE_SIZE: 'eaPageSize',
   EXPANDED: 'eaExpanded',
   ACTIVE_TILE: 'eaActiveTile',
-  // entity filter params kept identical to the existing hooks so bookmarked URLs remain valid
-  ENTITY_TYPES: 'entityTypes',
-  RISK_LEVELS: 'riskLevels',
-  ASSET_CRITICALITY: 'assetCriticality',
-  WATCHLISTS: 'watchlists',
-  DATA_SOURCES: 'dataSources',
+  ENTITY_TYPES: 'eaEntityTypes',
+  RISK_LEVELS: 'eaRiskLevels',
+  ASSET_CRITICALITY: 'eaAssetCriticality',
+  WATCHLISTS: 'eaWatchlists',
+  DATA_SOURCES: 'eaDataSources',
 } as const;
 
 /** Caps URL length; most recently expanded ids are kept. */
@@ -107,26 +106,13 @@ const isCriticality = (v: string): boolean => VALID_CRITICALITY.has(v);
 
 const splitParam = (raw: string) => raw.split(',').filter(Boolean);
 
-const parseExpandedIds = (raw: string | null): string[] => {
-  if (!raw) return [];
-  const ids: string[] = [];
-  for (const part of splitParam(raw)) {
-    try {
-      ids.push(decodeURIComponent(part));
-    } catch {
-      ids.push(part);
-    }
-  }
-  return ids.slice(-MAX_EXPANDED_ENTITY_IDS);
-};
+/** Expanded ids, one `eaExpanded` param each: ids can contain commas. */
+const readExpandedIds = (params: URLSearchParams): string[] =>
+  params.getAll(PARAM.EXPANDED).filter(Boolean).slice(-MAX_EXPANDED_ENTITY_IDS);
 
-const writeExpandedParam = (params: URLSearchParams, ids: string[]) => {
-  const capped = ids.slice(-MAX_EXPANDED_ENTITY_IDS);
-  if (capped.length) {
-    params.set(PARAM.EXPANDED, capped.map(encodeURIComponent).join(','));
-  } else {
-    params.delete(PARAM.EXPANDED);
-  }
+const writeExpandedIds = (params: URLSearchParams, ids: string[]) => {
+  params.delete(PARAM.EXPANDED);
+  for (const id of ids.slice(-MAX_EXPANDED_ENTITY_IDS)) params.append(PARAM.EXPANDED, id);
 };
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -232,8 +218,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [rawEntityTypes, rawRiskLevels, rawAssetCriticality, rawWatchlists, rawDataSources]
   );
 
-  const rawExpanded = p.get(PARAM.EXPANDED);
-  const expandedIds = useMemo(() => parseExpandedIds(rawExpanded), [rawExpanded]);
+  const expandedIds = useMemo(() => readExpandedIds(p), [p]);
 
   const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
   const activeTile = useMemo(
@@ -353,11 +338,11 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (entityId: string) =>
       update(
         (params) => {
-          const current = parseExpandedIds(params.get(PARAM.EXPANDED));
+          const current = readExpandedIds(params);
           const next = current.includes(entityId)
             ? current.filter((id) => id !== entityId)
             : [...current.filter((id) => id !== entityId), entityId];
-          writeExpandedParam(params, next);
+          writeExpandedIds(params, next);
         },
         { replace: true }
       ),
