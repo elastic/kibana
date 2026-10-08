@@ -10,7 +10,7 @@
 import React from 'react';
 import { Global, css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { layoutVarName, surfaceContainerCss } from './constants';
+import { layoutVarName } from './constants';
 import { useLayoutConfig } from './layout_config_context';
 import { useLayoutState } from './layout_state_context';
 
@@ -147,10 +147,6 @@ export const LayoutGlobalCSS = () => {
       ${applicationBottomBar}
       ${applicationContent}
       ${footer}
-    }
-
-    body {
-      ${surfaceContainerCss}
     }
   `;
 

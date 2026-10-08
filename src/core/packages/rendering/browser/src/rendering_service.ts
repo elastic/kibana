@@ -10,5 +10,11 @@
 import type React from 'react';
 
 export interface RenderingService {
-  addContext: (element: React.ReactNode) => React.ReactElement;
+  addContext: (
+    element: React.ReactNode,
+    options?: {
+      /** Element the React root is mounted in. EUI breakpoint hooks measure its nearest breakpoint container. */
+      mountElement?: HTMLElement;
+    }
+  ) => React.ReactElement;
 }

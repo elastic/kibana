@@ -14,7 +14,7 @@ import {
   highContrastModeStyles,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { layoutVar, layoutLevels, surfaceContainerCss } from '../constants';
+import { layoutVar, layoutLevels } from '../constants';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
@@ -26,7 +26,6 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
     return css`
       grid-area: application;
-      ${surfaceContainerCss}
 
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}

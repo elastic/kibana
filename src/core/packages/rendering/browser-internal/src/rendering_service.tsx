@@ -22,7 +22,6 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { EuiBreakpointContainerContext } from '@elastic/eui';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -99,14 +98,15 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
-    // POC: EUI breakpoints resolve from where each React root is mounted.
     const element = (
-      <EuiBreakpointContainerContext.Provider value={targetDomElement}>
-        <KibanaRootContextProvider {...startServices} globalStyles={true}>
-          <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
-          <Layout />
-        </KibanaRootContextProvider>
-      </EuiBreakpointContainerContext.Provider>
+      <KibanaRootContextProvider
+        {...startServices}
+        globalStyles={true}
+        mountElement={targetDomElement}
+      >
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
+        <Layout />
+      </KibanaRootContextProvider>
     );
 
     if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
@@ -117,7 +117,10 @@ export class RenderingService implements IRenderingService {
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call
-  private readonly ContextWrapper = React.memo<{ children: React.ReactNode }>(({ children }) => {
+  private readonly ContextWrapper = React.memo<{
+    children: React.ReactNode;
+    mountElement?: HTMLElement;
+  }>(({ children, mountElement }) => {
     /**
      * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
      * methods could be called before the CoreStart services are completely settled internally. If this
@@ -140,6 +143,7 @@ export class RenderingService implements IRenderingService {
         authc={deps.authc}
         coreEnv={deps.coreEnv}
         chrome={deps.chrome}
+        mountElement={mountElement}
       >
         {children}
       </KibanaRenderContextProvider>
@@ -149,8 +153,11 @@ export class RenderingService implements IRenderingService {
   /**
    * @public
    */
-  public addContext(element: React.ReactNode): React.ReactElement<string> {
+  public addContext(
+    element: React.ReactNode,
+    options?: { mountElement?: HTMLElement }
+  ): React.ReactElement<string> {
     const { ContextWrapper } = this;
-    return <ContextWrapper>{element}</ContextWrapper>;
+    return <ContextWrapper mountElement={options?.mountElement}>{element}</ContextWrapper>;
   }
 }
