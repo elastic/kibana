@@ -21,7 +21,10 @@ import type { Subscription } from 'rxjs';
 import { registerImpactEntityOpener } from '@kbn/agentic-investigations-common';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import {
+  ENABLE_NEW_FLYOUT_SETTING,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
@@ -179,7 +182,14 @@ export const registerEntityAttachment = ({
       openImpactEntityFlyout({
         entity,
         overlays,
+        application,
+        agentBuilder,
+        chrome,
+        isNewFlyoutEnabled:
+          !experimentalFeatures.newFlyoutSystemDisabled &&
+          (uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false),
         resolveSecurityCanvasContext,
+        searchSession,
       })
     );
   });
