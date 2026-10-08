@@ -130,7 +130,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       }
     }
 
-    // Icons with no API mapping (e.g. legacy `empty`/`popout`) are dropped by the transform.
+    // Icons with no API mapping (e.g. legacy `empty`) are dropped by the transform.
     if (viz.icon && iconCompat.toAPI(resolveVisIcon(viz.icon).id) === undefined) {
       delete viz.icon;
     }

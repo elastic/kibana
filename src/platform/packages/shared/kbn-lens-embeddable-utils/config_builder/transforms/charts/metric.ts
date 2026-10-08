@@ -112,6 +112,7 @@ export const iconCompat = getReversibleMappings<MetricIconName, VisIconType>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
