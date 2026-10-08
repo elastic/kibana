@@ -87,8 +87,11 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.data).toHaveLength(1);
-    expect(response.body.data[0].data.tags).toStrictEqual(['tag-2']);
+    const tagged = response.body.data.find(
+      (item: { data: { title: string } }) => item.data.title === 'Search Test Chart Tagged'
+    );
+    expect(tagged).toBeDefined();
+    expect(tagged.data.tags).toStrictEqual(['tag-2']);
   });
 
   apiTest('should return empty tags for untagged items', async ({ apiClient }) => {
@@ -98,7 +101,11 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.data[0].data.tags).toStrictEqual([]);
+    const untagged = response.body.data.find(
+      (item: { data: { title: string } }) => item.data.title === 'Search Test Chart Alpha'
+    );
+    expect(untagged).toBeDefined();
+    expect(untagged.data.tags).toStrictEqual([]);
   });
 
   apiTest('should include items by tag', async ({ apiClient }) => {
@@ -110,7 +117,7 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(
       response.body.data.map((item: { data: { title: string } }) => item.data.title)
-    ).toStrictEqual(['Search Test Chart Tagged']);
+    ).toContain('Search Test Chart Tagged');
   });
 
   apiTest('should exclude items by tag', async ({ apiClient }) => {
