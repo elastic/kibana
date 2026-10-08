@@ -128,16 +128,22 @@ describe('Nightshift investigation agent type', () => {
     ]);
   });
 
-  it('allow-lists the telemetry connector when one is configured', () => {
-    const base = staticBase(
-      getInvestigationAgentType({
-        sandboxEnabled: true,
-        cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
-      })
-    );
+  it('allow-lists the connectors resolved for the space', async () => {
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: true,
+      resolveConnectorIds: async () => ['elasticsearch-telemetry', 'github'],
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    const base = await type.baseConfiguration({
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+    });
+
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
   });
 
   describe('custom context', () => {

@@ -28,6 +28,8 @@ export interface NightshiftHeaderProps {
   /** Renders the "Start investigation" button when set. */
   onStartInvestigationClick?: () => void;
   isStartInvestigationOpen?: boolean;
+  /** Replaces the status-derived hero title. */
+  title?: string;
 }
 
 const getGreeting = (): string => {
@@ -80,10 +82,11 @@ export function NightshiftHeader({
   showAllEventsHref,
   onStartInvestigationClick,
   isStartInvestigationOpen = false,
+  title: titleOverride,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const title = getHeroTitle({ isLoading, hasActiveInvestigations });
+  const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
   const buttonCss = css`
     color: ${euiTheme.colors.textSubdued};
   `;

@@ -16,6 +16,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */
@@ -34,6 +35,7 @@ export interface NightshiftStartDependencies {
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

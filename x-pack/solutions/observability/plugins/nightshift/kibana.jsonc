@@ -25,7 +25,8 @@
       "agenticInvestigations",
       "nightshiftInvestigations",
       "serverless",
-      "spaces"
+      "spaces",
+      "triggersActionsUi"
     ],
     "requiredBundles": ["kibanaReact", "nightshiftInvestigations"]
   }
