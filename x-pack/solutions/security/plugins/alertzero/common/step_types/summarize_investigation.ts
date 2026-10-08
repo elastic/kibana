@@ -27,11 +27,7 @@ const outputSchema = z.object({
     .enum(['template', 'empty', 'incomplete'])
     .optional()
     .describe('Why the step wrote nothing.'),
-  description: z
-    .string()
-    .optional()
-    .describe('One-line card text written to metadata.description.'),
-  summary: z.string().optional().describe('Longer reading written to metadata.summary.'),
+  summary: z.string().optional().describe('Reading written to metadata.summary.'),
 });
 
 export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
@@ -46,7 +42,7 @@ export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.summarizeInvestigation.description',
     {
       defaultMessage:
-        'Reads journal notes, comments, and added attachments, then writes the investigation card summary.',
+        'Reads journal notes, comments, and added attachments, then writes the investigation summary.',
     }
   ),
   category: StepCategory.KibanaSecurity,

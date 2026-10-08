@@ -16,7 +16,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { filter, lastValueFrom } from 'rxjs';
 import { formatInvestigationStory, type StoryAttachment, type StoryEvent } from './format_story';
 
-const DESCRIPTION_MAX = 280;
 const SUMMARY_MAX = 10_000;
 
 const SUMMARY_TEMPLATES = new Set(['investigation', 'escalation']);
@@ -24,9 +23,8 @@ const SUMMARY_TEMPLATES = new Set(['investigation', 'escalation']);
 const OUTPUT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['description', 'summary'],
+  required: ['summary'],
   properties: {
-    description: { type: 'string' },
     summary: { type: 'string' },
   },
 };
@@ -53,44 +51,39 @@ export interface RunInvestigationSummaryDeps {
 export interface InvestigationSummaryResult {
   skipped: boolean;
   reason?: 'template' | 'empty' | 'incomplete';
-  description?: string;
   summary?: string;
 }
 
 const clip = (value: string, max: number): string => value.trim().slice(0, max);
 
-const oneLine = (value: string): string => clip(value.replace(/\s+/g, ' '), DESCRIPTION_MAX);
-
-const readOutput = (value: unknown): { description: string; summary: string } | undefined => {
+const readOutput = (value: unknown): { summary: string } | undefined => {
   if (!value || typeof value !== 'object') {
     return undefined;
   }
-  const record = value as { description?: unknown; summary?: unknown };
-  if (typeof record.description !== 'string' || typeof record.summary !== 'string') {
+  const record = value as { summary?: unknown };
+  if (typeof record.summary !== 'string') {
     return undefined;
   }
-  const description = oneLine(record.description);
   const summary = clip(record.summary, SUMMARY_MAX);
-  if (!description || !summary) {
+  if (!summary) {
     return undefined;
   }
-  return { description, summary };
+  return { summary };
 };
 
 const promptFor = (story: string): string =>
   [
-    'Read this AlertZero investigation timeline and write the card text.',
+    'Read this AlertZero investigation timeline and write the summary.',
     'The timeline is the story: journal notes posted as user messages, comments, and attachments that were added.',
     'Do not invent events, hosts, or conclusions that are not in the timeline.',
-    'description is one line for the investigation card.',
-    'summary is the longer reading of the same story, a few sentences.',
+    'summary is a few sentences reading that story.',
     'Do not write conversation metadata yourself.',
     '',
     story,
   ].join('\n');
 
 /**
- * Reads the investigation timeline and stores description plus summary on its metadata.
+ * Reads the investigation timeline and stores the summary on its metadata.
  * Standalone, so the run is not appended to the investigation chat.
  */
 export const runInvestigationSummary = async ({
@@ -139,11 +132,7 @@ export const runInvestigationSummary = async ({
     return { skipped: true, reason: 'incomplete' };
   }
 
-  await client.patchMetadata(
-    conversationId,
-    { description: output.description, summary: output.summary },
-    { access: 'converse' }
-  );
+  await client.patchMetadata(conversationId, { summary: output.summary }, { access: 'converse' });
 
-  return { skipped: false, description: output.description, summary: output.summary };
+  return { skipped: false, summary: output.summary };
 };

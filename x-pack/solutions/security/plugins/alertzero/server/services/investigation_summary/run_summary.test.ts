@@ -13,13 +13,13 @@ import { runInvestigationSummary, type InvestigationConversationReader } from '.
 
 const request = {} as KibanaRequest;
 
-const completed = (description: string, summary: string) =>
+const completed = (summary: string) =>
   of({
     type: ChatEventType.messageComplete,
     data: {
       message_id: 'm-1',
       message_content: summary,
-      structured_output: { description, summary },
+      structured_output: { summary },
     },
   } as ChatEvent);
 
@@ -44,14 +44,14 @@ describe('runInvestigationSummary', () => {
     };
     const executeAgent = jest.fn(
       async (_params: ExecuteAgentParams): Promise<ExecuteAgentResult> => ({
-        events$: completed('Okta admin rule fired.', 'The Okta admin rule fired and was noted.'),
+        events$: completed('The Okta admin rule fired and was noted.'),
         executionId: 'exec-1',
       })
     );
     return { client, executeAgent };
   };
 
-  it('writes description and summary from a standalone run', async () => {
+  it('writes the summary from a standalone run and leaves description untouched', async () => {
     const { client, executeAgent } = setup();
 
     const result = await runInvestigationSummary({
@@ -63,17 +63,16 @@ describe('runInvestigationSummary', () => {
       },
     });
 
-    expect(result.skipped).toBe(false);
-    expect(result.description).toBe('Okta admin rule fired.');
+    expect(result).toEqual({
+      skipped: false,
+      summary: 'The Okta admin rule fired and was noted.',
+    });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({ mode: AgentExecutionMode.standalone, useTaskManager: false })
     );
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
-      {
-        description: 'Okta admin rule fired.',
-        summary: 'The Okta admin rule fired and was noted.',
-      },
+      { summary: 'The Okta admin rule fired and was noted.' },
       { access: 'converse' }
     );
   });
