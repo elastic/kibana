@@ -6,15 +6,16 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getIndexPatternFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { DEFAULT_TIME_FIELD, getDateFieldNames } from './date_fields';
 
 /**
  * Reject a query that ignores the time picker on a source without `@timestamp`.
  *
- * Kibana applies the time range on its own only to `@timestamp`, or to the field the query
- * filters or buckets with `?_tstart`/`?_tend`. On a source whose event time lives in another
- * date field (e.g. `order_date`), a query without those params is never time-filtered.
+ * Kibana applies the time range on its own only to `@timestamp`, or to the field it parses
+ * from the function that takes `?_tstart`/`?_tend`. On a source whose event time lives in
+ * another date field (e.g. `order_date`), the query must filter or bucket that field with
+ * those params; params in a comment, wrapped in `TO_DATETIME`, or on an alias are not enough.
  *
  * Returns a message to feed back to the model, or undefined when the query is fine or the
  * source cannot be checked.
@@ -23,21 +24,32 @@ export const findMissingTimeFilterError = async (
   esClient: ElasticsearchClient,
   query: string | undefined
 ): Promise<string | undefined> => {
-  if (!query || hasStartEndParams(query)) {
+  if (!query) {
     return undefined;
   }
   const index = getIndexPatternFromESQLQuery(query);
   if (!index) {
     return undefined;
   }
+  const timeField = parseTimeFieldFromESQLQuery(query);
+  if (timeField === DEFAULT_TIME_FIELD) {
+    return undefined;
+  }
 
   try {
     const dateFields = await getDateFieldNames(esClient, index);
-    if (dateFields.length === 0 || dateFields.includes(DEFAULT_TIME_FIELD)) {
+    if (
+      dateFields.length === 0 ||
+      dateFields.includes(DEFAULT_TIME_FIELD) ||
+      (timeField && dateFields.includes(timeField))
+    ) {
       return undefined;
     }
 
-    return `The query has no time filter, so the chart would ignore the time picker: "${index}" has no ${DEFAULT_TIME_FIELD} field for Kibana to filter on its own. Pick its event-time field (one of: ${dateFields.join(
+    const problem = timeField
+      ? `The query applies the time picker to "${timeField}", which is not a date field of "${index}", so the chart would ignore the time picker.`
+      : `The query does not filter a date field with ?_tstart/?_tend, so the chart would ignore the time picker: "${index}" has no ${DEFAULT_TIME_FIELD} field for Kibana to filter on its own.`;
+    return `${problem} Pick its event-time field (one of: ${dateFields.join(
       ', '
     )}) and filter it before STATS with WHERE <time field> >= ?_tstart AND <time field> < ?_tend, or bucket it with BUCKET(<time field>, 100, ?_tstart, ?_tend) when the chart groups by time. Keep the query without a time filter only when the request asks for all-time data or none of these dates is an event time.`;
   } catch {
