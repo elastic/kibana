@@ -4981,8 +4981,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       '@apidevtools/swagger-parser':
-        specifier: 13.0.0
-        version: 13.0.0(openapi-types@12.1.3)
+        specifier: 13.1.0
+        version: 13.1.0(openapi-types@12.1.3)
       '@axe-core/playwright':
         specifier: 4.13.0
         version: 4.13.0(playwright-core@1.63.0)
@@ -5992,8 +5992,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
-        specifier: 2.36.0
-        version: 2.36.0
+        specifier: 2.53.3
+        version: 2.53.3
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.1
         version: 1.6.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@rspack/core@2.1.8(@swc/helpers@0.5.19))(supports-color@10.2.2)(webpack@5.96.1)
@@ -6403,8 +6403,8 @@ importers:
         specifier: 1.8.1
         version: 1.8.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       bump-cli:
-        specifier: 2.10.0
-        version: 2.10.0(supports-color@10.2.2)
+        specifier: 2.11.0
+        version: 2.11.0(supports-color@10.2.2)
       cache-manager:
         specifier: 7.0.0
         version: 7.0.0
@@ -9896,6 +9896,12 @@ packages:
     peerDependencies:
       '@types/json-schema': ^7.0.15
 
+  '@apidevtools/json-schema-ref-parser@16.0.3':
+    resolution: {integrity: sha512-7lZp4XCTZhU/AgiGpIG+j4uJeWPdGbpQ+8wqXrzuHy+tboKsjSacjGH9/kNThRDIFhMWHF3ba+ejS8J3PeSI1Q==}
+    engines: {node: '>=22.19.0'}
+    peerDependencies:
+      '@types/json-schema': ^7.0.15
+
   '@apidevtools/openapi-schemas@2.1.0':
     resolution: {integrity: sha512-Zc1AlqrJlX3SlpupFGpiLi2EbteyP7fXmUOGup6/DnkRgjP9bgMM/ag+n91rsv0U1Gpz0H3VILA/o3bW7Ua6BQ==}
     engines: {node: '>=10'}
@@ -9903,9 +9909,9 @@ packages:
   '@apidevtools/swagger-methods@3.0.2':
     resolution: {integrity: sha512-QAkD5kK2b1WfjDS/UQn/qQkbwF31uqRjPTrsCs5ZG9BQGAkjwvqGFjjPqAuzac/IYzpPtRzjCP1WrTuAIjMrXg==}
 
-  '@apidevtools/swagger-parser@13.0.0':
-    resolution: {integrity: sha512-TcvnmBzJD7DBREkc/2qaxMqbKpttOaHhOFsYRYKdYAv6HGY+iNlWY2IUA209C2/NmvL9z8RBZhkrESqvGkjqmw==}
-    engines: {node: ^20.19.0 || >=22.12.0}
+  '@apidevtools/swagger-parser@13.1.0':
+    resolution: {integrity: sha512-dkCuqCWh5U7u0aurmmc/qvel2KeKDxHTwVtUdYonndIpD7mXV6AVaWNdvaja2HAy628z7FT/Qdz8sCgzwhgwKg==}
+    engines: {node: '>=22.19.0'}
     peerDependencies:
       openapi-types: '>=7'
 
@@ -14125,8 +14131,8 @@ packages:
       yauzl:
         optional: true
 
-  '@redocly/cli@2.36.0':
-    resolution: {integrity: sha512-0ky8u/Zzx4zT35rJZY27KOuzXMI29JLt5FMbfzFV7AtVlK3DLjDmJjqprnhqUMJlt04R+FKSXahBZo1dUF6R5A==}
+  '@redocly/cli@2.53.3':
+    resolution: {integrity: sha512-hzNAWzHCOZ05vwRx0ehTxNeJaxxizjGV505eKtfs9MR/8ieD/8lYhAK4GF5FaqRRwOEpLO0PvzQwBSKYXmxhRA==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -16852,8 +16858,8 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bump-cli@2.10.0:
-    resolution: {integrity: sha512-xwYnEvXxcu6gL6iY5dw4xUORffhcVmvYtW2I80OWvOeZJj+zgqXM1wYwHgLbzshSy+sIzV5V+4CNHv/VY9X1ew==}
+  bump-cli@2.11.0:
+    resolution: {integrity: sha512-EMJembvmPobVt39y7s1mqqJeRZ08hN/UECJlxZS5FZeoSgbXWo1Qhd+UK1lDWCgDNViyVFV190Lo/IbnOJwi/w==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -25432,6 +25438,10 @@ packages:
     resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
     engines: {node: '>=20.18.1'}
 
+  undici@8.11.2:
+    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
+    engines: {node: '>=22.19.0'}
+
   unherit@1.1.3:
     resolution: {integrity: sha512-Ft16BJcnapDKp0+J/rqFC3Rrk6Y/Ng4nzsC028k2jdDII/rdZ7Wd3pPT/6+vIIxRagwRc9K0IUX0Ra4fKvw+WQ==}
 
@@ -26451,13 +26461,19 @@ snapshots:
       '@types/json-schema': 7.0.15
       js-yaml: 4.3.2
 
+  '@apidevtools/json-schema-ref-parser@16.0.3(@types/json-schema@7.0.15)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+      js-yaml: 5.4.2
+      undici: 8.11.2
+
   '@apidevtools/openapi-schemas@2.1.0': {}
 
   '@apidevtools/swagger-methods@3.0.2': {}
 
-  '@apidevtools/swagger-parser@13.0.0(openapi-types@12.1.3)':
+  '@apidevtools/swagger-parser@13.1.0(openapi-types@12.1.3)':
     dependencies:
-      '@apidevtools/json-schema-ref-parser': 15.3.6(@types/json-schema@7.0.15)
+      '@apidevtools/json-schema-ref-parser': 16.0.3(@types/json-schema@7.0.15)
       '@apidevtools/openapi-schemas': 2.1.0
       '@apidevtools/swagger-methods': 3.0.2
       '@types/json-schema': 7.0.15
@@ -31526,7 +31542,7 @@ snapshots:
       proxy-agent: 8.0.2(supports-color@10.2.2)
       yauzl: 3.4.0
 
-  '@redocly/cli@2.36.0': {}
+  '@redocly/cli@2.53.3': {}
 
   '@redux-saga/core@1.3.0':
     dependencies:
@@ -34673,7 +34689,7 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bump-cli@2.10.0(supports-color@10.2.2):
+  bump-cli@2.11.0(supports-color@10.2.2):
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.9.3
       '@asyncapi/specs': 6.11.1
@@ -45033,6 +45049,8 @@ snapshots:
   undici@6.29.0: {}
 
   undici@7.29.1: {}
+
+  undici@8.11.2: {}
 
   unherit@1.1.3:
     dependencies:
