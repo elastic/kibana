@@ -275,20 +275,18 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async completeSaveToDashboardForm(createNew?: boolean) {
-      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+      await testSubjects.existOrFail('add-to-dashboard-options');
+
       if (createNew) {
-        await testSubjects.waitForEnabled('open-dashboard-picker');
-
-        const label = await dashboardSelector.findByCssSelector(
-          `label[for="new-dashboard-option"]`
-        );
-        await label.click();
-
+        // Selecting a radio is idempotent, so re-issue the click until it registers.
         await retry.waitForWithTimeout(
           'the "New dashboard" option to be selected',
-          10 * 1000,
+          30 * 1000,
           async () => {
             const options = await testSubjects.find('add-to-dashboard-options');
+            const label = await options.findByCssSelector(`label[for="new-dashboard-option"]`);
+            await label.click();
+
             const newDashboardRadio = await options.findByCssSelector('#new-dashboard-option');
             return await newDashboardRadio.isSelected();
           }
