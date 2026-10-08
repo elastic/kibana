@@ -46,7 +46,7 @@ triggers:
           description: Optional chat model connector or inference endpoint id for this run.
         notificationDestinations:
           type: array
-          maxItems: 20
+          maxItems: 5
           description: Destinations that receive investigation lifecycle messages.
           items:
             type: object

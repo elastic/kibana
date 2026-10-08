@@ -123,12 +123,12 @@ describe('notification destination input', () => {
       ).toBe(false);
     }
   });
-  it('accepts 20 destinations and rejects 21', () => {
+  it('accepts 5 destinations and rejects 6', () => {
     expect(
-      investigationNotificationDestinationsSchema.safeParse(Array(20).fill(destination)).success
+      investigationNotificationDestinationsSchema.safeParse(Array(5).fill(destination)).success
     ).toBe(true);
     expect(
-      investigationNotificationDestinationsSchema.safeParse(Array(21).fill(destination)).success
+      investigationNotificationDestinationsSchema.safeParse(Array(6).fill(destination)).success
     ).toBe(false);
   });
 });

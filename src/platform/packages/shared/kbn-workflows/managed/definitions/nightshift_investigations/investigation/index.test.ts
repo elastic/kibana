@@ -240,8 +240,8 @@ describe('Nightshift investigation workflow', () => {
       'thread_ts',
     ])
       expect(valid([{ ...destination, [field]: 'sent' }])).toBe(false);
-    expect(valid(Array(20).fill(destination))).toBe(true);
-    expect(valid(Array(21).fill(destination))).toBe(false);
+    expect(valid(Array(5).fill(destination))).toBe(true);
+    expect(valid(Array(6).fill(destination))).toBe(false);
   });
 
   it('space-scopes the path of every kibana.request step', () => {

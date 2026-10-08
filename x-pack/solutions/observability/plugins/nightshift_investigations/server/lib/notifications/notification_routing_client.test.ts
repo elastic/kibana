@@ -31,19 +31,19 @@ describe('notification routing attachments', () => {
     expect(mergeNotificationDestinations([], inputs.reverse())[0].id).toBe(merged[0].id);
   });
 
-  it('counts anonymous endpoints once and enforces 20 retained associations', () => {
+  it('counts anonymous endpoints once and enforces 5 retained associations', () => {
     const anonymous = { ...destination, automation_id: undefined };
     expect(mergeNotificationDestinations([], [anonymous, anonymous])[0].automations).toHaveLength(
       1
     );
-    const inputs = Array.from({ length: 20 }, (_, index) => ({
+    const inputs = Array.from({ length: 5 }, (_, index) => ({
       ...destination,
       automation_id: `a${index}`,
     }));
     const merged = mergeNotificationDestinations([], inputs);
-    expect(merged[0].automations).toHaveLength(20);
+    expect(merged[0].automations).toHaveLength(5);
     expect(() => mergeNotificationDestinations(merged, [anonymous])).toThrow(
-      '20 notification associations'
+      '5 notification associations'
     );
   });
 

@@ -194,7 +194,10 @@ it.each(['alert', 'manual'])(
         .success
     ).toBe(false);
     expect(
-      schema.safeParse({ ...input, notificationDestinations: Array(21).fill(destination) }).success
+      schema.safeParse({ ...input, notificationDestinations: Array(5).fill(destination) }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ ...input, notificationDestinations: Array(6).fill(destination) }).success
     ).toBe(false);
   }
 );

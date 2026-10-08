@@ -36,7 +36,7 @@ export const investigationSubjectSchema = z.object({
 });
 
 /** Bound on notification destinations one investigation fans out to; one per automation is the norm. */
-export const MAX_INVESTIGATION_NOTIFICATIONS = 20;
+export const MAX_INVESTIGATION_NOTIFICATIONS = 5;
 
 const MAX_NOTIFICATION_PARAM_LENGTH = 4096;
 const MAX_NOTIFICATION_PARAM_ENTRIES = 20;
