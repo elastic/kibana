@@ -130,7 +130,7 @@ const filterLeafToAst = (condition: FilterCondition, negated: boolean): ESQLSing
     return Builder.expression.literal.boolean(negated);
   }
 
-  const compare = ({ operator, value }: Comparison) =>
+  const compare = ({ operator, value }: Comparison): ESQLSingleAstItem =>
     Builder.expression.func.binary(negated ? COMPLEMENT[operator] : operator, [
       field(),
       esqlLiteralFromAny(value),
