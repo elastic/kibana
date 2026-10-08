@@ -12,7 +12,6 @@ import {
   getImportWarnings,
   getPreconfiguredConflictWarnings,
   getInvalidConnectorIdWarnings,
-  getConnectorsThatPublishKeysWarnings,
 } from './get_import_warnings';
 
 describe('getImportWarnings', () => {
@@ -215,31 +214,5 @@ describe('getInvalidConnectorIdWarnings', () => {
     expect(warnings[0].message).toMatch(/Bad Id/);
     expect(warnings[0].message).toMatch(/UPPER/);
     expect(warnings[0].message).not.toMatch(/valid-one/);
-  });
-});
-
-describe('getConnectorsThatPublishKeysWarnings', () => {
-  const createConnector = (id: string, actionTypeId: string) =>
-    ({
-      type: 'action',
-      id,
-      attributes: { actionTypeId, config: {}, isMissingSecrets: false, name: 'test' },
-      references: [],
-      namespaces: ['default'],
-    } as unknown as SavedObject<RawAction>);
-
-  it('returns empty array when no connector type publishes keys', () => {
-    expect(getConnectorsThatPublishKeysWarnings([createConnector('a', '.server-log')])).toEqual([]);
-  });
-
-  it('lists the connectors whose type publishes keys in a single warning', () => {
-    const warnings = getConnectorsThatPublishKeysWarnings([
-      createConnector('ssf-1', '.ssf'),
-      createConnector('ssf-2', '.ssf'),
-      createConnector('log', '.server-log'),
-    ]);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0].message).toMatch(/\[ssf-1, ssf-2\]/);
-    expect(warnings[0].message).not.toMatch(/\blog\b/);
   });
 });

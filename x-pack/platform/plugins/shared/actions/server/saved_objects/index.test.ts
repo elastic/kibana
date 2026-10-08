@@ -113,64 +113,6 @@ describe('setupSavedObjects - onImport', () => {
     });
   });
 
-  describe('connectors whose type publishes keys', () => {
-    const createSsfConnector = (
-      id: string,
-      overrides: Partial<SavedObject<RawAction> & { destinationId?: string }> = {}
-    ) =>
-      createConnector(id, {
-        attributes: {
-          actionTypeId: '.ssf',
-          name: 'ssf',
-          config: {},
-          secrets: {},
-          isMissingSecrets: false,
-        },
-        ...overrides,
-      });
-
-    it('removes the connector and any signing key with its ID, and returns a warning', async () => {
-      const result = await onImport([createSsfConnector('ssf-1'), createConnector('regular')]);
-
-      expect(mockRepo.bulkDelete).toHaveBeenCalledTimes(2);
-      expect(mockRepo.bulkDelete).toHaveBeenNthCalledWith(1, [{ type: 'action', id: 'ssf-1' }], {
-        namespace: 'default',
-      });
-      expect(mockRepo.bulkDelete).toHaveBeenNthCalledWith(2, [
-        { type: 'connector_signing_key', id: 'ssf-1' },
-      ]);
-      expect(result.warnings).toEqual([
-        expect.objectContaining({
-          type: 'action_required',
-          message: expect.stringContaining('[ssf-1]'),
-        }),
-      ]);
-    });
-
-    it('removes the connector by its destination ID when the import remaps IDs', async () => {
-      await onImport([
-        createSsfConnector('ssf-1', { destinationId: 'new-uuid', namespaces: ['space-a'] }),
-      ]);
-
-      expect(mockRepo.bulkDelete).toHaveBeenNthCalledWith(1, [{ type: 'action', id: 'new-uuid' }], {
-        namespace: 'space-a',
-      });
-      expect(mockRepo.bulkDelete).toHaveBeenNthCalledWith(2, [
-        { type: 'connector_signing_key', id: 'new-uuid' },
-      ]);
-    });
-
-    it('deletes a connector only once when it also has an invalid ID', async () => {
-      await onImport([createSsfConnector('Invalid ID')]);
-
-      expect(mockRepo.bulkDelete).toHaveBeenNthCalledWith(
-        1,
-        [{ type: 'action', id: 'Invalid ID' }],
-        { namespace: 'default' }
-      );
-    });
-  });
-
   it('returns warnings even when deletion occurs', async () => {
     const connectors = [
       createConnector('preconfigured-id'),

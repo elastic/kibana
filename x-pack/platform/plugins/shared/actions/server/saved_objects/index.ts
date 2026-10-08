@@ -31,8 +31,6 @@ import {
   getPreconfiguredConflictWarnings,
   getInvalidConnectorIdWarnings,
   getConnectorsWithInvalidIds,
-  getConnectorsThatPublishKeys,
-  getConnectorsThatPublishKeysWarnings,
 } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import type { ActionTypeRegistry } from '../action_type_registry';
@@ -107,32 +105,18 @@ export function setupSavedObjects(
           ...preconfiguredConflicts,
           ...invalidIdConnectors.filter((c) => !preconfiguredConflicts.some((p) => p.id === c.id)),
         ];
-        // Removed by their stored ID, together with any signing key that has this ID. This also
-        // covers an import that overwrites an existing connector.
-        const keyPublishingIds = getConnectorsThatPublishKeys(typedConnectors).map(
-          (c) => c.destinationId ?? c.id
-        );
-        const connectorIdsToDelete = new Set([...toDelete.map((c) => c.id), ...keyPublishingIds]);
 
-        if (connectorIdsToDelete.size > 0) {
+        if (toDelete.length > 0) {
           // All connectors in a single import operation target the same space,
           // so using the namespace from the first connector applies correctly to
           // the entire batch. bulkDelete does not support per-object namespaces.
-          const namespace = typedConnectors[0]?.namespaces?.[0];
+          const namespace = toDelete[0]?.namespaces?.[0];
           const repo = await getSoRepository();
           if (repo) {
             await repo.bulkDelete(
-              [...connectorIdsToDelete].map((id) => ({ type: ACTION_SAVED_OBJECT_TYPE, id })),
+              toDelete.map((c) => ({ type: ACTION_SAVED_OBJECT_TYPE, id: c.id })),
               { namespace }
             );
-            if (keyPublishingIds.length > 0) {
-              await repo.bulkDelete(
-                keyPublishingIds.map((id) => ({
-                  type: CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
-                  id,
-                }))
-              );
-            }
           }
         }
 
@@ -141,7 +125,6 @@ export function setupSavedObjects(
             ...getImportWarnings(typedConnectors),
             ...getPreconfiguredConflictWarnings(typedConnectors, inMemoryConnectors),
             ...getInvalidConnectorIdWarnings(typedConnectors),
-            ...getConnectorsThatPublishKeysWarnings(typedConnectors),
           ],
         };
       },

@@ -419,10 +419,7 @@ export class ActionsPlugin
       this.inMemoryConnectors,
       async () => {
         const [coreStart] = await core.getStartServices();
-        return coreStart.savedObjects.createInternalRepository([
-          ACTION_SAVED_OBJECT_TYPE,
-          CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
-        ]);
+        return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
       }
     );
 
