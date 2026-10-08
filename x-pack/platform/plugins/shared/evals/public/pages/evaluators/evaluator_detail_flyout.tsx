@@ -159,7 +159,7 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
   const titleId = useGeneratedHtmlId();
   // Undefined means the current version, which is also what the catalog row links to.
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
-  const { data, isLoading, error } = useEvaluator(evaluatorName, selectedVersion);
+  const { data, isLoading, isFetching, error } = useEvaluator(evaluatorName, selectedVersion);
   // The last definition that loaded for the selection that asked for it. A failed fetch
   // clears `data` (previous data is only kept while loading), so this is what stays on
   // screen when a version in the history cannot be read.
@@ -192,11 +192,16 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
     // A failed fetch would otherwise leave the selector naming a version that never loaded,
     // beside a body from a different one. Returning to the selection that produced what is
     // rendered keeps the label honest, and that selection is cached, so nothing flickers.
+    // React Query keeps a key's last error while it refetches, so a retry has to settle
+    // before that error can be read as this selection's result.
+    if (isFetching) {
+      return;
+    }
     if (error && lastLoaded && selectedVersion && selectedVersion !== lastLoaded.selection) {
       setFailedVersion({ version: selectedVersion, message: getErrorMessage(error) });
       setSelectedVersion(lastLoaded.selection);
     }
-  }, [error, lastLoaded, selectedVersion]);
+  }, [error, isFetching, lastLoaded, selectedVersion]);
 
   const selectVersion = (version: string) => {
     setFailedVersion(undefined);
