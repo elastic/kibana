@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { NormalizedField } from '../../../../components/mappings_editor/types';
 import { EuiSpacer } from '@elastic/eui';
+import type { NormalizedField } from '../../../../components/mappings_editor/types';
 
 interface IndexErrorCalloutProps {
   errors: Array<{
@@ -30,17 +30,23 @@ export const IndexErrorCallout = ({ errors }: IndexErrorCalloutProps) => {
         actionProps={{
           primary: showErrors
             ? {
-              onClick: () => setShowErrors(false),
-              children: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.hideErrorsLabel', {
-                defaultMessage: 'Hide full error',
-              }),
-            }
+                onClick: () => setShowErrors(false),
+                children: i18n.translate(
+                  'xpack.idxMgmt.indexOverview.indexErrors.hideErrorsLabel',
+                  {
+                    defaultMessage: 'Hide full error',
+                  }
+                ),
+              }
             : {
-              onClick: () => setShowErrors(true),
-              children: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.showErrorsLabel', {
-                defaultMessage: 'Show full error',
-              }),
-            },
+                onClick: () => setShowErrors(true),
+                children: i18n.translate(
+                  'xpack.idxMgmt.indexOverview.indexErrors.showErrorsLabel',
+                  {
+                    defaultMessage: 'Show full error',
+                  }
+                ),
+              },
         }}
       >
         {showErrors && (
