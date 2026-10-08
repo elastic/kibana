@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const useAppsEnabled = (): boolean | undefined => {
@@ -16,7 +16,7 @@ export const useAppsEnabled = (): boolean | undefined => {
   // getBooleanValue$ builds a new observable on every call, so memoize it.
   // Otherwise useObservable re-subscribes and re-evaluates the flag on every render.
   const isAppsEnabledObservable = useMemo(
-    () => featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG, false),
+    () => featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     [featureFlags]
   );
 

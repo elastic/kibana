@@ -77,20 +77,19 @@ export const workersSelectedCount = (selected: number, total: number) =>
     values: { selected, total },
   });
 
-export const BEFORE_YOU_ENABLE_RUNS_AS = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.runsAs',
+export const SERVICE_ACCOUNT_SETUP_FAILED_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountSetupFailedTitle',
   {
-    defaultMessage:
-      'Workers run as the service account you select. Anything they do is attributed to that account.',
+    defaultMessage: "Some Workers weren't turned on",
   }
 );
 
-export const SERVICE_ACCOUNT_LABEL = i18n.translate(
-  'xpack.alertzero.onboarding.serviceAccountLabel',
-  {
-    defaultMessage: 'Run as',
-  }
-);
+export const serviceAccountSetupFailedText = (failures: string) =>
+  i18n.translate('xpack.alertzero.onboarding.serviceAccountSetupFailedText', {
+    defaultMessage:
+      "AlertZero couldn't set up their service accounts. {failures}. Select Enable and run to try again.",
+    values: { failures },
+  });
 
 export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
   defaultMessage: 'Back',
@@ -173,10 +172,6 @@ const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
 
 export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
-
-export const INTRO_TITLE = i18n.translate('xpack.alertzero.onboarding.intro.title', {
-  defaultMessage: 'AlertZero in 90 seconds',
-});
 
 export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
   defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',
