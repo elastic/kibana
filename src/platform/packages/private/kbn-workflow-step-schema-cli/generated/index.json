@@ -1005,11 +1005,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "d96b177bf14e03ef0c0016dafe0cdf2bf8d67e44ac60fae87c53e53b2e5e491a"
+      "sha256": "40d65e497c9f49b02460f5f154853ca18846e34bf4d77e7e41bea450e5b2abbd"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "2dea89bd354e5a3a27686cc451fbc240f4f87810b74120b0db509a17bb408bce"
+      "sha256": "e9be003bc36965b1e7b0c6b86e034bcc5e0228e328ba641f28ba620ed1c5b372"
     }
   }
 }
