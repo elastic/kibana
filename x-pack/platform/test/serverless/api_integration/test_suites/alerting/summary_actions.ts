@@ -43,6 +43,16 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   let roleAdmin: RoleCredentials;
 
+  const getRuleTags = async (ruleId: string): Promise<string[]> => {
+    const { body } = await supertest
+      .get(`/api/alerting/rule/${ruleId}`)
+      .set('kbn-xsrf', 'foo')
+      .set('x-elastic-internal-origin', 'foo')
+      .expect(200);
+
+    return body.tags;
+  };
+
   describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
@@ -154,7 +164,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -167,11 +176,11 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -221,13 +230,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        // On MKI the rule is created with an ES API key and no UIAM key, so alerting adds the
-        // "Missing Elastic Cloud API Key" tag. Compare against what the create API returned
-        // instead of hardcoding [] so this holds both locally and on MKI.
-        [ALERT_RULE_TAGS]: createdRule.tags,
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: createdRule.tags,
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -295,7 +301,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -308,11 +313,11 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -362,10 +367,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: createdRule.tags,
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: createdRule.tags,
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -523,11 +528,11 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -589,10 +594,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: createdRule.tags,
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: createdRule.tags,
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });

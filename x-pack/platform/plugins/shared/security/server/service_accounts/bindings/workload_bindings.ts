@@ -14,14 +14,21 @@ import type {
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
+  ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
-import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type {
+  AuditServiceSetup,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingCoordinates } from './binding_saved_object';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
+import type { ServiceAccountAuditEventParams } from '../../audit';
+import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit';
 import { getDetailedErrorMessage } from '../../errors';
+import type { EnsureClusterPrivilegeParams } from '../cluster_privilege';
 import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
@@ -56,7 +63,7 @@ export interface ServiceAccountWorkloadBindingsApi {
 
   withScopedRequest<T>(
     pluginId: string,
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }
@@ -67,6 +74,7 @@ export interface ServiceAccountWorkloadBindingsOptions {
   store: WorkloadBindingStore;
   backend: ServiceAccountsBackend;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  audit: AuditServiceSetup;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   /**
    * Resolves the user profile behind a request, including the creator of an API key. Used to keep
@@ -87,6 +95,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private readonly store: WorkloadBindingStore;
   private readonly backend: ServiceAccountsBackend;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly audit: AuditServiceSetup;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   private readonly getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   private readonly getSpaceId: (request: KibanaRequest) => string;
@@ -98,6 +107,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     store,
     backend,
     checkPrivilegesWithRequest,
+    audit,
     getCurrentUser,
     getCurrentUserProfileId,
     getSpaceId,
@@ -108,6 +118,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.store = store;
     this.backend = backend;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.audit = audit;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentUserProfileId = getCurrentUserProfileId;
     this.getSpaceId = getSpaceId;
@@ -128,14 +139,38 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       );
     }
 
-    await this.ensureCanManage(request, 'bind a service account to a workload');
+    const bindingAudit = this.bindingAudit(request, {
+      plugin_id: pluginId,
+      type: workloadType,
+      id: workloadId,
+    });
+    await this.ensureCanManage(
+      request,
+      'bind a service account to a workload',
+      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId)
+    );
+
+    const spaceId = this.getSpaceId(request);
+
+    // A rebind takes the workload away from one account and gives it to another. Both ends are
+    // audited, so that a search on either account finds the change.
+    const previousServiceAccountId = await this.readBoundServiceAccountId({
+      pluginId,
+      workloadType,
+      workloadId,
+      spaceId,
+    });
+    if (previousServiceAccountId !== undefined && previousServiceAccountId !== serviceAccountId) {
+      bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_UNBIND, previousServiceAccountId);
+    }
+    bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId);
 
     const binding = await this.store.set({
       pluginId,
       workloadType,
       workloadId,
       serviceAccountId,
-      spaceId: this.getSpaceId(request),
+      spaceId,
       boundBy: await resolveWorkloadBinder(
         user,
         bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
@@ -162,10 +197,29 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     // Same gate as bindWorkload: unbinding a workload silently drops it to no identity at all, which is
     // as much a privileged change as granting one.
-    await this.ensureCanManage(request, 'unbind a service account from a workload');
+    const bindingAudit = this.bindingAudit(request, {
+      plugin_id: pluginId,
+      type: workloadType,
+      id: workloadId,
+    });
+    await this.ensureCanManage(
+      request,
+      'unbind a service account from a workload',
+      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_UNBIND)
+    );
 
     const spaceId = this.getSpaceId(request);
-    const deleted = await this.store.delete({ pluginId, workloadType, workloadId, spaceId });
+    const coordinates = { pluginId, workloadType, workloadId, spaceId };
+
+    // The delete addresses the binding by its coordinates, so the account it takes the workload
+    // from is read first, verified, for the event. Absent when there is no binding to remove or
+    // the stored one cannot be trusted.
+    bindingAudit.intent(
+      ServiceAccountAuditAction.WORKLOAD_UNBIND,
+      await this.readBoundServiceAccountId(coordinates)
+    );
+
+    const deleted = await this.store.delete(coordinates);
 
     if (deleted) {
       this.logger.debug(
@@ -192,18 +246,25 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
   async withScopedRequest<T>(
     pluginId: string,
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T> {
     this.ensureAvailable();
 
     const coordinates = this.toCoordinates(pluginId, params);
     const binding = await this.requireBinding(coordinates);
+    if (
+      params.expectedServiceAccountId !== undefined &&
+      binding.serviceAccountId !== params.expectedServiceAccountId
+    ) {
+      throw Boom.forbidden('The workload binding does not match the expected service account.');
+    }
     let minted = false;
 
     const request = await this.backend.createFakeRequest({
       serviceAccountId: binding.serviceAccountId,
       spaceId: coordinates.spaceId,
+      boundAt: binding.boundAt,
       // No time-based lease: the binding check below runs before every re-mint, which is both
       // stricter and revocable — unbinding the workload denies a running execution its next
       // credential rather than waiting for a lease to lapse.
@@ -251,6 +312,26 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 
+  /**
+   * The account a workload is currently bound to, for naming in the audit event of a change that
+   * is about to replace or remove the binding. Only a verified binding is named: a stored document
+   * that fails integrity verification is already refused and logged by the store, and the change
+   * proceeds without a target rather than copying an untrusted id into the log. Any other failure
+   * to read is one the write that follows would share, and propagates.
+   */
+  private async readBoundServiceAccountId(
+    coordinates: WorkloadBindingCoordinates
+  ): Promise<string | undefined> {
+    try {
+      return (await this.store.getVerified(coordinates))?.serviceAccountId;
+    } catch (e) {
+      if (Boom.isBoom(e) && e.output.statusCode === 403) {
+        return undefined;
+      }
+      throw e;
+    }
+  }
+
   private async requireBinding(
     coordinates: WorkloadBindingCoordinates
   ): Promise<ServiceAccountWorkloadBinding> {
@@ -265,13 +346,56 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return binding;
   }
 
-  private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {
+  /**
+   * The audit events of a binding change, logged on the request making it. Binding changes follow
+   * the convention for writes: `intent` is logged once the change is authorized and before it is
+   * written, and is not awaited, so it records the attempt rather than the result. `refused` is
+   * the failed attempt when the request may not manage bindings.
+   */
+  private bindingAudit(
+    request: KibanaRequest,
+    workload: NonNullable<ServiceAccountAuditEventParams['workload']>
+  ) {
+    const auditLogger = this.audit.asScoped(request);
+    const log = (
+      action: ServiceAccountAuditAction,
+      serviceAccountId: string | undefined,
+      result: { outcome: 'unknown' } | { error: Error }
+    ) =>
+      auditLogger.log(
+        serviceAccountAuditEvent({
+          action,
+          ...(serviceAccountId !== undefined ? { serviceAccount: { id: serviceAccountId } } : {}),
+          workload,
+          ...result,
+        })
+      );
+
+    return {
+      intent: (action: ServiceAccountAuditAction, serviceAccountId?: string) =>
+        log(action, serviceAccountId, { outcome: 'unknown' }),
+      refused: (action: ServiceAccountAuditAction, serviceAccountId?: string) => (error: Error) =>
+        log(action, serviceAccountId, { error }),
+    };
+  }
+
+  /**
+   * Refuses with a 403 unless the request may manage bindings, calling `onRefused` first. Other
+   * errors from the check (an unavailable cluster, say) say nothing about authorization, and do
+   * not call it.
+   */
+  private ensureCanManage(
+    request: KibanaRequest,
+    action: string,
+    onRefused: EnsureClusterPrivilegeParams['onRefused']
+  ): Promise<void> {
     return ensureClusterPrivilege({
       privilege: 'manage_security',
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
       action,
+      onRefused,
     });
   }
 
@@ -299,24 +423,3 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
   }
 }
-
-/**
- * Stand-in for runtimes whose service account backend cannot execute workloads. Bind refuses
- * too: a binding that can never be exchanged for a credential is a promise Kibana cannot keep.
- *
- * See https://github.com/elastic/kibana/issues/284466.
- */
-export const createNotImplementedWorkloadBindings = (): ServiceAccountWorkloadBindingsApi => {
-  const notImplemented = () => {
-    throw Boom.notImplemented(
-      'Service account workload bindings are not yet implemented for the Elasticsearch backend'
-    );
-  };
-
-  return {
-    bindWorkload: async () => notImplemented(),
-    unbindWorkload: async () => notImplemented(),
-    getBinding: async () => notImplemented(),
-    withScopedRequest: async () => notImplemented(),
-  };
-};

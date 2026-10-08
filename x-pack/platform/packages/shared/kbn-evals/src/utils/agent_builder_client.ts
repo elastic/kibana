@@ -51,6 +51,15 @@ export interface AgentBuilderConverseParams {
     skillIds?: string[];
     enableElasticCapabilities?: boolean;
   };
+  /** Attachments sent with this turn, e.g. a by-value dashboard the agent should act on. */
+  attachments?: AgentBuilderConverseAttachment[];
+}
+
+export interface AgentBuilderConverseAttachment {
+  type: string;
+  data: Record<string, unknown>;
+  /** Attachment id; lets the caller find the attachment on the conversation afterwards. */
+  id?: string;
 }
 
 export interface AgentBuilderClientResponse {
@@ -84,7 +93,8 @@ interface RoundModelUsage {
 
 interface AgentBuilderConverseApiResponse {
   conversation_id?: string;
-  trace_id?: string;
+  /** An array when a prompt response resumed the round: one trace per execution, in order. */
+  trace_id?: string | string[];
   steps?: ConverseStep[];
   model_usage?: RoundModelUsage;
   response?: { message?: string; structured_output?: unknown; prompts?: unknown[] };
@@ -136,6 +146,7 @@ export function createAgentBuilderClient({
     conversationId,
     promptResponses,
     configurationOverrides,
+    attachments,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -180,6 +191,7 @@ export function createAgentBuilderClient({
           // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
           _execution_mode: 'local',
           ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(attachments ? { attachments } : {}),
         }),
       });
 
@@ -189,7 +201,7 @@ export function createAgentBuilderClient({
         steps: response.steps ?? [],
         structuredOutput: response.response?.structured_output,
         conversationId: response.conversation_id,
-        traceId: response.trace_id,
+        traceId: Array.isArray(response.trace_id) ? response.trace_id.at(-1) : response.trace_id,
         prompts: response.response?.prompts ?? [],
         tokensUsed: model_usage
           ? {

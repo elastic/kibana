@@ -25,6 +25,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.stateful.all
     const credentials = await samlAuth.asTransformManager();
     transformManagerCookieHeader = credentials.cookieHeader;
   });
+
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (const id of transformIds) {
       const config: estypes.TransformPutTransformRequest = {

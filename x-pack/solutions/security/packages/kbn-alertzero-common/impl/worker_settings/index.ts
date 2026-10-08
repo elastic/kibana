@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { WatchAutonomyLevel, WorkerSettings } from '../schemas';
 import { buildCompleteWorkerSettingsSchema, buildDefaultWorkerSettings } from './contract';
-import { RULE_CREATION_SETTINGS, RULE_TUNING_SETTINGS } from './detection_watch';
+import { RULE_COVERAGE_SETTINGS, RULE_TUNING_SETTINGS } from './detection_watch';
 import { ENDPOINT_ANALYSIS_SETTINGS } from './forensics_watch';
 import { ALERT_TRIAGE_SETTINGS, ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
 import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
@@ -21,7 +21,7 @@ export const WORKER_SETTINGS_DECLARATIONS: readonly WorkerSettingsDeclaration[] 
   CONTINUOUS_THREAT_HUNT_SETTINGS,
   ENDPOINT_ANALYSIS_SETTINGS,
   RULE_TUNING_SETTINGS,
-  RULE_CREATION_SETTINGS,
+  RULE_COVERAGE_SETTINGS,
 ];
 
 interface WorkerSettingsContract {
@@ -62,16 +62,34 @@ export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutono
   getContract(workerId).declaration.allowedAutonomyLevels;
 
 export {
+  nearestLowerAutonomyLevel,
+  upgradeStoredWorkerSettings,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
+export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
-  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './contract';
 export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
+  FP_COUNT_THRESHOLD_DEFAULT,
+  FP_COUNT_THRESHOLD_MAX,
+  FP_COUNT_THRESHOLD_MIN,
+  FP_RATE_THRESHOLD_PCT_DEFAULT,
+  FP_RATE_THRESHOLD_PCT_MAX,
+  FP_RATE_THRESHOLD_PCT_MIN,
+  LOOKBACK_DAYS_DEFAULT,
+  LOOKBACK_DAYS_MAX,
+  LOOKBACK_DAYS_MIN,
+  MAX_GAPS_PER_RUN_DEFAULT,
+  MAX_GAPS_PER_RUN_MAX,
+  MAX_GAPS_PER_RUN_MIN,
+  RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
+export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
+export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 export type { WorkerSettingsDeclaration } from './types';

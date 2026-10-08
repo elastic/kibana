@@ -12,10 +12,6 @@ import type { IntegrationCardItem } from '..';
 const mockGetBooleanValue = jest.fn();
 const mockGetUrlForApp = jest.fn().mockReturnValue('/app/onboarding/aws');
 const mockNavigateToApp = jest.fn();
-const mockGetHref = jest.fn(
-  (_page: string, values: { pkgkey: string }) =>
-    `/app/integrations/detail/${values.pkgkey}/overview`
-);
 
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({
@@ -25,7 +21,6 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: mockGetUrlForApp,
     },
   }),
-  useLink: () => ({ getHref: mockGetHref }),
 }));
 
 import { useOnboardingOverride } from './use_onboarding_override';
@@ -34,12 +29,13 @@ const ALL_HIDDEN_NAMES = [
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
+  'aws_billing',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',
-  'awsfargate',
-  'awsfirehose',
   'aws_securityhub',
+  'amazon_security_lake',
+  'awsfargate',
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',
@@ -52,11 +48,7 @@ const ALL_HIDDEN_NAMES = [
   'aws_waf_otel',
 ];
 
-function makeCard(
-  name: string,
-  id?: string,
-  overrides: Partial<IntegrationCardItem> = {}
-): IntegrationCardItem {
+function makeCard(name: string, id?: string): IntegrationCardItem {
   return {
     id: id ?? `epr:${name}`,
     name,
@@ -67,7 +59,6 @@ function makeCard(
     categories: [],
     url: '',
     version: '',
-    ...overrides,
   };
 }
 
@@ -90,45 +81,32 @@ describe('useOnboardingOverride', () => {
   describe('when onboarding is enabled', () => {
     beforeEach(() => mockGetBooleanValue.mockReturnValue(true));
 
-    it('filters every hidden name down to the single aws package card', () => {
+    it('filters every hidden name and replaces with single onboarding card', () => {
       const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));
       const { result } = renderHook(() => useOnboardingOverride());
       const output = result.current.applyOnboardingOverride(cards);
 
       expect(output).toHaveLength(1);
+      expect(output[0].name).toBe('aws-onboarding');
       expect(output[0].id).toBe('epr:aws');
-      expect(output[0].name).toBe('aws');
     });
 
-    it('keeps the aws package card so the tile still opens the detail page', () => {
-      const awsCard = makeCard('aws', undefined, { version: '3.2.1' });
+    it('filters cards whose id is epr:aws (content-package cards)', () => {
+      const cards = [makeCard('some-other-aws-package', 'epr:aws')];
       const { result } = renderHook(() => useOnboardingOverride());
-      const [output] = result.current.applyOnboardingOverride([awsCard]);
+      const output = result.current.applyOnboardingOverride(cards);
 
-      expect(output).toEqual({ ...awsCard, url: '/app/integrations/detail/aws-3.2.1/overview' });
-      expect(output.onCardClick).toBeUndefined();
-    });
-
-    it('pins the aws tile to the overview page even when tile-click-to-add points it at the wizard', () => {
-      const awsCard = makeCard('aws', undefined, {
-        version: '3.2.1',
-        url: '/app/integrations/detail/aws-3.2.1/add-integration',
-      });
-      const { result } = renderHook(() => useOnboardingOverride());
-      const [output] = result.current.applyOnboardingOverride([awsCard]);
-
-      expect(mockGetHref).toHaveBeenCalledWith('integration_details_overview', {
-        pkgkey: 'aws-3.2.1',
-        integration: 'aws',
-      });
-      expect(output.url).toBe('/app/integrations/detail/aws-3.2.1/overview');
+      expect(output).toHaveLength(1);
+      expect(output[0].name).toBe('aws-onboarding');
     });
 
     it('filters the aws policy template tiles', () => {
       const cards = [makeCard('aws', 'epr:aws-cloudtrail'), makeCard('aws', 'epr:aws-ec2')];
       const { result } = renderHook(() => useOnboardingOverride());
+      const output = result.current.applyOnboardingOverride(cards);
 
-      expect(result.current.applyOnboardingOverride(cards)).toHaveLength(0);
+      expect(output).toHaveLength(1);
+      expect(output[0].name).toBe('aws-onboarding');
     });
 
     it('preserves non-AWS cards', () => {
@@ -138,8 +116,72 @@ describe('useOnboardingOverride', () => {
       const output = result.current.applyOnboardingOverride(cards);
 
       expect(output).toHaveLength(2);
-      expect(output[0].id).toBe('epr:aws');
+      expect(output[0].name).toBe('aws-onboarding');
       expect(output[1]).toBe(nonAwsCard);
+    });
+
+    it('indexes the hidden tiles on the onboarding tile and lists them as search members', () => {
+      const guardduty = {
+        ...makeCard('aws', 'epr:aws-guardduty'),
+        integration: 'guardduty',
+        title: 'Amazon GuardDuty',
+        description: 'Collect GuardDuty findings.',
+        categories: ['security', 'observability'],
+      };
+      const guarddutyOtel = {
+        ...makeCard('aws_vpcflow_otel', 'epr:aws_vpcflow_otel'),
+        title: 'Amazon GuardDuty',
+      };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([guarddutyOtel, guardduty]);
+
+      expect(tile.searchableContent).toContain('guardduty');
+      expect(tile.searchableContent).toContain('Collect GuardDuty findings.');
+      expect(tile.searchMembers).toEqual([{ name: 'guardduty', title: 'Amazon GuardDuty' }]);
+      expect(tile.categories).toEqual(['aws', 'security', 'observability']);
+    });
+
+    it('leaves OpenTelemetry and content packages out of the search members', () => {
+      const real = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
+      const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
+      const content = {
+        ...makeCard('aws_waf_otel'),
+        title: 'AWS WAF OpenTelemetry Assets',
+        type: 'content',
+      };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([otel, content, real]);
+
+      expect(tile.searchMembers).toEqual([{ name: 'aws', title: 'AWS CloudTrail' }]);
+      // Still searchable by their text.
+      expect(tile.searchableContent).toContain('AWS WAF OpenTelemetry Assets');
+    });
+
+    it('does not list the package-level epr:aws card as a search member', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws', 'epr:aws')]);
+
+      expect(tile.searchMembers).toEqual([]);
+    });
+
+    it('places onboarding tile first', () => {
+      const cards = [makeCard('elastic_agent', 'epr:elastic_agent'), makeCard('aws')];
+      const { result } = renderHook(() => useOnboardingOverride());
+      const output = result.current.applyOnboardingOverride(cards);
+
+      expect(output[0].name).toBe('aws-onboarding');
+    });
+
+    it('sends the onboarding tile straight to the onboarding flow with a new session', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws')]);
+
+      expect(tile.url).toBe('/app/onboarding/aws');
+      tile.onCardClick?.();
+      expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
+        path: '/aws',
+        state: { newSession: true },
+      });
     });
 
     it('isOnboardingEnabled is true', () => {

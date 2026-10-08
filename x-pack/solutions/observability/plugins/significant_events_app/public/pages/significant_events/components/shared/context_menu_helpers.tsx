@@ -10,17 +10,24 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import React from 'react';
 import { ConnectorIcon } from '../../../../components/connector_icon';
 import { ConnectorSubPanel } from './connector_sub_panel';
-import { MODEL_SELECTION_PANEL_TITLE } from './translations';
+import {
+  MISSING_DEFAULT_MODEL_LABEL,
+  MISSING_SELECTED_MODEL_LABEL,
+  MODEL_SELECTION_PANEL_TITLE,
+  SELECT_MODEL_LABEL,
+} from './translations';
 
 export function buildConnectorSelectionPanel({
   connectors,
   resolvedConnectorId,
   selectedConnectorId,
+  defaultConnectorOnly,
   onSelect,
 }: {
   connectors: InferenceConnector[];
   resolvedConnectorId: string | undefined;
   selectedConnectorId: string | undefined;
+  defaultConnectorOnly: boolean;
   onSelect: (connectorId: string) => void;
 }) {
   return {
@@ -31,6 +38,7 @@ export function buildConnectorSelectionPanel({
         connectors={connectors}
         resolvedConnectorId={resolvedConnectorId}
         selectedConnectorId={selectedConnectorId}
+        defaultConnectorOnly={defaultConnectorOnly}
         onSelect={onSelect}
       />
     ),
@@ -39,11 +47,23 @@ export function buildConnectorSelectionPanel({
 
 export function buildConnectorMenuItem({
   connector,
+  selectedConnectorId,
+  resolvedConnectorId,
   panelId,
 }: {
   connector: InferenceConnector | undefined;
+  selectedConnectorId: string | undefined;
+  resolvedConnectorId: string | undefined;
   panelId: number;
 }): { name: React.ReactNode; panel: number } {
+  const connectorName =
+    connector?.name ??
+    (selectedConnectorId === undefined
+      ? SELECT_MODEL_LABEL
+      : selectedConnectorId === resolvedConnectorId
+      ? MISSING_DEFAULT_MODEL_LABEL
+      : MISSING_SELECTED_MODEL_LABEL);
+
   return {
     name: (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -51,7 +71,7 @@ export function buildConnectorMenuItem({
           <ConnectorIcon connectorName={connector?.name} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate" css={{ minWidth: 0 }}>
-          {connector?.name ?? '—'}
+          {connectorName}
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

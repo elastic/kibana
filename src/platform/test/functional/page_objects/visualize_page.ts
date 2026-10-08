@@ -81,7 +81,7 @@ export class VisualizePageObject extends FtrService {
     if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
       return false;
     }
-    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
+    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back))) {
       return false;
     }
     const ariaLabel = await this.testSubjects.getAttribute(
@@ -93,7 +93,7 @@ export class VisualizePageObject extends FtrService {
     }
     try {
       await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return 'confirmed';
       }
@@ -119,10 +119,21 @@ export class VisualizePageObject extends FtrService {
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
     if (visualizeLibraryBreadcrumb) {
-      await this.find.clickByCssSelector(selector);
+      try {
+        // The breadcrumb can be a transient leftover while the current app re-renders (for
+        // example after saving a map). Bound the click attempt and fall back to navigateToApp
+        // if the breadcrumb disappears before it can be clicked instead of retrying for the
+        // full try timeout.
+        await this.retry.tryForTime(5000, async () => {
+          await this.find.clickByCssSelector(selector, 1000);
+        });
+      } catch (error) {
+        this.log.debug(`Visualize library breadcrumb was not clickable: ${error}`);
+        return false;
+      }
       // Lens offers a last modal before leaving the page for unsaved charts
       // so close it as quick as possible
-      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return true;
       }
@@ -247,9 +258,13 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
-    // checking for the existence of the control gives the UI more time to bind a click handler
+    // waiting for the existence of the control gives the UI more time to bind a click handler
     // see https://github.com/elastic/kibana/issues/89958
-    if (!(await this.hasVisType(type))) {
+    if (
+      !(await this.testSubjects.waitForExists(`visType-${type}`, {
+        timeout: this.testSubjects.FIND_TIME,
+      }))
+    ) {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
     await this.testSubjects.click(`visType-${type}`);
@@ -399,7 +414,7 @@ export class VisualizePageObject extends FtrService {
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
     await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+    const isOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
     if (!isOpen) {
       await this.appMenu.clickMenuItem('visualizeSaveButton');
     }

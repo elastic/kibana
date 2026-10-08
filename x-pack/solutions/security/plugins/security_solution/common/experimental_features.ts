@@ -97,6 +97,18 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
+   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
+   * endpoint status, response action status)
+   * Release: TBD
+   *
+   * Ships disabled: it surfaces endpoint response-action state to chat and is
+   * the landing spot for the upcoming dispatch tools, so it must not be enabled
+   * by default on any branch. Enable it explicitly via config (or a Scout
+   * evals config) for local/CI testing.
+   */
+  endpointResponseActionsSkill: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -308,12 +320,6 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: true,
 
   /**
-   * Enables the detection-coverage Agent Builder skill.
-   * Part of the DEX AI skills family (`dexAiSkill*`).
-   */
-  dexAiSkillDetectionCoverage: false,
-
-  /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
    * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
    * Turning this flag on unregisters that advanced setting, forcing the
@@ -330,12 +336,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: true,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint
@@ -383,16 +383,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
-
-  /**
-   * Threat-intel supply pipeline (indices, ingest adapters, create
-   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Direct index access is not yet cross-space hardened, so this must remain
-   * disabled until that isolation is implemented or the administrator trust model
-   * is explicitly accepted. Enable with:
-   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
-   */
-  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

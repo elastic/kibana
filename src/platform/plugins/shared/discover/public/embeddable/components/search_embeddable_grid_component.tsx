@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
 import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
@@ -58,8 +59,10 @@ interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   };
   dataView: DataView;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
@@ -75,6 +78,7 @@ const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 export function SearchEmbeddableGridComponent({
   api,
   dataView,
+  esqlSource$,
   onAddFilter,
   enableDocumentViewer,
   inlineEditing,
@@ -92,6 +96,9 @@ export function SearchEmbeddableGridComponent({
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
+  const [emptyEsqlSource$] = useState(() => new BehaviorSubject<EsqlSource | undefined>(undefined));
+
+  const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
 
   const [
     loading,
@@ -110,6 +117,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
+    abortSignal,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -126,7 +134,8 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$
+    esqlVariables$ ?? emptyEsqlVariables$,
+    api.abortSignal$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -336,8 +345,18 @@ export function SearchEmbeddableGridComponent({
       projectRouting: fetchContext?.projectRouting,
       isApproximate: fetchContext?.isApproximate,
       requestId: getGridRequestId(rows),
+      abortSignal,
     };
-  }, [columnsMeta, esqlVariables, fetchContext, isEsql, rows, savedSearchQuery, timeRange]);
+  }, [
+    abortSignal,
+    columnsMeta,
+    esqlVariables,
+    fetchContext,
+    isEsql,
+    rows,
+    savedSearchQuery,
+    timeRange,
+  ]);
 
   return (
     <DiscoverGridEmbeddableMemoized
@@ -345,6 +364,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
+      dataSource={kbnDataSource}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
       rows={rows}

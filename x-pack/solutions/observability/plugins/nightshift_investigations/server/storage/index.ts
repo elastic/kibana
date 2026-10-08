@@ -6,6 +6,8 @@
  */
 
 export type {
+  DeleteAllInvestigationsFailure,
+  DeleteAllInvestigationsResult,
   FindInvestigationsAcrossSpacesResult,
   FindInvestigationsQuery,
   FindInvestigationsResult,
@@ -14,8 +16,10 @@ export type {
   InvestigationRecord,
   InvestigationRepository,
   InvestigationSweepRepository,
+  InvestigationThread,
   ProjectedInvestigationRecord,
 } from './types';
+export { MAX_THREAD_SEEN_EVENTS } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';
 export {

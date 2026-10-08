@@ -12,6 +12,14 @@ import { ConfigKey } from '../../../common/runtime_types';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import type { RouteContext } from '../types';
 
+interface PrivateLocationSpaceDefinition {
+  spaces?: string[];
+}
+
+type PrivateLocationLookup =
+  | SyntheticsPrivateLocations
+  | ReadonlyMap<string, PrivateLocationSpaceDefinition>;
+
 /**
  * Returns true if a private location's spaces cover every space in the monitor's space list.
  * A private location with '*' (ALL_SPACES_ID) covers all monitor spaces.
@@ -59,7 +67,7 @@ interface ValidationError {
  */
 export const validateMonitorPrivateLocationSpaces = (
   monitor: MonitorFields,
-  allPrivateLocations: SyntheticsPrivateLocations
+  allPrivateLocations: PrivateLocationLookup
 ): ValidationError | null => {
   const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
   if (monitorSpaces.length === 0) {
@@ -76,9 +84,9 @@ export const validateMonitorPrivateLocationSpaces = (
   const errors: PrivateLocationSpaceError[] = [];
 
   for (const loc of privateLocations) {
-    const matchedLocation = allPrivateLocations.find(
-      (privateLocation) => privateLocation.id === loc.id
-    );
+    const matchedLocation = Array.isArray(allPrivateLocations)
+      ? allPrivateLocations.find((privateLocation) => privateLocation.id === loc.id)
+      : allPrivateLocations.get(loc.id);
     const locationSpaces = matchedLocation?.spaces;
 
     if (!privateLocationCoversAllMonitorSpaces(monitorSpaces, locationSpaces)) {
@@ -114,7 +122,7 @@ export const validateMonitorPrivateLocationSpaces = (
   };
 };
 
-type MonitorSavedObjectBulkAction = 'bulk_update' | 'bulk_delete';
+type MonitorSavedObjectBulkAction = 'bulk_create' | 'bulk_update' | 'bulk_delete';
 
 /** Asserts that the current user has the requested privileges in all specified spaces. */
 export const assertCanPerformMonitorBulkActionInAllSpaces = async (
@@ -145,12 +153,18 @@ export const assertCanPerformMonitorBulkActionInAllSpaces = async (
 
   if (!hasAllRequested) {
     const isDeleteAction = action === 'bulk_delete';
+    const isCreateAction = action === 'bulk_create';
     return response.forbidden({
       body: {
         message: isDeleteAction
           ? i18n.translate('xpack.synthetics.validation.multiSpaceDeletePermissions', {
               defaultMessage:
                 'This monitor is shared to spaces where you do not have delete permissions. To delete it, request access to those spaces.',
+            })
+          : isCreateAction
+          ? i18n.translate('xpack.synthetics.validation.multiSpaceCreatePermissions', {
+              defaultMessage:
+                'You do not have create permissions in all spaces this monitor is shared to. To create it, request access to those spaces or remove them from the monitor.',
             })
           : i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
               defaultMessage:

@@ -16,6 +16,10 @@ export const DELETE_KI_STEP_ID = 'context-engine.deleteKi' as const;
 export const deleteKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema,
+  refresh: z
+    .boolean()
+    .optional()
+    .describe('Wait for the write to become searchable before the step completes (default false)'),
 });
 
 export const deleteKiOutputSchema = z.object({

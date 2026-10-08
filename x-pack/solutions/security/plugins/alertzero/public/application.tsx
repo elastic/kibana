@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
+import type { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, AppUnmount, CoreStart } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
+import { getSharedInvestigationsQueryClient } from '@kbn/agentic-investigations-plugin/public';
+import { AccessBoundary } from './components/access_boundary';
+import type { SubscriptionAvailability } from '../common/availability';
 import { AppChromeLayout } from './components/app_chrome';
 import type { AlertZeroStartDependencies } from './types';
 import { AlertZeroRoutes } from './routes';
@@ -20,6 +24,7 @@ interface RenderAppParams {
   coreStart: CoreStart;
   startDeps: AlertZeroStartDependencies;
   params: AppMountParameters;
+  availability$: Observable<SubscriptionAvailability>;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -29,31 +34,44 @@ const rootStyle: React.CSSProperties = {
   minHeight: 0,
 };
 
-export const renderApp = ({ coreStart, startDeps, params }: RenderAppParams) => {
+export const renderApp = async ({
+  coreStart,
+  startDeps,
+  params,
+  availability$,
+}: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 30_000,
-        refetchOnWindowFocus: 'always',
-        refetchOnMount: 'always',
-      },
-    },
-  });
+  // Shared with the investigation flyout's "Proposed actions" slot (registered by the
+  // agenticInvestigations plugin), so a decision made in either invalidates the other's cache
+  // directly instead of needing a cross-boundary signal to bridge two separate ones.
+  const queryClient = await getSharedInvestigationsQueryClient();
 
   /**
    * `KibanaContextProvider` backs `useKibana()` from `@kbn/kibana-react-plugin`, which the app uses
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+    <KibanaContextProvider
+      services={{
+        ...coreStart,
+        ...startDeps,
+        // `security` above is the Security plugin's contract, which shadows Core's. Core's
+        // service-account API is exposed under its own key.
+        serviceAccounts: coreStart.security.serviceAccounts,
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>
-            <AppChromeLayout>
-              <AlertZeroRoutes />
-            </AppChromeLayout>
+            <AccessBoundary
+              availability$={availability$}
+              serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
+            >
+              <AppChromeLayout>
+                <AlertZeroRoutes />
+              </AppChromeLayout>
+            </AccessBoundary>
           </div>
         </Router>
       </QueryClientProvider>
