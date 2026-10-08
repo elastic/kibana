@@ -162164,7 +162164,7 @@ components:
                               - max
                             type: string
                           grid_sort_direction:
-                            description: Direction of the metrics grid order. If omitted, ascending.
+                            description: Direction of the metrics grid order. If omitted, defaults to ascending.
                             enum:
                               - asc
                               - desc
