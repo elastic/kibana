@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../new_entities_table/common';
+import type { TimeRange } from '../../entities_grid/common';
 // The query module, not the table index: the index also loads the grid components.
 import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
   ML_ANOMALY_INDICES,
-} from '../../new_entities_table/queries/esql';
-import { buildPerTypeEuidEvals } from '../../new_entities_table/queries/euid_pipeline';
+} from '../../entities_grid/queries/esql';
+import { buildPerTypeEuidEvals } from '../../entities_grid/queries/euid_pipeline';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 /**

@@ -22,7 +22,7 @@ import {
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
   type TimeRange,
-} from '../../new_entities_table';
+} from '../../entities_grid';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../new_entities_table/common';
-import { getAlertsIndex, buildLookback } from '../../new_entities_table/queries/esql';
+import type { TimeRange } from '../../entities_grid/common';
+import { getAlertsIndex, buildLookback } from '../../entities_grid/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 /**

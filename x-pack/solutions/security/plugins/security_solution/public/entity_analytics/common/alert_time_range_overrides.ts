@@ -10,7 +10,7 @@ import {
   ENTITY_ANALYTICS_ALERTS_FROM,
   ENTITY_ANALYTICS_ALERTS_TO,
 } from '../components/home/constants';
-import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/new_entities_table/common';
+import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
 
 /**
  * Scope of the new entities table for the selected time range. Each range has its own

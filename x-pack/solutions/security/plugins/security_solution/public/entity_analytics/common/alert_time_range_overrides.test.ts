@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIME_RANGE_OPTIONS } from '../components/home/new_entities_table/common';
+import { TIME_RANGE_OPTIONS } from '../components/home/entities_grid/common';
 import {
   SCOPE_ALERT_TIME_RANGE_OVERRIDES,
   getEntityAnalyticsNewHomeScopeId,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../new_entities_table/common';
-import { buildLookback, getRiskScoreIndex } from '../../new_entities_table/queries/esql';
+import type { TimeRange } from '../../entities_grid/common';
+import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical risk

@@ -170,7 +170,7 @@ const VIEW_BY_CASES: readonly FilterCase[] = [
   ],
 ];
 
-describe('entities table on Elasticsearch', () => {
+describe('entities grid on Elasticsearch', () => {
   let cluster: FixtureCluster;
 
   beforeAll(async () => {

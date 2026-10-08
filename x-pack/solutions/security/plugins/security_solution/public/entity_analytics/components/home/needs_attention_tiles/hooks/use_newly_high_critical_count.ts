@@ -21,7 +21,7 @@ import {
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
   type TimeRange,
-} from '../../new_entities_table';
+} from '../../entities_grid';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { indentForkBranch } from '../../new_entities_table/queries/esql';
-import { buildPerTypeEuidEvals } from '../../new_entities_table/queries/euid_pipeline';
+import { indentForkBranch } from '../../entities_grid/queries/esql';
+import { buildPerTypeEuidEvals } from '../../entities_grid/queries/euid_pipeline';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 /**

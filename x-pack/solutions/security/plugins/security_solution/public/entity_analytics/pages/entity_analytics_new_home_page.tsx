@@ -48,10 +48,10 @@ import {
   getEntityId,
   getString,
   ENTITY_TYPE_FIELD,
-} from '../components/home/new_entities_table';
-import { toDsl, toEsql } from '../components/home/new_entities_table/active_filters';
-import type { ActiveFilters } from '../components/home/new_entities_table/active_filters';
-import type { RowActions, CellHandlers, RowsMode } from '../components/home/new_entities_table';
+} from '../components/home/entities_grid';
+import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
+import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
+import type { RowActions, CellHandlers, RowsMode } from '../components/home/entities_grid';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';

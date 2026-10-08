@@ -22,7 +22,7 @@ import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analyti
 import { useKibana } from '../../../common/lib/kibana';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { getEntitiesAlias, ENTITY_LATEST } from './constants';
-import type { RowsMode } from './new_entities_table/common';
+import type { RowsMode } from './entities_grid/common';
 
 export interface EntityFilterBarCounts {
   entity_types: Record<string, number>;
