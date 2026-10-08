@@ -10,8 +10,8 @@ const INTERNAL_URL = `/internal/entity_details` as const;
 export const ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL = `${INTERNAL_URL}/highlights` as const;
 export const ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL = `${INTERNAL_URL}/ai_summary` as const;
 
-export const ENTITY_GRID_CASES_INTERNAL_URL =
-  '/internal/entity_analytics/entities/grid/cases' as const;
+export const ENTITY_CASE_COUNTS_INTERNAL_URL =
+  '/internal/entity_analytics/entities/case_counts' as const;
 
 // PUBLIC
 export const PUBLIC_URL = `/api/entity_details` as const;

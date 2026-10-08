@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
+import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
 import { getEntityIds } from '../common';
 import type { ColumnQuerySpec, PageEnricher, RunContext } from './types';
 
@@ -16,7 +16,7 @@ const fetchCaseCounts = async (
   entityIds: readonly string[]
 ): Promise<Map<string, number>> => {
   if (entityIds.length === 0) return new Map();
-  const result = await http.post<Record<string, number>>(ENTITY_GRID_CASES_INTERNAL_URL, {
+  const result = await http.post<Record<string, number>>(ENTITY_CASE_COUNTS_INTERNAL_URL, {
     body: JSON.stringify({ entity_ids: entityIds }),
     version: '1',
     signal,

@@ -48,7 +48,7 @@ export const canReadSecurityCases = async (
  * Security cases of the space per entity id: the distinct cases with a `security.entity`
  * attachment of the entity. Check `canReadSecurityCases` first: the repository is internal.
  */
-export const fetchCaseCounts = async (
+export const fetchEntityCaseCounts = async (
   internalRepository: ISavedObjectsRepository,
   spaceId: string,
   entityIds: readonly string[]
