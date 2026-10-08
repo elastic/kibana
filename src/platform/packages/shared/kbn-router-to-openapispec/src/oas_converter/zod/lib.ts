@@ -646,7 +646,7 @@ function hoistMarkedSchemas(
   if (typeof name === 'string') {
     // Keep an existing definition (e.g. extracted from `$defs`) rather than
     // overwriting it with a partial inline copy of the same component.
-    if (name in shared) {
+    if (Object.hasOwn(shared, name)) {
       return { $ref: `#/components/schemas/${name}` };
     }
     const {

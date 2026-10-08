@@ -63,13 +63,13 @@ function ctxMeta(context: string, suffix: string, title: string) {
   return { id: `vis${context[0].toUpperCase()}${context.slice(1)}${suffix}`, title };
 }
 
-const ctxSchemaCache = new Map<string, z.ZodType>();
+const ctxSchemaCache = new Map<string, { base: z.ZodType; schema: z.ZodType }>();
 
 /**
  * Applies context-specific meta, creating each id'd schema only once so that
  * lazySchema factory re-runs (e.g. after GC) never produce duplicate schema ids.
  */
-function withCtxMeta<T extends z.ZodType>(
+export function withCtxMeta<T extends z.ZodType>(
   schema: T,
   context: string,
   suffix: string,
@@ -78,10 +78,13 @@ function withCtxMeta<T extends z.ZodType>(
   const meta = ctxMeta(context, suffix, title);
   const cached = ctxSchemaCache.get(meta.id);
   if (cached) {
-    return cached as T;
+    if (cached.base !== schema) {
+      throw new Error(`Schema id "${meta.id}" is already used by a different base schema`);
+    }
+    return cached.schema as T;
   }
   const created = schema.meta(meta);
-  ctxSchemaCache.set(meta.id, created);
+  ctxSchemaCache.set(meta.id, { base: schema, schema: created });
   return created;
 }
 

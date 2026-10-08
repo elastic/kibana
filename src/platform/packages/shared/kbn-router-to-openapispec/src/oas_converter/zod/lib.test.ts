@@ -633,6 +633,22 @@ describe('zod', () => {
       expect(outputStr).not.toContain('x-kbn-oas-component-id');
     });
 
+    test('component named like an Object.prototype member keeps its definition', () => {
+      const ctor = z.object({ a: z.string() });
+      registerZodV4Component(ctor, 'constructor');
+
+      const result = convert(z.object({ ctor }) as any);
+
+      expect(result.schema).toMatchObject({
+        properties: { ctor: { $ref: '#/components/schemas/constructor' } },
+      });
+      expect(Object.hasOwn(result.shared, 'constructor')).toBe(true);
+      expect(result.shared.constructor).toMatchObject({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+    });
+
     test('registered schema passed directly to convert() produces $ref', () => {
       const tag = z.object({ id: z.string(), label: z.string() });
       registerZodV4Component(tag, 'Tag');
