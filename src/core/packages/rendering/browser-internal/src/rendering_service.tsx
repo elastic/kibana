@@ -22,6 +22,7 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiBreakpointContainerContext } from '@elastic/eui';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -98,11 +99,14 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
+    // POC: EUI breakpoints resolve from where each React root is mounted.
     const element = (
-      <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
-        <Layout />
-      </KibanaRootContextProvider>
+      <EuiBreakpointContainerContext.Provider value={targetDomElement}>
+        <KibanaRootContextProvider {...startServices} globalStyles={true}>
+          <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
+          <Layout />
+        </KibanaRootContextProvider>
+      </EuiBreakpointContainerContext.Provider>
     );
 
     if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {

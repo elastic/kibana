@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiBreakpointContainerContext } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { KibanaRenderContextProviderProps } from '@kbn/react-kibana-context-render';
@@ -43,13 +44,20 @@ export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams):
 
   if (isParamsUsingPreferred(params)) {
     mount = (element: HTMLElement) => {
-      ReactDOM.render(params.addContext(node), element);
+      ReactDOM.render(
+        <EuiBreakpointContainerContext.Provider value={element}>
+          {params.addContext(node)}
+        </EuiBreakpointContainerContext.Provider>,
+        element
+      );
       return () => ReactDOM.unmountComponentAtNode(element);
     };
   } else {
     mount = (element: HTMLElement) => {
       ReactDOM.render(
-        <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>,
+        <EuiBreakpointContainerContext.Provider value={element}>
+          <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>
+        </EuiBreakpointContainerContext.Provider>,
         element
       );
       return () => ReactDOM.unmountComponentAtNode(element);
