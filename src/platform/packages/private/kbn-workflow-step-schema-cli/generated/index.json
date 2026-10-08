@@ -862,6 +862,7 @@
     "tavily_mcp.tavilyMap",
     "tavily_mcp.tavilySearch",
     "teams",
+    "test.cpuSpin",
     "thehive.createAlert",
     "thehive.pushToService",
     "threatq.addAttribute",
@@ -1001,11 +1002,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "6b244a3d2f0b1ac564e39224754fc03d779eb3f95ab59566c12f5a7689cd5bb7"
+      "sha256": "2f03c957ec8271b92d6695f0008084fbb38e9254225553e5715ee602385196e9"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "c60a773d90ecbbd2c01ff49d9c2ce4f9c1570bcae9656c79fdb9d0a76be8ad4d"
+      "sha256": "04590322dfe8780cc049ab7514ba55e576cb47403cd1ef05024b3a8ecee4c81e"
     }
   }
 }
