@@ -54,6 +54,13 @@ export const GetAgentPoliciesRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({
+        defaultValue: true,
+        meta: {
+          description:
+            'When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.',
+        },
+      }),
       noAgentCount: schema.maybe(
         schema.boolean({
           meta: { description: 'use withAgentCount instead', deprecated: true },

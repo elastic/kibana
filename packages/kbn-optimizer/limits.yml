@@ -29,15 +29,15 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
-  contentManagement: 8350
+  contentManagement: 8323
   controls: 10300
   core: 606422
-  cps: 9209
+  cps: 9109
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8661
-  data: 2758999
+  data: 516784
   dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
@@ -51,7 +51,7 @@ pageLoadAssetSize:
   devTools: 8107
   discover: 32000
   discoverEnhanced: 5353
-  discoveries: 35780
+  discoveries: 39653
   discoverShared: 2322
   elasticAssistant: 299772
   elasticAssistantSharedState: 4881
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   expressions: 104955
   expressionTagcloud: 14009
   expressionXY: 45000
-  features: 4145
+  features: 4141
   feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 4901
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   kubernetesSecurity: 6807
   lens: 99147
   licenseManagement: 8193
-  licensing: 10073
+  licensing: 10058
   links: 8620
   lists: 5093
   logsDataAccess: 7900
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 108732
+  observability: 120410
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -152,8 +152,8 @@ pageLoadAssetSize:
   runtimeFields: 11828
   sampleDataIngest: 2640
   savedObjects: 11735
-  savedObjectsFinder: 4319
-  savedObjectsManagement: 22361
+  savedObjectsFinder: 4306
+  savedObjectsManagement: 22273
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
@@ -200,8 +200,8 @@ pageLoadAssetSize:
   upgradeAssistant: 6898
   uptime: 48171
   urlDrilldown: 5852
-  urlForwarding: 7349
-  usageCollection: 5655
+  urlForwarding: 7346
+  usageCollection: 5641
   ux: 8376
   visDefaultEditor: 35080
   visTypeGauge: 13006
