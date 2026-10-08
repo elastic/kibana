@@ -1,5 +1,5 @@
 {
-  "sha1": "87e457ff1aafb9c3296cb0884df0dede0af33ed3",
+  "sha1": "1cc8991054d660fe1909e14f699e8589685f57dd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
-        "line": 16,
-        "column": 43
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "f5b0c8dfcdebe68-d4bdf534246a342",
+      "title": "Subscription status badge for users without billing access shows a tooltip asking to contact the administrator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/no_billing_access.spec.ts",
+        "line": 15,
+        "column": 41
       }
     }
   ]
