@@ -159,6 +159,7 @@ export const SEEDED_COMMAND = 'powershell.exe -EncodedCommand SQBFAFgA';
 export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
   const id = randomUUID();
   const host = `AZ-EVAL-${id.slice(0, 8)}`;
+  const endpointId = `alertzero-eval-${id}`;
   const index = `logs-endpoint.events.process-alertzero-eval-${id}`;
   const aiIndexId = `alertzero-eval-${id}`;
   const aiIndexDest = `ai-index-idx-${aiIndexId}`;
@@ -262,7 +263,7 @@ export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
           '@timestamp': new Date(now - (2 - i) * 60_000).toISOString(),
           event: { id: eventIds[i], category: ['process'], type: ['start'], kind: 'event' },
           host: { name: host, id: host, os: { type: 'windows' } },
-          agent: { id: `alertzero-eval-${id}`, type: 'endpoint' },
+          agent: { id: endpointId, type: 'endpoint' },
           process: {
             name: event.name,
             command_line: event.command_line,
@@ -323,6 +324,7 @@ export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
     });
     return {
       host,
+      endpointId,
       eventIds,
       command: SEEDED_COMMAND,
       index,
