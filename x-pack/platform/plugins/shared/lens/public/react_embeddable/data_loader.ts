@@ -52,7 +52,6 @@ import {
 import { addLog } from './logger';
 import {
   apiHasLensComponentCallbacks,
-  apiHasShowBorder,
   apiHasUserMessages,
   hasTablesAdapter,
   isPartialInspectorAdapters,
@@ -301,7 +300,6 @@ export function loadEmbeddableData(
         disableTriggers,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
-        showBorder: apiHasShowBorder(parentApi) ? parentApi.showBorder : undefined,
       }),
       getUsedDataViews(
         currentState.attributes.references,

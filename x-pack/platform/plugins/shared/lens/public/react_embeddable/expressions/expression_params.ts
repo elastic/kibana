@@ -57,7 +57,6 @@ interface GetExpressionRendererPropsParams {
   addUserMessages: (messages: UserMessage[]) => void;
   forceDSL?: boolean;
   getDisplayOptions: () => VisualizationDisplayOptions;
-  showBorder?: boolean;
 }
 
 async function getExpressionFromDocument(
@@ -160,7 +159,6 @@ export async function getExpressionRendererParams(
     searchContext,
     forceDSL,
     getDisplayOptions,
-    showBorder,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -228,7 +226,6 @@ export async function getExpressionRendererParams(
       style: state.style,
       className: state.className,
       noPadding: getDisplayOptions().noPadding,
-      showBorder,
     };
     return {
       indexPatterns,

@@ -311,11 +311,6 @@ export type LensComponentProps = Simplify<
        * Callback invoked with the Lens embeddable API once it is available
        */
       onApiAvailable?: (api: unknown) => void;
-      /**
-       * Border on the panel shown while the chart is loading.
-       * Omit to keep the default panel border.
-       */
-      showBorder?: boolean;
     }
 >;
 
@@ -331,7 +326,6 @@ export type LensComponentForwardedProps = Pick<
   | 'executionContext'
   | 'viewMode'
   | 'forceDSL'
-  | 'showBorder'
 >;
 
 /**
@@ -442,11 +436,6 @@ export interface ExpressionWrapperProps {
   noPadding?: boolean;
   paddingTop?: boolean;
   abortController?: AbortController;
-  /**
-   * Border on the panel shown while the chart expression is loading.
-   * Omit to keep the default panel border.
-   */
-  showBorder?: boolean;
 }
 
 export type GetStateType = () => LensRuntimeState;

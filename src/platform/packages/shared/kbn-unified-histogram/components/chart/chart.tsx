@@ -75,7 +75,6 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  showBorder?: EmbeddableComponentProps['showBorder'];
   withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }

@@ -72,10 +72,6 @@ export function apiHasLensComponentProps(api: unknown): api is LensComponentForw
   );
 }
 
-export function apiHasShowBorder(api: unknown): api is { showBorder?: boolean } {
-  return isObject(api) && Object.hasOwn(api, 'showBorder');
-}
-
 export function apiHasAbortController(api: unknown): api is { abortController: AbortController } {
   return isObject(api) && Object.hasOwn(api, 'abortController');
 }

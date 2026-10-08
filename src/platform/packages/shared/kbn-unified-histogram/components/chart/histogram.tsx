@@ -37,7 +37,6 @@ export interface HistogramProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
-  showBorder?: EmbeddableComponentProps['showBorder'];
 }
 
 export function Histogram({
@@ -56,7 +55,6 @@ export function Histogram({
   withDefaultActions,
   onApiAvailable,
   abortController,
-  showBorder,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
@@ -123,7 +121,6 @@ export function Histogram({
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}
           onApiAvailable={onApiAvailable}
-          showBorder={showBorder}
         />
       </div>
       {timeRangeDisplay}
