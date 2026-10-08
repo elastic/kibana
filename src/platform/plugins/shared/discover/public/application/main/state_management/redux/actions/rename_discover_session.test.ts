@@ -115,6 +115,29 @@ describe('renameDiscoverSession', () => {
     });
   });
 
+  it('should store the version saved by the rename, so a reload keeps the local tabs', async () => {
+    const { toolkit, services } = await setup({ tabsStorageEnabled: true });
+    jest.mocked(services.discoverSessionService.save).mockImplementationOnce(async (session) => ({
+      ...session,
+      id: 'test-session',
+      managed: false,
+      version: 'renamed-version',
+    }));
+
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+      .unwrap();
+
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.version).toBe(
+      'renamed-version'
+    );
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).discoverSessionVersion).toBe(
+        'renamed-version'
+      );
+    });
+  });
+
   it('should add the renamed session to the recently accessed list', async () => {
     const { toolkit, services } = await setup();
 

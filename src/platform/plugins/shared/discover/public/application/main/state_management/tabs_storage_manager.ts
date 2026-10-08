@@ -91,7 +91,7 @@ export interface TabsStorageManager {
     props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined,
-    discoverSessionVersion?: string
+    discoverSessionVersion?: string,
     draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
@@ -409,7 +409,7 @@ export const createTabsStorageManager = ({
     { allTabs, recentlyClosedTabs },
     getInternalState,
     discoverSessionId,
-    discoverSessionVersion
+    discoverSessionVersion,
     draftSessionTitle
   ) => {
     if (!enabled) {
@@ -524,8 +524,8 @@ export const createTabsStorageManager = ({
       storedSelectedTab &&
       isUrlStateFromStoredTab(storedSelectedTab)
     ) {
-      // Only a saved time range can replace the URL time. Global filters are shared with other
-      // apps, so they stay in _g.
+      // Only a saved time range can replace the URL time and refresh interval. Global filters are
+      // shared with other apps, so they stay in _g.
       // When the stored tab was removed, the first saved tab is selected, unless the URL asks
       // for a new tab with a label.
       const persistedSelectedTab =
@@ -533,9 +533,11 @@ export const createTabsStorageManager = ({
         (tabsStateFromURL?.tabLabel ? undefined : persistedDiscoverSession?.tabs[0]);
       if (persistedSelectedTab?.timeRestore) {
         const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-        void urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(urlGlobalState, 'time'), {
-          replace: true,
-        });
+        void urlStateStorage.set(
+          GLOBAL_STATE_URL_KEY,
+          omit(urlGlobalState, ['time', 'refreshInterval']),
+          { replace: true }
+        );
       }
       void urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
       void urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });

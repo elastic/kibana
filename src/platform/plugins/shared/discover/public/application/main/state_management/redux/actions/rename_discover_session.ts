@@ -56,6 +56,7 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       internalStateSlice.actions.setPersistedDiscoverSession({
         ...persistedDiscoverSession,
         title: newTitle,
+        version: discoverSession.version,
       })
     );
   }

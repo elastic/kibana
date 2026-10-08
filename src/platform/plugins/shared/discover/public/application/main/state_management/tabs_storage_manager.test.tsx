@@ -1177,7 +1177,8 @@ describe('TabsStorageManager', () => {
       storedProfileState?: TabState['profileState'],
       timeRestore = true,
       persistedTabId = mockTab1.id,
-      tabLabel?: string
+      tabLabel?: string,
+      urlRefreshInterval?: TabState['globalState']['refreshInterval']
     ) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
@@ -1193,6 +1194,7 @@ describe('TabsStorageManager', () => {
       urlStateStorage.set(APP_STATE_URL_KEY, urlAppState);
       urlStateStorage.set(GLOBAL_STATE_URL_KEY, {
         time: mockTab1.globalState.timeRange,
+        refreshInterval: urlRefreshInterval,
         filters: [],
       });
 
@@ -1257,6 +1259,19 @@ describe('TabsStorageManager', () => {
       const urlStateStorage = loadWithUrlAppState(mockTab1.appState);
 
       expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+    });
+
+    it('should clear the URL refresh interval when the saved tab restores time', () => {
+      const urlStateStorage = loadWithUrlAppState(
+        mockTab1.appState,
+        undefined,
+        true,
+        mockTab1.id,
+        undefined,
+        { pause: false, value: 5000 }
+      );
+
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
     });
 
@@ -1639,6 +1654,7 @@ describe('TabsStorageManager', () => {
     await tabsStorageManager.persistLocally(
       { allTabs: [mockTab1], recentlyClosedTabs: [] },
       mockGetInternalState,
+      undefined,
       undefined,
       'My draft'
     );
