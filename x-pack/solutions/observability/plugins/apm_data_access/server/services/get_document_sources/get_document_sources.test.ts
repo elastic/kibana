@@ -124,9 +124,52 @@ describe('getDocumentSources', () => {
     ]);
   });
 
-  it('keeps continuous rollups available when the legacy sub-query failed', async () => {
+  it('falls back to legacy documents when the legacy sub-query failed', async () => {
     await expect(
       getSources({ [RESPONSE_INDEX.TRANSACTION_METRIC_1M_WITHOUT_DURATION_SUMMARY]: failed })
-    ).resolves.toEqual(allSourcesAvailable);
+    ).resolves.toEqual([
+      {
+        documentType: ApmDocumentType.ServiceTransactionMetric,
+        rollupInterval: RollupInterval.OneMinute,
+        hasDocs: false,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.ServiceTransactionMetric,
+        rollupInterval: RollupInterval.TenMinutes,
+        hasDocs: false,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.ServiceTransactionMetric,
+        rollupInterval: RollupInterval.SixtyMinutes,
+        hasDocs: false,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: RollupInterval.OneMinute,
+        hasDocs: true,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: RollupInterval.TenMinutes,
+        hasDocs: false,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: RollupInterval.SixtyMinutes,
+        hasDocs: false,
+        hasDurationSummaryField: false,
+      },
+      {
+        documentType: ApmDocumentType.TransactionEvent,
+        rollupInterval: RollupInterval.None,
+        hasDocs: true,
+        hasDurationSummaryField: false,
+      },
+    ]);
   });
 });
