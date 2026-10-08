@@ -142,8 +142,11 @@ describe('securityLabsSearchTool', () => {
         expect(errorResult.data.message).toContain('Security Labs research is unavailable');
         expect(errorResult.data.message).toContain(`[GenAI Settings](${settingsUrl})`);
         expect(errorResult.data.message).toContain('make no further tool calls');
-        expect(errorResult.data.message).toContain('Do not continue from attachments');
+        expect(errorResult.data.message).toContain('Do not substitute prior knowledge');
         expect(errorResult.data.message).toContain('including product_documentation');
+        // The tool is shared with standalone MCP clients; attachment/rule-creation
+        // instructions belong to the detection-rule-edit skill, not this message.
+        expect(errorResult.data.message).not.toMatch(/attachment|rule creation|generate_esql/i);
         expect(retrieveDocumentation).not.toHaveBeenCalled();
       }
     );
