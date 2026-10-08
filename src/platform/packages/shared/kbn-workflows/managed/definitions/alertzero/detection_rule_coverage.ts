@@ -27,7 +27,7 @@ export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW = {
   id: ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yamlTemplate: (values: RuleCoverageWorkerTemplateValues): string =>
     renderRuleCoverageWorkerYaml(
       DETECTION_RULE_COVERAGE_YAML,

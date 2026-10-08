@@ -8,6 +8,8 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 import { AutomationsPage } from './automations_page';
 import {
   useAutomationRunsInRange,
@@ -17,6 +19,7 @@ import {
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
+  useUpdateAutomation,
 } from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
 import type { Automation } from './hooks/use_automations';
@@ -31,6 +34,7 @@ jest.mock('./hooks/use_automations', () => ({
   useFetchAutomations: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
+  useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
@@ -47,9 +51,17 @@ const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
 describe('AutomationsPage', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
+
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
-      services: { application: { capabilities: { nightshift: { manage: true } } } },
+      services: {
+        application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
+        http: { basePath: { prepend: (path: string) => path } },
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
@@ -61,14 +73,29 @@ describe('AutomationsPage', () => {
     mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseToggleAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
   });
 
+  const renderPage = (initialPath = '/automations') => {
+    const history = createMemoryHistory({ initialEntries: [initialPath] });
+    return {
+      history,
+      ...render(
+        <I18nProvider>
+          <Router history={history}>
+            <>
+              <Route path="/automations/:id/runs" component={AutomationsPage} />
+              <Route path="/automations/:id" component={AutomationsPage} />
+              <Route path="/automations" component={AutomationsPage} />
+            </>
+          </Router>
+        </I18nProvider>
+      ),
+    };
+  };
+
   it('shows the empty state and create action when no automations exist', () => {
-    render(
-      <I18nProvider>
-        <AutomationsPage />
-      </I18nProvider>
-    );
+    renderPage();
 
     expect(screen.getByText('Automations run on triggers you define')).toBeInTheDocument();
     expect(screen.queryByTestId('automationsSearch')).not.toBeInTheDocument();
@@ -101,17 +128,17 @@ describe('AutomationsPage', () => {
       isInitialLoading: false,
     });
 
-    render(
-      <I18nProvider>
-        <AutomationsPage />
-      </I18nProvider>
-    );
+    renderPage();
 
     fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'weekly' } });
     expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
     expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'nothing' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search and filters' }));
     expect(screen.getByText('Alert triage')).toBeInTheDocument();
     expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
   });
@@ -124,11 +151,7 @@ describe('AutomationsPage', () => {
       refetch,
     });
 
-    render(
-      <I18nProvider>
-        <AutomationsPage />
-      </I18nProvider>
-    );
+    renderPage();
 
     expect(screen.getByText('Failed to load automations')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
@@ -177,12 +200,6 @@ describe('AutomationsPage', () => {
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
-    const renderPage = () =>
-      render(
-        <I18nProvider>
-          <AutomationsPage />
-        </I18nProvider>
-      );
     const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
 
     beforeEach(() => {
@@ -194,6 +211,13 @@ describe('AutomationsPage', () => {
         ids.map((id) => ({
           data: {
             total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+            runs:
+              id === 'triage'
+                ? [
+                    ...Array(25).fill({ status: 'succeeded' }),
+                    ...Array(3).fill({ status: 'skipped' }),
+                  ]
+                : [],
           },
         }))
       );
@@ -222,7 +246,11 @@ describe('AutomationsPage', () => {
 
       const triageRow = rowOf('Triage incoming alerts');
       expect(within(triageRow).getByTestId('automationTags')).toHaveTextContent('2');
-      expect(within(triageRow).getByTestId('automationRuns')).toHaveTextContent('28');
+      expect(within(triageRow).getByTestId('automationRuns-succeeded-triage')).toHaveTextContent(
+        '25'
+      );
+      expect(within(triageRow).getByTestId('automationRuns-failed-triage')).toHaveTextContent('–');
+      expect(within(triageRow).getByTestId('automationRuns-skipped-triage')).toHaveTextContent('3');
       expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
       expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
       expect(within(triageRow).getByText('Emily Clarke')).toBeInTheDocument();
@@ -239,7 +267,11 @@ describe('AutomationsPage', () => {
 
       fireEvent.click(screen.getByTestId('automationToggle-report'));
 
-      expect(toggleMutate).toHaveBeenCalledWith({ id: 'report', isEnabled: true });
+      expect(toggleMutate).toHaveBeenCalledWith({
+        id: 'report',
+        name: 'Daily report',
+        isEnabled: true,
+      });
     });
 
     it('clones an automation from the row actions', async () => {
@@ -251,6 +283,7 @@ describe('AutomationsPage', () => {
       expect(createMutate).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Triage incoming alerts (copy)' })
       );
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
     });
 
     it('deletes an automation after confirmation', async () => {
@@ -258,9 +291,16 @@ describe('AutomationsPage', () => {
 
       fireEvent.click(screen.getByTestId('automationActions-report'));
       fireEvent.click(await screen.findByTestId('deleteAutomation'));
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+    });
+
+    it('returns to the list when the automation id in the URL does not exist', () => {
+      const { history } = renderPage('/automations/missing');
+
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+      expect(history.location.pathname).toBe('/automations');
     });
 
     it('opens the create flyout', () => {
@@ -271,6 +311,50 @@ describe('AutomationsPage', () => {
       expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
     });
 
+    it('opens a detail flyout and returns to the list with router navigation', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+
+      expect(screen.getByTestId('automationDetailFlyout')).toBeInTheDocument();
+      expect(document.querySelector('.euiTableRow-isSelected')).toHaveTextContent(
+        'Triage incoming alerts'
+      );
+      fireEvent.click(screen.getByTestId('automationCloseButton'));
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens run history filtered by the clicked run count', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationRuns-skipped-triage'));
+
+      for (const pill of screen.getAllByTestId('automationRunFilter-skipped')) {
+        expect(pill).toHaveAttribute('aria-pressed', 'true');
+      }
+    });
+
+    it('steps through automations in the table sort order', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+      expect(screen.getByTestId('automationPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('automationNextButton')).toBeDisabled();
+
+      fireEvent.click(screen.getAllByTestId('tableHeaderSortButton')[0]);
+      expect(screen.getByTestId('automationPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('automationNextButton')).toBeEnabled();
+    });
+
+    it('moves to the next automation with the arrow key while focus is in the flyout', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Daily report' }));
+      fireEvent.keyDown(screen.getByTestId('automationCloseButton'), { key: 'ArrowDown' });
+
+      expect(screen.getByRole('heading', { name: 'Triage incoming alerts' })).toBeInTheDocument();
+    });
+
     it('filters by status with counts and clears the selection', async () => {
       renderPage();
 
@@ -278,7 +362,7 @@ describe('AutomationsPage', () => {
       const activeOption = await screen.findByRole('option', { name: /Enabled/ });
       expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
         'Enabled1',
-        'Disabled1',
+        'Paused1',
         'Rate limited1',
       ]);
       expect(activeOption).toHaveTextContent('1');
@@ -287,22 +371,25 @@ describe('AutomationsPage', () => {
       ).not.toBeInTheDocument();
 
       fireEvent.click(activeOption);
-      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftAutomationFilterClearSelection'));
-      expect(screen.getByText('Daily report')).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('nightshiftAutomationName').map(({ textContent }) => textContent)
+      ).toContain('Daily report');
     });
 
     it('filters rate limited automations from the banner', () => {
       renderPage();
 
       expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
-        '1 automation reached their daily trigger limit'
+        '1 automation reached its daily trigger limit'
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
+      expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();
 
-      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
     });
 
@@ -318,7 +405,7 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));
 
       expect(screen.queryByText('Triage incoming alerts')).not.toBeInTheDocument();
-      expect(screen.getByText('Daily report')).toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftAutomationName')).toHaveTextContent('Daily report');
     });
 
     it('hides management actions for read-only users', () => {

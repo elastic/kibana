@@ -40,13 +40,13 @@ export function buildActionGroups(
 ): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
-  for (const { episode, policy } of matched) {
+  for (const { alert, policy } of matched) {
     let groupKey: Record<string, unknown>;
     switch (policy.groupingMode) {
       case 'per_alert':
         groupKey = {
-          groupHash: episode.group_hash,
-          episodeId: episode.episode_id,
+          groupHash: alert.group_hash,
+          alertId: alert.alert_id,
         };
         break;
       case 'all':
@@ -54,7 +54,7 @@ export function buildActionGroups(
         break;
       case 'per_field':
         groupKey = Object.fromEntries(
-          policy.groupBy.map((field) => [field, get(episode, field, null)])
+          policy.groupBy.map((field) => [field, get(alert, field, null)])
         );
         break;
     }
@@ -71,15 +71,15 @@ export function buildActionGroups(
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
-        episodes: [],
+        alerts: [],
         rules: {},
       });
     }
 
     const group = groupMap.get(actionGroupId)!;
-    group.episodes.push(episode);
-    const ruleId = episode.rule_id;
-    const rule = rules.forEpisode(episode);
+    group.alerts.push(alert);
+    const ruleId = alert.rule_id;
+    const rule = rules.forAlert(alert);
     if (rule && ruleId != null) {
       group.rules[ruleId] = { name: rule.name };
     }

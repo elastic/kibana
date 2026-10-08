@@ -27,7 +27,7 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   id: ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 9,
+  version: 10,
   yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
     renderRuleTuningWorkerYaml(
       DETECTION_RULE_TUNING_YAML,
