@@ -19,6 +19,7 @@ import {
 } from '../../../common/endpoint/models/policy_config';
 import { removeDeviceControl } from '../../../common/endpoint/models/policy_config_helpers';
 import { set } from '@kbn/safer-lodash-set';
+import type { PolicyConfig } from '../../../common/endpoint/types';
 
 const ESSENTIALS_KEYS = ALL_PRODUCT_FEATURE_KEYS.filter(
   (key) =>
@@ -26,7 +27,9 @@ const ESSENTIALS_KEYS = ALL_PRODUCT_FEATURE_KEYS.filter(
     key !== ProductFeatureSecurityKey.endpointCustomNotification
 );
 
-const makeInput = (policyValue: object): NewPackagePolicyInput[] => [
+const makeInput = (
+  policyValue: PolicyConfig & { global_manifest_version?: string }
+): NewPackagePolicyInput[] => [
   {
     type: 'endpoint',
     enabled: true,
@@ -108,19 +111,8 @@ describe('validatePolicyAgainstProductFeatures', () => {
   });
 
   describe('global_manifest_version gating', () => {
-    const makeInputWithManifestVersion = (version: string): NewPackagePolicyInput[] => [
-      {
-        type: 'endpoint',
-        enabled: true,
-        streams: [],
-        vars: {},
-        config: {
-          policy: {
-            value: { ...policyFactory(), global_manifest_version: version },
-          },
-        },
-      },
-    ];
+    const makeInputWithManifestVersion = (version: string) =>
+      makeInput({ ...policyFactory(), global_manifest_version: version });
 
     it('passes for "latest" global_manifest_version even when endpointProtectionUpdates is disabled', () => {
       const keysWithoutUpdates = ALL_PRODUCT_FEATURE_KEYS.filter(

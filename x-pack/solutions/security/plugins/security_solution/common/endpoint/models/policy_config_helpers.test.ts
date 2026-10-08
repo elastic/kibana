@@ -356,70 +356,53 @@ describe('Policy Config helpers', () => {
     });
 
     it.each([
-      ['windows.popup.malware.message', DefaultPolicyNotificationMessage],
-      ['windows.popup.behavior_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['windows.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['windows.popup.ransomware.message', DefaultPolicyNotificationMessage],
-      ['linux.popup.malware.message', DefaultPolicyNotificationMessage],
-      ['linux.popup.behavior_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['linux.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['mac.popup.malware.message', DefaultPolicyNotificationMessage],
-      ['mac.popup.behavior_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['mac.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage],
-      ['mac.popup.ransomware.message', DefaultPolicyNotificationMessage],
-      ['windows.popup.device_control.message', DefaultPolicyDeviceNotificationMessage],
-      ['mac.popup.device_control.message', DefaultPolicyDeviceNotificationMessage],
-    ])('resets %s to per-key default', (keyPath, expectedDefault) => {
+      'windows.popup.malware.message',
+      'windows.popup.behavior_protection.message',
+      'windows.popup.memory_protection.message',
+      'windows.popup.ransomware.message',
+      'windows.popup.device_control.message',
+      'linux.popup.malware.message',
+      'linux.popup.behavior_protection.message',
+      'linux.popup.memory_protection.message',
+      'mac.popup.malware.message',
+      'mac.popup.behavior_protection.message',
+      'mac.popup.memory_protection.message',
+      'mac.popup.ransomware.message',
+      'mac.popup.device_control.message',
+    ])('resets %s to the factory default (empty string)', (keyPath) => {
       set(policy, keyPath, 'Custom message');
-      const resetPatch = resetCustomNotifications(policy);
 
-      const updatedPolicy = merge({}, policy, resetPatch);
-      expect(get(updatedPolicy, keyPath)).toBe(expectedDefault);
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
+
+      expect(get(updatedPolicy, keyPath)).toBe('');
     });
 
-    it('resets malware message to {filename} default', () => {
+    it('resets UI-filled templates to the factory default', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage);
+
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
+
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe('');
+      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe('');
+    });
+
+    it('matches the popup messages of a factory policy', () => {
       set(policy, 'windows.popup.malware.message', 'Custom message');
-      const resetPatch = resetCustomNotifications(policy);
+      set(policy, 'linux.popup.behavior_protection.message', 'Another custom message');
 
-      const updatedPolicy = merge({}, policy, resetPatch);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
-    });
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
 
-    it('resets empty messages to per-key defaults', () => {
-      set(policy, 'windows.popup.malware.message', '');
-      const resetPatch = resetCustomNotifications(policy);
-
-      const updatedPolicy = merge({}, policy, resetPatch);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
-    });
-
-    it('resets messages for all operating systems with per-key defaults', () => {
-      set(policy, 'windows.popup.malware.message', 'Custom message');
-      set(policy, 'mac.popup.memory_protection.message', 'Another custom message');
-      set(policy, 'linux.popup.behavior_protection.message', 'Yet another custom message');
-      const resetPatch = resetCustomNotifications(policy);
-
-      const updatedPolicy = merge({}, policy, resetPatch);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
-      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe(
-        DefaultPolicyRuleNotificationMessage
-      );
-      expect(get(updatedPolicy, 'linux.popup.behavior_protection.message')).toBe(
-        DefaultPolicyRuleNotificationMessage
-      );
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(updatedPolicy[os].popup).toEqual(policyFactory()[os].popup);
+      }
     });
 
     it('applies an override string to all keys when provided', () => {
       const override = 'custom test';
-      const resetPatch = resetCustomNotifications(policy, override);
 
-      const updatedPolicy = merge({}, policy, resetPatch);
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy, override));
+
       expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(override);
       expect(get(updatedPolicy, 'windows.popup.memory_protection.message')).toBe(override);
       expect(get(updatedPolicy, 'mac.popup.behavior_protection.message')).toBe(override);
@@ -427,9 +410,9 @@ describe('Policy Config helpers', () => {
 
     it('does not create popup.device_control for a stripped (Essentials) policy', () => {
       const stripped = removeDeviceControl(policyFactory());
-      const resetPatch = resetCustomNotifications(stripped);
 
-      const updatedPolicy = merge({}, stripped, resetPatch);
+      const updatedPolicy = merge({}, stripped, resetCustomNotifications(stripped));
+
       expect(get(updatedPolicy, 'windows.popup.device_control')).toBeUndefined();
       expect(get(updatedPolicy, 'mac.popup.device_control')).toBeUndefined();
     });

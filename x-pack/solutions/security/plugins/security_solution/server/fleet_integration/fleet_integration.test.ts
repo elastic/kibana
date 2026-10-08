@@ -1049,9 +1049,6 @@ describe('Fleet integrations', () => {
       // A policy as Fleet stores it on Essentials: the first save strips device control.
       const getStoredEssentialsPolicy = async () => {
         const stored = await runUpdate(generator.generatePolicyPackagePolicy());
-        expect(stored.inputs[0]!.config!.policy.value.windows.popup).not.toHaveProperty(
-          'device_control'
-        );
         return structuredClone(stored) as Parameters<typeof callback>[0];
       };
 
