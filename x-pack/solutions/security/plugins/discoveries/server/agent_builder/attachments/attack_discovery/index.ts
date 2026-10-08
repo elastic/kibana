@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { transformSearchResponseToAlerts } from '../../../routes/post/validate/helpers/transform_search_response_to_alerts';
@@ -56,21 +56,23 @@ const MAX_ENTITY_SUMMARY_LENGTH = 8000;
  * The title and markdown are the persisted, anonymized text. When `replacements` is present,
  * the attachment's view and the agent both insert the original values from it, one source.
  */
-export const attackDiscoveryAttachmentDataSchema = z.object({
-  // `format` lists each id on its own line, so an id may not contain whitespace, which would
-  // let it add lines of its own to what the agent reads.
-  alert_ids: z.array(z.string().max(512).regex(/^\S+$/)).max(1000),
-  details_markdown: z.string().max(MAX_DETAILS_LENGTH),
-  entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
-  id: z.string().max(512),
-  mitre_attack_tactics: z.array(z.string().max(256)).max(64).optional(),
-  replacements: attachmentReplacementsSchema.optional(),
-  summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
-  // The discovery's `@timestamp`, so its "Open in Attacks" link can set the Attacks page's time
-  // range to include it.
-  timestamp: z.string().datetime({ offset: true }).optional(),
-  title: z.string().max(MAX_TITLE_LENGTH),
-});
+export const attackDiscoveryAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    // `format` lists each id on its own line, so an id may not contain whitespace, which would
+    // let it add lines of its own to what the agent reads.
+    alert_ids: z.array(z.string().max(512).regex(/^\S+$/)).max(1000),
+    details_markdown: z.string().max(MAX_DETAILS_LENGTH),
+    entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
+    id: z.string().max(512),
+    mitre_attack_tactics: z.array(z.string().max(256)).max(64).optional(),
+    replacements: attachmentReplacementsSchema.optional(),
+    summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
+    // The discovery's `@timestamp`, so its "Open in Attacks" link can set the Attacks page's time
+    // range to include it.
+    timestamp: z.string().datetime({ offset: true }).optional(),
+    title: z.string().max(MAX_TITLE_LENGTH),
+  })
+);
 
 export type AttackDiscoveryAttachmentData = z.infer<typeof attackDiscoveryAttachmentDataSchema>;
 

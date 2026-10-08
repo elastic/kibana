@@ -18,7 +18,7 @@ import {
 } from '../../../../../public/constants';
 
 export const OBSERVABILITY_ALERTING_SURFACES = [
-  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alert episodes' },
+  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alerts' },
   { name: 'Rules (V1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
   { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
   { name: 'Rule library', path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, title: 'Rule library' },

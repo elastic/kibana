@@ -147,6 +147,461 @@ describe('PayloadConformance', () => {
   );
 });
 
+describe('PayloadConformance contract checks', () => {
+  const worldChecks = (result: string, status = 'completed') => [
+    { name: 'entity_role', status, result, details: 'd' },
+    { name: 'process_parent', status, result, details: 'd' },
+    { name: 'network_destination', status, result, details: 'd' },
+  ];
+  const coverage = (entitiesSeen: number, eventsSeen: number, truncated = false) => ({
+    alerts: { seen: 1, cap: 10, truncated: false },
+    entities: { seen: entitiesSeen, cap: 10, truncated },
+    events: { seen: eventsSeen, cap: 10, truncated },
+  });
+
+  it('returns 1 for a false_positive with all world checks and both sources seen', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          raw: {
+            coverage: coverage(2, 5),
+            checks: worldChecks('contradicts'),
+            claims: {},
+          },
+        },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it.each<[string, string]>([
+    ['entity_role', 'checks is missing "entity_role"'],
+    ['process_parent', 'checks is missing "process_parent"'],
+    ['network_destination', 'checks is missing "network_destination"'],
+  ])('returns 0 when checks drops %s', async (dropped, expectedProblem) => {
+    const checks = worldChecks('supports').filter(({ name }) => name !== dropped);
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: { ...completed, raw: { coverage: coverage(2, 5), checks, claims: {} } },
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain(expectedProblem);
+  });
+
+  it('returns 0 for a false_positive with entities seen 0', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: coverage(0, 5), checks: worldChecks('contradicts'), claims: {} },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
+  it('returns 0 for a false_positive with entities coverage absent', async () => {
+    const cov = coverage(2, 5);
+    delete (cov as Record<string, unknown>).entities;
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: cov, checks: worldChecks('contradicts'), claims: {} },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
+  it('returns 0 for a false_positive whose world checks support and contradict', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: {
+          coverage: coverage(2, 5),
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'supports', details: 'd' },
+            { name: 'process_parent', status: 'completed', result: 'contradicts', details: 'd' },
+            {
+              name: 'network_destination',
+              status: 'completed',
+              result: 'contradicts',
+              details: 'd',
+            },
+          ],
+          claims: {},
+        },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('checks both support and contradict');
+  });
+
+  it('returns 1 for a false_positive with alert_linkage supports but world contradicts', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              ...worldChecks('contradicts'),
+              { name: 'alert_linkage', status: 'completed', result: 'supports', details: 'd' },
+            ],
+            claims: {},
+          },
+        },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('returns 0 for a true_positive whose world checks support and contradict', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: coverage(2, 5),
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'contradicts', details: 'd' },
+            { name: 'process_parent', status: 'completed', result: 'supports', details: 'd' },
+            { name: 'network_destination', status: 'completed', result: 'supports', details: 'd' },
+          ],
+          claims: {},
+        },
+      },
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('checks both support and contradict');
+  });
+
+  it('rule 1 ignores a contradicting alert_linkage', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'true_positive',
+          payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              ...worldChecks('supports'),
+              { name: 'alert_linkage', status: 'completed', result: 'contradicts', details: 'd' },
+            ],
+            claims: {},
+          },
+        },
+        'true_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('ignores skipped checks when testing rule 1', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'true_positive',
+          payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              { name: 'entity_role', status: 'skipped', result: 'contradicts', details: 'd' },
+              { name: 'process_parent', status: 'completed', result: 'supports', details: 'd' },
+              {
+                name: 'network_destination',
+                status: 'completed',
+                result: 'supports',
+                details: 'd',
+              },
+            ],
+            claims: {},
+          },
+        },
+        'true_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('rule 3 ignores a supporting process_parent check that was skipped', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'true_positive',
+          payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              { name: 'entity_role', status: 'skipped', result: 'supports', details: 'd' },
+              { name: 'process_parent', status: 'skipped', result: 'supports', details: 'd' },
+              { name: 'network_destination', status: 'skipped', result: 'supports', details: 'd' },
+            ],
+            claims: {},
+          },
+        },
+        'true_positive'
+      )
+    ).toBe(0);
+  });
+
+  it('returns 0 for a false_positive with entities seen reported as string "0"', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: {
+          coverage: {
+            alerts: { seen: 1, cap: 10, truncated: false },
+            entities: { seen: '0', cap: 10, truncated: false },
+            events: { seen: 5, cap: 10, truncated: false },
+          },
+          checks: worldChecks('contradicts'),
+          claims: {},
+        },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
+  it('returns 0 for a false_positive with events seen 0', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: coverage(2, 0), checks: worldChecks('contradicts'), claims: {} },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('false_positive with missing evidence');
+  });
+
+  it('passes a false_positive with both sources seen 1', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          raw: { coverage: coverage(1, 1), checks: worldChecks('contradicts'), claims: {} },
+        },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('passes a true_positive with entities seen 0', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'true_positive',
+          payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+          raw: { coverage: coverage(0, 5), checks: worldChecks('supports'), claims: {} },
+        },
+        'true_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('returns 0 for a non-truncated inconclusive dropping a world check', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        outcome: 'inconclusive',
+        payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: coverage(2, 5),
+          checks: worldChecks('neutral').slice(0, 2),
+          claims: {},
+        },
+      },
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('checks is missing');
+  });
+
+  it('returns 0 for a truncated inconclusive that kept its checks but dropped one', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        outcome: 'inconclusive',
+        payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: coverage(2, 5, true),
+          checks: worldChecks('neutral').slice(0, 2),
+          claims: {},
+        },
+      },
+      expected: { outcome: 'inconclusive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('checks is missing');
+  });
+
+  it('returns 0 for a false_positive with no world check contradicting', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        raw: { coverage: coverage(2, 5), checks: worldChecks('neutral'), claims: {} },
+      },
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('contradicts rule 2');
+  });
+
+  it('passes a false_positive with a skipped contradicting check but a completed one', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              { name: 'entity_role', status: 'completed', result: 'contradicts', details: 'd' },
+              { name: 'process_parent', status: 'skipped', result: 'supports', details: 'd' },
+              { name: 'network_destination', status: 'skipped', details: 'd' },
+            ],
+            claims: {},
+          },
+        },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('returns 0 for a true_positive with only entity_role supporting', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: coverage(2, 5),
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'supports', details: 'd' },
+            { name: 'process_parent', status: 'completed', result: 'neutral', details: 'd' },
+            { name: 'network_destination', status: 'skipped', details: 'd' },
+          ],
+          claims: {},
+        },
+      },
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('contradicts rule 3');
+  });
+
+  it('returns 0 for a true_positive with a world check contradicting', async () => {
+    const result = await payloadConformance.evaluate({
+      input: {},
+      output: {
+        ...completed,
+        outcome: 'true_positive',
+        payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+        raw: {
+          coverage: coverage(2, 5),
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'neutral', details: 'd' },
+            { name: 'process_parent', status: 'completed', result: 'supports', details: 'd' },
+            {
+              name: 'network_destination',
+              status: 'completed',
+              result: 'contradicts',
+              details: 'd',
+            },
+          ],
+          claims: {},
+        },
+      },
+      expected: { outcome: 'true_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('contradicts rule 3');
+  });
+
+  it('passes a true_positive with network_destination supporting', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'true_positive',
+          payload: { verdict: 'true_positive', summary_markdown: 'A summary' },
+          raw: {
+            coverage: coverage(2, 5),
+            checks: [
+              { name: 'entity_role', status: 'completed', result: 'supports', details: 'd' },
+              { name: 'process_parent', status: 'completed', result: 'neutral', details: 'd' },
+              {
+                name: 'network_destination',
+                status: 'completed',
+                result: 'supports',
+                details: 'd',
+              },
+            ],
+            claims: {},
+          },
+        },
+        'true_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('returns 1 for a downgraded inconclusive with no checks and truncated events', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'inconclusive',
+          payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+          raw: { coverage: coverage(2, 0, true), claims: undefined, checks: undefined },
+        },
+        'inconclusive'
+      )
+    ).toBe(1);
+  });
+});
+
 describe('trajectory', () => {
   const trajectory = createFpTpTrajectoryEvaluator();
 
