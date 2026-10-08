@@ -22,7 +22,10 @@ groups:
         applies_to:
           stack: ga 8.3
           ech: ga
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
 
   - group: Value lists settings
     id: value-lists-settings
@@ -36,7 +39,13 @@ groups:
         applies_to:
           stack: ga
           ech: ga
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
+        note: |
+          :applies_to: ech: ga
+          On {{ech}}, the value must be between `1000000` and `100000000`.
 
       - setting: xpack.lists.importBufferSize
         description: |
@@ -46,7 +55,13 @@ groups:
         applies_to:
           stack: ga
           ech: ga
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
+        note: |
+          :applies_to: ech: ga
+          On {{ech}}, the value must be between `1` and `10000`.
 
   - group: Elastic Defend settings
     id: elastic-defend-settings
@@ -54,40 +69,51 @@ groups:
 
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
-          Configure the maximum file size for use with the `upload` response action available with the Elastic Defend integration. To learn more, check [Endpoint response actions](docs-content://solutions/security/endpoint-response-actions.md#_upload).
-
-          The default and maximum values vary by version:
-
-          * {applies_to}`stack: ga 9.5+` {applies_to}`serverless:` **Default**: `500000000` bytes (500 MB). **Maximum**: no limit.
-          * {applies_to}`stack: ga 8.9-9.4` **Default**: `26214400` bytes (25 MB). **Maximum**: `104857600` bytes (100 MB).
+          Configure the maximum file size, in bytes, for use with the `upload` response action available with the Elastic Defend integration. There is no upper limit. To learn more, check [Endpoint response actions](docs-content://solutions/security/endpoint-response-actions.md#_upload).
         datatype: int
+        default: 209715200
         applies_to:
           stack: ga 8.9
           ech: ga
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
         note: |
-          :applies_to: {stack: ga 9.5+, serverless: ga}
+          :applies_to: stack: ga 9.0-9.4
+          In these versions, the default is `26214400` bytes (25 MB) and the maximum is `104857600` bytes (100 MB).
+        warning: |
+          :applies_to: stack: ga 9.5+
           Setting this value too high may cause timeouts, depending on your cluster's setup and resources.
 
       - setting: xpack.securitySolution.disableEndpointRuleAutoInstall
         description: |
-          Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created.
+          Set to `true` to stop Kibana from automatically installing the **Endpoint Security (Elastic Defend)** prebuilt rule when a new Elastic Defend integration policy is created. Set to `false` to keep the automatic installation.
         datatype: bool
         default: false
         applies_to:
-          - "stack: ga 9.2.4!+"
-          - "ech: ga"
-          - "self: ga"
+          stack: ga 9.1.10!+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.2.0!-9.2.3!
+          This setting is not available in these versions.
 
       - setting: xpack.securitySolution.maxEndpointScriptFileSize
         description: |
-          The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+          The maximum file size, in bytes, for scripts uploaded to the Elastic Defend script library.
         datatype: int
         default: 26214400
         applies_to:
-          - "stack: ga 9.4+"
-          - "ech: ga"
-          - "self: ga"
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
 
   - group: Experimental features
     id: experimental-features
@@ -100,10 +126,13 @@ groups:
         applies_to:
           stack: ga
           ech: ga
+          ece: ga
+          eck: ga
           self: ga
+          serverless: unavailable
         note: "Experimental features should not be enabled in production environments. Experimental features may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features."
         example: |
           ```yaml
           xpack.securitySolution.enableExperimental:
-            - sentinelRulesMigration
+            - featureFlagName
           ```
