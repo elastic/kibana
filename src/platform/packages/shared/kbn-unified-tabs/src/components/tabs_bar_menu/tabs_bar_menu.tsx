@@ -404,7 +404,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 </EuiFlexGroup>
               </EuiPopoverTitle>
               <div css={styles.sectionListCss}>
+                {/* Reset the nested panel when the menu is reopened. */}
                 <EuiContextMenu
+                  key={menuOpenedAt}
                   css={styles.recentlyClosedContextMenuCss}
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}

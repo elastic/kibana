@@ -291,7 +291,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.snapshotRestore.restoreSnapshot(sourceOnlyLogsDbIndex, true);
 
         // Verify it returns an error and doesn't allow to restore snapshot
-        expect(await testSubjects.exists('restoreSnapshotError')).to.be(true);
+        expect(await testSubjects.waitForExists('restoreSnapshotError')).to.be(true);
         expect(await testSubjects.getVisibleText('restoreSnapshotError')).to.contain(
           `index [${sourceOnlyLogsDbIndex}] wasn't fully snapshotted - cannot restore`
         );
