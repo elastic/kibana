@@ -596,7 +596,7 @@ describe('writeAndAttach', () => {
       get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
     } as unknown as ConversationPublicClient);
 
-  it('writes the index after the owner check and creates the by-reference attachment', async () => {
+  it('writes the index after confirming the conversation is readable, then creates the by-reference attachment', async () => {
     const { storage, service } = setup();
     const create = jest.fn().mockResolvedValue({ id: noteId() });
 
@@ -677,9 +677,11 @@ describe('writeAndAttach', () => {
     });
   });
 
-  it('does not write when the caller does not own the conversation', async () => {
+  it('does not write when the caller cannot converse with the conversation', async () => {
     const { storage, service } = setup();
 
+    // `conversations.get` itself enforces `converse` access and fails closed as not-found;
+    // `writeAndAttach` relies on that instead of a separate permission check.
     await expect(
       note.writeAndAttach({
         service,
@@ -688,7 +690,11 @@ describe('writeAndAttach', () => {
         mutate: () => body(),
         conversationId: CONVERSATION_ID,
         conversations: {
-          get: jest.fn().mockResolvedValue({ permissions: { update_access_control: false } }),
+          get: jest
+            .fn()
+            .mockRejectedValue(
+              createConversationNotFoundError({ conversationId: CONVERSATION_ID })
+            ),
         } as unknown as ConversationPublicClient,
         attachments: { create: jest.fn() } as unknown as AttachmentPublicClient,
       })

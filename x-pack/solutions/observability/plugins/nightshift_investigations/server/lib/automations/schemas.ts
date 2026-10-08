@@ -15,6 +15,13 @@ export const automationCompletionInputSchema = z.object({
   connectorId: investigationNotificationDestinationSchema.shape.connector_id.optional(),
 });
 
+export const automationCompletionUpdateSchema = automationCompletionInputSchema.extend({
+  action: automationCompletionInputSchema.shape.action.nullable(),
+  targetMode: automationCompletionInputSchema.shape.targetMode.nullable(),
+  destination: automationCompletionInputSchema.shape.destination.nullable(),
+  connectorId: automationCompletionInputSchema.shape.connectorId.nullable(),
+});
+
 export const automationCompletionSchema = automationCompletionInputSchema.superRefine(
   (completion, context) => {
     if (
