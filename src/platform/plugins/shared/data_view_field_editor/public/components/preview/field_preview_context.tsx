@@ -141,6 +141,8 @@ export const FieldPreviewProvider: FC<
       script: previewScript,
     });
 
+    controller.completePreviewRequest(currentApiCall);
+
     if (currentApiCall !== controller.getPreviewCount()) {
       // Discard this response as there is another one inflight
       // or we have called reset() and no longer need the response.
@@ -322,7 +324,9 @@ export const FieldPreviewProvider: FC<
    * changes the preview has to count as loading and the response of a request that is still in
    * flight has to be discarded: it describes the previous form values, and the guard in
    * updatePreview() only discards it once the next request has been issued, which the 500ms
-   * debounce below delays.
+   * debounce below delays. Discarding also invalidates the params cache, so that the debounced
+   * updatePreview() issues a new request even if the form went back to the discarded request's
+   * params in the meantime.
    */
   useEffect(() => {
     if (
