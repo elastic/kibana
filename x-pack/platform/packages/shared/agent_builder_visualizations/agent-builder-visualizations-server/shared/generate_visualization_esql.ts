@@ -50,7 +50,7 @@ interface GenerateVisualizationEsqlParams {
   timeRange?: TimeRange;
   /**
    * Renderer-specific guidance appended to the shared ES|QL instructions, e.g.
-   * Vega's stricter time-range-filtering requirements.
+   * Vega's dotless column names.
    */
   extraInstructions?: string;
 }
