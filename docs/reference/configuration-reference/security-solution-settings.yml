@@ -121,7 +121,7 @@ groups:
 
       - setting: xpack.securitySolution.entityAnalytics.riskEngine.alertSampleSizePerShard
         description: |
-          The maximum number of alerts per index shard that the risk engine samples for each entity when calculating risk scores. A value set in the risk engine configuration takes precedence over this setting.
+          The maximum number of alerts that the risk engine samples for each entity when calculating risk scores. A value set in the risk engine configuration takes precedence over this setting.
         datatype: int
         default: 10000
         applies_to:
@@ -145,7 +145,7 @@ groups:
           self: ga
           serverless: unavailable
         deprecation_details: |
-          This setting has no effect since 9.4. Kibana accepts it but ignores the value. Privileged user monitoring is replaced by [watchlists](docs-content://solutions/security/advanced-entity-analytics/watchlists.md).
+          Deprecated since 9.4. Privileged user monitoring is replaced by [watchlists](docs-content://solutions/security/advanced-entity-analytics/watchlists.md).
 
   - group: Experimental features
     id: experimental-features
