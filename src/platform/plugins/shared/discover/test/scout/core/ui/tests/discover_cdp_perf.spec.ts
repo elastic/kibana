@@ -77,10 +77,11 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, page, context, perfTracker }) => {
+    test.beforeEach(async ({ browserAuth, page, context, pageObjects, perfTracker }) => {
       await browserAuth.loginAsAdmin();
       cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
+      await pageObjects.discover.setQueryMode('classic');
       await page.gotoApp('home');
       await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
       await perfTracker.waitForJsLoad(cdp); // Ensure JS bundles are fully loaded
@@ -100,7 +101,6 @@ test.describe(
       perfTracker.captureBundleResponses(cdp); // Start tracking
 
       // Navigate to Discover app
-      await pageObjects.discover.setQueryMode('classic');
       await pageObjects.collapsibleNav.clickItem('Discover');
       await pageObjects.discover.waitUntilTabIsLoaded();
 
@@ -141,11 +141,6 @@ test.describe(
       perfTracker,
       log,
     }) => {
-      await pageObjects.discover.setQueryMode('classic');
-      await page.reload();
-      await page.testSubj.waitForSelector('homeApp', { timeout: 20000 });
-      await perfTracker.waitForJsLoad(cdp);
-
       const beforeMetrics = await perfTracker.capturePagePerformanceMetrics(cdp);
 
       // Navigate to Discover app
