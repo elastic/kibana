@@ -265,14 +265,6 @@ function runParsers(
   return [];
 }
 
-function getInputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
-  return runParsers(metadata, INPUT_FIELD_PARSERS);
-}
-
-function getOutputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
-  return runParsers(metadata, OUTPUT_FIELD_PARSERS);
-}
-
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
   const toolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
@@ -307,8 +299,8 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       // Multi-valued: one finish reason per choice — keep every element.
       finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
-    inputMessages: getInputMessages(metadata),
-    outputMessages: getOutputMessages(metadata),
+    inputMessages: runParsers(metadata, INPUT_FIELD_PARSERS),
+    outputMessages: runParsers(metadata, OUTPUT_FIELD_PARSERS),
     systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
     toolDefinitions,
     toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
