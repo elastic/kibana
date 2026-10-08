@@ -15,12 +15,19 @@ import type { ConversationEventBus } from './conversation_event_bus';
 import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
 /**
+ * Opt-in check registered by a solution through `conversations.enableUpdatedTrigger`, resolving
+ * whether `ai.conversation.updated` should be emitted for the request that performed the write.
+ */
+export type ConversationUpdatedCheck = (request: KibanaRequest) => Promise<boolean>;
+
+/**
  * Registers bridge listeners that forward conversation domain events to workflows_extensions.
  */
 export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
-  logger: Logger
+  logger: Logger,
+  conversationUpdatedChecks: readonly ConversationUpdatedCheck[]
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -68,7 +75,28 @@ export function registerConversationWorkflowEventBridge(
     );
   });
 
+  // Opt-in: without a solution enabling the trigger, the emit is skipped before the subscriber
+  // lookup, so deployments that have nothing subscribed don't pay for the write.
+  const isConversationUpdatedEnabled = async (request: KibanaRequest): Promise<boolean> => {
+    for (const isEnabled of conversationUpdatedChecks) {
+      try {
+        if (await isEnabled(request)) {
+          return true;
+        }
+      } catch (error) {
+        logger.warn(
+          `Failed to check whether "${ConversationUpdatedTriggerId}" is enabled: ${error}`
+        );
+      }
+    }
+    return false;
+  };
+
   conversationEventBus.onConversationUpdated((request, payload) => {
-    void forward(ConversationUpdatedTriggerId, payload, request);
+    void (async () => {
+      if (await isConversationUpdatedEnabled(request)) {
+        await forward(ConversationUpdatedTriggerId, payload, request);
+      }
+    })();
   });
 }

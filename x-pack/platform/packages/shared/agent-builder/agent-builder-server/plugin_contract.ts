@@ -229,6 +229,18 @@ export interface RuntimeStart {
 }
 
 /**
+ * AgentBuilder conversations service's setup contract.
+ */
+export interface ConversationsSetup {
+  /**
+   * Opts in to the `ai.conversation.updated` workflow trigger, which is only emitted for a
+   * conversation write when one of the registered checks resolves `true` for the request that
+   * performed it. Without any registered check, the trigger is never emitted.
+   */
+  enableUpdatedTrigger(isEnabled: (request: KibanaRequest) => Promise<boolean>): void;
+}
+
+/**
  * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
@@ -272,6 +284,10 @@ export interface AgentBuilderPluginSetup {
    * Conversation templates setup contract, which can be used to register templates.
    */
   conversationTemplates: ConversationTemplatesSetup;
+  /**
+   * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
+   */
+  conversations: ConversationsSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */

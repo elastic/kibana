@@ -49,6 +49,7 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
+import type { ConversationUpdatedCheck } from './workflows/triggers/event_bridge';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -77,6 +78,7 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
+  private readonly conversationUpdatedChecks: ConversationUpdatedCheck[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -319,6 +321,11 @@ export class AgentBuilderPlugin
           serviceSetups.conversationTemplates
         ),
       },
+      conversations: {
+        enableUpdatedTrigger: (isEnabled) => {
+          this.conversationUpdatedChecks.push(isEnabled);
+        },
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -381,7 +388,8 @@ export class AgentBuilderPlugin
     registerConversationWorkflowEventBridge(
       this.conversationEventBus,
       startDeps.workflowsExtensions,
-      this.logger
+      this.logger,
+      this.conversationUpdatedChecks
     );
 
     const {

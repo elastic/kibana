@@ -23,6 +23,7 @@ import {
   ConversationUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 import { createConversationEventBus } from './conversation_event_bus';
+import type { ConversationUpdatedCheck } from './event_bridge';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
 
 const flushMicrotasks = async () => {
@@ -77,7 +78,10 @@ describe('registerConversationWorkflowEventBridge', () => {
     mockClient = createWorkflowsClientMock();
     workflowsExtensions.getClient.mockClear();
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+    // `ai.conversation.updated` is opt-in; the gate itself is covered in its own describe below.
+    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger, [
+      async () => true,
+    ]);
   });
 
   it('forwards metadata patched events to workflows extensions', async () => {
@@ -117,7 +121,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('does nothing when workflowsExtensions is undefined', async () => {
     const isolatedBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger);
+    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger, []);
 
     isolatedBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -136,7 +140,7 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger);
+    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger, []);
 
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -256,6 +260,63 @@ describe('registerConversationWorkflowEventBridge', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Failed to emit workflow trigger "${ConversationUpdatedTriggerId}"`)
       );
+    });
+
+    describe('opt-in gate', () => {
+      /** Emits on a bus gated by `checks` and resolves once the forward had a chance to run. */
+      const emitWithChecks = async (checks: ConversationUpdatedCheck[]) => {
+        const gatedBus = createConversationEventBus();
+        registerConversationWorkflowEventBridge(gatedBus, workflowsExtensions, logger, checks);
+
+        gatedBus.emitConversationUpdated(request, payload);
+        await flushMicrotasks();
+      };
+
+      it('should not emit when no check is registered', async () => {
+        await emitWithChecks([]);
+
+        expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not emit when every check resolves false', async () => {
+        await emitWithChecks([async () => false, async () => false]);
+
+        expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
+        expect(mockClient.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should emit when any check resolves true', async () => {
+        await emitWithChecks([async () => false, async () => true]);
+
+        expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+      });
+
+      it('should warn and keep evaluating when a check throws', async () => {
+        await emitWithChecks([
+          async () => {
+            throw new Error('settings unavailable');
+          },
+          async () => true,
+        ]);
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `Failed to check whether "${ConversationUpdatedTriggerId}" is enabled`
+          )
+        );
+        expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+      });
+
+      it('should pass the emitting request to each check', async () => {
+        const firstCheck = jest.fn().mockResolvedValue(false);
+        const secondCheck = jest.fn().mockResolvedValue(false);
+
+        await emitWithChecks([firstCheck, secondCheck]);
+
+        expect(firstCheck).toHaveBeenCalledWith(request);
+        expect(secondCheck).toHaveBeenCalledWith(request);
+      });
     });
   });
 });
