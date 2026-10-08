@@ -182,11 +182,9 @@ export const toSortValue = (value: unknown): SortValue =>
 /** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
 const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
 
-export const createEsqlRunner = (
-  searchService: DataPublicPluginStart['search'],
-  signal?: AbortSignal
-): EsqlRunner => {
-  return async (query) => {
+export const createEsqlRunner =
+  (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
+  async (query) => {
     const { rawResponse } = await lastValueFrom(
       searchService.search<
         IKibanaSearchRequest<{ query: string }>,
@@ -202,7 +200,6 @@ export const createEsqlRunner = (
     );
     return toRows(rawResponse);
   };
-};
 
 /**
  * Resolves to `null` when the request fails, so the caller can fall back instead of failing.
