@@ -120,6 +120,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -158,6 +159,8 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
+
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
 export {
   compareWatchesForDisplay,

@@ -6,9 +6,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
+import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import { registerSubjectAttachmentTypes } from './subjects/attachments';
+import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionPublicStepDefinitions } from './workflow_execution/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
 import { escalationTemplate } from './conversation_templates/templates/escalation/register';
 import { investigationTemplate } from './conversation_templates/templates/investigation/register';
@@ -21,9 +26,10 @@ import type {
 } from './types';
 
 /**
- * Registers Impact workflow steps, the Impact attachment UI, and the conversation details flyout
- * UI of the `investigation` and `escalation` templates. Escalations, user profiles and the
- * connected investigation components are also consumed directly by a solution's UI.
+ * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
+ * conversation details flyout UI of the `investigation` and `escalation` templates. Escalations,
+ * user profiles and the connected investigation components are also consumed directly by a
+ * solution's UI.
  */
 export class AgenticInvestigationsPublicPlugin
   implements
@@ -35,6 +41,7 @@ export class AgenticInvestigationsPublicPlugin
     >
 {
   private readonly escalationsEnabled: boolean;
+  private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -46,7 +53,8 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginSetup {
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
-    return {};
+    registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
+    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
   }
 
   start(
@@ -56,12 +64,21 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder);
+      if (this.escalationsEnabled) {
+        registerEscalationConversationEventUiDefinitions({
+          conversationEvents: agentBuilder.conversationEvents,
+          application: core.application,
+        });
+      }
+      registerSubjectAttachmentTypes(agentBuilder);
+      registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
         startDeps: { ...startDeps, agentBuilder },
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        groupedAttachments: this.groupedAttachments,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
