@@ -69,7 +69,7 @@ function StackTracesContent() {
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
-  const { schema } = useProfilingSchema();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({
     rangeFrom,
@@ -81,7 +81,7 @@ function StackTracesContent() {
       if (!topNType) {
         return Promise.resolve({ charts: [], metadata: {} });
       }
-      if (!schema) {
+      if (!selectedSchema) {
         return undefined;
       }
       return fetchTopN({
@@ -90,10 +90,10 @@ function StackTracesContent() {
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
-        schema,
+        schema: selectedSchema,
       }).then(groupSamplesByCategory);
     },
-    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery, schema]
+    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery, selectedSchema]
   );
 
   function onChartClick(category: string) {

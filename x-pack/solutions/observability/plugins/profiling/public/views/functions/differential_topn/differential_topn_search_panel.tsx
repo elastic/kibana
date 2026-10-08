@@ -31,7 +31,7 @@ export function DifferentialTopNSearchPanel() {
   } = useProfilingParams('/functions/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
-  const { schema } = useProfilingSchema();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -81,7 +81,7 @@ export function DifferentialTopNSearchPanel() {
 
   return (
     <EuiFlexGroup direction="column">
-      <PrimaryAndComparisonSearchBar schema={schema} />
+      <PrimaryAndComparisonSearchBar schema={selectedSchema} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>

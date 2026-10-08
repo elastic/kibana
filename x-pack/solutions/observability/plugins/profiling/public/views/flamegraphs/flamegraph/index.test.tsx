@@ -26,7 +26,7 @@ jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dep
   }),
 }));
 jest.mock('../../../components/contexts/profiling_schema/use_profiling_schema', () => ({
-  useProfilingSchema: () => ({ schema: 'otel' }),
+  useProfilingSchema: () => ({ selectedSchema: 'otel' }),
 }));
 jest.mock('../../../hooks/use_profiling_params', () => ({
   useProfilingParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now', kuery: '' } }),

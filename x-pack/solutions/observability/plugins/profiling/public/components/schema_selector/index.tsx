@@ -119,7 +119,7 @@ const getHelpText = ({
 };
 
 export function SchemaSelector() {
-  const { schema, schemas, supportedSchemas, isLoading, error, onSchemaChange } =
+  const { selectedSchema, schemas, supportedSchemas, isLoading, error, onSchemaChange } =
     useProfilingSchema();
   const { fontSize } = useEuiFontSize('s');
 
@@ -134,7 +134,7 @@ export function SchemaSelector() {
     [offeredSchemas]
   );
 
-  const isInvalid = schema !== undefined && !offeredSchemas.includes(schema);
+  const isInvalid = selectedSchema !== undefined && !offeredSchemas.includes(selectedSchema);
 
   const displayOptions = useMemo<Array<EuiSuperSelectOption<SelectOption>>>(() => {
     if (options.length === 0) {
@@ -149,8 +149,8 @@ export function SchemaSelector() {
     if (isInvalid) {
       return [
         {
-          inputDisplay: <InvalidDisplay value={schemaTranslationMap[schema]} />,
-          dropdownDisplay: <InvalidDropdownDisplay value={schemaTranslationMap[schema]} />,
+          inputDisplay: <InvalidDisplay value={schemaTranslationMap[selectedSchema]} />,
+          dropdownDisplay: <InvalidDropdownDisplay value={schemaTranslationMap[selectedSchema]} />,
           value: UNKNOWN_OPTION,
           disabled: true,
         },
@@ -159,7 +159,7 @@ export function SchemaSelector() {
     }
 
     return options;
-  }, [isInvalid, options, schema]);
+  }, [isInvalid, options, selectedSchema]);
 
   const onSelect = useCallback(
     (selectedValue: SelectOption) => {
@@ -183,11 +183,11 @@ export function SchemaSelector() {
         id="profilingSchemaSelectorSelect"
         options={displayOptions}
         compressed
-        valueOfSelected={isInvalid ? UNKNOWN_OPTION : schema}
+        valueOfSelected={isInvalid ? UNKNOWN_OPTION : selectedSchema}
         placeholder={PLACEHOLDER}
         onChange={onSelect}
         isLoading={isLoading}
-        disabled={isLoading || !schema}
+        disabled={isLoading || !selectedSchema}
         fullWidth
         css={{ fontSize }}
         prepend={<EuiFormLabel>{SCHEMA_LABEL}</EuiFormLabel>}

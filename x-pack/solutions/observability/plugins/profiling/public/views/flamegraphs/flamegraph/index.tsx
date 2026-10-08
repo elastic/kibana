@@ -34,11 +34,11 @@ export function FlameGraphView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
-  const { schema } = useProfilingSchema();
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
-      if (!schema) {
+      if (!selectedSchema) {
         return undefined;
       }
       return fetchElasticFlamechart({
@@ -47,10 +47,10 @@ export function FlameGraphView() {
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
         showErrorFrames,
-        schema,
+        schema: selectedSchema,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames, schema]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames, selectedSchema]
   );
 
   const { data } = state;

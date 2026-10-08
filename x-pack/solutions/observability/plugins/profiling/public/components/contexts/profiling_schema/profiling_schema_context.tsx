@@ -19,7 +19,7 @@ import { useEnabledProfilingStatus } from '../profiling_status/use_enabled_profi
 
 export interface ProfilingSchemaContextValue {
   /** Schema selected in the URL, undefined until a default is selected. */
-  schema?: ProfilingSchema;
+  selectedSchema?: ProfilingSchema;
   /** Schemas with data for the time range and query, undefined while unknown. */
   schemas?: ProfilingSchema[];
   /** Schemas the deployment supports, regardless of their data. */
@@ -109,7 +109,14 @@ export function ProfilingSchemaContextProvider({
   );
 
   const value = useMemo(
-    () => ({ schema, schemas, supportedSchemas, isLoading, error, onSchemaChange }),
+    () => ({
+      selectedSchema: schema,
+      schemas,
+      supportedSchemas,
+      isLoading,
+      error,
+      onSchemaChange,
+    }),
     [schema, schemas, supportedSchemas, isLoading, error, onSchemaChange]
   );
 

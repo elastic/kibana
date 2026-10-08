@@ -32,7 +32,11 @@ jest.mock('../../components/profiling_app_page_template', () => {
   );
   return {
     ProfilingAppPageTemplate: ({ children }: { children: React.ReactElement }) =>
-      createElement(ProfilingSchemaContext.Provider, { value: { schema: mockSchema } }, children),
+      createElement(
+        ProfilingSchemaContext.Provider,
+        { value: { selectedSchema: mockSchema } },
+        children
+      ),
   };
 });
 jest.mock('../../routing/route_breadcrumb', () => ({

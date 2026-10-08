@@ -37,7 +37,7 @@ export function DifferentialFlameGraphSearchPanel() {
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
-  const { schema } = useProfilingSchema();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -106,7 +106,7 @@ export function DifferentialFlameGraphSearchPanel() {
 
   return (
     <EuiFlexGroup direction="column">
-      <PrimaryAndComparisonSearchBar schema={schema} />
+      <PrimaryAndComparisonSearchBar schema={selectedSchema} />
       <EuiFlexGroup direction="row">
         <DifferentialComparisonMode
           comparisonMode={comparisonMode}

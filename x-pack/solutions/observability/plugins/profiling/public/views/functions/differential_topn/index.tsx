@@ -60,11 +60,11 @@ export function DifferentialTopNFunctionsView() {
   const {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
-  const { schema } = useProfilingSchema();
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
-      if (!schema) {
+      if (!selectedSchema) {
         return undefined;
       }
       return fetchTopNFunctions({
@@ -74,15 +74,15 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
-        schema,
+        schema: selectedSchema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, schema]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, selectedSchema]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.start || !comparisonTimeRange.end || !schema) {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end || !selectedSchema) {
         return undefined;
       }
       return fetchTopNFunctions({
@@ -92,7 +92,7 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
-        schema,
+        schema: selectedSchema,
       });
     },
     [
@@ -100,7 +100,7 @@ export function DifferentialTopNFunctionsView() {
       comparisonTimeRange.end,
       fetchTopNFunctions,
       comparisonKuery,
-      schema,
+      selectedSchema,
     ]
   );
 

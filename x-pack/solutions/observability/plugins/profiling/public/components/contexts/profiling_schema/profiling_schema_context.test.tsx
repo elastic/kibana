@@ -148,7 +148,7 @@ describe('ProfilingSchemaContextProvider', () => {
 
         const { result } = renderProfilingSchema();
 
-        await waitFor(() => expect(result.current.schema).toBe(expectedSchema));
+        await waitFor(() => expect(result.current.selectedSchema).toBe(expectedSchema));
         expect(result.current.history.action).toBe('REPLACE');
         expect(result.current.location.search).toBe(`?kuery=&schema=${expectedSchema}`);
       }
@@ -163,7 +163,7 @@ describe('ProfilingSchemaContextProvider', () => {
 
       const { result } = renderProfilingSchema();
 
-      await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.OTEL));
+      await waitFor(() => expect(result.current.selectedSchema).toBe(ProfilingSchema.OTEL));
       expect(result.current.schemas).toBeUndefined();
       expect(result.current.error).toEqual(new Error('Request failed'));
     });
@@ -176,7 +176,7 @@ describe('ProfilingSchemaContextProvider', () => {
 
         const { result } = renderProfilingSchema({ profilingStatus });
 
-        await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.ECS));
+        await waitFor(() => expect(result.current.selectedSchema).toBe(ProfilingSchema.ECS));
       });
 
       it('selects Universal Profiling when the schemas with data cannot be fetched', async () => {
@@ -188,7 +188,7 @@ describe('ProfilingSchemaContextProvider', () => {
 
         const { result } = renderProfilingSchema({ profilingStatus });
 
-        await waitFor(() => expect(result.current.schema).toBe(ProfilingSchema.ECS));
+        await waitFor(() => expect(result.current.selectedSchema).toBe(ProfilingSchema.ECS));
       });
     });
 
@@ -198,7 +198,7 @@ describe('ProfilingSchemaContextProvider', () => {
       const { result } = renderProfilingSchema();
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.schema).toBeUndefined();
+      expect(result.current.selectedSchema).toBeUndefined();
       expect(result.current.location.search).toBe('?kuery=');
     });
   });
@@ -216,7 +216,7 @@ describe('ProfilingSchemaContextProvider', () => {
       });
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.schema).toBe(ProfilingSchema.ECS);
+      expect(result.current.selectedSchema).toBe(ProfilingSchema.ECS);
       expect(result.current.location.search).toBe('?kuery=&schema=ecs');
     });
   });
@@ -231,7 +231,7 @@ describe('ProfilingSchemaContextProvider', () => {
 
     act(() => result.current.onSchemaChange(ProfilingSchema.ECS));
 
-    expect(result.current.schema).toBe(ProfilingSchema.ECS);
+    expect(result.current.selectedSchema).toBe(ProfilingSchema.ECS);
     expect(result.current.history.action).toBe('PUSH');
     expect(result.current.location).toEqual(
       expect.objectContaining({ pathname: '/flamegraphs/flamegraph', search: '?kuery=&schema=ecs' })
