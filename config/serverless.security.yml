@@ -219,6 +219,18 @@ xpack.fleet.packages:
   - name: fleet_server
     version: latest
 
+# PoC only, do not merge: agentless auto upgrade testing on a PR-deployed project.
+xpack.fleet.internal.skipUploadPackageValidation: true
+xpack.fleet.agentless.autoUpgrade:
+  enabled: true
+  dryRun: false
+  interval: 5m
+  packages:
+    - name: aws
+      versionRange: '^8.0.0'
+    - name: okta
+      versionRange: '^3.0.0'
+
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp:
