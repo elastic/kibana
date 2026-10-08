@@ -91,7 +91,7 @@ export async function deleteAll(
 
     emitAttachmentsDeletedEvents(
       clientArgs,
-      caseID,
+      { id: caseID, access: theCase.attributes.access },
       comments.saved_objects.filter(({ id }) => deletedIds.has(id))
     );
   } catch (error) {
@@ -180,7 +180,11 @@ export async function deleteComment(
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
 
     if (deletedIds.includes(savedObjectId)) {
-      emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
+      emitAttachmentsDeletedEvents(
+        clientArgs,
+        { id, access: theCase.attributes.access },
+        [attachment]
+      );
     }
   } catch (error) {
     throw createCaseError({

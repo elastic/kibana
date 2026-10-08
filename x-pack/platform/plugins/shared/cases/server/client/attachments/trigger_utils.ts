@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { AttachmentAttributesV2, Case } from '../../../common/types/domain';
+import type { AttachmentAttributesV2, Case, CaseAccess } from '../../../common/types/domain';
 import type { Owner } from '../../../common/constants/types';
-import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common/utils';
+import {
+  getAlertInfoFromComments,
+  getEventInfoFromComments,
+  isCaseRestricted,
+} from '../../common/utils';
 import type { AlertInfo } from '../../common/types';
 import type { CasesClientArgs } from '..';
 
@@ -17,6 +21,12 @@ export function emitAttachmentsAddedEvent(
   attachmentIds: string[],
   attachmentType: string
 ): void {
+  // workflow triggers never fire for restricted cases — the event payload
+  // and the workflow run would reveal the case to non-assignees
+  if (isCaseRestricted(updatedCase)) {
+    return;
+  }
+
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId: updatedCase.id,
     attachmentIds,
@@ -37,12 +47,18 @@ const toIdsAndIndices = (infos: AlertInfo[]) => ({
 
 /**
  * Emits one attachmentsDeleted event per attachment type, including the referenced alert/event IDs.
+ * Suppressed entirely for restricted cases.
  */
 export function emitAttachmentsDeletedEvents(
   clientArgs: CasesClientArgs,
-  caseId: string,
+  theCase: { id: string; access?: CaseAccess | null },
   attachments: DeletedAttachment[]
 ): void {
+  if (isCaseRestricted(theCase)) {
+    return;
+  }
+
+  const caseId = theCase.id;
   const attachmentsByType = new Map<string, DeletedAttachment[]>();
   for (const attachment of attachments) {
     const { type } = attachment.attributes;

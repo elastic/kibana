@@ -48,6 +48,7 @@ import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
+  isCaseRestricted,
 } from '../../common/utils';
 import type { AlertInfo } from '../../common/types';
 import {
@@ -1231,6 +1232,12 @@ export const bulkUpdate = async (
     );
 
     for (const updatedCase of updatedCasesResponse) {
+      // workflow triggers never fire for restricted cases (an unrestricted
+      // case emits normally — it is visible again)
+      if (isCaseRestricted(updatedCase)) {
+        continue;
+      }
+
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
       clientArgs.casesEventBus?.emitCaseUpdated(
         clientArgs.request,

@@ -10,13 +10,21 @@ import type { Observable } from '../../../common/types/domain';
 import type { ObservablesAddedEventPayload } from '../../events/types';
 import type { CasesClientArgs } from '..';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { isCaseRestricted } from '../../common/utils';
 
-/** Emits the `cases.observablesAdded` event for the given newly-added observables. */
+/**
+ * Emits the `cases.observablesAdded` event for the given newly-added
+ * observables. Suppressed entirely for restricted cases.
+ */
 export const emitObservablesAddedEvent = (
   clientArgs: CasesClientArgs,
   theCase: CaseSavedObjectTransformed,
   observables: Observable[]
 ): void => {
+  if (isCaseRestricted(theCase.attributes)) {
+    return;
+  }
+
   const payload: ObservablesAddedEventPayload = {
     caseId: theCase.id,
     owner: theCase.attributes.owner as Owner,

@@ -59,6 +59,20 @@ describe('create', () => {
         owner: caseSO.attributes.owner,
       });
     });
+
+    it('does not emit a caseCreated event for a restricted case', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+
+      clientArgs.services.caseService.createCase.mockResolvedValue({
+        ...caseSO,
+        attributes: { ...caseSO.attributes, access: { mode: 'restricted' } },
+      });
+
+      await create({ ...theCase, access: { mode: 'restricted' } }, clientArgs, casesClientMock);
+
+      expect(clientArgs.casesEventBus.emitCaseCreated).not.toHaveBeenCalled();
+    });
   });
 
   describe('restricted case access', () => {

@@ -14,7 +14,7 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
+import { flattenCaseSavedObject, isCaseRestricted, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
@@ -533,10 +533,13 @@ export const create = async (
 
     const createdCase = decodeOrThrow(CaseRt)(res);
 
-    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
-      caseId: createdCase.id,
-      owner: createdCase.owner as Owner,
-    });
+    // workflow triggers never fire for restricted cases
+    if (!isCaseRestricted(createdCase)) {
+      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+        caseId: createdCase.id,
+        owner: createdCase.owner as Owner,
+      });
+    }
 
     return createdCase;
   } catch (error) {

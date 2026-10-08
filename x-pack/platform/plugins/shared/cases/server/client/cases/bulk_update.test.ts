@@ -4436,6 +4436,32 @@ describe('update', () => {
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalled();
     });
 
+    it('does not emit a caseUpdated event when the case becomes restricted', async () => {
+      const theCase = buildCaseFixture();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [theCase] });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          { ...theCase, attributes: { ...theCase.attributes, access: { mode: 'restricted' } } },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              access: { mode: 'restricted' as const },
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).not.toHaveBeenCalled();
+    });
+
     it('refuses to remove the last assignee of a restricted case', async () => {
       mockLoadedCase(
         buildCaseFixture({
