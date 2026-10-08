@@ -80,7 +80,7 @@ groups:
           self: ga
           serverless: unavailable
         note: |
-          :applies_to: stack: ga 9.0-9.4
+          :applies_to: stack: ga 8.9-9.4
           In these versions, the default is `26214400` bytes (25 MB) and the maximum is `104857600` bytes (100 MB).
         warning: |
           :applies_to: stack: ga 9.5+
