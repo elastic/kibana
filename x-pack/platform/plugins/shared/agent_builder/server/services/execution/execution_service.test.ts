@@ -92,6 +92,7 @@ jest.mock('./task/heartbeat_reporter', () => ({
 
 const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerRunSoon = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
@@ -102,6 +103,7 @@ describe('AgentExecutionService', () => {
   const taskManager = {
     schedule: mockTaskManagerSchedule,
     ensureScheduled: mockTaskManagerEnsureScheduled,
+    runSoon: mockTaskManagerRunSoon,
   } as any;
 
   const uiSettings = {
@@ -156,6 +158,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
+    security: {} as any,
     taskManager,
     inference,
     conversationService: conversationService as any,
@@ -236,6 +239,50 @@ describe('AgentExecutionService', () => {
           scope: ['agent-builder'],
         }),
         { request, cloneApiKey: true }
+      );
+      expect(mockTaskManagerRunSoon).not.toHaveBeenCalled();
+    });
+
+    it('requests an immediate claim of the scheduled task when asked to', async () => {
+      mockTaskManagerRunSoon.mockResolvedValue({ id: 'task-id' });
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+
+      expect(mockTaskManagerRunSoon).toHaveBeenCalledWith(`agent-${result.executionId}`, {
+        requestImmediateClaim: true,
+      });
+      expect(mockTaskManagerRunSoon.mock.invocationCallOrder[0]).toBeGreaterThan(
+        mockTaskManagerEnsureScheduled.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not fail the execution when the immediate claim request fails', async () => {
+      mockTaskManagerRunSoon.mockRejectedValue(new Error('task is already running'));
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+      await new Promise(process.nextTick);
+
+      expect(result.executionId).toBeDefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Could not request an immediate claim')
       );
     });
   });

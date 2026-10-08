@@ -103,3 +103,10 @@ export const MINIMAP_RESERVE_PX =
   MINIMAP_PADDING_RIGHT_PX +
   MINIMAP_GAP_PX +
   EDITOR_SCROLLBAR_WIDTH_PX;
+
+/**
+ * Vertical space (px) to keep clear above the editor's bottom edge for the floating
+ * `WorkflowDetailBottomBar` (≈58px tall, plus a small gap), so overlays pinned to the editor
+ * bottom, like the proposed-changes bulk bar, don't sit underneath it.
+ */
+export const BOTTOM_BAR_CLEARANCE_PX = 66;

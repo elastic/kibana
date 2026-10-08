@@ -66,6 +66,21 @@ const evaluate = (expression: string, context: Record<string, unknown>): unknown
   );
 
 describe('Endpoint analysis run', () => {
+  it('records the forensic execution on the verified investigation before processing it', () => {
+    const validRequest = stepByName('when_ki_valid');
+    expect(validRequest?.condition).toContain('steps.resolve_request.output.has_request == true');
+    expect(validRequest?.condition).toContain('steps.verify_investigation.output.metadata != null');
+    expect(validRequest?.steps?.[0]).toEqual({
+      name: 'append_workflow_execution',
+      type: 'investigations.appendWorkflowExecutionId',
+      'on-failure': { continue: true },
+      with: {
+        conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+        workflowExecutionId: '{{ execution.id }}',
+      },
+    });
+  });
+
   it('is the untagged global forensic pass, dispatched rather than scheduled', () => {
     expect(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID

@@ -77421,6 +77421,11 @@ paths:
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority:
+                          error: null
+                          lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          samplingRate: null
+                          status: started
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'
@@ -145033,10 +145038,17 @@ components:
       description: Rule metadata.
       type: object
       properties:
-        builder_type:
+        builder:
+          additionalProperties: false
           description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          type: string
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              type: string
+          required:
+            - type
         description:
           description: Human-readable description of the rule.
           maxLength: 1024
@@ -145460,10 +145472,17 @@ components:
           additionalProperties: false
           type: object
           properties:
-            builder_type:
-              maxLength: 64
+            builder:
+              additionalProperties: false
               nullable: true
-              type: string
+              type: object
+              properties:
+                type:
+                  description: Rule builder type.
+                  maxLength: 64
+                  type: string
+              required:
+                - type
             description:
               description: Human-readable description of the rule.
               maxLength: 1024
@@ -157340,18 +157359,18 @@ components:
             - query
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.
+          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
           type: object
           properties:
             enabled:
-              description: Whether the maintenance window applies to Alerting V2 alert episodes. If omitted, is treated as `true`.
+              description: Whether the maintenance window applies to Alerting V2 alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. Matching alert episodes don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alert episodes.
+                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -157383,18 +157402,18 @@ components:
                 - kql
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.
+          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window affects Alerting V2 alert episodes. Defaults to `true`.
+              description: Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. You can filter on `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching episodes don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alert episodes.
+                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -170062,7 +170081,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -170134,7 +170152,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -170206,7 +170223,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -172099,7 +172115,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -172135,7 +172150,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -174541,6 +174555,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByPercentileRankOperation'
@@ -174593,6 +174608,34 @@ components:
     Kibana_HTTP_APIs_visTermsRankByCustomDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
       description: Sort direction for custom ranking.
+    Kibana_HTTP_APIs_visTermsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_visTermsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -174611,7 +174654,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -176815,8 +176857,7 @@ components:
             - enum:
                 - stepped
               type: string
-          default: linear
-          description: Curve interpolation method for line and area series
+          description: Curve interpolation method for line and area series. Defaults to linear.
         overlays:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyStylingOverlays'
         points:

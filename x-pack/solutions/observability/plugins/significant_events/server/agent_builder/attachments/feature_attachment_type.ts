@@ -14,10 +14,13 @@ import type { Logger } from '@kbn/core/server';
 import { featureSchema, type Feature } from '@kbn/significant-events-schema';
 import { decodeFeatureAttachmentOrigin, KI_FEATURE_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
+import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventFeatureAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
 }
 
 export const formatFeatureAsText = (feature: Feature): string => {
@@ -37,6 +40,7 @@ export const formatFeatureAsText = (feature: Feature): string => {
 export const createSignificantEventFeatureAttachmentType = ({
   logger,
   getScopedClients,
+  server,
 }: CreateSignificantEventFeatureAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof KI_FEATURE_ATTACHMENT_TYPE,
   Feature
@@ -46,7 +50,7 @@ export const createSignificantEventFeatureAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<Feature | undefined> => {
     const decoded = decodeFeatureAttachmentOrigin(origin);
-    if (!decoded) {
+    if (!decoded || !(await canReadSignificantEvents({ request: context.request, server }))) {
       return undefined;
     }
 

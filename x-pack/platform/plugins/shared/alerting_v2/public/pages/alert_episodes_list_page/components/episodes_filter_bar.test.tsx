@@ -109,7 +109,7 @@ describe('EpisodesFilterBar', () => {
   it('renders search and all episode filters', () => {
     renderFilterBar();
 
-    expect(screen.getByRole('search', { name: 'Filter alert episodes' })).toBeInTheDocument();
+    expect(screen.getByRole('search', { name: 'Filter alerts' })).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-search')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-status-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-severity-button')).toBeInTheDocument();

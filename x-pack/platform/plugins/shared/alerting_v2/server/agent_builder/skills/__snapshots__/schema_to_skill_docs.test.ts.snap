@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Operations Schema Reference
 
 #### \`operation: \\"set_metadata\\"\`
@@ -60,7 +62,9 @@ Use \`validate\` as the last operation to confirm the action policy is complete 
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy API Schema Reference
 
 ## Top-Level Fields
@@ -76,7 +80,9 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Workflow Dispatch Payload
 
 Catalog of fields the dispatcher passes as \`inputs.payload\`. In Liquid:
@@ -146,7 +152,9 @@ steps:
 \`\`\`"
 `;
 
-exports[`schema_to_skill_docs generateAlertLifecycleDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateAlertLifecycleDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Alert Lifecycle
 
 Alerts are the unit of problem state. Each unique group (by \`group_hash\`) has its own alert. Each alert has a status that reflects where it is in the lifecycle:
@@ -161,7 +169,9 @@ Alerts are the unit of problem state. Each unique group (by \`group_hash\`) has 
 Only \`kind: alert\` rules produce alerts. \`kind: signal\` rules write raw signal events with no alert tracking."
 `;
 
-exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Dispatch Flow
 
 The end-to-end notification path:
@@ -178,7 +188,9 @@ The end-to-end notification path:
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events."
 `;
 
-exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Grouping Modes
 
 - \`per_alert\`: one notification per alert lifecycle (default).
@@ -188,7 +200,9 @@ exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skil
 Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Matchers
 
 A matcher selects which **alerts** a policy applies to.
@@ -262,7 +276,9 @@ To add tags while keeping an existing KQL filter, resend the current \`expressio
 \`\`\`"
 `;
 
-exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
@@ -301,7 +317,9 @@ not by a single rule name.
 For the default one-rule path, see [single-rule action policies](./action-policy-single-rule.md)."
 `;
 
-exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# No-Data Strategy
 
 \`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set via the \`set_no_data\` operation as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'ignore' }\`.
@@ -320,7 +338,9 @@ Omit \`query\` to use \`query.base\` to decide whether a group has data.
 Signal rules cannot set \`no_data\` ([rule-kind reference](./rule-kind.md))."
 `;
 
-exports[`schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Notifications via Action Policies
 
 Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.
@@ -339,7 +359,9 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
 `;
 
-exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Recovery Strategy
 
 \`recovery\` is a **top-level rule field** (not inside the query). It is set via the \`set_recovery\` operation as an object whose \`strategy\` selects the behaviour, and it controls how alerts transition from active to recovering/inactive (see [alert-lifecycle reference](./alert-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'no_breach' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).
@@ -384,8 +406,14 @@ Use \`set_metadata\` to name the rule and add a description or \`tags\` so the u
 | \`description\` | string | optional | Human-readable description of the rule. (max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`routing_tags\` | string[] | optional | Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\". (min items: 1, max items: 20) |
-| \`builder_type\` | string | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL. (max length: 64) |
+| \`builder\` | object | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL. |
 | \`operation\` | \\"set_metadata\\" | required |  |
+
+##### \`builder\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | string | required | Rule builder type. (max length: 64) |
 
 #### \`operation: \\"set_kind\\"\`
 
@@ -421,6 +449,15 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule.
 |---|---|---|---|
 | \`base\` | string | required | ES\\\\|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`. (min length: 1, max length: 10000) |
 | \`breach\` | object | optional | Optional ES\\\\|QL clause appended to \`query.base\`. If omitted, every row from \`query.base\` is a match, and a \`no_data\` strategy other than \`ignore\` then requires \`no_data.query\`. |
+
+#### \`operation: \\"set_time_field\\"\`
+
+Use \`set_time_field\` to explicitly set the date field for the lookback window. Use after \`set_query\` fails to auto-detect a time field, or when the index has multiple date fields and the wrong one was chosen.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_time_field\\" | required |  |
+| \`time_field\` | string | required | The date field used for the lookback window range filter. Auto-detected from the index during \`set_query\` when not set; use this operation to override when auto-detection fails or picks the wrong field. (min length: 1, max length: 128) |
 
 #### \`operation: \\"set_recovery\\"\`
 
@@ -627,7 +664,9 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
 `;
 
-exports[`schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Single-rule Action Policies
 
 Use this path when the user wants notifications for **one specific rule**.
@@ -682,7 +721,9 @@ If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."
 `;
 
-exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "## State Transition
 
 Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
@@ -699,7 +740,9 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema."
 `;
 
-exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Throttle / Grouping Compatibility
 
 - \`per_alert\`: one notification per alert lifecycle (default).
@@ -717,7 +760,9 @@ validates compatibility after all operations run.
 Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
-exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Throttle Strategies
 
 - \`on_status_change\`: notify only on alert status transitions (default for \`per_alert\`).
@@ -728,7 +773,9 @@ exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed
 Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[`schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Workflows
 
 A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.
