@@ -8,9 +8,6 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { uniqBy } from 'lodash';
-import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import type { DataSource } from '@kbn/data-source';
 import {
   type DiscoverAppState,
@@ -19,8 +16,9 @@ import {
   type ProfileAppStateDefaultFields,
   type TabState,
 } from '../redux';
-import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
+import type { ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
+import { getResolvedProfileColumns } from '../../../../context_awareness/utils/get_resolved_profile_columns';
 
 export const getProfileAppStateDefaults = ({
   scopedProfilesManager,
@@ -89,26 +87,15 @@ export const getProfileAppStateDefaults = ({
       const stateUpdate: DiscoverAppState = {};
 
       if (shouldResetProfileAppStateDefaultField(profileAppStateDefaults, 'columns')) {
-        const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
-        const isValidColumn = getIsValidColumn(postFetchDataSource);
-        const validColumns = uniqBy(
-          defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
-          'name'
-        );
+        const { columns, grid } = getResolvedProfileColumns({
+          profileColumns: defaultState.columns,
+          fallbackColumns: defaultState.columns === undefined ? [] : defaultColumns,
+          dataSource: postFetchDataSource,
+        });
 
-        if (validColumns?.length) {
-          const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
-          const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-            (acc, { name, width }, index) => {
-              // Ensure there's at least one auto width column so the columns fill the grid
-              const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
-              return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
-            },
-            undefined
-          );
-
-          stateUpdate.grid = columns ? { columns } : undefined;
-          stateUpdate.columns = validColumns.map(({ name }) => name);
+        if (columns.length) {
+          stateUpdate.grid = grid;
+          stateUpdate.columns = columns;
         }
       }
 
@@ -159,15 +146,6 @@ export const shouldResetProfileAppStateDefaultField = (
   profileAppStateDefaults.fieldsToReset === 'all' ||
   (profileAppStateDefaults.fieldsToReset !== 'none' &&
     profileAppStateDefaults.fieldsToReset.includes(field));
-
-const getIsValidColumn = (dataSource: DataSource) => (column: DefaultAppStateColumn) => {
-  // Summary is a synthetic column; allow it even when absent from the source
-  if (column.name === SOURCE_COLUMN) {
-    return true;
-  }
-
-  return Boolean(dataSource.getColumn(column.name));
-};
 
 /**
  * `getDefaultAppState` still takes a DataView. DataViewSource already wraps one;

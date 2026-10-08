@@ -9,3 +9,5 @@
 
 export const ESQL_QUERY_RESULTS_ATTACHMENT_TYPE = 'esql.query_results';
 export const DISCOVER_DATA_ANALYSIS_SKILL_ID = 'discover-data-analysis';
+export const DISCOVER_SESSION_SKILL_ID = 'discover-session';
+export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discover.session';

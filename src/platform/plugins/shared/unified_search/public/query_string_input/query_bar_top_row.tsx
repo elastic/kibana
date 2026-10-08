@@ -213,6 +213,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**
+   * When false, hide the date picker's previous / next / zoom time-window buttons.
+   * Defaults to true.
+   */
+  showTimeWindowButtons?: boolean;
+  /**
    * Style of the submit button
    * `iconOnly` - use IconButton
    * `full` - use SuperUpdateButton
@@ -388,6 +393,7 @@ export const QueryBarTopRow = React.memo(
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      showTimeWindowButtons = true,
       enableDateRangePicker = true,
     } = props;
 
@@ -973,7 +979,7 @@ export const QueryBarTopRow = React.memo(
             isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
             width={isMobile ? 'full' : 'auto'}
             compressed
-            showTimeWindowButtons
+            showTimeWindowButtons={showTimeWindowButtons}
             timeZoneDisplayProps={{
               timeZone: timeZoneName,
               customRender: timeZoneCustomRender,
@@ -1010,7 +1016,7 @@ export const QueryBarTopRow = React.memo(
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
-              showTimeWindowButtons
+              showTimeWindowButtons={showTimeWindowButtons}
               presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
               onPresetSave={dateRangePickerPresets.onPresetSave}
