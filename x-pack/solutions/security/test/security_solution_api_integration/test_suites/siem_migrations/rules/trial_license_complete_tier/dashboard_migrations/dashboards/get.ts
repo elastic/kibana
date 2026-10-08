@@ -156,10 +156,6 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      // Regression for the "search by part of a name" bug: titles are indexed with the
-      // standard analyzer, which does not split on `_`/`-`, so a name like
-      // `sysmon_dashboard_overview` is a single token. A `search_term` that is a sub-string
-      // of the name (e.g. `sysmon`) must still match it.
       it('should filter by a sub-string of a name joined by `_` or `-`', async () => {
         const substringMigrationResponse = await dashboardMigrationRoutes.create({});
         const substringMigrationId = substringMigrationResponse.body.migration_id;

@@ -141,10 +141,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.data).toEqual(expectedRuleDocuments);
       });
 
-      // Regression for the "search by part of a rule name" bug: titles are indexed
-      // with the standard analyzer, which does not split on `_`/`-`, so a name like
-      // `sysmon_detect_sysmon_config_changed` is a single token. A `searchTerm` that is
-      // a sub-string of the name (e.g. `sysmon`) must still match it.
       it('should fetch rules filtered by a sub-string of a name joined by `_` or `-`', async () => {
         const migrationId = uuidv4();
         const titles = [
