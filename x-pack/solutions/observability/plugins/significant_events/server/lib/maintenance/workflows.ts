@@ -119,7 +119,7 @@ export const reEnableWorkflow = async (
   { id, spaceId }: MaintenanceWorkflowTarget,
   request: KibanaRequest,
   failures: SignificantEventsMaintenanceFailure[],
-  reportMissing = true
+  { reportMissing = true }: { reportMissing?: boolean } = {}
 ): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
   const target = `workflow:${id}@${spaceId}`;
   try {
@@ -183,7 +183,10 @@ export const restoreWorkflowsAfterReset = async ({
   }
   const remaining: MaintenanceWorkflowTarget[] = [];
   for (const workflow of eligible) {
-    if ((await reEnableWorkflow(mgmt, workflow, request, failures, false)) === 'failed') {
+    if (
+      (await reEnableWorkflow(mgmt, workflow, request, failures, { reportMissing: false })) ===
+      'failed'
+    ) {
       remaining.push(workflow);
     }
   }

@@ -7,16 +7,14 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
-
-export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 /**
  * One document per space recording the maintenance state of Significant Events
  * background activity in that space (`enabled` / `paused`). A space without a
  * document is enabled. The type is space-isolated (`single`), so the same fixed
  * id exists independently in every space and pausing one space leaves the others
- * untouched. The document that was stored while this type was `agnostic` has no
- * namespace prefix, which makes it the default space's document.
+ * untouched.
  *
  * `state` is stored as a free-form string (keyword) rather than a closed enum
  * so a newer node can persist a state an older node does not yet know about;
@@ -24,9 +22,11 @@ export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-
  * stores the exact set of workflows and rules of its own space that were
  * disabled, so resume can re-enable precisely what was turned off (and nothing
  * that was already off). No data other than these enablement flags is affected.
- *
- * The id intentionally matches the type name: there is only ever one document
- * per space.
+ */
+export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE = 'significant-events-maintenance-state';
+
+/**
+ * The id intentionally matches the type name: there is only ever one document per space.
  */
 export const SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID = 'significant-events-maintenance-state';
 
@@ -94,6 +94,9 @@ const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),
 });
 
+/** Rules are recorded with the same `{ id, spaceId }` shape as workflows. */
+const disabledRuleSchemaV1 = disabledWorkflowSchemaV1;
+
 const maintenanceStateAttributesV3 = schema.object({
   state: schema.string(),
   updatedAt: schema.maybe(schema.string()),
@@ -101,7 +104,7 @@ const maintenanceStateAttributesV3 = schema.object({
   disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
-  disabledRules: schema.arrayOf(disabledWorkflowSchemaV1, {
+  disabledRules: schema.arrayOf(disabledRuleSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),
@@ -124,7 +127,7 @@ export const backfillDisabledRules = (
   attributes: {
     disabledRules:
       attributes.disabledRules ??
-      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: 'default' })),
+      (attributes.disabledRuleIds ?? []).map((id) => ({ id, spaceId: DEFAULT_SPACE_ID })),
   },
 });
 

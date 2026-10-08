@@ -28,9 +28,8 @@ scheduled workflows are disabled, in-flight executions are cancelled, and the co
 onboarding and scheduled discovery toggles are turned off, with their previous values kept
 for Resume. A space that a user already paused keeps its own record. The shared workflows
 stay enabled. The maintenance state of each space records `system:feature_flag` as who
-paused it. The alerting rules
-backing knowledge indicator queries keep running, because alerting v2 cannot toggle rules
-without a user request. A flag value only counts once it has held for 15 seconds, so the
+paused it. The alerting rules backing knowledge indicator queries keep running, because
+alerting v2 cannot toggle rules without a user request. A flag value only counts once it has held for 15 seconds, so the
 value read at startup, or a brief flip, never triggers a pause.
 
 Flipping it back on does not resume. After the managed workflows are reinstalled the pause

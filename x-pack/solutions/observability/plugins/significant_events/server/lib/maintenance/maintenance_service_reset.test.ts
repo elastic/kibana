@@ -207,6 +207,72 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('sweeps every space, including those the caller cannot see', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        spaceIds: ['default'],
+        internalSpaceIds: ['default', 'space-a'],
+      });
+
+      await service.reset({ request: REQUEST });
+
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, , spaceId]) => id === cleanupDocumentId('space-a') && spaceId === 'space-a'
+        )
+      ).toBe(true);
+    });
+
+    it('releases the spaces it paused when pausing a later space fails', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+      const createDocument = soClient.create.getMockImplementation();
+      if (!createDocument) {
+        throw new Error('Missing saved objects client fixture');
+      }
+      soClient.create
+        .mockImplementationOnce(createDocument)
+        .mockRejectedValueOnce(new Error('so write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('so write failed');
+
+      expect(soClient.readDocument('default')).toBeUndefined();
+      expect(soClient.readDocument('space-a')).toBeUndefined();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('records a space-specific failure only in the document of that space', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        investigations: {
+          deleted: 0,
+          failures: [{ id: 'inv-1', spaceId: 'space-a', error: 'delete failed' }],
+        },
+      });
+      // A space that keeps a recorded target keeps its document, so its summary is readable.
+      await service.pause({ request: REQUEST });
+      await service.pause({ request: requestInSpace('space-a') });
+
+      await service.reset({ request: REQUEST });
+
+      const failuresIn = (spaceId: string) =>
+        (
+          soClient.readDocument(spaceId) as {
+            lastSummary: { partialFailures: Array<{ target: string }> };
+          }
+        ).lastSummary.partialFailures.map(({ target }) => target);
+      expect(failuresIn('space-a')).toContain('investigation:inv-1@space-a');
+      expect(failuresIn('default')).not.toContain('investigation:inv-1@space-a');
+    });
+
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
       const { api } = makeManagementApi();
       const { service, initializeClient, internalEsClient, streamDocuments } = makeService({

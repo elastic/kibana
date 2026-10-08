@@ -124,6 +124,32 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('pauses nothing and rejects when it cannot list every space', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api, internalSpacesThrow: true });
+
+      await expect(service.pauseOnFlagOff()).rejects.toThrow('spaces finder failed');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('still pauses the later spaces and rejects when one space fails', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+      });
+      soClient.create.mockRejectedValueOnce(new Error('so write failed'));
+
+      await expect(service.pauseOnFlagOff()).rejects.toThrow('so write failed');
+
+      expect(soClient.readDocument('default')).toBeUndefined();
+      expect(soClient.readDocument('space-a')).toEqual(
+        expect.objectContaining({ state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR })
+      );
+    });
+
     it('does not sweep when already paused or when another node claims the pause first', async () => {
       // Every sweep cancels in-flight executions, so no cancel call means no sweep.
       const { api, cancelAllActiveWorkflowExecutions: sweepSignal } = makeManagementApi();
@@ -285,6 +311,36 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await expect(service.reassertPause()).rejects.toThrow('so write failed');
       expect(soClient.create.mock.calls.length).toBe(writesAfterPause + 2);
+    });
+
+    it('rejects when it cannot list every space, leaving paused spaces as they are', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        spaceIds: ['default'],
+        internalSpacesThrow: true,
+      });
+      await service.pause({ request: REQUEST });
+      const writesAfterPause = soClient.create.mock.calls.length;
+
+      await expect(service.reassertPause()).rejects.toThrow('spaces finder failed');
+      expect(soClient.create.mock.calls.length).toBe(writesAfterPause);
+    });
+
+    it('names every failed space when several fail', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+      });
+      await service.pause({ request: REQUEST });
+      await service.pause({ request: requestInSpace('space-a') });
+      soClient.create.mockRejectedValueOnce(new Error('first failed'));
+      soClient.create.mockRejectedValueOnce(new Error('second failed'));
+
+      await expect(service.reassertPause()).rejects.toThrow(
+        'Significant Events pause re-assert failed in 2 spaces: "default" (first failed), "space-a" (second failed)'
+      );
     });
 
     it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {

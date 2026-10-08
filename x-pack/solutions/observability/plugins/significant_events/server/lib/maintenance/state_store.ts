@@ -67,6 +67,7 @@ export const normalizeSummary = (
 ): SignificantEventsMaintenanceSummary | undefined =>
   raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
 
+/** A summary with every count at zero, for a state with nothing swept yet. */
 export const emptySummary = (
   state: SignificantEventsMaintenanceSummary['state']
 ): SignificantEventsMaintenanceSummary => ({
@@ -77,60 +78,63 @@ export const emptySummary = (
   partialFailures: [],
 });
 
-/** The targets that belong to `spaceId`; anything recorded for another space (or `*`) is dropped. */
-const ownTargets = <T extends { spaceId: string }>(
-  spaceId: SpaceId,
-  targets: T[] | undefined
-): T[] => (targets ?? []).filter((target) => target.spaceId === spaceId);
+const isNotFound = (error: unknown): boolean =>
+  error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error);
+
+const isConflict = (error: unknown): boolean =>
+  error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error);
 
 /**
- * A document holds the inventory of its own space only. The document stored while
- * the type was `agnostic` still lists targets of every space, so those are dropped
- * on read and again on write, which cleans the document the next time it is saved.
+ * Brands persisted targets with the space of the document that holds them. A document only
+ * ever records the inventory of its own space, so the document's space is the target's space.
  */
-const restrictToSpace = (
+const brandOwnTargets = (
   spaceId: SpaceId,
-  attributes: SignificantEventsMaintenanceStateAttributes
-): SignificantEventsMaintenanceStateAttributes => ({
-  ...attributes,
-  disabledWorkflows: ownTargets(spaceId, attributes.disabledWorkflows),
-  disabledRules: ownTargets(spaceId, attributes.disabledRules),
-  ...(attributes.pausedSettings
-    ? {
-        pausedSettings: {
-          ...attributes.pausedSettings,
-          scheduledDiscoveryEnabledSpaceIds:
-            attributes.pausedSettings.scheduledDiscoveryEnabledSpaceIds.filter(
-              (id) => id === spaceId
-            ),
-        },
-      }
-    : {}),
-});
+  targets: ReadonlyArray<{ id: string }> | undefined
+): Array<{ id: string; spaceId: SpaceId }> => (targets ?? []).map(({ id }) => ({ id, spaceId }));
 
 /** Reads and writes the maintenance saved object of each space. */
-export const createMaintenanceStateStore = (server: SignificantEventsServer) => {
-  // Lazy: this factory runs in plugin setup, before `server.core` is assigned
-  // in start(). Route authz is the user gate (Nightshift read for status,
-  // Nightshift manage for pause/resume, Nightshift manage and configure for reset). This SO is hidden
-  // and not listed on any Nightshift privilege `savedObject` array. A scoped client then checks
-  // `saved_object:significant-events-maintenance-state/get` and 403s every
-  // Nightshift-only user once the document exists. So the internal client is used, which skips
-  // the security extension but keeps the spaces extension, and is rebound to each space.
-  // Same pattern as run quotas.
-  let internalClient: SavedObjectsClientContract | undefined;
-  const spaceClients = new Map<SpaceId, SavedObjectsClientContract>();
+export interface IMaintenanceStateStore {
+  /** Loads a space's state with its SO version, or `undefined` when the space has no document. */
+  readVersionedState(spaceId: SpaceId): Promise<VersionedMaintenanceState | undefined>;
+  /** Loads a space's state, or `undefined` when the space has no document. */
+  readState(spaceId: SpaceId): Promise<LoadedMaintenanceState | undefined>;
+  /**
+   * Writes the paused intent only if the document is unchanged since `current` was read.
+   * Returns the claimed state, or `undefined` when another node won.
+   */
+  claimPausedIntent(params: {
+    spaceId: SpaceId;
+    current: VersionedMaintenanceState | undefined;
+    updatedBy: string;
+  }): Promise<LoadedMaintenanceState | undefined>;
+  /** Overwrites a space's document. */
+  writeState(
+    spaceId: SpaceId,
+    attributes: SignificantEventsMaintenanceStateAttributes
+  ): Promise<void>;
+  /** Removes a space's document, which reads as enabled afterwards. A missing document is fine. */
+  deleteState(spaceId: SpaceId): Promise<void>;
+}
 
+/** Creates the store; every operation addresses one space's document. */
+export const createMaintenanceStateStore = (
+  server: SignificantEventsServer
+): IMaintenanceStateStore => {
+  // Lazy: this factory runs in plugin setup, before `server.core` is assigned in start().
+  let internalClient: SavedObjectsClientContract | undefined;
+
+  // The internal client skips the security extension but keeps the spaces extension, and is
+  // rebound to each space. Route authz is the user gate (Nightshift read for status, manage for
+  // pause/resume, manage and configure for reset). The SO is hidden and not listed on any
+  // Nightshift privilege `savedObject` array, so a scoped client would check
+  // `saved_object:significant-events-maintenance-state/get` and 403 every Nightshift-only user
+  // once the document exists. Same pattern as run quotas.
   const getSoClient = (spaceId: SpaceId): SavedObjectsClientContract => {
     internalClient ??= server.core.savedObjects.getUnsafeInternalClient({
       includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
     });
-    let spaceClient = spaceClients.get(spaceId);
-    if (!spaceClient) {
-      spaceClient = internalClient.asScopedToNamespace(spaceId);
-      spaceClients.set(spaceId, spaceClient);
-    }
-    return spaceClient;
+    return internalClient.asScopedToNamespace(spaceId);
   };
 
   const normalizePausedSettings = (
@@ -160,12 +164,9 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
     spaceId: SpaceId,
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
   ): MaintenanceWorkflowTarget[] =>
-    ownTargets(spaceId, workflows)
-      .filter(
-        ({ id, spaceId: targetSpaceId }) =>
-          !(targetSpaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
-      )
-      .map(({ id }) => ({ id, spaceId }));
+    brandOwnTargets(spaceId, workflows).filter(
+      ({ id }) => !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
+    );
 
   const readVersionedState = async (
     spaceId: SpaceId
@@ -180,16 +181,13 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
         attributes: {
           ...so.attributes,
           disabledWorkflows: brandDisabledWorkflows(spaceId, so.attributes.disabledWorkflows),
-          disabledRules: ownTargets(spaceId, so.attributes.disabledRules).map(({ id }) => ({
-            id,
-            spaceId,
-          })),
+          disabledRules: brandOwnTargets(spaceId, so.attributes.disabledRules),
           pausedSettings: normalizePausedSettings(spaceId, so.attributes.pausedSettings),
         },
         version: so.version,
       };
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      if (isNotFound(error)) {
         return undefined;
       }
       throw error;
@@ -239,7 +237,7 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
       }
       return claimed;
     } catch (error) {
-      if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
+      if (isConflict(error)) {
         return undefined;
       }
       throw error;
@@ -252,7 +250,7 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
   ): Promise<void> => {
     await getSoClient(spaceId).create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      restrictToSpace(spaceId, attributes),
+      attributes,
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
     );
   };
@@ -265,7 +263,7 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
     } catch (error) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      if (!isNotFound(error)) {
         throw error;
       }
     }

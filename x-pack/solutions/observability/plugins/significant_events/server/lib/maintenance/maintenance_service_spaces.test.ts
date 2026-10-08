@@ -6,10 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
-  REQUEST,
-  cleanupDocumentId,
   makeManagementApi,
   makeService,
   makeV2RulesClient,
@@ -116,104 +113,5 @@ describe('maintenance across spaces', () => {
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
       );
     }
-  });
-});
-
-// While the type was agnostic, one document listed the targets of every space. It is now the
-// default space's document, so whatever it names for another space must not act on that space.
-describe('a document written while the type was agnostic', () => {
-  const agnosticDocument = {
-    state: 'paused',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'marco',
-    disabledWorkflows: [
-      { id: cleanupDocumentId('default'), spaceId: 'default' },
-      { id: cleanupDocumentId('space-a'), spaceId: 'space-a' },
-      { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID, spaceId: '*' },
-    ],
-    disabledRules: [
-      { id: 'rule-default', spaceId: 'default' },
-      { id: 'rule-a', spaceId: 'space-a' },
-    ],
-    pausedSettings: {
-      continuousOnboardingWasEnabled: false,
-      scheduledDiscoveryEnabledSpaceIds: ['default', 'space-a'],
-    },
-    lastSummary: {
-      state: 'paused',
-      executionsCancelled: 0,
-      workflowsDisabled: 3,
-      rulesDisabled: 2,
-      partialFailures: [],
-    },
-  };
-
-  const setup = async () => {
-    const { api, updateWorkflow, getWorkflow, cancelAllActiveWorkflowExecutions } =
-      makeManagementApi();
-    const fixture = makeService({
-      management: api,
-      spaceIds: ['default', 'space-a'],
-      ruleBackedRuleIds: ['rule-default'],
-      scheduledDiscoveryEnabled: true,
-    });
-    fixture.soClient.seed('default', agnosticDocument);
-    // The old pause really disabled every recorded workflow, so a wrong resume would show up.
-    for (const { id, spaceId } of agnosticDocument.disabledWorkflows) {
-      await api.updateWorkflow(id, { enabled: false }, spaceId);
-    }
-    updateWorkflow.mockClear();
-    return { ...fixture, updateWorkflow, getWorkflow, cancelAllActiveWorkflowExecutions };
-  };
-
-  it('pauses the default space only, and does not give another space a document', async () => {
-    const { service, soClient } = await setup();
-
-    await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
-    await expect(service.getState({ request: requestInSpace('space-a') })).resolves.toBe('enabled');
-    expect(soClient.readDocument('space-a')).toBeUndefined();
-  });
-
-  it('resumes only the targets of its own space and drops the rest of the inventory', async () => {
-    const { service, soClient, v2RulesClient, spaceUiSettingsClient, updateWorkflow, getWorkflow } =
-      await setup();
-
-    const summary = await service.resume({ request: REQUEST });
-
-    expect(summary.state).toBe('enabled');
-    expect(summary.partialFailures).toEqual([]);
-    // Neither the other space's workflow nor the shared one is touched.
-    expect(updateWorkflow.mock.calls.map(([id, patch]) => [id, patch.enabled])).toEqual([
-      [cleanupDocumentId('default'), true],
-    ]);
-    expect(getWorkflow.mock.calls.every(([, spaceId]) => spaceId === 'default')).toBe(true);
-    expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledTimes(1);
-    expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-default'] });
-    // The scheduled discovery toggle comes back for this space only.
-    expect(spaceUiSettingsClient.set).toHaveBeenCalledTimes(1);
-    expect(soClient.readDocument('default')).toEqual(
-      expect.objectContaining({ state: 'enabled', disabledWorkflows: [], disabledRules: [] })
-    );
-    expect(soClient.readDocument('space-a')).toBeUndefined();
-  });
-
-  it('only writes the targets of its own space when it is paused again', async () => {
-    const { service, soClient, updateWorkflow, cancelAllActiveWorkflowExecutions } = await setup();
-
-    await service.pause({ request: REQUEST });
-
-    expect(updateWorkflow.mock.calls.every(([, , spaceId]) => spaceId === 'default')).toBe(true);
-    expect(
-      cancelAllActiveWorkflowExecutions.mock.calls.every(([, spaceId]) => spaceId === 'default')
-    ).toBe(true);
-    const document = soClient.readDocument('default') as {
-      disabledWorkflows: Array<{ spaceId: string }>;
-      disabledRules: Array<{ id: string; spaceId: string }>;
-      pausedSettings: { scheduledDiscoveryEnabledSpaceIds: string[] };
-    };
-    expect(document.disabledWorkflows.length).toBeGreaterThan(0);
-    expect(document.disabledWorkflows.every(({ spaceId }) => spaceId === 'default')).toBe(true);
-    expect(document.disabledRules).toEqual([{ id: 'rule-default', spaceId: 'default' }]);
-    expect(document.pausedSettings.scheduledDiscoveryEnabledSpaceIds).toEqual(['default']);
   });
 });

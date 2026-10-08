@@ -42,7 +42,7 @@ const SECTION_DESCRIPTION = i18n.translate(
   'xpack.nightshift.settings.maintenance.spaceDescription',
   {
     defaultMessage:
-      'Controls detection activity in this space, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Other spaces are not affected. Existing data always persists.',
+      'Controls detection activity in this space, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Other spaces are not affected, and the cost estimates and run limits on this page are not scoped to this space. Existing data always persists.',
   }
 );
 
@@ -339,7 +339,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                     })
                   : i18n.translate('xpack.nightshift.settings.maintenance.spacePauseConfirmBody', {
                       defaultMessage:
-                        'This disables the Significant Events workflows of this space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries in this space. Other spaces keep running. No data is deleted.',
+                        'This disables the Significant Events workflows of this space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries in this space. Workflows shared by every space stay enabled, but their executions in this space are cancelled. Other spaces keep running. No data is deleted.',
                     })}
               </p>
             </EuiText>
