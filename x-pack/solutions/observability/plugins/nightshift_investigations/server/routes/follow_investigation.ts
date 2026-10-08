@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { concat, from, map, of, switchMap, takeWhile, timer } from 'rxjs';
 import type { InvestigationStatusEvent } from '../../common';
 import { InvestigationNotFoundError } from '../client/errors';
@@ -43,9 +43,11 @@ export const followInvestigationRoute = createNightshiftInvestigationsServerRout
     },
   },
   params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(500),
-    }),
+    path: lazySchema(() =>
+      z.object({
+        id: z.string().min(1).max(500),
+      })
+    ),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const investigationClient = getInvestigationsClient(request);

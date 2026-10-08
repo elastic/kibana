@@ -6,37 +6,18 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
-import { triggerRowSchema } from './trigger_row_schema';
-
-const triggerSchema = z.object({
-  rows: z.array(triggerRowSchema).min(1),
-});
-
-const executionSchema = z.object({
-  promptTemplate: z.string().max(50000).optional(),
-  reasoningMode: z.enum(['investigate', 'observe']).optional(),
-  agentId: z.string().max(512).optional(),
-  connectorId: z.string().max(512).optional(),
-});
-
-const completionSchema = z.object({
-  action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
-  targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-  destination: z.string().max(500).optional(),
-});
-
-const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(0).optional(),
-  timeoutSeconds: z.number().int().min(1).optional(),
-  dedupeWindowSeconds: z.number().int().min(0).optional(),
-  overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
-});
+import {
+  completionSchema,
+  executionSchema,
+  runtimeSchema,
+  triggerSchema,
+} from './automation_schemas';
 
 export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations',
@@ -49,17 +30,19 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['manage_nightshift'] },
   },
   params: z.object({
-    body: z.object({
-      name: z.string().min(1).max(500),
-      description: z.string().max(5000).optional(),
-      tags: z.array(z.string().max(32)).max(50).optional(),
-      isEnabled: z.boolean().optional(),
-      automationType: z.enum(['custom', 'managed']).optional(),
-      trigger: triggerSchema,
-      execution: executionSchema,
-      completion: completionSchema,
-      runtime: runtimeSchema,
-    }),
+    body: lazySchema(() =>
+      z.object({
+        name: z.string().min(1).max(500),
+        description: z.string().max(5000).optional(),
+        tags: z.array(z.string().max(32)).max(50).optional(),
+        isEnabled: z.boolean().optional(),
+        automationType: z.enum(['custom', 'managed']).optional(),
+        trigger: triggerSchema,
+        execution: executionSchema,
+        completion: completionSchema,
+        runtime: runtimeSchema,
+      })
+    ),
   }),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();

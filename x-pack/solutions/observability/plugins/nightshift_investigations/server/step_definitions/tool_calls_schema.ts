@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 const MAX_TOOL_CALLS = 2_000;
 
-const toolCallSchema = z
-  .object({
-    tool_id: z.string().max(512).optional(),
-    tool_call_id: z.string().max(512).optional(),
-    params: z.record(z.string(), z.unknown()).optional(),
-  })
-  .passthrough();
+const buildToolCallSchema = () =>
+  z
+    .object({
+      tool_id: z.string().max(512).optional(),
+      tool_call_id: z.string().max(512).optional(),
+      params: z.record(z.string(), z.unknown()).optional(),
+    })
+    .passthrough();
 
-const toolResultSchema = z
-  .object({
-    tool_id: z.string().max(512).optional(),
-    tool_call_id: z.string().max(512),
-    results: z.array(z.unknown()).max(MAX_TOOL_CALLS),
-  })
-  .passthrough();
+const buildToolResultSchema = () =>
+  z
+    .object({
+      tool_id: z.string().max(512).optional(),
+      tool_call_id: z.string().max(512),
+      results: z.array(z.unknown()).max(MAX_TOOL_CALLS),
+    })
+    .passthrough();
 
 const parseJsonArray = (value: unknown): unknown => {
   if (typeof value === 'string') {
@@ -37,13 +39,11 @@ const parseJsonArray = (value: unknown): unknown => {
 };
 
 /** Tool calls a post-execution hook passes for a completed round, as an array or its JSON string. */
-export const toolCallsSchema = z.preprocess(
-  parseJsonArray,
-  z.array(toolCallSchema).max(MAX_TOOL_CALLS).optional()
+export const toolCallsSchema = lazySchema(() =>
+  z.preprocess(parseJsonArray, z.array(buildToolCallSchema()).max(MAX_TOOL_CALLS).optional())
 );
 
 /** Tool call results a post-execution hook passes for a completed round, keyed by `tool_call_id`. */
-export const toolResultsSchema = z.preprocess(
-  parseJsonArray,
-  z.array(toolResultSchema).max(MAX_TOOL_CALLS).optional()
+export const toolResultsSchema = lazySchema(() =>
+  z.preprocess(parseJsonArray, z.array(buildToolResultSchema()).max(MAX_TOOL_CALLS).optional())
 );

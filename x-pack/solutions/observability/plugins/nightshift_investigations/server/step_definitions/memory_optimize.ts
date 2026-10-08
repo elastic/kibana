@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
@@ -49,64 +49,68 @@ export const memoryOptimizeStepDefinition = ({
     description:
       'Labels recalled Semantic Memory pages from a completed investigation round and ' +
       'extracts durable customer-environment facts into the Semantic Memory index.',
-    inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
-      agent_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Supported agent policy selector; never used as a storage boundary.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Lets the optimizer see what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
-      recalled_ids: z
-        .array(z.string().max(2_000))
-        .max(100)
-        .optional()
-        .describe('Semantic Memory ids persisted on the completed conversation round.'),
-      sandbox_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe(
-          'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
-            'Omit when there is no conversation sandbox.'
+    inputSchema: lazySchema(() =>
+      z.object({
+        prompt: z
+          .string()
+          .max(MAX_ROUND_TEXT_LENGTH)
+          .describe('The user message that started the round.'),
+        response: z
+          .string()
+          .max(MAX_ROUND_TEXT_LENGTH)
+          .describe("The assistant's final response for the round."),
+        agent_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Supported agent policy selector; never used as a storage boundary.'),
+        tool_calls: toolCallsSchema.describe(
+          'Investigator tool calls from this round. Lets the optimizer see what the investigator queried.'
         ),
-      connector_id: z
-        .string()
-        .max(MAX_KEYWORD_LENGTH)
-        .optional()
-        .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
-      round_connector_id: z
-        .string()
-        .max(MAX_KEYWORD_LENGTH)
-        .optional()
-        .describe('Inference connector the triggering agent used for this round.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Agent Builder conversation id for telemetry correlation.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Completed Agent Builder round id for telemetry correlation.'),
-    }),
-    outputSchema: z.object({
-      status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
-      skipped: z.boolean().optional(),
-    }),
+        tool_results: toolResultsSchema.describe(
+          'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
+        ),
+        recalled_ids: z
+          .array(z.string().max(2_000))
+          .max(100)
+          .optional()
+          .describe('Semantic Memory ids persisted on the completed conversation round.'),
+        sandbox_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe(
+            'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
+              'Omit when there is no conversation sandbox.'
+          ),
+        connector_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
+        round_connector_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe('Inference connector the triggering agent used for this round.'),
+        conversation_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Agent Builder conversation id for telemetry correlation.'),
+        round_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Completed Agent Builder round id for telemetry correlation.'),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
+        skipped: z.boolean().optional(),
+      })
+    ),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped memory optimize (flag off)');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
@@ -43,28 +43,32 @@ export const obtainSandboxStepDefinition = ({
     description:
       'Allocates the conversation sandbox and returns the space-scoped sandbox_id ' +
       'that hydrate, agent tools, and optimize must share.',
-    inputSchema: z.object({
-      conversation_id: z
-        .string()
-        .min(1)
-        .max(1024)
-        .describe('Unscoped conversation id from the Agent Builder hook.'),
-      required: z
-        .boolean()
-        .optional()
-        .describe(
-          'When false, a missing sandbox config skips allocate and still returns sandbox_id. ' +
-            'Hydrate leaves this unset (fail closed). Optimize sets false so transcript ' +
-            'extraction still runs.'
-        ),
-    }),
-    outputSchema: z.object({
-      sandbox_id: z
-        .string()
-        .describe('Workspace key (`<space>__<conversation>`). Pass this to every writer.'),
-      conversation_id: z.string().describe('Unscoped conversation id from the hook.'),
-      skipped: z.boolean().optional(),
-    }),
+    inputSchema: lazySchema(() =>
+      z.object({
+        conversation_id: z
+          .string()
+          .min(1)
+          .max(1024)
+          .describe('Unscoped conversation id from the Agent Builder hook.'),
+        required: z
+          .boolean()
+          .optional()
+          .describe(
+            'When false, a missing sandbox config skips allocate and still returns sandbox_id. ' +
+              'Hydrate leaves this unset (fail closed). Optimize sets false so transcript ' +
+              'extraction still runs.'
+          ),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        sandbox_id: z
+          .string()
+          .describe('Workspace key (`<space>__<conversation>`). Pass this to every writer.'),
+        conversation_id: z.string().describe('Unscoped conversation id from the hook.'),
+        skipped: z.boolean().optional(),
+      })
+    ),
     handler: async (context) => {
       const { conversation_id: conversationId, required = true } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;

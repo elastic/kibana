@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
@@ -37,39 +37,46 @@ export const cortexHydrateStepDefinition = ({
     description:
       'Writes the current Cortex wiki into /workspace/cortex for the sandbox obtained ' +
       'earlier in this workflow. Does not allocate; accepts its sandbox_id or a legacy conversation_id.',
-    inputSchema: z
-      .object({
-        sandbox_id: z
-          .string()
-          .min(1)
-          .max(1024)
+    inputSchema: lazySchema(() =>
+      z
+        .object({
+          sandbox_id: z
+            .string()
+            .min(1)
+            .max(1024)
+            .optional()
+            .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+          conversation_id: z
+            .string()
+            .min(1)
+            .max(1024)
+            .optional()
+            .describe('Legacy unscoped conversation id. Scoped using the workflow Space.'),
+        })
+        .refine(
+          ({ sandbox_id: sandboxId, conversation_id: conversationId }) => {
+            return sandboxId !== undefined || conversationId !== undefined;
+          },
+          { message: 'Either sandbox_id or conversation_id is required.' }
+        )
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        sandbox_id: z.string().describe('Sandbox that was hydrated.'),
+        conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
+        skipped: z.boolean().optional(),
+        failed: z
+          .boolean()
           .optional()
-          .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-        conversation_id: z
+          .describe('The write failed; its contents may be incomplete.'),
+        notification: z
           .string()
-          .min(1)
-          .max(1024)
-          .optional()
-          .describe('Legacy unscoped conversation id. Scoped using the workflow Space.'),
+          .describe(
+            'Empty on success. On failure, the incomplete-materialization notice for ' +
+              '/workspace/cortex.'
+          ),
       })
-      .refine(
-        ({ sandbox_id: sandboxId, conversation_id: conversationId }) => {
-          return sandboxId !== undefined || conversationId !== undefined;
-        },
-        { message: 'Either sandbox_id or conversation_id is required.' }
-      ),
-    outputSchema: z.object({
-      sandbox_id: z.string().describe('Sandbox that was hydrated.'),
-      conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
-      skipped: z.boolean().optional(),
-      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
-      notification: z
-        .string()
-        .describe(
-          'Empty on success. On failure, the incomplete-materialization notice for ' +
-            '/workspace/cortex.'
-        ),
-    }),
+    ),
     handler: async (context) => {
       const { sandbox_id: providedSandboxId, conversation_id: conversationId } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;

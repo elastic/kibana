@@ -6,7 +6,7 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -44,18 +44,25 @@ export const ensureInvestigationAgentStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Installs an investigation agent in the space this workflow runs in, so any caller can start an investigation without installing it first. Idempotent: an existing agent is left untouched.',
-    inputSchema: z.object({
-      agent_id: z
-        .enum([NIGHTSHIFT_INVESTIGATION_AGENT_ID, NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID])
-        .optional()
-        .describe(
-          `Which investigation agent to install. Defaults to ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}.`
-        ),
-    }),
-    outputSchema: z.object({
-      space_id: z.string().describe('The space the investigation agent was ensured in'),
-      agent_id: z.string().describe('The agent that was ensured'),
-    }),
+    inputSchema: lazySchema(() =>
+      z.object({
+        agent_id: z
+          .enum([
+            NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+            NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+          ])
+          .optional()
+          .describe(
+            `Which investigation agent to install. Defaults to ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}.`
+          ),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        space_id: z.string().describe('The space the investigation agent was ensured in'),
+        agent_id: z.string().describe('The agent that was ensured'),
+      })
+    ),
     handler: async (context) => {
       const agentBuilder = getAgentBuilder();
       if (!agentBuilder) {

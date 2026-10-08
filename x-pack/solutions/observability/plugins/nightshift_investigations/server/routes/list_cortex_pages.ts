@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { CORTEX_ENTITY_TYPES, CORTEX_PAGE_STATUSES } from '../../common/cortex';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -21,13 +21,15 @@ export const listCortexPagesRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    query: z
-      .object({
-        status: z.enum(CORTEX_PAGE_STATUSES).optional(),
-        entity_type: z.enum(CORTEX_ENTITY_TYPES).optional(),
-      })
-      .optional()
-      .default({}),
+    query: lazySchema(() =>
+      z
+        .object({
+          status: z.enum(CORTEX_PAGE_STATUSES).optional(),
+          entity_type: z.enum(CORTEX_ENTITY_TYPES).optional(),
+        })
+        .optional()
+        .default({})
+    ),
   }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');

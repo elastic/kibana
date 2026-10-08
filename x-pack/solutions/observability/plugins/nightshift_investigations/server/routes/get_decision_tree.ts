@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { symptomTreeId } from '@kbn/nightshift-decision-trees';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -22,9 +22,11 @@ export const getDecisionTreeRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    path: z.object({
-      symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
+    path: lazySchema(() =>
+      z.object({
+        symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      })
+    ),
   }),
   handler: async ({ request, params, getDecisionTreeStore, isDecisionTreesEnabled }) => {
     if (!isDecisionTreesEnabled()) throw notFound('Decision trees are not enabled');

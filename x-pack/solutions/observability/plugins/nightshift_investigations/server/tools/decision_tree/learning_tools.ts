@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -37,31 +37,37 @@ interface LearningToolDeps {
   onRecord?: (conversationId: string, record: LearningRecord) => void;
 }
 
-const treeIdField = z
-  .string()
-  .max(256)
-  .describe(
-    'The symptom:<slug> tree this learning belongs to. Use the id from decision-trees/monitors.md, or the slug you are creating.'
-  );
-
-const systemLearningSchema = z.object({
-  tree_id: treeIdField,
-  category: z
-    .enum(SYSTEM_LEARNING_CATEGORIES)
-    .describe('Which aspect of the system this learning is about.'),
-  content: z
+const treeIdField = lazySchema(() =>
+  z
     .string()
-    .max(MAX_LEARNING_LENGTH)
-    .describe('The learning, in 1-4 lines of plain language.'),
-});
+    .max(256)
+    .describe(
+      'The symptom:<slug> tree this learning belongs to. Use the id from decision-trees/monitors.md, or the slug you are creating.'
+    )
+);
 
-const remediationSchema = z.object({
-  tree_id: treeIdField,
-  content: z
-    .string()
-    .max(MAX_LEARNING_LENGTH)
-    .describe('The remediation that resolved the issue, in 1-4 lines of plain language.'),
-});
+const systemLearningSchema = lazySchema(() =>
+  z.object({
+    tree_id: treeIdField,
+    category: z
+      .enum(SYSTEM_LEARNING_CATEGORIES)
+      .describe('Which aspect of the system this learning is about.'),
+    content: z
+      .string()
+      .max(MAX_LEARNING_LENGTH)
+      .describe('The learning, in 1-4 lines of plain language.'),
+  })
+);
+
+const remediationSchema = lazySchema(() =>
+  z.object({
+    tree_id: treeIdField,
+    content: z
+      .string()
+      .max(MAX_LEARNING_LENGTH)
+      .describe('The remediation that resolved the issue, in 1-4 lines of plain language.'),
+  })
+);
 
 const toolLearningSchema = (connectorNames: readonly string[]) =>
   z.object({
@@ -169,7 +175,7 @@ export const createRecordToolLearningTool = ({
 }: LearningToolDeps & { connectorNames: readonly string[] }): BuiltinToolDefinition<
   ReturnType<typeof toolLearningSchema>
 > => {
-  const schema = toolLearningSchema(connectorNames);
+  const schema = lazySchema(() => toolLearningSchema(connectorNames));
   return {
     id: RECORD_TOOL_LEARNING_TOOL_ID,
     type: ToolType.builtin,

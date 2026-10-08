@@ -6,7 +6,7 @@
  */
 
 import { badRequest, conflict, notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   MAX_CUSTOM_CONTEXT_SNIPPETS,
@@ -65,17 +65,19 @@ const putCustomContextRoute = createNightshiftInvestigationsServerRoute({
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
-    body: z.object({
-      snippets: z
-        .array(
-          z.object({
-            id: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH).optional(),
-            text: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH),
-          })
-        )
-        .max(MAX_CUSTOM_CONTEXT_SNIPPETS),
-      version: z.string().max(MAX_CUSTOM_CONTEXT_VERSION_LENGTH).optional(),
-    }),
+    body: lazySchema(() =>
+      z.object({
+        snippets: z
+          .array(
+            z.object({
+              id: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH).optional(),
+              text: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH),
+            })
+          )
+          .max(MAX_CUSTOM_CONTEXT_SNIPPETS),
+        version: z.string().max(MAX_CUSTOM_CONTEXT_VERSION_LENGTH).optional(),
+      })
+    ),
   }),
   handler: async ({ request, params, customContextClient }): Promise<PutCustomContextResponse> => {
     try {
