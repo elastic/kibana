@@ -51,7 +51,13 @@ import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
+import {
+  applyStepUpdates,
+  countNonTodosSteps,
+  stepUpdates,
+  type RunStepUpdate,
+} from './step_state';
+import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -77,6 +83,7 @@ export const createAgentGraph = ({
   sessionId,
   cacheControl,
   contextManagement,
+  cycleHooks,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -101,6 +108,8 @@ export const createAgentGraph = ({
     ContextManagementDeps,
     'conversation' | 'chatModel' | 'cacheControl' | 'events'
   >;
+  /** The execution's cycle hooks, dispatched before each research model call. */
+  cycleHooks?: CycleHookRuntime;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
     ...contextManagement,
@@ -153,17 +162,29 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
 
+    // Returned on every path below: a retry must re-render the injected rows, not re-ask the hooks.
+    const injected = cycleHooks
+      ? await cycleHooks.dispatch({
+          cycle: state.currentCycle,
+          attempt: state.errorCount + state.contextRetryCount,
+          steps: state.steps,
+          summary: state.compactionSummary,
+        })
+      : [];
+    const runSteps = applyStepUpdates(state.steps, injected);
+
     const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
+      steps: injected,
       researchOutcome: { type: 'retry_error', error },
       errorCount: state.errorCount + 1,
       retryNotices: [
-        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
+        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(runSteps), error },
       ],
     });
 
     try {
       const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({ run: toCurrentRun(state) })
+        await promptFactory.getMainPrompt({ run: toCurrentRun({ ...state, steps: runSteps }) })
       );
 
       const currentCycle = state.currentCycle + 1;
@@ -182,7 +203,7 @@ export const createAgentGraph = ({
       }
 
       return {
-        steps: turn.stepUpdates,
+        steps: [...injected, ...turn.stepUpdates],
         researchOutcome: turn.outcome,
         toolRenderState: turn.renderState,
         pendingToolCallIds: turn.pendingToolCallIds,
@@ -197,6 +218,7 @@ export const createAgentGraph = ({
           throw executionError;
         }
         return {
+          steps: injected,
           researchOutcome: { type: 'context_length_error', error: executionError },
           contextRetryCount: state.contextRetryCount + 1,
         };

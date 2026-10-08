@@ -17,6 +17,7 @@ import type {
 import {
   ConversationRoundStepType,
   ToolResultType,
+  createInjectedContextStep,
   createPreExecutionWorkflowStep,
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
@@ -300,5 +301,36 @@ describe('renderUnit', () => {
     expect(rendered[2]).toContain('SECOND_INPUT');
     expect(rendered[2]).toContain('SECOND_ANSWER');
     expect(rendered[3]).toContain('RAW_x1');
+  });
+});
+
+describe('renderVisibleContext injected context', () => {
+  const render = (steps: ConversationRoundStep[], cursor?: CompactionCursor) =>
+    renderVisibleContext(
+      {
+        conversation: conversation(twoRoundTimeline()),
+        run: run(steps, { cursor, renderState: renderStateOf(['x1', 'x2']) }),
+        phase: 'research',
+      },
+      deps()
+    );
+
+  it('keeps a pinned note after the request once its cycle is covered, and drops an unpinned one', async () => {
+    const steps = [
+      createInjectedContextStep({ hook_id: 'h', text: 'PINNED_NOTE', pin: 'round' }),
+      createInjectedContextStep({ hook_id: 'h', text: 'LOOSE_NOTE' }),
+      call('x1'),
+      call('x2'),
+    ];
+
+    const uncovered = text(await render(steps));
+    expect(uncovered.split('PINNED_NOTE')).toHaveLength(2);
+    expect(uncovered.split('LOOSE_NOTE')).toHaveLength(2);
+
+    const covered = text(await render(steps, { round_id: 'current', tool_call_id: 'x1' }));
+    expect(covered.split('PINNED_NOTE')).toHaveLength(2);
+    expect(covered.split('LOOSE_NOTE')).toHaveLength(1);
+    expect(covered.indexOf('PINNED_NOTE')).toBeGreaterThan(covered.indexOf('NEXT_INPUT'));
+    expect(covered.indexOf('PINNED_NOTE')).toBeLessThan(covered.indexOf('RAW_x2'));
   });
 });

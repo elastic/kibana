@@ -10,12 +10,14 @@ import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AskUserQuestionStep,
   ConversationRoundStep,
+  InjectedContextStep,
   ReasoningStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  isInjectedContextStep,
   isPreExecutionWorkflowStep,
   isReasoningStep,
   isRelevantSkillsStep,
@@ -93,6 +95,24 @@ export const createPreExecutionWorkflowContextMessage = (modelContext: string): 
 
 export const isPreExecutionWorkflowContextMessage = (message: BaseMessage): boolean =>
   message.name === PRE_EXECUTION_WORKFLOW_CONTEXT_NAME;
+
+const INJECTED_CONTEXT_MESSAGE_NAME = 'injected_context';
+const PINNED_INJECTED_CONTEXT_MESSAGE_NAME = 'injected_context_pinned';
+
+/** The user-role notice an `injected_context` step renders as; a pinned step carries its own name. */
+export const createInjectedContextMessage = (step: InjectedContextStep): HumanMessage =>
+  new HumanMessage({
+    content: generateXmlTree({
+      tagName: 'injected_context',
+      attributes: { source: step.hook_id },
+      children: [step.text],
+    }),
+    name:
+      step.pin === 'round' ? PINNED_INJECTED_CONTEXT_MESSAGE_NAME : INJECTED_CONTEXT_MESSAGE_NAME,
+  });
+
+export const isPinnedInjectedContextMessage = (message: BaseMessage): boolean =>
+  message.name === PINNED_INJECTED_CONTEXT_MESSAGE_NAME;
 
 /**
  * Groups consecutive tool call steps by `tool_call_group_id`.
@@ -404,6 +424,8 @@ const renderSteps = async (
       if (step.model_context) {
         messages.push(createPreExecutionWorkflowContextMessage(step.model_context));
       }
+    } else if (isInjectedContextStep(step)) {
+      messages.push(createInjectedContextMessage(step));
     } else if (isToolCallStep(step)) {
       // Only render when we hit the first tool call of a group; the other calls of the group are
       // rendered as part of the same AI message.

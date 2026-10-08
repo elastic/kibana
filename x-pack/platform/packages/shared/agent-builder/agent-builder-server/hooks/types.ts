@@ -173,4 +173,5 @@ export interface HooksServiceStart {
 
 export interface AgentBuilderHooks {
   run: HooksServiceStart['run'];
+  listCycleHooks: HooksServiceStart['listCycleHooks'];
 }

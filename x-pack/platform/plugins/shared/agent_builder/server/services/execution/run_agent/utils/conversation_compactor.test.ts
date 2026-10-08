@@ -11,6 +11,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   ConversationRoundStepType,
   ToolResultType,
+  createInjectedContextStep,
   createPreExecutionWorkflowStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -622,5 +623,31 @@ describe('compactContext', () => {
 
     expect(invoke).toHaveBeenCalledTimes(1);
     expect(result).toBeUndefined();
+  });
+});
+
+describe('compactContext injected context', () => {
+  it('keeps pinned injected context out of summaries and sends unpinned notes', async () => {
+    const { invoke, deps } = setup();
+    const steps = [
+      createInjectedContextStep({ hook_id: 'h', text: 'PINNED_NOTE', pin: 'round' }),
+      createInjectedContextStep({ hook_id: 'h', text: 'LOOSE_NOTE' }),
+      ...['x1', 'x2', 'x3'].map((id) => call(id, BIG)),
+    ];
+
+    const result = await compactContext(
+      {
+        conversation: conversationOf([]),
+        run: run(steps),
+        tailCapTokens: 20_000,
+        fallbackOnFailure: false,
+      },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    const request = requestText(invoke, 0);
+    expect(request).toContain('LOOSE_NOTE');
+    expect(request).not.toContain('PINNED_NOTE');
   });
 });

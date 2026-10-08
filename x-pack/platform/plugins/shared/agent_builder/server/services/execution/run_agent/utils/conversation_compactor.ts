@@ -36,7 +36,10 @@ import {
   roundUserMessage,
   type VisibleContextDeps,
 } from './visible_context';
-import { isPreExecutionWorkflowContextMessage } from './render_steps_to_messages';
+import {
+  isPinnedInjectedContextMessage,
+  isPreExecutionWorkflowContextMessage,
+} from './render_steps_to_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -122,7 +125,7 @@ interface RenderedUnit {
   unit: ContextUnit;
   /** Size in the agent's context; pinned messages stay whatever is covered, like the request. */
   tokens: number;
-  /** What the summarizer is sent: workflow model context is kept out of summaries. */
+  /** What the summarizer is sent: workflow model context and pinned injected context stay out. */
   messages: BaseMessage[];
   messageTokens: number;
 }
@@ -132,7 +135,10 @@ const renderForCompaction = async (
   context: Parameters<typeof renderUnit>[1]
 ): Promise<RenderedUnit> => {
   const rendered = await renderUnit(unit, context);
-  const messages = rendered.filter((message) => !isPreExecutionWorkflowContextMessage(message));
+  const messages = rendered.filter(
+    (message) =>
+      !isPreExecutionWorkflowContextMessage(message) && !isPinnedInjectedContextMessage(message)
+  );
   const messageTokens = estimateMessagesTokens(messages);
   return {
     unit,

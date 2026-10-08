@@ -13,7 +13,11 @@ import type {
   ToolCallStep,
   ToolResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolResultType,
+  createInjectedContextStep,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -25,6 +29,7 @@ import {
   renderCurrentRun,
   renderHistorySteps,
   type CurrentRunRenderOptions,
+  isPinnedInjectedContextMessage,
 } from './render_steps_to_messages';
 import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
@@ -554,5 +559,38 @@ describe('renderCurrentRun', () => {
       expect(types(messages)).toEqual(['ai', 'tool', 'human']);
       expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'ok' });
     });
+  });
+});
+
+describe('injected context', () => {
+  const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember <this>' });
+
+  it('renders as a user message wrapping the escaped text with its source', async () => {
+    const [message] = await renderHistorySteps({ steps: [note] });
+
+    expect(message.getType()).toBe('human');
+    expect(message.name).toBe('injected_context');
+    expect(message.content).toContain('<injected_context source="memory">');
+    expect(message.content).toContain('remember &lt;this&gt;');
+    expect(isPinnedInjectedContextMessage(message)).toBe(false);
+  });
+
+  it('names a pinned step apart, with the same content', async () => {
+    const [pinned] = await renderHistorySteps({
+      steps: [createInjectedContextStep({ ...note, pin: 'round' })],
+    });
+    const [plain] = await renderHistorySteps({ steps: [note] });
+
+    expect(isPinnedInjectedContextMessage(pinned)).toBe(true);
+    expect(pinned.content).toEqual(plain.content);
+  });
+
+  it('renders in both phases of the current run, identically to history', async () => {
+    const [history] = await renderHistorySteps({ steps: [note] });
+    const [research] = await current([note], {});
+    const [answer] = await current([note], {}, { phase: 'answer' });
+
+    expect(research.toDict()).toEqual(history.toDict());
+    expect(answer.toDict()).toEqual(history.toDict());
   });
 });

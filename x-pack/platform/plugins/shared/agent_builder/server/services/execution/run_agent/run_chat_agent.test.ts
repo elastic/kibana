@@ -43,6 +43,7 @@ import { createAgentGraph } from './graph';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
+import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { steps as nodeNames } from './constants';
 import { applyStepUpdates, stepUpdates } from './step_state';
 import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
@@ -665,6 +666,61 @@ describe('runDefaultAgentMode', () => {
       expect(command.goto).toEqual([nodeNames.init]);
       expect(command.update).not.toHaveProperty('pendingToolCallIds');
       expect(command.update).toMatchObject({ cycleLimit: 30, steps: new Overwrite([]) });
+    });
+
+    it('starts the cycle hooks before the tool setup and hands the runtime to the graph', async () => {
+      const { context } = setup();
+      const getHandler = jest.fn(() => undefined);
+      (context.hooks.listCycleHooks as jest.Mock).mockReturnValue([{ id: 'memory', getHandler }]);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          agentId: 'agent-1',
+          executionId: 'exec-1',
+        },
+        context
+      );
+
+      expect(getHandler).toHaveBeenCalledTimes(1);
+      expect(getHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: context.request,
+          spaceId: context.spaceId,
+          agent: expect.objectContaining({ id: 'agent-1' }),
+          execution: expect.objectContaining({ id: 'exec-1', resumed: false }),
+          input: { message: 'hello', attachments: [] },
+          conversation: expect.objectContaining({ rounds: [] }),
+        })
+      );
+      // created and started before the tools are selected, so a 'first' hook overlaps the setup
+      expect(getHandler.mock.invocationCallOrder[0]).toBeLessThan(
+        selectToolsMock.mock.invocationCallOrder[0]
+      );
+      expect(createAgentGraphMock.mock.calls[0][0].cycleHooks).toBeInstanceOf(CycleHookRuntime);
+    });
+
+    it('closes the cycle hook runtime when the run completes and when it fails', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+      expect(close).toHaveBeenCalledTimes(1);
+
+      extractRoundMock.mockRejectedValueOnce(new Error('stream failed'));
+      await expect(
+        runDefaultAgentMode(
+          { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+          context
+        )
+      ).rejects.toThrow('stream failed');
+      expect(close).toHaveBeenCalledTimes(2);
+
+      close.mockRestore();
     });
 
     it('also cuts the inherited abort signals for a standalone run', async () => {
