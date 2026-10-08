@@ -19,6 +19,8 @@ export type {
 } from './src/fetch/create_contract_mock_fetch';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';
+export { isMcpSpec } from './src/mcp/mcp_protocol';
+export type { McpSpec, McpTool } from './src/mcp/mcp_protocol';
 export type {
   CursorRequest,
   NextUrlRequest,

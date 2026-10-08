@@ -8,6 +8,7 @@
  */
 
 import { generateKeyPairSync, webcrypto } from 'crypto';
+import { Readable } from 'stream';
 import axios from 'axios';
 import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
 import { createContractMockFetch } from '@kbn/connector-contract-mock';
@@ -217,6 +218,7 @@ export const createContractContext = async ({
   const { id, schema } = getSchemaForAuthType(definition);
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
+  const streamed = new WeakSet<object>();
   const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {
@@ -224,8 +226,19 @@ export const createContractContext = async ({
       requestConfig.data = await toMultipart(requestConfig.data);
       requestConfig.headers.setContentType(`multipart/form-data; boundary=${FORM_BOUNDARY}`);
     }
+    // The http adapter answers `responseType: 'stream'` with a Node stream, as the MCP client's
+    // fetch expects of Kibana's axios instances; the fetch adapter refuses it.
+    if (requestConfig.responseType === 'stream') {
+      requestConfig.responseType = 'arraybuffer';
+      streamed.add(requestConfig);
+    }
     return requestConfig;
   });
+  client.interceptors.response.use((response) =>
+    streamed.has(response.config)
+      ? { ...response, data: Readable.from([Buffer.from(response.data)]) }
+      : response
+  );
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
