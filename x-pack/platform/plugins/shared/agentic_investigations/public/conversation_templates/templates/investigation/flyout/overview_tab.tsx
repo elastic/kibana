@@ -60,7 +60,7 @@ export const toOverviewSections = (
  */
 export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
   conversation,
-  attachmentsService,
+  groupedAttachments,
   proposedActionsContent,
   proposedActionsCount,
 }) => {
@@ -80,7 +80,7 @@ export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
     <OverviewTab
       investigation={investigation}
       attachments={conversation.attachments}
-      attachmentsService={attachmentsService}
+      groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
       sections={sections}

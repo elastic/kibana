@@ -509,6 +509,7 @@ src/platform/packages/shared/context-switcher-components @elastic/appex-sharedux
 src/platform/packages/shared/controls/control-group-renderer @elastic/kibana-dashboards
 src/platform/packages/shared/controls/controls-constants @elastic/kibana-dashboards
 src/platform/packages/shared/controls/controls-schemas @elastic/kibana-dashboards
+src/platform/packages/shared/dashboard-markdown-schemas @elastic/kibana-dashboards
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/deeplinks/agent_builder @elastic/workchat-eng
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-discover @elastic/kibana-dashboards
@@ -1568,7 +1569,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-discover
-/src/platform/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-discover # Assigned per only use: test/functional/apps/management/group3/_test_huge_fields.ts
+/src/platform/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-discover # Assigned per only use: src/platform/plugins/shared/data_view_management/test/scout/ui/tests/huge_fields.spec.ts
 /x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash.json @elastic/kibana-discover # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/discover/async_scripted_fields.ts#L35
 /x-pack/platform/test/functional/fixtures/kbn_archives/discover @elastic/kibana-discover
 /src/platform/test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-discover # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
@@ -1588,7 +1589,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/es_archiver/hamlet @elastic/kibana-discover # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L30
 /src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns @elastic/kibana-discover
 /src/platform/test/api_integration/fixtures/es_archiver/index_patterns @elastic/kibana-discover
-/src/platform/test/functional/fixtures/es_archiver/alias @elastic/kibana-discover
 /src/platform/test/functional/page_objects/context_page.ts @elastic/kibana-discover
 /src/platform/test/functional/services/data_views.ts @elastic/kibana-discover
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/kibana-discover
@@ -1618,7 +1618,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/examples/unified_tabs_examples @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
-/src/platform/test/functional/apps/management/group3 @elastic/kibana-discover
 /src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-discover
 /x-pack/platform/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-discover
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-discover
@@ -1634,7 +1633,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/serverless/api_integration/test_suites/search_oss @elastic/kibana-discover
 /x-pack/platform/test/serverless/functional/test_suites/discover @elastic/kibana-discover
 /x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover @elastic/kibana-discover
-/x-pack/platform/test/serverless/functional/test_suites/management/data_views @elastic/kibana-discover
 /src/platform/plugins/shared/data/**/esaggs* @elastic/kibana-discover @elastic/kibana-dashboards
 
 # Discover session metrics tab schema
@@ -2650,6 +2648,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_functions/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_sql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/bitbucket/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng

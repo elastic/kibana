@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { InvestigationOverview } from './overview_tab';
@@ -33,9 +33,7 @@ const conversation = {
   metadata: { status: 'open', summary: 'From the conversation' },
 } as Conversation;
 
-const attachmentsService = {
-  getAttachmentUiDefinition: jest.fn(),
-} as unknown as AttachmentServiceStartContract;
+const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
 
 const investigation: Investigation = {
   id: 'conv-1',
@@ -65,7 +63,7 @@ const renderOverview = () =>
       <I18nProvider>
         <InvestigationOverview
           conversation={conversation}
-          attachmentsService={attachmentsService}
+          groupedAttachments={groupedAttachments}
         />
       </I18nProvider>
     </EuiProvider>
