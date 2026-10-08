@@ -64,12 +64,8 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
           {[
             i18n.translate(
-              'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.jinaModels',
-              { defaultMessage: 'Access the latest Jina models' }
-            ),
-            i18n.translate(
-              'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.topProviders',
-              { defaultMessage: 'Choose from top providers and the latest models' }
+              'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.latestModels',
+              { defaultMessage: 'Access the latest models from Jina and other top providers' }
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.regionRestriction',
