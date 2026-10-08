@@ -30,6 +30,7 @@ import {
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
+  resolveDefaultJudgeConnectorId,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
 import { resolveScoutTarget, type ScoutTarget } from './scout_target';
@@ -305,11 +306,16 @@ export const resolveProfileEnvOverrides = async ({
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
 };
 
+/**
+ * Judge connector: `--judge` flag, then `EVAL_CONNECTOR_ID`, then the profile's
+ * `evaluationConnectorId` (pre-selected in the picker on a TTY; used as-is otherwise).
+ */
 export const resolveEvaluationConnectorId = async (
   repoRoot: string,
   log: ToolingLog,
   flagsReader: FlagsReader,
-  suite?: EvalSuiteDefinition
+  suite?: EvalSuiteDefinition,
+  profile?: string
 ): Promise<string> => {
   const evaluationConnectorId =
     flagsReader.string('evaluation-connector-id') ??
@@ -320,11 +326,24 @@ export const resolveEvaluationConnectorId = async (
     return evaluationConnectorId;
   }
 
+  const defaultConnectorId = resolveDefaultJudgeConnectorId(repoRoot, profile);
+
   if (isTTY()) {
-    return promptForConnector(repoRoot, log);
+    return promptForConnector(repoRoot, log, undefined, defaultConnectorId);
   }
 
-  throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  if (!defaultConnectorId) {
+    throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  }
+
+  if (!getAllAvailableConnectors(repoRoot).some((c) => c.id === defaultConnectorId)) {
+    throw createFlagError(
+      `Default judge ${defaultConnectorId} (from the profile config) is not among the available connectors. Set --judge / EVAL_CONNECTOR_ID, or run \`node scripts/evals init\`.`
+    );
+  }
+
+  log.info(`Using default judge: ${defaultConnectorId}`);
+  return defaultConnectorId;
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -358,7 +377,8 @@ export const resolveEvalRunContext = async ({
     repoRoot,
     log,
     flagsReader,
-    suite
+    suite,
+    profile
   );
 
   let projects: string[] = [];
