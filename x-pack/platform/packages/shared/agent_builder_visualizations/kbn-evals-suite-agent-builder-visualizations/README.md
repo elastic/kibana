@@ -40,7 +40,8 @@ node scripts/evals run --suite agent-builder-visualizations
 Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~21 prompts):
 
 - **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus a Vega-Lite scatter and a layered Vega-Lite time series (bars and a line)
-- **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
+- **ecommerce** (`kibana_sample_data_ecommerce`): metric (an order count, revenue, and a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields, and a Vega-Lite single number. The source has no `@timestamp`, so every gold filters `order_date` with the time-picker params
+- **flights** (`kibana_sample_data_flights`): a pie by carrier, filtered on its `timestamp` field
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 - **edits** (`datasets/edits.ts`, run as its own dataset by `visualization_edit.spec.ts`): two-turn conversations where the first turn creates a chart and the second changes it (make it horizontal, split by response code, switch to a pie, add a second series). The gold describes the chart after the edit; only that chart is scored, and the trajectory sees both turns.
 - **refusals** (`datasets/negatives.ts`, run as its own dataset by `visualization_refusal.spec.ts`): a missing index, a missing field, and an ambiguous request. The missing-index case doubles as a canary: if positive evaluators ever score it, they have stopped discriminating.

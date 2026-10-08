@@ -30,7 +30,7 @@ export type ChartFamily =
   | 'query_only'
   | 'refusal';
 
-export type DataSource = 'logs' | 'ecommerce' | 'host_metrics';
+export type DataSource = 'logs' | 'ecommerce' | 'flights' | 'host_metrics';
 
 export type ConfigFeature = 'breakdown_by' | 'secondary_metric' | 'multi_series';
 

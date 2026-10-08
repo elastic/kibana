@@ -6,7 +6,7 @@
  */
 
 import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
-import { TIME_BUCKET_COLUMN, timeSeriesQuery } from './factories';
+import { TIME_BUCKET_COLUMN, timeSeriesQuery, totalsQuery } from './factories';
 import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 
 /** Vega-Lite path: forms Lens does not express. */
@@ -80,6 +80,32 @@ export const VEGA_EXAMPLES: VisualizationDatasetExample[] = [
             },
           ],
         },
+      },
+      goldenToolPath: GOLDEN_TOOL_PATH,
+    },
+  },
+  // Vega single number on a source without @timestamp: Kibana cannot apply the time
+  // picker on its own, so the gold filters order_date with the time-picker params.
+  // The gold pins only the mark: a number with a label layer is just as valid as a
+  // single text mark, and Column Binding Integrity checks the bound column.
+  {
+    input: {
+      question:
+        'Create a Vega-Lite chart showing the total number of orders in kibana_sample_data_ecommerce as a single large number.',
+    },
+    metadata: { chartFamily: 'vega', dataSource: 'ecommerce' },
+    output: {
+      renderer: 'vega',
+      config: {
+        data_source: {
+          type: 'esql',
+          query: totalsQuery({
+            index: 'kibana_sample_data_ecommerce',
+            metrics: [{ alias: 'Order Count', expression: 'COUNT(*)' }],
+            timeField: 'order_date',
+          }),
+        },
+        spec: { mark: 'text' },
       },
       goldenToolPath: GOLDEN_TOOL_PATH,
     },
