@@ -62,6 +62,13 @@ export function SLOOverviewAlerts({
           })}
           titleColor="danger"
           isLoading={isLoading}
+          ariaLabel={i18n.translate(
+            'xpack.slo.sLOsOverview.euiStat.burnRateActiveAlerts.ariaLabel',
+            {
+              defaultMessage: '{count} active burn rate alerts. Go to the active alerts page.',
+              values: { count: data?.burnRateActiveAlerts ?? 0 },
+            }
+          )}
           onClick={() => {
             application.navigateToUrl(getAlertsUrl('active'));
           }}
@@ -73,6 +80,14 @@ export function SLOOverviewAlerts({
           })}
           titleColor="success"
           isLoading={isLoading}
+          ariaLabel={i18n.translate(
+            'xpack.slo.sLOsOverview.euiStat.burnRateRecoveredAlerts.ariaLabel',
+            {
+              defaultMessage:
+                '{count} recovered burn rate alerts. Go to the recovered alerts page.',
+              values: { count: data?.burnRateRecoveredAlerts ?? 0 },
+            }
+          )}
           onClick={() => {
             application.navigateToUrl(getAlertsUrl('recovered'));
           }}
@@ -84,6 +99,10 @@ export function SLOOverviewAlerts({
           })}
           titleColor="default"
           isLoading={isLoading}
+          ariaLabel={i18n.translate('xpack.slo.sLOsOverview.euiStat.burnRateRules.ariaLabel', {
+            defaultMessage: '{count} burn rate rules. Go to the burn rate rules page.',
+            values: { count: data?.burnRateRules ?? 0 },
+          })}
           onClick={() => {
             locator?.navigate({
               type: ['slo.rules.burnRate'],
