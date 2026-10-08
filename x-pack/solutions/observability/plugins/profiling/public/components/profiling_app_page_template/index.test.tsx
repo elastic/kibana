@@ -37,6 +37,7 @@ import { useProfilingDependencies } from '../contexts/profiling_dependencies/use
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
+import { AsyncStatus } from '../../hooks/use_async';
 import { SchemaSelector } from '../schema_selector';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import {
@@ -59,9 +60,13 @@ describe('ProfilingAppPageTemplate', () => {
   const mockDefaultTimeRange = { from: 'now-30m', to: 'now-5m' };
 
   const mockProfilingStatus = (
-    universalProfiling: Partial<Extract<ProfilingStatus, { isEnabled: true }>['universalProfiling']>
+    universalProfiling: Partial<
+      Extract<ProfilingStatus, { isEnabled: true }>['universalProfiling']
+    >,
+    status = AsyncStatus.Settled
   ) =>
     (useProfilingStatus as jest.Mock).mockReturnValue({
+      status,
       data: {
         isEnabled: true,
         otel: { isAvailable: true, hasData: true },
@@ -170,8 +175,28 @@ describe('ProfilingAppPageTemplate', () => {
       renderTemplate('');
 
       expect(getStorageExplorerItem()).toEqual(
-        expect.objectContaining({ disableButton: false, tooltipContent: undefined })
+        expect.objectContaining({
+          isLoading: false,
+          disableButton: false,
+          tooltipContent: undefined,
+        })
       );
+    });
+
+    it('is loading before the profiling status is first loaded', () => {
+      (useProfilingStatus as jest.Mock).mockReturnValue({ status: AsyncStatus.Loading });
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(expect.objectContaining({ isLoading: true }));
+    });
+
+    it('is loading while the profiling status is refreshed', () => {
+      mockProfilingStatus({}, AsyncStatus.Loading);
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(expect.objectContaining({ isLoading: true }));
     });
 
     it('is disabled with a setup hint when Universal Profiling is not set up', () => {

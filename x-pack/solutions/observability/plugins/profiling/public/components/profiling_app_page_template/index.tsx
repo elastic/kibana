@@ -24,6 +24,7 @@ import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/pro
 import { SchemaSelector } from '../schema_selector';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
+import { AsyncStatus } from '../../hooks/use_async';
 import {
   getStorageExplorerAvailability,
   StorageExplorerAvailability,
@@ -92,7 +93,10 @@ export function ProfilingAppPageTemplate({
   const rangeTo = searchParams.get('rangeTo') || defaultRangeTo;
 
   const backTarget = useBackNavigation();
-  const { data: profilingStatus } = useProfilingStatus();
+  const { data: profilingStatus, status: profilingStatusRequestStatus } = useProfilingStatus();
+  // A failed status request doesn't need handling here: CheckStatus renders ProfilingStatusErrorPrompt
+  // instead of the page, higher up in the tree
+  const isProfilingStatusLoading = profilingStatusRequestStatus !== AsyncStatus.Settled;
   const storageExplorerDisabledReason = profilingStatus?.isEnabled
     ? STORAGE_EXPLORER_DISABLED_REASONS[
         getStorageExplorerAvailability(profilingStatus.universalProfiling)
@@ -121,6 +125,7 @@ export function ProfilingAppPageTemplate({
           },
         }),
         iconType: 'database',
+        isLoading: isProfilingStatusLoading,
         disableButton: storageExplorerDisabledReason !== undefined,
         tooltipContent: storageExplorerDisabledReason,
       },
