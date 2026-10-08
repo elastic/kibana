@@ -380,6 +380,9 @@ importers:
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
+      '@elastic/distillate':
+        specifier: 0.2.0
+        version: 0.2.0
       '@elastic/ebt':
         specifier: 1.4.1
         version: 1.4.1
@@ -407,6 +410,12 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-runtime':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      '@elastic/isomer-sdk':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -11022,6 +11031,10 @@ packages:
     peerDependencies:
       moment: ^2.24.0
 
+  '@elastic/distillate@0.2.0':
+    resolution: {integrity: sha512-MT6/KONPeYj/y+v16KjzjY8t7DozXFrEVykJrd7YOFPnJOxZCPtVMe+jtQxl0niWfHnoMn9Rbgy1t+bwh5HrnQ==}
+    engines: {node: '>=20'}
+
   '@elastic/ebt@1.4.1':
     resolution: {integrity: sha512-8kvqG4cU/+V0CvJcXH9Bh0jyHmqvmVwhsOiGW0ZS1ylHMMgVP95186W3quL8luivoAg7PNIUj69OsV2OjLDmwg==}
 
@@ -11124,6 +11137,25 @@ packages:
 
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
+
+  '@elastic/isomer-runtime@0.2.0':
+    resolution: {integrity: sha512-7zq59s2I+4TNdMXZanIvbSjtmqed0kK4jCC2NK2y/hgotLtRVaq02UG4IJqXdZtthmwVyV/UX7x/ymDRfTTl8A==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+
+  '@elastic/isomer-sdk@0.2.0':
+    resolution: {integrity: sha512-xXtu094TQq9tU5MhTxajpT3SvWD5+bqeNF4WC2nac+HaW2ndcHLqZMpVXcPlFWYn7ntlbyVyuJ6M9vjAGHxuFA==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   '@elastic/kibana-d3-color@2.0.1':
     resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
@@ -28014,6 +28046,10 @@ snapshots:
       moment: 2.31.0
       tslib: 1.14.1
 
+  '@elastic/distillate@0.2.0':
+    dependencies:
+      stylis: 4.4.0
+
   '@elastic/ebt@1.4.1':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -28204,6 +28240,29 @@ snapshots:
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/isomer-runtime@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      '@elastic/isomer-sdk': 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@elastic/isomer-sdk@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      acorn: 8.18.0
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
+      mdast-util-gfm: 3.1.0(supports-color@10.2.2)
+      mdast-util-to-markdown: 2.1.3
+      micromark-extension-gfm: 3.0.0
+      react: 18.2.0
+      zod: 4.4.3
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@elastic/kibana-d3-color@2.0.1': {}
 
