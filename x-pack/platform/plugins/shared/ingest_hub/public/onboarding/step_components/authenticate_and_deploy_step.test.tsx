@@ -718,7 +718,11 @@ describe('AuthenticateAndDeployStep', () => {
     });
 
     it('merges newly-added services into instances passed to useEcfDeployment', () => {
-      const vpcflowService: AwsServiceMatrixEntry = { ...ecfService, id: 'vpcflow', name: 'AWS VPC Flow' };
+      const vpcflowService: AwsServiceMatrixEntry = {
+        ...ecfService,
+        id: 'vpcflow',
+        name: 'AWS VPC Flow',
+      };
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: ['cloudtrail', 'vpcflow'], dataFormat: 'json' },
         awsServicesMap: new Map([
@@ -727,7 +731,11 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
-        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          onboardingDeploymentId: undefined,
+        },
         updateDetectAndReviewStep: jest.fn(),
       });
       // Session storage only recorded cloudtrail (vpcflow was added after the session snapshot)
@@ -736,7 +744,12 @@ describe('AuthenticateAndDeployStep', () => {
           globalRegion: 'us-east-1',
           serviceVars: {},
           instances: [
-            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'AWS CloudTrail', isDuplicate: false },
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
           ],
         },
         jest.fn(),
