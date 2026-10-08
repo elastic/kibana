@@ -13,9 +13,11 @@ import { triggerLabels } from '../translations';
 export const TimezonePicker = ({
   timezone,
   onChange,
+  readOnly = false,
 }: {
   timezone: string;
   onChange: (timezone: string) => void;
+  readOnly?: boolean;
 }) => (
   <SelectPill
     ariaLabel={triggerLabels.timezone}
@@ -24,5 +26,6 @@ export const TimezonePicker = ({
     onChange={onChange}
     searchPlaceholder={triggerLabels.timezonePlaceholder}
     testSubject="automationTimezone"
+    readOnly={readOnly}
   />
 );

@@ -19,9 +19,10 @@ import * as i18n from './translations';
 
 interface Props {
   onContinue: () => void;
+  continueDisabledReason?: string;
 }
 
-export const OnboardingIntro: React.FC<Props> = ({ onContinue }) => {
+export const OnboardingIntro: React.FC<Props> = ({ onContinue, continueDisabledReason }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -63,7 +64,7 @@ export const OnboardingIntro: React.FC<Props> = ({ onContinue }) => {
         <OnboardingSetUpDataPanel />
       </div>
 
-      <OnboardingContinueFooter onContinue={onContinue} />
+      <OnboardingContinueFooter onContinue={onContinue} disabledReason={continueDisabledReason} />
     </AlertZeroPageSection>
   );
 };

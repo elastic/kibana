@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { filterQuery } from '../model/filter_query';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
@@ -13,14 +13,16 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
-export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.ipv4().or(z.ipv6()).optional(),
-  flowTarget,
-  sort,
-  filterQuery,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.topCountries),
-});
+export const networkTopCountriesSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    ip: z.ipv4().or(z.ipv6()).optional(),
+    flowTarget,
+    sort,
+    filterQuery,
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.topCountries),
+  })
+);
 
 export type NetworkTopCountriesRequestOptionsInput = z.input<typeof networkTopCountriesSchema>;
 
