@@ -18,7 +18,7 @@ import createCache from '@emotion/cache';
 // import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import type { EuiProviderProps } from '@elastic/eui';
-import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
+import { EuiProvider, euiStylisPrefixer, setEuiSurfaceConfig } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -77,6 +77,19 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
 
 const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
 const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+
+// POC: EUI breakpoints resolve against the app area for content inside it, and the window elsewhere.
+// Toggle with `localStorage.kbnSurfacePoc = 'true'` and reload.
+if (localStorage.getItem('kbnSurfacePoc') === 'true') {
+  setEuiSurfaceConfig({
+    name: 'euiSurface',
+    // No container means an app mount, which renders into the app area.
+    getRoot: (container) =>
+      container
+        ? container.closest<HTMLElement>(FLYOUT_CONTAINER_SELECTOR)
+        : document.querySelector<HTMLElement>(FLYOUT_CONTAINER_SELECTOR),
+  });
+}
 
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
