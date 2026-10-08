@@ -33,7 +33,7 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toIsomerComposition: ({ content }) => ({
+    toSurfaceComposition: ({ content }) => ({
       type: 'view',
       body: [{ type: 'markdown', text: content }],
     }),

@@ -87,7 +87,7 @@ describe('renderPayload', () => {
     );
     const attachmentsService = {
       getTypeDefinition: () => ({
-        toIsomerComposition: (data: { query: string }) => ({
+        toSurfaceComposition: (data: { query: string }) => ({
           type: 'view',
           body: [{ type: 'markdown', text: `\`${data.query}\`` }],
         }),

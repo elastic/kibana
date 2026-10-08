@@ -19,8 +19,8 @@ import {
   type RenderAttachmentElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
-  IsomerComposition,
-  IsomerNode,
+  SurfaceComposition,
+  SurfaceNode,
   MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
@@ -38,7 +38,7 @@ interface AttachmentNode extends RenderAttachmentElementAttributes {
 }
 
 /** The response message split into its markdown and its attachment tags, in order. */
-type MessageNode = IsomerNode | AttachmentNode;
+type MessageNode = SurfaceNode | AttachmentNode;
 
 const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
   const attachmentId = getCustomElementAttribute(tag, attributes.attachmentId);
@@ -82,17 +82,17 @@ const toMessageNodes = (message: string): MessageNode[] =>
  * Keeps the `title` and `subtitle` of an attachment's composition, which would otherwise be lost
  * when its body is spliced into the message: they become a `markdown` node, with the title in bold
  * and the subtitle in italics, placed before the body. Returns nothing when the mapping sets
- * neither, so it's `toIsomerComposition` that decides whether an attachment has a heading.
+ * neither, so it's `toSurfaceComposition` that decides whether an attachment has a heading.
  */
-const toHeadingNode = ({ title, subtitle }: IsomerComposition): MarkdownNode[] => {
+const toHeadingNode = ({ title, subtitle }: SurfaceComposition): MarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
 };
 
 /**
- * Replaces an attachment node with what its type's `toIsomerComposition` returns. Attachments
- * that are missing or have no `toIsomerComposition` are expected, and left out quietly. A
- * `toIsomerComposition` that fails is a bug in its mapping, so it's left out with a warning.
+ * Replaces an attachment node with what its type's `toSurfaceComposition` returns. Attachments
+ * that are missing or have no `toSurfaceComposition` are expected, and left out quietly. A
+ * `toSurfaceComposition` that fails is a bug in its mapping, so it's left out with a warning.
  */
 const resolveAttachmentNode = (
   node: AttachmentNode,
@@ -109,7 +109,7 @@ const resolveAttachmentNode = (
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
   }
-): IsomerNode[] => {
+): SurfaceNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
 
   if (!attachment) {
@@ -131,20 +131,20 @@ const resolveAttachmentNode = (
     return [];
   }
 
-  const toIsomerComposition = attachmentsService.getTypeDefinition(
+  const toSurfaceComposition = attachmentsService.getTypeDefinition(
     attachment.type
-  )?.toIsomerComposition;
+  )?.toSurfaceComposition;
 
-  if (!toIsomerComposition) {
+  if (!toSurfaceComposition) {
     logger.debug(
-      `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toIsomerComposition`
+      `Leaving out attachment "${attachment.id}": type "${attachment.type}" has no toSurfaceComposition`
     );
 
     return [];
   }
 
   try {
-    const composition = toIsomerComposition(attachmentVersion.data, {
+    const composition = toSurfaceComposition(attachmentVersion.data, {
       attachment,
       version: attachmentVersion.version,
     });
@@ -152,7 +152,7 @@ const resolveAttachmentNode = (
     return [...toHeadingNode(composition), ...composition.body];
   } catch (error) {
     logger.warn(
-      `Leaving out attachment "${attachment.id}": its toIsomerComposition failed: ${error.message}`
+      `Leaving out attachment "${attachment.id}": its toSurfaceComposition failed: ${error.message}`
     );
 
     return [];
@@ -162,7 +162,7 @@ const resolveAttachmentNode = (
 /**
  * Builds the Isomer composition of a response message: its markdown becomes `markdown` nodes,
  * and each `<render_attachment>` tag is replaced, in place, by what its type's
- * `toIsomerComposition` returns.
+ * `toSurfaceComposition` returns.
  */
 export const buildComposition = ({
   round: { response, input },
@@ -175,9 +175,9 @@ export const buildComposition = ({
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
   logger: Logger;
-}): IsomerComposition => ({
+}): SurfaceComposition => ({
   type: 'view',
-  body: toMessageNodes(response.message).flatMap((node): IsomerNode[] =>
+  body: toMessageNodes(response.message).flatMap((node): SurfaceNode[] =>
     node.type === 'attachment'
       ? resolveAttachmentNode(node, {
           attachments,

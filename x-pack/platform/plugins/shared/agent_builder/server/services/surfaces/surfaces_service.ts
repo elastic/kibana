@@ -29,7 +29,7 @@ export interface SurfacesService {
 }
 
 export class SurfacesServiceImpl implements SurfacesService {
-  /** Looks up attachment types, whose `toIsomerComposition` renders attachments in place of their tags. */
+  /** Looks up attachment types, whose `toSurfaceComposition` renders attachments in place of their tags. */
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
 

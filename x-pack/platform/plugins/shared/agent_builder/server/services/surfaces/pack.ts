@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IsomerNode, MarkdownNode } from '@kbn/agent-builder-server/attachments';
+import type { SurfaceNode, MarkdownNode } from '@kbn/agent-builder-server/attachments';
 import {
   composePacks,
   createPrimitiveDispatcher,
@@ -43,6 +43,6 @@ export const agentBuilderPack = definePrimitivePack({
 });
 
 /** Renders compositions on any surface. */
-export const compositionDispatcher = createPrimitiveDispatcher<IsomerNode>(
+export const compositionDispatcher = createPrimitiveDispatcher<SurfaceNode>(
   composePacks([agentBuilderPack]).definitions
 );

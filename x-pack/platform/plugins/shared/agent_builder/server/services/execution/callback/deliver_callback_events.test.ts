@@ -355,7 +355,7 @@ describe('deliverCallbackEvents', () => {
     getTypeDefinition.mockImplementation((type: string) =>
       type === 'text'
         ? {
-            toIsomerComposition: ({ content }: { content: string }) => ({
+            toSurfaceComposition: ({ content }: { content: string }) => ({
               type: 'view',
               body: [{ type: 'markdown', text: content }],
             }),

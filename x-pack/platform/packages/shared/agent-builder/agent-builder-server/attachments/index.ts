@@ -15,9 +15,9 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentValidateContext,
-  IsomerComposition,
-  IsomerNode,
-  AttachmentIsomerCompositionContext,
+  SurfaceComposition,
+  SurfaceNode,
+  AttachmentSurfaceCompositionContext,
   MarkdownNode,
 } from './type_definition';
 export type {

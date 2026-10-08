@@ -92,13 +92,13 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    */
   maxContentLength?: number;
   /**
-   * Maps the attachment's data to an Isomer composition, so it renders on surfaces other than
+   * Maps the attachment's data to a surface composition, so it renders on surfaces other than
    * Kibana, such as Slack. Without it, those surfaces leave it out.
    */
-  toIsomerComposition?: (
+  toSurfaceComposition?: (
     data: TContent,
-    context: AttachmentIsomerCompositionContext
-  ) => IsomerComposition;
+    context: AttachmentSurfaceCompositionContext
+  ) => SurfaceComposition;
 }
 
 /**
@@ -120,27 +120,28 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 }
 
 /**
- * Context passed to the {@link AttachmentTypeDefinition.toIsomerComposition} function.
+ * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function.
  */
-export interface AttachmentIsomerCompositionContext {
+export interface AttachmentSurfaceCompositionContext {
   attachment: VersionedAttachment;
   version: number;
 }
 
-/** A block of GitHub-flavored markdown in an Isomer composition. */
+/** A block of GitHub-flavored markdown in a {@link SurfaceComposition}. */
 export interface MarkdownNode extends PrimitiveNode {
   type: 'markdown';
   text: string;
 }
 
-/** The node types of an {@link IsomerComposition}, the ones Agent Builder's Isomer pack renders. */
-export type IsomerNode = MarkdownNode;
+/** The node types of a {@link SurfaceComposition}, the ones Agent Builder's Isomer pack renders. */
+export type SurfaceNode = MarkdownNode;
 
 /**
- * An Isomer composition built from Agent Builder's node types, the ones its pack renders. What
- * an attachment type's `toIsomerComposition` returns, and what a response message becomes.
+ * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
+ * types: the same document renders to every surface, such as Slack. What an attachment type's
+ * `toSurfaceComposition` returns, and what a response message becomes.
  */
-export type IsomerComposition = Composition<IsomerNode>;
+export type SurfaceComposition = Composition<SurfaceNode>;
 
 /**
  * Return type for attachment's validation handlers.

@@ -15,7 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildComposition } from './composition';
 
-type ToIsomerComposition = NonNullable<AttachmentTypeDefinition['toIsomerComposition']>;
+type ToSurfaceComposition = NonNullable<AttachmentTypeDefinition['toSurfaceComposition']>;
 
 const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'a1',
@@ -31,7 +31,7 @@ const createAttachment = (parts: Partial<VersionedAttachment> = {}): VersionedAt
 });
 
 /** Renders each attachment as its id and version, so tests can see which one was resolved. */
-const echoAttachment: ToIsomerComposition = (data, { attachment, version }) => ({
+const echoAttachment: ToSurfaceComposition = (data, { attachment, version }) => ({
   type: 'view',
   body: [{ type: 'markdown', text: `[${attachment.id} v${version}]` }],
 });
@@ -39,7 +39,7 @@ const echoAttachment: ToIsomerComposition = (data, { attachment, version }) => (
 interface ComposeOptions {
   attachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
-  toIsomerComposition?: ToIsomerComposition;
+  toSurfaceComposition?: ToSurfaceComposition;
 }
 
 const compose = (
@@ -47,7 +47,7 @@ const compose = (
   {
     attachments = [createAttachment()],
     attachmentRefs,
-    toIsomerComposition = echoAttachment,
+    toSurfaceComposition = echoAttachment,
   }: ComposeOptions = {}
 ) =>
   buildComposition({
@@ -57,7 +57,7 @@ const compose = (
     } as ConversationRound,
     attachments,
     attachmentsService: {
-      getTypeDefinition: (type: string) => (type === 'text' ? { toIsomerComposition } : undefined),
+      getTypeDefinition: (type: string) => (type === 'text' ? { toSurfaceComposition } : undefined),
     } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
   });
@@ -71,7 +71,7 @@ describe('buildComposition', () => {
     expect(build('There are **3** alerts.')).toEqual(['There are **3** alerts.']);
   });
 
-  it('replaces tags with what their toIsomerComposition returns, in place', () => {
+  it('replaces tags with what their toSurfaceComposition returns, in place', () => {
     const message = [
       'Here is the note:',
       '<render_attachment id="a1" version="1" />',
@@ -82,14 +82,14 @@ describe('buildComposition', () => {
   });
 
   it('shows the title and subtitle of the attachment composition as a heading', () => {
-    const toIsomerComposition: ToIsomerComposition = () => ({
+    const toSurfaceComposition: ToSurfaceComposition = () => ({
       type: 'view',
       title: 'Note',
       subtitle: 'v1',
       body: [{ type: 'markdown', text: 'Content' }],
     });
 
-    expect(build('<render_attachment id="a1" />', { toIsomerComposition })).toEqual([
+    expect(build('<render_attachment id="a1" />', { toSurfaceComposition })).toEqual([
       '**Note**\n_v1_',
       'Content',
     ]);
@@ -120,7 +120,7 @@ describe('buildComposition', () => {
     expect(build('Hello <render_attachment version="1" />')).toEqual(['Hello']);
   });
 
-  it('leaves out types without a toIsomerComposition', () => {
+  it('leaves out types without a toSurfaceComposition', () => {
     expect(
       build('Here: <render_attachment id="a1" />', {
         attachments: [createAttachment({ type: 'case' })],
@@ -133,12 +133,12 @@ describe('buildComposition', () => {
     expect(build('Here: <render_attachment id="a1" version="9" />')).toEqual(['Here:']);
   });
 
-  it('leaves out attachments whose toIsomerComposition fails', () => {
-    const toIsomerComposition: ToIsomerComposition = () => {
+  it('leaves out attachments whose toSurfaceComposition fails', () => {
+    const toSurfaceComposition: ToSurfaceComposition = () => {
       throw new Error('boom');
     };
 
-    expect(build('Here: <render_attachment id="a1" />', { toIsomerComposition })).toEqual([
+    expect(build('Here: <render_attachment id="a1" />', { toSurfaceComposition })).toEqual([
       'Here:',
     ]);
   });
