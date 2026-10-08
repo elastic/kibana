@@ -8,7 +8,7 @@
 import { type Attributes, type Counter, metrics, ValueType } from '@opentelemetry/api';
 
 /** Which API requested the nudge. */
-export type ClaimNudgeSource = 'run_soon';
+export type ClaimNudgeSource = 'run_soon' | 'schedule';
 
 class TaskManagerClaimNudgeTelemetry {
   private readonly meter = metrics.getMeter('kibana.task_manager');

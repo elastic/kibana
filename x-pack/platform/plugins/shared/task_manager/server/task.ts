@@ -733,7 +733,22 @@ export interface ApiKeyOptions {
   onEsKey?: boolean;
 }
 
-export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+export type ScheduleOptions = Record<string, unknown> &
+  ApiKeyOptions & {
+    /**
+     * Only honored by `schedule`. Requests a best-effort extra claim cycle on background
+     * nodes after the task is created. Requires an ad-hoc task with no `runAt`, no
+     * `schedule`, and not `enabled: false`. Not supported by `ensureScheduled` or
+     * `bulkSchedule` (those APIs omit this field from their options type).
+     */
+    requestImmediateClaim?: boolean;
+  };
+
+/** Options accepted by `TaskStore.schedule`. */
+export type ScheduleStoreOptions = ApiKeyOptions & {
+  /** When true, refresh the task index after create so the task is searchable immediately. */
+  refresh?: boolean;
+};
 
 // Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
 export interface TaskEventLogger {

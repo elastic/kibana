@@ -517,6 +517,8 @@ Use `getRegisteredTypes` to get a list of all registered task types. This only r
 Use `schedule` to instruct TaskManager to schedule an instance of a TaskType at some point in the future.
 Please check the [Schedule options](#schedule-options) for the scheduling config details
 
+Pass `schedule(task, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle (same caveats as [`runSoon`](#runsoon)). Only for ad-hoc tasks: no `runAt`, no recurring `schedule`, and not `enabled: false`. Unsupported by `ensureScheduled` and `bulkSchedule`.
+
 ```js
 export class Plugin {
   constructor() {}
@@ -534,6 +536,12 @@ export class Plugin {
       params,
       scope: ['my-fanci-app'],
     });
+
+    // Ad-hoc task that also requests an immediate claim cycle:
+    await taskManager.schedule(
+      { taskType, params, scope: ['my-fanci-app'] },
+      { requestImmediateClaim: true }
+    );
 
     // Removes the specified task
     await taskManager.remove(task.id);
@@ -579,9 +587,9 @@ The only exception to this is if you use `ensureScheduled` to schedule a task wi
 
 Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
-Pass `runSoon(id, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle on background task nodes, instead of waiting for the next poll. `runSoon` refreshes the task update but does not wait for the request to be delivered; if delivery fails, regular polling claims the task. Requests are throttled to one admitted nudge per 500ms per node, and ignored while Task Manager is backing off from Elasticsearch errors. `xpack.task_manager.claim_nudge.enabled: false` turns this off.
+Pass `runSoon(id, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle on background task nodes, instead of waiting for the next poll. `runSoon` refreshes the task update but does not wait for the request to be delivered; if delivery fails, regular polling claims the task. Requests are throttled to one admitted nudge per 500ms per node, and ignored while Task Manager is backing off from Elasticsearch errors. `xpack.task_manager.claim_nudge.enabled: false` turns this off. See [`schedule`](#schedule) for the same option when creating a new ad-hoc task.
 
-The extra cycle may claim any eligible task, not just this one, so a task that needs a delay before running must encode it in its own eligibility or rescheduling logic. The `kibana.task_manager.claim_nudge.count` metric counts successful opted-in `runSoon` calls.
+The extra cycle may claim any eligible task, not just this one, so a task that needs a delay before running must encode it in its own eligibility or rescheduling logic. The `kibana.task_manager.claim_nudge.count` metric counts successful opted-in `schedule` and `runSoon` calls.
 
 Pass `runSoon(id, { priority })` to also change the task's stored priority. This requires `allowPriorityOverride: true` on the task type and throws otherwise. See [Changing an existing task's priority](#changing-an-existing-tasks-priority). The legacy boolean form `runSoon(id, true)` is equivalent to `runSoon(id, { force: true })`.
 
