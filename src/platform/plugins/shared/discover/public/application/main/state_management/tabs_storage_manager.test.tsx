@@ -1178,7 +1178,7 @@ describe('TabsStorageManager', () => {
       timeRestore = true,
       persistedTabId = mockTab1.id,
       tabLabel?: string,
-      urlRefreshInterval?: TabState['globalState']['refreshInterval']
+      urlRefreshInterval = mockTab1.globalState.refreshInterval
     ) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
@@ -1241,6 +1241,7 @@ describe('TabsStorageManager', () => {
 
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
         time: mockTab1.globalState.timeRange,
+        refreshInterval: mockTab1.globalState.refreshInterval,
         filters: [],
       });
     });
@@ -1251,6 +1252,7 @@ describe('TabsStorageManager', () => {
       expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
         time: mockTab1.globalState.timeRange,
+        refreshInterval: mockTab1.globalState.refreshInterval,
         filters: [],
       });
     });
@@ -1262,7 +1264,7 @@ describe('TabsStorageManager', () => {
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
     });
 
-    it('should clear the URL refresh interval when the saved tab restores time', () => {
+    it('should keep URL state that differs from the stored tab only in refresh interval, e.g. from a shared link', () => {
       const urlStateStorage = loadWithUrlAppState(
         mockTab1.appState,
         undefined,
@@ -1272,7 +1274,12 @@ describe('TabsStorageManager', () => {
         { pause: false, value: 5000 }
       );
 
-      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual(mockTab1.appState);
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
+        time: mockTab1.globalState.timeRange,
+        refreshInterval: { pause: false, value: 5000 },
+        filters: [],
+      });
     });
 
     it('should clear URL state when the stored tab also keeps state for an inactive profile', () => {

@@ -267,12 +267,12 @@ export const createTabsStorageManager = ({
       urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)
     );
 
+    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+
     return (
       isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
-      isEqual(
-        urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time,
-        globalState?.timeRange
-      ) &&
+      isEqual(urlGlobalState?.time, globalState?.timeRange) &&
+      isEqual(urlGlobalState?.refreshInterval, globalState?.refreshInterval) &&
       // The URL only holds the active profile state, while the stored tab keeps every profile.
       isEqual(urlProfileState, pick(getUrlProfileState(profileState), Object.keys(urlProfileState)))
     );
