@@ -151,4 +151,22 @@ export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): 
     `| LIMIT ${pageSize + 1}`,
   ].join('\n');
 
+/**
+ * Page rows after a STATS that produced one row per entity with the sort value: sort and
+ * limit, then join the entity docs of just the page rows. The join runs after STATS, on the
+ * coordinator, so joining every row before the limit is what made these sorts slow.
+ */
+export const buildJoinedPageSteps = (
+  args: QueryArgs,
+  sortField: string,
+  extraFields: readonly string[] = []
+): string[] => [
+  ...buildCursorClause(args.cursor),
+  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+  buildLookupJoinClause(args.concreteEntityIndexName),
+  buildKeepClause(args, sortField, ...extraFields),
+  // LOOKUP JOIN may not keep the input order.
+  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+];
+
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;

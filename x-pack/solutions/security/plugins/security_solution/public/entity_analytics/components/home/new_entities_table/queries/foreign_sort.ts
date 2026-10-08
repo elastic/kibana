@@ -7,29 +7,10 @@
 
 import { ENTITY_ID_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { buildCursorClause, buildKeepClause, buildLookupJoinClause, buildSortSuffix } from './esql';
+import { buildJoinedPageSteps } from './esql';
 import { IN_VIEW_FIELD, buildEntitiesInViewSteps } from './entities_in_view';
 
 // ── foreign sorts ────────────────────────────────────────────────────────────
-
-/**
- * Page rows of a foreign sort, after the merge produced one row per entity in view with
- * the sort value (null or 0 when the foreign index has nothing for it). Sorting and
- * limiting before the join keeps the join to the page rows: it runs after STATS, on the
- * coordinator, so joining every merged row is what made foreign sorts slow.
- */
-export const buildForeignSortPageSteps = (
-  args: QueryArgs,
-  sortField: string,
-  extraFields: readonly string[] = []
-): string[] => [
-  ...buildCursorClause(args.cursor),
-  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
-  buildLookupJoinClause(args.concreteEntityIndexName),
-  buildKeepClause(args, sortField, ...extraFields),
-  // LOOKUP JOIN may not keep the input order.
-  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
-];
 
 export interface MergedForeignRowsOptions {
   /** Statements that go before the query, for example `SET …;`. */
@@ -91,6 +72,4 @@ export const buildMergedForeignSortQuery = (
   args: QueryArgs,
   { sortField, ...options }: MergedForeignSortOptions
 ): string =>
-  [...buildMergedForeignRows(args, options), ...buildForeignSortPageSteps(args, sortField)].join(
-    '\n'
-  );
+  [...buildMergedForeignRows(args, options), ...buildJoinedPageSteps(args, sortField)].join('\n');

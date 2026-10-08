@@ -21,9 +21,8 @@ import {
   buildFilterClause,
   buildLookupJoinClause,
   toList,
-  buildSortSuffix,
   buildCursorClause,
-  esc,
+  buildJoinedPageSteps,
 } from './esql';
 import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
@@ -37,7 +36,7 @@ import type {
   SortDir,
   SortPageContext,
 } from '../common';
-import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
+import { SPLIT_SORT_MIN_VIEW_SIZE, buildEmptyRowsQuery } from './split_sort';
 
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
@@ -60,12 +59,7 @@ const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*), has_head = MAX(is_head) BY group_key`,
     '| WHERE has_head == 1',
     '| RENAME group_key AS `entity.id`',
-    ...buildCursorClause(args.cursor),
-    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
-    buildLookupJoinClause(args.concreteEntityIndexName),
-    buildKeepClause(args, GROUP_SIZE_FIELD),
-    // LOOKUP JOIN may not keep the input order.
-    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
+    ...buildJoinedPageSteps(args, GROUP_SIZE_FIELD),
   ].join('\n');
 
 /**
@@ -112,12 +106,7 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
     ]),
     ')',
     `| STATS ${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD}) BY \`entity.id\``,
-    ...cursor,
-    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
-    buildLookupJoinClause(args.concreteEntityIndexName),
-    buildKeepClause(args, GROUP_SIZE_FIELD),
-    // LOOKUP JOIN may not keep the input order.
-    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
+    ...buildJoinedPageSteps(args, GROUP_SIZE_FIELD),
   ].join('\n');
 };
 
@@ -172,14 +161,12 @@ const buildAliasGroupsQuery = (args: QueryArgs): string =>
  * head a group with aliases, so callers ask for that many extra rows.
  */
 const buildSingleEntitiesQuery = (args: QueryArgs, afterId: string | null, limit: number) =>
-  [
-    ...buildEntitiesInViewSteps(args),
-    ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : []),
-    `| SORT ${ENTITY_ID_FIELD} ASC`,
-    `| LIMIT ${limit}`,
-    `| EVAL ${GROUP_SIZE_FIELD} = TO_LONG(1)`,
-    buildKeepClause(args, GROUP_SIZE_FIELD),
-  ].join('\n');
+  buildEmptyRowsQuery(
+    args,
+    { emptyColumns: `${GROUP_SIZE_FIELD} = TO_LONG(1)`, columns: [GROUP_SIZE_FIELD] },
+    afterId,
+    limit
+  );
 
 const getGroupSize = (row: Row): number => getNumber(row, GROUP_SIZE_FIELD) ?? 1;
 

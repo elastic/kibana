@@ -12,6 +12,7 @@ import {
   buildLookupJoinClause,
   getEntityAlias,
   buildLookback,
+  buildJoinedPageSteps,
   toList,
 } from './esql';
 import {
@@ -24,7 +25,6 @@ import {
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
-import { buildForeignSortPageSteps } from './foreign_sort';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
 import { buildEntityListSortPlan, buildSplitSortSpec } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
@@ -133,7 +133,7 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
       `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
     ].join(', ')} BY \`entity.id\``,
     `| WHERE ${IN_VIEW_FIELD} == 1`,
-    ...buildForeignSortPageSteps(args, sortField, ALERT_FIELDS),
+    ...buildJoinedPageSteps(args, sortField, ALERT_FIELDS),
   ].join('\n');
 };
 
