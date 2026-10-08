@@ -27,6 +27,8 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
 import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
@@ -76,7 +78,7 @@ import {
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -96,6 +98,8 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
@@ -248,10 +252,19 @@ const handleConversationExecution = async ({
   // resolution moved inside this guard too, so a run that fails to resolve one still gets a
   // terminal recorded next to the message that was already persisted.
   try {
+    // Captured once, before the first model call, so every EIS call in this round (including
+    // the title-generation and default-connector lookups below, which run ahead of the
+    // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
+    // active when the model-provider's (memoized) telemetry metadata was first resolved.
+    const roundTraceId = getCurrentTraceId();
+    const roundTelemetryMetadata = roundTraceId
+      ? { ...telemetryMetadata, traceId: roundTraceId }
+      : telemetryMetadata;
+
     const { modelProvider, selectedConnectorId } = await resolveServices({
       agentId,
       connectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
     });
@@ -269,7 +282,7 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       defaultConnectorId: selectedConnectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
       reasoningLevel,
       runAgent,
@@ -623,10 +636,17 @@ const handleStandaloneExecution = async ({
   const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
     execution.agentParams;
 
+  // See the matching comment in handleConversationExecution: captured once, ahead of the first
+  // model call, so every EIS call in this execution reports the same trace id.
+  const roundTraceId = getCurrentTraceId();
+  const roundTelemetryMetadata = roundTraceId
+    ? { ...telemetryMetadata, traceId: roundTraceId }
+    : telemetryMetadata;
+
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
   });
@@ -639,7 +659,7 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
     reasoningLevel,
     runAgent,

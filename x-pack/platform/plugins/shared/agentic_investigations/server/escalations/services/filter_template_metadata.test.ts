@@ -23,14 +23,14 @@ describe('filterMetadataToTemplateFields', () => {
     const result = filterMetadataToTemplateFields({
       metadata: {
         // Present on investigation template, absent on escalation — the exact 400 this filter prevents.
-        workflow_execution_id: 'wf-123',
+        workflow_execution_ids: ['wf-123'],
         severity: 'high',
         summary: 'Suspicious activity',
       },
       declaredFields: ESCALATION_FIELDS,
     });
 
-    expect(result).not.toHaveProperty('workflow_execution_id');
+    expect(result).not.toHaveProperty('workflow_execution_ids');
     expect(result).toHaveProperty('severity', 'high');
     expect(result).toHaveProperty('summary', 'Suspicious activity');
   });
@@ -105,7 +105,7 @@ describe('filterMetadataToTemplateFields', () => {
       summary: 'An attacker exploited...',
       description: 'Alert fired on suspicious PowerShell',
       close_reason: 'resolved',
-      workflow_execution_id: 'wf-abc', // investigation-only: must be excluded
+      workflow_execution_ids: ['wf-abc'], // investigation-only: must be excluded
     };
 
     const result = filterMetadataToTemplateFields({
@@ -125,6 +125,6 @@ describe('filterMetadataToTemplateFields', () => {
         'close_reason',
       ].sort()
     );
-    expect(result).not.toHaveProperty('workflow_execution_id');
+    expect(result).not.toHaveProperty('workflow_execution_ids');
   });
 });

@@ -101,6 +101,42 @@ const evaluateExpression = (expression: string, context: Record<string, unknown>
 };
 
 describe('Hunt Watch worker chain', () => {
+  it('records the hunt run on both new and reused investigations before attaching findings', () => {
+    const append = stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution');
+    expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+    expect(append?.['on-failure']).toEqual({ continue: true });
+    expect(append?.with).toEqual({
+      conversationId: '{{ steps.find_or_create.output.investigationConversationId }}',
+      workflowExecutionId: '{{ inputs.runId }}',
+    });
+    const names = findOrCreateInvestigation.steps.map(({ name }) => name);
+    expect(names.indexOf('find_or_create')).toBeLessThan(
+      names.indexOf('append_workflow_execution')
+    );
+    expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+      names.indexOf('attach_threat_report')
+    );
+  });
+
+  it.each([
+    ['conv-1', 'exec-1', true],
+    ['conv-1', '', false],
+    ['', 'exec-1', false],
+    [undefined, 'exec-1', false],
+  ])(
+    'only appends when a hunt conversation and run ID exist: %p, %p',
+    (conversationId, runId, expected) => {
+      const condition =
+        stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution')?.if ?? '';
+      expect(
+        evaluateExpression(condition, {
+          inputs: { runId },
+          steps: { find_or_create: { output: { investigationConversationId: conversationId } } },
+        })
+      ).toBe(expected);
+    }
+  );
+
   // 1b: the two feature children carry exactly the shared tag pair, and neither the
   // Worker-only watch tags.
   it.each([
