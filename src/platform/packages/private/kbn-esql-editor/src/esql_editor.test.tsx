@@ -15,8 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/dom';
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -171,14 +170,21 @@ describe('ESQLEditor', () => {
   });
 
   it('should render correctly if editorIsInline prop is set to true', async () => {
+    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
       editorIsInline: true,
+      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
+
+    if (runQueryButton) {
+      await userEvent.click(runQueryButton);
+      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
+    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {

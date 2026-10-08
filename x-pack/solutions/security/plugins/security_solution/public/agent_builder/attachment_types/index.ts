@@ -24,10 +24,6 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import {
-  createAlertSummaryRows,
-  createAlertsSummaryRows,
-} from './attachment_summary_drilldown/create_details_drilldown';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -66,8 +62,7 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
- *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
+ *   - `security.alert` — label and icon.
  *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
@@ -76,20 +71,11 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  */
 export const registerAttachmentUiDefinitions = ({
   attachments,
-  resolveSecurityCanvasContext,
-  getSpaceId,
-  data,
 }: {
   attachments: AttachmentServiceStartContract;
-  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  getSpaceId: () => Promise<string>;
-  data: DataPublicPluginStart;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAlertSummaryRows({
-      resolveSecurityCanvasContext,
-    }),
   });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
@@ -105,11 +91,6 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
-      renderConversationDetailsContent: createAlertsSummaryRows({
-        resolveSecurityCanvasContext,
-        getSpaceId,
-        search: data.search.search,
-      }),
     }
   );
 };
@@ -397,6 +378,26 @@ export const registerEntityRiskScoreHistoryAttachment = ({
       })
     );
   });
+};
+
+/**
+ * Registers the `security.siem_migration.rule_migration_items` attachment renderer (chip label only).
+ * No rich renderer needed — the attachment label is pre-built by the client.
+ */
+export const registerSiemMigrationRuleItemsAttachment = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.ruleMigrationItems,
+    {
+      getLabel: (attachment) =>
+        attachment?.data?.attachmentLabel ??
+        i18n.translate('xpack.securitySolution.agentBuilder.ruleMigrationItemsAttachment.label', {
+          defaultMessage: 'Migration Rules',
+        }),
+      getIcon: () => 'productAgent',
+    }
+  );
 };
 
 /**
