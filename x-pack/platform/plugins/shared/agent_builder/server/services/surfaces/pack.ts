@@ -14,6 +14,7 @@ import {
   requiredString,
   z,
 } from '@elastic/isomer-sdk';
+import { md } from '@elastic/isomer-sdk/markdown';
 
 const markdown = definePrimitive<MarkdownNode>({
   type: 'markdown',
@@ -32,7 +33,7 @@ const markdown = definePrimitive<MarkdownNode>({
   renderers: {
     react: ({ text }) => text,
     text: ({ text }) => text,
-    markdown: ({ text }) => text,
+    markdown: ({ text }) => md.authored(text),
   },
 });
 

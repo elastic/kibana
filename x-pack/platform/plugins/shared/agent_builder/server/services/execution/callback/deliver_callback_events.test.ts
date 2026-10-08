@@ -335,7 +335,21 @@ describe('deliverCallbackEvents', () => {
         ...roundCompleteEvent,
         surface_payload: {
           text: expect.any(String),
-          blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'There are *3* alerts.' } }],
+          blocks: [
+            {
+              type: 'rich_text',
+              elements: [
+                {
+                  type: 'rich_text_section',
+                  elements: [
+                    { type: 'text', text: 'There are ' },
+                    { type: 'text', text: '3', style: { bold: true } },
+                    { type: 'text', text: ' alerts.' },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     ]);

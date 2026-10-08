@@ -408,8 +408,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2
       '@elastic/isomer-sdk':
-        specifier: 0.1.0
-        version: 0.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -11044,8 +11044,8 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
-  '@elastic/isomer-sdk@0.1.0':
-    resolution: {integrity: sha512-/y4AkG39Wb/b5ZxEvnwCMw79jgT6OcpH+kmLmaFoKOv/ZvHs0dBY3pZ7SllBYHy+8a73SpIMb2yPcgBBUFYqCg==}
+  '@elastic/isomer-sdk@0.2.0':
+    resolution: {integrity: sha512-xXtu094TQq9tU5MhTxajpT3SvWD5+bqeNF4WC2nac+HaW2ndcHLqZMpVXcPlFWYn7ntlbyVyuJ6M9vjAGHxuFA==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
@@ -27962,7 +27962,7 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
-  '@elastic/isomer-sdk@0.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+  '@elastic/isomer-sdk@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
       acorn: 8.18.0
       mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)

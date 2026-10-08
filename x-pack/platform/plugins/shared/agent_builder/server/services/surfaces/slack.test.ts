@@ -18,8 +18,19 @@ describe('slackSurface', () => {
       text: expect.any(String),
       blocks: [
         {
-          type: 'section',
-          text: { type: 'mrkdwn', text: 'There are *3* <https://example.com|alerts>.' },
+          type: 'rich_text',
+          elements: [
+            {
+              type: 'rich_text_section',
+              elements: [
+                { type: 'text', text: 'There are ' },
+                { type: 'text', text: '3', style: { bold: true } },
+                { type: 'text', text: ' ' },
+                { type: 'link', text: 'alerts', url: 'https://example.com' },
+                { type: 'text', text: '.' },
+              ],
+            },
+          ],
         },
       ],
     });
