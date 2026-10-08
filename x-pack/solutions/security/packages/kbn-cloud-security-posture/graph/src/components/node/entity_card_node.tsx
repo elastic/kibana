@@ -28,6 +28,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { NodeContainer, NodeShapeContainer, NodeButton, HandleStyleOverride } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
+import { getRiskLevel, getRiskScoreColors } from './utils/risk_score';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_DETAILS_ID,
@@ -147,70 +148,9 @@ const EntityCardHeader = ({ children }: { children: React.ReactNode }) => (
 /** Size of the inset icon box inside the header. */
 const ICON_BOX_SIZE = 40;
 
-// ---------------------------------------------------------------------------
-// Risk-score helpers
-//
-// These mirror the logic in security_solution:
-//   - getRiskLevel    → security_solution/common/entity_analytics/risk_engine/risk_levels.ts
-//   - getRiskScoreColors → security_solution/.../entities_table/risk_score_cell.tsx
-//
-// We cannot import from there directly because `security_solution` is a
-// `visibility: private` plugin and this package is a separate module —
-// crossing that boundary is forbidden by Kibana's module-boundary rules
-// (enforced by ESLint). If those thresholds or color tokens ever change,
-// update this copy too.
-// ---------------------------------------------------------------------------
-
-/** Risk severity levels, ordered ascending. */
-type RiskLevel = 'Unknown' | 'Low' | 'Moderate' | 'High' | 'Critical';
-
-/** Bucket a numeric risk score into a severity level. Thresholds match Entity Analytics. */
-const getRiskLevel = (score: number): RiskLevel => {
-  if (score >= 90) return 'Critical';
-  if (score >= 70) return 'High';
-  if (score >= 40) return 'Moderate';
-  if (score >= 20) return 'Low';
-  return 'Unknown';
-};
-
-/** Semantic EUI color tokens per risk level — identical to getRiskScoreColors in entity analytics. */
-const getRiskScoreColors = (
-  euiTheme: EuiThemeComputed,
-  level: RiskLevel
-): { background: string; text: string } => {
-  switch (level) {
-    case 'Critical':
-      return {
-        background: euiTheme.colors.backgroundLightDanger,
-        text: euiTheme.colors.textDanger,
-      };
-    case 'High':
-      return {
-        background: euiTheme.colors.backgroundLightRisk,
-        text: euiTheme.colors.textRisk,
-      };
-    case 'Moderate':
-      return {
-        background: euiTheme.colors.backgroundLightWarning,
-        text: euiTheme.colors.textWarning,
-      };
-    case 'Low':
-      return {
-        background: euiTheme.colors.backgroundBaseNeutral,
-        text: euiTheme.colors.textNeutral,
-      };
-    default:
-      return {
-        background: euiTheme.colors.backgroundBaseSubdued,
-        text: euiTheme.colors.textSubdued,
-      };
-  }
-};
-
 /**
-/**
- * Contained colored icon box — inset with padding so it doesn't span
- * the full card height.
+ * Outer wrapper — owns the border, border-radius, and selection shadow for both
+ * the header row and the optional metadata panel below it.
  */
 const IconBox = styled.div<{ bgColor: string }>`
   position: relative;

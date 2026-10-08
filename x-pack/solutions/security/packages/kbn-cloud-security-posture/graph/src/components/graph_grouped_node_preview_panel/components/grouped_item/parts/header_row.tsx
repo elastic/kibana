@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -28,7 +29,9 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
+  GROUPED_ITEM_RISK_TEST_ID,
 } from '../../../test_ids';
+import { getRiskLevel, getRiskScoreColors } from '../../../../node/utils/risk_score';
 import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
@@ -60,6 +63,15 @@ export interface HeaderRowProps {
 
 export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const riskBadge = useMemo(() => {
+    if (item.itemType !== DOCUMENT_TYPE_ENTITY) return null;
+    const risk = (item as EntityItem).risk;
+    if (risk == null) return null;
+    const level = getRiskLevel(risk);
+    const colors = getRiskScoreColors(euiTheme, level);
+    return { display: (Math.round(risk * 100) / 100).toFixed(2), colors };
+  }, [item, euiTheme]);
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
   const euidApi = useEntityStoreEuidApi()?.euid;
@@ -166,6 +178,28 @@ export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: Heade
           </EuiToolTip>
         )}
       </EuiFlexItem>
+      {riskBadge && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            data-test-subj={GROUPED_ITEM_RISK_TEST_ID}
+            color={riskBadge.colors.background}
+            css={css`
+              flex-shrink: 0;
+              white-space: nowrap;
+            `}
+          >
+            <EuiText
+              size="xs"
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+                color: ${riskBadge.colors.text};
+              `}
+            >
+              {riskBadge.display}
+            </EuiText>
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {item.itemType === DOCUMENT_TYPE_ENTITY ? (
           <EntityActionsButton
