@@ -151982,7 +151982,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 ack actions to create.
+          description: List of 1 to 100 ack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item'
           maxItems: 100
@@ -152012,7 +152012,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 activate actions to create.
+          description: List of 1 to 100 activate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item'
           maxItems: 100
@@ -152043,7 +152043,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 assign actions to create.
+          description: List of 1 to 100 assign actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item'
           maxItems: 100
@@ -152223,7 +152223,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 deactivate actions to create.
+          description: List of 1 to 100 deactivate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item'
           maxItems: 100
@@ -152349,7 +152349,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 tag actions to create.
+          description: List of 1 to 100 tag actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item'
           maxItems: 100
@@ -152373,7 +152373,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 unack actions to create.
+          description: List of 1 to 100 unack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item'
           maxItems: 100
