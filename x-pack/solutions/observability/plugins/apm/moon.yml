@@ -182,7 +182,6 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/lens-common'
   - '@kbn/core-http-browser-mocks'
-  - '@kbn/genai-common'
 tags:
   - plugin
   - prod

@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/metrics-data-access-plugin'
   - '@kbn/safer-lodash-set'
-  - '@kbn/genai-common'
 tags:
   - plugin
   - prod
