@@ -11,15 +11,13 @@ import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
-import { updateSignificantEventStatus } from './update_event_status';
+import { applyLifecycleInput } from './lifecycle_controller';
 
-jest.mock('./update_event_status', () => ({
-  updateSignificantEventStatus: jest.fn(),
+jest.mock('./lifecycle_controller', () => ({
+  applyLifecycleInput: jest.fn(),
 }));
 
-const updateStatusMock = updateSignificantEventStatus as jest.MockedFunction<
-  typeof updateSignificantEventStatus
->;
+const updateStatusMock = applyLifecycleInput as jest.MockedFunction<typeof applyLifecycleInput>;
 
 const makeAlertEventsClient = (
   overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
@@ -106,7 +104,7 @@ describe('cleanupStaleEvents', () => {
     expect(updateStatusMock).toHaveBeenCalledWith({
       eventSearchClient,
       eventId: 'stale-event',
-      status: 'inactive',
+      input: { kind: 'rule_deleted' },
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
       alertEventsClient,
     });
@@ -130,7 +128,7 @@ describe('cleanupStaleEvents', () => {
 
     expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
     expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
-      status: ['active'],
+      status: ['active', 'recovering'],
       ruleUuids: undefined,
       afterGroupHash: 'group-event-0999',
       batchSize: 1000,
@@ -152,7 +150,7 @@ describe('cleanupStaleEvents', () => {
     });
 
     expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
-      status: ['active'],
+      status: ['active', 'recovering'],
       ruleUuids: ['rule-1'],
       afterGroupHash: undefined,
       batchSize: 1000,
@@ -232,7 +230,7 @@ describe('cleanupStaleEvents', () => {
   });
 
   describe('.rule-events writes', () => {
-    it('propagates alertEventsClient to each updateSignificantEventStatus call', async () => {
+    it('propagates alertEventsClient to each applyLifecycleInput call', async () => {
       const stale = createEvent('stale-1', ['deleted-rule']);
       const eventSearchClient = createEventSearchClient([[stale]]);
       const rulesClient = createRulesClient([]);

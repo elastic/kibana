@@ -10,12 +10,13 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   SEVERITY_CONTRACT_RULE,
+  significantEventManualStatusSchema,
   significantEventSchema,
   severitySchema,
 } from '@kbn/significant-events-schema';
-import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -33,7 +34,6 @@ export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEvents
 const createEventSchema = lazySchema(() =>
   significantEventSchema
     .pick({
-      status: true,
       title: true,
       symptom_hypothesis: true,
       summary: true,
@@ -41,6 +41,7 @@ const createEventSchema = lazySchema(() =>
     })
     .extend({
       slugs: sourceSlugsSchema,
+      status: significantEventManualStatusSchema,
       severity: severitySchema
         .optional()
         .describe(`${SEVERITY_CONTRACT_RULE}\n\nOmit to store "low".`),

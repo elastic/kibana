@@ -51,6 +51,7 @@ describe('updateEventStatusToolHandler', () => {
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'not_found',
     });
 
     const eventClientSame = {
@@ -70,6 +71,7 @@ describe('updateEventStatusToolHandler', () => {
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'already_in_state',
     });
   });
 });
