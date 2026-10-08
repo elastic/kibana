@@ -4152,6 +4152,33 @@ describe('ConversationClient', () => {
       expect(indexed.conversation_rounds).toHaveLength(1);
     });
 
+    it('appendEvents writes with the requested refresh, the storage default otherwise', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+      const append = (eventId: string, refresh?: false) =>
+        client.appendEvents(
+          {
+            id: 'conversation-1',
+            events: [
+              {
+                id: eventId,
+                type: TimelineEventType.userMessage,
+                created_at: '2026-09-22T10:00:00.000Z',
+                actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+                data: { message: 'hello' },
+              },
+            ],
+          },
+          { source: 'execution', ...(refresh !== undefined ? { refresh } : {}) }
+        );
+
+      await append('9c2e0f11-0000-4000-8000-000000000002', false);
+      await append('9c2e0f11-0000-4000-8000-000000000003');
+
+      const [[withRefresh], [withDefault]] = mockEsClient.index.mock.calls;
+      expect(withRefresh).toEqual(expect.objectContaining({ refresh: false }));
+      expect(withDefault).not.toHaveProperty('refresh');
+    });
+
     it('round-trips attachment_refs through the stored events projection', async () => {
       mockGetReturnsIndexedDocument();
       const attachmentRefs = [
