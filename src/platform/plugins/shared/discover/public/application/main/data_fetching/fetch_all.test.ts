@@ -458,6 +458,24 @@ describe('test fetchAll', () => {
       expect(onFetchRecordsComplete).not.toHaveBeenCalled();
     });
 
+    test('should not call onFetchRecordsComplete of a replaced fetch when the newer fetch is cancelled', async () => {
+      setEsqlQuery();
+      const replacedFetchComplete = jest.fn().mockResolvedValue(undefined);
+      const newerFetchComplete = jest.fn().mockResolvedValue(undefined);
+      const replacedController = new AbortController();
+      const newerController = new AbortController();
+
+      startFetch(replacedController, { onFetchRecordsComplete: replacedFetchComplete });
+      replacedController.abort(AbortReason.REPLACED);
+      startFetch(newerController, { onFetchRecordsComplete: newerFetchComplete });
+      newerController.abort(AbortReason.CANCELED);
+      await waitForNextTick();
+
+      // The replaced fetch is still waiting on the shared documents$, which the cancel settles
+      expect(replacedFetchComplete).not.toHaveBeenCalled();
+      expect(newerFetchComplete).not.toHaveBeenCalled();
+    });
+
     test('should not settle a newer fetch that started before the cancellation was processed', async () => {
       setEsqlQuery();
       const documentsValues = collectValues(subjects.documents$);

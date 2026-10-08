@@ -249,9 +249,10 @@ export function fetchAll(
       race(
         combineLatest([
           isComplete(dataSubjects.documents$).pipe(
-            // Nothing was fetched, so there is no post-fetch state to apply
+            // Nothing was fetched, so there is no post-fetch state to apply. A replaced fetch also
+            // waits on this shared subject and must leave the post-fetch state to the newer fetch.
             switchMap(async () =>
-              isCancelledWithoutResults ? undefined : onFetchRecordsComplete?.()
+              isCancelledWithoutResults || !isActiveFetch() ? undefined : onFetchRecordsComplete?.()
             )
           ),
           isComplete(dataSubjects.totalHits$),
