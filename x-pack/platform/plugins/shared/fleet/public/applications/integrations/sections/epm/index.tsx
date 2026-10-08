@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiSkeletonText } from '@elastic/eui';
@@ -23,6 +24,13 @@ import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
+// PROTOTYPE: remount the create page when pkgkey changes, so the root schema toggle (ECS / OTel)
+// loads a fresh form for the other child package instead of reusing stale form state.
+const KeyedCreatePackagePolicyPage: React.FC = () => {
+  const { pkgkey } = useParams<{ pkgkey: string }>();
+  return <CreatePackagePolicyPage key={pkgkey} />;
+};
+
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
   useBreadcrumbs('integrations');
@@ -32,7 +40,7 @@ export const EPMApp: React.FunctionComponent = () => {
   return (
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicyPage />
+        <KeyedCreatePackagePolicyPage />
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
