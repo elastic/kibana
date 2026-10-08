@@ -27,8 +27,16 @@ import { toSOAuthMethod } from './agent_based_section/credential_method_selector
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
 import {
+  fetchPackagePolicySecretRefs,
+  filterSecretRefsForMethod,
+  withoutCoveredCredentials,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
+import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
+  pickSecretSourcePolicyId,
   buildCleanedLiveStale,
   buildRemainingPending,
 } from './cleanup_reconciliation';
@@ -45,6 +53,9 @@ export interface UseAgentBasedDeployResult {
   /** Update the in-memory credential values used on the next deploy. Secrets (secret_access_key,
    *  session_token) are kept in a ref — never written to session storage. */
   setAgentCredentials: (creds: AgentCredentialVars | undefined) => void;
+  /** Deployed package policy whose stored secrets the credential forms can offer to keep: the
+   *  first one a pending cleanup does not delete. Undefined when none survives. */
+  secretSourcePolicyId: string | undefined;
 }
 
 export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
@@ -185,13 +196,53 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const { dataFormat } = servicesStep;
 
       try {
+        // New package policies reuse the keys the user kept from an already deployed one. Read
+        // before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
+        // deletes the secret, so refs read from it would dangle.
+        const credentials = agentCredentialsRef.current;
+        const typedCreds = credentials;
+        const keysMethod =
+          agentCredentialMethod === 'static_keys' || agentCredentialMethod === 'temporary_keys'
+            ? agentCredentialMethod
+            : undefined;
+        const isTyped =
+          !!typedCreds?.access_key_id &&
+          !!typedCreds.secret_access_key &&
+          (typedCreds.method !== 'temporary_keys' || !!typedCreds.session_token);
+        const keptSecretRefs =
+          keysMethod && !isTyped
+            ? filterSecretRefsForMethod(
+                await fetchPackagePolicySecretRefs(
+                  pickSecretSourcePolicyId(
+                    detectAndReviewStep.policyIdsByInstance ?? {},
+                    effectivePendingCleanup
+                  )
+                ),
+                keysMethod
+              )
+            : undefined;
+
+        // Typed keys that Fleet will store as new secrets (not kept or replaced-in-full ones).
+        const hasTypedKeys =
+          !!keysMethod &&
+          Boolean(
+            typedCreds?.access_key_id || typedCreds?.secret_access_key || typedCreds?.session_token
+          );
+        const withoutCoveredSecrets = (
+          creds: AgentCredentialVars | undefined,
+          refs: ExistingSecretRefs
+        ) => creds && withoutCoveredCredentials(creds, refs);
+
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
           globalRegion,
           storedServiceVars,
-          authenticateAndDeployStep,
+          authenticateAndDeployStep: {
+            ...authenticateAndDeployStep,
+            existingSecretRefs: keptSecretRefs,
+          },
           pkgVersion: '', // overridden per-package inside deploy functions
-          agentCredentials: agentCredentialsRef.current,
+          agentCredentials: credentials,
         };
 
         // Cleaned instance IDs — excluded from packagePolicyIds in the SO update.
@@ -213,7 +264,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             servicesMap: servicesMap ?? new Map(),
             // Cleanup never changes agent-policy selection; keep the policy's current policy_ids.
             selectedAgentPolicyIds: [],
-            agentCredentials: agentCredentialsRef.current,
+            agentCredentials: credentials,
           });
           // Only prune successfully cleaned instances — failures stay in pendingCleanupPolicyIds.
           const succeededIds = new Set([
@@ -254,24 +305,42 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             byPolicy.get(policyId)!.push(instanceId);
           }
           if (byPolicy.size > 0) {
-            const redeployResults = await Promise.allSettled(
-              [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+            // Typed keys become new Fleet secrets: store them once on the first package policy
+            // and have the others (and this run's new ones) use that secret.
+            const { results: redeployResults, sharedRefs } = await runWithSharedSecrets({
+              items: [...byPolicy.entries()],
+              hasTypedSecrets: hasTypedKeys,
+              // An update can delete the secret it replaced: finish one before starting the next.
+              sequential: true,
+              run: ([policyId, instanceIdsForPolicy], shared) =>
                 updateAgentBasedPolicy(policyId, instanceIdsForPolicy, {
                   instances: serviceSettings?.instances ?? [],
                   storedServiceVars,
                   globalRegion,
                   namespace: DEFAULT_NAMESPACE,
-                  authenticateAndDeployStep,
+                  authenticateAndDeployStep: shared
+                    ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
+                    : authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
                   // Only override policy_ids when the selection drifted; otherwise a var-only redeploy
                   // would detach agent policies attached outside the wizard.
                   selectedAgentPolicyIds: detectAndReviewStep.isPolicySelectionDirty
                     ? targetPolicyIds
                     : [],
-                  agentCredentials: agentCredentialsRef.current,
-                })
-              )
-            );
+                  agentCredentials: shared
+                    ? withoutCoveredSecrets(credentials, shared)
+                    : credentials,
+                }),
+              getPolicyId: ([policyId]) => policyId,
+              fetchRefs: fetchPackagePolicySecretRefs,
+            });
+            if (sharedRefs) {
+              baseOpts.authenticateAndDeployStep = {
+                ...authenticateAndDeployStep,
+                existingSecretRefs: sharedRefs,
+              };
+              baseOpts.agentCredentials = withoutCoveredSecrets(credentials, sharedRefs);
+            }
             redeployResults.forEach((result) => {
               if (result.status === 'rejected') {
                 // eslint-disable-next-line no-console
@@ -672,6 +741,22 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     ]
   );
 
+  const secretSourcePolicyId = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+    return pickSecretSourcePolicyId(
+      policyIdsByInstance,
+      buildEffectivePendingCleanup(
+        buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds),
+        detectAndReviewStep.pendingCleanupPolicyIds
+      )
+    );
+  }, [
+    targets,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
+
   return {
     targets,
     isDeploying,
@@ -679,5 +764,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     isAlreadyDeployed,
     handleDeploy,
     setAgentCredentials,
+    secretSourcePolicyId,
   };
 }

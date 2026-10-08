@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -43,7 +43,6 @@ import type {
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { StaticKeysReplaceView } from './static_keys_replace_view';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
@@ -61,6 +60,10 @@ interface ManagedIntegrationsSectionProps {
   hasFailed: boolean;
   /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
   isCleanupOnly?: boolean;
+  /** Credential fields already stored as secrets on the deployed policies; kept unless replaced. */
+  storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
+  /** True until the stored-secret lookup has settled, so the form does not flash empty inputs. */
+  isStoredSecretsLoading?: boolean;
   /**
    * When true, settings have drifted from the last deploy. With an existing identity-federation
    * connector the Deploy button is enabled immediately — credentials were already validated by the
@@ -76,6 +79,9 @@ interface ManagedIntegrationsSectionProps {
   onReplaceFormDirtyChange?: (dirty: boolean) => void;
 }
 
+const NO_STORED_SECRET_FIELDS: NonNullable<ManagedIntegrationsSectionProps['storedSecretFields']> =
+  [];
+
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
@@ -85,6 +91,8 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
   isCleanupOnly = false,
+  storedSecretFields = NO_STORED_SECRET_FIELDS,
+  isStoredSecretsLoading = false,
   isDirty = false,
   onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
@@ -142,7 +150,7 @@ export function ManagedIntegrationsSection({
 
   // Re-seed from session so the user doesn't have to re-enter credentials they already provided
   // (e.g. after navigating Back/Forward or adding a new service without changing auth).
-  // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  // isStaticKeysEditMode intentionally skips the seed: the credentials are not in memory there.
   // isDeployReady is authoritative — set to true only when the form explicitly reports ready.
   // Do not seed true from connectorId: if the IaC key check fails, the form will not emit a
   // second false (it was already false internally), so the seed would leave Deploy enabled for
@@ -161,35 +169,26 @@ export function ManagedIntegrationsSection({
     [setConnectorId]
   );
 
-  const handleStaticKeysChange = useCallback(
+  // A deployment is being edited when it was resumed (`?deploymentId=`) or when its policies hold
+  // stored keys, which is also the case right after a deploy in the same session. Typing into a
+  // key field there, replacing a stored one or not, is a change to deploy; keeping every stored
+  // value is not. Emptying the fields again clears the change.
+  const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
+  const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
-      setStaticKeys(fields);
-    },
-    [setStaticKeys]
-  );
-
-  // Whether the replace form has ever reported ready in this component lifetime.
-  // Used to distinguish the initial-mount false (empty fields on fresh mount after Back+Next)
-  // from an explicit cancellation (user entered keys then cleared them), so remounting the form
-  // does not propagate false to the parent and clear a persisted isDirty flag.
-  const replaceFormEverReady = useRef(false);
-  const handleStaticKeyReplaceReadyChange = useCallback(
-    (ready: boolean) => {
-      setIsDeployReady(ready);
-      if (ready) {
-        replaceFormEverReady.current = true;
-        onReplaceFormDirtyChange?.(true);
-      } else if (replaceFormEverReady.current) {
-        // Form was previously ready — user cleared the fields, treat as cancellation.
-        // Clear only the in-memory staged keys without touching persisted authMethod/connectorId so
-        // isStaticKeysEditMode stays true and the SO comparison does not report false auth drift.
+      if (isEditingDeployedKeys && !fields) {
+        // The form has no access key id yet (for example the secret was typed first). Drop only the
+        // in-memory keys: clearing the auth method would leave edit mode, and the access key
+        // typed next would no longer mark the deployment as changed.
         clearStagedStaticKeys();
-        onReplaceFormDirtyChange?.(false);
+      } else {
+        setStaticKeys(fields);
       }
-      // If form was never ready, its false is a mount-time event, not a cancellation —
-      // don't forward it so the persisted isDirty from a prior visit is preserved.
+      if (isEditingDeployedKeys) {
+        onReplaceFormDirtyChange?.(Boolean(fields?.access_key_id || fields?.secret_access_key));
+      }
     },
-    [clearStagedStaticKeys, onReplaceFormDirtyChange]
+    [setStaticKeys, clearStagedStaticKeys, isEditingDeployedKeys, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -349,6 +348,30 @@ export function ManagedIntegrationsSection({
 
             <EuiSpacer size="m" />
 
+            {/* Credentials are never persisted: when none are stored (the lookup found nothing, or
+                the package keeps them as plain values) a resumed deployment needs them again. */}
+            {isStaticKeysEditMode &&
+              preferredMethod === 'access_keys' &&
+              !isStoredSecretsLoading &&
+              storedSecretFields.length === 0 &&
+              !isDeployReady && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.resumeCredentialsCallout',
+                      {
+                        defaultMessage: 'Credentials couldn’t be found, re-enter them to continue.',
+                      }
+                    )}
+                    data-test-subj="managedIntegrationsSection-resumeCredentialsCallout"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
                 <LazyAwsIdentityFederationSetup
@@ -361,16 +384,14 @@ export function ManagedIntegrationsSection({
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
-              ) : isStaticKeysEditMode ? (
-                <StaticKeysReplaceView
-                  onReadyChange={handleStaticKeyReplaceReadyChange}
-                  onFieldsChange={handleStaticKeysChange}
-                />
+              ) : isStoredSecretsLoading ? (
+                <EuiLoadingSpinner />
               ) : (
                 <LazyAwsStaticKeysForm
                   initialValues={authenticateAndDeployStep.staticKeys}
+                  storedSecretFields={storedSecretFields}
                   onReadyChange={setIsDeployReady}
-                  onFieldsChange={handleStaticKeysChange}
+                  onFieldsChange={handleStoredKeysFormChange}
                 />
               )}
             </Suspense>
