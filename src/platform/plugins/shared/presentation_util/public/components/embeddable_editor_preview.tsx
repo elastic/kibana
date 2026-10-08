@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  getFlyoutManagerStore,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -47,7 +48,18 @@ export interface EmbeddableEditorPreviewProps<
    */
   size?: 's' | 'm';
   verticalAlignment?: 'stretch' | 'top';
+  /**
+   * Called when the preview closes. The close button is only shown while EUI stacks the preview over
+   * the editor flyout on narrow screens, where it is the only way back to the editor.
+   */
+  onClose?: () => void;
 }
+
+/** Whether EUI currently stacks child flyouts over their parent instead of beside it. */
+const useIsFlyoutLayoutStacked = (): boolean => {
+  const store = getFlyoutManagerStore();
+  return useSyncExternalStore(store.subscribe, () => store.getState().layoutMode === 'stacked');
+};
 
 const defaultPreviewTitle = i18n.translate('presentationUtil.embeddableEditorPreview.flyoutTitle', {
   defaultMessage: 'Preview',
@@ -66,6 +78,7 @@ export const EmbeddableEditorPreview = <
   title = defaultPreviewTitle,
   size = 'm',
   verticalAlignment = 'stretch',
+  onClose,
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
   const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
   const latestStateRef = useRef(serializedState);
@@ -73,6 +86,7 @@ export const EmbeddableEditorPreview = <
   const [api, setApi] = useState<Api>();
   const [updateError, setUpdateError] = useState<Error>();
   const updateQueueRef = useRef(Promise.resolve());
+  const canClose = useIsFlyoutLayoutStacked() && onClose !== undefined;
 
   // Stable search subjects for the child embeddable. `useSearchApi` creates them once;
   // `EmbeddableRenderer` latches `getParentApi()` on mount so subjects must not be recreated.
@@ -101,8 +115,10 @@ export const EmbeddableEditorPreview = <
     <EuiFlyout
       aria-labelledby={titleId}
       data-test-subj="embeddableEditorPreviewFlyout"
-      hideCloseButton
-      onClose={() => {}}
+      hideCloseButton={!canClose}
+      // EUI removes a closed managed flyout whether or not this handler acts, and leaves stacked
+      // mode before calling it, so always report the close.
+      onClose={() => onClose?.()}
       ownFocus={false}
       resizable
       session="inherit"

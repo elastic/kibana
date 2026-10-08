@@ -25,6 +25,15 @@ type PreviewParentApi = HasSerializedChildState<PreviewState> & {
 };
 
 const mockApi = { applySerializedState: jest.fn() };
+let mockLayoutMode: 'side-by-side' | 'stacked' = 'side-by-side';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  getFlyoutManagerStore: () => ({
+    getState: () => ({ layoutMode: mockLayoutMode }),
+    subscribe: () => () => {},
+  }),
+}));
 let mockGetParentApi: (() => Record<string, unknown>) | undefined;
 
 jest.mock('@kbn/embeddable-plugin/public', () => ({
@@ -68,6 +77,7 @@ describe('EmbeddableEditorPreview', () => {
     jest.clearAllMocks();
     mockApi.applySerializedState.mockResolvedValue(undefined);
     mockGetParentApi = undefined;
+    mockLayoutMode = 'side-by-side';
   });
 
   it('renders the embeddable and the toolbar', async () => {
@@ -120,5 +130,34 @@ describe('EmbeddableEditorPreview', () => {
     await waitFor(() =>
       expect(screen.queryByText('Unable to update preview')).not.toBeInTheDocument()
     );
+  });
+
+  describe('closing', () => {
+    it('has no close button beside the editor', async () => {
+      renderPreview({ onClose: jest.fn() });
+
+      await screen.findByTestId('mockEmbeddable');
+      expect(screen.queryByTestId('euiFlyoutCloseButton')).not.toBeInTheDocument();
+    });
+
+    it('can be closed while stacked over the editor', async () => {
+      mockLayoutMode = 'stacked';
+      const onClose = jest.fn();
+      renderPreview({ onClose });
+
+      await act(async () => {
+        (await screen.findByTestId('euiFlyoutCloseButton')).click();
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('has no close button while stacked when it cannot be closed', async () => {
+      mockLayoutMode = 'stacked';
+      renderPreview();
+
+      await screen.findByTestId('mockEmbeddable');
+      expect(screen.queryByTestId('euiFlyoutCloseButton')).not.toBeInTheDocument();
+    });
   });
 });

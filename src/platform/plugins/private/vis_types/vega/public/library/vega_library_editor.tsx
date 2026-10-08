@@ -110,6 +110,8 @@ export const VegaLibraryEditor = ({
   );
   const [draft, setDraft] = useState(initialDraft);
   const [previewedDraft, setPreviewedDraft] = useState(initialDraft);
+  // The preview can only be closed while it is stacked over the editor on narrow screens.
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
   const [specDataViews, setSpecDataViews] = useState<DataView[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
@@ -259,8 +261,12 @@ export const VegaLibraryEditor = ({
         cancelButtonLabel={canSave ? undefined : closeLabel}
         cancelButtonDataTestSubj="vegaLibraryEditorCancelButton"
         previewAction={{
-          onPreview: () => setPreviewedDraft(draft),
-          isEnabled: canPreview,
+          onPreview: () => {
+            setPreviewedDraft(draft);
+            setIsPreviewOpen(true);
+          },
+          // Also reopens a closed preview.
+          isEnabled: canPreview || !isPreviewOpen,
           'data-test-subj': 'vegaLibraryEditorPreviewButton',
         }}
         hideSave={!canSave}
@@ -288,32 +294,35 @@ export const VegaLibraryEditor = ({
             : undefined
         }
       />
-      <EmbeddableEditorPreview<VegaByValueState, VegaPreviewApi, VegaPreviewParentApi>
-        type={VEGA_EMBEDDABLE_TYPE}
-        serializedState={previewState}
-        getParentApi={getPreviewParentApi}
-        toolbar={
-          // Sized and placed like the date picker in the unified search bar.
-          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiSuperDatePicker
-                start={timeRange?.from}
-                end={timeRange?.to}
-                onTimeChange={({ start, end }) => {
-                  const next = { from: start, to: end };
-                  setTimeRange(next);
-                  timeRange$.next(next);
-                }}
-                commonlyUsedRanges={quickRanges}
-                showUpdateButton={false}
-                compressed
-                width="auto"
-                data-test-subj="vegaLibraryEditorPreviewTimePicker"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      {isPreviewOpen ? (
+        <EmbeddableEditorPreview<VegaByValueState, VegaPreviewApi, VegaPreviewParentApi>
+          type={VEGA_EMBEDDABLE_TYPE}
+          serializedState={previewState}
+          getParentApi={getPreviewParentApi}
+          onClose={() => setIsPreviewOpen(false)}
+          toolbar={
+            // Sized and placed like the date picker in the unified search bar.
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={timeRange?.from}
+                  end={timeRange?.to}
+                  onTimeChange={({ start, end }) => {
+                    const next = { from: start, to: end };
+                    setTimeRange(next);
+                    timeRange$.next(next);
+                  }}
+                  commonlyUsedRanges={quickRanges}
+                  showUpdateButton={false}
+                  compressed
+                  width="auto"
+                  data-test-subj="vegaLibraryEditorPreviewTimePicker"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      ) : null}
       {isDiscardConfirmOpen ? (
         <EuiConfirmModal
           aria-labelledby="vegaLibraryEditorDiscardTitle"

@@ -38,7 +38,7 @@ jest.mock('../components/vega_vis_editor', () => ({
 const mockPreview = jest.fn();
 jest.mock('@kbn/presentation-util-plugin/public', () => ({
   ...jest.requireActual('@kbn/presentation-util-plugin/public'),
-  EmbeddableEditorPreview: (props: { serializedState: unknown }) => {
+  EmbeddableEditorPreview: (props: { serializedState: unknown; onClose?: () => void }) => {
     mockPreview(props);
     return <div data-test-subj="mockPreview" />;
   },
@@ -282,6 +282,23 @@ describe('VegaLibraryEditor', () => {
       await userEvent.click(screen.getByTestId('vegaLibraryEditorPreviewButton'));
 
       expect(lastPreviewState().spec.value).toBe('{ mark: bar }');
+      expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeDisabled();
+    });
+
+    it('reopens with the run preview button after it is closed', async () => {
+      renderEditor();
+      await screen.findByTestId('mockPreview');
+
+      await act(async () => {
+        mockPreview.mock.lastCall?.[0].onClose();
+      });
+
+      expect(screen.queryByTestId('mockPreview')).not.toBeInTheDocument();
+      expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeEnabled();
+
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorPreviewButton'));
+
+      expect(screen.getByTestId('mockPreview')).toBeInTheDocument();
       expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeDisabled();
     });
 
