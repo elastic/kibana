@@ -114,6 +114,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   shutdownEs = shutdown;
                 })
               : undefined;
+          // Observe ES failures during the plugin build; Promise.all propagates them below.
+          void esPromise?.catch(() => {});
 
           await withSpan('build_kibana_platform_plugins', () =>
             ensureKibanaPlatformPluginsBuilt({

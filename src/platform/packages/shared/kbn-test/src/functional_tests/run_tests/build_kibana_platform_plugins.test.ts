@@ -58,7 +58,11 @@ describe('createKibanaPlatformPluginsBuilder', () => {
     expect(procs.run).toHaveBeenCalledTimes(1);
     expect(procs.run).toHaveBeenCalledWith('kibana-platform-plugins-build', {
       cmd: process.execPath,
-      args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
+      args: [
+        Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js'),
+        '--examples',
+        '--test-plugins',
+      ],
       cwd: REPO_ROOT,
       env: {},
       wait: true,
@@ -78,7 +82,11 @@ describe('createKibanaPlatformPluginsBuilder', () => {
     expect(procs.run).toHaveBeenCalledWith(
       'kibana-platform-plugins-build',
       expect.objectContaining({
-        args: [Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js')],
+        args: [
+          Path.resolve(REPO_ROOT, 'scripts/build_kibana_platform_plugins.js'),
+          '--examples',
+          '--test-plugins',
+        ],
         env: { TEST_ENV: 'server' },
       })
     );
