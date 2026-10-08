@@ -623,9 +623,9 @@ describe('SlackAppService', () => {
       tenantUrl: 'https://acme.slack.com/',
     };
 
-    it('marks the workspace connected', async () => {
+    it('marks the workspace connected, only if the connection is unchanged since it was read', async () => {
       const { server, soClient } = createHarness();
-      soClient.get.mockResolvedValue({ attributes: pendingConnection });
+      soClient.get.mockResolvedValue({ attributes: pendingConnection, version: 'v1' });
 
       const result = await new SlackAppService(server).confirm(request, 'T0123ABC');
 
@@ -635,9 +635,25 @@ describe('SlackAppService', () => {
           ...pendingConnection,
           status: RELAY_APP_CONNECTION_STATUS.connected,
         }),
-        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true, version: 'v1' }
       );
       expect(result).toEqual({ status: RELAY_APP_CONNECTION_STATUS.connected });
+    });
+
+    it('returns 409 without publishing the connector when the connection changed concurrently', async () => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({ attributes: pendingConnection, version: 'v1' });
+      soClient.create.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(
+          RELAY_APP_CONNECTION_SO_TYPE,
+          RELAY_APP_CONNECTION_SO_ID
+        )
+      );
+
+      await expect(new SlackAppService(server).confirm(request, 'T0123ABC')).rejects.toMatchObject({
+        statusCode: 409,
+      });
+      expect(registerDynamicConnector).not.toHaveBeenCalled();
     });
 
     it('refuses a workspace other than the one awaiting confirmation', async () => {
@@ -700,6 +716,24 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_ID
       );
       expect(result).toEqual({ status: 'disconnected' });
+    });
+
+    it('returns 409 and tears nothing down when a different workspace is stored than the one rejected', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-2',
+          tenantKey: 'T999OTHER',
+        },
+      });
+
+      await expect(
+        new SlackAppService(server).disconnect(request, 'T0123ABC')
+      ).rejects.toMatchObject({ statusCode: 409 });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(unbind).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('invalidates the key, unbinds from the Relay by tenantKey, and deletes the binding', async () => {

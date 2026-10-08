@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -190,15 +195,14 @@ export class SlackAppService {
     this.publishConnector(desiredTenantKey);
   }
 
-  private async readConnection(
+  private async readConnectionObject(
     soClient: SavedObjectsClientContract
-  ): Promise<RelayAppConnectionAttributes | undefined> {
+  ): Promise<SavedObject<RelayAppConnectionAttributes> | undefined> {
     try {
-      const so = await soClient.get<RelayAppConnectionAttributes>(
+      return await soClient.get<RelayAppConnectionAttributes>(
         RELAY_APP_CONNECTION_SO_TYPE,
         RELAY_APP_CONNECTION_SO_ID
       );
-      return so.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
         return undefined;
@@ -207,14 +211,22 @@ export class SlackAppService {
     }
   }
 
+  private async readConnection(
+    soClient: SavedObjectsClientContract
+  ): Promise<RelayAppConnectionAttributes | undefined> {
+    return (await this.readConnectionObject(soClient))?.attributes;
+  }
+
+  /** Pass the `version` that was read to fail with a conflict if another request wrote in between. */
   private async writeConnection(
     soClient: SavedObjectsClientContract,
-    attributes: Omit<RelayAppConnectionAttributes, 'updatedAt'>
+    attributes: Omit<RelayAppConnectionAttributes, 'updatedAt'>,
+    version?: string
   ): Promise<void> {
     await soClient.create<RelayAppConnectionAttributes>(
       RELAY_APP_CONNECTION_SO_TYPE,
       { ...attributes, updatedAt: new Date().toISOString() },
-      { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true, ...(version ? { version } : {}) }
     );
   }
 
@@ -523,21 +535,31 @@ export class SlackAppService {
     }
 
     const soClient = this.getSoClient(request);
-    const connection = await this.readConnection(soClient);
-    if (!connection?.tenantKey || !isAwaitingConfirmation(connection)) {
+    const saved = await this.readConnectionObject(soClient);
+    const connection = saved?.attributes;
+    if (!saved || !connection?.tenantKey || !isAwaitingConfirmation(connection)) {
       throw new SlackAppUnavailableError('No Slack workspace is awaiting confirmation');
     }
+    const workspaceChanged = new StatusError(
+      'The Slack workspace awaiting confirmation has changed. Review it and confirm again.',
+      409
+    );
     if (connection.tenantKey !== tenantKey) {
-      throw new StatusError(
-        'The Slack workspace awaiting confirmation has changed. Review it and confirm again.',
-        409
-      );
+      throw workspaceChanged;
     }
 
-    await this.writeConnection(soClient, {
-      ...connection,
-      status: RELAY_APP_CONNECTION_STATUS.connected,
-    });
+    try {
+      await this.writeConnection(
+        soClient,
+        { ...connection, status: RELAY_APP_CONNECTION_STATUS.connected },
+        saved.version
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        throw workspaceChanged;
+      }
+      throw error;
+    }
     this.publishConnector(connection.tenantKey);
     return { status: RELAY_APP_CONNECTION_STATUS.connected };
   }
@@ -620,7 +642,11 @@ export class SlackAppService {
     await relayClient.unbindChannel(tenantKey, channelId);
   }
 
-  async disconnect(request: KibanaRequest): Promise<SlackAppDisconnectResponse> {
+  /** With `tenantKey`, refuses to tear down any workspace other than the one the caller was shown. */
+  async disconnect(
+    request: KibanaRequest,
+    tenantKey?: string
+  ): Promise<SlackAppDisconnectResponse> {
     const soClient = this.getSoClient(request);
     const [relayClient, connection] = await Promise.all([
       this.getRelayClient(),
@@ -629,6 +655,9 @@ export class SlackAppService {
 
     if (!connection) {
       return { status: 'disconnected' };
+    }
+    if (tenantKey && connection.tenantKey !== tenantKey) {
+      throw new StatusError('The Slack workspace has changed. Review it and try again.', 409);
     }
 
     // Up front, not on the success path: a failed unbind below leaves the connection in `error` for

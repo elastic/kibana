@@ -42,7 +42,8 @@ export interface UseRelayAppConnection {
   connect: () => Promise<void>;
   /** Accepts the workspace awaiting confirmation; rejecting it is `disconnect`. */
   confirm: (tenantKey: string) => Promise<void>;
-  disconnect: () => Promise<void>;
+  /** With `tenantKey`, the server refuses if a different workspace is stored. */
+  disconnect: (tenantKey?: string) => Promise<void>;
 }
 
 export function useRelayAppConnection(): UseRelayAppConnection {
@@ -104,10 +105,14 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
   });
 
-  const disconnectMutation = useMutation<SlackAppDisconnectResponse, Error>({
-    mutationFn: () => {
+  const disconnectMutation = useMutation<SlackAppDisconnectResponse, Error, string | undefined>({
+    mutationFn: (tenantKey) => {
       pollDeadlineRef.current = 0;
-      return http.post<SlackAppDisconnectResponse>(DISCONNECT_ROUTE);
+      return tenantKey
+        ? http.post<SlackAppDisconnectResponse>(DISCONNECT_ROUTE, {
+            body: JSON.stringify({ tenantKey }),
+          })
+        : http.post<SlackAppDisconnectResponse>(DISCONNECT_ROUTE);
     },
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
@@ -164,8 +169,8 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     confirm: async (tenantKey) => {
       await confirmMutation.mutateAsync(tenantKey);
     },
-    disconnect: async () => {
-      await disconnectMutation.mutateAsync();
+    disconnect: async (tenantKey) => {
+      await disconnectMutation.mutateAsync(tenantKey);
     },
   };
 }

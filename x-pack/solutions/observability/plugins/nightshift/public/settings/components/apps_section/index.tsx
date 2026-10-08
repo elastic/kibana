@@ -185,7 +185,7 @@ interface SlackCardBodyProps {
   isMutating: boolean;
   onConnect: () => void;
   onConfirm: (tenantKey: string) => Promise<void>;
-  onDisconnect: () => Promise<void>;
+  onDisconnect: (tenantKey?: string) => Promise<void>;
 }
 
 function SlackCardBody({
@@ -231,7 +231,7 @@ function SlackCardBody({
           <EuiButtonEmpty
             size="s"
             color="danger"
-            onClick={onDisconnect}
+            onClick={() => onDisconnect()}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppCancelButton"
           >
@@ -324,7 +324,7 @@ interface ConfirmWorkspaceCalloutProps {
   canEdit: boolean;
   isMutating: boolean;
   onConfirm: (tenantKey: string) => Promise<void>;
-  onReject: () => Promise<void>;
+  onReject: (tenantKey: string) => Promise<void>;
 }
 
 function ConfirmWorkspaceCallout({
@@ -394,7 +394,7 @@ function ConfirmWorkspaceCallout({
           <EuiButtonEmpty
             size="s"
             color="warning"
-            onClick={() => void onReject().catch(() => undefined)}
+            onClick={() => void onReject(tenantKey).catch(() => undefined)}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppRejectWorkspaceButton"
           >

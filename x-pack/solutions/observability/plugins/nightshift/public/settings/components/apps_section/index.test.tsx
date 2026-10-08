@@ -133,7 +133,7 @@ describe('AppsSection', () => {
       setup();
 
       fireEvent.click(screen.getByTestId('streamsSlackAppRejectWorkspaceButton'));
-      expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1);
+      expect(mockDisconnectWorkspace).toHaveBeenCalledWith('T0123ABC');
       expect(mockConfirmWorkspace).not.toHaveBeenCalled();
     });
 

@@ -96,17 +96,19 @@ const disconnectSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Disconnect the Elastic Slack App',
     description:
-      'Invalidates the managed API key, asks the Relay to unbind the workspace, and clears the stored connection state. Also rejects a workspace that is awaiting confirmation.',
+      'Invalidates the managed API key, asks the Relay to unbind the workspace, and clears the stored connection state. Also rejects a workspace that is awaiting confirmation. With `tenantKey`, returns 409 if a different workspace is stored.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, server }): Promise<SlackAppDisconnectResponse> => {
+  params: z.object({
+    body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).optional(),
+  }),
+  handler: async ({ params, request, server }): Promise<SlackAppDisconnectResponse> => {
     try {
-      return await new SlackAppService(server).disconnect(request);
+      return await new SlackAppService(server).disconnect(request, params?.body?.tenantKey);
     } catch (error) {
       if (error instanceof RelayRequestError) throwRelayError(error);
       throw error;
