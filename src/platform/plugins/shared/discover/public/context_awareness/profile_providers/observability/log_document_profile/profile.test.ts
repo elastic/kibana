@@ -201,6 +201,22 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('does not match in Classic when solution profiles are disabled', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles: false,
+        },
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'data_stream.type': ['logs'],
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   describe('getDocViewer', () => {
     it('adds a log overview doc view to the registry', () => {
       const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(

@@ -59,4 +59,33 @@ describe('getTopNavBadges()', function () {
       `);
     });
   });
+
+  describe('solution profile badge', () => {
+    const discoverServiceWithSpacesMock = createDiscoverServicesMock();
+    discoverServiceWithSpacesMock.spaces = spacesPluginMock.createStartContract();
+
+    test('returns the named solution badge when a solution profile is active', () => {
+      const topNavBadges = getTopNavBadges({
+        isMobile: false,
+        isManaged: false,
+        services: discoverServiceMock,
+        activeSolution: 'observability',
+      });
+
+      expect(topNavBadges).toHaveLength(1);
+      expect(topNavBadges[0].badgeText).toEqual('Observability view');
+    });
+
+    test('suppresses the solutions view promo while a solution profile is active', () => {
+      const topNavBadges = getTopNavBadges({
+        isMobile: false,
+        isManaged: false,
+        services: discoverServiceWithSpacesMock,
+        activeSolution: 'security',
+      });
+
+      expect(topNavBadges).toHaveLength(1);
+      expect(topNavBadges[0].badgeText).toEqual('Security view');
+    });
+  });
 });

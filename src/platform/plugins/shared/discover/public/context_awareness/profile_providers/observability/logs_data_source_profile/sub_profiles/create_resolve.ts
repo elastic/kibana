@@ -9,7 +9,7 @@
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { BehaviorSubject } from 'rxjs';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { areSolutionProfilesAllowed, DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
@@ -36,7 +36,7 @@ export const createResolve = (
       solutionType === SolutionType.Observability ||
       (enabledInClassicNav && solutionType === SolutionType.Default);
 
-    if (!isSupportedSolutionType) {
+    if (!isSupportedSolutionType || !areSolutionProfilesAllowed(params.rootContext)) {
       return { isMatch: false };
     }
 

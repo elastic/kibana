@@ -41,6 +41,26 @@ describe('classicNavRootProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('reads allowSolutionProfiles from the advanced setting', async () => {
+    const getSetting = jest.spyOn(mockServices.uiSettings, 'get');
+
+    getSetting.mockReturnValueOnce(false);
+    const disabled = await classicNavRootProfileProvider.resolve({ solutionNavId: null });
+    if (!disabled.isMatch) {
+      throw new Error('Expected result to match');
+    }
+    expect(disabled.context.allowSolutionProfiles).toBe(false);
+
+    getSetting.mockReturnValueOnce(true);
+    const enabled = await classicNavRootProfileProvider.resolve({ solutionNavId: null });
+    if (!enabled.isMatch) {
+      throw new Error('Expected result to match');
+    }
+    expect(enabled.context.allowSolutionProfiles).toBe(true);
+
+    getSetting.mockRestore();
+  });
+
   describe('getDefaultAdHocDataViews', () => {
     it('should return an "All logs" default data view', async () => {
       const result = await classicNavRootProfileProvider.resolve({ solutionNavId: undefined });

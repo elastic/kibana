@@ -150,7 +150,11 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
   });
 
   describe('Classic navigation (SolutionType.Default)', () => {
-    const resolveInClassic = (profileId: string, indexPattern: string) => {
+    const resolveInClassic = (
+      profileId: string,
+      indexPattern: string,
+      allowSolutionProfiles?: boolean
+    ) => {
       const provider = providers.find((candidate) => candidate.profileId === profileId);
       if (!provider) {
         throw new Error(`Missing provider ${profileId}`);
@@ -159,7 +163,11 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
       dataView.matchedIndices = [indexPattern.replace('-*', '-default')];
 
       return provider.resolve({
-        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles,
+        },
         dataSource: createEsqlDataSource(),
         query: { esql: `FROM ${indexPattern}` },
         dataView,
@@ -180,6 +188,16 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
         await resolveInClassic(
           'observability-windows-logs-data-source-profile',
           'logs-windows.powershell-*'
+        )
+      ).toEqual({ isMatch: false });
+    });
+
+    it('does not activate when solution profiles are disabled in Classic', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-nginx-access-logs-data-source-profile',
+          'logs-nginx.access-*',
+          false
         )
       ).toEqual({ isMatch: false });
     });

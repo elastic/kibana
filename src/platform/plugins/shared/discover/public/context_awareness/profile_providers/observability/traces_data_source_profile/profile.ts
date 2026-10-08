@@ -9,6 +9,7 @@
 
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import {
+  areSolutionProfilesAllowed,
   SolutionType,
   DataSourceCategory,
   type DataSourceProfileProvider,
@@ -42,6 +43,7 @@ export const createTracesDataSourceProfileProvider = ({
     if (
       (params.rootContext.solutionType === SolutionType.Observability ||
         params.rootContext.solutionType === SolutionType.Default) &&
+      areSolutionProfilesAllowed(params.rootContext) &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
         isValidNonTransformationalESQLQuery(params.query))

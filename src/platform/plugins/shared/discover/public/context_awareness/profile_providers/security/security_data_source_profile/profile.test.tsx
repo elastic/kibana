@@ -50,6 +50,22 @@ describe('createSecurityDataSourceProfileProvider', () => {
     });
   });
 
+  it('does not match in Classic navigation when solution profiles are disabled', async () => {
+    await expect(
+      provider.resolve({
+        rootContext: {
+          profileId: 'root',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles: false,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'security-solution-default' }),
+        dataView: createStubIndexPattern({
+          spec: { id: 'security-solution-default', title: 'logs-*,filebeat-*' },
+        }),
+      })
+    ).resolves.toEqual({ isMatch: false });
+  });
+
   it('matches an all-Security ES|QL query in Classic navigation', async () => {
     const dataView = createStubIndexPattern({
       spec: { title: '.alerts-security.alerts-default,logs-endpoint.events.process-*' },
