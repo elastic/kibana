@@ -336,6 +336,66 @@ describe('policy_config and licenses', () => {
       const valid = isEndpointPolicyValidForLicense(policy, Basic);
       expect(valid).toBeTruthy();
     });
+
+    describe('partial policy payloads (missing protection blocks)', () => {
+      // A policy update may carry a partial `inputs[0].config.policy.value` that
+      // omits one or more OS protection blocks. License validation must not throw
+      // `TypeError: Cannot read properties of undefined (reading 'supported')`.
+      // See https://github.com/elastic/observability-error-backlog/issues/4130
+      const licenses = [
+        ['Platinum', Platinum],
+        ['Enterprise', Enterprise],
+        ['Gold', Gold],
+        ['Basic', Basic],
+      ] as const;
+
+      it.each(licenses)(
+        'does not throw when ransomware/memory/behavior blocks are missing (%s)',
+        (_name, license) => {
+          const policy = policyFactoryWithoutPaidFeatures();
+          disableEnterpriseFeatures(policy);
+
+          // Simulate a partial payload where OS protection sub-objects are absent.
+          delete (policy.windows as Partial<PolicyConfig['windows']>).ransomware;
+          delete (policy.mac as Partial<PolicyConfig['mac']>).ransomware;
+          delete (policy.windows as Partial<PolicyConfig['windows']>).memory_protection;
+          delete (policy.mac as Partial<PolicyConfig['mac']>).memory_protection;
+          delete (policy.linux as Partial<PolicyConfig['linux']>).memory_protection;
+          delete (policy.windows as Partial<PolicyConfig['windows']>).behavior_protection;
+          delete (policy.mac as Partial<PolicyConfig['mac']>).behavior_protection;
+          delete (policy.linux as Partial<PolicyConfig['linux']>).behavior_protection;
+
+          expect(() => isEndpointPolicyValidForLicense(policy, license)).not.toThrow();
+          // Absent blocks are treated as unchanged from defaults, so the policy stays valid.
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+        }
+      );
+
+      it.each(licenses)(
+        'does not throw when popup notification blocks are missing (%s)',
+        (_name, license) => {
+          const policy = policyFactoryWithoutPaidFeatures();
+          disableEnterpriseFeatures(policy);
+
+          delete (policy.windows.popup as Partial<PolicyConfig['windows']['popup']>).malware;
+          delete (policy.mac.popup as Partial<PolicyConfig['mac']['popup']>).malware;
+          delete (policy.windows.popup as Partial<PolicyConfig['windows']['popup']>).ransomware;
+          delete (policy.mac.popup as Partial<PolicyConfig['mac']['popup']>).ransomware;
+          delete (policy.windows.popup as Partial<PolicyConfig['windows']['popup']>)
+            .memory_protection;
+          delete (policy.windows.popup as Partial<PolicyConfig['windows']['popup']>)
+            .behavior_protection;
+
+          expect(() => isEndpointPolicyValidForLicense(policy, license)).not.toThrow();
+        }
+      );
+
+      it('still blocks a paid ransomware change for Gold when the block is present', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.ransomware.supported = true; // paid feature toggled on
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+    });
   });
 
   describe('unsetPolicyFeaturesAccordingToLicenseLevel', () => {
