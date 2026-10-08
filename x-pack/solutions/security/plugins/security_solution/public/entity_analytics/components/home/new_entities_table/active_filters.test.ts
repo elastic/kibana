@@ -9,7 +9,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { toDsl, toEsql } from './active_filters';
 import type { ActiveFilters } from './active_filters';
-import { EMPTY_ENTITY_FILTERS } from './hooks/use_entity_analytics_url_state';
+import { EMPTY_ENTITY_FILTERS } from './common';
 
 const NONE: ActiveFilters = {
   search: {},

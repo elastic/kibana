@@ -14,12 +14,8 @@ import {
 } from '../needs_attention_tiles/tile_entity_filter';
 import { RESOLVED_TO_FIELD } from './common';
 import { joinAnd } from './queries/esql';
-import type { QueryArgs, RowsMode } from './common';
-import {
-  buildEntityFiltersExpression,
-  buildEntityFiltersQuery,
-} from './hooks/use_entity_grid_filters';
-import type { EntityFilters } from './hooks/use_entity_analytics_url_state';
+import type { EntityFilters, QueryArgs, RowsMode } from './common';
+import { buildEntityFiltersExpression, buildEntityFiltersQuery } from './queries/entity_filters';
 
 /**
  * Everything that narrows the entities on the page: the search bar, the filter dropdowns,

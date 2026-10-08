@@ -8,11 +8,11 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
+import { EMPTY_ENTITY_FILTERS } from '../../common';
 import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
 import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
-import { EMPTY_ENTITY_FILTERS } from '../../hooks/use_entity_analytics_url_state';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';

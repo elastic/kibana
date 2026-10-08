@@ -13,28 +13,12 @@ import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import { GROUP_SIZE_FIELD, RISK_SCORE_NORM_FIELD, TIME_RANGE_OPTIONS } from '../common';
-import type { RowsMode, SortDir, TimeRange } from '../common';
+import type { EntityFilters, RowsMode, SortDir, TimeRange } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
 export type { TimeRange, RowsMode };
-
-export interface EntityFilters {
-  entityTypes: EntityType[];
-  riskLevels: RiskSeverity[];
-  assetCriticality: string[];
-  watchlists: string[];
-  dataSources: string[];
-}
-
-export const EMPTY_ENTITY_FILTERS: EntityFilters = {
-  entityTypes: [],
-  riskLevels: [],
-  assetCriticality: [],
-  watchlists: [],
-  dataSources: [],
-};
 
 // ── param keys ────────────────────────────────────────────────────────────────
 

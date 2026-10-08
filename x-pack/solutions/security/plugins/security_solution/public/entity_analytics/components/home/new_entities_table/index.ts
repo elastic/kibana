@@ -6,15 +6,16 @@
  */
 
 export {
-  EMPTY_ENTITY_FILTERS,
   TIME_RANGE_OPTIONS,
   useEntityAnalyticsUrlState,
 } from './hooks/use_entity_analytics_url_state';
-export type { TimeRange, RowsMode, EntityFilters } from './hooks/use_entity_analytics_url_state';
+export type { TimeRange, RowsMode } from './hooks/use_entity_analytics_url_state';
+export { EMPTY_ENTITY_FILTERS } from './common';
+export type { EntityFilters } from './common';
 export { EntitiesGrid } from './components/entities_grid';
 export { EntitiesGroups } from './components/entities_groups';
 export type { RowActions, CellHandlers } from './components/entities_cell_renderer';
 export { RESOLVED_ROWS_COLUMNS, INDIVIDUAL_ROWS_COLUMNS } from './grid_columns';
 export { ENTITY_TYPE_FIELD, getEntityId, getString } from './common';
-export { buildEntityFilterClauses } from './hooks/use_entity_grid_filters';
+export { buildEntityFilterClauses } from './queries/entity_filters';
 export { useSearchBarExpression } from './hooks/use_search_bar_expression';

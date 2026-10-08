@@ -9,6 +9,8 @@ import {
   getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -71,6 +73,23 @@ export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
 export type RowsMode = 'resolved' | 'individual';
 export type Row = Record<string, unknown>;
 export type SortDir = 'asc' | 'desc';
+
+/** The filter dropdowns' selections. */
+export interface EntityFilters {
+  entityTypes: EntityType[];
+  riskLevels: RiskSeverity[];
+  assetCriticality: string[];
+  watchlists: string[];
+  dataSources: string[];
+}
+
+export const EMPTY_ENTITY_FILTERS: EntityFilters = {
+  entityTypes: [],
+  riskLevels: [],
+  assetCriticality: [],
+  watchlists: [],
+  dataSources: [],
+};
 /** A sort column value in a cursor. Sort columns hold strings, numbers or null. */
 export type SortValue = string | number | null;
 
