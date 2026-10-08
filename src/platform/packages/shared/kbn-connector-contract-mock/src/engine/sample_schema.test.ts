@@ -176,4 +176,21 @@ describe('sampleJsonSchema', () => {
       filter: { field: 'string' },
     });
   });
+
+  it('samples at the upper bounds with boundary, ignoring defaults', () => {
+    const bounded = {
+      type: 'object',
+      properties: {
+        query: { type: 'string', maxLength: 5 },
+        limit: { type: 'integer', maximum: 100, default: 10 },
+        sort: { enum: ['asc', 'desc'] },
+      },
+    };
+
+    expect(sampleJsonSchema(bounded, { boundary: true })).toEqual({
+      query: 'strin',
+      limit: 100,
+      sort: 'desc',
+    });
+  });
 });
