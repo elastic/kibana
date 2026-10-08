@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   ASSETS_SAMPLE_GRANULARITY,
+  CDR_METERING_STATE_INDEX,
   CLOUD_SECURITY_TASK_TYPE,
   CNVM,
   CSPM,
@@ -17,6 +18,7 @@ import {
   METERING_CONFIGS,
   BILLABLE_ASSETS_CONFIG,
 } from './constants';
+import { CSPM_METERING_WINDOW, getCspmStateAggQuery } from './cspm_metering_state_query';
 import type { ResourceSubtypeCounter, Tier, UsageRecord } from '../types';
 import type {
   CloudSecurityMeteringCallbackInput,
@@ -184,16 +186,96 @@ export const getAssetAggQueryByCloudSecuritySolution = (
   };
 };
 
+/**
+ * Answers one question each metering run: is the state-index billing path
+ * ready to use, or should CSPM keep billing the legacy way this cycle?
+ *
+ * WHY THE CHECK EXISTS. The state index is only populated once two things
+ * are true, neither of them instant or under our control: (1) the customer's
+ * cloud_security_posture package is >=3.6.0, whose ingest pipeline writes the
+ * resource.lifecycle fields, and (2) the metering_state transform has run at
+ * least once against those fields. Until both hold, the index is empty and
+ * CSPM must bill via the legacy latest-index query — which is why this code
+ * can ship before the package does: the new path stays dormant until the
+ * data exists.
+ *
+ * WHY IT FAILS OPEN. If the probe itself errors (ES hiccup, permissions),
+ * failing closed would skip the billing cycle — the customer bills nothing
+ * for 30 minutes because of an infrastructure blip. Failing open (return
+ * false) bills the customer exactly as they were billed yesterday. Nothing
+ * is lost, so a probe failure is designed behavior, not an emergency: that
+ * is why no error is logged here. The caller logs one debug line with the
+ * selected path, so an investigation can still see which query billed any
+ * given cycle.
+ *
+ * KNOWN IMPERFECTION, ACCEPTED ON PURPOSE. Right after a package upgrade the
+ * transform fills the state index incrementally, and this probe only asks
+ * "is there at least ONE fresh doc?". For a short window the index may hold
+ * a partial asset set, so CSPM bills from an incomplete picture — a slight
+ * undercharge, in the customer's favor, for typically one or two 30-minute
+ * cycles, once, at upgrade time. The alternative is an "enough docs" check,
+ * but "enough" depends on fleet size and becomes a per-project tunable that
+ * can be mis-tuned into worse problems. If you found this comment while
+ * investigating an underbilling report around a package upgrade: this is
+ * that gap, it was sized and chosen deliberately.
+ */
+const stateIndexHasFreshData = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  try {
+    const response = await esClient.search(
+      {
+        index: CDR_METERING_STATE_INDEX,
+        size: 1,
+        _source: false,
+        query: {
+          bool: {
+            must: [
+              { term: { posture_type: CSPM } },
+              { range: { last_seen: { gte: CSPM_METERING_WINDOW } } },
+            ],
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return (response.hits?.hits?.length ?? 0) > 0;
+  } catch {
+    return false;
+  }
+};
+
 export const getAssetAggByCloudSecuritySolution = async (
   esClient: ElasticsearchClient,
-  cloudSecuritySolution: CloudSecuritySolutions
+  cloudSecuritySolution: CloudSecuritySolutions,
+  logger: Logger
 ): Promise<AssetCountAggregation | undefined> => {
-  const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution);
+  const useStateIndex = cloudSecuritySolution === CSPM && (await stateIndexHasFreshData(esClient));
+
+  if (cloudSecuritySolution === CSPM) {
+    logger.debug(`CSPM metering path: ${useStateIndex ? 'state-index' : 'legacy'}`);
+  }
+
+  const assetsAggQuery = useStateIndex
+    ? getCspmStateAggQuery()
+    : getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution);
 
   // @ts-expect-error elasticsearch@9.0.0 The types are tripping because of the dynamic aggs
   const response = await esClient.search<unknown, AssetCountAggregation>(assetsAggQuery);
 
   if (!response.aggregations) return;
+
+  // Guard the state path against an empty result set: the fresh-data probe can
+  // pass while the billing query matches nothing (e.g. only GCP instances
+  // failing the two-scan rule), leaving min_timestamp null. This does not
+  // change the billing outcome — getUsageRecords would throw a RangeError on
+  // min_timestamp.value_as_string, and the catch-all in
+  // getCloudSecurityUsageRecord returns undefined where this returns [];
+  // neither emits a usage record. What it avoids is the throw itself and the
+  // recurring error-level log it produces every cycle, which reads to on-call
+  // as a real metering failure rather than a legitimately empty result.
+  if (useStateIndex && response.aggregations.min_timestamp?.value_as_string == null) {
+    return;
+  }
 
   return response.aggregations as AssetCountAggregation;
 };
@@ -231,7 +313,8 @@ export const getCloudSecurityUsageRecord = async ({
 
     const assetCountAggregation = await getAssetAggByCloudSecuritySolution(
       esClient,
-      cloudSecuritySolution
+      cloudSecuritySolution,
+      logger
     );
 
     if (!assetCountAggregation) return [];
