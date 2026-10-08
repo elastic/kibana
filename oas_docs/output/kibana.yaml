@@ -8871,7 +8871,8 @@ paths:
                           - id: workflow-1
                             type: workflow
                         enabled: true
-                        grouping_mode: per_alert
+                        grouping:
+                          mode: per_alert
                         id: action-policy-1
                         matcher:
                           tags:
@@ -8996,7 +8997,8 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_alert
+                  grouping:
+                    mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -9021,7 +9023,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10035,7 +10038,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10201,7 +10205,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10373,7 +10378,8 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_alert
+                  grouping:
+                    mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -10398,7 +10404,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10427,7 +10434,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10590,7 +10598,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: false
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10757,7 +10766,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10944,7 +10954,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -11112,7 +11123,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -11279,7 +11291,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -151911,21 +151924,60 @@ components:
         propertyName: type
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
-    Kibana_HTTP_APIs_alerting_action_policy_grouping_mode:
-      anyOf:
-        - description: one notification per alert lifecycle (default).
-          enum:
-            - per_alert
-          type: string
-        - description: a single notification for all matching alerts.
+    Kibana_HTTP_APIs_alerting_action_policy_grouping:
+      discriminator:
+        mapping:
+          all: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_all'
+          per_alert: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert'
+          per_field: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field'
+        propertyName: mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_all'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field'
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_all:
+      additionalProperties: false
+      description: a single notification for all matching alerts.
+      type: object
+      properties:
+        mode:
           enum:
             - all
           type: string
-        - description: group by specified `groupBy` fields.
+      required:
+        - mode
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert:
+      additionalProperties: false
+      description: one notification per alert lifecycle (default).
+      type: object
+      properties:
+        mode:
+          enum:
+            - per_alert
+          type: string
+      required:
+        - mode
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field:
+      additionalProperties: false
+      description: group by the specified `fields`.
+      type: object
+      properties:
+        fields:
+          description: The fields alerts are grouped by. At least one is required, and no other mode accepts them.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          minItems: 1
+          type: array
+        mode:
           enum:
             - per_field
           type: string
-      description: 'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+      required:
+        - mode
+        - fields
     Kibana_HTTP_APIs_alerting_action_policy_list_response:
       additionalProperties: false
       description: Paginated list of action policies.
@@ -151975,14 +152027,9 @@ components:
         enabled:
           description: Whether the action policy is enabled.
           type: boolean
-        group_by:
-          description: The fields used to group alerts. Omitted when the alerts are not grouped.
-          items:
-            type: string
-          type: array
-        grouping_mode:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications. Omitted when none is set.
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: How matched alerts are batched into notifications. Omitted when none is set, which groups per alert.
         id:
           description: The unique identifier for the action policy.
           type: string
@@ -152012,35 +152059,8 @@ components:
           description: The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.
           type: string
         throttle:
-          additionalProperties: false
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications. Omitted when none is set.
-          type: object
-          properties:
-            interval:
-              description: The throttle interval duration (e.g. 5m, 1h). Omitted when the strategy is intervalless.
-              maxLength: 32
-              type: string
-            strategy:
-              anyOf:
-                - description: notify only on alert status transitions (default for `per_alert`).
-                  enum:
-                    - on_status_change
-                  type: string
-                - description: notify on transitions and at regular intervals.
-                  enum:
-                    - per_status_interval
-                  type: string
-                - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
-                  enum:
-                    - time_interval
-                  type: string
-                - description: notify on every evaluation cycle (high volume).
-                  enum:
-                    - every_time
-                  type: string
-              description: The throttle strategy.
-          required:
-            - strategy
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
@@ -152061,62 +152081,72 @@ components:
         - updated_by
         - updated_at
     Kibana_HTTP_APIs_alerting_action_policy_throttle:
+      discriminator:
+        mapping:
+          every_time: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time'
+          on_status_change: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change'
+          per_status_interval: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval'
+          time_interval: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval'
+        propertyName: strategy
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time'
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time:
       additionalProperties: false
+      description: notify on every evaluation cycle (high volume).
       type: object
       properties:
-        interval:
-          description: The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.
-          maxLength: 32
-          type: string
         strategy:
-          anyOf:
-            - description: notify only on alert status transitions (default for `per_alert`).
-              enum:
-                - on_status_change
-              type: string
-            - description: notify on transitions and at regular intervals.
-              enum:
-                - per_status_interval
-              type: string
-            - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
-              enum:
-                - time_interval
-              type: string
-            - description: notify on every evaluation cycle (high volume).
-              enum:
-                - every_time
-              type: string
-          description: 'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.'
+          enum:
+            - every_time
+          type: string
       required:
         - strategy
-    Kibana_HTTP_APIs_alerting_action_policy_throttle_patch:
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change:
       additionalProperties: false
+      description: notify only on alert status transitions (default for `per_alert`).
+      type: object
+      properties:
+        strategy:
+          enum:
+            - on_status_change
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval:
+      additionalProperties: false
+      description: notify on transitions and at regular intervals.
       type: object
       properties:
         interval:
-          description: The throttle interval duration (e.g. 5m, 1h). Required by the `per_status_interval` and `time_interval` strategies, and absent for the intervalless ones. Omit it on create; send `null` on PATCH to clear it.
+          description: The throttle interval duration (e.g. 5m, 1h) that sets the notification cadence.
           maxLength: 32
-          nullable: true
           type: string
         strategy:
-          anyOf:
-            - description: notify only on alert status transitions (default for `per_alert`).
-              enum:
-                - on_status_change
-              type: string
-            - description: notify on transitions and at regular intervals.
-              enum:
-                - per_status_interval
-              type: string
-            - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
-              enum:
-                - time_interval
-              type: string
-            - description: notify on every evaluation cycle (high volume).
-              enum:
-                - every_time
-              type: string
-          description: 'The throttle strategy. Required whenever `throttle` is present: clear the whole block with `throttle: null` on PATCH rather than clearing this field on its own.'
+          enum:
+            - per_status_interval
+          type: string
+      required:
+        - strategy
+        - interval
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval:
+      additionalProperties: false
+      description: notify at regular intervals regardless of status (default for `all`/`per_field`).
+      type: object
+      properties:
+        interval:
+          description: The throttle interval duration (e.g. 5m, 1h) that sets the notification cadence.
+          maxLength: 32
+          type: string
+        strategy:
+          enum:
+            - time_interval
+          type: string
+      required:
+        - strategy
+        - interval
     Kibana_HTTP_APIs_alerting_actor:
       additionalProperties: false
       description: Identity that performed the write.
@@ -152583,18 +152613,9 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        group_by:
-          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          minItems: 1
-          type: array
-        grouping_mode:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
         matcher:
           additionalProperties: false
           description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
@@ -152621,7 +152642,7 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
       required:
         - name
         - destinations
@@ -152884,18 +152905,9 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        group_by:
-          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          minItems: 1
-          type: array
-        grouping_mode:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
         matcher:
           additionalProperties: false
           description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
@@ -152922,7 +152934,7 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
       required:
         - name
         - destinations
@@ -153131,18 +153143,20 @@ components:
       properties:
         builder:
           additionalProperties: false
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
           type: object
           properties:
             type:
               description: Rule builder type.
               maxLength: 64
+              minLength: 1
               type: string
           required:
             - type
         description:
-          description: Human-readable description of the rule.
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
+          minLength: 1
           type: string
         name:
           description: Rule name (must be unique within the space).
@@ -153176,19 +153190,21 @@ components:
       properties:
         builder:
           additionalProperties: false
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
           nullable: true
           type: object
           properties:
             type:
               description: Rule builder type.
               maxLength: 64
+              minLength: 1
               type: string
           required:
             - type
         description:
-          description: Human-readable description of the rule.
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
+          minLength: 1
           nullable: true
           type: string
         name:
@@ -153638,24 +153654,14 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        group_by:
-          description: 'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.'
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          minItems: 1
-          nullable: true
-          type: array
-        grouping_mode:
+        grouping:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
           nullable: true
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` for a catch-all policy that applies to all alerts. An empty `matcher` is rejected; clearing the last of `tags` and `expression` clears the matcher itself, which is also a catch-all.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` for a catch-all policy that applies to all alerts. An empty `matcher` names no leaf and so changes nothing; clearing the last of `tags` and `expression` clears the matcher itself, which is also a catch-all.
           nullable: true
           type: object
           properties:
@@ -153682,8 +153688,8 @@ components:
           type: string
         throttle:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_patch'
-          description: The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it.
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
           nullable: true
     Kibana_HTTP_APIs_alerting_update_rule:
       additionalProperties: false
