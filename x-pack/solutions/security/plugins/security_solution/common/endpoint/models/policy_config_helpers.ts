@@ -8,7 +8,11 @@
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
-import { DefaultPolicyNotificationMessage } from './policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
+} from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
   PolicyOperatingSystem,
@@ -33,26 +37,32 @@ const allOsValues = [
 const getPolicyPopupReference = (): Array<{
   keyPath: string;
   osList: PolicyOperatingSystem[];
+  defaultMessage: string;
 }> => [
   {
     keyPath: 'popup.malware.message',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
     keyPath: 'popup.memory_protection.message',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
     keyPath: 'popup.behavior_protection.message',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
     keyPath: 'popup.ransomware.message',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
     keyPath: 'popup.device_control.message',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyDeviceNotificationMessage,
   },
 ];
 
@@ -298,11 +308,19 @@ export function isBillablePolicy(policy: PolicyConfig) {
 export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.some(({ keyPath, osList }) => {
+  return popupRefs.some(({ keyPath, osList, defaultMessage }) => {
     return osList.some((osValue) => {
       const fullKeyPathForOs = `${osValue}.${keyPath}`;
       const currentValue = get(policy, fullKeyPathForOs);
-      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+      // A message is non-custom when absent (branch stripped), empty (factory default),
+      // matches the per-key UI default, or equals the legacy {filename} value that all
+      // Essentials policies received from the Aug 2025 startup migration.
+      return (
+        currentValue != null &&
+        currentValue !== '' &&
+        currentValue !== defaultMessage &&
+        currentValue !== DefaultPolicyNotificationMessage
+      );
     });
   });
 };
@@ -331,13 +349,20 @@ export const getDeviceControlNotificationConflicts = (
 };
 
 export const resetCustomNotifications = (
-  customNotification = DefaultPolicyNotificationMessage
+  policy: PolicyConfig,
+  customNotification?: string
 ): Partial<PolicyConfig> => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.reduce((acc, { keyPath, osList }) => {
+  return popupRefs.reduce((acc, { keyPath, osList, defaultMessage }) => {
+    const message = customNotification ?? defaultMessage;
     osList.forEach((osValue) => {
-      set(acc, `${osValue}.${keyPath}`, customNotification);
+      // Only touch branches that already exist in the policy — writing a partial
+      // popup.device_control stub creates config for a stripped feature.
+      const branchPath = keyPath.split('.').slice(0, -1).join('.');
+      if (get(policy, `${osValue}.${branchPath}`) !== undefined) {
+        set(acc, `${osValue}.${keyPath}`, message);
+      }
     });
     return acc;
   }, {});
