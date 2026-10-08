@@ -129,7 +129,7 @@ export const getRuleEventsTool = ({
         message: 'Failed to fetch rule events for episode',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED,
         labels: {
-          episode_id: episodeId,
+          alert_id: episodeId,
           space_id: toolContext.spaceId,
         },
         error,
@@ -169,7 +169,7 @@ export const getRuleEventsTool = ({
           message: 'Failed to look up episode while fetching rule events',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
           labels: {
-            episode_id: episodeId,
+            alert_id: episodeId,
             space_id: toolContext.spaceId,
           },
           error,

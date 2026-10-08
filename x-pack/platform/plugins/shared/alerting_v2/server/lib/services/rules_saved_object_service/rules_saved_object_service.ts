@@ -86,9 +86,16 @@ export type BulkCreateResultItem =
       error: SavedObjectError;
     };
 
-export interface RulesFindAllResultItem {
+type RuleAttributeName = keyof RuleSavedObjectAttributes;
+
+export interface FindByIdsOptions<TField extends RuleAttributeName = RuleAttributeName> {
+  spaceId?: string;
+  fields?: TField[];
+}
+
+export interface RulesFindAllResultItem<TField extends RuleAttributeName = RuleAttributeName> {
   id: string;
-  attributes: RuleSavedObjectAttributes;
+  attributes: Pick<RuleSavedObjectAttributes, TField>;
   namespaces?: string[];
   /** Always populated by the real SO service; optional on test mocks. */
   references?: SavedObjectReference[];
@@ -128,7 +135,10 @@ export interface RulesSavedObjectServiceContract {
   }): Promise<RuleWriteResult>;
   get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
-  findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
+  findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    options?: FindByIdsOptions<TField>
+  ): Promise<Array<RulesFindAllResultItem<TField>>>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
@@ -280,7 +290,10 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]> {
+  public async findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    { spaceId, fields }: FindByIdsOptions<TField> = {}
+  ): Promise<Array<RulesFindAllResultItem<TField>>> {
     if (ruleIds.length === 0) {
       return [];
     }
@@ -290,14 +303,15 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
       .join(' OR ');
 
-    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+    const finder = this.client.createPointInTimeFinder<Pick<RuleSavedObjectAttributes, TField>>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 1000,
       namespaces: namespace ? [namespace] : ['*'],
       filter,
+      fields,
     });
 
-    const results: RulesFindAllResultItem[] = [];
+    const results: Array<RulesFindAllResultItem<TField>> = [];
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
         results.push({
