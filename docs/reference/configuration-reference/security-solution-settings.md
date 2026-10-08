@@ -1,8 +1,7 @@
 ---
 navigation_title: "Security Solution settings"
 applies_to:
-  deployment:
-    self: all
+  stack: ga
 ---
 
 # Security Solution settings in {{kib}} [security-solution-settings]
