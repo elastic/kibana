@@ -135,7 +135,7 @@ describe('config validation', () => {
             "lens": true,
           },
           "restrictedCases": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "runWorkflows": Object {
             "enabled": false,
@@ -212,14 +212,14 @@ describe('config validation', () => {
   });
 
   describe('restrictedCases', () => {
-    it('sets restrictedCases.enabled default to false', () => {
+    it('sets restrictedCases.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.restrictedCases.enabled).toBe(false);
+      expect(config.restrictedCases.enabled).toBe(true);
     });
 
-    it('allows restrictedCases.enabled to be set to true explicitly', () => {
-      const config = ConfigSchema.validate({ restrictedCases: { enabled: true } });
-      expect(config.restrictedCases.enabled).toBe(true);
+    it('allows restrictedCases.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ restrictedCases: { enabled: false } });
+      expect(config.restrictedCases.enabled).toBe(false);
     });
   });
 });

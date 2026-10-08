@@ -161,7 +161,7 @@ export const ConfigSchema = schema.object({
   // `access` field is ignored on write, hidden in responses, and no visibility
   // rules are enforced.
   restrictedCases: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
