@@ -12,7 +12,7 @@ import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../../common/typed_json';
-import { buildEntityNameFilter } from '../../../../../common/search_strategy';
+import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -27,8 +27,7 @@ import {
   type EntityDetailsPath,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { getHeaderRiskLevel } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
+import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
@@ -261,12 +260,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
     entityRecord: entityFromStoreResult.entityRecord ?? null,
   });
 
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  const riskLevel = getHeaderRiskLevel(
-    entityFromStoreResult.entityRecord,
-    isNewEntityAnalyticsPage
-  );
-
   const tabsNode = tabs ? (
     <EntityPanelHeaderTabs
       tabs={tabs}
@@ -281,14 +274,18 @@ export const Service: FC<ServiceProps> = memo(function Service({
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        entityId={entityStoreEntityId}
         flyoutHeaderProps={{
           css: css`
             padding-block: ${euiTheme.size.s} !important;
           `,
           panelProps: { paddingSize: 'none' },
         }}
-        riskLevel={riskLevel}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
       />
       <FlyoutBody panelProps={{ paddingSize: 'none' }}>
         {entityFromStoreResult.entityRecord && (

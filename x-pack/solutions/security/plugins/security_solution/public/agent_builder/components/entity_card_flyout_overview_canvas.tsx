@@ -24,6 +24,7 @@ import {
   buildUserNamesFilter,
   EntityType as SearchEntityType,
   type EntityRiskScore,
+  type RiskSeverity,
   type RiskStats,
 } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
@@ -984,12 +985,6 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  const headerRiskLevel = getHeaderRiskLevel(
-    entityFromStoreResult.entityRecord,
-    isNewEntityAnalyticsPage
-  );
-
   if (observedService.isLoading) {
     return <FlyoutLoading />;
   }
@@ -1000,8 +995,12 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        entityId={entityStoreEntityId}
-        riskLevel={headerRiskLevel}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (

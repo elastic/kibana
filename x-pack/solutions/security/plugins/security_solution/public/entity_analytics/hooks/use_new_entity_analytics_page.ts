@@ -8,7 +8,6 @@
 import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 
-/** Whether the Entity Analytics 9.6 facelift (`securitySolution.useNewEntityAnalyticsPage`) is on. */
 export const useNewEntityAnalyticsPage = (): boolean => {
   const { featureFlags } = useKibana().services;
   return featureFlags.useBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
