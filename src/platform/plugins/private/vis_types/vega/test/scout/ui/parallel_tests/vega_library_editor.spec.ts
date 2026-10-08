@@ -85,7 +85,8 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       // Nothing changed yet, so there is nothing to save.
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
 
-      const queryInput = page.testSubj.locator('editorFlyoutSearchBar').getByTestId('queryInput');
+      // The search bar puts its test subject on the query input itself.
+      const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
       await queryInput.fill('status:active');
       await queryInput.press('Enter');
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
@@ -137,7 +138,8 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await pageObjects.visualize.clickSavedVisualization(title);
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
 
-      const queryInput = page.testSubj.locator('editorFlyoutSearchBar').getByTestId('queryInput');
+      // The search bar puts its test subject on the query input itself.
+      const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
       await queryInput.fill('status:active');
       await queryInput.press('Enter');
       await page.testSubj.click('vegaLibraryEditorCancelButton');

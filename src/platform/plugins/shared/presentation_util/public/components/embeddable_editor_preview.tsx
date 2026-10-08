@@ -40,6 +40,11 @@ export interface EmbeddableEditorPreviewProps<
   /** Rendered above the embeddable, e.g. a time range picker. */
   toolbar?: ReactNode;
   title?: string;
+  /**
+   * A named size, as child flyouts require. EUI rejects `m` when the editor flyout is `m` too, so
+   * pick a size that pairs with the editor's.
+   */
+  size?: 's' | 'm';
   verticalAlignment?: 'stretch' | 'top';
 }
 
@@ -58,6 +63,7 @@ export const EmbeddableEditorPreview = <
   getParentApi,
   toolbar,
   title = defaultPreviewTitle,
+  size = 'm',
   verticalAlignment = 'stretch',
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
   const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
@@ -99,7 +105,7 @@ export const EmbeddableEditorPreview = <
       ownFocus={false}
       resizable
       session="inherit"
-      size="m"
+      size={size}
       flyoutMenuProps={{ title }}
     >
       <EuiFlyoutHeader hasBorder>

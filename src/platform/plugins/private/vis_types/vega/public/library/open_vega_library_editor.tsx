@@ -32,8 +32,9 @@ export const openVegaLibraryEditor = async ({
   const flyoutRef = openLazySystemFlyout({
     core,
     flyoutProps: {
+      // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
+      // allow a parent and child flyout to both be `m`.
       title: vegaTitleInWizard,
-      size: 'm',
       // The library page has no panel to push aside, so cover it like a dialog would.
       type: 'overlay',
       ownFocus: true,

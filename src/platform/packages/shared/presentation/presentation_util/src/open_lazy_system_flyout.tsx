@@ -54,7 +54,7 @@ export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
       paddingSize: 'm',
       maxWidth: 800,
       ownFocus,
-      isResizable: true,
+      resizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazySystemFlyout',
       'aria-labelledby': ariaLabelledBy,

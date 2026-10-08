@@ -40,7 +40,7 @@ describe('openLazySystemFlyout', () => {
       expect.objectContaining({
         className: 'kbnPresentationLazySystemFlyout',
         'data-test-subj': 'managedEditor',
-        isResizable: true,
+        resizable: true,
         session: 'start',
         size: 500,
       })
