@@ -1275,6 +1275,27 @@ describe('ClaimGrounding', () => {
     expect(result.score).toBe(0.5);
   });
 
+  it('does not let a grounded claim hide a conflicting result for the same (check, source, id)', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
+              { check: 'entity_role', result: 'supports', source: 'entity_store', id: 'ent-1' },
+            ],
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('result "supports" contradicts raw.checks "contradicts"');
+  });
+
   it('scores 0 for a world claim whose check is not a world check', async () => {
     const result = await claimGrounding.evaluate({
       input: {},

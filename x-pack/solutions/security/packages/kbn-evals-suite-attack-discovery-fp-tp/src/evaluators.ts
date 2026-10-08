@@ -361,8 +361,9 @@ const ALERT_LINK_FIELDS: ReadonlySet<string> = new Set([
  * - An alert link must use an allowlisted pivot field, and every listed alert must
  *   carry the claimed value for it.
  *
- * World claims are deduplicated on (check, source, id) so repeating one grounded claim
- * does not inflate the score. Score = grounded claims / total claims.
+ * World claims are deduplicated on (check, result, source, id) so repeating one grounded
+ * claim does not inflate the score, while conflicting results for the same (check, source,
+ * id) are each scored. Score = grounded claims / total claims.
  */
 export const claimGrounding: Evaluator = {
   name: 'ClaimGrounding',
@@ -436,9 +437,12 @@ export const claimGrounding: Evaluator = {
     );
     const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
 
-    // Repeating one claim must not raise the score, so count each (check, source, id) once.
+    // Repeating one claim must not raise the score, so count each identical claim once.
+    // `result` is part of the key: two claims citing the same (check, source, id) with
+    // different results are conflicting, not duplicates, and the one that contradicts
+    // raw.checks must still be scored rather than hidden behind the grounded one.
     const claimKeys = worldClaims.map((claim) =>
-      JSON.stringify([claim.check, claim.source, claim.id])
+      JSON.stringify([claim.check, claim.result, claim.source, claim.id])
     );
     const uniqueWorldClaims = worldClaims.filter(
       (_, index) => claimKeys.indexOf(claimKeys[index]) === index
