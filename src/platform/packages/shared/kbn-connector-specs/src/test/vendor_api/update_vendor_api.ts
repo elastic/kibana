@@ -16,10 +16,17 @@ import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
-import type { ManifestSource, UnmatchedRequest, VendorApiManifest } from './manifest';
+import type {
+  ManifestOperation,
+  ManifestPagination,
+  ManifestSource,
+  UnmatchedRequest,
+  VendorApiManifest,
+} from './manifest';
 import { parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
+import { assessPagination } from './propose_pagination';
 import type { RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
@@ -201,6 +208,45 @@ export const updateVendorApi = async ({
   for (const finding of recording.findings) {
     (isProblem(finding) ? problems : warnings).add(describeFinding(finding));
   }
+
+  const operationKey = ({ source, method, path: operationPath }: ManifestOperation) =>
+    `${method.toUpperCase()} ${operationPath} (${source})`;
+  // Assessed operations too, so each is proposed or reported once across actions.
+  const declared = new Map<string, ManifestPagination | undefined>(
+    Object.values(previous?.operations ?? {})
+      .flat()
+      .flatMap(({ pagination, ...entry }) =>
+        pagination ? [[operationKey(entry), pagination] as const] : []
+      )
+  );
+  const paginationOf = (operation: ManifestOperation): ManifestPagination | undefined => {
+    const key = operationKey(operation);
+    if (declared.has(key)) {
+      return declared.get(key);
+    }
+    const assessment = assessPagination(specs[operation.source], operation);
+    const proposed = assessment.listLike ? assessment.proposal : undefined;
+    if (assessment.listLike && proposed) {
+      warnings.add(
+        `${key}: proposed "pagination" from ${proposed.basis} in ${MANIFEST}; review it`
+      );
+    } else if (assessment.listLike) {
+      problems.add(
+        `${key} looks like it returns a collection, as ${assessment.reason}; declare its "pagination" in ${MANIFEST}, or "none" if it returns everything at once`
+      );
+    }
+    declared.set(key, proposed?.pagination);
+    return proposed?.pagination;
+  };
+  const operations = Object.fromEntries(
+    Object.entries(recording.operations).map(([action, entries]) => [
+      action,
+      entries.map((entry) => {
+        const pagination = paginationOf(entry);
+        return pagination ? { ...entry, pagination } : entry;
+      }),
+    ])
+  );
   warnings.forEach((warning) => log.warning(warning));
 
   const unmatched: Record<string, UnmatchedRequest[]> = {};
@@ -223,11 +269,11 @@ export const updateVendorApi = async ({
   const files: Record<string, string> = {};
   const sources: Record<string, ManifestSource> = {};
   for (const [name, document] of Object.entries(raw)) {
-    const operations = Object.values(recording.operations)
+    const used = Object.values(recording.operations)
       .flat()
       .filter(({ source }) => source === name);
     const file = snapshotFile(name);
-    files[file] = toStableJson(projectSpec(document, operations));
+    files[file] = toStableJson(projectSpec(document, used));
     const unchanged = (await read(file)) === files[file];
     const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
@@ -240,7 +286,7 @@ export const updateVendorApi = async ({
   }
   files[MANIFEST] = serializeManifest({
     sources,
-    operations: recording.operations,
+    operations,
     ...(Object.keys(unmatched).length === 0 ? {} : { unmatched }),
   });
 

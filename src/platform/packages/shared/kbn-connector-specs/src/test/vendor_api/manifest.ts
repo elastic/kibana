@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { PaginationDescriptor } from '@kbn/connector-contract-mock';
 import { toStableJson } from './stable_json';
 
 const sourceSchema = z
@@ -22,6 +23,76 @@ const sourceSchema = z
   })
   .strict();
 
+const located = { in: z.enum(['query', 'body', 'header']).optional() };
+const size = { sizeParam: z.string().min(1).optional() };
+const cursorRequest = { cursorParam: z.string().min(1), ...size };
+const offsetRequest = { offsetParam: z.string().min(1), ...size };
+const pageRequest = {
+  pageParam: z.string().min(1),
+  ...size,
+  firstPage: z.number().int().nonnegative().optional(),
+};
+const nextUrlRequestSchema = z.union([
+  z.object(cursorRequest).strict(),
+  z.object(offsetRequest).strict(),
+  z.object(pageRequest).strict(),
+]);
+const defaultSize = { defaultSize: z.number().int().positive().optional() };
+const itemsPath = z.string();
+const totalResponseSchema = z.object({ itemsPath, totalPath: z.string().optional() }).strict();
+
+const paginationSchema = z.discriminatedUnion('style', [
+  z
+    .object({
+      style: z.literal('cursor'),
+      request: z.object({ ...cursorRequest, ...located }).strict(),
+      response: z
+        .object({
+          in: z.enum(['body', 'header']).optional(),
+          itemsPath,
+          nextPath: z.string().min(1),
+          hasMorePath: z.string().optional(),
+        })
+        .strict(),
+      end: z.enum(['empty_string', 'null', 'missing']).optional(),
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('offset'),
+      request: z.object({ ...offsetRequest, ...located }).strict(),
+      response: totalResponseSchema,
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('page'),
+      request: z.object({ ...pageRequest, ...located }).strict(),
+      response: totalResponseSchema,
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('link'),
+      request: nextUrlRequestSchema,
+      response: z.object({ itemsPath }).strict(),
+      ...defaultSize,
+    })
+    .strict(),
+  z
+    .object({
+      style: z.literal('next_url'),
+      request: nextUrlRequestSchema,
+      response: z.object({ itemsPath, nextPath: z.string().min(1) }).strict(),
+      end: z.enum(['null', 'missing']).optional(),
+      ...defaultSize,
+    })
+    .strict(),
+]);
+
 const operationSchema = z
   .object({
     source: z.string(),
@@ -29,6 +100,11 @@ const operationSchema = z
     method: z.string(),
     /** The path template, as in the spec. */
     path: z.string(),
+    /**
+     * How the operation pages, for the contract mock; `none` for list-like operations that
+     * return everything in one response.
+     */
+    pagination: z.union([z.literal('none'), paginationSchema]).optional(),
   })
   .strict();
 
@@ -57,6 +133,12 @@ export type VendorApiManifest = z.infer<typeof vendorApiManifestSchema>;
 export type ManifestOperation = z.infer<typeof operationSchema>;
 export type ManifestSource = z.infer<typeof sourceSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
+export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;
+
+/** A manifest descriptor, as the contract mock takes it; fails to compile if the two diverge. */
+export const toPaginationDescriptor = (
+  pagination: Exclude<ManifestPagination, 'none'>
+): PaginationDescriptor => pagination;
 
 export const parseManifest = (json: string): VendorApiManifest =>
   vendorApiManifestSchema.parse(JSON.parse(json));

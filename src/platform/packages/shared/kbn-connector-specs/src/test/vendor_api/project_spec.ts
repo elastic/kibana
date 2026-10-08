@@ -37,7 +37,14 @@ const STRIPPED_KEYWORDS = new Set([
 ]);
 
 // Values that are data, not spec objects, so nothing in them is stripped.
-const LITERAL_KEYWORDS = new Set(['enum', 'const', 'default']);
+const LITERAL_KEYWORDS = new Set([
+  'enum',
+  'const',
+  'default',
+  // Pagination extensions, which describe the contract and are read to propose descriptors.
+  'x-speakeasy-pagination',
+  'x-ms-pageable',
+]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
 const NAME_MAPS = new Set([
@@ -66,7 +73,10 @@ const NAME_MAPS = new Set([
 
 const PATH_ITEM_KEYS = new Set(['parameters', 'servers', '$ref']);
 
-/** Removes documentation and `x-` extensions from spec objects, keeping names and literal values. */
+/**
+ * Removes documentation and `x-` extensions other than pagination ones from spec objects,
+ * keeping names and literal values.
+ */
 export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown => {
   if (Array.isArray(value)) {
     return value.map((item) => normalizeSpecNode(item));
@@ -117,8 +127,8 @@ const toKeptTokens = (tokens: string[]): string[] =>
  * Trims an OpenAPI 3.x document (Swagger 2.0 is converted first) to the given operations, with
  * their path-level parameters and servers, the security schemes they use and every component
  * they reference, directly or through other components. Documentation, examples, `x-`
- * extensions and `info` other than the title are left out, so the result only changes when the
- * contract does.
+ * extensions other than pagination ones and `info` other than the title are left out, so the
+ * result only changes when the contract does.
  */
 export const projectSpec = (
   source: OpenApiDocument,

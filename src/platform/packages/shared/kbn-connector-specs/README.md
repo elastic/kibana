@@ -598,7 +598,7 @@ node scripts/connector_vendor_api --connector datadog --check
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination` and `x-ms-pageable` are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
@@ -613,9 +613,10 @@ The script fails when:
 - a `read` action sends any other request;
 - a `queries` entry is never needed;
 - a response override breaks the spec;
-- a request matches no operation and isn't listed in `unmatched`.
+- a request matches no operation and isn't listed in `unmatched`;
+- an operation looks like it returns a collection, but has no `pagination` and none could be proposed.
 
-Requests that break the spec and handler errors are reported as warnings.
+Requests that break the spec, handler errors and proposed `pagination` descriptors are reported as warnings.
 
 ### `manifest.json`
 
@@ -630,7 +631,18 @@ Requests that break the spec and handler errors are reported as warnings.
     }
   },
   "operations": {
-    "search": [{ "source": "v1", "method": "get", "path": "/search" }]
+    "search": [
+      {
+        "source": "v1",
+        "method": "get",
+        "path": "/search",
+        "pagination": {
+          "style": "cursor",
+          "request": { "cursorParam": "cursor", "sizeParam": "limit" },
+          "response": { "itemsPath": "results", "nextPath": "next_cursor" }
+        }
+      }
+    ]
   },
   "unmatched": {
     "mute": [{ "method": "post", "path": "/v1/mute", "reason": "Missing from the spec; see #123" }]
@@ -640,6 +652,7 @@ Requests that break the spec and handler errors are reported as warnings.
 
 - `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
+- `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-contract-mock` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A request that matches nothing and isn't listed fails the script.
 
 Keys are sorted at every depth (`serializeManifest`), so regenerating without vendor changes produces no diff. `vendorApiManifestSchema` is the schema.
