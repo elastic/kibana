@@ -26,6 +26,7 @@ import {
   buildJoinedPageSteps,
 } from './esql';
 import { buildEntitiesInViewSteps } from './entities_in_view';
+import { buildMergedForeignSortQuery } from './foreign_sort';
 import type {
   EsqlRunner,
   QueryArgs,
@@ -110,11 +111,32 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
   ].join('\n');
 };
 
-/** The single query of a view without a search (searches read their targets directly). */
-const buildGroupSizeSortQuery = (args: QueryArgs): string =>
-  args.entityExpression
-    ? buildAliasFirstGroupSizeSortQuery(args)
-    : buildUnfilteredGroupSizeSortQuery(args);
+/**
+ * A search picks the rows, like it does for every sort: the targets that match. It doesn't
+ * change their values, so each row keeps the size of its whole group and stays expandable.
+ * KQL can't run after a join, so the targets in view merge with the sizes of every group.
+ * Searches read their targets directly first; this runs when there are too many groups with
+ * aliases for that.
+ */
+const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
+  buildMergedForeignSortQuery(args, {
+    foreignRows: [
+      `FROM ${getEntityAlias(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER}`,
+      `| EVAL group_key = ${GROUP_KEY}`,
+      `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
+      '| RENAME group_key AS `entity.id`',
+    ],
+    mergeAggregations: [`${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD})`],
+    sortField: GROUP_SIZE_FIELD,
+  });
+
+/** The single query of a view, for small views and when the plans in parts can't be used. */
+const buildGroupSizeSortQuery = (args: QueryArgs): string => {
+  if (args.searchExpression) return buildSearchGroupSizeSortQuery(args);
+  if (args.entityExpression) return buildAliasFirstGroupSizeSortQuery(args);
+  return buildUnfilteredGroupSizeSortQuery(args);
+};
 
 // ── large views ───────────────────────────────────────────────────────────────
 

@@ -182,4 +182,16 @@ describe('group size sort page', () => {
     await runPage(baseArgs, runQuery);
     expect(kinds).toEqual(['groups', 'general']);
   });
+
+  it('keeps the search in the single query when a broad search meets too many groups', async () => {
+    const groups = Array.from({ length: 10_001 }, (_, i) => group(`g${i}`, 2));
+    const targets = Array.from({ length: 10_001 }, (_, i) => ({ 'entity.id': `t${i}` }));
+    const { runQuery } = fakeRunner(groups, [], { targets });
+    const queries: string[] = [];
+    await runPage({ ...baseArgs, searchExpression: SEARCH }, async (query) => {
+      queries.push(query);
+      return runQuery(query);
+    });
+    expect(queries[queries.length - 1]).toContain(SEARCH);
+  });
 });
