@@ -403,11 +403,15 @@ The first line links only the failed-test issue. When supported, the **Relevant 
 Add the following at the very end of the PR description (and outside of the details block):
 
 ```markdown
-> [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Mention `@copilot` to make quick changes.
+> [!IMPORTANT]
+> Requested by @${{ env.REQUESTED_BY }}. The flaky test runner may verify the PR, but the owning **team is responsible the next steps**:
+>
+> - Review and merge it (update the branch or add missing labels if needed)
+> - Make changes (check out the branch locally, or ask `@copilot` if Copilot is enabled on your account)
+> - Close it if it is not worth shipping (share feedback in #kibana-qa)
 ```
 
-(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
+(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the IMPORTANT block if the requester is a bot or `kibanamachine`, leaving the rest of the block.)
 
 ## Release-note and backport labels
 

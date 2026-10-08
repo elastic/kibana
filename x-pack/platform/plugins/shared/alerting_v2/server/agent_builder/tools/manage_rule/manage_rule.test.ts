@@ -151,6 +151,60 @@ describe('manageRuleTool', () => {
       });
     });
 
+    it('returns time-field warnings in the tool result', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      });
+      // The target index has no date fields, so the explicit time field can't be verified.
+      getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: {} });
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Test' },
+            { operation: 'set_time_field', time_field: 'event.ingested' },
+            { operation: 'set_query', query: { base: 'FROM no-date-index | STATS COUNT(*)' } },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          data?: { warnings?: string[]; ruleAttachment?: { time_field?: string } };
+        }>;
+      };
+      expect(results[0].data?.warnings).toEqual([expect.stringContaining('event.ingested')]);
+      expect(results[0].data?.ruleAttachment?.time_field).toBe('event.ingested');
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { time_field?: string } };
+      expect(addCall.data.time_field).toBe('event.ingested');
+    });
+
+    it('omits warnings from the tool result when there are none', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Test' },
+            { operation: 'set_query', query: { base: 'FROM logs-* | STATS COUNT(*)' } },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ data?: { warnings?: string[] } }> };
+      expect(results[0].data).not.toHaveProperty('warnings');
+    });
+
     it('returns an error result when query validation fails', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockRejectedValueOnce(new Error('Unknown index [bad-index-*]'));

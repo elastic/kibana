@@ -12,14 +12,17 @@ import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflow
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
+import type { SignificantEventsServer } from '../../../types';
 import description from './description.text';
 import content from './skill.md.text';
 
 export const createKiIdentificationManagementSkill = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -34,12 +37,13 @@ export const createKiIdentificationManagementSkill = ({
     description,
     content,
     getInlineTools: () => [
-      createKiIdentificationCancelTool({ streamsKIsOnboardingClient }),
+      createKiIdentificationCancelTool({ server, streamsKIsOnboardingClient }),
       createKiIdentificationStartTool({
+        server,
         telemetry,
         streamsKIsOnboardingClient,
         maintenanceService,
       }),
-      createKiIdentificationStatusTool({ streamsKIsOnboardingClient }),
+      createKiIdentificationStatusTool({ server, streamsKIsOnboardingClient }),
     ],
   });

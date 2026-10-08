@@ -69,10 +69,6 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
-// TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
-//       once exported from the plugin or moved to a shared package.
-const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
-
 const getEditLabel = (name: string) =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.editPolicyLink', {
     defaultMessage: 'Edit {name}',
@@ -86,12 +82,19 @@ interface Props {
     onClose: () => void;
     onSuccess: () => void;
   }>;
+  /**
+   * Builds a host-aware href to an action policy's edit page. Injected by the host
+   * plugin from the action policies locator; absent → the policy name renders as
+   * plain text instead of a link.
+   */
+  getActionPolicyEditHref?: (actionPolicyId: string) => string;
 }
 
 export const LinkedActionPoliciesStep = ({
   http,
   createActionPolicyDisabledReason,
   CreateActionPolicyFormFlyout,
+  getActionPolicyEditHref,
 }: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
   const routingTags = metadata?.routingTags;
@@ -185,6 +188,7 @@ export const LinkedActionPoliciesStep = ({
             {items.map(({ action_policy: actionPolicy, category }, index) => {
               const editLabel = getEditLabel(actionPolicy.name);
               const connectorTypes = connectorTypesByPolicy.get(actionPolicy.id) ?? [];
+              const editHref = getActionPolicyEditHref?.(actionPolicy.id);
               return (
                 <Fragment key={actionPolicy.id}>
                   {index > 0 && <EuiHorizontalRule margin="none" />}
@@ -194,18 +198,25 @@ export const LinkedActionPoliciesStep = ({
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiLink
-                          href={http.basePath.prepend(
-                            `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          external={false}
-                          aria-label={editLabel}
-                          data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
-                        >
-                          {actionPolicy.name}
-                        </EuiLink>
+                        {editHref ? (
+                          <EuiLink
+                            href={editHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            external={false}
+                            aria-label={editLabel}
+                            data-test-subj={`linkedActionPolicyEdit-${actionPolicy.id}`}
+                          >
+                            {actionPolicy.name}
+                          </EuiLink>
+                        ) : (
+                          <EuiText
+                            size="s"
+                            data-test-subj={`linkedActionPolicyName-${actionPolicy.id}`}
+                          >
+                            {actionPolicy.name}
+                          </EuiText>
+                        )}
                       </EuiFlexItem>
                       <EuiFlexItem grow>
                         <WorkflowConnectorIcons
