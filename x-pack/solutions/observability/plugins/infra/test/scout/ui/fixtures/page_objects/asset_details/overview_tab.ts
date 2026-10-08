@@ -12,7 +12,6 @@ import { AssetDetailsTab } from './asset_details_tab';
 import { EXTENDED_TIMEOUT, KPI_METRICS } from '../../constants';
 
 const EMBEDDABLE_PANEL_SELECTOR = '[data-test-subj="embeddablePanel"]';
-const RENDERED_PANEL_SELECTOR = `${EMBEDDABLE_PANEL_SELECTOR}[data-render-complete="true"]`;
 const PENDING_PANEL_SELECTOR = `${EMBEDDABLE_PANEL_SELECTOR}[data-render-complete="false"]`;
 
 export type OverviewTabMetricsSection = 'cpu' | 'memory' | 'network' | 'disk';
@@ -74,6 +73,7 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly metricsDiskIOChart: Locator;
 
   private readonly metricsSectionsByMetric: Record<OverviewTabMetricsSection, Locator>;
+  private readonly metricsShowAllButtonsByMetric: Record<OverviewTabMetricsSection, Locator>;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
     super(page, kbnUrl);
@@ -197,6 +197,12 @@ export class OverviewTab extends AssetDetailsTab {
       network: this.metricsNetworkSection,
       disk: this.metricsDiskSection,
     };
+    this.metricsShowAllButtonsByMetric = {
+      cpu: this.metricsCpuShowAllButton,
+      memory: this.metricsMemoryShowAllButton,
+      network: this.metricsNetworkShowAllButton,
+      disk: this.metricsDiskShowAllButton,
+    };
   }
 
   /**
@@ -205,41 +211,27 @@ export class OverviewTab extends AssetDetailsTab {
    * mounted once its panel intersects the viewport and the panel then grows
    * past the height it reserved while loading, so scrolling the link into view
    * is itself what starts the re-layout that can move it out from under the
-   * cursor mid-click.
+   * cursor mid-click. Other async sections above the metrics (metadata, alerts,
+   * services) are not waited on.
    */
-  public async clickMetricsShowAllButton(
-    metric: OverviewTabMetricsSection,
-    timeout = EXTENDED_TIMEOUT
-  ) {
+  public async clickMetricsShowAllButton(metric: OverviewTabMetricsSection) {
     const section = this.metricsSectionsByMetric[metric];
 
     await section.scrollIntoViewIfNeeded();
-    await this.waitForChartsToRender(section, timeout);
+    await this.waitForChartsToRender(section);
 
-    await section.getByRole('button', { name: 'Show all' }).click();
+    await this.metricsShowAllButtonsByMetric[metric].click();
   }
 
-  private async waitForChartsToRender(section: Locator, timeout: number) {
-    const sectionPanels = section.locator(EMBEDDABLE_PANEL_SELECTOR);
-    const renderedSectionPanels = section.locator(RENDERED_PANEL_SELECTOR);
+  private async waitForChartsToRender(section: Locator) {
     // A chart that hasn't mounted its embeddable yet renders a placeholder and
     // no `embeddablePanel`, so charts further down the tab can't hold this up.
-    const pendingTabPanels = this.tabContent.locator(PENDING_PANEL_SELECTOR);
-
-    await expect
-      .poll(
-        async () => {
-          const [sectionCount, renderedCount, pendingCount] = await Promise.all([
-            sectionPanels.count(),
-            renderedSectionPanels.count(),
-            pendingTabPanels.count(),
-          ]);
-
-          return sectionCount > 0 && renderedCount === sectionCount && pendingCount === 0;
-        },
-        { timeout, intervals: [200] }
-      )
-      .toBe(true);
+    await expect(section.locator(EMBEDDABLE_PANEL_SELECTOR)).not.toHaveCount(0, {
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await expect(this.tabContent.locator(PENDING_PANEL_SELECTOR)).toHaveCount(0, {
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   private getKPIValueSelector(kpiPanelTestId: string): string {
