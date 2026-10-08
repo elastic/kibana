@@ -636,6 +636,14 @@ describe('isEcfStackArnValid()', () => {
   it('rejects a bare stack/ prefix with no stack name', () => {
     expect(isEcfStackArnValid('arn:aws:cloudformation:us-east-1:123456789012:stack/')).toBe(false);
   });
+
+  it('rejects trailing garbage after the unique ID', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123/extra-segment'
+      )
+    ).toBe(false);
+  });
 });
 
 // ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────

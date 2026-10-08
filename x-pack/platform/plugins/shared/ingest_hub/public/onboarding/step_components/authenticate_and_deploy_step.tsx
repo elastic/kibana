@@ -163,13 +163,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     const stored = serviceSettings?.instances;
     // Filter against selectedServiceIds: Step 2 reconciles on mount but may not be mounted here,
     // so raw session storage can still contain instances for services removed in Step 1.
-    const valid = stored?.filter((inst) => selectedServiceIds.includes(inst.serviceId));
-    if (valid && valid.length > 0) return valid;
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
+    const valid = stored?.filter((inst) => selectedServiceIds.includes(inst.serviceId)) ?? [];
+    // Also merge in services added after the last Step 2 visit so staleness is detected when
+    // the user adds a service while already on Step 3.
+    const storedIds = new Set(valid.map((inst) => inst.serviceId));
+    const merged = [
+      ...valid,
+      ...selectedServiceIds.flatMap((id) => {
+        if (storedIds.has(id)) return [];
+        const service = awsServicesMap?.get(id);
+        if (!service?.showInUI) return [];
+        return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
+      }),
+    ];
+    return merged;
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
   // ── Settings collected for ECF vs. the selected method ───────────────────────
