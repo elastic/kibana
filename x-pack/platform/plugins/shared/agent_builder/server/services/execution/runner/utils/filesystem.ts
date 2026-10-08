@@ -23,11 +23,13 @@ export const createFilesystemServices = async ({
   manager,
   experimentalFeatures,
   workspaceId,
+  persistWorkspace,
   spaceId,
 }: {
   manager: RunnerManager;
   experimentalFeatures: ExperimentalFeatures;
   workspaceId?: string;
+  persistWorkspace: boolean;
   spaceId: string;
 }): Promise<{
   filesystemService: FilesystemService;
@@ -43,6 +45,7 @@ export const createFilesystemServices = async ({
   const workspaceVolume = new WorkspaceVolume({
     workspaceClient,
     initialWorkspaceId: workspaceId,
+    persist: persistWorkspace,
   });
 
   const filesystemService = new FilesystemService({

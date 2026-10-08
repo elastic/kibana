@@ -1,0 +1,6 @@
+{
+  "labelStep": "add the `release_note:breaking` PR label (replacing any other `release_note:*` label)",
+  "textStep": "add release note text to the PR description, see the Release note section below",
+  "guidance": "Add a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.",
+  "optionalPrompt": "Optional: release note describing the change in the PR description"
+}
