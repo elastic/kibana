@@ -25,23 +25,23 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import { EntityType } from '../../../../../common/entity_analytics/types';
-import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { SEVERITY_COUNT_FIELDS, getNumber } from './common';
-import type { Row } from './common';
-import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from './grid_columns';
-import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
-import { RiskScoreCell } from '../entities_table/risk_score_cell';
-import { AssetCriticalityBadge } from '../../asset_criticality';
-import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { getSeverityColor } from '../../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import { FormattedCount } from '../../../../../common/components/formatted_number';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { SEVERITY_COUNT_FIELDS, getNumber } from '../common';
+import type { Row } from '../common';
+import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from '../grid_columns';
+import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
+import { RiskScoreCell } from '../../entities_table/risk_score_cell';
+import { AssetCriticalityBadge } from '../../../asset_criticality';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import {
   EntitySourceValue,
   TruncatedBadgeList,
   toEntitySourceArray,
-} from '../../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../../../flyout/entity_details/shared/components/entity_source_value';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.watchlistsOverflowTitle',

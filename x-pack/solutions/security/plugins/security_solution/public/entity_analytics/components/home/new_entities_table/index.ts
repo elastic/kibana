@@ -11,9 +11,9 @@ export {
   useEntityAnalyticsUrlState,
 } from './hooks/use_entity_analytics_url_state';
 export type { TimeRange, RowsMode, EntityFilters } from './hooks/use_entity_analytics_url_state';
-export { EntitiesGrid } from './entities_grid';
-export { EntitiesGroups } from './entities_groups';
-export type { RowActions, CellHandlers } from './entities_cell_renderer';
+export { EntitiesGrid } from './components/entities_grid';
+export { EntitiesGroups } from './components/entities_groups';
+export type { RowActions, CellHandlers } from './components/entities_cell_renderer';
 export { RESOLVED_ROWS_COLUMNS, INDIVIDUAL_ROWS_COLUMNS } from './grid_columns';
 export { ENTITY_TYPE_FIELD, getEntityId, getString } from './common';
 export { buildEntityFilterClauses } from './hooks/use_entity_grid_filters';

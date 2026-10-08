@@ -30,23 +30,23 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useIsFetching } from '@kbn/react-query';
-import { useResetEntityGridFilters } from './hooks/use_entity_grid_filters';
+import { useResetEntityGridFilters } from '../hooks/use_entity_grid_filters';
 import {
   ENTITY_GRID_CHILDREN_QUERY_KEY,
   MAX_LOADED_ROWS,
   useEntityGridData,
-} from './hooks/use_entity_grid_data';
-import { GROUP_SIZE_FIELD, getEntityId, getNumber } from './common';
+} from '../hooks/use_entity_grid_data';
+import { GROUP_SIZE_FIELD, getEntityId, getNumber } from '../common';
 import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityGroup, getGroupRecordsOptions } from './entities_expanded_row';
-import { AdditionalControls } from '../entities_table/additional_controls';
-import { DataViewContext } from '../entities_table';
-import { LastUpdated } from '../last_updated';
+import { AdditionalControls } from '../../entities_table/additional_controls';
+import { DataViewContext } from '../../entities_table';
+import { LastUpdated } from '../../last_updated';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
-import { isGridColumnId } from './grid_columns';
-import { useEntityAnalyticsUrlState } from './hooks/use_entity_analytics_url_state';
-import type { TimeRange } from './hooks/use_entity_analytics_url_state';
-import type { Row, RowsMode, SortDir } from './common';
+import { isGridColumnId } from '../grid_columns';
+import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import type { TimeRange } from '../hooks/use_entity_analytics_url_state';
+import type { Row, RowsMode, SortDir } from '../common';
 
 const GRID_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.ariaLabel',

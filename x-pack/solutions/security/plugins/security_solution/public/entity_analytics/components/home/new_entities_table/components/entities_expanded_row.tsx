@@ -17,17 +17,17 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
-import { useEntityGridData } from './hooks/use_entity_grid_data';
-import type { UseEntityGridDataOptions } from './hooks/use_entity_grid_data';
+import { useEntityGridData } from '../hooks/use_entity_grid_data';
+import type { UseEntityGridDataOptions } from '../hooks/use_entity_grid_data';
 import {
   ENTITY_ID_FIELD,
   GROUP_SIZE_FIELD,
   RESOLVED_TO_FIELD,
   RISK_SCORE_NORM_FIELD,
   getEntityId,
-} from './common';
-import { esc } from './queries/esql';
-import type { TimeRange } from './common';
+} from '../common';
+import { esc } from '../queries/esql';
+import type { TimeRange } from '../common';
 
 /** Most records an expanded group shows. */
 const MAX_GROUP_RECORDS = 100;

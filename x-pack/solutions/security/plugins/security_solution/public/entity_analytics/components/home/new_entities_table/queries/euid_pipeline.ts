@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../euid_esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from './euid_esql';
 import { ALLOWED_ENTITY_TYPES } from '../common';
 import { evalGuardedTypedEuids } from '../../needs_attention_tiles/queries/guarded_typed_euid_eval';
 import { indentForkBranch, toList } from './esql';
