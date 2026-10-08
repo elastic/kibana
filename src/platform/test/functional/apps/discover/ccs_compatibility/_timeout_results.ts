@@ -66,6 +66,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('bfetch enabled', () => {
+      // The local cluster has to answer inside `search:timeout`, so give it more headroom than 3s
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'search:timeout': 15000 });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({ 'search:timeout': 3000 });
+      });
+
       /**
        * Migration recommendation: MIXED. Keep one CCS smoke that Discover shows the callout,
        * inspector "timed out" details, and still returns the full local 14,004 hits. Drop the
@@ -90,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 30
               }
             ]
           }
@@ -100,92 +109,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.be('Timed out');
+        await retry.try(async () => {
+          const { title } = await toasts.getErrorByIndex(1, true);
+          expect(title).to.be('Timed out');
+        });
 
         // Dismiss the toast so it doesn't cover the callout's action button
         await toasts.dismissAllWithChecks();
 
         // View cluster details shows timed out
         await testSubjects.click('searchResponseWarningsViewDetails');
-        await testSubjects.click('viewDetailsContextMenu');
-        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
-        // Wait for the accordion content to render before reading it
-        await retry.waitFor(
-          'cluster details callout to render',
-          async () =>
-            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
-        );
-        const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
-        expect(txt).to.be(
-          'Request timed out before completion. Results may be incomplete or empty.'
-        );
 
-        // Ensure documents are still returned for the successful shards
-        await retry.try(async function tryingForTime() {
-          const hitCount = await discover.getHitCount();
-          expect(hitCount).to.be('14,004');
-        });
-      });
-    });
-
-    describe('bfetch disabled', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({ 'bfetch:disable': true });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.unset('bfetch:disabled');
-      });
-
-      /**
-       * Migration recommendation: DELETE. Duplicate of the bfetch-enabled test. bfetch is a
-       * transport, not Discover CCS behavior.
-       */
-      it('timeout on single shard shows warning and results', async () => {
-        await common.navigateToApp('discover');
-        await dataViews.createFromSearchBar({
-          name: 'ftr-remote:logstash-*,logstash-*',
-          hasTimeField: false,
-          adHoc: true,
-        });
-
-        // Add a stall time to the remote indices
-        await filterBar.addDslFilter(
-          `
-      {
-        "query": {
-          "error_query": {
-            "indices": [
-              {
-                "name": "*:*",
-                "error_type": "exception",
-                "message": "'Watch out!'",
-                "stall_time_seconds": 5
-              }
-            ]
-          }
+        // "View details" only opens a context menu when more than one request warned
+        if (await testSubjects.exists('viewDetailsContextMenu')) {
+          await testSubjects.click('viewDetailsContextMenu');
         }
-      }`,
-          true
-        );
 
-        // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
-
-        // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.be('Timed out');
-
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
-
-        // View cluster details shows timed out
-        await testSubjects.click('searchResponseWarningsViewDetails');
-        await testSubjects.click('viewDetailsContextMenu');
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
         // Wait for the accordion content to render before reading it
         await retry.waitFor(
