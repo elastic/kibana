@@ -87,6 +87,7 @@ const EMPTY_CATALOG: MitreCatalog = {
   subtechniqueById: new Map(),
 };
 
+// The catalog is global ATT&CK Enterprise reference data, identical for every space; keyed by client only so a fresh client (tests) gets a fresh catalog, not for per-space isolation.
 // Keyed by client so a fresh client (tests, or a future client swap) never sees a stale catalog.
 const catalogByClient = new WeakMap<MitreAttackDataClient, MitreCatalog>();
 

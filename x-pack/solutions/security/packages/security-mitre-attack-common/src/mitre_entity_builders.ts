@@ -115,7 +115,7 @@ export const buildMockAtlasSubtechnique = (
     framework_version: '2026.8',
     id: 'AML.T0024.002',
     name: 'Extract AI Model',
-    reference: 'https://atlas.mitre.org/techniques/AML.T0024/002/',
+    reference: 'https://atlas.mitre.org/techniques/AML.T0024.002/',
     tactic_ids: ['AML.TA0010'],
     technique_id: 'AML.T0024',
     ...overrides,

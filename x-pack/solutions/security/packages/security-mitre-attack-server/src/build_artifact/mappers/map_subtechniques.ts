@@ -23,7 +23,14 @@ import {
  */
 const getParentIdFromDotPrefix = (subtechniqueId: string): string => {
   const lastDot = subtechniqueId.lastIndexOf('.');
-  return lastDot === -1 ? subtechniqueId : subtechniqueId.slice(0, lastDot);
+  const isOnlyAtlasPrefixDot =
+    subtechniqueId.startsWith('AML.') && lastDot === subtechniqueId.indexOf('.');
+  if (lastDot === -1 || isOnlyAtlasPrefixDot) {
+    throw new Error(
+      `Subtechnique ID '${subtechniqueId}' is malformed: expected a parent technique ID followed by a dot-separated suffix (e.g. 'T1003.001' or 'AML.T0024.002').`
+    );
+  }
+  return subtechniqueId.slice(0, lastDot);
 };
 
 /**

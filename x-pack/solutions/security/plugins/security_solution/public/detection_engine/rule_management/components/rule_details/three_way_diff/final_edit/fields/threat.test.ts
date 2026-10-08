@@ -36,6 +36,24 @@ describe('threatSerializer', () => {
     ]);
   });
 
+  it('defaults threat entries with an empty framework to MITRE ATT&CK', () => {
+    const result = threatSerializer({
+      threat: [
+        {
+          framework: '',
+          tactic: {
+            id: 'TA0005',
+            name: 'Defense Evasion',
+            reference: 'https://attack.mitre.org/tactics/TA0005/',
+          },
+          technique: [],
+        },
+      ],
+    });
+
+    expect(result.threat[0].framework).toBe('MITRE ATT&CK');
+  });
+
   it('defaults threat entries without a framework to MITRE ATT&CK', () => {
     const result = threatSerializer({
       threat: [

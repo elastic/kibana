@@ -37,6 +37,7 @@ const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompl
   'query_ungrounded',
   'quote_ungrounded',
   'execute_failed',
+  'catalog_unavailable',
 ]);
 
 export const isRetryableIncompleteReason = (reason: HuntIncompleteReason): boolean =>

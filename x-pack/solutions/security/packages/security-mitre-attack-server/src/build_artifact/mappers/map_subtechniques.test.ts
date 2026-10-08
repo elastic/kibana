@@ -72,6 +72,26 @@ describe('mapSubtechniques', () => {
     );
   });
 
+  it('throws a descriptive error when the id has no dot', () => {
+    const malformed = getMockSubtechniqueEntity({
+      external_references: getMockMitreExternalReferences('T1003'),
+    });
+    const bundle: StixBundle = { objects: [matrix, tactic, technique, malformed] };
+    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+      /Subtechnique ID 'T1003' is malformed/
+    );
+  });
+
+  it('throws a descriptive error when the only dot in an ATLAS id is the AML prefix dot', () => {
+    const malformed = getMockSubtechniqueEntity({
+      external_references: getMockMitreExternalReferences('AML.T0024'),
+    });
+    const bundle: StixBundle = { objects: [matrix, tactic, technique, malformed] };
+    expect(() => mapSubtechniques(bundle, FRAMEWORK, FRAMEWORK_VERSION, SOURCE_NAME)).toThrow(
+      /Subtechnique ID 'AML.T0024' is malformed/
+    );
+  });
+
   it('populates tactic_ids from kill_chain_phases', () => {
     const subtechnique = getMockSubtechniqueEntity(); // credential-access phase -> TA0006
     const rel = getMockRelationshipEntity(); // subtechnique-of, T1003.001 -> T1003

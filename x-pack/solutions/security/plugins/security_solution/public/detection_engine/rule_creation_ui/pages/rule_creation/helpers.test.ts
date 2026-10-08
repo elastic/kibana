@@ -895,6 +895,24 @@ describe('helpers', () => {
       ]);
     });
 
+    test('defaults threat entries with an empty framework to MITRE ATT&CK', () => {
+      const threatWithEmptyFramework = {
+        framework: '',
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [],
+      } as Threats[number];
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        threat: [threatWithEmptyFramework],
+      };
+      const result = formatAboutStepData(mockStepData);
+      expect(result.threat?.[0].framework).toBe('MITRE ATT&CK');
+    });
+
     test('defaults threat entries without a framework to MITRE ATT&CK', () => {
       const threatWithoutFramework = {
         tactic: {

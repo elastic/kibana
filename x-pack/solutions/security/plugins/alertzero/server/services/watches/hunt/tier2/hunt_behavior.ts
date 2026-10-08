@@ -619,7 +619,16 @@ export const huntBehavior = async (
     mitreDataClient,
     logger,
   });
-  for (const candidate of candidates) {
+  // An empty catalog is a deployment-side gap (managed MITRE data not populated yet, the
+  // mitreAttack plugin disabled, or the read failed), not evidence the model invented ids.
+  const catalogUnavailable = techniqueById.size === 0 && subtechniqueById.size === 0;
+  if (catalogUnavailable) {
+    logger.warn(
+      `[hunt:extract] the MITRE ATT&CK catalog is not available; ${candidates.length} ` +
+        `candidate(s) could not be verified and were not hunted.`
+    );
+  }
+  for (const candidate of catalogUnavailable ? [] : candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);
     const entry = technique ?? subtechnique;
@@ -690,6 +699,15 @@ export const huntBehavior = async (
   // actually hunted has to read all of them, and each new cause added as its own
   // optional field is one more a caller can miss and read silence as coverage.
   const incomplete: HuntIncompleteness[] = [
+    ...(catalogUnavailable ? candidates.map(({ technique_id }) => technique_id) : []).map(
+      (technique_id) => ({
+        reason: 'catalog_unavailable' as const,
+        technique_id,
+        detail:
+          `The MITRE ATT&CK catalog is not available (managed MITRE data not populated yet or ` +
+          `the mitreAttack plugin is disabled), so ${technique_id} could not be verified.`,
+      })
+    ),
     ...droppedIds.map((technique_id) => ({
       reason: 'unknown_technique_id' as const,
       technique_id,

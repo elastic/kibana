@@ -43,7 +43,8 @@ export const resolveMitreBuckets = async (
     return collection;
   }
 
-  if (framework !== DEFAULT_MITRE_FRAMEWORK) {
+  // The legacy blob is ATT&CK Enterprise only, regardless of what the default framework is.
+  if (framework !== 'enterprise') {
     throw new Error(
       `Legacy MITRE data source only provides the enterprise framework (requested: ${framework})`
     );

@@ -633,9 +633,9 @@ export const formatAboutStepData = (
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
-      // Rows added via the picker's "Add tactic" button carry no framework yet,
+      // Rows added via the picker's "Add tactic" button carry no framework yet (undefined or empty string),
       // so fall back to ATT&CK while preserving any framework already set (e.g. ATLAS).
-      framework: singleThreat.framework ?? MITRE_ATTACK_FRAMEWORK,
+      framework: singleThreat.framework || MITRE_ATTACK_FRAMEWORK,
     })),
     threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,

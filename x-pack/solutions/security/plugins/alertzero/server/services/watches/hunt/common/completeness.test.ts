@@ -24,6 +24,7 @@ describe('huntCompletenessOf', () => {
     'index_unavailable',
     'generation_failed',
     'execute_failed',
+    'catalog_unavailable',
   ])('treats %s as retryable, so the report stays eligible', (reason) => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_retryable');
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
