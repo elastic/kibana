@@ -80,7 +80,9 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import {
+  ensureInheritedBindingCurrent,
   getWorkflowOriginalRequest,
+  resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
@@ -1261,13 +1263,16 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
       spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      await ensureServiceAccountBinding(args.workflow, args.spaceId);
+      if (!args.inheritedIdentity) {
+        await ensureServiceAccountBinding(args.workflow, args.spaceId);
+      }
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1303,15 +1308,32 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request: KibanaRequest,
+      originalRequest: KibanaRequest,
       options: { refresh: boolean | 'wait_for' } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
+        inheritParentIdentity: context.inheritParentIdentity === true,
+        parentWorkflowId:
+          typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
+        parentWorkflowExecutionId:
+          typeof context.parentWorkflowExecutionId === 'string'
+            ? context.parentWorkflowExecutionId
+            : undefined,
+        parentStepId: typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
+        parentStepName:
+          typeof context.parentStepName === 'string' ? context.parentStepName : undefined,
+        spaceId,
+      });
+      if (inheritedIdentity) {
+        await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
+      }
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1321,6 +1343,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        inheritedIdentity,
         spaceId,
         context,
         defaultTriggeredBy,
@@ -1339,7 +1362,7 @@ export class WorkflowsExecutionEnginePlugin
       // Bound executions must be searchable before the final admission check so
       // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.workflowDefinition?.settings?.run_as
+        refresh: workflowExecution.effectiveIdentity
           ? options.refresh || 'wait_for'
           : workflowExecution.concurrencyGroupKey
           ? options.refresh
@@ -1410,7 +1433,7 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'manual',
-        request,
+        originalRequest,
         { refresh: true }
       );
 
