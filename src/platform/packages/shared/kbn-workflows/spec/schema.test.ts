@@ -1389,6 +1389,20 @@ describe('HITL external channel schemas', () => {
       http: ['url', 'method', 'headers', 'body'],
     });
   });
+
+  it('rejects unknown keys on the HTTP approval channel', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: {
+        channels: {
+          http: { url: 'https://hooks.example/hitl', body: 'ping', mthod: 'POST' },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('`on-failure` on step schemas', () => {

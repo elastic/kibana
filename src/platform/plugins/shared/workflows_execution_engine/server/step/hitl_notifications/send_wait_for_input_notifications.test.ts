@@ -95,14 +95,19 @@ describe('sendWaitForInputNotifications', () => {
         http: {
           url: 'https://hooks.example/{{context.hitl.externalFormLink}}',
           method: 'PUT',
-          headers: { 'X-Form': '{{context.hitl.externalFormLink}}' },
+          headers: {
+            'X-Form': '{{context.hitl.externalFormLink}}',
+            'X-{{inputs.tenant}}': 'soc',
+          },
           body: '{"form":"{{context.hitl.externalFormLink}}"}',
         },
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
       renderTemplate: (template) =>
-        template.replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+        template
+          .replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form')
+          .replaceAll('{{inputs.tenant}}', 'acme'),
       connectorExecutor: { executeSystemConnector } as never,
       abortController: new AbortController(),
     });
@@ -112,10 +117,29 @@ describe('sendWaitForInputNotifications', () => {
       input: {
         url: 'https://hooks.example/https://kibana.example/form',
         method: 'PUT',
-        headers: { 'X-Form': 'https://kibana.example/form' },
+        headers: { 'X-Form': 'https://kibana.example/form', 'X-acme': 'soc' },
         body: '{"form":"https://kibana.example/form"}',
       },
       abortController: expect.any(AbortController),
     });
+  });
+
+  it('rejects an HTTP header name that renders empty', async () => {
+    await expect(
+      sendWaitForInputNotifications({
+        channels: {
+          http: {
+            url: 'https://hooks.example/hitl',
+            headers: { '{{inputs.tenant}}': 'soc' },
+            body: 'ping',
+          },
+        },
+        stepMessage: 'Please provide input',
+        formUrl: 'https://kibana.example/form',
+        renderTemplate: () => '',
+        connectorExecutor: { executeSystemConnector: jest.fn() } as never,
+        abortController: new AbortController(),
+      })
+    ).rejects.toThrow('HTTP HITL header name rendered to an empty string');
   });
 });

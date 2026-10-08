@@ -42,7 +42,13 @@ export function renderHitlHttpConnectorInput(
 ) {
   const headers = channel.headers
     ? Object.fromEntries(
-        Object.entries(channel.headers).map(([name, value]) => [name, renderTemplate(value)])
+        Object.entries(channel.headers).map(([name, value]) => {
+          const renderedName = renderTemplate(name);
+          if (renderedName.length === 0) {
+            throw new Error('HTTP HITL header name rendered to an empty string');
+          }
+          return [renderedName, renderTemplate(value)];
+        })
       )
     : undefined;
 
