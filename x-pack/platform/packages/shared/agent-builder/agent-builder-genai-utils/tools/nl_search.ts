@@ -32,6 +32,7 @@ export const naturalLanguageSearch = async ({
   target,
   model,
   esClient,
+  internalEsClient,
   logger,
   events,
   rowLimit,
@@ -43,6 +44,7 @@ export const naturalLanguageSearch = async ({
   target: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   rowLimit?: number;
@@ -56,6 +58,7 @@ export const naturalLanguageSearch = async ({
     executeQuery: true,
     model,
     esClient,
+    internalEsClient,
     logger,
     events,
     rowLimit,

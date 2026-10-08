@@ -40,6 +40,7 @@ export interface GenerateEsqlResponse {
 export interface GenerateEsqlDeps {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
 }
@@ -108,11 +109,15 @@ export const generateEsql = async ({
   includeFrozen = false,
   model,
   esClient,
+  internalEsClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
-  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const esqlCallbacks = buildServerESQLCallbacks({
+    esClient: { asCurrentUser: esClient, asInternalUser: internalEsClient ?? esClient },
+    logger,
+  });
 
   const graph = createNlToEsqlGraph({
     model,

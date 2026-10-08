@@ -106,6 +106,7 @@ Note:
         allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         model: await modelProvider.getDefaultModel(),
         events,
         logger,

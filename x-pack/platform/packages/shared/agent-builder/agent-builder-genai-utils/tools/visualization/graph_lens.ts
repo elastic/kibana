@@ -128,6 +128,7 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         additionalInstructions: esqlAdditionalInstructions,
       });
 

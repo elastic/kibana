@@ -66,6 +66,7 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
 export const createSearchToolGraph = ({
   model,
   esClient,
+  internalEsClient,
   logger,
   events,
   topSnippetsConfig,
@@ -73,6 +74,7 @@ export const createSearchToolGraph = ({
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
@@ -90,6 +92,7 @@ export const createSearchToolGraph = ({
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
       esClient,
+      internalEsClient,
       events,
       logger,
       rowLimit: state.rowLimit,
