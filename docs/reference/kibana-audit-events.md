@@ -356,7 +356,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 | --- | --- | --- |
 | `service_account_workload_bind` {applies_to}`stack: preview 9.6+` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
 | | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
-| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. `user.target` is omitted when the workload has no binding or the stored binding failed integrity verification. |
+| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
 | | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
 
 #### Type: deletion
@@ -364,7 +364,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
 | `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
-| | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. |
+| | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. A forced delete appends `[force=true]` to this message too. |
 
 ::::{note}
 Following ECS, every event in this category has two values in `event.type`: the type it is listed under and `user`, for example `[user, creation]`. An `ignore_filters` rule that matches on `types` has to list both.
