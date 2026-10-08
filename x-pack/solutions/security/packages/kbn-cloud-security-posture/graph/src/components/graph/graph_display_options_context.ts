@@ -43,10 +43,3 @@ export const GraphDisplayOptionsContext = createContext<GraphDisplayOptions>(
 
 /** Consume the current graph display options inside any node component. */
 export const useGraphDisplayOptions = () => useContext(GraphDisplayOptionsContext);
-
-export const GraphDisplayOptionsSetterContext = createContext<(opts: GraphDisplayOptions) => void>(
-  () => {}
-);
-
-/** Consume the global display-options setter inside any node component. */
-export const useSetGraphDisplayOptions = () => useContext(GraphDisplayOptionsSetterContext);

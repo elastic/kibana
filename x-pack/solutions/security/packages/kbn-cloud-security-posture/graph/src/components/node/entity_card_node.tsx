@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
-  EuiPopover,
   EuiText,
   EuiTextTruncate,
   EuiToolTip,
@@ -34,7 +33,6 @@ import {
   GRAPH_ENTITY_NODE_DETAILS_ID,
   GRAPH_ENTITY_NODE_RISK_BADGE_ID,
   GRAPH_ENTITY_NODE_LAYERS_PANEL_ID,
-  GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID,
   GRAPH_STACKED_SHAPE_ID,
   GRAPH_TAG_TEXT_ID,
   GRAPH_TAG_COUNT_ID,
@@ -46,9 +44,7 @@ import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
 import {
   GraphDisplayOptionsContext,
   useGraphDisplayOptions,
-  useSetGraphDisplayOptions,
 } from '../graph/graph_display_options_context';
-import { LayersPanel } from '../controls/layers_panel';
 
 /** Converts an ISO 3166-1 alpha-2 country code to its flag emoji. */
 const countryCodeToFlag = (code: string): string =>
@@ -807,11 +803,6 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
   </>
 );
 
-const NodeLayersLabel = i18n.translate(
-  'securitySolutionPackages.csp.graph.entityNode.toolbar.layers',
-  { defaultMessage: 'Layers' }
-);
-
 interface ToolbarButtonRowProps {
   items: NodeToolbarItem[];
   isHovered: boolean;
@@ -821,8 +812,6 @@ interface ToolbarButtonRowProps {
   style?: React.CSSProperties;
   /** Additional Emotion CSS merged into the wrapper div (e.g. absolute positioning for grouped nodes). */
   extraCss?: ReturnType<typeof css>;
-  /** When true, renders a Layers button that controls the global display options. */
-  showLayersButton?: boolean;
 }
 
 /** Shared toolbar button row used by both single and grouped entity nodes. */
@@ -833,12 +822,7 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
   onMouseLeave,
   style,
   extraCss,
-  showLayersButton,
 }) => {
-  const globalOpts = useGraphDisplayOptions();
-  const setGlobalOpts = useSetGraphDisplayOptions();
-  const [isLayersOpen, setIsLayersOpen] = useState(false);
-
   return (
     <div
       onMouseEnter={onMouseEnter}
@@ -861,55 +845,9 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
         extraCss,
       ]}
     >
-      {/* Items before position 5 (indices 0–3) */}
-      {items.slice(0, 4).map((item, idx) => (
+      {items.map((item, idx) => (
         <EuiToolTip
           key={idx}
-          content={item.toolTipText ?? item.label}
-          data-test-subj={item.toolTipTestSubj}
-          disableScreenReaderOutput={!item.toolTipText}
-        >
-          <EuiButtonIcon
-            data-test-subj={item.testSubject}
-            iconType={item.iconType}
-            iconSize="m"
-            color="text"
-            size="s"
-            aria-label={item.label}
-            disabled={item.disabled}
-            onClick={item.onClick}
-          />
-        </EuiToolTip>
-      ))}
-      {/* Layers button is always the 5th button */}
-      {showLayersButton && (
-        <EuiPopover
-          aria-label={NodeLayersLabel}
-          isOpen={isLayersOpen}
-          closePopover={() => setIsLayersOpen(false)}
-          anchorPosition="downCenter"
-          panelPaddingSize="none"
-          button={
-            <EuiToolTip content={NodeLayersLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                data-test-subj={GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID}
-                iconType="layers"
-                iconSize="m"
-                color={isLayersOpen ? 'primary' : 'text'}
-                size="s"
-                aria-label={NodeLayersLabel}
-                onClick={() => setIsLayersOpen((prev) => !prev)}
-              />
-            </EuiToolTip>
-          }
-        >
-          <LayersPanel displayOptions={globalOpts} onChange={setGlobalOpts} />
-        </EuiPopover>
-      )}
-      {/* Remaining items after position 5 (index 4+) */}
-      {items.slice(4).map((item, idx) => (
-        <EuiToolTip
-          key={idx + 4}
           content={item.toolTipText ?? item.label}
           data-test-subj={item.toolTipTestSubj}
           disableScreenReaderOutput={!item.toolTipText}
@@ -1050,7 +988,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               isHovered={isHovered}
               onMouseEnter={showToolbar}
               onMouseLeave={handleToolbarMouseLeave}
-              showLayersButton={!isGrouped}
               extraCss={css`
                 position: absolute;
                 bottom: calc(100% + 4px);

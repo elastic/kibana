@@ -79,8 +79,6 @@ export const GRAPH_ENTITY_NODE_RISK_BADGE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeRiskBadge` as const;
 export const GRAPH_ENTITY_NODE_LAYERS_PANEL_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeLayersPanel` as const;
-export const GRAPH_ENTITY_NODE_TOOLBAR_LAYERS_BTN_ID =
-  `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeToolbarLayersBtn` as const;
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;
