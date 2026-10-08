@@ -47,7 +47,7 @@ describe('evals_detection_watch_rule_creation config set', () => {
       ],
       [
         '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',
-        'registers the security.rule attachment the workflow\'s attach_draft step writes',
+        "registers the security.rule attachment the workflow's attach_draft step writes",
       ],
       [
         '--uiSettings.overrides.workflows:ui:enabled=true',

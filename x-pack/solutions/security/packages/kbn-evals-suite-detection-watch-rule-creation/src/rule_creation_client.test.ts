@@ -75,7 +75,10 @@ describe('RuleCreationClient proposal gate', () => {
     expect(result.pendingApproval).toBe(true);
     expect(result.proposalId).toBe('prop-1');
     const list = calls.find((c) => c.url === '/internal/proposals');
-    expect(list!.query).toMatchObject({ status: 'pending', origin: 'alertzero' });
+    expect(list!.query).toMatchObject({
+      status: 'pending',
+      conversationId: result.investigationId,
+    });
   });
 
   it('approves through the proposals approve route and waits for completion', async () => {
