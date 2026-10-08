@@ -31,10 +31,6 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-jest.mock('./static_keys_replace_view', () => ({
-  StaticKeysReplaceView: jest.fn(),
-}));
-
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetPackageInfoByKeyQuery,
@@ -45,10 +41,8 @@ import {
 import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
-import { StaticKeysReplaceView } from './static_keys_replace_view';
 
 const mockUseLocation = useLocation as jest.Mock;
-const MockStaticKeysReplaceView = StaticKeysReplaceView as unknown as jest.Mock;
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
@@ -177,26 +171,6 @@ function setupMocks({
       </div>
     )
   );
-
-  MockStaticKeysReplaceView.mockImplementation(
-    ({
-      onReadyChange,
-      onFieldsChange,
-    }: {
-      onReadyChange?: (v: boolean) => void;
-      onFieldsChange?: (f: unknown) => void;
-    }) => (
-      <div data-test-subj="static-keys-replace-view">
-        <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
-        <button onClick={() => onReadyChange?.(false)}>replace-cancel</button>
-        <button
-          onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
-        >
-          replace-fields
-        </button>
-      </div>
-    )
-  );
 }
 
 function renderSection(
@@ -209,6 +183,8 @@ function renderSection(
     isDone?: boolean;
     hasFailed?: boolean;
     isDirty?: boolean;
+    storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
+    isStoredSecretsLoading?: boolean;
     onReplaceFormDirtyChange?: jest.Mock;
   } = {}
 ) {
@@ -224,6 +200,8 @@ function renderSection(
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
           isDirty={props.isDirty ?? false}
+          storedSecretFields={props.storedSecretFields}
+          isStoredSecretsLoading={props.isStoredSecretsLoading}
           onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
         />
       </React.Suspense>
@@ -662,19 +640,17 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('static-keys edit mode (isStaticKeysEditMode)', () => {
-    it('shows StaticKeysReplaceView when ?deploymentId= in URL and no connectorId', () => {
+    it('shows the static keys form (no identity federation) when ?deploymentId= in URL and no connectorId', () => {
       setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
       renderSection({ showIdentityFederation: true });
-      expect(screen.getByTestId('static-keys-replace-view')).toBeInTheDocument();
-      expect(screen.queryByTestId('static-keys')).not.toBeInTheDocument();
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
       expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
     });
 
-    it('shows LazyAwsStaticKeysForm (not replace view) when no deploymentId in URL', () => {
+    it('shows the static keys form when no deploymentId in URL', () => {
       setupMocks({ searchParams: '', connectorId: undefined });
       renderSection({ showIdentityFederation: false });
       expect(screen.getByTestId('static-keys')).toBeInTheDocument();
-      expect(screen.queryByTestId('static-keys-replace-view')).not.toBeInTheDocument();
     });
 
     it('initialises preferredMethod to access_keys on static-keys resume', () => {
@@ -696,21 +672,6 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByRole('radio', { name: /access keys/i })).not.toBeDisabled();
     });
 
-    it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
-      const setStaticKeys = jest.fn();
-      setupMocks({
-        searchParams: '?deploymentId=dep-123',
-        authMethod: 'static_keys',
-        setStaticKeys,
-      });
-      renderSection({ showIdentityFederation: true });
-      fireEvent.click(screen.getByText('replace-fields'));
-      expect(setStaticKeys).toHaveBeenCalledWith({
-        access_key_id: 'NEW',
-        secret_access_key: 'newsecret',
-      });
-    });
-
     it('onFieldsChange on LazyAwsStaticKeysForm calls setStaticKeys', () => {
       const setStaticKeys = jest.fn();
       setupMocks({ searchParams: '', connectorId: undefined, setStaticKeys });
@@ -722,24 +683,227 @@ describe('ManagedIntegrationsSection', () => {
       });
     });
 
-    it('replace form ready calls onReplaceFormDirtyChange(true)', () => {
+    it('typing keys in edit mode calls onReplaceFormDirtyChange(true)', () => {
       const onReplaceFormDirtyChange = jest.fn();
       setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
       renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
-      fireEvent.click(screen.getByText('replace-ready'));
-      expect(onReplaceFormDirtyChange).toHaveBeenCalledWith(true);
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
     });
 
-    it('replace form cancel calls onReplaceFormDirtyChange(false) so parent can clear callout', () => {
-      // When user fills then cancels the replace form, the section must report false so the
-      // parent can merge with drift state and clear isDirty if no underlying drift exists.
+    it('keeps resume mode when the form reports no credentials yet, so the next entry still marks a change', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
       const onReplaceFormDirtyChange = jest.fn();
-      setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
+      setupMocks({
+        authMethod: 'static_keys',
+        searchParams: 'deploymentId=dep-abc',
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>secret-only</button>
+            <button
+              onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 's' })}
+            >
+              both
+            </button>
+          </div>
+        )
+      );
       renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
-      fireEvent.click(screen.getByText('replace-ready'));
-      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
-      fireEvent.click(screen.getByText('replace-cancel'));
+
+      // Secret typed before the access key: the form has nothing to report yet.
+      fireEvent.click(screen.getByText('secret-only'));
+      expect(clearStagedStaticKeys).toHaveBeenCalledTimes(1);
+      expect(setStaticKeys).not.toHaveBeenCalled();
       expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
+
+      // The access key follows: still in resume mode, so the change is reported.
+      fireEvent.click(screen.getByText('both'));
+      expect(setStaticKeys).toHaveBeenCalledWith({ access_key_id: 'AKIA', secret_access_key: 's' });
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('still clears the keys through setStaticKeys outside resume mode', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '',
+        connectorId: undefined,
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>empty</button>
+          </div>
+        )
+      );
+      renderSection({ showIdentityFederation: false });
+      fireEvent.click(screen.getByText('empty'));
+      expect(setStaticKeys).toHaveBeenCalledWith(undefined);
+      expect(clearStagedStaticKeys).not.toHaveBeenCalled();
+    });
+
+    it('does not report a change outside edit mode', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ searchParams: '', connectorId: undefined });
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(onReplaceFormDirtyChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stored secrets', () => {
+    const STORED = ['access_key_id', 'secret_access_key'] as Array<
+      'access_key_id' | 'secret_access_key'
+    >;
+
+    it('passes the stored fields to the form on resume', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      expect(MockStaticKeys.mock.calls[0][0].storedSecretFields).toEqual(STORED);
+    });
+
+    it('shows the plain form on resume when nothing is stored', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      expect(MockStaticKeys.mock.calls[0][0].storedSecretFields).toEqual([]);
+    });
+
+    describe('re-enter credentials callout on resume', () => {
+      const CALLOUT = 'managedIntegrationsSection-resumeCredentialsCallout';
+
+      it('is shown when nothing is stored (lookup found nothing or failed)', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+      });
+
+      it('is hidden when the keys are stored', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('is hidden while the stored secrets are still loading', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, isStoredSecretsLoading: true });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('goes away once the keys are entered', () => {
+        setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        fireEvent.click(screen.getByText('mark-ready'));
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+
+      it('is not shown outside resume mode', () => {
+        setupMocks({ searchParams: '', connectorId: undefined });
+        renderSection({ showIdentityFederation: false, storedSecretFields: [] });
+        expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows no form while the stored secrets are loading', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: false, isStoredSecretsLoading: true });
+      expect(screen.queryByTestId('static-keys')).not.toBeInTheDocument();
+    });
+
+    it('enables Deploy as soon as the form reports ready, without retyping keys', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
+    });
+
+    it('clears the dirty state when the replaced values are emptied again', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button
+              onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: 'NEW' })}
+            >
+              type-secret
+            </button>
+            <button onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: '' })}>
+              empty-secret
+            </button>
+          </div>
+        )
+      );
+      renderSection({
+        showIdentityFederation: false,
+        storedSecretFields: STORED,
+        onReplaceFormDirtyChange,
+      });
+      fireEvent.click(screen.getByText('type-secret'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+      fireEvent.click(screen.getByText('empty-secret'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('reports a replaced stored value as a change in the same session, without ?deploymentId=', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ searchParams: '', connectorId: undefined });
+      renderSection({
+        showIdentityFederation: false,
+        storedSecretFields: STORED,
+        onReplaceFormDirtyChange,
+      });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('keeps the auth method while a stored value is replaced in the same session', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '',
+        connectorId: undefined,
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>no-keys-yet</button>
+          </div>
+        )
+      );
+      renderSection({ showIdentityFederation: false, storedSecretFields: STORED });
+      fireEvent.click(screen.getByText('no-keys-yet'));
+      expect(clearStagedStaticKeys).toHaveBeenCalledTimes(1);
+      expect(setStaticKeys).not.toHaveBeenCalled();
+    });
+
+    it('marks the form dirty when a stored value is replaced', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      const setStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        authMethod: 'static_keys',
+        setStaticKeys,
+      });
+      renderSection({
+        showIdentityFederation: false,
+        storedSecretFields: STORED,
+        onReplaceFormDirtyChange,
+      });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(setStaticKeys).toHaveBeenCalled();
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
     });
   });
 
