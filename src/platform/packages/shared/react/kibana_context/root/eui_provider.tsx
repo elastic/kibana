@@ -84,8 +84,8 @@ const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/
 const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
 
 // POC: EUI breakpoints resolve against the nearest breakpoint container (the app area or `body`).
-// Toggle with `localStorage.kbnSurfacePoc = 'true'` and reload.
-const BREAKPOINT_CONTAINER_POC = localStorage.getItem('kbnSurfacePoc') === 'true';
+// `localStorage.kbnSurfacePoc = 'css'` switches CSS only, `'js'` switches CSS and JS. Reload after changing.
+const BREAKPOINT_CONTAINER_POC = localStorage.getItem('kbnSurfacePoc');
 
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
@@ -164,9 +164,14 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         highContrastMode,
         theme: _theme,
         componentDefaults,
-        breakpointContainer: BREAKPOINT_CONTAINER_POC
-          ? { mountElement: mountElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) }
-          : undefined,
+        breakpointContainer:
+          BREAKPOINT_CONTAINER_POC === 'css'
+            ? true
+            : BREAKPOINT_CONTAINER_POC === 'js'
+            ? {
+                mountElement: mountElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID),
+              }
+            : undefined,
       }}
     >
       {children}
