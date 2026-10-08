@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DatasetsSelector } from './datasets_selector';
 
@@ -26,7 +25,7 @@ describe('DatasetsSelector', () => {
     ).toBeInTheDocument();
   });
 
-  it('lets the user remove a selected dataset that is no longer available', async () => {
+  it('lets the user remove a selected dataset that is no longer available', () => {
     const onChangeDatasetSelection = jest.fn();
 
     renderWithKibanaRenderContext(
@@ -37,7 +36,7 @@ describe('DatasetsSelector', () => {
       />
     );
 
-    await userEvent.click(screen.getByTitle('Remove missing.dataset from selection in this group'));
+    fireEvent.click(screen.getByTitle('Remove missing.dataset from selection in this group'));
 
     expect(onChangeDatasetSelection).toHaveBeenCalledWith([]);
   });
