@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,9 +25,32 @@ const AGE_COLUMN_WIDTH = '6.5rem';
 /** Room for "Approved by" plus a typical display name before the label truncates. */
 const OUTCOME_MAX_WIDTH = '14rem';
 
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<{ $isSelected: boolean }>(({ theme: { euiTheme }, $isSelected }) => ({
+  padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
+  cursor: 'pointer',
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  '&:hover': {
+    backgroundColor: $isSelected
+      ? euiTheme.colors.backgroundBaseInteractiveSelect
+      : euiTheme.colors.backgroundBaseSubdued,
+    boxShadow: 'none',
+  },
+}));
+
 interface ConversationCardCompactProps {
   investigation: Investigation;
-  hasBorder: boolean;
   isSelected?: boolean;
   /** Resolved by the caller: `Investigation` carries no decision fields. */
   outcome?: string;
@@ -45,7 +69,6 @@ interface ConversationCardCompactProps {
 export const ConversationCardCompact = memo<ConversationCardCompactProps>(
   ({
     investigation,
-    hasBorder,
     isSelected = false,
     outcome,
     onClickRecommendedAction,
@@ -58,27 +81,14 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
-        css={{
-          padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
-          cursor: 'pointer',
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          '&:hover': {
-            backgroundColor: isSelected
-              ? euiTheme.colors.backgroundBaseInteractiveSelect
-              : euiTheme.colors.backgroundBaseSubdued,
-            boxShadow: 'none',
-          },
-        }}
+        $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
@@ -157,7 +167,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );
