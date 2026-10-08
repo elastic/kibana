@@ -9,10 +9,14 @@
 
 import Fs from 'fs';
 import Fsp from 'fs/promises';
+import { cpus } from 'os';
 import Path from 'path';
 
 import { parseSync } from '@swc/core';
-import { build, type Plugin } from 'esbuild';
+import { build as esbuild, type Plugin } from 'esbuild';
+import { asyncForEachWithLimit } from '@kbn/std';
+
+import type { Task } from '../lib';
 
 const FUNCTION_NODES = new Set([
   'FunctionDeclaration',
@@ -27,6 +31,27 @@ const FUNCTION_NODES = new Set([
   'PrivateGetter',
   'PrivateSetter',
 ]);
+
+/**
+ * Bundle each plugin's `server/plugin.js` startup graph.
+ *
+ * Runs after `CreatePackageJson`. That task walks each `server/index.js` graph to
+ * decide which packages to install. The import scanner drops `require()` calls
+ * inside the esbuild bundle, so bundling first omits packages such as
+ * `@kbn/inference-langchain`.
+ */
+export const BundlePluginServers: Task = {
+  description: 'Bundling plugin server startup graphs',
+
+  async run(config, log, build) {
+    const plugins = config.getDistPluginsFromRepo();
+    log.info(`Bundling server startup graphs for ${plugins.length} plugins`);
+
+    await asyncForEachWithLimit(plugins, cpus().length, async (pkg) => {
+      await bundlePluginServer(build.resolvePath(pkg.normalizedRepoRelativeDir));
+    });
+  },
+};
 
 /**
  * Replace `server/plugin.js` with one CommonJS bundle of the files Node loads
@@ -49,7 +74,7 @@ export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
   const serverDir = Path.dirname(entry);
 
   try {
-    await build({
+    await esbuild({
       entryPoints: [entry],
       bundle: true,
       platform: 'node',
@@ -74,8 +99,8 @@ export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
 function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plugin {
   return {
     name: 'plugin-server-bundle',
-    setup(esbuild) {
-      esbuild.onResolve({ filter: /.*/ }, (args) => {
+    setup(pluginBuild) {
+      pluginBuild.onResolve({ filter: /.*/ }, (args) => {
         if (args.kind === 'entry-point') {
           return null;
         }
@@ -92,7 +117,7 @@ function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plug
         return { path: relativeSpecifier(serverDir, expected), external: true };
       });
 
-      esbuild.onLoad({ filter: /\.js$/ }, async (args) => {
+      pluginBuild.onLoad({ filter: /\.js$/ }, async (args) => {
         const filename = Fs.realpathSync(args.path);
         const source = await Fsp.readFile(filename, 'utf8');
         return {
