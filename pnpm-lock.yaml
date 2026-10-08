@@ -4493,8 +4493,8 @@ importers:
         specifier: 0.2.20
         version: 0.2.20
       piscina:
-        specifier: 5.3.1
-        version: 5.3.1
+        specifier: 5.3.2
+        version: 5.3.2
       polished:
         specifier: 4.3.1
         version: 4.3.1
@@ -22416,8 +22416,8 @@ packages:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
 
-  piscina@5.3.1:
-    resolution: {integrity: sha512-LYbVUyHb5CzavqNgs64Uv+gHkrCdEt73kfPazdsJnndDSJiaEDIzMUIAHbtV3plzaoBUphZfXZCQKF01LHMgXw==}
+  piscina@5.3.2:
+    resolution: {integrity: sha512-vv7l/mM7B9WgrhDaudIqv1x6v4LOBRYYmpWGdWushhpbCmVHp11sUB2v4hj1CAeTGXVxuZFz6xOU1RalAiPKfQ==}
     engines: {node: '>=20.x'}
 
   pixelmatch@5.3.0:
@@ -41918,7 +41918,7 @@ snapshots:
 
   pirates@4.0.7: {}
 
-  piscina@5.3.1:
+  piscina@5.3.2:
     optionalDependencies:
       '@napi-rs/nice': 1.1.1
 

@@ -36,6 +36,7 @@ import {
   SyncPrivateLocationMonitorsTask,
   PRIVATE_LOCATIONS_SYNC_TASK_ID,
 } from './tasks/sync_private_locations_monitors_task';
+import { ensureCleanUpTaskScheduled } from './tasks/clean_up_package_policies_task';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
@@ -170,6 +171,12 @@ export class Plugin implements PluginType {
       .catch((e) => {
         this.logger.error('Failed to start sync private location monitors task', { error: e });
       });
+
+    if (this.server) {
+      ensureCleanUpTaskScheduled(this.server).catch((e) => {
+        this.logger.error('Failed to schedule package policy clean up task', { error: e });
+      });
+    }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
