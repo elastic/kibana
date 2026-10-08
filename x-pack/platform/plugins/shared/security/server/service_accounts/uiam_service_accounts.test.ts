@@ -1153,7 +1153,12 @@ describe('UiamServiceAccounts', () => {
           mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
           await expect(
             serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-          ).rejects.toMatchObject({ cause, retryable: false });
+          ).rejects.toMatchObject({
+            cause,
+            retryable: false,
+            statusCode,
+            message: `Error occurred during service account token exchange (status ${statusCode}).`,
+          });
         }
       );
 
@@ -1189,7 +1194,12 @@ describe('UiamServiceAccounts', () => {
         mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ cause, retryable: true });
+        ).rejects.toMatchObject({
+          cause,
+          retryable: true,
+          statusCode: undefined,
+          message: 'Error occurred during service account token exchange.',
+        });
       });
 
       it.each(['ENOTFOUND', 'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNCLASSIFIED'])(

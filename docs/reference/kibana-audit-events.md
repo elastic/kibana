@@ -30,7 +30,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `session_cleanup` | `unknown` | Removing invalid or expired session. |
 | `access_agreement_acknowledged` | n/a | User has acknowledged the access agreement. |
 | `service_account_assume` {applies_to}`stack: preview 9.6+` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Every event the workload causes while it runs shares this event's `trace.id`. |
-| | `failure` | Workload [plugin/type/id] failed to execute as service account [id=x]. {{kib}} could not get a credential for the account, the binding failed integrity verification, or the workload was bound to a different account or unbound while it ran. A workload whose account was force-deleted fails here at its next run. The account is omitted when the binding failed integrity verification. |
+| | `failure` | Workload [plugin/type/id] failed to execute as service account [id=x]. Logged when the workload starts, or when it loses its credential while it runs. The account was deleted, or recreated after the workload was bound, its credential was refused, the binding failed integrity verification, or the workload was bound to a different account or unbound. A temporary failure, such as an unavailable {{es}} cluster, is not logged. The account is omitted when the binding failed integrity verification. |
 
 ::::{note}
 For `service_account_assume`, the service account is the actor: `user.id` and `user.name` are the account id, and `user.roles` is omitted. A workload that runs often writes one event per run. To drop the successful ones, add `{ actions: ['service_account_assume'], outcomes: ['success'] }` to `xpack.security.audit.ignore_filters`.

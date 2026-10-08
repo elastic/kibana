@@ -98,7 +98,7 @@ interface ExecutionAudit {
   failed(error: Error, serviceAccountId?: string): void;
   /** The fake request exists, and the workload is about to run on it. */
   started(request: KibanaRequest, serviceAccountId: string): void;
-  /** A re-mint was refused for good while the workload ran. */
+  /** A re-mint failed for good while the workload ran, so it has no credential left. */
   revoked(request: KibanaRequest, serviceAccountId: string, error: Error): void;
 }
 
@@ -356,13 +356,16 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
    * checked again before every re-mint (see {@link rebindCheck}), which is both stricter and
    * revocable. Unbinding the workload denies a running execution its next credential rather than
    * waiting for a lease to lapse.
+   *
+   * A failure is audited by the same rule here as on a re-mint: only when it is terminal. A
+   * retryable one is an outage, not a decision about the account, and is left to the server log.
    */
   private async createExecutionRequest(
     coordinates: WorkloadBindingCoordinates,
     { serviceAccountId, boundAt }: ServiceAccountWorkloadBinding,
     executionAudit: ExecutionAudit
   ): Promise<KibanaRequest> {
-    // Set once the first mint returns. A refusal before then fails `createFakeRequest`, and is
+    // Set once the first mint returns. A failure before then fails `createFakeRequest`, and is
     // audited by the catch below instead.
     const execution: { request?: KibanaRequest } = {};
 
@@ -381,7 +384,11 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       execution.request = request;
       return request;
     } catch (e) {
-      executionAudit.failed(e, serviceAccountId);
+      // The initial mint goes straight to the exchange, so nothing here was raised by the
+      // interceptor.
+      if (isTerminalMintFailure(e, { raisedByInterceptor: false })) {
+        executionAudit.failed(e, serviceAccountId);
+      }
       throw e;
     }
   }
@@ -393,14 +400,16 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
    * place a binding check can reach it. The initial mint follows the verification that started the
    * execution, and is let through on its strength rather than paying for the read twice.
    *
-   * `onTerminalRefusal` is called with a refusal the registry latches (see `isTerminalMintFailure`).
-   * That ends the execution's credentials for good, so it is called at most once. A check that
-   * failed on a blip is retried, and is not reported.
+   * `onTerminalFailure` is called with a failure the registry latches (see `isTerminalMintFailure`),
+   * whether the binding check refused or the exchange behind it did. The exchange is how a deleted
+   * or recreated account shows up, since its binding still names the same id. A latched failure
+   * ends the execution's credentials for good, so it is called at most once. A failure on a blip
+   * is retried, and is not reported.
    */
   private rebindCheck(
     coordinates: WorkloadBindingCoordinates,
     serviceAccountId: string,
-    onTerminalRefusal: (error: Error) => void
+    onTerminalFailure: (error: Error) => void
   ): ServiceAccountMintInterceptor {
     let minted = false;
 
@@ -427,12 +436,19 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
           }] of plugin [${coordinates.pluginId}]: ${getDetailedErrorMessage(e)}`
         );
         if (isTerminalMintFailure(e, { raisedByInterceptor: true })) {
-          onTerminalRefusal(e);
+          onTerminalFailure(e);
         }
         throw e;
       }
 
-      return await mint();
+      try {
+        return await mint();
+      } catch (e) {
+        if (isTerminalMintFailure(e, { raisedByInterceptor: false })) {
+          onTerminalFailure(e);
+        }
+        throw e;
+      }
     };
   }
 

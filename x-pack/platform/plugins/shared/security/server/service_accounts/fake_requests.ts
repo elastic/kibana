@@ -82,8 +82,8 @@ export interface CreateServiceAccountFakeRequestParams {
  * saved objects read against a briefly unavailable cluster, say — that the next refresh may not
  * hit again. Latching those would kill a still-valid execution over one blip.
  *
- * Workload executions audit an interceptor refusal exactly when this says it is terminal, so the
- * two rules cannot drift apart: a change here changes which refusals reach the audit log.
+ * Workload executions audit a mint failure exactly when this says it is terminal, so the two
+ * rules cannot drift apart: a change here changes which failures reach the audit log.
  */
 export const isTerminalMintFailure = (
   err: unknown,

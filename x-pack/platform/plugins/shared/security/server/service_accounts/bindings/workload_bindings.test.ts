@@ -18,6 +18,7 @@ import { licenseMock } from '../../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { auditLoggerMock, auditServiceMock } from '../../audit/mocks';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
+import { ServiceAccountTokenExchangeError } from '../token_exchange_error';
 import type { ServiceAccountsBackend } from '../types';
 
 const PLUGIN_ID = 'alerting';
@@ -834,13 +835,34 @@ describe('ServiceAccountWorkloadBindings', () => {
         );
       });
 
+      // The shapes the backends really reject with: the exchange's own failures are wrapped, and
+      // the Elasticsearch backend's refusals of a stored credential are not.
+      const exchangeFailure = (retryable: boolean, statusCode?: number) =>
+        new ServiceAccountTokenExchangeError(
+          new Error('Service account token exchange failed for [service-account-id].'),
+          { retryable, statusCode }
+        );
+
       it.each([
-        ['the exchange fails', new Error('exchange failed')],
+        [
+          'the account is gone',
+          exchangeFailure(false, 404),
+          {
+            code: 'ServiceAccountTokenExchangeError',
+            message: 'Error occurred during service account token exchange (status 404).',
+          },
+        ],
         [
           'the account was created after the workload was bound',
-          Boom.forbidden('The service account was created after the workload was bound.'),
+          Boom.forbidden(
+            'The workload was bound to an earlier service account with the same name.'
+          ),
+          {
+            code: 'Error',
+            message: 'The workload was bound to an earlier service account with the same name.',
+          },
         ],
-      ])('logs `failure` without a request when %s', async (_name, error) => {
+      ])('logs `failure` without a request when %s', async (_name, error, auditedError) => {
         backend.createFakeRequest.mockRejectedValue(error);
         const execute = jest.fn();
 
@@ -857,8 +879,22 @@ describe('ServiceAccountWorkloadBindings', () => {
             'Workload [alerting/rule/rule-id] failed to execute as service account [id=service-account-id]',
           user: assumedAccount('service-account-id'),
           kibana: { workload: AUDIT_WORKLOAD, space_id: 'default' },
-          error: { code: 'Error', message: error.message },
+          error: auditedError,
         });
+      });
+
+      it.each([
+        ['an unavailable exchange', exchangeFailure(true, 503)],
+        ['a transport failure', exchangeFailure(true)],
+      ])('logs nothing when the exchange fails with %s', async (_name, error) => {
+        backend.createFakeRequest.mockRejectedValue(error);
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toBe(error);
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
       });
 
       describe('on a re-mint', () => {
@@ -889,6 +925,45 @@ describe('ServiceAccountWorkloadBindings', () => {
               kibana: { workload: AUDIT_WORKLOAD },
             })
           );
+          expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+        });
+
+        it.each([
+          ['the account is gone', exchangeFailure(false, 404)],
+          [
+            'the account was created after the workload was bound',
+            Boom.forbidden(
+              'The workload was bound to an earlier service account with the same name.'
+            ),
+          ],
+        ])(
+          'logs `failure` on the minted request when the binding holds but %s',
+          async (_name, error) => {
+            const interceptor = await captureRefreshInterceptor();
+
+            await expect(interceptor(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+
+            expect(audit.asScoped).toHaveBeenCalledWith(mintedRequest);
+            expect(auditLogger.log).toHaveBeenCalledTimes(1);
+            expect(auditLogger.log).toHaveBeenCalledWith(
+              expect.objectContaining({
+                ...assumeEvent('failure'),
+                user: assumedAccount('service-account-id'),
+                kibana: { workload: AUDIT_WORKLOAD },
+                error: { code: error.name, message: error.message },
+              })
+            );
+            expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+          }
+        );
+
+        it('logs nothing when the binding holds but the exchange is unavailable', async () => {
+          const interceptor = await captureRefreshInterceptor();
+          const error = exchangeFailure(true, 503);
+
+          await expect(interceptor(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+
+          expect(auditLogger.log).not.toHaveBeenCalled();
           expect(audit.withoutRequest.log).not.toHaveBeenCalled();
         });
 

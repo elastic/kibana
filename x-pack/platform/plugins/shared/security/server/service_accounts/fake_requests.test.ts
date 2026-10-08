@@ -230,7 +230,9 @@ describe('ServiceAccountFakeRequests', () => {
     it('backs off after a failed mint, then allows a new attempt', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
-      const error = new ServiceAccountTokenExchangeError(new Error('exchange failed'), true);
+      const error = new ServiceAccountTokenExchangeError(new Error('exchange failed'), {
+        retryable: true,
+      });
       mintToken.mockRejectedValueOnce(error);
 
       jest.advanceTimersByTime(MAX_AGE_MS);
@@ -349,7 +351,7 @@ describe('ServiceAccountFakeRequests', () => {
     });
 
     it.each([
-      new ServiceAccountTokenExchangeError(new Error('revoked'), false),
+      new ServiceAccountTokenExchangeError(new Error('revoked'), { retryable: false }),
       new Error('unclassified failure'),
     ])('retains terminal failure and never returns a cached token: %s', async (error) => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
@@ -367,7 +369,10 @@ describe('ServiceAccountFakeRequests', () => {
 
     it('honors a longer retry delay without returning the cached token during backoff', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
-      const error = new ServiceAccountTokenExchangeError(new Error('throttled'), true, 20_000);
+      const error = new ServiceAccountTokenExchangeError(new Error('throttled'), {
+        retryable: true,
+        retryAfterMs: 20_000,
+      });
       mintToken.mockRejectedValueOnce(error);
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toBe(error);
       jest.advanceTimersByTime(19_999);
@@ -629,14 +634,20 @@ describe('isTerminalMintFailure', () => {
   it('treats any failure not raised by the interceptor as terminal, unless the exchange says otherwise', () => {
     expect(isTerminalMintFailure(new Error('boom'), { raisedByInterceptor: false })).toBe(true);
     expect(
-      isTerminalMintFailure(new ServiceAccountTokenExchangeError(new Error('503'), true), {
-        raisedByInterceptor: false,
-      })
+      isTerminalMintFailure(
+        new ServiceAccountTokenExchangeError(new Error('503'), { retryable: true }),
+        {
+          raisedByInterceptor: false,
+        }
+      )
     ).toBe(false);
     expect(
-      isTerminalMintFailure(new ServiceAccountTokenExchangeError(new Error('revoked'), false), {
-        raisedByInterceptor: true,
-      })
+      isTerminalMintFailure(
+        new ServiceAccountTokenExchangeError(new Error('revoked'), { retryable: false }),
+        {
+          raisedByInterceptor: true,
+        }
+      )
     ).toBe(true);
   });
 });
