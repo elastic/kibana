@@ -206,7 +206,15 @@ export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined
   return parts.length ? parts.join(' OR ') : undefined;
 };
 
-const quoteField = (f: string) => (/[@\s]/.test(f) ? `\`${f}\`` : f);
+/** ES|QL field names without quotes: letters, digits, `_` and `.`, not starting with a digit. */
+const PLAIN_FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_.]*$/;
+
+/**
+ * Backticks a field name unless it is plain, e.g. `@timestamp` or a field picked in Fields
+ * with `-` or `:`. A backtick in the name is doubled.
+ */
+const quoteField = (field: string): string =>
+  PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
 
 export const buildKeepClause = (
   args: Pick<QueryArgs, 'keepFields'>,

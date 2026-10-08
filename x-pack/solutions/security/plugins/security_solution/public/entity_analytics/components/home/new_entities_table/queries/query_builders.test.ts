@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { enrichEntityRows } from '../common';
+import { buildKeepClause, enrichEntityRows } from '../common';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
 import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
 import { alertCountQuerySpec } from './alerts';
@@ -180,6 +180,12 @@ describe('entities grid query builders', () => {
 
       expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
     });
+  });
+
+  it('quotes the KEEP fields that are not plain names', () => {
+    expect(
+      buildKeepClause({ keepFields: ['host.os.name', 'cloud.account-id', 'labels.a:b', 'we`ird'] })
+    ).toContain(', host.os.name, `cloud.account-id`, `labels.a:b`, `we``ird`');
   });
 
   describe('enrich queries', () => {
