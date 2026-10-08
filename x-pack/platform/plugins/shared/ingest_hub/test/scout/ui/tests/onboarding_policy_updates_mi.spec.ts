@@ -14,6 +14,7 @@ import {
   backToServiceSettings,
   continueToDeploy,
   deployElbWithTypedKeys,
+  expectDeployDone,
   mockManagedIntegrations,
 } from '../helpers/policy_updates';
 
@@ -37,7 +38,8 @@ test.describe(
       await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId-stored')).toBeVisible();
       await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
-      await expect.poll(() => requests.updated.length).toBe(1);
+      await expectDeployDone(page);
+      expect(requests.updated).toHaveLength(1);
       expect(requests.created).toHaveLength(1);
       expect(requests.updated[0].policyId).toBe('policy-1');
       expect(requests.updated[0].body.vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
@@ -65,10 +67,11 @@ test.describe(
 
       await page.testSubj.locator('managedIntegrationsSection-retryButton').click();
 
-      await expect.poll(() => requests.updated.length).toBe(2);
+      await expectDeployDone(page);
+      await expect(page.testSubj.locator('managedIntegrationsSection-errorCallout')).toBeHidden();
+      expect(requests.updated).toHaveLength(2);
       expect(requests.updated[1].policyId).toBe('policy-1');
       expect(requests.created).toHaveLength(1);
-      await expect(page.testSubj.locator('managedIntegrationsSection-errorCallout')).toBeHidden();
     });
 
     test('a service with its own namespace gets its own policy', async ({ browserAuth, page }) => {
@@ -84,7 +87,8 @@ test.describe(
       await continueToDeploy(page);
       await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
-      await expect.poll(() => requests.created.length).toBe(2);
+      await expectDeployDone(page);
+      expect(requests.created).toHaveLength(2);
       expect(requests.created[1].namespace).toBe('prod');
       expect(requests.updated).toHaveLength(0);
     });
@@ -101,7 +105,8 @@ test.describe(
       await continueToDeploy(page);
       await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
-      await expect.poll(() => requests.created.length).toBe(2);
+      await expectDeployDone(page);
+      expect(requests.created).toHaveLength(2);
       expect(requests.updated).toHaveLength(0);
     });
   }

@@ -160,6 +160,14 @@ export async function deployElbWithTypedKeys(
   await expect(page.testSubj.locator('managedIntegrationsSection').getByText('Done')).toBeVisible();
 }
 
+/**
+ * Waits until the deploy has finished. Assert "no other request was sent" only after this: a
+ * request recorded early in a deploy says nothing about the ones that follow it.
+ */
+export async function expectDeployDone(page: ScoutPage) {
+  await expect(page.testSubj.locator('managedIntegrationsSection').getByText('Done')).toBeVisible();
+}
+
 /** Back to Services (in-app navigation keeps the wizard state) and on to the settings step. */
 export async function backToServiceSettings(page: ScoutPage, toggleServiceIds: string[] = []) {
   await page.evaluate(() => {

@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import {
   useOnboardingFeatureFlag,
+  expectOnboardingStepVisible,
   mockAwsPackage,
   SERVICE_SETTINGS_SESSION_KEY,
   AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
@@ -151,7 +152,9 @@ test.describe(
       await expect(nextButton).toBeEnabled();
       await nextButton.click();
 
-      await expect.poll(() => updated.length).toBe(1);
+      // The wizard moves on only once the deploy has finished; assert the requests after that.
+      await expectOnboardingStepVisible(page, 'detect-and-review');
+      expect(updated).toHaveLength(1);
       expect(created).toHaveLength(0);
       expect(updated[0].vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
       expect(updated[0].vars.secret_access_key).toStrictEqual(SECRET_KEY_REF);

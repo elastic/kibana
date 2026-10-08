@@ -148,7 +148,10 @@ test.describe(
       await expect(deployButton).toBeEnabled();
       await deployButton.click();
       // Same package: the first policy is updated with both services, no second one is created.
-      await expect.poll(() => updated.length).toBe(1);
+      await expect(
+        page.testSubj.locator('managedIntegrationsSection').getByText('Done')
+      ).toBeVisible();
+      expect(updated).toHaveLength(1);
       expect(created).toHaveLength(1);
 
       expect(updated[0].vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
