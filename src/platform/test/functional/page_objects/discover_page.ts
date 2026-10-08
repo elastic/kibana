@@ -1339,7 +1339,7 @@ export class DiscoverPageObject extends FtrService {
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
    * flag), so `defaultMode` defaults to `'esql'` to match the enabled default.
    */
-  public async setQueryMode(currentMode: string, defaultMode: string = 'esql  ') {
+  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
     const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
     const currentUrl = await this.browser.getCurrentUrl();
     if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {
