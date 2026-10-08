@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { sampleSchema } from './sample_schema';
+import { sampleJsonSchema, sampleSchema } from './sample_schema';
 
 const sample = (schema: unknown, schemas = {}) => sampleSchema(schema, { components: { schemas } });
 
@@ -140,6 +140,40 @@ describe('sampleSchema', () => {
     expect(sample({ $ref: '#/components/schemas/Node' }, schemas)).toEqual({
       id: 'string',
       children: [{ id: 'string', children: [{ id: 'string' }] }],
+    });
+  });
+});
+
+describe('sampleJsonSchema', () => {
+  const schema = {
+    type: 'object',
+    required: ['query', 'filter'],
+    properties: {
+      query: { type: 'string', minLength: 1 },
+      limit: { type: 'integer', default: 10 },
+      filter: { $ref: '#/$defs/Filter' },
+    },
+    $defs: {
+      Filter: {
+        type: 'object',
+        required: ['field'],
+        properties: { field: { type: 'string' }, exact: { type: 'boolean' } },
+      },
+    },
+  };
+
+  it('includes optional properties and resolves refs against the schema itself', () => {
+    expect(sampleJsonSchema(schema)).toEqual({
+      query: 'string',
+      limit: 10,
+      filter: { field: 'string', exact: true },
+    });
+  });
+
+  it('leaves out optional properties at every depth with optional: required', () => {
+    expect(sampleJsonSchema(schema, { optional: 'required' })).toEqual({
+      query: 'string',
+      filter: { field: 'string' },
     });
   });
 });
