@@ -95,7 +95,9 @@ describe('validatePolicyAgainstProductFeatures', () => {
 
   describe('Complete tier (all features enabled)', () => {
     it('passes when a custom malware message is set', () => {
-      const productFeaturesService = createProductFeaturesServiceMock([...ALL_PRODUCT_FEATURE_KEYS]);
+      const productFeaturesService = createProductFeaturesServiceMock([
+        ...ALL_PRODUCT_FEATURE_KEYS,
+      ]);
       const policy = policyFactory();
       set(policy, 'windows.popup.malware.message', 'Block it');
 
