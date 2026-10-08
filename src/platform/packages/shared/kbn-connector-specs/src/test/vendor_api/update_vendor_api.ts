@@ -125,7 +125,10 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
-  kind === 'read-scope' || kind === 'unused-query' || kind === 'rejected-response';
+  kind === 'request-violation' ||
+  kind === 'read-scope' ||
+  kind === 'unused-query' ||
+  kind === 'rejected-response';
 
 /**
  * Regenerates a connector's `vendor_api` artifacts: records its actions against the vendor

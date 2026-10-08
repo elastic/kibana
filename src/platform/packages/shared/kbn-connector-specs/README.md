@@ -604,19 +604,28 @@ The folder holds:
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults.
 
-Connectors without a usable vendor spec, such as database drivers, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. A test checks that each entry is a connector without a `vendor_api` folder.
+Connectors without a usable vendor spec, such as database drivers, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Connectors whose artifacts haven't been recorded yet are listed there too, until [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
 The script fails when:
 
+- a request breaks the spec;
 - a `read` action sends any other request;
 - a `queries` entry is never needed;
 - a response override breaks the spec;
 - a request matches no operation and isn't listed in `unmatched`;
 - an operation looks like it returns a collection, but has no `pagination` and none could be proposed.
 
-Requests that break the spec, handler errors and proposed `pagination` descriptors are reported as warnings.
+Handler errors and proposed `pagination` descriptors are reported as warnings.
+
+### Contract test
+
+`src/connector_spec_vendor_api_contract.test.ts` runs in the package's Jest config, offline. It fails when:
+
+- a connector has neither a `vendor_api/manifest.json` nor an exemption, or has both;
+- an exemption is added for a connector that existed at the merge base (`GITHUB_PR_MERGE_BASE` in CI, otherwise the merge base with `upstream/main` or `origin/main`), so the list only shrinks. New connectors can be exempted in the PR that adds them. Without a merge base, this check is skipped;
+- re-recording a connector against its committed snapshots finds a problem from the list above, or would change `manifest.json` or a snapshot. This catches actions added or changed without rerunning the script.
 
 ### `manifest.json`
 

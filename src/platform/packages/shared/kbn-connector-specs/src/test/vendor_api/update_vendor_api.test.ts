@@ -234,6 +234,25 @@ describe('updateVendorApi', () => {
     expect(warnings).toEqual([]);
   });
 
+  it('reports requests the spec rejects as problems', async () => {
+    const invalid: ConnectorSpec = {
+      ...connector,
+      actions: {
+        listItems: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => (await client.get(`${BASE}/items?page=first`)).data,
+        },
+      },
+    };
+
+    const { problems } = await update({ connector: invalid, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      expect.stringMatching(/^listItems: GET .*\/items breaks the spec: /),
+    ]);
+  });
+
   it('reports list-like operations it cannot propose pagination for', async () => {
     const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
 
