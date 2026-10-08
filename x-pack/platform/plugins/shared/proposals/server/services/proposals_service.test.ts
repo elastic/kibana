@@ -15,6 +15,7 @@ import {
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
+  ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -707,6 +708,143 @@ describe('ProposalsService', () => {
 
       expect(proposal.actionWorkflowId).toBeUndefined();
       expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create — caller-supplied id', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+    const idParams = (overrides: Partial<Parameters<ProposalsService['create']>[0]> = {}) => ({
+      conversationId: 'conv-1',
+      comment: 'Isolate the host for this finding',
+      confidence: 'medium' as const,
+      origin: 'alertzero' as const,
+      id: ID,
+      ...overrides,
+    });
+    const conflict = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
+
+    it('creates the proposal under the supplied id, rooted at itself', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const proposal = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.id).toBe(ID);
+      expect(createArgs.op_type).toBe('create');
+      expect(createArgs.document.rootProposalId).toBe(ID);
+      expect(proposal.id).toBe(ID);
+    });
+
+    it('omitting the id behaves identically to today: a fresh random id every call', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const first = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+      const second = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(first.id).not.toBe(second.id);
+      expect(first.id).not.toBe(ID);
+    });
+
+    it('does not read anything before the create, or on a success', async () => {
+      // The atomicity comes from `op_type: 'create'` itself, not from a
+      // check-then-create pair in application code.
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses an id that already exists, reading and returning nothing', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(conflict());
+      const { service, attachmentsClient } = createService(storage);
+
+      const attempt = service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      await expect(attempt).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
+      // Nothing about the existing record, whoever or whichever space owns it,
+      // is looked up on the way to the error, so nothing can leak through it.
+      expect(storage.search).not.toHaveBeenCalled();
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('is a conflict as far as routes and workflows are concerned', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(conflict());
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(idParams(), { spaceId: SPACE_ID, request })
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+    });
+
+    it('rethrows a conflict on a random id unchanged: only a caller-chosen id can duplicate', async () => {
+      const storage = createStorage();
+      const error = conflict();
+      storage.index.mockRejectedValue(error);
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(idParams({ id: undefined }), { spaceId: SPACE_ID, request })
+      ).rejects.toBe(error);
+    });
+
+    it('rethrows a failure that is not a conflict', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 500 }));
+      const { service } = createService(storage);
+
+      await expect(service.create(idParams(), { spaceId: SPACE_ID, request })).rejects.toThrow(
+        'boom'
+      );
+    });
+
+    /**
+     * A true multi-request race can only be fully proven against real
+     * Elasticsearch, where `op_type: 'create'` is actually atomic. What a unit test
+     * can prove is that two calls fired together against a fake that enforces the
+     * same "only the first create to reach an id wins, every other throws a
+     * conflict" contract produce one proposal and one refusal. The fake's
+     * check-and-set is forced apart by a real `await`, so the calls interleave
+     * there instead of running one after the other.
+     */
+    it('lets only one of two concurrent calls with the same id create the proposal', async () => {
+      const documents = new Map<string, ProposalDocument>();
+      const storage = {
+        index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
+          await new Promise((resolve) => setImmediate(resolve));
+          if (documents.has(id)) {
+            throw conflict();
+          }
+          documents.set(id, document);
+          return { _id: id };
+        }),
+        search: jest.fn(),
+      } as unknown as ReturnType<typeof createStorage>;
+      const { service: serviceA, attachmentsClient: attachmentsA } = createService(storage);
+      const { service: serviceB, attachmentsClient: attachmentsB } = createService(storage);
+
+      const results = await Promise.allSettled([
+        serviceA.create(idParams(), { spaceId: SPACE_ID, request }),
+        serviceB.create(idParams(), { spaceId: SPACE_ID, request }),
+      ]);
+
+      expect(results.map(({ status }) => status).sort()).toEqual(['fulfilled', 'rejected']);
+      const refused = results.find(({ status }) => status === 'rejected') as PromiseRejectedResult;
+      expect(refused.reason).toBeInstanceOf(ProposalAlreadyExistsError);
+      expect(documents.size).toBe(1);
+      // Only the winner posted a conversation card.
+      expect(attachmentsA.create.mock.calls.length + attachmentsB.create.mock.calls.length).toBe(1);
     });
   });
 

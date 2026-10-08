@@ -388,6 +388,99 @@ describe('parseSystemInstructions', () => {
   });
 });
 
+describe('OpenRouter field fallbacks on getGenAiFields', () => {
+  describe('input messages fallback to gen_ai.prompt', () => {
+    it('reads gen_ai.prompt when input.messages is absent', () => {
+      const prompt = JSON.stringify({
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'What is the weather?' },
+        ],
+      });
+      const fields = getGenAiFields({ 'attributes.gen_ai.prompt': prompt });
+      expect(fields.inputMessages).toHaveLength(2);
+      expect(fields.inputMessages[0].role).toBe('system');
+      expect(fields.inputMessages[1].role).toBe('user');
+      expect(fields.inputMessages[1].content).toBe('What is the weather?');
+    });
+
+    it('prefers OTel input.messages over gen_ai.prompt when both are present', () => {
+      const otelMessage = JSON.stringify({ role: 'user', content: 'OTel message' });
+      const prompt = JSON.stringify({
+        messages: [{ role: 'user', content: 'OpenRouter message' }],
+      });
+      const fields = getGenAiFields({
+        'attributes.gen_ai.input.messages': [otelMessage],
+        'attributes.gen_ai.prompt': prompt,
+      });
+      expect(fields.inputMessages).toHaveLength(1);
+      expect(fields.inputMessages[0].content).toBe('OTel message');
+    });
+
+    it('returns empty when gen_ai.prompt is malformed JSON', () => {
+      const fields = getGenAiFields({ 'attributes.gen_ai.prompt': '{broken json' });
+      expect(fields.inputMessages).toHaveLength(0);
+    });
+
+    it('returns empty when gen_ai.prompt has no messages key', () => {
+      const fields = getGenAiFields({
+        'attributes.gen_ai.prompt': JSON.stringify({ role: 'user', content: 'Hello' }),
+      });
+      expect(fields.inputMessages).toHaveLength(0);
+    });
+
+    it('filters out invalid message elements from gen_ai.prompt messages array', () => {
+      const fields = getGenAiFields({
+        'attributes.gen_ai.prompt': JSON.stringify({
+          messages: [null, { content: 'no role' }, { role: 'user', content: 'valid' }],
+        }),
+      });
+      expect(fields.inputMessages).toHaveLength(1);
+      expect(fields.inputMessages[0].content).toBe('valid');
+    });
+  });
+
+  describe('output messages fallback to gen_ai.completion', () => {
+    it('reads gen_ai.completion and wraps the completion string as an assistant message', () => {
+      const completion = JSON.stringify({
+        completion: 'The weather is sunny.',
+        reasoning: 'Based on current data...',
+        rawRequest: {},
+      });
+      const fields = getGenAiFields({ 'attributes.gen_ai.completion': completion });
+      expect(fields.outputMessages).toHaveLength(1);
+      expect(fields.outputMessages[0].role).toBe('assistant');
+      expect(fields.outputMessages[0].content).toBe('The weather is sunny.');
+      // reasoning and rawRequest are intentionally ignored
+      expect(fields.outputMessages[0]).not.toHaveProperty('reasoning');
+      expect(fields.outputMessages[0]).not.toHaveProperty('rawRequest');
+    });
+
+    it('prefers OTel output.messages over gen_ai.completion when both are present', () => {
+      const otelMessage = JSON.stringify({ role: 'assistant', content: 'OTel response' });
+      const completion = JSON.stringify({ completion: 'OpenRouter response' });
+      const fields = getGenAiFields({
+        'attributes.gen_ai.output.messages': [otelMessage],
+        'attributes.gen_ai.completion': completion,
+      });
+      expect(fields.outputMessages).toHaveLength(1);
+      expect(fields.outputMessages[0].content).toBe('OTel response');
+    });
+
+    it('returns empty when gen_ai.completion is malformed JSON', () => {
+      const fields = getGenAiFields({ 'attributes.gen_ai.completion': '{broken json' });
+      expect(fields.outputMessages).toHaveLength(0);
+    });
+
+    it('returns empty when gen_ai.completion has no completion key', () => {
+      const fields = getGenAiFields({
+        'attributes.gen_ai.completion': JSON.stringify({ reasoning: 'Some thinking...' }),
+      });
+      expect(fields.outputMessages).toHaveLength(0);
+    });
+  });
+});
+
 describe('tool fields on getGenAiFields', () => {
   it('extracts tool definitions and tool call I/O from bare keys', () => {
     const toolDefinitions = JSON.stringify([
