@@ -37,6 +37,16 @@ const NO_FABRICATION_CRITERIA = [
 ];
 
 /**
+ * Extra criterion for requests that do NOT ask for an expected/typical/full stage sequence.
+ * The skill's opt-in rule permits a skeleton only when the analyst asked for one, so for a
+ * neutral "timeline of attacker activity" ask even a separately labelled hypothetical
+ * skeleton is unrequested content. NO_FABRICATION_CRITERIA alone lets that pass, because it
+ * accepts a labelled, separated skeleton (the right behaviour when the analyst opted in).
+ */
+const NO_UNREQUESTED_SKELETON_CRITERION =
+  'Does not include any expected, typical, or hypothetical attack-stage sequence for WKSTN-QUIET-12, even in a separately labelled section, because the analyst did not ask for one. The response contains only what the endpoint telemetry shows plus the statement that it shows no attack-chain activity (or is sparse/inconclusive). A labelled skeleton fails this criterion for this request';
+
+/**
  * Same shape as NO_FABRICATION_CRITERIA but for the adversarial host.
  * WKSTN-ADMIN-07 is the hard case: its telemetry is real but *ambiguous* —
  * `vssadmin.exe list shadows` (read-only, pattern-matches ransomware
@@ -135,7 +145,7 @@ evaluate.describe(
                     'Give me a timeline of attacker activity on WKSTN-QUIET-12 starting from the first suspicious event.',
                 },
                 output: {
-                  criteria: [...NO_FABRICATION_CRITERIA],
+                  criteria: [...NO_FABRICATION_CRITERIA, NO_UNREQUESTED_SKELETON_CRITERION],
                   tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
                 },
                 metadata: {
