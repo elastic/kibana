@@ -73,7 +73,7 @@ export const DURATION_LOWER_BOUND_TOOLTIP = i18n.translate(
   'xpack.alertingV2EpisodesUi.durationCell.lowerBoundTooltip',
   {
     defaultMessage:
-      'The episode started before the selected time range, so its actual duration is longer. Widen the time range or open the episode to see it.',
+      'The alert started before the selected time range, so its actual duration is longer. Widen the time range or open the alert to see it.',
   }
 );
 

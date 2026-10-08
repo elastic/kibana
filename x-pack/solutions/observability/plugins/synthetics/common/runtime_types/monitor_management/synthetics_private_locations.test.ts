@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PrivateLocationCodec } from './synthetics_private_locations';
+import { PrivateLocationCodec } from '../schemas/synthetics_private_locations';
 
 const location = {
   label: 'Loc',
