@@ -29,8 +29,16 @@ import type {
   RenderIacTemplateIntegration,
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
+import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
+import { getRenderIntegrations } from '../hooks/render_artifact_template';
+import { useManagedOnboarding } from '../hooks/use_managed_onboarding';
+import {
+  getTemplateUrlFromQuickCreateUrl,
+  useManagedStackCreate,
+} from '../hooks/use_managed_stack';
+import { ManagedStackProgress } from '../components/managed_stack_progress';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -42,7 +50,12 @@ import {
 } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
-import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
+import {
+  getCloudConnectorNameError,
+  getStaticTemplate,
+  getWorkloadIdentityFederationStackParams,
+  isStackArnInvalid,
+} from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 
@@ -188,6 +201,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     integrations,
   });
 
+  // Managed onboarding (POC): Kibana creates the stack itself and feeds the outputs into the
+  // same create call the manual path uses.
+  const managed = useManagedOnboarding(cloud);
+  const managedCreateResetRef = useRef<(() => void) | undefined>(undefined);
+
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
       setSelected({ id: connector.id, name: connector.name });
@@ -198,28 +216,68 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       // The template details belong to the identity just created; a second Create without a new
       // Launch must not re-post it.
       clearIacConfirm();
+      managedCreateResetRef.current?.();
     }
   );
 
+  const createIdentity = useCallback(
+    (args: { roleArn: string; stackArn: string; iac: CloudConnectorIacState | undefined }) => {
+      const stack = args.stackArn.trim();
+      createConnector({
+        name: connectorName,
+        cloudProvider: 'aws',
+        accountType,
+        vars: {
+          role_arn: { value: args.roleArn, type: 'text' },
+        },
+        ...(hasPendingIacConfirm(args.iac) ? args.iac : {}),
+        ...(stack && !isStackArnInvalid(stack) ? { iac_deployment_id: stack } : {}),
+      });
+    },
+    [createConnector, connectorName, accountType]
+  );
+
   const handleCreate = useCallback(() => {
-    createConnector({
-      name: connectorName,
-      cloudProvider: 'aws',
+    createIdentity({ roleArn, stackArn: trimmedStackArn, iac: iacConfirm });
+  }, [createIdentity, roleArn, trimmedStackArn, iacConfirm]);
+
+  const managedCreate = useManagedStackCreate({
+    onComplete: ({ stackId, roleArn: createdRoleArn, iac }) => {
+      if (createdRoleArn) {
+        // Create straight away; the identity is selected on the Existing tab on success, so the
+        // read-only fields are only shown when the stack completed without a RoleArn output.
+        createIdentity({ roleArn: createdRoleArn, stackArn: stackId, iac });
+        return;
+      }
+      setStackArn(stackId);
+      setRoleArn('');
+    },
+  });
+  managedCreateResetRef.current = managedCreate.reset;
+
+  const startManagedCreate = useCallback(() => {
+    const stackParams = getWorkloadIdentityFederationStackParams(cloud);
+    const staticTemplate = getStaticTemplate({
+      provider: 'aws',
+      cloud,
       accountType,
-      vars: {
-        role_arn: { value: roleArn, type: 'text' },
-      },
-      ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
-      ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
+      iacTemplateUrl,
+      stackParams,
+    });
+    const templateUrl = getTemplateUrlFromQuickCreateUrl(staticTemplate.url);
+    managedCreate.start({
+      integrations: getRenderIntegrations({ integrations, packageName, policyTemplates }),
+      parameters: stackParams,
+      ...(templateUrl ? { templateUrl } : {}),
     });
   }, [
-    createConnector,
-    connectorName,
     accountType,
-    roleArn,
-    iacConfirm,
-    trimmedStackArn,
-    stackArnInvalid,
+    cloud,
+    iacTemplateUrl,
+    integrations,
+    managedCreate,
+    packageName,
+    policyTemplates,
   ]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
@@ -276,22 +334,31 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             <CloudFormationCloudCredentialsGuide accountType={accountType} />
           </EuiAccordion>
           <EuiSpacer size="l" />
-          <LaunchCloudFormationButton
-            launchButtonProps={launchButtonProps}
-            isLoading={isGeneratingTemplate}
-            // With the provisioner on the hook never disables the button, but a live render still
-            // needs the console URL that only `cloud` provides, so keep the old guard.
-            isDisabled={isLaunchDisabled || !cloud}
-            templateGenerationError={templateGenerationError}
-            data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
-            errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
-          />
+          {managed.isConfigured ? (
+            <ManagedStackProgress
+              state={managedCreate}
+              action="create"
+              onRetry={startManagedCreate}
+            />
+          ) : (
+            <LaunchCloudFormationButton
+              launchButtonProps={launchButtonProps}
+              isLoading={isGeneratingTemplate}
+              // With the provisioner on the hook never disables the button, but a live render still
+              // needs the console URL that only `cloud` provides, so keep the old guard.
+              isDisabled={isLaunchDisabled || !cloud}
+              templateGenerationError={templateGenerationError}
+              data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
+              errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
+            />
+          )}
           {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
               it is what the identity's details link to and what a later update targets. */}
           <EuiSpacer size="m" />
           <StackArnField
             value={stackArn}
             onChange={setStackArn}
+            readOnly={managed.isConfigured}
             data-test-subj="awsIdentityFederationSetup-stackArn"
           />
           <EuiSpacer size="m" />
@@ -313,6 +380,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               fullWidth
               value={roleArn}
               isInvalid={roleArnInvalid}
+              readOnly={managed.isConfigured}
               onChange={(e) => setRoleArn(e.target.value)}
               data-test-subj="awsIdentityFederationSetup-roleArn"
             />
@@ -320,18 +388,39 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isLoading={isCreating}
-                isDisabled={isCreateDisabled}
-                onClick={handleCreate}
-                data-test-subj="awsIdentityFederationSetup-createButton"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.awsIdentityFederationSetup.createButton"
-                  defaultMessage="Create Identity"
-                />
-              </EuiButton>
+              {managed.isConfigured ? (
+                <EuiButton
+                  fill
+                  iconType="play"
+                  isLoading={managedCreate.isRunning || isCreating}
+                  isDisabled={
+                    !cloud ||
+                    !!getCloudConnectorNameError(connectorName) ||
+                    managedCreate.isRunning ||
+                    isCreating
+                  }
+                  onClick={startManagedCreate}
+                  data-test-subj="awsIdentityFederationSetup-managedCreateButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.awsIdentityFederationSetup.managedCreateButton"
+                    defaultMessage="Create Identity from Kibana"
+                  />
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  fill
+                  isLoading={isCreating}
+                  isDisabled={isCreateDisabled}
+                  onClick={handleCreate}
+                  data-test-subj="awsIdentityFederationSetup-createButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.awsIdentityFederationSetup.createButton"
+                    defaultMessage="Create Identity"
+                  />
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -385,13 +474,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   ];
 
   return (
-    <CloudConnectorTabs
-      tabs={tabs}
-      selectedTabId={selectedTabId}
-      onTabClick={handleTabClick}
-      isEditPage={isEditPage}
-      cloudProvider="aws"
-      cloudConnectorsCount={cloudConnectors.length}
-    />
+    <>
+      <CloudConnectorTabs
+        tabs={tabs}
+        selectedTabId={selectedTabId}
+        onTabClick={handleTabClick}
+        isEditPage={isEditPage}
+        cloudProvider="aws"
+        cloudConnectorsCount={cloudConnectors.length}
+      />
+    </>
   );
 };

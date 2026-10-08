@@ -18,8 +18,14 @@ import {
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
+import { VERIFY_IAC_KEY_QUERY_KEY, useVerifyIacKey } from '../hooks/use_verify_iac_key';
 import { updateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useManagedOnboarding } from '../hooks/use_managed_onboarding';
+import {
+  getTemplateUrlFromQuickCreateUrl,
+  useManagedStackUpdate,
+} from '../hooks/use_managed_stack';
+import { getStaticTemplate, getWorkloadIdentityFederationStackParams } from '../utils';
 import {
   useCloudConnectorTemplate,
   type TemplateRendered,
@@ -28,6 +34,7 @@ import type { CloudSetupForCloudConnector } from '../types';
 import { AWS_PROVIDER } from '../constants';
 
 import { IacKeyCheckCallout } from './iac_key_check_callout';
+import { ManagedStackProgress } from './managed_stack_progress';
 
 /** Template details of a rendered template, in the shape the connector API stores it. */
 export interface IacRenderedTemplate {
@@ -166,6 +173,62 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       onTemplateRendered,
     });
 
+  // Managed onboarding (POC): Kibana runs the stack update itself and only lifts the block once
+  // CloudFormation reports UPDATE_COMPLETE (or that the stack is already current).
+  const managed = useManagedOnboarding(cloud);
+  const managedUpdate = useManagedStackUpdate({
+    onComplete: ({ iac }) => {
+      if (iac.iac_key && iac.iac_blueprint_id && iac.iac_blueprint_version) {
+        onTemplateRendered({
+          key: iac.iac_key,
+          integrations: data?.integrations ?? integrations,
+          blueprintId: iac.iac_blueprint_id,
+          blueprintVersion: iac.iac_blueprint_version,
+        });
+      } else if (cloudConnectorId) {
+        // Static template: nothing to record, but the stack is updated.
+        setLaunchedFor({ connectorId: cloudConnectorId, integrationsKey });
+      }
+      if (writeOnRender) {
+        queryClient.invalidateQueries([VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId]);
+      }
+    },
+    onUpToDate: () => {
+      if (cloudConnectorId) {
+        setLaunchedFor({ connectorId: cloudConnectorId, integrationsKey });
+      }
+      queryClient.invalidateQueries([VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId]);
+    },
+  });
+  const startManagedUpdate = useCallback(() => {
+    if (!cloudConnectorId) return;
+    // Same inputs as the console flow: the server renders via IaCP when it can and otherwise
+    // updates with the package's static template.
+    const parameters = getWorkloadIdentityFederationStackParams(cloud);
+    const templateUrl = getTemplateUrlFromQuickCreateUrl(
+      getStaticTemplate({
+        provider: AWS_PROVIDER,
+        cloud,
+        accountType: accountType ?? 'single-account',
+        iacTemplateUrl,
+        stackParams: parameters,
+      }).url
+    );
+    managedUpdate.start(cloudConnectorId, {
+      integrations: data?.integrations ?? integrations,
+      parameters,
+      ...(templateUrl ? { templateUrl } : {}),
+    });
+  }, [
+    accountType,
+    cloud,
+    cloudConnectorId,
+    data?.integrations,
+    iacTemplateUrl,
+    integrations,
+    managedUpdate,
+  ]);
+
   // A missing key blocks like a mismatched one: either way the deployed template is not known to
   // cover the selection.
   const isBlocking =
@@ -233,7 +296,20 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
         }}
         isUpdating={isGeneratingTemplate}
         updateLaunched={updateLaunched}
+        {...(managed.isConfigured && isBlocking && data.deploymentId
+          ? {
+              managedUpdate: {
+                onClick: () => {
+                  reportAction('update_stack_clicked');
+                  startManagedUpdate();
+                },
+                isRunning: managedUpdate.isRunning,
+                isUpdated: managedUpdate.phase === 'complete',
+              },
+            }
+          : {})}
       />
+      <ManagedStackProgress state={managedUpdate} action="update" onRetry={startManagedUpdate} />
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />

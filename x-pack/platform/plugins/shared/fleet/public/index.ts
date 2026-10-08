@@ -227,6 +227,14 @@ export const LazyAwsIdentityFederationSetup = lazy(() =>
 );
 export type { AwsIdentityFederationSetupProps } from './components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
 
+// Managed AWS onboarding (POC) opt-in callout, rendered by the onboarding wizard shell
+export const LazyManagedOnboardingCallout = lazy(() =>
+  import('./components/cloud_connector/components/managed_onboarding_callout').then((module) => ({
+    default: module.ManagedOnboardingCallout,
+  }))
+);
+export type { ManagedOnboardingCalloutProps } from './components/cloud_connector/components/managed_onboarding_callout';
+
 export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector/utils';
 
 // KibanaVersionContext — must be provided by any plugin that renders Fleet components

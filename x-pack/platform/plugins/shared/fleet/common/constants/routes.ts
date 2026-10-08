@@ -133,6 +133,15 @@ export const IAC_PROVISIONER_API_ROUTES = {
   RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
 };
 
+// Managed AWS onboarding (POC): Kibana creates and updates Federated Identity stacks via the AWS SDK
+export const AWS_ONBOARDING_API_ROUTES = {
+  CREDENTIALS_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/credentials`,
+  STACKS_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/stacks`,
+  STACK_INFO_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/stacks/{stackId}`,
+  STACK_UPDATE_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/cloud_connectors/{cloudConnectorId}/stack_update`,
+  BOOTSTRAP_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_template`,
+};
+
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {
   K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,

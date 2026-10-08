@@ -26,6 +26,16 @@ export interface IacKeyCheckCalloutProps {
    * console and continue; Update stays available to relaunch.
    */
   updateLaunched?: boolean;
+  /**
+   * Managed onboarding (POC): Kibana runs the stack update itself. When given, the primary action
+   * starts it and the console launch is demoted to a secondary action.
+   */
+  managedUpdate?: {
+    onClick: () => void;
+    isRunning: boolean;
+    /** The managed update finished; the copy says so instead of "opened in the console". */
+    isUpdated: boolean;
+  };
 }
 
 /** Renders null when the IAC key matches or there is no actionable reason. */
@@ -35,6 +45,7 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   onUpdateStack,
   isUpdating,
   updateLaunched = false,
+  managedUpdate,
 }) => {
   if (result.matches || !result.reason) {
     return null;
@@ -43,7 +54,12 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   // One message whether the stored key is missing (no_key) or mismatched: both mean the deployed
   // template does not cover the selection, and users are never told an identity "uses the static
   // template".
-  const title = updateLaunched ? (
+  const title = managedUpdate?.isUpdated ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.iacCheck.managedUpdatedTitle"
+      defaultMessage="CloudFormation stack updated"
+    />
+  ) : updateLaunched ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.launchedTitle"
       defaultMessage="CloudFormation stack update opened"
@@ -66,7 +82,12 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     </strong>
   );
 
-  const bodyText = updateLaunched ? (
+  const bodyText = managedUpdate?.isUpdated ? (
+    <FormattedMessage
+      id="xpack.fleet.cloudConnector.iacCheck.managedUpdatedBody"
+      defaultMessage="Kibana updated the stack in your AWS account. Continue to complete setup."
+    />
+  ) : updateLaunched ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.launchedBody"
       defaultMessage="Apply the update in the AWS console, then continue. The new services report once the stack is updated."
@@ -110,7 +131,37 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
       announceOnMount
       data-test-subj={CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT}
       text={text}
-      {...(canUpdate
+      {...(canUpdate && managedUpdate
+        ? {
+            actionProps: {
+              primary: {
+                iconType: 'play',
+                isLoading: managedUpdate.isRunning,
+                isDisabled: managedUpdate.isUpdated,
+                onClick: managedUpdate.onClick,
+                'data-test-subj': 'iacKeyCheck-managedUpdateButton',
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.iacCheck.managedUpdateButton"
+                    defaultMessage="Update stack from Kibana"
+                  />
+                ),
+              },
+              secondary: {
+                iconType: 'popout',
+                isLoading: isUpdating,
+                onClick: onUpdateStack,
+                'data-test-subj': CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON,
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.iacCheck.openInConsoleButton"
+                    defaultMessage="Open in AWS console instead"
+                  />
+                ),
+              },
+            },
+          }
+        : canUpdate
         ? {
             actionProps: {
               primary: {

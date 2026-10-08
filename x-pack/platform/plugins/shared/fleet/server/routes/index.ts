@@ -35,6 +35,7 @@ import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connecto
 import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
 import { registerRoutes as registerIacProvisionerRoutes } from './iac_provisioner';
+import { registerRoutes as registerAwsOnboardingRoutes } from './aws_onboarding';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -71,6 +72,7 @@ export function registerRoutes(
   registerCloudConnectorRoutes(fleetAuthzRouter);
   registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
   registerIacProvisionerRoutes(fleetAuthzRouter);
+  registerAwsOnboardingRoutes(fleetAuthzRouter);
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes

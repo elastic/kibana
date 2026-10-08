@@ -344,6 +344,9 @@ importers:
       '@aws-sdk/client-bedrock-runtime':
         specifier: 3.1089.0
         version: 3.1089.0
+      '@aws-sdk/client-cloudformation':
+        specifier: 3.1089.0
+        version: 3.1089.0
       '@babel/plugin-transform-class-static-block':
         specifier: 7.28.3
         version: 7.28.3(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
@@ -9938,6 +9941,10 @@ packages:
 
   '@aws-sdk/client-bedrock-runtime@3.1089.0':
     resolution: {integrity: sha512-vzaxap4+0rl+c+SDIAcu71OwkSEYtfu3TPxurB0wZJQ18hTZo4/PCCysqIGrWJqoollCy0ACAfSNUDShX/jj2w==}
+    engines: {node: '>=20.0.0'}
+
+  '@aws-sdk/client-cloudformation@3.1089.0':
+    resolution: {integrity: sha512-56kyaFKOnU0rE1DPTxIsmegpMb9z8uJJJpKjg+/6vynPbnGVHOAoxBxbVjCHhSLuozezVEM/k0T9g3fRzxy2tA==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/client-kendra@3.1089.0':
@@ -26514,6 +26521,17 @@ snapshots:
       '@aws-sdk/middleware-eventstream': 3.972.30
       '@aws-sdk/middleware-websocket': 3.972.54
       '@aws-sdk/token-providers': 3.1089.0
+      '@aws-sdk/types': 3.974.6
+      '@smithy/core': 3.35.1
+      '@smithy/fetch-http-handler': 5.8.0
+      '@smithy/node-http-handler': 4.9.13
+      '@smithy/types': 4.16.1
+      tslib: 2.8.1
+
+  '@aws-sdk/client-cloudformation@3.1089.0':
+    dependencies:
+      '@aws-sdk/core': 3.978.1
+      '@aws-sdk/credential-provider-node': 3.972.70
       '@aws-sdk/types': 3.974.6
       '@smithy/core': 3.35.1
       '@smithy/fetch-http-handler': 5.8.0
