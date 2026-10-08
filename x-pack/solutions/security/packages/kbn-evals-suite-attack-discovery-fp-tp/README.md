@@ -104,15 +104,17 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 `PayloadConformance` and `UnsafeClose` are constant at 1.000 (all models, all repetitions). `trajectory` is N/A: the managed agent declares no tools.
 
+What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` downgrade, which is only the `verdict: inconclusive` + truncated-source + `checks` omitted shape), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), a `false_positive` or `true_positive` verdict while completed world checks both support and contradict (rule 1 requires `inconclusive`; `alert_linkage` never decides), a `false_positive` without a completed world check contradicting and none supporting (rule 2), and a `true_positive` without `process_parent` or `network_destination` supporting, or with a world check contradicting (rule 3). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so new discriminating scenarios remain follow-up work. The 2026-10-05 baseline numbers above predate this change; a re-baseline is pending.
+
 ## Acceptance criteria (proposed)
 
-- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. Both are saturated — each measured 1.000 for every model and every repetition in the baseline above — so a passing gate proves nothing at this ceiling: neither evaluator can currently detect a regression. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
+- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. `PayloadConformance` now enforces the prompt's verdict rules 1-3, the missing-evidence rule, and world-check presence, so it can fail a wrong-but-well-formed answer; its threshold needs re-baselining against a new run. `UnsafeClose` is still saturated at 1.000 — no current scenario elicits a `false_positive` prediction on a non-FP gold, so it cannot detect a regression yet. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
 - `OutcomeAccuracy`: set the threshold against the baseline above, whose floor is gpt-5-5 at 0.754 (CI down to 0.580).
 
 ## Follow-ups (sample-workflow removal done)
 
 1. Add the claim-grounding evaluator.
 2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
+3. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
