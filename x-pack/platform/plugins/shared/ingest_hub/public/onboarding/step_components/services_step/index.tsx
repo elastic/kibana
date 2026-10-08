@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -106,26 +105,27 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       {agentBasedOnlySelected.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.ingestHub.servicesStep.agentBasedOnlyCallout.title', {
               defaultMessage: 'Some services require a self-managed Elastic Agent',
             })}
-            color="warning"
-            iconType="warning"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
+                  defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
+                  values={{
+                    count: agentBasedOnlySelected.length,
+                    services: (
+                      <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>
+                    ),
+                  }}
+                />
+              </p>
+            }
             data-test-subj="servicesStep-agentBasedOnlyCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
-                defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
-                values={{
-                  count: agentBasedOnlySelected.length,
-                  services: <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>,
-                }}
-              />
-            </p>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       )}
