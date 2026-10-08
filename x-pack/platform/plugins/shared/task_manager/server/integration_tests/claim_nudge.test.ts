@@ -235,7 +235,7 @@ describe('claim nudge', () => {
     }
   );
 
-  // That schedule() never nudges is covered by the 'does not notify the claim nudge' unit test.
+  // schedule() without requestImmediateClaim is covered by the 'does not notify the claim nudge' unit test.
   it('still runs a schedule() task', async () => {
     const taskManagerPlugin = await startKibanaWith({
       claim_strategy: 'mget',

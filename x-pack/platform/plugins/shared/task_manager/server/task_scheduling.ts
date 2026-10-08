@@ -60,6 +60,22 @@ const scheduleOptionsToStoreApiKeyOptions = (
   return Object.keys(storeOpts).length ? storeOpts : undefined;
 };
 
+const assertCanRequestImmediateClaim = (taskInstance: TaskInstanceWithDeprecatedFields): void => {
+  if (taskInstance.runAt != null) {
+    throw new Error(
+      'requestImmediateClaim requires the task to omit runAt so Task Manager can schedule it to run immediately'
+    );
+  }
+  if (taskInstance.schedule != null) {
+    throw new Error(
+      'requestImmediateClaim is only supported for ad-hoc tasks and cannot be used with a recurring schedule'
+    );
+  }
+  if (taskInstance.enabled === false) {
+    throw new Error('requestImmediateClaim cannot be used when scheduling a disabled task');
+  }
+};
+
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
@@ -176,24 +192,44 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const requestImmediateClaim = options?.requestImmediateClaim === true;
+    // The refresh only serves the nudge, so both are skipped together.
+    const nudge = requestImmediateClaim && this.claimNudgeEnabled;
+
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...omit(options, 'apiKey', 'request'),
+      ...omit(options, 'apiKey', 'request', 'requestImmediateClaim'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
+
+    if (requestImmediateClaim) {
+      assertCanRequestImmediateClaim(modifiedTask);
+    }
 
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule(
+    const storeApiKeyOptions = scheduleOptionsToStoreApiKeyOptions(options);
+    const storeOptions =
+      storeApiKeyOptions || nudge
+        ? { ...storeApiKeyOptions, ...(nudge ? { refresh: true } : {}) }
+        : undefined;
+
+    const scheduledTask = await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      scheduleOptionsToStoreApiKeyOptions(options)
+      storeOptions
     );
+
+    if (nudge) {
+      void this.notifyClaimNudge(scheduledTask.id, 'schedule');
+    }
+
+    return scheduledTask;
   }
 
   /**
@@ -204,7 +240,7 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: ScheduleOptions
+    options?: Omit<ScheduleOptions, 'requestImmediateClaim'>
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
@@ -456,23 +492,30 @@ export class TaskScheduling {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: ScheduleOptions
+    options?: Omit<ScheduleOptions, 'requestImmediateClaim'>
   ): Promise<TaskInstanceWithId> {
+    // Strip even if present at runtime: ScheduleOptions includes Record<string, unknown>, so
+    // Omit alone does not reliably exclude the key, and schedule() would otherwise honor it.
+    const scheduleOptions = options ? omit(options, 'requestImmediateClaim') : undefined;
+
     // Scheduling grants the API keys before it writes the task, so scheduling an id that already
     // exists mints a key pair that the version conflict below then throws away. Callers treat this
     // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
     // leaking a key pair per call. Racing callers still land on the conflict path. The store's
     // predicate keeps this guard aligned with the actual grant condition (and skips the lookup
     // when no key would be granted anyway, e.g. security disabled).
-    if (this.store.willGrantApiKeys(options) && (await this.store.taskExists(taskInstance.id))) {
-      return this.updateScheduleOfExistingTask(taskInstance, options);
+    if (
+      this.store.willGrantApiKeys(scheduleOptions) &&
+      (await this.store.taskExists(taskInstance.id))
+    ) {
+      return this.updateScheduleOfExistingTask(taskInstance, scheduleOptions);
     }
 
     try {
-      return await this.schedule(taskInstance, options);
+      return await this.schedule(taskInstance, scheduleOptions);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
-        return this.updateScheduleOfExistingTask(taskInstance, options);
+        return this.updateScheduleOfExistingTask(taskInstance, scheduleOptions);
       }
       throw err;
     }
@@ -480,7 +523,7 @@ export class TaskScheduling {
 
   private async updateScheduleOfExistingTask(
     taskInstance: TaskInstanceWithId,
-    options?: ScheduleOptions
+    options?: Omit<ScheduleOptions, 'requestImmediateClaim'>
   ): Promise<TaskInstanceWithId> {
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule

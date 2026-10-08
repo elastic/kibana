@@ -227,6 +227,22 @@ describe('TaskStore', () => {
       });
     });
 
+    test('passes refresh through to saved objects create', async () => {
+      const task = {
+        id: 'id',
+        params: {},
+        state: {},
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+      await testSchedule(task, { refresh: true });
+
+      expect(savedObjectsClient.create).toHaveBeenCalledWith('task', expect.any(Object), {
+        id: 'id',
+        refresh: true,
+      });
+    });
+
     test('returns a concrete task instance', async () => {
       const task = {
         params: { hello: 'world' },

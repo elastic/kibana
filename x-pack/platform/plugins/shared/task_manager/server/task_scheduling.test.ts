@@ -164,6 +164,87 @@ describe('TaskScheduling', () => {
     expect(claimNudgeService.notify).not.toHaveBeenCalled();
   });
 
+  test('notifies the claim nudge and refreshes when requestImmediateClaim is true', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+    mockTaskStore.schedule.mockResolvedValueOnce(taskManagerMock.createTask({ id: 'my-foo-id' }));
+    claimNudgeService.notify.mockResolvedValueOnce(undefined);
+
+    await taskScheduling.schedule(task, { requestImmediateClaim: true });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      { refresh: true }
+    );
+    expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
+    expect(recordClaimNudgeSpy).toHaveBeenCalledWith('schedule');
+  });
+
+  test('rejects requestImmediateClaim when runAt is set', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+    await expect(
+      taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {}, runAt: new Date() },
+        { requestImmediateClaim: true }
+      )
+    ).rejects.toThrow(/omit runAt/);
+
+    expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+  });
+
+  test('rejects requestImmediateClaim when schedule is set', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+    await expect(
+      taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {}, schedule: { interval: '1m' } },
+        { requestImmediateClaim: true }
+      )
+    ).rejects.toThrow(/ad-hoc tasks/);
+
+    expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+  });
+
+  test('rejects requestImmediateClaim when the task is disabled', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+    await expect(
+      taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {}, enabled: false },
+        { requestImmediateClaim: true }
+      )
+    ).rejects.toThrow(/disabled task/);
+
+    expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+  });
+
+  test('does not attempt to notify or force a refresh when no claim nudge service is configured', async () => {
+    const taskScheduling = new TaskScheduling(omit(taskSchedulingOpts, 'claimNudgeService'));
+    mockTaskStore.schedule.mockResolvedValueOnce(taskManagerMock.createTask({ id: 'my-foo-id' }));
+
+    await taskScheduling.schedule(
+      { taskType: 'foo', params: {}, state: {} },
+      { requestImmediateClaim: true }
+    );
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(expect.anything(), undefined);
+    expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
+  });
+
   test('allows scheduling tasks that are disabled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const task = {
@@ -202,13 +283,10 @@ describe('TaskScheduling', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
-  test('does not notify the claim nudge when ensureScheduled finds the task already scheduled', async () => {
+  test('strips requestImmediateClaim so a successful create does not nudge', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    mockTaskStore.schedule.mockRejectedValueOnce({
-      statusCode: 409,
-    });
+    mockTaskStore.schedule.mockResolvedValueOnce(taskManagerMock.createTask({ id: 'my-foo-id' }));
 
-    // Nothing became claimable: the existing task keeps its own runAt.
     await taskScheduling.ensureScheduled(
       {
         id: 'my-foo-id',
@@ -216,33 +294,11 @@ describe('TaskScheduling', () => {
         params: {},
         state: {},
       },
-      { requestImmediateClaim: true }
+      // ScheduleOptions includes Record<string, unknown>; pass through despite Omit.
+      { requestImmediateClaim: true } as Parameters<TaskScheduling['ensureScheduled']>[1]
     );
 
-    expect(claimNudgeService.notify).not.toHaveBeenCalled();
-  });
-
-  test('does not notify the claim nudge when a 409 reschedules an existing recurring task', async () => {
-    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    jest
-      .spyOn(taskScheduling, 'bulkUpdateSchedules')
-      .mockResolvedValue({ tasks: [getTask()], errors: [] });
-    mockTaskStore.schedule.mockRejectedValueOnce({
-      statusCode: 409,
-    });
-
-    // The 409 path moves `runAt` here, but the task already existed, so there is nothing to nudge.
-    await taskScheduling.ensureScheduled(
-      {
-        id: 'my-foo-id',
-        taskType: 'foo',
-        params: {},
-        state: {},
-        schedule: { interval: '1m' },
-      },
-      { requestImmediateClaim: true }
-    );
-
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(expect.anything(), undefined);
     expect(claimNudgeService.notify).not.toHaveBeenCalled();
   });
 
@@ -1837,9 +1893,11 @@ describe('TaskScheduling', () => {
     test('ignores requestImmediateClaim: it neither nudges nor forces a refresh', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      await taskScheduling.bulkSchedule([{ taskType: 'foo', params: {}, state: {} }], {
-        requestImmediateClaim: true,
-      });
+      await taskScheduling.bulkSchedule(
+        [{ taskType: 'foo', params: {}, state: {} }],
+        // requestImmediateClaim is omitted from bulkSchedule's options type
+        { requestImmediateClaim: true } as Parameters<TaskScheduling['bulkSchedule']>[1]
+      );
 
       expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith(expect.anything(), undefined);
       expect(claimNudgeService.notify).not.toHaveBeenCalled();
