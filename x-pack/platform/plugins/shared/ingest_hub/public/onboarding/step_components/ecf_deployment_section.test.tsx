@@ -481,11 +481,27 @@ describe('EcfDeploymentSection', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('is hidden when the family is stale (Update stack is shown instead)', () => {
+    it('is visible when stale with no valid ARN (user may not have deployed yet)', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
         stackArns: {},
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      // Launch button stays visible — without an ARN the stack may not exist so re-launch is valid
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('is hidden when stale with a valid ARN (Update stack is shown instead)', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
         isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
       });
       expect(

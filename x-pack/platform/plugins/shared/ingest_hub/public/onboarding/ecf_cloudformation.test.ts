@@ -644,6 +644,14 @@ describe('isEcfStackArnValid()', () => {
       )
     ).toBe(false);
   });
+
+  it('rejects a unique ID containing an embedded space', () => {
+    expect(
+      isEcfStackArnValid(
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc123 trailing'
+      )
+    ).toBe(false);
+  });
 });
 
 // ── buildEcfStackConsoleUrl ────────────────────────────────────────────────────

@@ -716,6 +716,41 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       expect(screen.queryByTestId('mock-ecf-launch-btn')).not.toBeInTheDocument();
     });
+
+    it('merges newly-added services into instances passed to useEcfDeployment', () => {
+      const vpcflowService: AwsServiceMatrixEntry = { ...ecfService, id: 'vpcflow', name: 'AWS VPC Flow' };
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail', 'vpcflow'], dataFormat: 'json' },
+        awsServicesMap: new Map([
+          ['cloudtrail', ecfService],
+          ['vpcflow', vpcflowService],
+        ]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+      // Session storage only recorded cloudtrail (vpcflow was added after the session snapshot)
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [
+            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'AWS CloudTrail', isDuplicate: false },
+          ],
+        },
+        jest.fn(),
+      ]);
+      renderStep();
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          instances: expect.arrayContaining([
+            expect.objectContaining({ serviceId: 'cloudtrail' }),
+            expect.objectContaining({ serviceId: 'vpcflow' }),
+          ]),
+        })
+      );
+    });
   });
 
   describe('ECF + MI both present', () => {

@@ -587,10 +587,9 @@ const EcfFamilyPanel = ({
 }: EcfFamilyPanelProps) => {
   const isArnValid = isEcfStackArnValid(stackArn.trim());
 
-  // Show the Launch button until the user has provided a valid ARN. When stale (services changed),
-  // hide the Launch button and show the Update button in the stale callout instead — re-launching
-  // would create a new stack rather than update the existing one.
-  const showLaunchButton = !isLaunched || (!isArnValid && !isStale);
+  // Show the Launch button until the user provides a valid ARN. When stale with a valid ARN the
+  // Update button in the stale callout is shown instead — re-launching would create a new stack.
+  const showLaunchButton = !isLaunched || !isArnValid;
 
   return (
     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>

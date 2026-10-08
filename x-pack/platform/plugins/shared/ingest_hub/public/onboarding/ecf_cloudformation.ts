@@ -80,12 +80,12 @@ export interface EcfServiceConfig {
 /**
  * Matches a complete CloudFormation stack ARN and captures the partition and region.
  * Format: arn:PARTITION:cloudformation:REGION:ACCOUNT:stack/STACK_NAME/UNIQUE_ID
- * The `[^/]+/[^/]+$` after `stack/` ensures both stack name and unique ID are present,
- * and the `$` anchor rejects trailing garbage after the unique ID.
+ * The unique ID segment is restricted to hex digits and hyphens to reject embedded spaces or
+ * other characters that the AWS console never produces.
  * Supports standard (aws), GovCloud (aws-us-gov), and China (aws-cn) partitions.
  */
 const CFN_STACK_ARN_REGEX =
-  /^arn:(aws(?:-us-gov|-cn)?):cloudformation:([a-z0-9-]+):\d+:stack\/[^/]+\/[^/]+$/;
+  /^arn:(aws(?:-us-gov|-cn)?):cloudformation:([a-z0-9-]+):\d+:stack\/[^/]+\/[0-9a-fA-F-]+$/;
 
 /** Returns true when the trimmed value is a well-formed CloudFormation stack ARN. */
 export const isEcfStackArnValid = (arn: string): boolean => CFN_STACK_ARN_REGEX.test(arn.trim());
