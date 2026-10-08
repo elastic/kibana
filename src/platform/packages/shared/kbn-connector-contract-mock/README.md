@@ -54,10 +54,14 @@ Examples and samples use the lowest declared 2xx response (then `2XX`, then `def
 
 ## Pagination
 
-Operations listed in `pagination` (method, path template and a descriptor from the connector's manifest) serve a virtual collection of `collectionSize` items (default 3), built from the first item of the response they would otherwise get, with distinct `id`s. The request's cursor, offset or page number and page size select a slice:
+Operations listed in `pagination` (method, path template and a descriptor from the connector's manifest) serve a virtual collection of `collectionSize` items (default 3), built from the first item of the response they would otherwise get, with distinct `id`s. The request's cursor, offset or page number and page size select a slice. For `cursor`, `offset` and `page`, `request.in` says whether they are read from the query (default), the JSON body or headers:
 
-- `cursor`: the next cursor is written at `nextPath` (and `hasMorePath`, if given); the last page signals the end as the vendor does (`empty_string`, `null` or `missing`). Cursors are opaque positions; a cursor the mock didn't issue gets **400**.
+- `cursor`: the next cursor is written at `nextPath` in the body, or in the `nextPath` header with `response.in: 'header'` (and at `hasMorePath`, if given); the last page signals the end as the vendor does (`empty_string`, `null` or `missing`). Cursors are opaque positions; a cursor the mock didn't issue gets **400**.
 - `offset` and `page`: the total is written at `totalPath`, if given.
+- `link`: the next page's URL is sent in a `Link: <url>; rel="next"` header, as on GitHub, and left out on the last page.
+- `next_url`: the next page's URL is written at `nextPath` in the body, as with Microsoft Graph's `@odata.nextLink`, and is `null` or missing on the last page.
+
+Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`.
 
 Page sizes above the vendor's `maximum` already get **422** from request validation.
 

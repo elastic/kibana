@@ -14,10 +14,15 @@ export type {
   ContractMockOptions,
 } from './src/fetch/create_contract_mock_fetch';
 export type {
+  CursorRequest,
+  NextUrlRequest,
+  OffsetRequest,
+  PageNumberRequest,
   PaginatedOperation,
   PaginationDescriptor,
   PaginationEnd,
   PaginationOptions,
+  PaginationParameterLocation,
 } from './src/engine/paginate';
 export type {
   OperationRef,
