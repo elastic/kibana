@@ -129,7 +129,12 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
-          <EuiPanel hasBorder hasShadow={false} data-test-subj="streamsSlackAppCard">
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            css={{ maxWidth: 800 }}
+            data-test-subj="streamsSlackAppCard"
+          >
             <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoSlack" size="l" aria-hidden={true} />
