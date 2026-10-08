@@ -70,7 +70,7 @@ const makeEsql = (scenario: Scenario, failOn?: (query: string) => Error | undefi
   });
 
 const makeSearch = () =>
-  jest.fn(async (params: { aggs?: unknown }) =>
+  jest.fn(async (params: { aggs?: unknown; runtime_mappings?: unknown; query?: unknown }) =>
     params.aggs
       ? {
           hits: { hits: [] },
@@ -174,6 +174,32 @@ describe('buildGlance', () => {
       { type: 'host', level: 'Critical', count: 1 },
       { type: 'host', level: 'Low', count: 4 },
     ]);
+  });
+
+  it('uses the requested time range for current windows, not the 24h default', async () => {
+    const esql = makeEsql(defaultScenario);
+    await buildGlance(makeContext(esql, makeSearch()));
+    const queries = esql.mock.calls.map(([{ query }]) => query);
+    const alertsCurrent = queries.find(
+      (query) => query.includes('.alerts-security.alerts-') && query.includes('alerts_count')
+    );
+    expect(alertsCurrent).toContain('- 7d');
+    const riskCurrent = queries.filter((query) => query.includes('FIRST(risk_score'));
+    expect(riskCurrent.some((query) => query.includes('- 170h'))).toBe(true);
+    expect(queries.some((query) => query.includes('level_num') && query.includes('- 170h'))).toBe(
+      true
+    );
+  });
+
+  it('prefers resolution risk for golden entities in posture and leaders', async () => {
+    const search = makeSearch();
+    await buildGlance(makeContext(makeEsql(defaultScenario), search));
+    for (const [params] of search.mock.calls) {
+      const mappings = JSON.stringify(params.runtime_mappings);
+      expect(mappings).toContain('entity.relationships.resolution.risk.calculated_score_norm');
+      expect(mappings).toContain('entity.risk.calculated_score_norm');
+      expect(JSON.stringify(params.query)).toContain('resolved_to');
+    }
   });
 
   it('pins every window to the fixed now and never pulls id lists for counts', async () => {

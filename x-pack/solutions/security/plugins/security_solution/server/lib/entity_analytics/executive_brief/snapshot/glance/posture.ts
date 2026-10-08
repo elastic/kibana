@@ -14,10 +14,40 @@ import { MAX_EXPOSURE_LEADERS } from '../../../../../../common/entity_analytics/
 import type { SnapshotContext } from '../context';
 import { QUERY_TIMEOUT_MS } from './esql';
 
-const SCORE_FIELD = 'entity.risk.calculated_score_norm';
-const LEVEL_FIELD = 'entity.risk.calculated_level';
-const TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
+const RESOLUTION_RISK_PREFIX = 'entity.relationships.resolution.risk';
+const ENTITY_RISK_PREFIX = 'entity.risk';
+/** Runtime fields: a golden entity's risk lives under resolution risk, others under entity.risk. */
+const SCORE_FIELD = 'brief_risk_norm';
+const LEVEL_FIELD = 'brief_risk_level';
+
+const preferResolutionRisk = (suffix: string): string => {
+  const resolution = `${RESOLUTION_RISK_PREFIX}.${suffix}`;
+  const own = `${ENTITY_RISK_PREFIX}.${suffix}`;
+  return `
+    if (doc.containsKey('${resolution}') && doc['${resolution}'].size() > 0) {
+      emit(doc['${resolution}'].value);
+    } else if (doc.containsKey('${own}') && doc['${own}'].size() > 0) {
+      emit(doc['${own}'].value);
+    }`
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+export const RISK_RUNTIME_MAPPINGS = {
+  [SCORE_FIELD]: {
+    type: 'double' as const,
+    script: { source: preferResolutionRisk('calculated_score_norm') },
+  },
+  [LEVEL_FIELD]: {
+    type: 'keyword' as const,
+    script: { source: preferResolutionRisk('calculated_level') },
+  },
+};
+
+/** Golden view: alias entities are collapsed into the entity they resolve to. */
+const GOLDEN_ONLY = { must_not: [{ exists: { field: RESOLVED_TO_FIELD } }] };
+const TYPE_FIELD = 'entity.EngineMetadata.Type';
 
 interface PostureAggs {
   avgScore: { value: number | null };
@@ -53,7 +83,8 @@ export const getPosture = async (ctx: SnapshotContext, latestIndex: string): Pro
     {
       index: latestIndex,
       size: 0,
-      query: { exists: { field: SCORE_FIELD } },
+      runtime_mappings: RISK_RUNTIME_MAPPINGS,
+      query: { bool: { filter: [{ exists: { field: SCORE_FIELD } }], ...GOLDEN_ONLY } },
       aggs: {
         avgScore: { avg: { field: SCORE_FIELD } },
         byType: {
@@ -114,12 +145,8 @@ export const getExposureLeaders = async (
       index: latestIndex,
       size: MAX_EXPOSURE_LEADERS,
       _source: ['entity.id'],
-      query: {
-        bool: {
-          filter: [{ exists: { field: SCORE_FIELD } }],
-          must_not: [{ exists: { field: RESOLVED_TO_FIELD } }],
-        },
-      },
+      runtime_mappings: RISK_RUNTIME_MAPPINGS,
+      query: { bool: { filter: [{ exists: { field: SCORE_FIELD } }], ...GOLDEN_ONLY } },
       sort: [{ [SCORE_FIELD]: { order: 'desc' } }, { 'entity.id': { order: 'asc' } }],
     },
     { signal }

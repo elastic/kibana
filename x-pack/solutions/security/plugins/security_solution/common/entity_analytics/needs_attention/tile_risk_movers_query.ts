@@ -62,7 +62,7 @@ export const buildRiskMoversCountQuery = (
   entitiesIndexName: string,
   window: ComparisonWindow = riskMoversWindow(),
   entityFilterClauses: string[] = [],
-  { includeIds = true, sampleLimit }: TileCountQueryOptions = {}
+  { includeIds = true, sampleLimit, riskMoversBaseline = 'boundary' }: TileCountQueryOptions = {}
 ): string => {
   const index = `risk-score.risk-score-${spaceId}`;
   const upperBoundClause = window.upperBound
@@ -75,12 +75,19 @@ export const buildRiskMoversCountQuery = (
     `| EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`,
     `| WHERE entity_euid IS NOT NULL`,
-    `| EVAL period = CASE(@timestamp <= NOW() - ${window.boundary}, "boundary", "current")`,
-    `| STATS score = LAST(risk_score, @timestamp) BY entity_euid, period`,
-    `| EVAL current_score  = CASE(period == "current",  score, null)`,
-    `| EVAL boundary_score = CASE(period == "boundary", score, null)`,
-    `| STATS current_score = MAX(current_score), boundary_score = MAX(boundary_score) BY entity_euid`,
-    `| WHERE current_score IS NOT NULL AND boundary_score IS NOT NULL AND current_score - boundary_score >= 10`,
+    ...(riskMoversBaseline === 'earliest'
+      ? [
+          `| STATS current_score = LAST(risk_score, @timestamp), boundary_score = FIRST(risk_score, @timestamp), docs = COUNT(*) BY entity_euid`,
+          `| WHERE docs > 1 AND current_score IS NOT NULL AND boundary_score IS NOT NULL AND current_score - boundary_score >= 10`,
+        ]
+      : [
+          `| EVAL period = CASE(@timestamp <= NOW() - ${window.boundary}, "boundary", "current")`,
+          `| STATS score = LAST(risk_score, @timestamp) BY entity_euid, period`,
+          `| EVAL current_score  = CASE(period == "current",  score, null)`,
+          `| EVAL boundary_score = CASE(period == "boundary", score, null)`,
+          `| STATS current_score = MAX(current_score), boundary_score = MAX(boundary_score) BY entity_euid`,
+          `| WHERE current_score IS NOT NULL AND boundary_score IS NOT NULL AND current_score - boundary_score >= 10`,
+        ]),
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
     `| WHERE entity.name IS NOT NULL`,

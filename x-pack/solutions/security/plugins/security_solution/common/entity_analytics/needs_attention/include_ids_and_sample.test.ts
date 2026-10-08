@@ -50,6 +50,16 @@ describe('includeIds / sampleLimit options', () => {
   });
 });
 
+describe('riskMoversBaseline earliest', () => {
+  it('compares the latest score with the first score inside the window', () => {
+    const query = buildRiskMoversCountQuery('default', 'idx', undefined, [], {
+      riskMoversBaseline: 'earliest',
+    });
+    expect(query).toContain('FIRST(risk_score, @timestamp)');
+    expect(query).not.toContain('period');
+  });
+});
+
 describe('pinQueryNow', () => {
   it('replaces every NOW()', () => {
     const pinned = pinQueryNow('WHERE a >= NOW() - 24h AND b < NOW()', '2026-10-08T00:00:00.000Z');

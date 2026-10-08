@@ -17,11 +17,18 @@ export interface TileCountQueryOptions {
    * `effective_id`.
    */
   sampleLimit?: number;
+  /**
+   * Risk movers only. `'boundary'` (default) compares the score now with the last score at or before
+   * the window start, so it needs risk history reaching back past the window. `'earliest'` compares
+   * with the first score inside the window, which still finds movers when history is shorter.
+   */
+  riskMoversBaseline?: 'boundary' | 'earliest';
 }
 
 /** Ranked, capped tail used by every tile when `sampleLimit` is set. */
 export const buildSampleTail = (sampleLimit: number): string[] => [
-  `| STATS risk_score = MAX(entity.risk.calculated_score_norm) BY effective_id`,
+  // Golden entities keep their risk under resolution risk; others under entity.risk.
+  `| STATS risk_score = MAX(COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm)) BY effective_id`,
   `| SORT risk_score DESC NULLS LAST, effective_id ASC`,
   `| LIMIT ${Math.max(1, Math.floor(sampleLimit))}`,
   `| KEEP effective_id`,

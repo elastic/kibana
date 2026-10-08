@@ -19,6 +19,7 @@ import {
 } from '../../../../../../common/entity_analytics/executive_brief/constants';
 import {
   alertsPrevWindow,
+  alertsWindow,
   buildAlertBasedTilesQuery,
   buildAlertBasedTilesTrailingSeriesQuery,
   buildNewlyHighCriticalCountQuery,
@@ -27,10 +28,12 @@ import {
   buildRiskMoversTrailingSeriesQuery,
   getDeltaPercentage,
   newlyHighCriticalPrevWindow,
+  newlyHighCriticalWindow,
   parseAlertBasedTilesResponse,
   parseAlertBasedTilesTrend,
   pinQueryNow,
   riskMoversPrevWindow,
+  riskMoversWindow,
   TRAILING_WINDOW,
   type TimeRange,
 } from '../../../../../../common/entity_analytics/needs_attention';
@@ -105,7 +108,7 @@ const buildTileQueries = (
   switch (tileId) {
     case 'entitiesWithAlerts':
       return {
-        count: buildAlertBasedTilesQuery(euid, latestIndex, spaceId, undefined, [], {
+        count: buildAlertBasedTilesQuery(euid, latestIndex, spaceId, alertsWindow(range), [], {
           includeIds: false,
         }),
         previous: buildAlertBasedTilesQuery(
@@ -116,7 +119,7 @@ const buildTileQueries = (
           [],
           { includeIds: false }
         ),
-        sample: buildAlertBasedTilesQuery(euid, latestIndex, spaceId, undefined, [], {
+        sample: buildAlertBasedTilesQuery(euid, latestIndex, spaceId, alertsWindow(range), [], {
           sampleLimit: MAX_TILE_SAMPLE,
         }),
         series: buildAlertBasedTilesTrailingSeriesQuery(euid, latestIndex, spaceId, range, []),
@@ -126,14 +129,17 @@ const buildTileQueries = (
       };
     case 'riskMovers':
       return {
-        count: buildRiskMoversCountQuery(spaceId, latestIndex, undefined, [], {
+        count: buildRiskMoversCountQuery(spaceId, latestIndex, riskMoversWindow(range), [], {
           includeIds: false,
+          riskMoversBaseline: 'earliest',
         }),
         previous: buildRiskMoversCountQuery(spaceId, latestIndex, riskMoversPrevWindow(range), [], {
           includeIds: false,
+          riskMoversBaseline: 'earliest',
         }),
-        sample: buildRiskMoversCountQuery(spaceId, latestIndex, undefined, [], {
+        sample: buildRiskMoversCountQuery(spaceId, latestIndex, riskMoversWindow(range), [], {
           sampleLimit: RISK_MOVERS_SAMPLE_LIMIT,
+          riskMoversBaseline: 'earliest',
         }),
         series: buildRiskMoversTrailingSeriesQuery(spaceId, latestIndex, range, []),
         sampleLimit: RISK_MOVERS_SAMPLE_LIMIT,
@@ -142,9 +148,15 @@ const buildTileQueries = (
       };
     case 'newlyHighCritical':
       return {
-        count: buildNewlyHighCriticalCountQuery(spaceId, latestIndex, undefined, [], {
-          includeIds: false,
-        }),
+        count: buildNewlyHighCriticalCountQuery(
+          spaceId,
+          latestIndex,
+          newlyHighCriticalWindow(range),
+          [],
+          {
+            includeIds: false,
+          }
+        ),
         previous: buildNewlyHighCriticalCountQuery(
           spaceId,
           latestIndex,
@@ -152,9 +164,15 @@ const buildTileQueries = (
           [],
           { includeIds: false }
         ),
-        sample: buildNewlyHighCriticalCountQuery(spaceId, latestIndex, undefined, [], {
-          sampleLimit: MAX_TILE_SAMPLE,
-        }),
+        sample: buildNewlyHighCriticalCountQuery(
+          spaceId,
+          latestIndex,
+          newlyHighCriticalWindow(range),
+          [],
+          {
+            sampleLimit: MAX_TILE_SAMPLE,
+          }
+        ),
         series: buildNewlyHighCriticalTrailingSeriesQuery(spaceId, latestIndex, range, []),
         sampleLimit: MAX_TILE_SAMPLE,
         parseCount: readValue,
