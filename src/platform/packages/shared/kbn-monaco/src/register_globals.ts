@@ -10,6 +10,7 @@
 import { monaco } from './monaco_imports';
 import type { CustomLangModuleType } from './types';
 import { getWorker } from './languages/worker_factory';
+import { scopeLanguageTheme } from './language_theme_scope';
 
 declare module 'monaco-editor/editor/editor.api' {
   export interface Environment {
@@ -115,6 +116,10 @@ Object.defineProperties(monaco.editor, {
         throw new Error(`Language theme resolver for ${langId} is already registered`);
       }
       languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
+      // Shipping a theme for a language is what opts it into scoped theming: its rules are
+      // namespaced to its own tokens so they can't repaint another language's, and vice versa.
+      // See `language_theme_scope.ts` for why Monaco can't scope per editor instead.
+      scopeLanguageTheme(langId);
     }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
     enumerable: true,
     configurable: false,
