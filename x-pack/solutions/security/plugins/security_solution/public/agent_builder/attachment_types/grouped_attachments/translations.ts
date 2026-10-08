@@ -32,3 +32,15 @@ export const alertsTitle = (count: number) =>
     defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
     values: { count },
   });
+
+export const rulesTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.rulesTitle', {
+    defaultMessage: '{count} {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const attacksTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.attacksTitle', {
+    defaultMessage: '{count} {count, plural, one {attack} other {attacks}}',
+    values: { count },
+  });

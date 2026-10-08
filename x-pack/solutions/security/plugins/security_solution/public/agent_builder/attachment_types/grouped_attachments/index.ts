@@ -13,4 +13,7 @@ export {
   RULE_FALLBACK_TITLE,
   RULE_SUBTITLE,
   alertsTitle,
+  attacksTitle,
+  rulesTitle,
 } from './translations';
+export { buildPageTimerange, encodePageParam } from './page_url';

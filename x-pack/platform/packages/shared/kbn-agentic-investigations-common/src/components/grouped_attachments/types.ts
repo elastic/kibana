@@ -14,6 +14,13 @@ export enum FlyoutGroupedAttachments {
   RULES = 'rules',
 }
 
+/** The order the flyouts list the groups in; a registered group not listed here does not render. */
+export const FLYOUT_GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
+  FlyoutGroupedAttachments.ALERTS,
+  FlyoutGroupedAttachments.ATTACKS,
+  FlyoutGroupedAttachments.RULES,
+];
+
 export interface FlyoutGroupedAttachmentRendererProps {
   attachments: UnknownAttachment[];
 }
