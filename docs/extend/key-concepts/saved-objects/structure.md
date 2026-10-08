@@ -215,7 +215,7 @@ For implementation examples, see [Update: Use-case examples](update.md#use-case-
 
 #### update [_update]
 
-Optional. A `@kbn/config-schema` object type schema used to validate document attributes during `update` and `bulkUpdate` operations. Only the latest model version's `update` schema is used; when it is absent, updates are not validated. Once a model version defines `update`, all later model versions must define it too (enforced by the saved objects CI check).
+Optional. A `@kbn/config-schema` object type schema used to validate document attributes during `update` and `bulkUpdate` operations. Only the latest model version's `update` schema is used; when it is absent, updates are not validated. Once a model version defines `update`, all later model versions must define it too (enforced by the saved objects CI check). Once an `update` schema has shipped, it is held to the same snapshot diff as `create`: removing it, removing a field, changing a field type, or adding a required field fails the check.
 
 The schema is applied to the full document that is about to be indexed: the stored document is fetched, migrated to the latest model version, and merged with the provided attributes before validation. Because existing documents may contain fields that are not part of the current `create` schema, reuse the `create` schema while ignoring unknown fields:
 
