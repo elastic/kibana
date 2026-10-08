@@ -30,6 +30,22 @@ const { fetch, calls } = createContractMockFetch({ specs: { v1: datadogV1, v2: d
 
 Each call's `matched.source` then says which spec answered it. Fixtures, recordings and pagination entries can name a `source` next to their method and path template to apply to that spec only; without one, they apply to the operation in every spec.
 
+## Server mode
+
+A running Kibana can't use an in-process `fetch`, so the mock can also sit behind an HTTP forward proxy, which Kibana reaches through `xpack.actions.proxyUrl`:
+
+```ts
+import { createCertificateAuthority, createContractMockProxy } from '@kbn/connector-contract-mock';
+
+const certificateAuthority = createCertificateAuthority();
+const proxy = createContractMockProxy({ fetch: mock.fetch, certificateAuthority });
+const proxyUrl = await proxy.listen(8080);
+```
+
+Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendor hosts in connector code and config need no changes. Plain HTTP requests arrive in absolute form (`GET http://vendor.example/path`). HTTPS ones arrive through `CONNECT` tunnels, whose TLS the proxy terminates with a certificate for the requested host, issued on first use by `certificateAuthority`. Requests sent to the proxy as if it were the vendor get **400**, and errors thrown by `fetch` **502**.
+
+Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
+
 ## Credentials
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.

@@ -8,6 +8,13 @@
  */
 
 export { createContractMockFetch } from './src/fetch/create_contract_mock_fetch';
+export { createCertificateAuthority } from './src/server/certificate_authority';
+export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
+export { createContractMockProxy } from './src/server/create_contract_mock_proxy';
+export type {
+  ContractMockProxy,
+  ContractMockProxyOptions,
+} from './src/server/create_contract_mock_proxy';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';

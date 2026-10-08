@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-connector-contract-mock
 dependsOn:
   - '@kbn/safer-lodash-set'
+  - '@kbn/actions-utils'
+  - '@kbn/logging-mocks'
 tags:
   - test-helper
   - package
