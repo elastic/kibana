@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { schema } from '@kbn/config-schema';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 
-export const hasProfilingData = (status?: ProfilingStatus): boolean =>
-  status?.isEnabled === true && (status.otel.hasData || status.universalProfiling.hasData);
+export const profilingSchemaParam = schema.maybe(
+  schema.oneOf([schema.literal(ProfilingSchema.ECS), schema.literal(ProfilingSchema.OTEL)])
+);
