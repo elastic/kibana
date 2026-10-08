@@ -337,6 +337,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           onChangeDataView={onChangeDataView}
           onAddField={createField}
           onDataViewCreated={createNewDataView}
+          showDataViewLabel={false}
           trigger={{
             label: selectedDataView?.getName() || '',
             'data-test-subj': 'dataView-switch-link',

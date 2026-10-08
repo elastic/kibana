@@ -49,6 +49,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
       data-test-subj="aggregate-query-top-nav-menu"
       data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
       data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
+      data-show-data-view-label={String(dataViewPickerComponentProps?.showDataViewLabel)}
       data-disable-submit-action={String(Boolean(disableSubmitAction))}
       data-date-picker-disabled={
         typeof showDatePicker === 'object' ? String(showDatePicker.disabled) : 'false'
@@ -222,6 +223,16 @@ describe('Discover topnav component', () => {
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
     expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
+  });
+
+  test('hides the data view type label in the data view picker', async () => {
+    const { toolkit, props } = await setup();
+    renderTestComponent({ toolkit, props });
+
+    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+      'data-show-data-view-label',
+      'false'
+    );
   });
 
   test.each([
