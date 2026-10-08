@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type FunctionComponent } from 'react';
+import React, { useMemo, useState, type FunctionComponent } from 'react';
 import {
   EuiBadge,
   EuiPopover,
@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ActiveSolution } from './get_active_solution_profile';
@@ -40,8 +41,24 @@ export const SolutionProfileBadge: FunctionComponent<{
 }> = ({ services, activeSolution }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const theme = useObservable(services.theme.theme$, services.theme.getTheme());
+  const activeSpace$ = useMemo(
+    () => services.spaces?.getActiveSpace$() ?? of(undefined),
+    [services.spaces]
+  );
+  const activeSpace = useObservable(activeSpace$);
+
+  const canManageSpaces = services.capabilities.spaces?.manage === true;
   const canEditAdvancedSettings = services.capabilities.advancedSettings?.save === true;
   const badgeText = getSolutionProfileBadgeText(activeSolution);
+
+  // The space can still adopt a solution view when Spaces is available and the space is classic.
+  const canPromoteSolutionView =
+    Boolean(services.spaces?.isSolutionViewEnabled) &&
+    Boolean(activeSpace) &&
+    (!activeSpace?.solution || activeSpace.solution === 'classic');
+  const spaceSettingsHref = activeSpace
+    ? services.addBasePath(`/app/management/kibana/spaces/edit/${activeSpace.id}`)
+    : undefined;
 
   const onClickAriaLabel = i18n.translate(
     'discover.topNav.solutionProfileBadge.clickToLearnMoreAriaLabel',
@@ -73,9 +90,32 @@ export const SolutionProfileBadge: FunctionComponent<{
           <p>
             <FormattedMessage
               id="discover.topNav.solutionProfileBadge.description"
-              defaultMessage="Discover detected this data and tailored the view with contextual columns, cell renderers, and document details."
+              defaultMessage="Discover adapted this view to your data."
             />
           </p>
+          {canPromoteSolutionView && (
+            <p>
+              {canManageSpaces && spaceSettingsHref ? (
+                <FormattedMessage
+                  id="discover.topNav.solutionProfileBadge.switchPrompt"
+                  defaultMessage="For a more complete experience, switch your space to the {solutionViewLink}."
+                  values={{
+                    solutionViewLink: (
+                      <EuiLink href={spaceSettingsHref} target="_blank">
+                        {badgeText}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="discover.topNav.solutionProfileBadge.switchPromptNoPermission"
+                  defaultMessage="For a more complete experience, ask your administrator to switch your space to the {solutionView}."
+                  values={{ solutionView: badgeText }}
+                />
+              )}
+            </p>
+          )}
         </EuiText>
         <EuiPopoverFooter>
           {canEditAdvancedSettings ? (
