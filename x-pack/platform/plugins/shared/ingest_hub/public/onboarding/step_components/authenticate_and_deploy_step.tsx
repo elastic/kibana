@@ -71,6 +71,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     deploymentMethod,
     setDeploymentMethod,
+    setSelectedServiceIds,
     serviceSettingsMethod,
     authenticateAndDeployStep,
     agentBasedDeployment: agentBasedDeploymentFromFlow,
@@ -99,6 +100,39 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // Any agent-based-only service in the selection forces agent-based mode for all — lock the card.
   const allAgentBasedOnly = agentBasedOnlyServices.length > 0;
+
+  // ECF-only services have no agent-based route, so choosing agent-based removes them from the selection.
+  const ecfOnlyServices = useMemo(
+    () =>
+      selectedServiceIds
+        .map((id) => awsServicesMap?.get(id))
+        .filter((s): s is AwsServiceMatrixEntry => !!s?.ecfOnly),
+    [selectedServiceIds, awsServicesMap]
+  );
+  // With nothing but ECF-only services there is no other method to choose, so the card is locked.
+  const allEcfOnly =
+    ecfOnlyServices.length > 0 && ecfOnlyServices.length === selectedServiceIds.length;
+
+  // Selected services that each method cannot deploy. The Edit modal lists them before Save, and
+  // switching to that method removes them from the selection.
+  const unsupportedServices = useMemo(
+    (): Partial<Record<DeploymentMethod, AwsServiceMatrixEntry[]>> => ({
+      agent_based: ecfOnlyServices,
+    }),
+    [ecfOnlyServices]
+  );
+
+  const handleDeploymentMethodChange = useCallback(
+    (method: DeploymentMethod) => {
+      setDeploymentMethod(method);
+      const unsupported = unsupportedServices[method] ?? [];
+      if (unsupported.length > 0) {
+        const unsupportedIds = new Set(unsupported.map((s) => s.id));
+        setSelectedServiceIds(selectedServiceIds.filter((id) => !unsupportedIds.has(id)));
+      }
+    },
+    [setDeploymentMethod, setSelectedServiceIds, selectedServiceIds, unsupportedServices]
+  );
 
   // True while any selected service's manifest is still in-flight (not yet loaded or errored).
   const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
@@ -628,9 +662,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard
         selectedMethod={deploymentMethod}
-        onChange={setDeploymentMethod}
+        onChange={handleDeploymentMethodChange}
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
-        locked={isSelfManaged || (allAgentBasedOnly && !isMethodLocked)}
+        unsupportedServices={unsupportedServices}
+        locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
         disabled={isMethodLocked}
       />
 
