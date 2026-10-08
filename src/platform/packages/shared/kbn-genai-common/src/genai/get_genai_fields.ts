@@ -8,10 +8,12 @@
  */
 
 import {
+  ATTRIBUTE_GEN_AI_COMPLETION,
   ATTRIBUTE_GEN_AI_CONVERSATION_ID,
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OPERATION_NAME,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_PROMPT,
   ATTRIBUTE_GEN_AI_PROVIDER_NAME,
   ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
   ATTRIBUTE_GEN_AI_REQUEST_MODEL,
@@ -30,43 +32,9 @@ import {
   ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
-} from '@kbn/apm-types/es_fields';
-
-export interface GenAiMessage {
-  role: string;
-  content?: string;
-  parts?: Array<{ type: string; content?: string; [key: string]: unknown }>;
-  [key: string]: unknown;
-}
-
-export interface GenAiFields {
-  operationName?: string;
-  requestModel?: string;
-  responseModel?: string;
-  provider?: string;
-  system?: string;
-  inputTokens?: number;
-  outputTokens?: number;
-  conversationId?: string;
-  requestParams: {
-    temperature?: number;
-    top_p?: number;
-    top_k?: number;
-    max_tokens?: number;
-    seed?: number;
-  };
-  response: {
-    id?: string;
-    finish_reasons?: string[];
-  };
-  inputMessages: GenAiMessage[];
-  outputMessages: GenAiMessage[];
-  systemInstructions?: string;
-  toolDefinitions?: unknown;
-  toolName?: string;
-  toolCallArguments?: unknown;
-  toolCallResult?: unknown;
-}
+  GEN_AI_MESSAGE_ROLES,
+} from './constants';
+import type { GenAiFields, GenAiMessage } from './types';
 
 /** Extracts and joins the content of text parts. */
 export function getTextPartsContent(parts: unknown): string | undefined {
@@ -228,6 +196,75 @@ function parseSystemInstructions(raw: unknown): string | undefined {
   return stringifyFallback(raw);
 }
 
+type MessageParser = (raw: unknown) => GenAiMessage[] | undefined;
+
+// Each entry tries a field in priority order; the first non-empty result wins.
+const INPUT_FIELD_PARSERS: Array<{ field: string; parse: MessageParser }> = [
+  {
+    field: ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+    parse: (raw) => {
+      const vals = (Array.isArray(raw) ? raw : [raw]).filter(
+        (v): v is string => typeof v === 'string'
+      );
+      return vals.length > 0 ? parseGenAiMessages(vals) : undefined;
+    },
+  },
+  {
+    field: ATTRIBUTE_GEN_AI_PROMPT,
+    parse: (raw) => {
+      const value = Array.isArray(raw) ? raw.find((v) => v != null) : raw;
+      const parsed = parseJsonValue(value);
+      if (parsed != null && typeof parsed === 'object' && 'messages' in parsed) {
+        const { messages } = parsed;
+        if (Array.isArray(messages)) {
+          const valid = messages.filter(
+            (m): m is GenAiMessage =>
+              m != null && typeof m === 'object' && typeof m.role === 'string'
+          );
+          return valid.length > 0 ? valid : undefined;
+        }
+      }
+    },
+  },
+];
+
+const OUTPUT_FIELD_PARSERS: Array<{ field: string; parse: MessageParser }> = [
+  {
+    field: ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+    parse: (raw) => {
+      const vals = (Array.isArray(raw) ? raw : [raw]).filter(
+        (v): v is string => typeof v === 'string'
+      );
+      return vals.length > 0 ? parseGenAiMessages(vals) : undefined;
+    },
+  },
+  {
+    field: ATTRIBUTE_GEN_AI_COMPLETION,
+    parse: (raw) => {
+      const value = Array.isArray(raw) ? raw.find((v) => v != null) : raw;
+      const parsed = parseJsonValue(value);
+      if (parsed != null && typeof parsed === 'object' && 'completion' in parsed) {
+        const { completion } = parsed;
+        if (typeof completion === 'string')
+          return [{ role: GEN_AI_MESSAGE_ROLES.ASSISTANT, content: completion }];
+      }
+    },
+  },
+];
+
+function runParsers(
+  metadata: Record<string, unknown>,
+  parsers: Array<{ field: string; parse: MessageParser }>
+): GenAiMessage[] {
+  for (const { field, parse } of parsers) {
+    const raw = rawValue(metadata, field);
+    if (raw == null) continue;
+    const messages = parse(raw);
+    if (messages && messages.length > 0) return messages;
+  }
+  return [];
+}
+
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
   const toolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
@@ -262,10 +299,8 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       // Multi-valued: one finish reason per choice — keep every element.
       finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
-    inputMessages: parseGenAiMessages(allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES)),
-    outputMessages: parseGenAiMessages(
-      allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
-    ),
+    inputMessages: runParsers(metadata, INPUT_FIELD_PARSERS),
+    outputMessages: runParsers(metadata, OUTPUT_FIELD_PARSERS),
     systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
     toolDefinitions,
     toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,

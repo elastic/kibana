@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GenAiTab } from './genai_tab';
-export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
-export { getFieldFromSource } from './get_field_from_source';
-export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
-export {
-  GenAiTabImpression,
-  GENAI_TAB_IMPRESSION_EVENT_TYPE,
-  registerGenAiTabImpressionEventType,
-  type GenAiTabImpressionEvent,
-  type GenAiTabImpressionProps,
-} from './genai_tab_impression';
+export * from './src/testing/fixtures';
