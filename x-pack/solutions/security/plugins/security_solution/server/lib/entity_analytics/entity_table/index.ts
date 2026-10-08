@@ -13,7 +13,7 @@ import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
-import { fetchCaseCounts } from './columns/cases';
+import { CASE_ATTACHMENT_TYPE, canReadSecurityCases, fetchCaseCounts } from './columns/cases';
 
 export const registerEntityGridCasesRoute = ({
   router,
@@ -43,9 +43,15 @@ export const registerEntityGridCasesRoute = ({
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [coreStart] = await getStartServices();
-          const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
-          const counts = await fetchCaseCounts(soClient, request.body.entity_ids);
+          const [coreStart, { security }] = await getStartServices();
+          // Without access to Security cases, the user sees no case counts.
+          if (!(await canReadSecurityCases(security, request))) return response.ok({ body: {} });
+
+          const spaceId = (await context.securitySolution).getSpaceId();
+          const repository = coreStart.savedObjects.createInternalRepository([
+            CASE_ATTACHMENT_TYPE,
+          ]);
+          const counts = await fetchCaseCounts(repository, spaceId, request.body.entity_ids);
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {
           logger.error(`Failed to count cases of entities: ${err}`);
