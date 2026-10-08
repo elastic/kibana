@@ -17,7 +17,6 @@
     ".datadog",
     ".dropbox",
     ".dynatrace",
-    ".elasticsearch",
     ".email",
     ".figma",
     ".firecrawl",
@@ -283,15 +282,11 @@
     "dynatrace.listProblems",
     "dynatrace.queryMetrics",
     "elasticsearch.bulk",
-    "elasticsearch.esql",
     "elasticsearch.esql.query",
-    "elasticsearch.getClusterInfo",
-    "elasticsearch.getMapping",
     "elasticsearch.index",
     "elasticsearch.indices.create",
     "elasticsearch.indices.delete",
     "elasticsearch.indices.exists",
-    "elasticsearch.listIndices",
     "elasticsearch.request",
     "elasticsearch.search",
     "elasticsearch.update",
@@ -980,6 +975,7 @@
     "alerting.ruleExecutionFailed",
     "alerting.ruleUpdated",
     "cases.attachmentsAdded",
+    "cases.attachmentsDeleted",
     "cases.caseCreated",
     "cases.caseStatusUpdated",
     "cases.caseUpdated",
@@ -1008,11 +1004,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "bcd9fa7cfc2caa7c1f0501d8b224111ce1da261200415958d50d7402febe976f"
+      "sha256": "24eb4b49b7c502b4461ae46661248bc7b3c35fa6324dbd4d09aa8e7fde345057"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "490d640dd0bbb2459d1f50e21e3e9092fef1ce7d46e39d5398f163677439247d"
+      "sha256": "9ae1498fafd5c980dd3542cbd6d22c9a9bd7dfd33359e462b20a7f8df06b6dbc"
     }
   }
 }
