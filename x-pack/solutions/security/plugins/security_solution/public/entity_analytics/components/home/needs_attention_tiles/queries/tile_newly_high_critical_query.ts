@@ -6,6 +6,7 @@
  */
 
 import type { TimeRange } from '../../use_time_range_param';
+import type { ComparisonWindow } from './tile_time_window';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical
@@ -25,6 +26,10 @@ import type { TimeRange } from '../../use_time_range_param';
  * An entity qualifies when:
  *   - current_level_num >= 3  (is High or Critical right now)
  *   - boundary_level_num < 3 OR boundary_level_num IS NULL  (was not H/C at the boundary)
+ *
+ * Use `newlyHighCriticalWindow(timeRange)` for the current period and
+ * `newlyHighCriticalPrevWindow(timeRange)` for the previous period, then pass the result
+ * to `buildNewlyHighCriticalCountQuery`.
  */
 
 const TIME_RANGE_TO_ESQL: Record<TimeRange, { fetchWindow: string; period: string }> = {
@@ -33,23 +38,46 @@ const TIME_RANGE_TO_ESQL: Record<TimeRange, { fetchWindow: string; period: strin
   '30d': { fetchWindow: '722h', period: '30d' }, // 30*24 + 2 = 722h
 };
 
+const PREV_TIME_RANGE_TO_ESQL: Record<
+  TimeRange,
+  { prevFetchWindow: string; prevBoundary: string; upperBound: string }
+> = {
+  '24h': { prevFetchWindow: '50h', prevBoundary: '48h', upperBound: '24h' },
+  '7d': { prevFetchWindow: '338h', prevBoundary: '336h', upperBound: '168h' },
+  '30d': { prevFetchWindow: '1442h', prevBoundary: '1440h', upperBound: '720h' },
+};
+
+/** Returns the time window for the current period of the newly high/critical query. */
+export const newlyHighCriticalWindow = (timeRange: TimeRange = '24h'): ComparisonWindow => {
+  const { fetchWindow, period } = TIME_RANGE_TO_ESQL[timeRange];
+  return { fetchWindow, boundary: period };
+};
+
+/** Returns the time window for the previous period of the newly high/critical query. */
+export const newlyHighCriticalPrevWindow = (timeRange: TimeRange = '24h'): ComparisonWindow => {
+  const { prevFetchWindow, prevBoundary, upperBound } = PREV_TIME_RANGE_TO_ESQL[timeRange];
+  return { fetchWindow: prevFetchWindow, boundary: prevBoundary, upperBound };
+};
+
 export const buildNewlyHighCriticalCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
-  timeRange: TimeRange = '24h',
+  window: ComparisonWindow = newlyHighCriticalWindow(),
   entityFilterClauses: string[] = []
 ): string => {
   const index = `risk-score.risk-score-${spaceId}`;
-  const { fetchWindow, period } = TIME_RANGE_TO_ESQL[timeRange];
+  const upperBoundClause = window.upperBound
+    ? ` AND @timestamp < NOW() - ${window.upperBound}`
+    : '';
   return [
     `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
-    `| WHERE @timestamp >= NOW() - ${fetchWindow}`,
+    `| WHERE @timestamp >= NOW() - ${window.fetchWindow}${upperBoundClause}`,
     `| EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
     `| WHERE entity_euid IS NOT NULL`,
     `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Moderate", 2, risk_level == "Low", 1, 0)`,
-    `| EVAL period = CASE(@timestamp <= NOW() - ${period}, "boundary", "current")`,
+    `| EVAL period = CASE(@timestamp <= NOW() - ${window.boundary}, "boundary", "current")`,
     `| STATS level_num = LAST(level_num, @timestamp) BY entity_euid, period`,
     `| EVAL current_level_num  = CASE(period == "current",  level_num, null)`,
     `| EVAL boundary_level_num = CASE(period == "boundary", level_num, null)`,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
+import { buildRiskMoversCountQuery, riskMoversWindow } from './tile_risk_movers_query';
 
 describe('buildRiskMoversCountQuery', () => {
   it('emits the unmapped_fields nullify pragma to handle sparse entity-type indices', () => {
@@ -19,22 +19,22 @@ describe('buildRiskMoversCountQuery', () => {
   });
 
   it('fetches a window wider than the period so both sides of the boundary are covered', () => {
-    const query24h = buildRiskMoversCountQuery('default', '.entities-v1', '24h');
-    const query7d = buildRiskMoversCountQuery('default', '.entities-v1', '7d');
-    const query30d = buildRiskMoversCountQuery('default', '.entities-v1', '30d');
+    const query24h = buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('24h'));
+    const query7d = buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('7d'));
+    const query30d = buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('30d'));
     expect(query24h).toContain('@timestamp >= NOW() - 26h');
     expect(query7d).toContain('@timestamp >= NOW() - 170h');
     expect(query30d).toContain('@timestamp >= NOW() - 722h');
   });
 
   it('labels docs as "boundary" or "current" using the correct period cutoff for each time range', () => {
-    expect(buildRiskMoversCountQuery('default', '.entities-v1', '24h')).toContain(
+    expect(buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('24h'))).toContain(
       'CASE(@timestamp <= NOW() - 24h, "boundary", "current")'
     );
-    expect(buildRiskMoversCountQuery('default', '.entities-v1', '7d')).toContain(
+    expect(buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('7d'))).toContain(
       'CASE(@timestamp <= NOW() - 7d, "boundary", "current")'
     );
-    expect(buildRiskMoversCountQuery('default', '.entities-v1', '30d')).toContain(
+    expect(buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('30d'))).toContain(
       'CASE(@timestamp <= NOW() - 30d, "boundary", "current")'
     );
   });
@@ -83,7 +83,9 @@ describe('buildRiskMoversCountQuery', () => {
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
     const filter = '| WHERE entity.type == "host"';
-    const query = buildRiskMoversCountQuery('default', '.entities-v1', '24h', [filter]);
+    const query = buildRiskMoversCountQuery('default', '.entities-v1', riskMoversWindow('24h'), [
+      filter,
+    ]);
     const joinIdx = query.indexOf('| LOOKUP JOIN');
     const filterIdx = query.indexOf(filter);
     expect(filterIdx).toBeGreaterThan(joinIdx);

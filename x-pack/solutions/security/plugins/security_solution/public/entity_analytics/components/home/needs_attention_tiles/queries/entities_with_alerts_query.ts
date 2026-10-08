@@ -7,9 +7,27 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../use_time_range_param';
+import type { SimpleTimeWindow } from './tile_time_window';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
-const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
+export const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
+
+const DOUBLE_TIME_RANGE: Record<TimeRange, string> = {
+  '24h': '48h',
+  '7d': '14d',
+  '30d': '60d',
+};
+
+/** Returns the time window for the current period of the alert-based tiles query. */
+export const alertsWindow = (timeRange: TimeRange = '24h'): SimpleTimeWindow => ({
+  from: timeRange,
+});
+
+/** Returns the time window for the previous period of the alert-based tiles query. */
+export const alertsPrevWindow = (timeRange: TimeRange = '24h'): SimpleTimeWindow => ({
+  from: DOUBLE_TIME_RANGE[timeRange],
+  to: timeRange,
+});
 
 /**
  * Builds a single ES|QL query that computes both the entities-with-alerts count
@@ -29,19 +47,24 @@ const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
  *
  * COUNT_DISTINCT and VALUES ignore null values, so nulling out non-watchlisted rows
  * is all that is needed to produce the watchlist-only aggregation.
+ *
+ * Use `alertsWindow(timeRange)` for the current period and
+ * `alertsPrevWindow(timeRange)` for the previous period, then pass the result
+ * to this function.
  */
 export const buildAlertBasedTilesQuery = (
   euid: EntityStoreEuid,
   entitiesIndexName: string,
   spaceId: string,
-  timeRange: TimeRange = '24h',
+  window: SimpleTimeWindow = alertsWindow(),
   entityFilterClauses: string[] = []
 ): string => {
   const parts: string[] = [];
+  const upperBoundClause = window.to ? ` AND @timestamp < NOW() - ${window.to}` : '';
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${alertsIndex(spaceId)}`);
-  parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
+  parts.push(`| WHERE @timestamp >= NOW() - ${window.from}${upperBoundClause}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);

@@ -31,8 +31,13 @@ const indentBranch = (esql: string): string =>
  *
  * After MV_EXPAND the entity.id column is always scalar; nulls are filtered out so
  * non-matching entity types don't produce phantom rows downstream.
+ *
+ * Pass `bucket` (a `STATS ... BY` grouping such as `bucket = BUCKET(@timestamp, 1 hour)`) to
+ * keep @timestamp through the FORK and deduplicate per bucket and entity instead of per entity,
+ * which gives one row per (bucket, entity.id) for a sparkline series.
  */
-export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
+export const buildAlertEuidPipeline = (euid: EntityStoreEuid, bucket?: string): string[] => {
+  const keepColumns = bucket ? '_ea_entity_id, @timestamp' : '_ea_entity_id';
   const derivedSteps: string[] = ['WHERE `kibana.alert.entity.id` IS NULL'];
 
   for (const entityType of ENTITY_TYPES) {
@@ -43,13 +48,13 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     derivedSteps.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
   derivedSteps.push(evalGuardedTypedEuids('_ea_entity_id'));
-  derivedSteps.push('| KEEP _ea_entity_id');
+  derivedSteps.push(`| KEEP ${keepColumns}`);
 
   const fork = [
     '| FORK (',
     '    WHERE `kibana.alert.entity.id` IS NOT NULL',
     '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
-    '    | KEEP _ea_entity_id',
+    `    | KEEP ${keepColumns}`,
     '  )',
     '  (',
     indentBranch(derivedSteps.join('\n')),
@@ -62,7 +67,7 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     '| WHERE _ea_entity_id IS NOT NULL',
     // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field
     // in the alerts index rather than our computed EUID column.
-    '| STATS BY _ea_entity_id',
+    bucket ? `| STATS BY ${bucket}, _ea_entity_id` : '| STATS BY _ea_entity_id',
     '| RENAME _ea_entity_id AS `entity.id`',
   ];
 };

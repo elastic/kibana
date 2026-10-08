@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import { buildAlertBasedTilesQuery } from './entities_with_alerts_query';
+import { buildAlertBasedTilesQuery, alertsWindow } from './entities_with_alerts_query';
 
 const mockEuid = {
   esql: {
@@ -47,14 +47,25 @@ describe('buildAlertBasedTilesQuery', () => {
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
     const filter = '| WHERE entity.type == "user"';
-    const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default', '24h', [filter]);
+    const query = buildAlertBasedTilesQuery(
+      mockEuid,
+      '.entities-v1',
+      'default',
+      alertsWindow('24h'),
+      [filter]
+    );
     const joinIdx = query.indexOf('| LOOKUP JOIN');
     const filterIdx = query.indexOf(filter);
     expect(filterIdx).toBeGreaterThan(joinIdx);
   });
 
   it('uses the provided time range in the WHERE clause', () => {
-    const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default', '7d');
+    const query = buildAlertBasedTilesQuery(
+      mockEuid,
+      '.entities-v1',
+      'default',
+      alertsWindow('7d')
+    );
     expect(query).toContain('@timestamp >= NOW() - 7d');
   });
 

@@ -6,7 +6,10 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_query';
+import {
+  buildEntitiesWithAnomaliesCountQuery,
+  anomaliesWindow,
+} from './entities_with_anomalies_query';
 
 const mockEuid = {
   esql: {
@@ -51,7 +54,7 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(
       mockEuid,
       '.entities-v1',
-      '24h',
+      anomaliesWindow('24h'),
       [],
       ['job-a', 'job-b']
     );
@@ -64,14 +67,23 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
     const filter = '| WHERE entity.type == "host"';
-    const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '24h', [filter]);
+    const query = buildEntitiesWithAnomaliesCountQuery(
+      mockEuid,
+      '.entities-v1',
+      anomaliesWindow('24h'),
+      [filter]
+    );
     const joinIdx = query.indexOf('| LOOKUP JOIN');
     const filterIdx = query.indexOf(filter);
     expect(filterIdx).toBeGreaterThan(joinIdx);
   });
 
   it('uses the provided time range', () => {
-    const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '7d');
+    const query = buildEntitiesWithAnomaliesCountQuery(
+      mockEuid,
+      '.entities-v1',
+      anomaliesWindow('7d')
+    );
     expect(query).toContain('@timestamp >= NOW() - 7d');
   });
 

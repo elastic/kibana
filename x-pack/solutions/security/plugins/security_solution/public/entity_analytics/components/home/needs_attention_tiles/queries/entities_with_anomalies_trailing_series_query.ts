@@ -7,45 +7,36 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../use_time_range_param';
-import type { SimpleTimeWindow } from './tile_time_window';
+import { ML_ANOMALIES_INDEX } from './entities_with_anomalies_query';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
+import {
+  TRAILING_WINDOW,
+  trailingBucketGrouping,
+  trailingFetchHours,
+} from './tile_trailing_window';
+import { trailingDotFilter } from './tile_trailing_dots';
 
-export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
-const DOUBLE_TIME_RANGE: Record<TimeRange, string> = {
-  '24h': '48h',
-  '7d': '14d',
-  '30d': '60d',
-};
-
-/** Returns the time window for the current period of the anomalies query. */
-export const anomaliesWindow = (timeRange: TimeRange = '24h'): SimpleTimeWindow => ({
-  from: timeRange,
-});
-
-/** Returns the time window for the previous period of the anomalies query. */
-export const anomaliesPrevWindow = (timeRange: TimeRange = '24h'): SimpleTimeWindow => ({
-  from: DOUBLE_TIME_RANGE[timeRange],
-  to: timeRange,
-});
+/** Returns the result column of dot `k` (0 = newest) for the Entities with anomalies tile. */
+export const trailingAnomaliesColumn = (k: number): string => `anomalies_${k}`;
 
 /**
- * Builds a single ES|QL query that counts distinct entities with at least one
- * ML anomaly record within the selected time window, using a LOOKUP JOIN from
- * anomalies → entity-latest on the typed EUID (entity.id).
+ * Builds one query that returns every sparkline dot of the Entities with anomalies tile as columns
+ * of a single row, where dot `k` is what the tile would have shown `k` steps ago.
  *
- * Use `anomaliesWindow(timeRange)` for the current period and
- * `anomaliesPrevWindow(timeRange)` for the previous period, then pass the result
- * to this function.
+ * It is the tile's count query (same record filter, EUID derivation, LOOKUP JOIN and resolution
+ * dedupe) with the pre-join dedupe done per (bucket, entity), then each dot counts the distinct
+ * entities in the buckets of its trailing window (the selected time range).
  */
-export const buildEntitiesWithAnomaliesCountQuery = (
+export const buildEntitiesWithAnomaliesTrailingSeriesQuery = (
   euid: EntityStoreEuid,
   entitiesIndexName: string,
-  window: SimpleTimeWindow = anomaliesWindow(),
+  timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
   jobIds: string[] = []
 ): string => {
+  const { dots } = TRAILING_WINDOW[timeRange];
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
@@ -53,9 +44,10 @@ export const buildEntitiesWithAnomaliesCountQuery = (
 
   const jobFilter =
     jobIds.length > 0 ? ` AND job_id IN (${jobIds.map((id) => `"${id}"`).join(', ')})` : '';
-  const upperBoundClause = window.to ? ` AND @timestamp < NOW() - ${window.to}` : '';
   parts.push(
-    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${window.from}${upperBoundClause}${jobFilter}`
+    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${trailingFetchHours(
+      timeRange
+    )}h${jobFilter}`
   );
 
   for (const entityType of ENTITY_TYPES) {
@@ -71,7 +63,7 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(`| WHERE derived_euids IS NOT NULL`);
   // STATS BY on a temp column avoids grouping on the mapped entity.id field in the anomalies
   // index rather than our computed EUID. RENAME after STATS produces entity.id for the JOIN.
-  parts.push(`| STATS BY derived_euids`);
+  parts.push(`| STATS BY ${trailingBucketGrouping(timeRange)}, derived_euids`);
   parts.push(`| RENAME derived_euids AS \`entity.id\``);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
 
@@ -81,7 +73,17 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
-  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`);
+
+  const aggregations = Array.from(
+    { length: dots },
+    (_, k) =>
+      `${trailingAnomaliesColumn(k)} = COUNT_DISTINCT(effective_id) ${trailingDotFilter(
+        timeRange,
+        k
+      )}`
+  );
+  parts.push(`| STATS`);
+  parts.push(`    ${aggregations.join(',\n    ')}`);
 
   return parts.join('\n');
 };

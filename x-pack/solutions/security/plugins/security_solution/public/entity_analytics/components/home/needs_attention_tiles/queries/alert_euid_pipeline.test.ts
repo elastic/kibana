@@ -64,4 +64,27 @@ describe('buildAlertEuidPipeline', () => {
   it('does not include a field evaluation EVAL when getFieldEvaluations returns undefined', () => {
     expect(pipelineText()).not.toContain('user.namespace');
   });
+
+  describe('with a bucket grouping', () => {
+    const bucket = 'bucket = BUCKET(@timestamp, 6 hours)';
+    const bucketedText = (): string => buildAlertEuidPipeline(mockEuid, bucket).join('\n');
+
+    it('keeps @timestamp through both FORK branches', () => {
+      const query = bucketedText();
+      expect(query.match(/\| KEEP _ea_entity_id, @timestamp/g)).toHaveLength(2);
+      expect(query).not.toContain('| KEEP _ea_entity_id\n');
+    });
+
+    it('deduplicates per bucket and entity, then renames to entity.id', () => {
+      const pipeline = buildAlertEuidPipeline(mockEuid, bucket);
+      expect(pipeline).toContain(`| STATS BY ${bucket}, _ea_entity_id`);
+      expect(pipeline).not.toContain('| STATS BY _ea_entity_id');
+      expect(pipeline).toContain('| RENAME _ea_entity_id AS `entity.id`');
+    });
+
+    it('leaves the default pipeline unchanged when no bucket is given', () => {
+      expect(pipelineText()).not.toContain('@timestamp');
+      expect(buildAlertEuidPipeline(mockEuid)).toContain('| STATS BY _ea_entity_id');
+    });
+  });
 });
