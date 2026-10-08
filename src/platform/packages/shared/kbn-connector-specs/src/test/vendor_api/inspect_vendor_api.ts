@@ -18,7 +18,7 @@ import { loadVendorSpec } from './load_vendor_spec';
 import type { ManifestSource, VendorApiManifest } from './manifest';
 import { parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
-import { readOptional } from './update_vendor_api';
+import { readOptional } from './load_vendor_specs';
 
 /** Operations listed per source before the list is cut short. */
 export const LIST_LIMIT = 200;

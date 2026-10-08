@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/connector-contract-mock'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
 tags:
   - shared-common
   - package

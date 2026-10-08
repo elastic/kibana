@@ -708,6 +708,19 @@ Per action:
 
 `vendorApiFixturesSchema` is the schema.
 
+### Running a connector in Kibana against its contract mock
+
+`node scripts/connector_contract_mock` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-contract-mock`'s README), so a running Kibana can execute the connector without vendor credentials:
+
+```bash
+# Answers from the committed snapshots, with the overlay applied
+node scripts/connector_contract_mock --connector firecrawl
+# Answers from each source's current vendor spec instead
+node scripts/connector_contract_mock --connector firecrawl --spec latest --port 5691
+```
+
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. It logs every request with its status, and the violations of failed ones. On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_contract_mock/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
+
 ## Related Documentation
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference

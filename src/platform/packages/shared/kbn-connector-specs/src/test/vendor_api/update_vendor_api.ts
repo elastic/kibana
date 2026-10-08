@@ -10,7 +10,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
-import { applyOverlay } from '@kbn/connector-contract-mock';
 import type { ConnectorSpec } from '../../connector_spec';
 import { forEachRef } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
@@ -24,6 +23,15 @@ import type {
   VendorApiManifest,
 } from './manifest';
 import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
+import type { VendorApiLog } from './load_vendor_specs';
+import {
+  applyOverlayToSources,
+  FIXTURES,
+  MANIFEST,
+  OVERLAY,
+  readOptional,
+  snapshotFile,
+} from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -31,10 +39,7 @@ import type { RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
-export interface VendorApiLog {
-  readonly info: (message: string) => void;
-  readonly warning: (message: string) => void;
-}
+export type { VendorApiLog } from './load_vendor_specs';
 
 export interface UpdateVendorApiOptions {
   readonly connector: ConnectorSpec;
@@ -62,23 +67,6 @@ export interface UpdateVendorApiResult {
   /** What makes the artifacts untrustworthy; the script fails when there are any. */
   readonly problems: readonly string[];
 }
-
-const MANIFEST = 'manifest.json';
-const FIXTURES = 'fixtures.json';
-const OVERLAY = 'overlay.yaml';
-const snapshotFile = (source: string) => path.join('snapshots', `${source}.openapi.json`);
-
-/** Reads a file that may not exist yet. */
-export const readOptional = async (file: string): Promise<string | undefined> => {
-  try {
-    return await fs.readFile(file, 'utf8');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return undefined;
-    }
-    throw error;
-  }
-};
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
   try {
@@ -188,24 +176,7 @@ export const updateVendorApi = async ({
     }
   }
 
-  // One overlay corrects every source; an action only needs to match in one of them.
-  const specs: Record<string, OpenApiDocument> = {};
-  const matched = new Set<number>();
-  for (const [name, document] of Object.entries(raw)) {
-    const result = overlay ? applyOverlay(document, overlay) : { document, findings: [] };
-    specs[name] = result.document;
-    const missed = new Set(
-      result.findings.filter(({ problem }) => problem === 'no-match').map(({ index }) => index)
-    );
-    overlay?.actions.forEach((_, index) => !missed.has(index) && matched.add(index));
-  }
-  overlay?.actions.forEach((_, index) => {
-    if (!matched.has(index)) {
-      log.warning(
-        `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
-      );
-    }
-  });
+  const specs = applyOverlayToSources(raw, overlay, log);
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`

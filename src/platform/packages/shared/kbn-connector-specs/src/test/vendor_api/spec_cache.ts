@@ -11,7 +11,7 @@ import { createHash } from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from '@kbn/zod/v4';
-import { readOptional } from './update_vendor_api';
+import { readOptional } from './load_vendor_specs';
 
 const cacheEntrySchema = z.object({
   url: z.string(),
