@@ -97,7 +97,7 @@ const enableableDependencyLabel = (id: EnableableDependencyId): string => {
 };
 
 interface Props {
-  worker: Pick<Worker, 'id' | 'enableBlockedReason' | 'alertAnalysisDependencyStatus'>;
+  worker: Pick<Worker, 'id' | 'enableBlockedReason'>;
   surface: 'onboarding' | 'settings';
 }
 
@@ -183,9 +183,7 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
       case 'alertAnalysis':
         return {
           id,
-          status:
-            worker.alertAnalysisDependencyStatus ??
-            (worker.enableBlockedReason ? 'missing' : 'satisfied'),
+          status: worker.enableBlockedReason ? 'missing' : 'satisfied',
           label: i18n.ALERT_ANALYSIS_LABEL,
           description:
             worker.enableBlockedReason === 'alertAnalysisWorkflowDisabled'
@@ -347,15 +345,7 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           ))}
         </ul>
         {hasUnknown ? (
-          <EuiButtonEmpty
-            size="xs"
-            onClick={() => {
-              checks.retry();
-              if (worker.alertAnalysisDependencyStatus === 'unknown') {
-                void queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
-              }
-            }}
-          >
+          <EuiButtonEmpty size="xs" onClick={checks.retry}>
             {i18n.RETRY_BUTTON_LABEL}
           </EuiButtonEmpty>
         ) : null}

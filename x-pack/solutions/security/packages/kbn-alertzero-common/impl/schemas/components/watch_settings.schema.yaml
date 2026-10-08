@@ -132,12 +132,6 @@ components:
           description: >-
             Why Alert Triage cannot be enabled. Omitted for other Workers and when
             its Alert Analysis prerequisite is available.
-        alertAnalysisDependencyStatus:
-          type: string
-          enum: [satisfied, missing, unknown]
-          description: >-
-            Result of checking Alert Triage's Alert Analysis prerequisite. Unknown means
-            the workflow or runtime setting could not be verified. Omitted for other Workers.
         lifecycle:
           $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
         settings:

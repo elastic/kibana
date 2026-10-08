@@ -29,7 +29,7 @@ import * as i18n from './translations';
 
 interface Props {
   worker: CatalogWorker;
-  serverWorker?: Pick<Worker, 'id' | 'enableBlockedReason' | 'alertAnalysisDependencyStatus'>;
+  serverWorker?: Pick<Worker, 'id' | 'enableBlockedReason'>;
   scheduleInterval?: string;
   checked: boolean;
   disabled: boolean;

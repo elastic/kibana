@@ -90,14 +90,6 @@ export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisRuntimeDisabled'
   | 'ruleAttachmentUnavailable';
 
-type AlertAnalysisDependencyCheck =
-  | { status: 'satisfied' }
-  | {
-      status: 'missing';
-      reason: 'alertAnalysisWorkflowDisabled' | 'alertAnalysisRuntimeDisabled';
-    }
-  | { status: 'unknown' };
-
 const readServiceAccountId = (
   values: Record<string, unknown> | null | undefined
 ): string | undefined => {
@@ -282,9 +274,9 @@ export class WorkersService {
     // is left with a bumped revision and no way back to a consistent "not yet enabled" state.
     // `status.workflowId` is deterministic regardless of install state, so this can run first.
     if (isAlertTriageWorker && patch.enabled) {
-      const alertAnalysisCheck = await this.checkAlertAnalysisDependency(request);
-      if (alertAnalysisCheck.status === 'missing') {
-        return { outcome: 'blocked', reason: alertAnalysisCheck.reason };
+      const blockedReason = await this.checkAlertAnalysisPreflight(request);
+      if (blockedReason) {
+        return { outcome: 'blocked', reason: blockedReason };
       }
 
       alertTriageAttachmentService = await this.getAlertTriageAttachmentService(
@@ -461,8 +453,9 @@ export class WorkersService {
   }
 
   /**
-   * Checks whether Alert Analysis can do the Worker's work. A failed read remains unknown
-   * in the Worker projection, while the enable preflight only blocks confirmed missing checks.
+   * Returns why the Alert Analysis workflow cannot do the Worker's work, or null if the enable
+   * may proceed. The Worker wraps that workflow, so enabling it against an unusable one
+   * produces a Worker that triages nothing.
    *
    * Two independent things have to hold, and they fail differently:
    *
@@ -477,12 +470,11 @@ export class WorkersService {
    * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
    * by security_solution, so it is not ours to flip.
    */
-  private async checkAlertAnalysisDependency(
+  private async checkAlertAnalysisPreflight(
     request: KibanaRequest
-  ): Promise<AlertAnalysisDependencyCheck> {
+  ): Promise<AlertTriageEnableBlockedReason | null> {
     const management = this.management;
-    if (!management) return { status: 'unknown' };
-    let couldNotVerify = false;
+    if (!management) return null;
     try {
       const workflow = await management.getWorkflow(
         SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -493,7 +485,7 @@ export class WorkersService {
       // `workflow.execute` against a nonexistent workflow fails the same way as against a
       // disabled one, so both must block the enable the same way.
       if (!workflow || !workflow.enabled) {
-        return { status: 'missing', reason: 'alertAnalysisWorkflowDisabled' };
+        return 'alertAnalysisWorkflowDisabled';
       }
     } catch (err) {
       // Degrades to the runtime-config check below and, ultimately, to the YAML-level
@@ -505,14 +497,13 @@ export class WorkersService {
           err instanceof Error ? err.message : String(err)
         }`
       );
-      couldNotVerify = true;
     }
 
     const { isAlertAnalysisRuntimeEnabled } = this.alertTriageOpts;
     if (isAlertAnalysisRuntimeEnabled) {
       try {
         if (!(await isAlertAnalysisRuntimeEnabled(request))) {
-          return { status: 'missing', reason: 'alertAnalysisRuntimeDisabled' };
+          return 'alertAnalysisRuntimeDisabled';
         }
       } catch (err) {
         // Refusing on an unreadable setting would make the Worker un-enableable whenever the
@@ -522,11 +513,10 @@ export class WorkersService {
             err instanceof Error ? err.message : String(err)
           }`
         );
-        couldNotVerify = true;
       }
     }
 
-    return couldNotVerify ? { status: 'unknown' } : { status: 'satisfied' };
+    return null;
   }
 
   private async getAlertTriageAttachmentService(
@@ -600,9 +590,9 @@ export class WorkersService {
       definition = getDefinitionFromTemplate(registration);
     }
 
-    const alertAnalysisCheck =
+    const alertAnalysisReason =
       registration.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
-        ? await this.checkAlertAnalysisDependency(request)
+        ? await this.checkAlertAnalysisPreflight(request)
         : null;
 
     return {
@@ -612,9 +602,9 @@ export class WorkersService {
       enabled,
       lastRun,
       state: settingsUnavailable ? 'unavailable' : enabled ? 'ok' : 'paused',
-      ...(alertAnalysisCheck ? { alertAnalysisDependencyStatus: alertAnalysisCheck.status } : {}),
-      ...(alertAnalysisCheck?.status === 'missing'
-        ? { enableBlockedReason: alertAnalysisCheck.reason }
+      ...(alertAnalysisReason === 'alertAnalysisWorkflowDisabled' ||
+      alertAnalysisReason === 'alertAnalysisRuntimeDisabled'
+        ? { enableBlockedReason: alertAnalysisReason }
         : {}),
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }

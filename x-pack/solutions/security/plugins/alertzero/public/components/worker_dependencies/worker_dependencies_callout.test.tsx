@@ -26,14 +26,9 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { WorkerDependenciesCallout } from './worker_dependencies_callout';
 import { THREAT_REPORT_WORKFLOWS } from './use_worker_dependency_checks';
 
-const worker = (
-  id: string,
-  enableBlockedReason?: Worker['enableBlockedReason'],
-  alertAnalysisDependencyStatus?: Worker['alertAnalysisDependencyStatus']
-) => ({
+const worker = (id: string, enableBlockedReason?: Worker['enableBlockedReason']) => ({
   id,
   enableBlockedReason,
-  alertAnalysisDependencyStatus,
 });
 
 const setup = ({
@@ -67,11 +62,7 @@ const setup = ({
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   const renderCallouts = (
-    workers: Array<{
-      id: string;
-      enableBlockedReason?: Worker['enableBlockedReason'];
-      alertAnalysisDependencyStatus?: Worker['alertAnalysisDependencyStatus'];
-    }>,
+    workers: Array<{ id: string; enableBlockedReason?: Worker['enableBlockedReason'] }>,
     surface: 'onboarding' | 'settings' = 'settings'
   ) =>
     render(
@@ -88,7 +79,7 @@ const setup = ({
       </I18nProvider>
     );
 
-  return { core, contextSetting, discoverySetting, queryClient, renderCallouts };
+  return { core, contextSetting, discoverySetting, renderCallouts };
 };
 
 describe('WorkerDependenciesCallout', () => {
@@ -453,18 +444,6 @@ describe('WorkerDependenciesCallout', () => {
       '/s/analyst/app/security/rules/alert_analysis_workflow'
     );
     expect(within(item).queryByRole('button', { name: /Enable/ })).toBeNull();
-  });
-
-  it('shows an unverified Alert Triage check and retries the Workers API query', () => {
-    const { queryClient, renderCallouts } = setup();
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, undefined, 'unknown')]);
-
-    const item = screen.getByTestId('alertZeroWorkerDependency-alertAnalysis');
-    expect(item).toHaveTextContent('Could not verify Alert analysis');
-    expect(within(item).queryByRole('button', { name: /Enable/ })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
-    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['alertzero', 'workers', 'list'] });
   });
 
   it('uses administrator guidance if Attack Discovery is off at deployment level', () => {

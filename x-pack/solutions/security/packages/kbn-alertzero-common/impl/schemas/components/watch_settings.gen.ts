@@ -139,15 +139,6 @@ export const Worker = lazySchema(() =>
       .describe(
         'Why Alert Triage cannot be enabled. Omitted for other Workers and when its Alert Analysis prerequisite is available.'
       ),
-    /**
-     * Result of checking Alert Triage's Alert Analysis prerequisite. Unknown means the workflow or runtime setting could not be verified. Omitted for other Workers.
-     */
-    alertAnalysisDependencyStatus: z
-      .enum(['satisfied', 'missing', 'unknown'])
-      .optional()
-      .describe(
-        "Result of checking Alert Triage's Alert Analysis prerequisite. Unknown means the workflow or runtime setting could not be verified. Omitted for other Workers."
-      ),
     lifecycle: Lifecycle.optional(),
     settings: WorkerSettings,
     /**
