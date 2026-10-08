@@ -546,9 +546,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(analyze?.timeout).toBe('8m');
     });
 
-    // The first-match block is locked to the sample workflow's text, so the eval
-    // suite's later retarget onto this YAML still passes.
-    it('keeps the sample verdict rules', () => {
+    // The eval suite's verdict_rules.test.ts locks this block to FP_TP_VERDICT_RULES.
+    it('keeps the managed verdict rules', () => {
       const message = String(analyze?.with?.message);
       const [, rules = ''] =
         /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(message) ?? [];

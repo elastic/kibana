@@ -20,6 +20,7 @@ export type UpsellingSectionId =
   | 'endpoint_agent_tamper_protection'
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
+  | 'cloud_defend_integration_installation'
   | 'ruleDetailsEndpointExceptions'
   | 'automatic_import'
   | 'siem_migrations_start'

@@ -165,21 +165,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
-  const model = await modelProvider.getDefaultModel();
-  const resolvedConfiguration = await resolveConfiguration(agentConfiguration, {
-    aiIndicesEnabled: experimentalFeatures.aiIndices,
-    request,
-    resolver: context.aiIndexResolver,
-    logger,
-  });
-
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const relevantSkillsEnabled =
-    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
-
-  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
+    modelProvider.getDefaultModel(),
+    resolveConfiguration(agentConfiguration, {
+      aiIndicesEnabled: experimentalFeatures.aiIndices,
+      request,
+      resolver: context.aiIndexResolver,
+      logger,
+    }),
+    experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
+    context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
+  ]);
   const skillIdsOverride = configurationOverrides?.skill_ids;
   const filteredPluginSkillIds =
     skillIdsOverride !== undefined

@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/features-plugin'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/logging-mocks'
   - '@kbn/security-plugin-types-server'
   - '@kbn/spaces-plugin'
@@ -32,6 +33,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/es-query'
   - '@kbn/agent-builder-platform-plugin'
@@ -48,6 +50,9 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/proposals-ui'
+  - '@kbn/charts-theme'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/visualization-utils'
 tags:
   - plugin
   - prod

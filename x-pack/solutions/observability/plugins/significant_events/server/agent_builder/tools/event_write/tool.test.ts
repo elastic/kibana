@@ -43,7 +43,6 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
-    getEventClient: jest.fn().mockReturnValue({}),
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
@@ -366,7 +365,7 @@ describe('events_write tool', () => {
     });
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         source: 'discovery',
         inputs: [
           expect.objectContaining({
@@ -423,7 +422,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [
           expect.objectContaining({
             causal_features: [
@@ -450,7 +449,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [expect.objectContaining({ causal_features: causalFeatures })],
       })
     );
