@@ -111,9 +111,9 @@ steps:
                 `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
                 { headers: ownerHeaders }
               );
-              return deleted.status === 200
+              return deleted.statusCode === 200
                 ? 200
-                : `${deleted.status}: ${deleted.body?.message ?? '<no message>'}`;
+                : `${deleted.statusCode}: ${deleted.body?.message ?? '<no message>'}`;
             },
             { timeout: 30_000 }
           )
