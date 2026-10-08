@@ -5283,6 +5283,35 @@ describe('Package policy service', () => {
         );
       });
 
+      it('checks every Space for other users of a replaced secret, with an unscoped client', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient);
+        mockAgentPolicyGet();
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'old-secret' }],
+          })
+        );
+
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          createPackagePolicyMock()
+        );
+
+        // Secrets are global: a policy in another Space may still use the replaced one, and the
+        // request-scoped client cannot see it.
+        const call = mockedSecretsModule.deleteSecretsIfNotReferenced.mock.calls[0][0];
+        expect(call.checkAllSpaces).toBe(true);
+        expect(call.soClient).not.toBe(soClient);
+      });
+
       it('backfills vars from the stored policy when the update payload omits them', async () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const soClient = createSavedObjectClientMock();
