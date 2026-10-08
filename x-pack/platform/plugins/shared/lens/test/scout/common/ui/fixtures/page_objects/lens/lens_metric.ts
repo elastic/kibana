@@ -46,7 +46,9 @@ export class LensMetric {
   async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
     const button = this.page.testSubj.locator(`lnsMetric_background_chart_${type}`);
     await button.click();
-    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+    await button
+      .and(this.page.getByRole('button', { pressed: true }))
+      .waitFor({ state: 'visible' });
   }
 
   /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
