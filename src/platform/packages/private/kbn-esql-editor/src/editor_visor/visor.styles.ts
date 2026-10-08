@@ -27,11 +27,13 @@ export const visorStyles = (
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
+      position: relative;
+      z-index: ${euiTheme.levels.menu};
       ${isInline
         ? `
           min-height: ${isVisible ? euiTheme.size.xl : '0'};
-          height: ${isVisible ? 'auto' : '0'};
-          max-height: ${isVisible ? NL_TEXTAREA_MAX_HEIGHT : '0'};
+          height: ${isVisible ? euiTheme.size.xl : '0'};
+          max-height: ${isVisible ? euiTheme.size.xl : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
@@ -185,21 +187,26 @@ export const visorStyles = (
       ) !important;
     `,
     nlInputWrapper: css`
-      justify-content: center;
       min-width: 0;
     `,
     nlInput: css`
+      position: relative;
+      width: 100%;
+      height: ${euiTheme.size.xl};
+
       .euiTextArea {
-        box-sizing: border-box;
         height: ${euiTheme.size.xl};
         min-height: ${euiTheme.size.xl};
-        padding-block-start: ${euiTheme.size.xxs};
-        padding-block-end: 0;
-        padding-inline: ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.control};
         font-size: ${fontSize};
-        line-height: calc(${euiTheme.size.xl} - (${euiTheme.border.width.thin} * 2));
         overflow: hidden;
+      }
+
+      .euiTextArea:focus {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        overflow: auto;
+        max-height: ${NL_TEXTAREA_MAX_HEIGHT};
       }
     `,
   };

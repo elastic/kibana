@@ -709,6 +709,9 @@ describe('Attack Discovery worker chain', () => {
       ['attach_alerts', 'foreach'],
       ['attach_alert_batch', 'ai.attachment.add'],
       ['verify_evidence', 'ai.attachment.read'],
+      ['collect_impact_entities', 'security.getAlertEntities'],
+      ['attach_impact', 'investigations.attachImpact'],
+      ['journal_impact_recorded', 'workflow.execute'],
       ['run_fp_tp_analysis', 'workflow.execute'],
       ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
@@ -860,16 +863,34 @@ describe('Attack Discovery worker chain', () => {
       // recording it here would group nothing and quietly break the telemetry that
       // reads this field.
       it('records the Worker run that produced it, not its own execution', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
-        expect(metadata?.workflow_execution_id).toBe('{{ inputs.parent_run_id }}');
+        expect(metadata?.workflow_execution_ids).toEqual(['{{ inputs.parent_run_id }}']);
+      });
+
+      it('appends the runner ID when reusing an investigation without changing its metadata at creation', () => {
+        const append = stepIn(reviewSteps, 'append_workflow_execution');
+        expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+        expect(append?.['on-failure']).toEqual({ continue: true });
+        expect(append?.if).toBe('${{ inputs.parent_run_id != blank }}');
+        expect(append?.with).toEqual({
+          conversationId: '{{ steps.resolve_investigation_id.output.investigation_id }}',
+          workflowExecutionId: '{{ inputs.parent_run_id }}',
+        });
+        const names = reviewSteps.map(({ name }) => name);
+        expect(names.indexOf('verify_investigation')).toBeLessThan(
+          names.indexOf('append_workflow_execution')
+        );
+        expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+          names.indexOf('run_fp_tp_analysis')
+        );
       });
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
       // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
         expect(metadata?.summary).toBe(
           "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
@@ -920,8 +941,10 @@ describe('Attack Discovery worker chain', () => {
         ).toEqual([]);
       });
 
-      it('does not re-fetch the Attack Discovery from the ad-hoc index', () => {
-        expect(reviewSteps.filter((step) => step.type === 'elasticsearch.search')).toEqual([]);
+      // Impact reads the correlated alerts through the Security step, and nothing reads the
+      // attack from Elasticsearch.
+      it('reads no Elasticsearch index itself', () => {
+        expect(reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'))).toEqual([]);
       });
 
       it('does not run an agent against the Investigation', () => {
@@ -1169,13 +1192,302 @@ describe('Attack Discovery worker chain', () => {
       });
     });
 
+    // The hosts and users the attack touched, recorded on the Investigation as the
+    // Impact the AlertZero landing page filters proposals by. Bookkeeping, not
+    // evidence, so none of it may fail the review.
+    describe('impact', () => {
+      const IMPACT_STEPS = [
+        'collect_impact_entities',
+        'attach_impact',
+        'journal_impact_recorded',
+      ] as const;
+
+      const collect = stepIn(reviewSteps, 'collect_impact_entities');
+      const attach = stepIn(reviewSteps, 'attach_impact');
+      const journal = stepIn(reviewSteps, 'journal_impact_recorded');
+
+      // Same engine options the execution engine's templating uses, so the authored
+      // expressions evaluate here exactly as they will in a run.
+      const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const evaluate = (expression: string, context: Record<string, unknown>): unknown =>
+        liquid.evalValueSync(
+          expression
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      const entities = [
+        { id: 'host:web-01-id', name: 'web-01', type: 'host' },
+        { id: 'user:alice@web-01-id@local', name: 'alice@web-01', type: 'user' },
+        { id: 'host:unnamed-id', type: 'host' },
+      ];
+
+      it('continues past every impact step that fails', () => {
+        expect(
+          IMPACT_STEPS.filter(
+            (name) => stepIn(reviewSteps, name)?.['on-failure']?.continue !== true
+          )
+        ).toEqual([]);
+      });
+
+      it('runs the impact steps in order', () => {
+        const positions = IMPACT_STEPS.map((name) => reviewStepNames.indexOf(name));
+
+        expect(positions).toEqual([...positions].sort((a, b) => a - b));
+      });
+
+      it.each(['verify_evidence', 'journal_evidence_attached'])(
+        'records impact after %s',
+        (name) => {
+          expect(reviewStepNames.indexOf(IMPACT_STEPS[0])).toBeGreaterThan(
+            reviewStepNames.indexOf(name)
+          );
+        }
+      );
+
+      // Before the analysis, so a parked escalation gate already has its Impact and the
+      // proposal shows up under the landing-page pills from the moment it is raised.
+      it.each(['journal_analysis_started', 'run_fp_tp_analysis', 'escalation_gate'])(
+        'records impact before %s',
+        (name) => {
+          expect(reviewStepNames.indexOf('journal_impact_recorded')).toBeLessThan(
+            reviewStepNames.indexOf(name)
+          );
+        }
+      );
+
+      // The search honors the step's abort signal, so a timeout ends it. The attach does
+      // not: it would keep writing after the timeout, and the journal would say it failed.
+      it('bounds the read of the alerts, and not the attach', () => {
+        expect(collect?.timeout).toBe('60s');
+        expect(attach?.timeout).toBeUndefined();
+      });
+
+      // The step accepts alert ids up to 256 characters (`MAX_ALERT_ID_LENGTH`), and one
+      // longer id would fail the whole read.
+      it('accepts no alert id longer than the step does', () => {
+        const alertIds = review.triggers?.[0]?.inputs?.properties?.alert_ids as
+          | { items?: { maxLength?: number } }
+          | undefined;
+
+        expect(alertIds?.items?.maxLength).toBe(256);
+      });
+
+      describe('the entities', () => {
+        // The entities come from a Security step that derives them with the Entity Store's
+        // own rules, so the YAML holds none of that logic.
+        it('come from the correlated alerts through the Security step', () => {
+          expect(collect?.type).toBe('security.getAlertEntities');
+          expect(collect?.with?.alert_ids).toBe('${{ inputs.alert_ids }}');
+        });
+
+        // The step derives the index from the space, and takes no other input that could
+        // name one.
+        it('name no index', () => {
+          expect(Object.keys(collect?.with ?? {}).sort()).toEqual(['alert_ids', 'max_entities']);
+        });
+
+        // Room for another writer: the attach rejects a merge past 100.
+        it('are capped below what one Investigation may hold', () => {
+          expect(collect?.with?.max_entities).toBe('${{ consts.impact_entity_cap }}');
+          expect(review.consts?.impact_entity_cap).toBe(50);
+        });
+      });
+
+      describe('the attach', () => {
+        it('attaches to the derived Investigation', () => {
+          expect(attach?.with?.conversationId).toBe(derivedInvestigationId);
+        });
+
+        // `${{ }}` keeps the entities an array of objects. `{{ }}` would hand the step a
+        // string it rejects.
+        it('passes the entities with a type-preserving template', () => {
+          expect(attach?.with?.entities).toBe(
+            '${{ steps.collect_impact_entities.output.entities }}'
+          );
+        });
+      });
+
+      // The attach rejects an empty `entities`, and a skipped or failed step leaves its
+      // output undefined. Each guard skips its step for both, so nothing downstream is
+      // handed nothing.
+      describe('the guards', () => {
+        const guard = (step: YamlStep | undefined, context: Record<string, unknown>) =>
+          evaluate(String(step?.if), context);
+
+        it.each([
+          ['missing', undefined, false],
+          ['empty', [], false],
+          ['present', ['alert-1'], true],
+        ])('collects only when alert_ids is %s', (_label, alertIds, expected) => {
+          expect(guard(collect, { inputs: { alert_ids: alertIds } })).toBe(expected);
+        });
+
+        it('attaches only when there are entities to attach', () => {
+          const withEntities = (value: unknown) => ({
+            steps: {
+              collect_impact_entities: value === undefined ? {} : { output: { entities: value } },
+            },
+          });
+
+          expect([
+            guard(attach, withEntities(undefined)),
+            guard(attach, withEntities([])),
+            guard(attach, withEntities(entities)),
+          ]).toEqual([false, false, true]);
+        });
+      });
+
+      // Rendered through the engine, because the message is a folded scalar whose
+      // phrases the YAML source splits across lines.
+      describe('the journal note', () => {
+        const ALERT_IDS = ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'];
+
+        const render = (
+          steps: Record<string, unknown>,
+          inputs: Record<string, unknown> = { alert_ids: ALERT_IDS }
+        ): Promise<string> =>
+          liquid.parseAndRender(
+            String((journal?.with?.inputs as Record<string, unknown> | undefined)?.message),
+            { execution: { id: 'execution-1' }, inputs, steps }
+          );
+
+        const collected = { output: { entities, total: 3, truncated: false } };
+
+        it('writes to the derived Investigation', () => {
+          expect(
+            (journal?.with?.inputs as Record<string, unknown> | undefined)?.conversation_id
+          ).toBe(derivedInvestigationId);
+        });
+
+        it('says how many entities were recorded', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: collected,
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s).');
+        });
+
+        // The attach returns everything the Investigation's impact now holds, which can
+        // include what an earlier review or another writer recorded.
+        it('counts what this review found, not what the Investigation now holds', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities: [...entities, ...entities, ...entities] } },
+              collect_impact_entities: collected,
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s).');
+        });
+
+        it('says when it recorded only the most alerted', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: { output: { entities, total: 120, truncated: true } },
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s) (the most alerted of 120).');
+        });
+
+        // A fixed sentence per error type: the raw message of an internal failure would land
+        // in the Investigation, where every later agent round reads it as user input.
+        it.each([
+          [
+            'PermissionError',
+            "Could not record impact: the review's principal lacks the Manage investigations privilege.",
+          ],
+          [
+            'NotFoundError',
+            "Could not record impact: the review's principal does not own this Investigation.",
+          ],
+          [
+            'ValidationError',
+            "Could not record impact: it was rejected as invalid (an Investigation's impact holds at most 100 hosts and users).",
+          ],
+          [
+            'ConflictError',
+            'Could not record impact: another writer updated it at the same time. Re-running the review retries it.',
+          ],
+          ['ApiError', 'Could not record impact. See review execution execution-1.'],
+          ['TimeoutError', 'Could not record impact. See review execution execution-1.'],
+        ])('says why the attach failed with a %s', async (type, expected) => {
+          expect(
+            await render({
+              attach_impact: { error: { message: 'internal detail', type } },
+              collect_impact_entities: collected,
+            })
+          ).toBe(expected);
+        });
+
+        it('never journals the raw error message', async () => {
+          expect(
+            await render({
+              attach_impact: { error: { message: 'internal detail', type: 'ApiError' } },
+              collect_impact_entities: collected,
+            })
+          ).not.toContain('internal detail');
+        });
+
+        // Includes a principal that may not read the alerts index: the search fails rather
+        // than returning nothing.
+        it('says when the alerts could not be read', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { error: { message: 'security_exception', type: 'Error' } },
+            })
+          ).toBe(
+            "Could not read the correlated alerts' hosts and users, so no impact was recorded. See review execution execution-1."
+          );
+        });
+
+        it.each([
+          ['missing', {}],
+          ['empty', { alert_ids: [] }],
+        ])(
+          'says when the review was given no alerts, with alert_ids %s',
+          async (_label, inputs) => {
+            expect(await render({}, inputs)).toBe(
+              'No impact recorded: the review was given no correlated alerts.'
+            );
+          }
+        );
+
+        it('says when there was nothing to record, and how many alerts it read', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { output: { entities: [], total: 0, truncated: false } },
+            })
+          ).toBe('No impact recorded: the 5 correlated alert(s) name no host or user.');
+        });
+      });
+    });
+
     describe('attachments', () => {
       const attachments = reviewSteps.filter((step) => step.type === 'ai.attachment.add');
 
       // Evidence goes on as attachments, never as chat messages: a message would
       // wake the agent on a conversation the Worker is only writing to.
-      it('adds exactly three attachments', () => {
+      it('adds exactly three evidence attachments', () => {
         expect(attachments).toHaveLength(3);
+      });
+
+      // Impact is the one other attachment, and it is bookkeeping, not evidence. Reads and
+      // the verdict refresh write no new attachment, nor do investigation metadata updates.
+      it('writes no other attachment than the Impact', () => {
+        const evidenceSteps = ['ai.attachment.add', 'ai.attachment.read', 'ai.attachment.update'];
+
+        expect(
+          reviewSteps
+            .filter(
+              (step) =>
+                (step.type.startsWith('ai.attachment.') ||
+                  step.type.startsWith('investigations.attach')) &&
+                !evidenceSteps.includes(step.type)
+            )
+            .map((step) => step.type)
+        ).toEqual(['investigations.attachImpact']);
       });
 
       // Every one domain-typed. A generic `text` attachment would carry the verdict
@@ -1869,6 +2181,7 @@ describe('Attack Discovery worker chain', () => {
     const INFLECTIONS = [
       'journal_review_started',
       'journal_evidence_attached',
+      'journal_impact_recorded',
       'journal_analysis_started',
       'journal_analysis_finished',
       'journal_fp_closed',

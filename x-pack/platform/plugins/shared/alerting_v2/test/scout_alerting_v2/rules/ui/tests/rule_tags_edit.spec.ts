@@ -12,7 +12,7 @@ import { buildCreateRuleData, test } from '../fixtures';
  * Tags editing through the shared rule form (compose_discover flyout, Details
  * step). The `TagsField` and this edit flow are shared by both the rule builder
  * and the ES|QL form; this suite exercises the ES|QL path (a composed rule with
- * no `builder_type`, which opens the edit flyout in ES|QL mode).
+ * no `builder` metadata, which opens the edit flyout in ES|QL mode).
  *
  * Regression: removing every tag used to report success but silently preserve
  * the old tags, because an empty tags array was dropped from the update payload
@@ -68,7 +68,7 @@ test.describe(
       await test.step('seed an ES|QL rule with tags via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            // No `builder_type`, so the edit flyout opens in ES|QL mode.
+            // No `builder` metadata, so the edit flyout opens in ES|QL mode.
             metadata: { name: 'scout-esql-clear-tags', tags: ['prod', 'infra'] },
             query: {
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
@@ -90,7 +90,7 @@ test.describe(
       await test.step('open the edit flyout in ES|QL mode', async () => {
         await pageObjects.composeDiscover.openEditFlyout(ruleId!);
         await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
-        // A rule without builder_type opens directly in ES|QL mode (no builder switch).
+        // A rule without builder metadata opens directly in ES|QL mode (no builder switch).
         await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
       });
 

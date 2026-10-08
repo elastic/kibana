@@ -121,6 +121,7 @@ export interface CreateSubAgentParams {
 
 /** Parameters for sending a message to an existing persistent sub-agent. */
 export interface SendToSubAgentParams {
+  agentId: string;
   parentExecutionId: string;
   /** Existing child conversation id */
   conversationId: string;
