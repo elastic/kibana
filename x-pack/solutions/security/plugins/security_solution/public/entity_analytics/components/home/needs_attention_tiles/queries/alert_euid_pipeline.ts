@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { indentForkBranch } from '../../new_entities_table/queries/esql';
+import { buildPerTypeEuidEvals } from '../../new_entities_table/queries/euid_pipeline';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
-
-const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
  * Returns ES|QL pipeline stages that resolve entity.id for alert documents.
@@ -32,18 +30,13 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  */
 const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 
-export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
-  const derivedSteps: string[] = ['WHERE `kibana.alert.entity.id` IS NULL'];
-
-  for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-    if (fieldEvals) {
-      derivedSteps.push(`| EVAL ${fieldEvals}`);
-    }
-    derivedSteps.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-  derivedSteps.push(evalGuardedTypedEuids('_ea_entity_id'));
-  derivedSteps.push(`| KEEP ${KEEP_COLUMNS}`);
+export const buildAlertEuidPipeline = (): string[] => {
+  const derivedSteps = [
+    'WHERE `kibana.alert.entity.id` IS NULL',
+    ...buildPerTypeEuidEvals(),
+    evalGuardedTypedEuids('_ea_entity_id'),
+    `| KEEP ${KEEP_COLUMNS}`,
+  ];
 
   const fork = [
     '| FORK (',

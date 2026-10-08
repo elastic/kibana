@@ -13,7 +13,7 @@ import { indentForkBranch, toList } from './esql';
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 
 /** `EVAL`s of the user, host and service EUIDs into `user_euid`, `host_euid`, `service_euid`. */
-const buildPerTypeEuidEvals = (): string[] =>
+export const buildPerTypeEuidEvals = (): string[] =>
   ALLOWED_ENTITY_TYPES.flatMap((entityType) => {
     const fieldEvals = getFieldEvaluationsEsql(entityType);
     return [

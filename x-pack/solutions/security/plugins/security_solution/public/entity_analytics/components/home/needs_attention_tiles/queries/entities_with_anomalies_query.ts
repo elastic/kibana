@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../new_entities_table';
 // The query module, not the table index: the index also loads the grid components.
 import {
@@ -14,9 +13,8 @@ import {
   buildLookback,
   ML_ANOMALY_INDICES,
 } from '../../new_entities_table/queries/esql';
+import { buildPerTypeEuidEvals } from '../../new_entities_table/queries/euid_pipeline';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
-
-const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
@@ -24,7 +22,6 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  * anomalies → entity-latest on the typed EUID (entity.id).
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
-  euid: EntityStoreEuid,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
@@ -40,14 +37,7 @@ export const buildEntitiesWithAnomaliesCountQuery = (
     )} AND ${buildAnomalyJobFilter(jobIds)}`
   );
 
-  for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-    if (fieldEvals) {
-      parts.push(`| EVAL ${fieldEvals}`);
-    }
-    parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-
+  parts.push(...buildPerTypeEuidEvals());
   parts.push(evalGuardedTypedEuids('derived_euids'));
   parts.push(`| MV_EXPAND derived_euids`);
   parts.push(`| WHERE derived_euids IS NOT NULL`);

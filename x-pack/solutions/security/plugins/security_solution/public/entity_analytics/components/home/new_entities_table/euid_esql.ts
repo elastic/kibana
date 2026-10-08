@@ -31,8 +31,11 @@
  * The entity ids are the same (checked per document over all alerts and anomaly records),
  * and the alert and anomaly sorts ran 2.3–2.6x faster at 1M entities.
  *
+ * The grid and the needs attention tiles both read it through `queries/euid_pipeline.ts`.
+ *
  * TODO: port this to the generator (it also feeds logs extraction, the entity analytics
- * maintainers and the graph route), measure those consumers, and delete this copy.
+ * maintainers and the graph route), measure those consumers, and delete this copy:
+ * `euid_pipeline.ts` then imports the generator's functions instead.
  */
 
 import type { EntityType } from '@kbn/entity-store/common';
