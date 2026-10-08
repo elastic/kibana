@@ -436,7 +436,10 @@ export class TestSubjects extends FtrService {
   public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<boolean> {
     const success = await this.retry.tryForTime(timeout, async () => {
       const element = await this.find(selector);
-      return (await element.isDisplayed()) && (await element.isEnabled());
+      if (!(await element.isDisplayed()) || !(await element.isEnabled())) {
+        throw new Error(`expected testSubject(${selector}) to be displayed and enabled`);
+      }
+      return true;
     });
     return success;
   }

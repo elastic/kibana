@@ -148,7 +148,18 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async selectFirstRowInAssigneesPopover() {
-      await (await find.byClassName('euiSelectableListItem__content')).click();
+      const selectable = await find.byClassName('euiSelectable');
+      const searchInput = await selectable.findByCssSelector('input');
+      const searchTerm = ((await searchInput.getAttribute('value')) ?? '').toLowerCase();
+      const firstOption = await retry.try(async () => {
+        if (searchTerm) {
+          await selectable.findByTestSubject('clearSearchButton');
+        }
+        const option = await selectable.findByCssSelector('[role="option"]');
+        expect((await option.getVisibleText()).toLowerCase()).to.contain(searchTerm);
+        return option;
+      });
+      await firstOption.click();
       await header.waitUntilLoadingHasFinished();
     },
 

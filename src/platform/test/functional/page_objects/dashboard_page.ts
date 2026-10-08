@@ -791,15 +791,14 @@ export class DashboardPageObject extends FtrService {
 
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
-      if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
-      } else {
-        await this.listingTable.clickItemLink('dashboard', dashboardName);
-      }
+      await this.listingTable.clickItemLink('dashboard', dashboardName);
       await this.header.waitUntilLoadingHasFinished();
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+    if (openInEditMode) {
+      await this.switchToEditMode();
+    }
   }
 
   public async loadSavedDashboard(dashboardName: string) {

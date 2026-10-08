@@ -82,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           // No-op on the first attempt, when there's no filter yet to remove.
           await filterBar.removeAllFilters().catch(() => {});
+          await discover.waitUntilSearchingHasFinished();
 
           await filterBar.addDslFilter(
             `
