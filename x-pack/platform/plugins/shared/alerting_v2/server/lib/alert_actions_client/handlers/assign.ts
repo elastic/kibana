@@ -33,9 +33,6 @@ export const assignHandler: ActionHandler<AssignAlertActionBody> = {
       });
     }
 
-    return {
-      alertActionDoc,
-      updatedActionState: { ...actionState, assignee_uid: action.assignee_uid },
-    };
+    return { alertActionDoc };
   },
 };

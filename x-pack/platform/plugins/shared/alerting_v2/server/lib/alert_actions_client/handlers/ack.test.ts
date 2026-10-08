@@ -37,12 +37,6 @@ describe('ackHandler', () => {
     expect(prepared.alertActionDoc).toBe(item.alertActionDoc);
   });
 
-  it('reports the alert as acknowledged once applied', () => {
-    expect(ackHandler.prepare(buildAckItem(false)).updatedActionState).toEqual(
-      expect.objectContaining({ acknowledged: true })
-    );
-  });
-
   it('builds no synthetic rule event — acknowledgement does not touch the lifecycle', () => {
     expect(ackHandler.prepare(buildAckItem(false)).ruleEvent).toBeUndefined();
   });
@@ -74,12 +68,6 @@ describe('unackHandler', () => {
     const prepared = unackHandler.prepare(item);
 
     expect(prepared.alertActionDoc).toBe(item.alertActionDoc);
-  });
-
-  it('reports the alert as not acknowledged once applied', () => {
-    expect(unackHandler.prepare(buildUnackItem(true)).updatedActionState).toEqual(
-      expect.objectContaining({ acknowledged: false })
-    );
   });
 
   it('rejects an alert that is not acknowledged with a 409 INVALID_ALERT_STATE_TRANSITION', () => {

@@ -46,6 +46,6 @@ export const tagHandler: ActionHandler<TagAlertActionBody> = {
       });
     }
 
-    return { alertActionDoc, updatedActionState: { ...actionState, tags: action.tags } };
+    return { alertActionDoc };
   },
 };

@@ -381,8 +381,6 @@ export class AlertActionsClient {
    * items only — one latest-event query over their series to enforce the
    * latest-episode guard. Missing or superseded episodes and failed
    * preconditions are reported per item; the rest of the batch still runs.
-   * Items are evaluated in order, as if each were its own request, so a
-   * repeat of an earlier item for the same alert is rejected as a no-op.
    */
   public async createBulkEpisodeActions(
     items: BulkCreateEpisodeAlertActionItemBody[]
@@ -447,21 +445,15 @@ export class AlertActionsClient {
       }
 
       try {
-        const preparedAction = this.prepareAction({
-          action: item,
-          alertEvent,
-          userProfileUid,
-          docAlertId: alertEvent.episode_id,
-          actionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
-        });
-        prepared.push(preparedAction);
-        this.updateBatchState({
-          alertId: item.alert_id,
-          alertEvent,
-          preparedAction,
-          actionStates,
-          eventByEpisodeId,
-        });
+        prepared.push(
+          this.prepareAction({
+            action: item,
+            alertEvent,
+            userProfileUid,
+            docAlertId: alertEvent.episode_id,
+            actionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
+          })
+        );
       } catch (error) {
         if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
           errors.push(boomToBulkActionError(item.alert_id, error));
@@ -480,34 +472,6 @@ export class AlertActionsClient {
     }
 
     return { affected_count: prepared.length, errors };
-  }
-
-  /**
-   * Records what an accepted bulk item changes, so a later item for the same
-   * alert is checked against that state rather than the one loaded before the
-   * batch. Without this, `[ack e1, ack e1]` would write two ack documents.
-   */
-  private updateBatchState(params: {
-    alertId: string;
-    alertEvent: AlertEventRecord;
-    preparedAction: PreparedAction;
-    actionStates: Map<string, AlertActionState>;
-    eventByEpisodeId: Map<string, AlertEventRecord>;
-  }): void {
-    const { alertId, alertEvent, preparedAction, actionStates, eventByEpisodeId } = params;
-    const { updatedActionState, ruleEvent } = preparedAction;
-
-    if (updatedActionState) {
-      actionStates.set(alertId, updatedActionState);
-    }
-
-    if (ruleEvent?.alert) {
-      eventByEpisodeId.set(alertId, {
-        ...alertEvent,
-        status: ruleEvent.status,
-        episode_status: ruleEvent.alert.status,
-      });
-    }
   }
 
   private buildAlertActionDocument(params: {
